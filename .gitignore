@@ -1,1 +1,7 @@
+doc/
+
 tnvme
+.cproject
+.project
+*.a
+doxygen.log
