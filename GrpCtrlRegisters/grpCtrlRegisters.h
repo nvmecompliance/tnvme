@@ -14,7 +14,7 @@ using namespace std;
 class GrpCtrlRegisters : public Group
 {
 public:
-    GrpCtrlRegisters(size_t grpNum, SpecRevType specRev);
+    GrpCtrlRegisters(size_t grpNum, SpecRevType specRev, int fd);
     virtual ~GrpCtrlRegisters();
 };
 

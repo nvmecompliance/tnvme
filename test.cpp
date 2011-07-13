@@ -2,6 +2,17 @@
 #include "test.h"
 
 
+Test::Test(int fd)
+{
+    mFd = fd;
+}
+
+
+Test::~Test()
+{
+}
+
+
 bool
 Test::Run()
 {

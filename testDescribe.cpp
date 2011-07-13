@@ -4,10 +4,11 @@
 
 TestDescribe::TestDescribe()
 {
-    // 72 chars allowed: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-    mShortDesc =        "Missing short test description";
-    mLongDesc  =        "Missing long test description";
-    mCompliance =       "Missing compliance description";
+    // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    mShortDesc =            "Missing short test description";
+    mCompliance =           "Missing compliance description";
+    // No string size limit for the long description
+    mLongDesc  =            "Missing long test description";
 }
 
 
@@ -19,8 +20,10 @@ TestDescribe::~TestDescribe()
 void
 TestDescribe::SetShort(string desc)
 {
-    if (desc.length() > MAX_CHAR_PER_LINE_DESCRIPTION)
-        LOG_ERR("Short description length violation");
+    if (desc.length() > MAX_CHAR_PER_LINE_DESCRIPTION) {
+        LOG_ERR("Short description length violation, concatenating \"%s\"",
+            desc.c_str());
+    }
     mShortDesc = desc.substr(0, MAX_CHAR_PER_LINE_DESCRIPTION);
 }
 

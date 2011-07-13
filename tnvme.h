@@ -2,6 +2,9 @@
 #define _TNVME_H_
 
 #include <stdio.h>
+#include <string>
+
+using namespace std;
 
 #define DEBUG
 
@@ -18,7 +21,7 @@
 #define LOG_DBG(fmt, ...)    ;
 #endif
 
-#define MAX_CHAR_PER_LINE_DESCRIPTION       72
+#define MAX_CHAR_PER_LINE_DESCRIPTION       66
 
 typedef enum
 {
@@ -56,6 +59,7 @@ struct CmdLineType {
     SpecRevType rev;
     TargetType  detail;
     TargetType  test;
+    string      device;
     ResetType   reset;
 };
 

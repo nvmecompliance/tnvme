@@ -4,8 +4,6 @@
 #include <string>
 #include "testDescribe.h"
 
-#define TD_MAX_CHAR_PER_LINE    72  // Allows for external formatting
-
 using namespace std;
 
 
@@ -17,8 +15,11 @@ using namespace std;
 class Test
 {
 public:
-    Test() {}
-    virtual ~Test() {}
+    /**
+     * @param fd Pass the opened file descriptor for the device under test
+     */
+    Test(int fd);
+    virtual ~Test();
 
     /**
      * Get test information
@@ -50,6 +51,8 @@ public:
 
 
 protected:
+    int mFd;
+
     /// Children must populate this member, probably during construction
     TestDescribe mTestDesc;
 
@@ -58,6 +61,10 @@ protected:
      * @return true upon success, otherwise false.
      */
     virtual bool RunCoreTest() = 0;
+
+
+private:
+    Test();
 };
 
 

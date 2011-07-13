@@ -9,7 +9,7 @@ using namespace std;
 class CtrlCapabilities_r10a : public Test
 {
 public:
-    CtrlCapabilities_r10a();
+    CtrlCapabilities_r10a(int fd);
     virtual ~CtrlCapabilities_r10a();
 
 

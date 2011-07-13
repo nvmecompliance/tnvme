@@ -9,10 +9,10 @@
 using namespace std;
 
 /// Use to append a new x.0 test number at the group level
-#define APPEND_TEST_AT_GROUP_LEVEL(test)            \
+#define APPEND_TEST_AT_GROUP_LEVEL(test, fd)        \
     {                                               \
         vector<Test *> tmp;                         \
-        tmp.push_back(new test());                  \
+        tmp.push_back(new test(fd));                \
         mTests.push_back(tmp);                      \
     }
 
@@ -49,7 +49,7 @@ class Group
 {
 public:
     /**
-     * @param grpNum Pass the assigned group number
+     * @param grpNum Pass the assigned group number, globally unique ID
      * @param specRev Pass which compliance is needed to target
      * @param desc Pass a 1-line comment (max 72 chars) describing group purpose
      */
