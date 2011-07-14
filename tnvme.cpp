@@ -390,7 +390,7 @@ BuildTestInfrastructure(vector<Group *> &groups, int &fd, string device,
 
 
 /**
- * Tear down that which has been created by CreateTestInfrastructure()
+ * Tear down that which has been created by BuildTestInfrastructure()
  * @param groups Pass the structure to contain the test objects, if the
  *               structure is not empty the function will abort.
  * @param fd Pass the file descriptor to free from the allocated resource pool

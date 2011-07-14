@@ -42,7 +42,7 @@ typedef enum
  * -----------------------------------------------------------------------------
  * false     n/a            n/a           n/a      nothing has been requested
  * true   ==ULONG_MAX       n/a           n/a      request all groups all tests
- * true   !=ULONG_MAX  ==ULONG_MAX || ==ULONG_MAX  request spec'dc group
+ * true   !=ULONG_MAX  ==ULONG_MAX || ==ULONG_MAX  request spec'd group
  * true   !=ULONG_MAX  !=ULONG_MAX && !=ULONG_MAX  request spec'd test in group
  */
 struct TargetType {

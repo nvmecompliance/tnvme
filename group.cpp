@@ -11,8 +11,10 @@ Group::Group(size_t grpNum, SpecRevType specRev, string desc)
     mGrpNum = grpNum;
     mSpecRev = specRev;
 
-    if (desc.length() > MAX_CHAR_PER_LINE_DESCRIPTION)
-        LOG_ERR("Group description length violation");
+    if (desc.length() > MAX_CHAR_PER_LINE_DESCRIPTION) {
+        LOG_ERR("Group description length violation, concatenating \"%s\"",
+            desc.c_str());
+    }
     mGrpDesc = desc.substr(0, MAX_CHAR_PER_LINE_DESCRIPTION);
 }
 
