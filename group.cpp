@@ -6,7 +6,7 @@
 #define NEWLINE                 "\n"
 
 
-Group::Group(size_t grpNum, SpecRevType specRev, string desc)
+Group::Group(size_t grpNum, SpecRev specRev, string desc)
 {
     mGrpNum = grpNum;
     mSpecRev = specRev;
@@ -35,53 +35,59 @@ string
 Group::GetGroupSummary(bool verbose)
 {
     string work;
+    TestRef tr;
 
-    for (size_t major = 0; major < mTests.size(); major++) {
-        for (size_t minor = 0; minor < mTests[major].size(); minor++) {
-            work += GetTestDescription(verbose, major, minor);
+    tr.group = mGrpNum;
+    for (tr.major = 0; tr.major < mTests.size(); tr.major++) {
+        for (tr.minor = 0; tr.minor < mTests[tr.major].size(); tr.minor++) {
+            work += GetTestDescription(verbose, tr);
         }
     }
 
-    return (work);
+    return work;
 }
 
 
 string
-Group::GetTestDescription(bool verbose, size_t major, size_t minor)
+Group::GetTestDescription(bool verbose, TestRef &tr)
 {
     string work;
 
-    FORMAT_TEST_NUM(work, PAD_INDENT_LVL1, major, minor)
+    FORMAT_TEST_NUM(work, PAD_INDENT_LVL1, tr.major, tr.minor)
 
-    if (TestExists(major, minor) == false) {
+    if (TestExists(tr) == false) {
         work += "unknown test";
         work += NEWLINE;
 
     } else {
         if (verbose) {
-            work += mTests[major][minor]->GetShortDescription();
+            work += mTests[tr.major][tr.minor]->GetShortDescription();
             work += NEWLINE;
             work += PAD_INDENT_LVL2;
             work += "Compliance: ";
-            work += mTests[major][minor]->GetComplianceDescription();
+            work += mTests[tr.major][tr.minor]->GetComplianceDescription();
             work += NEWLINE;
-            work += mTests[major][minor]->
+            work += mTests[tr.major][tr.minor]->
                 GetLongDescription(true, sizeof(PAD_INDENT_LVL2) + 2);
         } else {
-            work += mTests[major][minor]->GetShortDescription();
+            work += mTests[tr.major][tr.minor]->GetShortDescription();
             work += NEWLINE;
         }
     }
 
-    return (work);
+    return work;
 }
 
 
 bool
-Group::TestExists(size_t major, size_t minor)
+Group::TestExists(TestRef tr)
 {
-    if ((major >= mTests.size()) || (minor >= mTests[major].size())) {
-        LOG_DBG("Test case %ld.%ld does not exist within group", major, minor);
+    if ((tr.group != mGrpNum) ||
+        (tr.major >= mTests.size()) ||
+        (tr.minor >= mTests[tr.major].size())) {
+
+        LOG_DBG("Test case %ld:%ld.%ld does not exist within group %ld",
+            tr.group, tr.major, tr.minor, mGrpNum);
         return false;
     }
     return true;
@@ -89,55 +95,97 @@ Group::TestExists(size_t major, size_t minor)
 
 
 bool
-Group::RunTest(TestIteratorType &testIter, bool &done)
+Group::IteraterToTestRef(TestIteratorType testIter, TestRef &tr)
 {
     size_t count = 0;
     size_t major = 0;
     size_t minor = 0;
-    done = false;
 
+    // This loop is attempting to take the testIter, it should be pointing to
+    // the next test to consider for execution. However that doesn't mean there
+    // actually is a test object at the testIter index within mTests[][]. Start
+    // from the beginning and traverse the entire matrix to attain a valid test
+    // object for execution.
+    LOG_DBG("Traverse test matrix %ld seeking test @ iterator idx=%ld",
+        mGrpNum, testIter);
     while (count < testIter) {
-        if (TestExists(major, minor+1)) {
+        if (TestExists(TestRef(mGrpNum, major, minor+1))) {
             minor++;        // same group level, but the next test level count
             count++;
-        } else if (TestExists(major+1, 0)) {
+        } else if (TestExists(TestRef(mGrpNum, major+1, 0))) {
             major++;
             minor = 0;      // new group level, restart test level counting
             count++;
-        } else {
-            done = true;
-            return true;
+        } else {            // no next test, never found it
+            break;
         }
     }
 
-    if (count == testIter) {
-        testIter++;     // next test to consider for execution in the future
-        return RunTest(major, minor);
-    }
+    if (count != testIter)
+        return false;
 
-    LOG_DBG("Programmatic failure; how can this occur?");
-    return false;
+    tr.group = mGrpNum;
+    tr.major = major;
+    tr.minor = minor;
+    return true;
 }
 
 
 bool
-Group::RunTest(size_t major, size_t minor)
+Group::RunTest(TestIteratorType &testIter, vector<TestRef> &skipTest,
+    bool &done)
+{
+    TestRef tr;
+    done = false;
+
+    if (IteraterToTestRef(testIter, tr) == false) {
+        done = true;
+        return true;
+    }
+
+    testIter++;     // next test to consider for execution in the future
+    return RunTest(tr, skipTest);
+}
+
+
+bool
+Group::RunTest(TestRef &tr, vector<TestRef> &skipTest)
 {
     string work;
 
-    if (TestExists(major, minor) == false)
+    if (TestExists(tr) == false)
         return false;
 
     FORMAT_GROUP_DESCRIPTION(work, this)
     LOG_NORM("%s", work.c_str());
 
-    FORMAT_TEST_NUM(work, "", major, minor)
-    work += mTests[major][minor]->GetShortDescription();
+    FORMAT_TEST_NUM(work, "", tr.major, tr.minor)
+    work += mTests[tr.major][tr.minor]->GetShortDescription();
     LOG_NORM("%s", work.c_str());
     LOG_NORM("Compliance: %s",
-        mTests[major][minor]->GetComplianceDescription().c_str());
+        mTests[tr.major][tr.minor]->GetComplianceDescription().c_str());
     LOG_NORM("%s",
-        mTests[major][minor]->GetLongDescription(false, 0).c_str());
+        mTests[tr.major][tr.minor]->GetLongDescription(false, 0).c_str());
 
-    return mTests[major][minor]->Run();
+    if (SkippingTest(tr, skipTest))
+        return true;
+    else
+        return mTests[tr.major][tr.minor]->Run();
+}
+
+
+bool
+Group::SkippingTest(TestRef &tr, vector<TestRef> &skipTest)
+{
+    for (size_t i = 0; i < skipTest.size(); i++) {
+         if ((tr.group == skipTest[i].group) &&
+             (tr.major == skipTest[i].major) &&
+             (tr.minor == skipTest[i].minor)) {
+
+            LOG_NORM("Instructed to skip test: %ld:%ld.%ld", tr.group, tr.major,
+                tr.minor);
+            return true;
+         }
+    }
+    return false;
 }

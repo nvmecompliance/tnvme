@@ -51,9 +51,9 @@ public:
     /**
      * @param grpNum Pass the assigned group number, globally unique ID
      * @param specRev Pass which compliance is needed to target
-     * @param desc Pass a 1-line comment (max 72 chars) describing group purpose
+     * @param desc Pass a 1-line comment describing group purpose
      */
-    Group(size_t grpNum, SpecRevType specRev, string desc);
+    Group(size_t grpNum, SpecRev specRev, string desc);
     virtual ~Group();
 
     /**
@@ -77,11 +77,10 @@ public:
     /**
      * Get formatted test information
      * @param verbose Pass information verbosity level
-     * @param major Pass the test case major number
-     * @param minor Pass the test case minor number
+     * @param tr Pass the test case number to consider
      * @return Formatted information
      */
-    string GetTestDescription(bool verbose, size_t major, size_t minor);
+    string GetTestDescription(bool verbose, TestRef &tr);
 
     /**
      * Used to allow iterating through all the tests contained within this
@@ -92,25 +91,28 @@ public:
     /**
      * Run a spec'd test case and report back.
      * @param testIter Pass the test case iterator
+     * @param skipTest Pass the complete list of test which should be skipped
      * @param done Returns true when testIter is pointing past the last possible
-     *          test case, i.e. all tests have run, otherwise false
+     *          test case, i.e. all tests have run, otherwise false indicates
+     *          there could be more tests to execute within this group
      * @return true upon success, otherwise false
      */
-    bool RunTest(TestIteratorType &testIter, bool &done);
+    bool RunTest(TestIteratorType &testIter, vector<TestRef> &skipTest,
+        bool &done);
 
     /**
      * Run a spec'd test case and report back.
-     * @param major Pass the test case major number
-     * @param minor Pass the test case minor number
+     * @param tr Pass the test case number to execute
+     * @param skipTest Pass the complete list of test which should be skipped
      * @return true upon success, otherwise false
      */
-    bool RunTest(size_t major, size_t minor);
+    bool RunTest(TestRef &tr, vector<TestRef> &skipTest);
 
 
 protected:
-    size_t          mGrpNum;
-    string          mGrpDesc;
-    SpecRevType     mSpecRev;
+    size_t      mGrpNum;
+    string      mGrpDesc;
+    SpecRev     mSpecRev;
 
     /// vector[major][minor];
     /// major test number: are related at the group level; 1.0, 2.0, 3.0
@@ -119,11 +121,31 @@ protected:
 
     /**
      * Validate whether or not the spec'd test case exists.
-     * @param major Pass the test case major number
-     * @param minor Pass the test case minor number
+     * @param tr Pass the test case number to consider
      * @return true if it exists, otherwise false
      */
-    bool TestExists(size_t major, size_t minor);
+    bool TestExists(TestRef tr);
+
+    /**
+     * Convert a user supplied iterator into a test reference of the form
+     * (group:major.minor).
+     * @param testIter Pass the iterator to convert
+     * @param tr Returns the converted equivalent if successful
+     * @return true upon success, otherwise false. A false return will
+     *         indicate that there are no more tests to execute, if and only if,
+     *         one were to keep calling this routine while incrementing the
+     *         iterator each time, thus iterating all tests.
+     */
+    bool IteraterToTestRef(TestIteratorType testIter, TestRef &tr);
+
+    /**
+     * Deterines if the test under consideration is one of the ones which
+     * must be skipped.
+     * @param tr Pass in the present test to consider
+     * @param skipTest Pass the complete list of tests to skip execution
+     * @return true upon success, otherwise false.
+     */
+    bool SkippingTest(TestRef &tr, vector<TestRef> &skipTest);
 
 
 private:

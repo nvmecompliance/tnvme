@@ -16,7 +16,7 @@ public:
     virtual ~TestDescribe();
 
     /**
-     * Set a 1-line comment (max 72 chars) briefly describing the purpose of a
+     * Set a 1-line comment briefly describing the purpose of a
      * test case.
      * @param desc Pass a 1-line comment
      */
@@ -32,7 +32,7 @@ public:
     void SetLong(string desc);
 
     /**
-     * Set a 1-line comment (max 72 chars) describing the targeted compliance
+     * Set a 1-line comment describing the targeted compliance
      * of a test case. Example: "rev 1.0a, section 4"
      * @param desc Pass a 1-line comment
      */

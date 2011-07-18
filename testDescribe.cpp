@@ -1,3 +1,4 @@
+#include <stdarg.h>
 #include "tnvme.h"
 #include "testDescribe.h"
 

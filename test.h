@@ -30,7 +30,7 @@ public:
     /**
      * Get test information
      * @param limit80Chars Pass whether to format the long paragraph to 80
-     *          character column displays.
+     *        character column displays.
      * @param indent Pass num of spaces to indent the long paragraph
      * @return Test description, long form.
      */

@@ -3,13 +3,15 @@ CFLAGS=-g -W -Wall -Werror
 APP_NAME := tnvme
 
 SUBDIRS := \
+	GrpInformative		\
 	GrpCtrlRegisters
 
 SOURCES := \
 	group.cpp \
 	test.cpp \
 	testDescribe.cpp \
-	tnvme.cpp
+	tnvme.cpp \
+	tnvmeHelpers.cpp
 
 LDFLAGS=-lm $(patsubst Grp%, libGrp%.a, $(SUBDIRS))
 

@@ -22,7 +22,7 @@ CtrlCapabilities_r10a::~CtrlCapabilities_r10a()
 bool
 CtrlCapabilities_r10a::RunCoreTest()
 {
-    return (false); // not to be implemented until Sept 5th
+    return false;   // todo; add some reset logic when available
 }
 
 

@@ -3,8 +3,6 @@
 
 #include "test.h"
 
-using namespace std;
-
 
 class CtrlCapabilities_r10a : public Test
 {

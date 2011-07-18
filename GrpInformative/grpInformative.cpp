@@ -1,9 +1,10 @@
-#include "grpCtrlRegisters.h"
-#include "ctrlCapabilities_r10a.h"
+#include "grpInformative.h"
+#include "dumpPciAddrSpace_r10a.h"
+#include "dumpCtrlrAddrSpace_r10a.h"
 
 
-GrpCtrlRegisters::GrpCtrlRegisters(size_t grpNum, SpecRev specRev, int fd) :
-    Group(grpNum, specRev, "Controller registers syntactic")
+GrpInformative::GrpInformative(size_t grpNum, SpecRev specRev, int fd) :
+    Group(grpNum, specRev, "Informative")
 {
     // IMPORTANT: Once a test case is assigned a position in the vector, i.e.
     //            a test index/number of the form major.minor, then it should
@@ -15,7 +16,8 @@ GrpCtrlRegisters::GrpCtrlRegisters(size_t grpNum, SpecRev specRev, int fd) :
     switch (mSpecRev) {
     case SPECREV_10:    // 1.0 is identical to 1.0a
     case SPECREV_10a:
-        APPEND_TEST_AT_GROUP_LEVEL(CtrlCapabilities_r10a, fd)
+        APPEND_TEST_AT_GROUP_LEVEL(DumpPciAddrSpace_r10a, fd)
+        APPEND_TEST_AT_GROUP_LEVEL(DumpCtrlrAddrSpace_r10a, fd)
         break;
 
     default:
@@ -26,7 +28,7 @@ GrpCtrlRegisters::GrpCtrlRegisters(size_t grpNum, SpecRev specRev, int fd) :
 }
 
 
-GrpCtrlRegisters::~GrpCtrlRegisters()
+GrpInformative::~GrpInformative()
 {
     // mTests deallocated in parent
 }

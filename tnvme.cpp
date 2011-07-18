@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <getopt.h>
 #include <string.h>
@@ -7,20 +6,23 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <dirent.h>
-#include <unistd.h>
 #include <errno.h>
-#include <vector>
 #include "tnvme.h"
+#include "tnvmeHelpers.h"
 
+
+// ------------------------------EDIT HERE---------------------------------
+#include "GrpInformative/grpInformative.h"
 #include "GrpCtrlRegisters/grpCtrlRegisters.h"
 
+
+#define NO_DEVICES     "no devices found"
+
+
 void Usage(void);
-bool ParseTargetCmdLine(TargetType &target, char *optarg);
 void DestroyTestInfrastructure(vector<Group *> &groups, int &fd);
-bool BuildTestInfrastructure(vector<Group *> &groups, int &fd, string device,
-    SpecRevType specRev);
-bool ExecuteTests(TargetType test, size_t loop, bool ignore,
-    vector<Group *> &groups);
+bool BuildTestInfrastructure(vector<Group *> &groups, int &fd,
+    struct CmdLine &cl);
 
 
 void
@@ -35,12 +37,19 @@ Usage(void) {
     printf("                                      {all | spec'd_group | test_within_group}\n");
     printf("  -t(--test) [<grp> | <grp>:<test>]   Execute tests for:\n");
     printf("                                      {all | spec'd_group | test_within_group}\n");
+    printf("  -f(--informative)                   Run Group Informative tests in addition\n");
+    printf("                                      to any test specified by -t(--test)\n");
     printf("  -d(--device) <name>                 Device to open for testing: /dev/node\n");
     printf("                                      dflt=(1st device listed in --list)\n");
+    printf("  -m(--mmap) <space:offset:num>       Read MemMap I/O registers from\n");
+    printf("                                      <space>={PCI | BAR01} at <offset> bytes\n");
+    printf("                                      from beginning for <num> bytes\n");
     printf("  -r(--reset) {<pci> | <ctrlr>}       Reset the device\n");
     printf("  -i(--ignore)                        Ignore detected errors\n");
     printf("  -p(--loop) <count>                  Loop test execution <count> times; dflt=1\n");
     printf("  -l(--list)                          List all devices available for test\n");
+    printf("  -k(--skiptest) <filename>           A file contains a list of tests to skip\n");
+    printf("  -y(--sticky)                        Reset sticky error bits between tests\n");
 }
 
 
@@ -52,27 +61,34 @@ main(int argc, char *argv[])
     int idx = 0;
     int exitCode = 0;
     char *endptr;
+    long tmp;
     string work;
     vector<Group *> groups;
     vector<string> devices;
-    struct CmdLineType CmdLine;
+    struct CmdLine CmdLine;
     struct dirent *dirEntry;
     bool deviceFound = false;
-    const char *short_opt = "hsliv:e::r:p:t::d:";
+    const char *short_opt = "hsyfliv:e::r:p:t::d:k:m:";
     static struct option long_opt[] = {
-        // {name,       has_arg,            flag,   val}
-        {   "help",     no_argument,        NULL,   'h'},
-        {   "summary",  no_argument,        NULL,   's'},
-        {   "rev",      required_argument,  NULL,   'v'},
-        {   "detail",   optional_argument,  NULL,   'e'},
-        {   "test",     optional_argument,  NULL,   't'},
-        {   "device",   required_argument,  NULL,   'd'},
-        {   "reset",    required_argument,  NULL,   'r'},
-        {   "ignore",   no_argument,        NULL,   'i'},
-        {   "loop",     required_argument,  NULL,   'p'},
-        {   "list",     no_argument,        NULL,   'l'},
-        {   NULL,       no_argument,        NULL,    0}
+        // {name,           has_arg,            flag,   val}
+        {   "help",         no_argument,        NULL,   'h'},
+        {   "summary",      no_argument,        NULL,   's'},
+        {   "rev",          required_argument,  NULL,   'v'},
+        {   "detail",       optional_argument,  NULL,   'e'},
+        {   "test",         optional_argument,  NULL,   't'},
+        {   "informative",  no_argument,        NULL,   'f'},
+        {   "device",       required_argument,  NULL,   'd'},
+        {   "mmap" ,        required_argument,  NULL,   'm'},
+        {   "reset",        required_argument,  NULL,   'r'},
+        {   "ignore",       no_argument,        NULL,   'i'},
+        {   "loop",         required_argument,  NULL,   'p'},
+        {   "skiptest",     required_argument,  NULL,   'k'},
+        {   "list",         no_argument,        NULL,   'l'},
+        {   "sticky",       no_argument,        NULL,   'y'},
+        {   NULL,           no_argument,        NULL,    0}
     };
+
+    LOG_NORM("%s launched", APPNAME);
 
     // defaults if not spec'd on cmd line
     CmdLine.rev = SPECREV_10a;
@@ -81,8 +97,11 @@ main(int argc, char *argv[])
     CmdLine.reset = RESETTYPE_FENCE;
     CmdLine.summary = false;
     CmdLine.ignore = false;
+    CmdLine.sticky = false;
+    CmdLine.informative.req = false;
     CmdLine.loop = 1;
-    CmdLine.device = "none found";
+    CmdLine.device = NO_DEVICES;
+    CmdLine.mmap.req = false;
 
 
     // Seek for all possible devices that this app may commune
@@ -119,14 +138,28 @@ main(int argc, char *argv[])
 
         case 'e':
             if (ParseTargetCmdLine(CmdLine.detail, optarg) == false) {
-                Usage();
+                printf("Unable to parse --detail cmd line\n");
                 exit(1);
             }
             break;
 
         case 't':
             if (ParseTargetCmdLine(CmdLine.test, optarg) == false) {
-                Usage();
+                printf("Unable to parse --test cmd line\n");
+                exit(1);
+            }
+            break;
+
+        case 'k':
+            if (ParseSkipTestCmdLine(CmdLine.skiptest, optarg) == false) {
+                printf("Unable to parse --skiptest cmd line\n");
+                exit(1);
+            }
+            break;
+
+        case 'm':
+            if (ParseMmapCmdLine(CmdLine.mmap, optarg) == false) {
+                printf("Unable to parse --mmap cmd line\n");
                 exit(1);
             }
             break;
@@ -159,14 +192,15 @@ main(int argc, char *argv[])
             break;
 
         case 'p':
-            CmdLine.loop = strtoul(optarg, &endptr, 10);
+            tmp = strtol(optarg, &endptr, 10);
             if (*endptr != '\0') {
                 printf("Unrecognized --loop <count>=%s\n", optarg);
                 exit(1);
-            } else if (CmdLine.loop <= 0) {
+            } else if (tmp <= 0) {
                 printf("Negative/zero values for --loop are unproductive\n");
                 exit(1);
             }
+            CmdLine.loop = tmp;
             break;
 
         case 'l':
@@ -181,10 +215,12 @@ main(int argc, char *argv[])
             exit(0);
 
         default:
-        case 'h':   Usage();                    exit(0);
-        case '?':   Usage();                    exit(1);
-        case 's':   CmdLine.summary = true;     break;
-        case 'i':   CmdLine.ignore = true;      break;
+        case 'h':   Usage();                            exit(0);
+        case '?':   Usage();                            exit(1);
+        case 's':   CmdLine.summary = true;             break;
+        case 'f':   CmdLine.informative.req = true;     break;
+        case 'i':   CmdLine.ignore = true;              break;
+        case 'y':   CmdLine.sticky = true;              break;
         }
     }
 
@@ -200,10 +236,8 @@ main(int argc, char *argv[])
 
 
     // Execute cmd line options which require the test infrastructure
-    if (BuildTestInfrastructure(groups, fd, CmdLine.device,
-        CmdLine.rev) == false) {
+    if (BuildTestInfrastructure(groups, fd, CmdLine) == false)
         exit(1);
-    }
 
     if (CmdLine.summary) {
         for (size_t i = 0; i < groups.size(); i++) {
@@ -213,7 +247,7 @@ main(int argc, char *argv[])
         }
 
     } else if (CmdLine.detail.req) {
-        if (CmdLine.detail.group == ULONG_MAX) {
+        if (CmdLine.detail.t.group == ULONG_MAX) {
             for (size_t i = 0; i < groups.size(); i++) {
                 FORMAT_GROUP_DESCRIPTION(work, groups[i])
                 printf("%s\n", work.c_str());
@@ -221,123 +255,40 @@ main(int argc, char *argv[])
             }
 
         } else {    // user spec'd a group they are interested in
-            if (CmdLine.detail.group >= groups.size()) {
+            if (CmdLine.detail.t.group >= groups.size()) {
                 printf("Specified test group does not exist\n");
 
             } else {
                 for (size_t i = 0; i < groups.size(); i++) {
-                    if (i == CmdLine.detail.group) {
+                    if (i == CmdLine.detail.t.group) {
                         FORMAT_GROUP_DESCRIPTION(work, groups[i])
                         printf("%s\n", work.c_str());
 
-                        if ((CmdLine.detail.major == ULONG_MAX) ||
-                            (CmdLine.detail.minor == ULONG_MAX)) {
+                        if ((CmdLine.detail.t.major == ULONG_MAX) ||
+                            (CmdLine.detail.t.minor == ULONG_MAX)) {
                             // Want info on all tests within group
                             printf("%s",
                                 groups[i]->GetGroupSummary(true).c_str());
                         } else {
                             // Want info on spec'd test within group
                             printf("%s", groups[i]->GetTestDescription(true,
-                                CmdLine.detail.major,
-                                CmdLine.detail.minor).c_str());
+                                CmdLine.detail.t).c_str());
                             break;
                         }
                     }
                 }
             }
         }
+    } else if (CmdLine.mmap.req) {
+        ;   // todo; add some reset logic when available
     } else if (CmdLine.reset != RESETTYPE_FENCE) {
         ;   // todo; add some reset logic when available
     } else if (CmdLine.test.req) {
-        exitCode = ExecuteTests(CmdLine.test, CmdLine.loop,
-            CmdLine.ignore, groups) ? 0 : 1;
+        exitCode = ExecuteTests(CmdLine, groups) ? 0 : 1;
     }
 
     DestroyTestInfrastructure(groups, fd);
     exit(exitCode);
-}
-
-
-/**
- * A function to specifically handle parsing cmd lines of the form
- * "[<grp> | <grp>:<test>]" where the absent of the optional parameters means
- * a user is specifying "all" things.
- * @param target Pass a structure to populate with parsing results
- * @param optarg Pass the 'optarg' argument from the getopt_long() API.
- * @return true upon successful parsing, otherwise false.
- */
-bool
-ParseTargetCmdLine(TargetType &target, char *optarg)
-{
-    size_t ulwork;
-    char *endptr;
-    string swork;
-
-
-    target.req = true;
-    target.group = ULONG_MAX;
-    target.major = ULONG_MAX;
-    target.minor = ULONG_MAX;
-    if (optarg == NULL)
-        return (true);
-
-    swork = optarg;
-    if ((ulwork = swork.find(":", 0)) == string::npos) {
-        // Specified format <grp>
-        target.group = strtoul(swork.c_str(), &endptr, 10);
-        if (*endptr != '\0') {
-            printf("Unrecognized --detail <grp>:<test>=%s\n", optarg);
-            return (false);
-        }
-
-    } else {
-        // Specified format <grp>:<test>
-        target.group = strtoul(
-            swork.substr(0, swork.size()).c_str(), &endptr, 10);
-        if (*endptr != ':') {
-            printf("Missing ':' character in format string\n");
-            return (false);
-        }
-
-        // Find major piece of <test>
-        swork = swork.substr(swork.find_first_of(':') + 1, swork.length());
-        if (swork.length() == 0) {
-            printf("Missing <test> format string\n");
-            return (false);
-        }
-
-        target.major = strtoul(
-            swork.substr(0, swork.size()).c_str(), &endptr, 10);
-        if (*endptr != '.') {
-            printf("Missing '.' character in format string\n");
-            return (false);
-        }
-
-        // Find minor piece of <test>
-        swork = swork.substr(swork.find_first_of('.') + 1, swork.length());
-        if (swork.length() == 0) {
-            printf("Unrecognized --detail <grp>:<test>=%s\n", optarg);
-            return (false);
-        }
-
-        target.minor = strtoul(
-            swork.substr(0, swork.size()).c_str(), &endptr, 10);
-        if (*endptr != '\0') {
-            printf("Unrecognized --detail <grp>:<test>=%s\n", optarg);
-            return (false);
-        }
-    }
-
-    if (target.group == ULONG_MAX) {
-        printf("Unrecognized --detail <grp>=%s\n", optarg);
-        return (false);
-    } else if (((target.major == ULONG_MAX) && (target.minor != ULONG_MAX)) ||
-               ((target.major != ULONG_MAX) && (target.minor == ULONG_MAX))) {
-        printf("Unrecognized --detail <grp>:<test>=%s\n", optarg);
-        return (false);
-    }
-
-    return (true);
 }
 
 
@@ -352,8 +303,8 @@ ParseTargetCmdLine(TargetType &target, char *optarg)
  * @return true upon success, otherwise false
  */
 bool
-BuildTestInfrastructure(vector<Group *> &groups, int &fd, string device,
-    SpecRevType specRev)
+BuildTestInfrastructure(vector<Group *> &groups, int &fd,
+    struct CmdLine &cl)
 {
     struct flock fdlock = {F_WRLCK, SEEK_SET, 0, 0, 0};
 
@@ -367,23 +318,39 @@ BuildTestInfrastructure(vector<Group *> &groups, int &fd, string device,
     // could cause testing corruption, and therefore a single threaded device
     // interaction model is needed. No more than 1 test can occur at any time
     // to any device and all tests must be single threaded.
-    fd = open(device.c_str(), (O_RDWR | O_DIRECT));
-    if ((fd = open(device.c_str(), O_RDWR)) == -1) {
-        if ((errno == EACCES) || (errno == EAGAIN))
+    if (cl.device.compare(NO_DEVICES) == 0) {
+        printf("There are no devices present\n");
+        return false;
+    }
+    if ((fd = open(cl.device.c_str(), O_RDWR)) == -1) {
+        if ((errno == EACCES) || (errno == EAGAIN)) {
             printf("%s may need permission set for current user\n",
-                device.c_str());
-        LOG_ERR("%s", strerror(errno));
+                cl.device.c_str());
+        }
+        LOG_ERR("device=%s: %s", cl.device.c_str(), strerror(errno));
         return false;
     }
     if (fcntl(fd, F_SETLK, &fdlock) == -1) {
-        if ((errno == EACCES) || (errno == EAGAIN))
-            printf("%s has been locked by another process\n", device.c_str());
+        if ((errno == EACCES) || (errno == EAGAIN)) {
+            printf("%s has been locked by another process\n",
+                cl.device.c_str());
+        }
         LOG_ERR("%s", strerror(errno));
     }
 
+    // ------------------------------EDIT HERE---------------------------------
+    // IMPORTANT: Once a group is assigned/push_back() to a position in the
+    //            vector, i.e. a group index/number, then it should stay in that
+    //            position so that the group references won't change per
+    //            release. Future groups can be appended 1, 2, 3, 4, etc., but
+    //            existing groups need to keep their original assigned vector
+    //            position so users of this app can rely on these assignments.
+    //
     // All groups will be pushed here. The groups themselves dictate which
     // tests get executed based upon the constructed 'specRev' being targeted.
-    groups.push_back(new GrpCtrlRegisters(groups.size(), specRev, fd));
+    cl.informative.grpInfoIdx = groups.size();  // tied to the next statement
+    groups.push_back(new GrpInformative(groups.size(), cl.rev, fd));       // 1
+    groups.push_back(new GrpCtrlRegisters(groups.size(), cl.rev, fd));     // 0
 
     return true;
 }
@@ -409,80 +376,4 @@ DestroyTestInfrastructure(vector<Group *> &groups, int &fd)
         if (close(fd) == -1)
             LOG_ERR("%s", strerror(errno));
     }
-}
-
-
-/**
- * A function to execute the desired test case(s). Param ignore
- * indicates that when an error is reported from a test case, it is ignored to
- * the point that the next test case will be allowed to run, if and only if,
- * there are more tests which could have run if the test passed. The error
- * itself won't be lost. because the end return value from this function will
- * indicate an error was detected even though it was ignored.
- * @param test Pass the structure as returned from ParseTargetCmdLine()
- * @param loop Pass the number of times to loop the test(s)
- * @param ignore Pass whether to keep running when errors are detected
- * @param groups Pass all groups being considered for execution
- * @return true upon success, false if failures/errors detected; Param
- *          ignore does not affect return value if an error is detected.
- */
-bool
-ExecuteTests(TargetType test, size_t loop, bool ignore, vector<Group *> &groups)
-{
-    bool finResult = true;    // assuming success until we find otherwise
-    bool allHaveRun = false;
-    TestIteratorType testIter;
-
-
-    if ((test.group != ULONG_MAX) && (test.group >= groups.size())) {
-        LOG_ERR("Specified test group does not exist");
-        return false;
-    }
-
-    for (size_t iLoop = 0; iLoop < loop; iLoop++) {
-        LOG_NORM("Start loop execution %ld", iLoop);
-
-        for (size_t iGrp = 0; iGrp < groups.size(); iGrp++) {
-            bool locResult;
-
-            if (test.group == ULONG_MAX) {
-                // Run all tests within all groups
-                testIter = groups[iGrp]->GetTestIterator();
-                while (allHaveRun == false) {
-                    locResult = groups[iGrp]->RunTest(testIter, allHaveRun);
-                    finResult = finResult ? locResult : finResult;
-                    if ((ignore == false) && (finResult == false))
-                        goto FAIL_OUT;
-                }
-
-            } else if ((test.major == ULONG_MAX) || (test.minor == ULONG_MAX)) {
-                // Run all tests within spec'd group
-                if (iGrp == test.group) {
-                    testIter = groups[iGrp]->GetTestIterator();
-                    while (allHaveRun == false) {
-                        locResult = groups[iGrp]->RunTest(testIter, allHaveRun);
-                        finResult = finResult ? locResult : finResult;
-                        if ((ignore == false) && (finResult == false))
-                            goto FAIL_OUT;
-                    }
-                    break;  // done; do we keep looping?
-                }
-
-            } else {
-                // Run spec'd test within spec'd group
-                if (iGrp == test.group) {
-                    locResult = groups[iGrp]->RunTest(test.major, test.minor);
-                    finResult = finResult ? locResult : finResult;
-                    if ((ignore == false) && (finResult == false))
-                        goto FAIL_OUT;
-                    break;  // done; do we keep looping?
-                }
-            }
-        }
-
-        LOG_NORM("Stop loop execution %ld", iLoop);
-    }
-
-FAIL_OUT:
-    return (finResult);
 }
