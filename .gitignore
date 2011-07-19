@@ -1,4 +1,6 @@
 doc/
+src/
+rpm/
 
 tnvme
 .cproject

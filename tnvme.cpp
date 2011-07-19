@@ -9,6 +9,7 @@
 #include <errno.h>
 #include "tnvme.h"
 #include "tnvmeHelpers.h"
+#include "version.h"
 
 
 // ------------------------------EDIT HERE---------------------------------
@@ -28,7 +29,7 @@ bool BuildTestInfrastructure(vector<Group *> &groups, int &fd,
 void
 Usage(void) {
     //80->  xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-    printf("%s\n", APPNAME);
+    printf("%s (revision %d.%d)\n", APPNAME, VER_MAJOR, VER_MINOR);
     printf("  -h(--help)                          Display this help\n");
     printf("  -v(--rev) <spec>                    All options forced to target specified\n");
     printf("                                      NVME revision {1.0 | 1.0a}; dflt=1.0a\n");
@@ -88,8 +89,6 @@ main(int argc, char *argv[])
         {   NULL,           no_argument,        NULL,    0}
     };
 
-    LOG_NORM("%s launched", APPNAME);
-
     // defaults if not spec'd on cmd line
     CmdLine.rev = SPECREV_10a;
     CmdLine.detail.req = false;
@@ -102,6 +101,12 @@ main(int argc, char *argv[])
     CmdLine.loop = 1;
     CmdLine.device = NO_DEVICES;
     CmdLine.mmap.req = false;
+
+    if (argc == 1) {
+        printf("%s is a compliance test suite for NVM Express hardware.\n",
+            APPNAME);
+        exit(0);
+    }
 
 
     // Seek for all possible devices that this app may commune
@@ -120,11 +125,6 @@ main(int argc, char *argv[])
 
 
     // Parse cmd line options
-    if (argc == 1) {
-        printf("%s is a compliance test suite for NVM Express hardware.\n",
-            APPNAME);
-        exit(0);
-    }
     while ((c = getopt_long(argc, argv, short_opt, long_opt, &idx)) != -1) {
         switch (c) {
 
