@@ -59,7 +59,7 @@ Registers::Read(PciSpc reg, unsigned long long &value)
     int rsize = mPciSpcMetrics[reg].size;
     int roffset = mPciSpcMetrics[reg].offset;
     const char *rdesc = mPciSpcMetrics[reg].desc;
-    struct nvme_read_generic io = { NVME_PCI_HEADER,
+    struct nvme_read_generic io = { NVMEIO_PCI_HDR,
                                     roffset, rsize,
                                     (unsigned char *)&value };
 
@@ -82,7 +82,37 @@ Registers::Read(PciSpc reg, unsigned long long &value)
 
 
 bool
-Registers::Read(type_t regSpc, int rsize, int roffset, unsigned char *value)
+Registers::Read(CtlSpc reg, unsigned long long &value)
+{
+    int rc;
+    int rsize = mCtlSpcMetrics[reg].size;
+    int roffset = mCtlSpcMetrics[reg].offset;
+    const char *rdesc = mCtlSpcMetrics[reg].desc;
+    struct nvme_read_generic io = { NVMEIO_BAR01,
+                                    roffset, rsize,
+                                    (unsigned char *)&value };
+
+    // Verify we discovered the true offset of requested register
+    if (roffset == INT_MAX) {
+        LOG_ERR("Offset of %s could not be discovered", rdesc);
+        return false;
+    } else if (rsize > MAX_SUPPORTED_REG_SIZE) {
+        LOG_ERR("Size of %s is larger than supplied buffer", rdesc);
+        return false;
+    } else if ((rc = ioctl(mFd, NVME_IOCTL_READ_GENERIC, &io)) < 0) {
+        LOG_ERR("Error reading %s: %d returned", rdesc, rc);
+        return false;
+    }
+
+    value = value & RegMasking[rsize];
+    LOG_NRM("%s", FormatRegister(rsize, rdesc, value).c_str());
+    return true;
+}
+
+
+bool
+Registers::Read(nvme_io_space regSpc, int rsize, int roffset,
+    unsigned char *value)
 {
     int rc;
     struct nvme_read_generic io = { regSpc, roffset, rsize, value };
@@ -93,30 +123,6 @@ Registers::Read(type_t regSpc, int rsize, int roffset, unsigned char *value)
     }
 
     LOG_NRM("%s", FormatRegister(regSpc, rsize, roffset, value).c_str());
-    return true;
-}
-
-
-bool
-Registers::Read(CtlSpc reg, unsigned long long &value)
-{
-    int rsize = mCtlSpcMetrics[reg].size;
-    int roffset = mCtlSpcMetrics[reg].offset;
-    const char *rdesc = mCtlSpcMetrics[reg].desc;
-
-    // Verify we discovered the true offset of requested register
-    if (roffset == INT_MAX) {
-        LOG_ERR("Offset of %s could not be discovered", rdesc);
-        return false;
-    } else if (rsize > MAX_SUPPORTED_REG_SIZE) {
-        LOG_ERR("Size of %s is larger than supplied buffer", rdesc);
-        return false;
-    } else if (Read(NVME_PCI_HEADER, rsize, roffset, (unsigned char *)value)) {
-        return false;
-    }
-
-    value = value & RegMasking[rsize];
-    LOG_NRM("%s", FormatRegister(rsize, rdesc, value).c_str());
     return true;
 }
 
@@ -155,7 +161,7 @@ Registers::FormatRegister(int regSize, const char *regDesc,
 
 
 string
-Registers::FormatRegister(type_t regSpc, int rsize, int roffset,
+Registers::FormatRegister(nvme_io_space regSpc, int rsize, int roffset,
     unsigned char *value)
 {
     unsigned char *tmp = value;
@@ -165,11 +171,11 @@ Registers::FormatRegister(type_t regSpc, int rsize, int roffset,
 
     switch (regSpc) {
 
-    case NVME_PCI_HEADER:
+    case NVMEIO_PCI_HDR:
         snprintf(buffer, sizeof(buffer),
             "PCI space reg offset 0x%08X = ...", roffset);
         break;
-    case NVME_PCI_BAR01:
+    case NVMEIO_BAR01:
         snprintf(buffer, sizeof(buffer),
             "Ctrl'r space reg offset 0x%08X = ...", roffset);
         break;
@@ -186,7 +192,7 @@ Registers::FormatRegister(type_t regSpc, int rsize, int roffset,
         snprintf(buffer, sizeof(buffer), "%02X ", *tmp++);
         result += buffer;
         if (i >= 15)
-            i = 0;
+            i = -1;
     }
 
     return result;
@@ -201,7 +207,7 @@ Registers::DiscoverPciCapabilities()
     unsigned int capOffset;
     unsigned long long work;
     unsigned long long nextCap;
-    struct nvme_read_generic io = { NVME_PCI_HEADER, 0, 4,
+    struct nvme_read_generic io = { NVMEIO_PCI_HDR, 0, 4,
                                     (unsigned char *)&nextCap };
 
 
@@ -276,7 +282,7 @@ Registers::DiscoverPciCapabilities()
 
         // For each capability we find update our knowledge of each reg's
         // offset within that capability.
-        for (int i = 0; i <= PCISPC_FENCE; i++) {
+        for (int i = 0; i < PCISPC_FENCE; i++) {
             if (mPciSpcMetrics[i].cap == mPciCap.back()) {
                 mPciSpcMetrics[i].offset =
                     mPciSpcMetrics[i-1].offset + mPciSpcMetrics[i-1].size;

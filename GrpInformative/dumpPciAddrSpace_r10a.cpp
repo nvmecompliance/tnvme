@@ -47,7 +47,7 @@ DumpPciAddrSpace_r10a::RunCoreTest()
     // Traverse the PCI header registers
     work = "PCI header registers\n";
     write(fd, work.c_str(), work.size());
-    for (int j = 0; j <= PCISPC_FENCE; j++) {
+    for (int j = 0; j < PCISPC_FENCE; j++) {
         if (pciMetrics[j].cap == PCICAP_FENCE) {
             if (gRegisters->Read((PciSpc)j, value) == false)
                 goto EXIT;
@@ -82,11 +82,26 @@ DumpPciAddrSpace_r10a::RunCoreTest()
         write(fd, work.c_str(), work.size());
 
         // Read all registers assoc with the discovered capability
-        for (int j = 0; j <= PCISPC_FENCE; j++) {
-            if (gRegisters->Read((PciSpc)j, value) == false) {
-                goto EXIT;
-            } else {
-                WriteToFile(fd, pciMetrics[j], value);
+        for (int j = 0; j < PCISPC_FENCE; j++) {
+            if (pciCap->at(i) == pciMetrics[j].cap) {
+                if (pciMetrics[j].size > MAX_SUPPORTED_REG_SIZE) {
+                    unsigned char *buffer;
+                    buffer = new unsigned char[pciMetrics[j].size];
+                    if (gRegisters->Read(NVMEIO_PCI_HDR, pciMetrics[j].size,
+                        pciMetrics[j].offset, buffer) == false) {
+                        goto EXIT;
+                    } else {
+                        string work = "  ";
+                        work += gRegisters->FormatRegister(NVMEIO_PCI_HDR,
+                            pciMetrics[j].size, pciMetrics[j].offset, buffer);
+                        work += "\n";
+                        write(fd, work.c_str(), work.size());
+                    }
+                } else if (gRegisters->Read((PciSpc)j, value) == false) {
+                    goto EXIT;
+                } else {
+                    WriteToFile(fd, pciMetrics[j], value);
+                }
             }
         }
     }

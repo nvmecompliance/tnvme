@@ -45,7 +45,8 @@ public:
      * @param value Returns the value read, if and only if successful.
      * @return true upon success, otherwise false
      */
-    bool Read(type_t regSpc, int rsize, int roffset, unsigned char *value);
+    bool Read(nvme_io_space regSpc, int rsize, int roffset,
+        unsigned char *value);
 
     /**
      * Returns the list of capabilities discovered by parsing PCI address
@@ -71,7 +72,7 @@ public:
      */
     string FormatRegister(int regSize, const char *regDesc,
         unsigned long long regValue);
-    string FormatRegister(type_t regSpc, int rsize, int roffset,
+    string FormatRegister(nvme_io_space regSpc, int rsize, int roffset,
         unsigned char *value);
 
 
