@@ -1,5 +1,12 @@
+#include <unistd.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <errno.h>
 #include "dumpCtrlrAddrSpace_r10a.h"
 #include "grpInformative.h"
+#include "../globals.h"
 
 
 DumpCtrlrAddrSpace_r10a::DumpCtrlrAddrSpace_r10a(int fd) : Test(fd)
@@ -22,7 +29,36 @@ DumpCtrlrAddrSpace_r10a::~DumpCtrlrAddrSpace_r10a()
 bool
 DumpCtrlrAddrSpace_r10a::RunCoreTest()
 {
-    return false;   // todo; add some reset logic when available
+    int fd;
+    string work;
+    unsigned long long value = 0;
+    const CtlSpcType *pciMetrics = gRegisters->GetCtlMetrics();
+
+
+    // Dumping all register values to well known file
+    if ((fd = open(FILENAME_DUMP_CTRLR_REGS, FILENAME_FLAGS,
+        FILENAME_MODE)) == -1) {
+
+        LOG_ERR("file=%s: %s", FILENAME_DUMP_CTRLR_REGS, strerror(errno));
+        return false;
+    }
+
+    // Read all registers in ctrlr space
+    for (int i = 0; i <= CTLSPC_FENCE; i++) {
+        if (pciMetrics[i].size > MAX_SUPPORTED_REG_SIZE)
+            continue;   // Don't care about really large areas
+        else if (gRegisters->Read((CtlSpc)i, value) == false)
+            break;
+
+        work = "  ";    // indent reg values within each capability
+        work += gRegisters->FormatRegister(pciMetrics[i].size,
+            pciMetrics[i].desc, value);
+        work += "\n";
+        write(fd, work.c_str(), work.size());
+    }
+
+    close(fd);
+    return true;
 }
 
 

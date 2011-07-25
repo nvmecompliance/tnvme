@@ -3,6 +3,7 @@
 
 #include <string>
 #include "testDescribe.h"
+#include "registers.h"
 
 using namespace std;
 
@@ -51,9 +52,9 @@ public:
 
 
 protected:
+    /// file descriptor to the device under test
     int mFd;
-
-    /// Children must populate this member, probably during construction
+    /// Children must populate this during construction
     TestDescribe mTestDesc;
 
     /**

@@ -7,11 +7,9 @@
 
 using namespace std;
 
-#define DEBUG
-
 #define APPNAME         "tnvme"
 #define LEVEL           APPNAME
-#define LOG_NORM(fmt, ...)    \
+#define LOG_NRM(fmt, ...)    \
     fprintf(stderr, "%s: " fmt "\n", LEVEL, ## __VA_ARGS__);
 #define LOG_ERR(fmt, ...)    \
     fprintf(stderr, "%s-err:%s:%d: " fmt "\n", LEVEL, __FILE__, __LINE__, ## __VA_ARGS__);

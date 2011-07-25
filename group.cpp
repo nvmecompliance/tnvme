@@ -157,14 +157,14 @@ Group::RunTest(TestRef &tr, vector<TestRef> &skipTest)
         return false;
 
     FORMAT_GROUP_DESCRIPTION(work, this)
-    LOG_NORM("%s", work.c_str());
+    LOG_NRM("%s", work.c_str());
 
     FORMAT_TEST_NUM(work, "", tr.major, tr.minor)
     work += mTests[tr.major][tr.minor]->GetShortDescription();
-    LOG_NORM("%s", work.c_str());
-    LOG_NORM("Compliance: %s",
+    LOG_NRM("%s", work.c_str());
+    LOG_NRM("Compliance: %s",
         mTests[tr.major][tr.minor]->GetComplianceDescription().c_str());
-    LOG_NORM("%s",
+    LOG_NRM("%s",
         mTests[tr.major][tr.minor]->GetLongDescription(false, 0).c_str());
 
     if (SkippingTest(tr, skipTest))
@@ -182,7 +182,7 @@ Group::SkippingTest(TestRef &tr, vector<TestRef> &skipTest)
              (tr.major == skipTest[i].major) &&
              (tr.minor == skipTest[i].minor)) {
 
-            LOG_NORM("Instructed to skip test: %ld:%ld.%ld", tr.group, tr.major,
+            LOG_NRM("Instructed to skip test: %ld:%ld.%ld", tr.group, tr.major,
                 tr.minor);
             return true;
          }

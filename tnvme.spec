@@ -3,7 +3,7 @@
 Name:           tnvme
 Version:        %{_major}.%{_minor}
 Release:        1%{?dist}
-Summary:        NVM Express hardware compliance test suite
+Summary:        NVM Express hardware compliance test suite application
 Group:          Applications/Engineering
 License:        Commercial
 URL:            http://www.intel.com
@@ -11,7 +11,7 @@ Source0:        %{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %description
-NVM Express hardware compliance test suite.
+NVM Express hardware compliance test suite application.
 
 %prep
 %setup -q

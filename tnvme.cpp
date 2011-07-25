@@ -10,6 +10,7 @@
 #include "tnvme.h"
 #include "tnvmeHelpers.h"
 #include "version.h"
+#include "globals.h"
 
 
 // ------------------------------EDIT HERE---------------------------------
@@ -337,6 +338,11 @@ BuildTestInfrastructure(vector<Group *> &groups, int &fd,
         }
         LOG_ERR("%s", strerror(errno));
     }
+
+
+    // Create globals here, stand alone objects which all tests will need
+    gRegisters = new Registers(fd);
+
 
     // ------------------------------EDIT HERE---------------------------------
     // IMPORTANT: Once a group is assigned/push_back() to a position in the

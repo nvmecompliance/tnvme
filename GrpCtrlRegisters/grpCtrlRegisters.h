@@ -1,7 +1,7 @@
 #ifndef _GRPCTRLREGISTERS_H_
 #define _GRPCTRLREGISTERS_H_
 
-#include "group.h"
+#include "../group.h"
 
 
 /**

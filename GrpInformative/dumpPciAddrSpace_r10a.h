@@ -14,6 +14,10 @@ public:
 protected:
     virtual bool RunCoreTest();
 
+
+private:
+    void WriteToFile(int fd, const PciSpcType regMetrics,
+        unsigned long long value);
 };
 
 

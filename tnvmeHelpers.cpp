@@ -25,7 +25,6 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
 {
     bool allTestsPass = true;    // assuming success until we find otherwise
     TestIteratorType testIter;
-    TestRef tr;
 
 
     if ((cl.test.t.group != ULONG_MAX) && (cl.test.t.group >= groups.size())) {
@@ -34,7 +33,7 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
     }
 
     for (size_t iLoop = 0; iLoop < cl.loop; iLoop++) {
-        LOG_NORM("Start loop execution %ld", iLoop);
+        LOG_NRM("Start loop execution %ld", iLoop);
 
         for (size_t iGrp = 0; iGrp < groups.size(); iGrp++) {
             bool allHaveRun = false;
@@ -42,7 +41,7 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
 
             // Handle the --informative cmd line option
             if (cl.informative.req && (iGrp == cl.informative.grpInfoIdx)) {
-                LOG_NORM("Cmd line forces executing informative group");
+                LOG_NRM("Cmd line forces executing informative group");
                 testIter = groups[iGrp]->GetTestIterator();
                 while (allHaveRun == false) {
                     locResult = groups[iGrp]->RunTest(testIter, cl.skiptest,
@@ -95,7 +94,7 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
                     if (cl.sticky) {
                         // todo; add some reset logic when available
                     }
-                    locResult = groups[iGrp]->RunTest(tr, cl.skiptest);
+                    locResult = groups[iGrp]->RunTest(cl.test.t, cl.skiptest);
                     allTestsPass = allTestsPass ? locResult : allTestsPass;
                     if ((cl.ignore == false) && (allTestsPass == false))
                         goto FAIL_OUT;
@@ -104,7 +103,7 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
             }
         }
 
-        LOG_NORM("Stop loop execution %ld", iLoop);
+        LOG_NRM("Stop loop execution %ld", iLoop);
     }
 
 FAIL_OUT:
@@ -189,7 +188,7 @@ ParseSkipTestCmdLine(vector<TestRef> &skipTest, const char *optarg)
             skipTest[i].group, skipTest[i].major, skipTest[i].minor);
         output += work;
     }
-    LOG_NORM("%s", output.c_str());
+    LOG_NRM("%s", output.c_str());
 
     close(fd);
     return true;

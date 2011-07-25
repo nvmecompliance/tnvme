@@ -1,9 +1,12 @@
 doc/
 src/
 rpm/
+Debug/
 
 tnvme
 .cproject
 .project
 *.a
 doxygen.log
+dump.reg.pci
+dump.reg.ctrl

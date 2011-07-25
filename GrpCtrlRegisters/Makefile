@@ -6,14 +6,14 @@ SRC = \
 .SUFFIXES: .cpp
 
 OBJ = $(SRC:.cpp=.o)
-OUT = ../libGrpCtrlRegisters.a
+OUT = libGrpCtrlRegisters.a
 
-CCFLAGS = -g -W -Wall -Werror
+CCFLAGS = -g -O0 -W -Wall -Werror
 LDFLAGS=-lm
 CC = g++
 
 LIBS = -L../ -L/usr/local/lib -lm
-INCLUDES = -I. -I../ -I/usr/local/include
+INCLUDES = -I. -I../ -I../../ -I/usr/local/include
 
 all: $(OUT)
 

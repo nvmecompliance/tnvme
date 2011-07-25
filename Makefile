@@ -1,17 +1,20 @@
-SHELL:=/bin/bash 
 CC=g++
-CFLAGS=-g -W -Wall -Werror
+CFLAGS=-g -O0 -W -Wall -Werror -DDEBUG
 APP_NAME:=tnvme
+LDFLAGS=$(foreach stem, $(SUBDIRS),./$(stem)/lib$(stem).a)
+INCLUDE := -I./ -I../
 
-SUBDIRS:= \
+SUBDIRS:=				\
 	GrpInformative		\
 	GrpCtrlRegisters
 
-SOURCES:= \
-	group.cpp \
-	test.cpp \
-	testDescribe.cpp \
-	tnvme.cpp \
+SOURCES:=				\
+	globals.cpp			\
+	group.cpp			\
+	registers.cpp		\
+	test.cpp			\
+	testDescribe.cpp	\
+	tnvme.cpp			\
 	tnvmeHelpers.cpp
 
 #
@@ -26,10 +29,6 @@ RPMCOMPILEDIR=$(PWD)/rpmbuild
 RPMSRCFILE=$(PWD)/$(RPMFILE)
 RPMSPECFILE=$(RPMBASE).spec
 SRCDIR?=./src
-
-LDFLAGS=-lm $(patsubst Grp%, libGrp%.a, $(SUBDIRS))
-
-INCLUDE := ./
 
 all: GOAL=all
 all: $(APP_NAME) doc
@@ -50,7 +49,6 @@ clobber: GOAL=clobber
 clobber: $(SUBDIRS) clean
 	rm -rf doc
 	rm -f $(APP_NAME)
-	rm -f *.a
 
 doc: GOAL=doc
 doc: $(SUBDIRS)
@@ -60,6 +58,9 @@ $(SUBDIRS):
 	$(MAKE) -C $@ $(GOAL)
 
 $(APP_NAME): $(SUBDIRS) $(SOURCES)
+	echo todd
+	echo $(LDFLAGS)
+	exit
 	$(CC) $(CFLAGS) -I$(INCLUDE) $(SOURCES) -o $(APP_NAME) $(LDFLAGS)
 
 # Specify a custom source c:ompile dir: "make src SRCDIR=../compile/dir"
@@ -88,4 +89,4 @@ rpmbuild: rpmzipsrc
 	cp -p $(RPMCOMPILEDIR)/RPMS/x86_64/*.rpm ./rpm
 	cp -p $(RPMCOMPILEDIR)/SRPMS/*.rpm ./rpm
 
-.PHONY: all clean doc $(SUBDIRS) src rpmzipsrc
+.PHONY: all clean clobber doc $(SUBDIRS) src install rpmzipsrc rpmbuild

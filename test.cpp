@@ -19,10 +19,10 @@ bool
 Test::Run()
 {
     if (RunCoreTest()) {
-        LOG_NORM("SUCCESSFUL test case run");
+        LOG_NRM("SUCCESSFUL test case run");
         return true;
     } else {
-        LOG_NORM("FAILED test case run");
+        LOG_NRM("FAILED test case run");
         return false;
     }
 }

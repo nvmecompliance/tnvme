@@ -1,5 +1,12 @@
+#include <unistd.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <errno.h>
 #include "dumpPciAddrSpace_r10a.h"
 #include "grpInformative.h"
+#include "../globals.h"
 
 
 DumpPciAddrSpace_r10a::DumpPciAddrSpace_r10a(int fd) : Test(fd)
@@ -22,7 +29,83 @@ DumpPciAddrSpace_r10a::~DumpPciAddrSpace_r10a()
 bool
 DumpPciAddrSpace_r10a::RunCoreTest()
 {
-    return false;   // todo; add some reset logic when available
+    int fd;
+    string work;
+    unsigned long long value;
+    const PciSpcType *pciMetrics = gRegisters->GetPciMetrics();
+    const vector<PciCapabilities> *pciCap = gRegisters->GetPciCapabilities();
+
+
+    // Dumping all register values to well known file
+    if ((fd = open(FILENAME_DUMP_PCI_REGS, FILENAME_FLAGS,
+        FILENAME_MODE)) == -1) {
+
+        LOG_ERR("file=%s: %s", FILENAME_DUMP_PCI_REGS, strerror(errno));
+        return false;
+    }
+
+    // Traverse the PCI header registers
+    work = "PCI header registers\n";
+    write(fd, work.c_str(), work.size());
+    for (int j = 0; j <= PCISPC_FENCE; j++) {
+        if (pciMetrics[j].cap == PCICAP_FENCE) {
+            if (gRegisters->Read((PciSpc)j, value) == false)
+                goto EXIT;
+            WriteToFile(fd, pciMetrics[j], value);
+        }
+    }
+
+    // Traverse all discovered capabilities
+    for (size_t i = 0; i < pciCap->size(); i++) {
+        switch (pciCap->at(i)) {
+
+        case PCICAP_PMCAP:
+            work = "Capabilities: PMCAP: PCI power management\n";
+            break;
+        case PCICAP_MSICAP:
+            work = "Capabilities: MSICAP: Message signaled interrupt\n";
+            break;
+        case PCICAP_MSIXCAP:
+            work = "Capabilities: MSIXCAP: Message signaled interrupt ext'd\n";
+            break;
+        case PCICAP_PXCAP:
+            work = "Capabilities: PXCAP: Message signaled interrupt\n";
+            break;
+        case PCICAP_AERCAP:
+            work = "Capabilities: AERCAP: Advanced Error Reporting\n";
+            break;
+        default:
+            LOG_ERR("PCI space reporting an unknown capability: %d\n",
+                pciCap->at(i));
+            goto EXIT;
+        }
+        write(fd, work.c_str(), work.size());
+
+        // Read all registers assoc with the discovered capability
+        for (int j = 0; j <= PCISPC_FENCE; j++) {
+            if (gRegisters->Read((PciSpc)j, value) == false) {
+                goto EXIT;
+            } else {
+                WriteToFile(fd, pciMetrics[j], value);
+            }
+        }
+    }
+
+EXIT:
+    close(fd);
+    return true;
+}
+
+
+void
+DumpPciAddrSpace_r10a::WriteToFile(int fd, const PciSpcType regMetrics,
+    unsigned long long value)
+{
+    string work = "  ";    // indent reg values within each capability
+    work += gRegisters->FormatRegister(regMetrics.size,
+        regMetrics.desc, value);
+    work += "\n";
+    write(fd, work.c_str(), work.size());
 }
 
 
