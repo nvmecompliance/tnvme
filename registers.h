@@ -21,7 +21,10 @@ public:
     Registers(int fd);
     virtual ~Registers();
 
-    /// Available to mask unsigned long long variables to appropriate length
+    /**
+     * Available to mask unsigned long long variables to appropriate length.
+     * Where the index to array is the size in bytes to keep.
+     */
     static const unsigned long long RegMasking[];
 
     /**

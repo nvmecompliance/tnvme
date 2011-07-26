@@ -172,23 +172,22 @@ Registers::FormatRegister(nvme_io_space regSpc, int rsize, int roffset,
     switch (regSpc) {
 
     case NVMEIO_PCI_HDR:
-        snprintf(buffer, sizeof(buffer),
-            "PCI space reg offset 0x%08X = ...", roffset);
+        snprintf(buffer, sizeof(buffer), "PCI space register...");
         break;
     case NVMEIO_BAR01:
-        snprintf(buffer, sizeof(buffer),
-            "Ctrl'r space reg offset 0x%08X = ...", roffset);
+        snprintf(buffer, sizeof(buffer), "Ctrl'r space register...");
         break;
     default:
-        snprintf(buffer, sizeof(buffer),
-            "Unknown space reg offset 0x%08X = ...", roffset);
+        snprintf(buffer, sizeof(buffer), "Unknown space register");
         break;
     }
     result = buffer;
 
     for (i = 0, j = 0; j < rsize; i++, j++) {
-        if (i == 0)
-            result += "\n    0x";
+        if (i == 0) {
+            snprintf(buffer, sizeof(buffer), "\n    0x%08X: 0x", roffset+j);
+            result += buffer;
+        }
         snprintf(buffer, sizeof(buffer), "%02X ", *tmp++);
         result += buffer;
         if (i >= 15)

@@ -43,9 +43,10 @@ Usage(void) {
     printf("                                      to any test specified by -t(--test)\n");
     printf("  -d(--device) <name>                 Device to open for testing: /dev/node\n");
     printf("                                      dflt=(1st device listed in --list)\n");
-    printf("  -m(--mmap) <space:offset:num>       Read MemMap I/O registers from\n");
+    printf("  -m(--mmap) <space:offset:size>      Read MemMap I/O registers from\n");
     printf("                                      <space>={PCI | BAR01} at <offset> bytes\n");
-    printf("                                      from beginning for <num> bytes\n");
+    printf("                                      from beginning of space for <size> bytes\n");
+    printf("                                      <offset:size> require base 16 values\n");
     printf("  -r(--reset) {<pci> | <ctrlr>}       Reset the device\n");
     printf("  -i(--ignore)                        Ignore detected errors\n");
     printf("  -p(--loop) <count>                  Loop test execution <count> times; dflt=1\n");
@@ -281,7 +282,12 @@ main(int argc, char *argv[])
             }
         }
     } else if (CmdLine.mmap.req) {
-        ;   // todo; add some reset logic when available
+        unsigned char *value = new unsigned char[CmdLine.mmap.size];
+        gRegisters->Read(CmdLine.mmap.space, CmdLine.mmap.size,
+            CmdLine.mmap.offset, value);
+        string result = gRegisters->FormatRegister(CmdLine.mmap.space,
+            CmdLine.mmap.size, CmdLine.mmap.offset, value);
+        printf("%s\n", result.c_str());
     } else if (CmdLine.reset != RESETTYPE_FENCE) {
         ;   // todo; add some reset logic when available
     } else if (CmdLine.test.req) {

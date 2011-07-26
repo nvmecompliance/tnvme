@@ -1,4 +1,9 @@
-# source files.
+CC=g++
+CFLAGS=-g -O0 -W -Wall -Werror -DDEBUG
+LDFLAGS=-lm
+LIBS = -L../ -L/usr/local/lib -lm
+INCLUDES = -I. -I../ -I../../ -I/usr/local/include
+
 SRC = \
 	grpInformative.cpp			\
 	dumpPciAddrSpace_r10a.cpp	\
@@ -9,17 +14,10 @@ SRC = \
 OBJ = $(SRC:.cpp=.o)
 OUT = libGrpInformative.a
 
-CCFLAGS = -g -O0 -W -Wall -Werror
-LDFLAGS=-lm
-CC = g++
-
-LIBS = -L../ -L/usr/local/lib -lm
-INCLUDES = -I. -I../ -I../../ -I/usr/local/include
-
 all: $(OUT)
 
 .cpp.o:
-	$(CC) $(INCLUDES) $(CCFLAGS) -c $< -o $@ $(LDFLAGS)
+	$(CC) $(INCLUDES) $(CFLAGS) -c $< -o $@ $(LDFLAGS)
 
 $(OUT): $(OBJ)
 	ar rcs $(OUT) $(OBJ)

@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string>
 #include <vector>
+#include "dnvme/dnvme_interface.h"
 
 using namespace std;
 
@@ -34,12 +35,6 @@ typedef enum {
     RESETTYPE_FENCE             // always must be the last element
 } ResetType;
 
-typedef enum {
-    MMAP_PCI,                   // PCI address space for ctrlr
-    MMAP_BAR01,                 // Ctrlr regs mapped into PCI BAR0 and BAR1
-    MMAP_FENCE                  // always must be the last element
-} IoSpaceType;
-
 struct TestRef {
     size_t  group;
     size_t  major;
@@ -57,20 +52,20 @@ struct TestRef {
  * true   !=ULONG_MAX  !=ULONG_MAX && !=ULONG_MAX  request spec'd test in group
  */
 struct TestTarget {
-    bool    req;    // requested by cmd line
+    bool    req;                // requested by cmd line
     TestRef t;
 };
 
 struct InformativeGrp {
-    bool req;       // requested by cmd line
-    size_t grpInfoIdx;
+    bool    req;                // requested by cmd line
+    size_t  grpInfoIdx;
 };
 
 struct MmapIo {
-    bool req;       // requested by cmd line
-    IoSpaceType space;
-    size_t      offset;
-    size_t      num;
+    bool            req;        // requested by cmd line
+    nvme_io_space   space;
+    size_t          offset;
+    size_t          size;
 };
 
 struct CmdLine {

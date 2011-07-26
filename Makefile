@@ -58,9 +58,6 @@ $(SUBDIRS):
 	$(MAKE) -C $@ $(GOAL)
 
 $(APP_NAME): $(SUBDIRS) $(SOURCES)
-	echo todd
-	echo $(LDFLAGS)
-	exit
 	$(CC) $(CFLAGS) -I$(INCLUDE) $(SOURCES) -o $(APP_NAME) $(LDFLAGS)
 
 # Specify a custom source c:ompile dir: "make src SRCDIR=../compile/dir"

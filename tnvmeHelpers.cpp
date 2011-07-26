@@ -311,30 +311,30 @@ ParseMmapCmdLine(MmapIo &mmap, const char *optarg)
 
 
     mmap.req = true;
-    mmap.space = MMAP_FENCE;
+    mmap.space = NVMEIO_FENCE;
     mmap.offset = 0;
-    mmap.num = 0;
+    mmap.size = 0;
 
-    // Parsing <space:offset:num>
+    // Parsing <space:offset:size>
     swork = optarg;
     if ((ulwork = swork.find(":", 0)) == string::npos) {
-        LOG_ERR("Unrecognized format <space:offset:num>=%s", optarg);
+        LOG_ERR("Unrecognized format <space:offset:size>=%s", optarg);
         return false;
     }
     if (strcmp("PCI", swork.substr(0, ulwork).c_str()) == 0) {
-        mmap.space = MMAP_PCI;
+        mmap.space = NVMEIO_PCI_HDR;
     } else if (strcmp("BAR01", swork.substr(0, ulwork).c_str()) == 0) {
-        mmap.space = MMAP_BAR01;
+        mmap.space = NVMEIO_BAR01;
     } else {
         LOG_ERR("Unrecognized identifier <space>=%s", optarg);
         return false;
     }
 
-    // Parsing <offset:num>
+    // Parsing <offset:size>
     swork = swork.substr(ulwork+1, swork.size());
-    tmp = strtol(swork.substr(0, swork.size()).c_str(), &endptr, 10);
+    tmp = strtol(swork.substr(0, swork.size()).c_str(), &endptr, 16);
     if (*endptr != ':') {
-        LOG_ERR("Unrecognized format <offset:num>=%s", optarg);
+        LOG_ERR("Unrecognized format <offset:size>=%s", optarg);
         return false;
     } else if (tmp < 0) {
         LOG_ERR("<offset> values < 0 are not supported");
@@ -342,21 +342,21 @@ ParseMmapCmdLine(MmapIo &mmap, const char *optarg)
     }
     mmap.offset = tmp;
 
-    // Parsing <num>
+    // Parsing <size>
     swork = swork.substr(swork.find_first_of(':') + 1, swork.length());
     if (swork.length() == 0) {
-        LOG_ERR("Missing <num> format string");
+        LOG_ERR("Missing <size> format string");
         return false;
     }
-    tmp = strtol(swork.substr(0, swork.size()).c_str(), &endptr, 10);
+    tmp = strtol(swork.substr(0, swork.size()).c_str(), &endptr, 16);
     if (*endptr != '\0') {
-        LOG_ERR("Unrecognized format <num>=%s", optarg);
+        LOG_ERR("Unrecognized format <size>=%s", optarg);
         return false;
     } else if (tmp < 0) {
-        LOG_ERR("<num> values < 0 are not supported");
+        LOG_ERR("<size> values < 0 are not supported");
         return false;
     }
-    mmap.num = tmp;
+    mmap.size = tmp;
 
     return true;
 }
