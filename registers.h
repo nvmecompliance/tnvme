@@ -6,6 +6,13 @@
 #include "regDefs.h"
 #include "dnvme/dnvme_interface.h"
 
+/**
+ * @param regVal Pass the 64 bit register value to mask down to size.
+ * @param bytes Pass the number of bytes to keep of the 8 byte regVal
+ */
+#define REGMASK(regval, bytes)  \
+        (regval & (0xffffffffffffffff >> (64 - (bytes * 8))))
+
 using namespace std;
 
 
@@ -20,12 +27,6 @@ public:
      */
     Registers(int fd);
     virtual ~Registers();
-
-    /**
-     * Available to mask unsigned long long variables to appropriate length.
-     * Where the index to array is the size in bytes to keep.
-     */
-    static const unsigned long long RegMasking[];
 
     /**
      * Read a register value from the appropriate address space.

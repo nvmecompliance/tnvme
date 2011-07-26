@@ -3,18 +3,6 @@
 #include "tnvme.h"
 #include "dnvme/dnvme_ioctls.h"
 
-const unsigned long long Registers::RegMasking[MAX_SUPPORTED_REG_SIZE + 1] = {
-    0x0000000000000000,
-    0x00000000000000ff,
-    0x000000000000ffff,
-    0x0000000000ffffff,
-    0x00000000ffffffff,
-    0x000000ffffffffff,
-    0x0000ffffffffffff,
-    0x00ffffffffffffff,
-    0xffffffffffffffff
-};
-
 
 // Register metrics (meta data) to aid interfacing with the kernel driver
 #define ZZ(a, b, c, d, e)       { b, c, d, e },
@@ -75,7 +63,7 @@ Registers::Read(PciSpc reg, unsigned long long &value)
         return false;
     }
 
-    value = value & RegMasking[rsize];
+    value = REGMASK(value, rsize);
     LOG_NRM("%s", FormatRegister(rsize, rdesc, value).c_str());
     return true;
 }
@@ -104,7 +92,7 @@ Registers::Read(CtlSpc reg, unsigned long long &value)
         return false;
     }
 
-    value = value & RegMasking[rsize];
+    value = REGMASK(value, rsize);
     LOG_NRM("%s", FormatRegister(rsize, rdesc, value).c_str());
     return true;
 }
@@ -152,7 +140,7 @@ Registers::FormatRegister(int regSize, const char *regDesc,
     }
 
     snprintf(buffer, sizeof(buffer), regFmt[regSize], regDesc,
-        (regValue & RegMasking[regSize]));
+        REGMASK(regValue, regSize));
     result = buffer;
     if (truncated)
         result += "(TRUNCATED VALUE)";
@@ -235,19 +223,19 @@ Registers::DiscoverPciCapabilities()
 
     // Traverse the link list of capabilities, PCI spec states when next ptr
     // becomes 0, then that is the capabilities among many.
-    while (((nextCap >> 8) & RegMasking[1]) != 0) {
-        io.offset = (unsigned int)((nextCap >> 8) & RegMasking[1]);
+    while (REGMASK((nextCap >> 8), 1)) {
+        io.offset = (unsigned int)REGMASK((nextCap >> 8), 1);
         if ((rc = ioctl(mFd, NVME_IOCTL_READ_GENERIC, &io)) < 0) {
             LOG_ERR("Error reading offset 0x%08X from PCI space: %d returned",
                 io.offset, rc);
             return;
         }
         LOG_NRM("PCI space offset 0x%04X=0x%04X", io.offset,
-            (unsigned int)(RegMasking[2] & nextCap));
+            (unsigned int)REGMASK(nextCap, 2));
 
         // For each capability we find, log the order in which it was found
-        capId = (unsigned char)(RegMasking[1] & nextCap);
-        capOffset = (unsigned int)(RegMasking[1] & (nextCap >> 8));
+        capId = (unsigned char)REGMASK(nextCap, 1);
+        capOffset = (unsigned int)REGMASK((nextCap >> 8), 1);
         switch (capId) {
 
         case 0x01:  // PCICAP_PMCAP
@@ -299,9 +287,9 @@ Registers::DiscoverPciCapabilities()
         return;
     }
     LOG_NRM("Extended PCI space offset 0x%04X=0x%08X", io.offset,
-        (unsigned int)(RegMasking[4] & nextCap));
-    capId = (unsigned int)(RegMasking[2] & nextCap);
-    capOffset = (unsigned int)(RegMasking[2] & (nextCap >> 20));
+        (unsigned int)REGMASK(nextCap, 4));
+    capId = (unsigned int)REGMASK(nextCap, 2);
+    capOffset = (unsigned int)REGMASK((nextCap >> 20), 2);
     if (capId == 0x0001) {
         LOG_NRM("Decoding AERCAP capabilities");
         mPciCap.push_back(PCICAP_AERCAP);
