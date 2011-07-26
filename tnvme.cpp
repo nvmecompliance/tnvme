@@ -71,6 +71,7 @@ main(int argc, char *argv[])
     struct CmdLine CmdLine;
     struct dirent *dirEntry;
     bool deviceFound = false;
+    unsigned long long regVal;
     const char *short_opt = "hsyfliv:e::r:p:t::d:k:m:";
     static struct option long_opt[] = {
         // {name,           has_arg,            flag,   val}
@@ -240,6 +241,14 @@ main(int argc, char *argv[])
     // Execute cmd line options which require the test infrastructure
     if (BuildTestInfrastructure(groups, fd, CmdLine) == false)
         exit(1);
+
+    LOG_NRM("Checking for unintended device under low powered states");
+    if (gRegisters->Read(PCISPC_PMCS, regVal) == false) {
+        exit(1);
+    } else if (regVal & 0x03) {
+        LOG_ERR("PCI power state not fully operational, is this intended?");
+    }
+
 
     if (CmdLine.summary) {
         for (size_t i = 0; i < groups.size(); i++) {
