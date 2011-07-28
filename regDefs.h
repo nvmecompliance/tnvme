@@ -86,8 +86,8 @@ typedef enum PciSpc
 
 struct PciSpcType {
     PciCapabilities cap;
-    int             offset;     // ==INT_MAX implies offset is unknown
-    int             size;
+    unsigned int    offset;     // ==INT_MAX implies offset is unknown
+    unsigned int    size;
     const char      *desc;
 };
 
@@ -119,9 +119,9 @@ typedef enum CtlSpc
 #undef ZZ
 
 struct CtlSpcType {
-    int         offset;     // ==INT_MAX implies offset is unknown
-    int         size;
-    const char *desc;
+    unsigned int offset;     // ==INT_MAX implies offset is unknown
+    unsigned int size;
+    const char  *desc;
 };
 
 
@@ -141,6 +141,15 @@ typedef enum STSBits {
     STS_SSE     = 0x4000,
     STS_DPE     = 0x8000
 } STSBits;
+
+typedef enum PXDSBits {
+    PXDS_TP     = 0x0040,
+    PXDS_APD    = 0x0010,
+    PXDS_URD    = 0x0008,
+    PXDS_FED    = 0x0004,
+    PXDS_NFED   = 0x0002,
+    PXDS_CED    = 0x0001
+} PXDSBits;
 
 
 #endif

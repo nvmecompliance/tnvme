@@ -2,6 +2,8 @@ doc/
 src/
 rpm/
 Debug/
+rpmbuild/
+tnvme-*/
 
 tnvme
 .cproject
@@ -10,3 +12,4 @@ tnvme
 doxygen.log
 dump.reg.pci
 dump.reg.ctrl
+tnvme-*.tar.gz

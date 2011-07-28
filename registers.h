@@ -11,7 +11,7 @@
  * @param bytes Pass the number of bytes to keep of the 8 byte regVal
  */
 #define REGMASK(regval, bytes)  \
-        (regval & (0xffffffffffffffff >> (64 - (bytes * 8))))
+        (regval & (0xffffffffffffffffULL >> (64 - (bytes * 8))))
 
 using namespace std;
 
@@ -40,7 +40,7 @@ public:
     bool Read(CtlSpc reg, unsigned long long &value);
 
     /**
-     * Generic read function, you supply all the necessary data to read at
+     * Generic read function, you supply ALL the necessary data to read at
      * specified offset, length of register, which address space to read, etc.
      * @param regSpc Pass which register space to read from
      * @param rsize Pass the length in bytes of the register
@@ -49,8 +49,17 @@ public:
      * @param value Returns the value read, if and only if successful.
      * @return true upon success, otherwise false
      */
-    bool Read(nvme_io_space regSpc, int rsize, int roffset,
+    bool Read(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
         unsigned char *value);
+
+    /**
+     * Write a register value to the appropriate address space.
+     * @param reg Pass which register to write.
+     * @param value Pass the value to write.
+     * @return true upon success, otherwise false
+     */
+    bool Write(PciSpc reg, unsigned long long value);
+    bool Write(CtlSpc reg, unsigned long long value);
 
     /**
      * Returns the list of capabilities discovered by parsing PCI address
@@ -61,7 +70,9 @@ public:
     const vector<PciCapabilities> *GetPciCapabilities() { return &mPciCap; }
 
     /**
-     * Returns the known metrics (meta data) for each and every register
+     * Returns the known metrics (meta data) for each and every register.
+     * Metrics are discovered during class instantiation to learn of the
+     * capabilities of the device.
      */
     const PciSpcType *GetPciMetrics() { return mPciSpcMetrics; }
     const CtlSpcType *GetCtlMetrics() { return mCtlSpcMetrics; }
@@ -74,10 +85,10 @@ public:
      *          smaller than the unsigned long long variable size.
      * @return the formatted resulting string
      */
-    string FormatRegister(int regSize, const char *regDesc,
+    string FormatRegister(unsigned int regSize, const char *regDesc,
         unsigned long long regValue);
-    string FormatRegister(nvme_io_space regSpc, int rsize, int roffset,
-        unsigned char *value);
+    string FormatRegister(nvme_io_space regSpc, unsigned int rsize,
+        unsigned int roffset, unsigned char *value);
 
 
 private:
@@ -99,6 +110,11 @@ private:
      * Thus we need to traverse the capabilities discovering those offsets.
      */
     void DiscoverPciCapabilities();
+
+    bool Read(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
+        unsigned long long &value, const char *rdesc);
+    bool Write(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
+        unsigned long long &value, const char *rdesc);
 };
 
 

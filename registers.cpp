@@ -43,42 +43,25 @@ Registers::~Registers()
 bool
 Registers::Read(PciSpc reg, unsigned long long &value)
 {
-    int rc;
-    int rsize = mPciSpcMetrics[reg].size;
-    int roffset = mPciSpcMetrics[reg].offset;
-    const char *rdesc = mPciSpcMetrics[reg].desc;
-    struct nvme_read_generic io = { NVMEIO_PCI_HDR,
-                                    roffset, rsize,
-                                    (unsigned char *)&value };
-
-    // Verify we discovered the true offset of requested register
-    if (roffset == INT_MAX) {
-        LOG_ERR("Offset of %s could not be discovered", rdesc);
-        return false;
-    } else if (rsize > MAX_SUPPORTED_REG_SIZE) {
-        LOG_ERR("Size of %s is larger than supplied buffer", rdesc);
-        return false;
-    } else if ((rc = ioctl(mFd, NVME_IOCTL_READ_GENERIC, &io)) < 0) {
-        LOG_ERR("Error reading %s: %d returned", rdesc, rc);
-        return false;
-    }
-
-    value = REGMASK(value, rsize);
-    LOG_NRM("%s", FormatRegister(rsize, rdesc, value).c_str());
-    return true;
+    return Read(NVMEIO_PCI_HDR, mPciSpcMetrics[reg].size,
+        mPciSpcMetrics[reg].offset, value, mPciSpcMetrics[reg].desc);
 }
 
 
 bool
 Registers::Read(CtlSpc reg, unsigned long long &value)
 {
+    return Read(NVMEIO_BAR01, mCtlSpcMetrics[reg].size,
+        mCtlSpcMetrics[reg].offset, value, mCtlSpcMetrics[reg].desc);
+}
+
+
+bool
+Registers::Read(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
+    unsigned long long &value, const char *rdesc)
+{
     int rc;
-    int rsize = mCtlSpcMetrics[reg].size;
-    int roffset = mCtlSpcMetrics[reg].offset;
-    const char *rdesc = mCtlSpcMetrics[reg].desc;
-    struct nvme_read_generic io = { NVMEIO_BAR01,
-                                    roffset, rsize,
-                                    (unsigned char *)&value };
+    struct rw_generic io = { regSpc, roffset, rsize, (unsigned char *)&value };
 
     // Verify we discovered the true offset of requested register
     if (roffset == INT_MAX) {
@@ -93,30 +76,72 @@ Registers::Read(CtlSpc reg, unsigned long long &value)
     }
 
     value = REGMASK(value, rsize);
-    LOG_NRM("%s", FormatRegister(rsize, rdesc, value).c_str());
+    LOG_NRM("Reading %s", FormatRegister(rsize, rdesc, value).c_str());
     return true;
 }
 
 
 bool
-Registers::Read(nvme_io_space regSpc, int rsize, int roffset,
+Registers::Read(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
     unsigned char *value)
 {
     int rc;
-    struct nvme_read_generic io = { regSpc, roffset, rsize, value };
+    struct rw_generic io = { regSpc, roffset, rsize, value };
 
     if ((rc = ioctl(mFd, NVME_IOCTL_READ_GENERIC, &io)) < 0) {
         LOG_ERR("Error reading reg offset 0x%08X: %d returned", roffset, rc);
         return false;
     }
 
-    LOG_NRM("%s", FormatRegister(regSpc, rsize, roffset, value).c_str());
+    LOG_NRM("Reading %s",
+        FormatRegister(regSpc, rsize, roffset, value).c_str());
+    return true;
+}
+
+
+bool
+Registers::Write(PciSpc reg, unsigned long long value)
+{
+     return Write(NVMEIO_PCI_HDR, mPciSpcMetrics[reg].size,
+        mPciSpcMetrics[reg].offset, value, mPciSpcMetrics[reg].desc);
+}
+
+
+bool
+Registers::Write(CtlSpc reg, unsigned long long value)
+{
+    return Write(NVMEIO_BAR01, mCtlSpcMetrics[reg].size,
+        mCtlSpcMetrics[reg].offset, value, mCtlSpcMetrics[reg].desc);
+}
+
+
+bool
+Registers::Write(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
+    unsigned long long &value, const char *rdesc)
+{
+    int rc;
+    struct rw_generic io = { regSpc, roffset, rsize, (unsigned char *)&value };
+
+    // Verify we discovered the true offset of requested register
+    if (roffset == INT_MAX) {
+        LOG_ERR("Offset of %s could not be discovered", rdesc);
+        return false;
+    } else if (rsize > MAX_SUPPORTED_REG_SIZE) {
+        LOG_ERR("Size of %s is larger than supplied buffer", rdesc);
+        return false;
+    } else if ((rc = ioctl(mFd, NVME_IOCTL_WRITE_GENERIC, &io)) < 0) {
+        LOG_ERR("Error writing %s: %d returned", rdesc, rc);
+        return false;
+    }
+
+    value = REGMASK(value, rsize);
+    LOG_NRM("Writing %s", FormatRegister(rsize, rdesc, value).c_str());
     return true;
 }
 
 
 string
-Registers::FormatRegister(int regSize, const char *regDesc,
+Registers::FormatRegister(unsigned int regSize, const char *regDesc,
     unsigned long long regValue)
 {
     string result;
@@ -149,13 +174,14 @@ Registers::FormatRegister(int regSize, const char *regDesc,
 
 
 string
-Registers::FormatRegister(nvme_io_space regSpc, int rsize, int roffset,
-    unsigned char *value)
+Registers::FormatRegister(nvme_io_space regSpc, unsigned int rsize,
+    unsigned int roffset, unsigned char *value)
 {
     unsigned char *tmp = value;
     char buffer[80];
     string result;
-    int i,j;
+    int i;
+    unsigned int j;
 
     switch (regSpc) {
 
@@ -163,10 +189,10 @@ Registers::FormatRegister(nvme_io_space regSpc, int rsize, int roffset,
         snprintf(buffer, sizeof(buffer), "PCI space register...");
         break;
     case NVMEIO_BAR01:
-        snprintf(buffer, sizeof(buffer), "Ctrl'r space register...");
+        snprintf(buffer, sizeof(buffer), "ctrl'r space register...");
         break;
     default:
-        snprintf(buffer, sizeof(buffer), "Unknown space register");
+        snprintf(buffer, sizeof(buffer), "unknown space register");
         break;
     }
     result = buffer;
@@ -185,7 +211,7 @@ Registers::FormatRegister(nvme_io_space regSpc, int rsize, int roffset,
     return result;
 }
 
-
+#include <stdlib.h>
 void
 Registers::DiscoverPciCapabilities()
 {
@@ -194,8 +220,7 @@ Registers::DiscoverPciCapabilities()
     unsigned int capOffset;
     unsigned long long work;
     unsigned long long nextCap;
-    struct nvme_read_generic io = { NVMEIO_PCI_HDR, 0, 4,
-                                    (unsigned char *)&nextCap };
+    struct rw_generic io = { NVMEIO_PCI_HDR, 0, 4, (unsigned char *)&nextCap };
 
 
     // NOTE: We cannot report errors/violations of the spec as we parse PCI
@@ -230,7 +255,7 @@ Registers::DiscoverPciCapabilities()
                 io.offset, rc);
             return;
         }
-        LOG_NRM("PCI space offset 0x%04X=0x%04X", io.offset,
+        LOG_NRM("Reading PCI space offset 0x%04X=0x%04X", io.offset,
             (unsigned int)REGMASK(nextCap, 2));
 
         // For each capability we find, log the order in which it was found
@@ -286,7 +311,7 @@ Registers::DiscoverPciCapabilities()
             io.offset, rc);
         return;
     }
-    LOG_NRM("Extended PCI space offset 0x%04X=0x%08X", io.offset,
+    LOG_NRM("Reading extended PCI space offset 0x%04X=0x%08X", io.offset,
         (unsigned int)REGMASK(nextCap, 4));
     capId = (unsigned int)REGMASK(nextCap, 2);
     capOffset = (unsigned int)REGMASK((nextCap >> 20), 2);

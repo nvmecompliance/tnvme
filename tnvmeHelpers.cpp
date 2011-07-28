@@ -7,6 +7,7 @@
 #include <errno.h>
 #include <vector>
 #include "tnvmeHelpers.h"
+#include "globals.h"
 
 
 /**
@@ -32,6 +33,7 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
         return false;
     }
 
+    ResetStickyErrors();
     for (size_t iLoop = 0; iLoop < cl.loop; iLoop++) {
         LOG_NRM("Start loop execution %ld", iLoop);
 
@@ -44,11 +46,10 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
                 LOG_NRM("Cmd line forces executing informative group");
                 testIter = groups[iGrp]->GetTestIterator();
                 while (allHaveRun == false) {
+                    if (cl.sticky)
+                        ResetStickyErrors();
                     locResult = groups[iGrp]->RunTest(testIter, cl.skiptest,
                         allHaveRun);
-                    if (cl.sticky) {
-                        // todo; add some reset logic when available
-                    }
                     allTestsPass = allTestsPass ? locResult : allTestsPass;
                     if ((cl.ignore == false) && (allTestsPass == false))
                         goto FAIL_OUT;
@@ -60,11 +61,10 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
                 // Run all tests within all groups
                 testIter = groups[iGrp]->GetTestIterator();
                 while (allHaveRun == false) {
+                    if (cl.sticky)
+                        ResetStickyErrors();
                     locResult = groups[iGrp]->RunTest(testIter, cl.skiptest,
                         allHaveRun);
-                    if (cl.sticky) {
-                        // todo; add some reset logic when available
-                    }
                     allTestsPass = allTestsPass ? locResult : allTestsPass;
                     if ((cl.ignore == false) && (allTestsPass == false))
                         goto FAIL_OUT;
@@ -76,11 +76,10 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
                 if (iGrp == cl.test.t.group) {
                     testIter = groups[iGrp]->GetTestIterator();
                     while (allHaveRun == false) {
+                        if (cl.sticky)
+                            ResetStickyErrors();
                         locResult = groups[iGrp]->RunTest(testIter, cl.skiptest,
                             allHaveRun);
-                        if (cl.sticky) {
-                            // todo; add some reset logic when available
-                        }
                         allTestsPass = allTestsPass ? locResult : allTestsPass;
                         if ((cl.ignore == false) && (allTestsPass == false))
                             goto FAIL_OUT;
@@ -91,9 +90,6 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
             } else {
                 // Run spec'd test within spec'd group
                 if (iGrp == cl.test.t.group) {
-                    if (cl.sticky) {
-                        // todo; add some reset logic when available
-                    }
                     locResult = groups[iGrp]->RunTest(cl.test.t, cl.skiptest);
                     allTestsPass = allTestsPass ? locResult : allTestsPass;
                     if ((cl.ignore == false) && (allTestsPass == false))
@@ -359,5 +355,30 @@ ParseMmapCmdLine(MmapIo &mmap, const char *optarg)
     mmap.size = tmp;
 
     return true;
+}
+
+
+void
+ResetStickyErrors()
+{
+    unsigned long long maskSTS = (STS_DPE | STS_RMA | STS_RTA | STS_DPD);
+    unsigned long long maskPXDS = (PXDS_URD | PXDS_FED | PXDS_NFED | PXDS_CED);
+    unsigned long long maskAERUCES = 0xffff;
+    unsigned long long maskAERUCESEV = 0xffff;
+    const vector<PciCapabilities> *cap = gRegisters->GetPciCapabilities();
+
+    LOG_NRM("Reseting sticky PCI errors");
+    gRegisters->Write(PCISPC_STS, maskSTS);
+
+    for (unsigned int i = 0; i < cap->size(); i++) {
+        if (cap->at(i) == PCICAP_PXCAP) {
+            gRegisters->Write(PCISPC_PXDS, maskPXDS);
+        } else if (cap->at(i) == PCICAP_AERCAP) {
+            gRegisters->Write(PCISPC_AERUCES, maskAERUCES);
+            gRegisters->Write(PCISPC_AERUCESEV, maskAERUCESEV);
+        }
+    }
+
+
 }
 
