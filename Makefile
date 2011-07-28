@@ -65,8 +65,10 @@ $(APP_NAME): $(SUBDIRS) $(SOURCES)
 # "make src SRCDIR=src" will copy all except "src" dir.
 src:
 	rm -rf $(SRCDIR)
-	mkdir -p $(SRCDIR)
+	mkdir -p $(SRCDIR)/dnvme
 	(git archive HEAD) | tar xf - -C $(SRCDIR)
+	git archive --remote=ssh://dcgshare.lm.intel.com/share/lm/repo/nvme/dnvme HEAD dnvme_interface.h | tar xf - -C $(SRCDIR)/dnvme
+	git archive --remote=ssh://dcgshare.lm.intel.com/share/lm/repo/nvme/dnvme HEAD dnvme_ioctls.h | tar xf - -C $(SRCDIR)/dnvme
 
 install:
 	# typically one invokes this as "sudo make install"
