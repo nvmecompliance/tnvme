@@ -5,8 +5,8 @@ LIBS = -L../ -L/usr/local/lib -lm
 INCLUDES = -I. -I../ -I../../ -I/usr/local/include
 
 SRC = \
-	grpCtrlRegisters.cpp		\
-	allCtrlRegs_r10a.cpp
+	grpPciRegisters.cpp	\
+	allPciRegs_10a.cpp
 
 .SUFFIXES: .cpp
 

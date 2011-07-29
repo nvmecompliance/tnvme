@@ -5,14 +5,14 @@
 
 
 // Register metrics (meta data) to aid interfacing with the kernel driver
-#define ZZ(a, b, c, d, e)       { b, c, d, e },
+#define ZZ(a, b, c, d, e, f, g, h)          { b, c, d, e, f, g, h },
 PciSpcType Registers::mPciSpcMetrics[] =
 {
     PCISPC_TABLE
 };
 #undef ZZ
 
-#define ZZ(a, b, c, d)          { b, c, d },
+#define ZZ(a, b, c, d, e, f, g)             { b, c, d, e, f, g },
 CtlSpcType Registers::mCtlSpcMetrics[] =
 {
     CTLSPC_TABLE
@@ -21,7 +21,7 @@ CtlSpcType Registers::mCtlSpcMetrics[] =
 
 
 
-Registers::Registers(int fd)
+Registers::Registers(int fd, SpecRev specRev)
 {
     LOG_NRM("Constructing register access");
 
@@ -31,6 +31,7 @@ Registers::Registers(int fd)
         return;
     }
 
+    mSpecRev = specRev;
     DiscoverPciCapabilities();
 }
 
@@ -43,6 +44,10 @@ Registers::~Registers()
 bool
 Registers::Read(PciSpc reg, unsigned long long &value)
 {
+    if (mPciSpcMetrics[reg].specRev != mSpecRev) {
+        LOG_ERR("Attempting reg (%d) access to incompatible spec release", reg);
+        return false;
+    }
     return Read(NVMEIO_PCI_HDR, mPciSpcMetrics[reg].size,
         mPciSpcMetrics[reg].offset, value, mPciSpcMetrics[reg].desc);
 }
@@ -51,6 +56,10 @@ Registers::Read(PciSpc reg, unsigned long long &value)
 bool
 Registers::Read(CtlSpc reg, unsigned long long &value)
 {
+    if (mPciSpcMetrics[reg].specRev != mSpecRev) {
+        LOG_ERR("Attempting reg (%d) access to incompatible spec release", reg);
+        return false;
+    }
     return Read(NVMEIO_BAR01, mCtlSpcMetrics[reg].size,
         mCtlSpcMetrics[reg].offset, value, mCtlSpcMetrics[reg].desc);
 }
@@ -102,7 +111,11 @@ Registers::Read(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
 bool
 Registers::Write(PciSpc reg, unsigned long long value)
 {
-     return Write(NVMEIO_PCI_HDR, mPciSpcMetrics[reg].size,
+    if (mPciSpcMetrics[reg].specRev != mSpecRev) {
+        LOG_ERR("Attempting reg (%d) access to incompatible spec release", reg);
+        return false;
+    }
+    return Write(NVMEIO_PCI_HDR, mPciSpcMetrics[reg].size,
         mPciSpcMetrics[reg].offset, value, mPciSpcMetrics[reg].desc);
 }
 
@@ -110,6 +123,10 @@ Registers::Write(PciSpc reg, unsigned long long value)
 bool
 Registers::Write(CtlSpc reg, unsigned long long value)
 {
+    if (mPciSpcMetrics[reg].specRev != mSpecRev) {
+        LOG_ERR("Attempting reg (%d) access to incompatible spec release", reg);
+        return false;
+    }
     return Write(NVMEIO_BAR01, mCtlSpcMetrics[reg].size,
         mCtlSpcMetrics[reg].offset, value, mCtlSpcMetrics[reg].desc);
 }
@@ -224,13 +241,13 @@ Registers::DiscoverPciCapabilities()
 
 
     // NOTE: We cannot report errors/violations of the spec as we parse PCI
-    //      space because any non-conformance we may find could be changed
-    //      in later releases of the NVME spec. Being that this is a
-    //      non-versioned utility class we have no ability to note changes in
-    //      the spec. The test architecture does handle specification mods but
-    //      that is handled in the versioning of the test cases themselves.
-    //      This is not a test case, thus we can't flag spec violations, this is
-    //      a helper class for the test cases only.
+    //       space because any non-conformance we may find could be changed
+    //       in later releases of the NVME spec. Being that this is a
+    //       non-versioned utility class we have no ability to note changes in
+    //       the spec. The test architecture does handle specification mods but
+    //       that is handled in the versioning of the test cases themselves.
+    //       This is not a test case, thus we can't flag spec violations, this
+    //       is a helper class for the test cases only.
     LOG_NRM("Discovering PCI capabilities");
     mPciCap.clear();
     if (Read(PCISPC_STS, work) == false)

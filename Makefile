@@ -48,6 +48,7 @@ clean: $(SUBDIRS)
 clobber: GOAL=clobber
 clobber: $(SUBDIRS) clean
 	rm -rf doc
+	rm -rf rpm
 	rm -f $(APP_NAME)
 
 doc: GOAL=doc

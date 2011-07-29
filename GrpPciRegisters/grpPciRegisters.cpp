@@ -1,10 +1,9 @@
-#include "grpInformative.h"
-#include "dumpPciAddrSpace_r10a.h"
-#include "dumpCtrlrAddrSpace_r10a.h"
+#include "grpPciRegisters.h"
+#include "allPciRegs_r10a.h"
 
 
-GrpInformative::GrpInformative(size_t grpNum, SpecRev specRev, int fd) :
-    Group(grpNum, specRev, "Informative")
+GrpPciRegisters::GrpPciRegisters(size_t grpNum, SpecRev specRev, int fd) :
+    Group(grpNum, specRev, "PCI registers syntactic")
 {
     // IMPORTANT: Once a test case is assigned a position in the vector, i.e.
     //            a test index/number of the form major.minor, then it should
@@ -15,8 +14,7 @@ GrpInformative::GrpInformative(size_t grpNum, SpecRev specRev, int fd) :
     //            Tests x.0, x.1, x.<next_test_num=2>  Minor num; test level
     switch (mSpecRev) {
     case SPECREV_10a:
-        APPEND_TEST_AT_GROUP_LEVEL(DumpPciAddrSpace_r10a, fd)
-        APPEND_TEST_AT_GROUP_LEVEL(DumpCtrlrAddrSpace_r10a, fd)
+        APPEND_TEST_AT_GROUP_LEVEL(AllPciRegs_r10a, fd)
         break;
 
     default:
@@ -27,7 +25,7 @@ GrpInformative::GrpInformative(size_t grpNum, SpecRev specRev, int fd) :
 }
 
 
-GrpInformative::~GrpInformative()
+GrpPciRegisters::~GrpPciRegisters()
 {
     // mTests deallocated in parent
 }

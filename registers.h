@@ -24,8 +24,9 @@ class Registers
 public:
     /**
      * @param fd Pass the opened file descriptor for the device under test
+     * @param specRev Pass which compliance is needed to target
      */
-    Registers(int fd);
+    Registers(int fd, SpecRev specRev);
     virtual ~Registers();
 
     /**
@@ -94,6 +95,8 @@ public:
 private:
     Registers();
 
+    /// which spec release is being targeted
+    SpecRev mSpecRev;
     /// file descriptor to the device under test
     int mFd;
     /// Keeps track of discovered PCI capabilities

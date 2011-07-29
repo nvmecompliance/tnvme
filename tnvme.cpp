@@ -33,7 +33,7 @@ Usage(void) {
     printf("%s (revision %d.%d)\n", APPNAME, VER_MAJOR, VER_MINOR);
     printf("  -h(--help)                          Display this help\n");
     printf("  -v(--rev) <spec>                    All options forced to target specified\n");
-    printf("                                      NVME revision {1.0 | 1.0a}; dflt=1.0a\n");
+    printf("                                      NVME revision {1.0a}; dflt=1.0a\n");
     printf("  -s(--summary)                       Summarize all groups and tests\n");
     printf("  -e(--detail) [<grp> | <grp>:<test>] Detailed group and test description for:\n");
     printf("                                      {all | spec'd_group | test_within_group}\n");
@@ -132,9 +132,7 @@ main(int argc, char *argv[])
         switch (c) {
 
         case 'v':
-            if (strcmp("1.0", optarg) == 0) {
-                CmdLine.rev = SPECREV_10;
-            } else if (strcmp("1.0a", optarg) == 0) {
+            if (strcmp("1.0a", optarg) == 0) {
                 CmdLine.rev = SPECREV_10a;
             }
             break;
@@ -356,7 +354,7 @@ BuildTestInfrastructure(vector<Group *> &groups, int &fd,
 
 
     // Create globals here, stand alone objects which all tests will need
-    gRegisters = new Registers(fd);
+    gRegisters = new Registers(fd, cl.rev);
 
 
     // ------------------------------EDIT HERE---------------------------------
