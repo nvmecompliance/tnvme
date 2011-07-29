@@ -43,11 +43,16 @@ Usage(void) {
     printf("                                      to any test specified by -t(--test)\n");
     printf("  -d(--device) <name>                 Device to open for testing: /dev/node\n");
     printf("                                      dflt=(1st device listed in --list)\n");
-    printf("  -m(--mmap) <space:offset:size>      Read MemMap I/O registers from\n");
+    printf("  -r(--rmmap) <space:offset:size>     Read memmap'd I/O registers from\n");
     printf("                                      <space>={PCI | BAR01} at <offset> bytes\n");
-    printf("                                      from beginning of space for <size> bytes\n");
+    printf("                                      from start of space for <size> bytes\n");
     printf("                                      <offset:size> require base 16 values\n");
-    printf("  -r(--reset) {<pci> | <ctrlr>}       Reset the device\n");
+    printf("  -w(--wmmap) <space:offset:size:val> Write <val> data to memmap'd I/O reg from\n");
+    printf("                                      <space>={PCI | BAR01} at <offset> bytes\n");
+    printf("                                      from start of space for <size> bytes\n");
+    printf("                                      (Require: (<size> < 8)\n");
+    printf("                                      <offset:size> requires base 16 values\n");
+    printf("  -z(--reset) {<pci> | <ctrlr>}       Reset the device\n");
     printf("  -i(--ignore)                        Ignore detected errors\n");
     printf("  -p(--loop) <count>                  Loop test execution <count> times; dflt=1\n");
     printf("  -l(--list)                          List all devices available for test\n");
@@ -72,7 +77,7 @@ main(int argc, char *argv[])
     struct dirent *dirEntry;
     bool deviceFound = false;
     unsigned long long regVal;
-    const char *short_opt = "hsyfliv:e::r:p:t::d:k:m:";
+    const char *short_opt = "hsyfliv:e::z:p:t::d:k:r:w:";
     static struct option long_opt[] = {
         // {name,           has_arg,            flag,   val}
         {   "help",         no_argument,        NULL,   'h'},
@@ -82,8 +87,9 @@ main(int argc, char *argv[])
         {   "test",         optional_argument,  NULL,   't'},
         {   "informative",  no_argument,        NULL,   'f'},
         {   "device",       required_argument,  NULL,   'd'},
-        {   "mmap" ,        required_argument,  NULL,   'm'},
-        {   "reset",        required_argument,  NULL,   'r'},
+        {   "rmmap" ,       required_argument,  NULL,   'r'},
+        {   "wmmap" ,       required_argument,  NULL,   'w'},
+        {   "reset",        required_argument,  NULL,   'z'},
         {   "ignore",       no_argument,        NULL,   'i'},
         {   "loop",         required_argument,  NULL,   'p'},
         {   "skiptest",     required_argument,  NULL,   'k'},
@@ -103,7 +109,8 @@ main(int argc, char *argv[])
     CmdLine.informative.req = false;
     CmdLine.loop = 1;
     CmdLine.device = NO_DEVICES;
-    CmdLine.mmap.req = false;
+    CmdLine.rmmap.req = false;
+    CmdLine.wmmap.req = false;
 
     if (argc == 1) {
         printf("%s is a compliance test suite for NVM Express hardware.\n",
@@ -158,9 +165,16 @@ main(int argc, char *argv[])
             }
             break;
 
-        case 'm':
-            if (ParseMmapCmdLine(CmdLine.mmap, optarg) == false) {
-                printf("Unable to parse --mmap cmd line\n");
+        case 'r':
+            if (ParseRmmapCmdLine(CmdLine.rmmap, optarg) == false) {
+                printf("Unable to parse --rmmap cmd line\n");
+                exit(1);
+            }
+            break;
+
+        case 'w':
+            if (ParseWmmapCmdLine(CmdLine.wmmap, optarg) == false) {
+                printf("Unable to parse --wmmap cmd line\n");
                 exit(1);
             }
             break;
@@ -181,7 +195,7 @@ main(int argc, char *argv[])
             }
             break;
 
-        case 'r':
+        case 'z':
             if (strcmp("pci", optarg) == 0) {
                 CmdLine.reset = RESET_PCI;
             } else if (strcmp("ctrlr", optarg) == 0) {
@@ -288,13 +302,16 @@ main(int argc, char *argv[])
                 }
             }
         }
-    } else if (CmdLine.mmap.req) {
-        unsigned char *value = new unsigned char[CmdLine.mmap.size];
-        gRegisters->Read(CmdLine.mmap.space, CmdLine.mmap.size,
-            CmdLine.mmap.offset, value);
-        string result = gRegisters->FormatRegister(CmdLine.mmap.space,
-            CmdLine.mmap.size, CmdLine.mmap.offset, value);
+    } else if (CmdLine.rmmap.req) {
+        unsigned char *value = new unsigned char[CmdLine.rmmap.size];
+        gRegisters->Read(CmdLine.rmmap.space, CmdLine.rmmap.size,
+            CmdLine.rmmap.offset, value);
+        string result = gRegisters->FormatRegister(CmdLine.rmmap.space,
+            CmdLine.rmmap.size, CmdLine.rmmap.offset, value);
         printf("%s\n", result.c_str());
+    } else if (CmdLine.wmmap.req) {
+        gRegisters->Write(CmdLine.wmmap.space, CmdLine.wmmap.size,
+            CmdLine.wmmap.offset, (unsigned char *)(&CmdLine.wmmap.value));
     } else if (CmdLine.reset != RESETTYPE_FENCE) {
         ;   // todo; add some reset logic when available
     } else if (CmdLine.test.req) {

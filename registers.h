@@ -43,7 +43,7 @@ public:
     /**
      * Generic read function, you supply ALL the necessary data to read at
      * specified offset, length of register, which address space to read, etc.
-     * @param regSpc Pass which register space to read from
+     * @param regSpc Pass which register space to read
      * @param rsize Pass the length in bytes of the register
      * @param roffset Pass the offset from start of spec'd address space to
      *        start reading.
@@ -61,6 +61,19 @@ public:
      */
     bool Write(PciSpc reg, unsigned long long value);
     bool Write(CtlSpc reg, unsigned long long value);
+
+    /**
+     * Generic write function, you supply ALL the necessary data to write at
+     * specified offset, length of register, which address space to write, etc.
+     * @param regSpc Pass which register space to write
+     * @param rsize Pass the length in bytes of the register
+     * @param roffset Pass the offset from start of spec'd address space to
+     *        start writing.
+     * @param value Pass the array of value(s) to write, must be of rsize size
+     * @return true upon success, otherwise false
+     */
+    bool Write(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
+        unsigned char *value);
 
     /**
      * Returns the list of capabilities discovered by parsing PCI address

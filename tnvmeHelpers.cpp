@@ -293,23 +293,23 @@ ParseTargetCmdLine(TestTarget &target, const char *optarg)
 /**
  * A function to specifically handle parsing cmd lines of the form
  * "<space:offset:num>".
- * @param mmap Pass a structure to populate with parsing results
+ * @param rmmap Pass a structure to populate with parsing results
  * @param optarg Pass the 'optarg' argument from the getopt_long() API.
  * @return true upon successful parsing, otherwise false.
  */
 bool
-ParseMmapCmdLine(MmapIo &mmap, const char *optarg)
+ParseRmmapCmdLine(RmmapIo &rmmap, const char *optarg)
 {
     size_t ulwork;
     char *endptr;
     string swork;
-    long tmp;
+    size_t tmp;
 
 
-    mmap.req = true;
-    mmap.space = NVMEIO_FENCE;
-    mmap.offset = 0;
-    mmap.size = 0;
+    rmmap.req = true;
+    rmmap.space = NVMEIO_FENCE;
+    rmmap.offset = 0;
+    rmmap.size = 0;
 
     // Parsing <space:offset:size>
     swork = optarg;
@@ -318,9 +318,9 @@ ParseMmapCmdLine(MmapIo &mmap, const char *optarg)
         return false;
     }
     if (strcmp("PCI", swork.substr(0, ulwork).c_str()) == 0) {
-        mmap.space = NVMEIO_PCI_HDR;
+        rmmap.space = NVMEIO_PCI_HDR;
     } else if (strcmp("BAR01", swork.substr(0, ulwork).c_str()) == 0) {
-        mmap.space = NVMEIO_BAR01;
+        rmmap.space = NVMEIO_BAR01;
     } else {
         LOG_ERR("Unrecognized identifier <space>=%s", optarg);
         return false;
@@ -328,15 +328,12 @@ ParseMmapCmdLine(MmapIo &mmap, const char *optarg)
 
     // Parsing <offset:size>
     swork = swork.substr(ulwork+1, swork.size());
-    tmp = strtol(swork.substr(0, swork.size()).c_str(), &endptr, 16);
+    tmp = strtoul(swork.substr(0, swork.size()).c_str(), &endptr, 16);
     if (*endptr != ':') {
         LOG_ERR("Unrecognized format <offset:size>=%s", optarg);
         return false;
-    } else if (tmp < 0) {
-        LOG_ERR("<offset> values < 0 are not supported");
-        return false;
     }
-    mmap.offset = tmp;
+    rmmap.offset = tmp;
 
     // Parsing <size>
     swork = swork.substr(swork.find_first_of(':') + 1, swork.length());
@@ -344,15 +341,89 @@ ParseMmapCmdLine(MmapIo &mmap, const char *optarg)
         LOG_ERR("Missing <size> format string");
         return false;
     }
-    tmp = strtol(swork.substr(0, swork.size()).c_str(), &endptr, 16);
+    tmp = strtoul(swork.substr(0, swork.size()).c_str(), &endptr, 16);
     if (*endptr != '\0') {
         LOG_ERR("Unrecognized format <size>=%s", optarg);
         return false;
-    } else if (tmp < 0) {
-        LOG_ERR("<size> values < 0 are not supported");
+    }
+    rmmap.size = tmp;
+
+    return true;
+}
+
+
+/**
+ * A function to specifically handle parsing cmd lines of the form
+ * "<space:offset:num:val>".
+ * @param wmmap Pass a structure to populate with parsing results
+ * @param optarg Pass the 'optarg' argument from the getopt_long() API.
+ * @return true upon successful parsing, otherwise false.
+ */
+bool
+ParseWmmapCmdLine(WmmapIo &wmmap, const char *optarg)
+{
+    size_t ulwork;
+    char *endptr;
+    string swork;
+    size_t tmp;
+    unsigned long long tmpVal;
+
+
+    wmmap.req = true;
+    wmmap.space = NVMEIO_FENCE;
+    wmmap.offset = 0;
+    wmmap.size = 0;
+    wmmap.value = 0;
+
+    // Parsing <space:offset:size:val>
+    swork = optarg;
+    if ((ulwork = swork.find(":", 0)) == string::npos) {
+        LOG_ERR("Unrecognized format <space:offset:size:val>=%s", optarg);
         return false;
     }
-    mmap.size = tmp;
+    if (strcmp("PCI", swork.substr(0, ulwork).c_str()) == 0) {
+        wmmap.space = NVMEIO_PCI_HDR;
+    } else if (strcmp("BAR01", swork.substr(0, ulwork).c_str()) == 0) {
+        wmmap.space = NVMEIO_BAR01;
+    } else {
+        LOG_ERR("Unrecognized identifier <space>=%s", optarg);
+        return false;
+    }
+
+    // Parsing <offset:size:val>
+    swork = swork.substr(ulwork+1, swork.size());
+    tmp = strtoul(swork.substr(0, swork.size()).c_str(), &endptr, 16);
+    if (*endptr != ':') {
+        LOG_ERR("Unrecognized format <offset:size:val>=%s", optarg);
+        return false;
+    }
+    wmmap.offset = tmp;
+
+    // Parsing <size:val>
+    swork = swork.substr(swork.find_first_of(':') + 1, swork.length());
+    tmp = strtoul(swork.substr(0, swork.size()).c_str(), &endptr, 16);
+    if (*endptr != ':') {
+        LOG_ERR("Unrecognized format <size:val>=%s", optarg);
+        return false;
+    } else if (tmp > MAX_SUPPORTED_REG_SIZE) {
+        LOG_ERR("<size> > allowed value of max of %d bytes",
+            MAX_SUPPORTED_REG_SIZE);
+        return false;
+    }
+    wmmap.size = tmp;
+
+    // Parsing <val>
+    swork = swork.substr(swork.find_first_of(':') + 1, swork.length());
+    if (swork.length() == 0) {
+        LOG_ERR("Missing <val> format string");
+        return false;
+    }
+    tmpVal = strtoull(swork.substr(0, swork.size()).c_str(), &endptr, 16);
+    if (*endptr != '\0') {
+        LOG_ERR("Unrecognized format <val>=%s", optarg);
+        return false;
+    }
+    wmmap.value = tmpVal;
 
     return true;
 }

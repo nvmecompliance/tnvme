@@ -60,11 +60,19 @@ struct InformativeGrp {
     size_t  grpInfoIdx;
 };
 
-struct MmapIo {
-    bool            req;        // requested by cmd line
-    nvme_io_space   space;
-    size_t          offset;
-    size_t          size;
+struct RmmapIo {
+    bool               req;     // requested by cmd line
+    nvme_io_space      space;
+    size_t             offset;
+    size_t             size;
+};
+
+struct WmmapIo {
+    bool               req;     // requested by cmd line
+    nvme_io_space      space;
+    size_t             offset;
+    size_t             size;
+    unsigned long long value;
 };
 
 struct CmdLine {
@@ -79,7 +87,8 @@ struct CmdLine {
     ResetType       reset;
     InformativeGrp  informative;
     vector<TestRef> skiptest;
-    MmapIo          mmap;
+    RmmapIo         rmmap;
+    WmmapIo         wmmap;
 };
 
 

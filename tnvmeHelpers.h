@@ -6,7 +6,8 @@
 
 bool ParseTargetCmdLine(TestTarget &target, const char *optarg);
 bool ParseSkipTestCmdLine(vector<TestRef> &skipTest, const char *optarg);
-bool ParseMmapCmdLine(MmapIo &mmap, const char *optarg);
+bool ParseRmmapCmdLine(RmmapIo &rmmap, const char *optarg);
+bool ParseWmmapCmdLine(WmmapIo &wmmap, const char *optarg);
 bool ExecuteTests(struct CmdLine &cl, vector<Group *> &groups);
 void ResetStickyErrors();
 
