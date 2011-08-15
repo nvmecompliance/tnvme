@@ -56,35 +56,37 @@ TestDescribe::GetLong(bool limit80Chars, size_t indent)
     string indentation;
     string work;
     size_t spaceIdx, startSpaceIdx;
+    string tmpLongDesc = mLongDesc;
 
+    tmpLongDesc += " ";
     for (size_t i = 0; i < indent; i++)
         indentation += " ";
 
     if (limit80Chars) {
         startSpaceIdx = 0;
-        spaceIdx = (mLongDesc.length() > (80 - indent)) ?
-            (80 - indent) : mLongDesc.length();
+        spaceIdx = (tmpLongDesc.length() > (80 - indent)) ?
+            (80 - indent) : tmpLongDesc.length();
         spaceIdx -= 1;      // make up for 0-based indexing
 
         while (startSpaceIdx < spaceIdx) {
-            spaceIdx = mLongDesc.find_last_of(' ', spaceIdx);
+            spaceIdx = tmpLongDesc.find_last_of(' ', spaceIdx);
 
             // Returning results identical to the last implies this is last iter
             if ((spaceIdx + 1) == startSpaceIdx)
-                spaceIdx = (mLongDesc.length() - 1);
+                spaceIdx = (tmpLongDesc.length() - 1);
 
             work += indentation;
-            work += mLongDesc.substr(startSpaceIdx, (spaceIdx - startSpaceIdx));
+            work += tmpLongDesc.substr(startSpaceIdx, (spaceIdx - startSpaceIdx));
             work += "\n";
 
             startSpaceIdx = spaceIdx + 1;
-            spaceIdx = (mLongDesc.length() > (startSpaceIdx + (80 - indent))) ?
-                (startSpaceIdx + (80 - indent)) : mLongDesc.length();
+            spaceIdx = (tmpLongDesc.length() > (startSpaceIdx + (80 - indent))) ?
+                (startSpaceIdx + (80 - indent)) : tmpLongDesc.length();
             spaceIdx -= 1;      // make up for 0-based indexing
         }
     } else {
         work += indentation;
-        work += mLongDesc;
+        work += tmpLongDesc;
     }
 
     return work;
