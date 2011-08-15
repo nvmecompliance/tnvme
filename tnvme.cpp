@@ -50,7 +50,7 @@ Usage(void) {
     printf("  -w(--wmmap) <space:offset:size:val> Write <val> data to memmap'd I/O reg from\n");
     printf("                                      <space>={PCI | BAR01} at <offset> bytes\n");
     printf("                                      from start of space for <size> bytes\n");
-    printf("                                      (Require: (<size> < 8)\n");
+    printf("                                      (Require: <size> < 8)\n");
     printf("                                      <offset:size> requires base 16 values\n");
     printf("  -z(--reset) {<pci> | <ctrlr>}       Reset the device\n");
     printf("  -i(--ignore)                        Ignore detected errors\n");
@@ -76,6 +76,7 @@ main(int argc, char *argv[])
     struct CmdLine CmdLine;
     struct dirent *dirEntry;
     bool deviceFound = false;
+    bool accessingHdw = true;
     unsigned long long regVal;
     const char *short_opt = "hsyfliv:e::z:p:t::d:k:r:w:";
     static struct option long_opt[] = {
@@ -149,6 +150,7 @@ main(int argc, char *argv[])
                 printf("Unable to parse --detail cmd line\n");
                 exit(1);
             }
+            accessingHdw = false;
             break;
 
         case 't':
@@ -229,10 +231,14 @@ main(int argc, char *argv[])
             }
             exit(0);
 
+        case 's':
+            CmdLine.summary = true;
+            accessingHdw = false;
+            break;
+
         default:
         case 'h':   Usage();                            exit(0);
         case '?':   Usage();                            exit(1);
-        case 's':   CmdLine.summary = true;             break;
         case 'f':   CmdLine.informative.req = true;     break;
         case 'i':   CmdLine.ignore = true;              break;
         case 'y':   CmdLine.sticky = true;              break;
@@ -254,11 +260,17 @@ main(int argc, char *argv[])
     if (BuildTestInfrastructure(groups, fd, CmdLine) == false)
         exit(1);
 
-    LOG_NRM("Checking for unintended device under low powered states");
-    if (gRegisters->Read(PCISPC_PMCS, regVal) == false) {
-        exit(1);
-    } else if (regVal & 0x03) {
-        LOG_ERR("PCI power state not fully operational, is this intended?");
+    // Accessing hardware requires specific checks and inquiries before running
+    if (accessingHdw) {
+        // Create globals here, stand alone objects which all tests will need
+        gRegisters = new Registers(fd, CmdLine.rev);
+
+        LOG_NRM("Checking for unintended device under low powered states");
+        if (gRegisters->Read(PCISPC_PMCS, regVal) == false) {
+            exit(1);
+        } else if (regVal & 0x03) {
+            LOG_ERR("PCI power state not fully operational, is this intended?");
+        }
     }
 
 
@@ -329,8 +341,7 @@ main(int argc, char *argv[])
  * options presented to this app.
  * @param groups Pass the structure to contain the test objects
  * @param fd Pass the file descriptor to associate with the device
- * @param device Pass the device node to open for testing /dev/node
- * @param specRev Pass the appropriate NVME revision to steer compliance testing
+ * @param cl Pass the cmd line args
  * @return true upon success, otherwise false
  */
 bool
@@ -370,10 +381,6 @@ BuildTestInfrastructure(vector<Group *> &groups, int &fd,
     }
 
 
-    // Create globals here, stand alone objects which all tests will need
-    gRegisters = new Registers(fd, cl.rev);
-
-
     // ------------------------------EDIT HERE---------------------------------
     // IMPORTANT: Once a group is assigned/push_back() to a position in the
     //            vector, i.e. a group index/number, then it should stay in that
@@ -385,8 +392,8 @@ BuildTestInfrastructure(vector<Group *> &groups, int &fd,
     // All groups will be pushed here. The groups themselves dictate which
     // tests get executed based upon the constructed 'specRev' being targeted.
     cl.informative.grpInfoIdx = groups.size();  // tied to the next statement
-    groups.push_back(new GrpInformative(groups.size(), cl.rev, fd));       // 1
-    groups.push_back(new GrpCtrlRegisters(groups.size(), cl.rev, fd));     // 0
+    groups.push_back(new GrpInformative(groups.size(), cl.rev, fd));       // 0
+    groups.push_back(new GrpCtrlRegisters(groups.size(), cl.rev, fd));     // 1
 
     return true;
 }
