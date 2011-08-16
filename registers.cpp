@@ -81,6 +81,8 @@ Registers::Read(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
         return false;
     } else if ((rc = ioctl(mFd, NVME_IOCTL_READ_GENERIC, &io)) < 0) {
         LOG_ERR("Error reading %s: %d returned", rdesc, rc);
+        LOG_DBG("io.{type,offset,nBytes,buffer} = {%d, 0x%04X, 0x%04X, %p}",
+            io.type, io.offset, io.nBytes, io.buffer);
         return false;
     }
 
@@ -99,6 +101,8 @@ Registers::Read(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
 
     if ((rc = ioctl(mFd, NVME_IOCTL_READ_GENERIC, &io)) < 0) {
         LOG_ERR("Error reading reg offset 0x%08X: %d returned", roffset, rc);
+        LOG_DBG("io.{type,offset,nBytes,buffer} = {%d, 0x%04X, 0x%04X, %p}",
+            io.type, io.offset, io.nBytes, io.buffer);
         return false;
     }
 
@@ -148,6 +152,8 @@ Registers::Write(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
         return false;
     } else if ((rc = ioctl(mFd, NVME_IOCTL_WRITE_GENERIC, &io)) < 0) {
         LOG_ERR("Error writing %s: %d returned", rdesc, rc);
+        LOG_DBG("io.{type,offset,nBytes,buffer} = {%d, 0x%04X, 0x%04X, %p}",
+            io.type, io.offset, io.nBytes, io.buffer);
         return false;
     }
 
@@ -166,6 +172,8 @@ Registers::Write(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
 
     if ((rc = ioctl(mFd, NVME_IOCTL_WRITE_GENERIC, &io)) < 0) {
         LOG_ERR("Error writing reg offset 0x%08X: %d returned", roffset, rc);
+        LOG_DBG("io.{type,offset,nBytes,buffer} = {%d, 0x%04X, 0x%04X, %p}",
+            io.type, io.offset, io.nBytes, io.buffer);
         return false;
     }
 
@@ -251,6 +259,7 @@ void
 Registers::DiscoverPciCapabilities()
 {
     int rc;
+    int capIdx;
     unsigned int capId;
     unsigned int capOffset;
     unsigned long long work;
@@ -301,25 +310,29 @@ Registers::DiscoverPciCapabilities()
         case 0x01:  // PCICAP_PMCAP
             LOG_NRM("Decoding PMCAP capabilities");
             mPciCap.push_back(PCICAP_PMCAP);
-            mPciSpcMetrics[PCISPC_PID].offset = capOffset;
+            capIdx = PCISPC_PID;
+            mPciSpcMetrics[capIdx].offset = capOffset;
             break;
 
         case 0x05:  // PCICAP_MSICAP
             LOG_NRM("Decoding MSICAP capabilities");
             mPciCap.push_back(PCICAP_MSICAP);
-            mPciSpcMetrics[PCISPC_MID].offset = capOffset;
+            capIdx = PCISPC_MID;
+            mPciSpcMetrics[capIdx].offset = capOffset;
             break;
 
         case 0x10:  // PCICAP_PXCAP
             LOG_NRM("Decoding PXCAP capabilities");
             mPciCap.push_back(PCICAP_PXCAP);
-            mPciSpcMetrics[PCISPC_PXID].offset = capOffset;
+            capIdx = PCISPC_PXID;
+            mPciSpcMetrics[capIdx].offset = capOffset;
             break;
 
         case 0x11:  // PCICAP_MSIXCAP
             LOG_NRM("Decoding MSIXCAP capabilities");
             mPciCap.push_back(PCICAP_MSIXCAP);
-            mPciSpcMetrics[PCISPC_MXID].offset = capOffset;
+            capIdx = PCISPC_MXID;
+            mPciSpcMetrics[capIdx].offset = capOffset;
             break;
 
         default:
@@ -328,8 +341,8 @@ Registers::DiscoverPciCapabilities()
         }
 
         // For each capability we find update our knowledge of each reg's
-        // offset within that capability.
-        for (int i = 0; i < PCISPC_FENCE; i++) {
+        // offset within that capability starting with the offset we know.
+        for (int i = (capIdx+1); i < PCISPC_FENCE; i++) {
             if (mPciSpcMetrics[i].cap == mPciCap.back()) {
                 mPciSpcMetrics[i].offset =
                     mPciSpcMetrics[i-1].offset + mPciSpcMetrics[i-1].size;

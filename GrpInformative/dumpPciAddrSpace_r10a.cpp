@@ -35,7 +35,7 @@ DumpPciAddrSpace_r10a::RunCoreTest()
     const PciSpcType *pciMetrics = gRegisters->GetPciMetrics();
     const vector<PciCapabilities> *pciCap = gRegisters->GetPciCapabilities();
 
-
+LOG_ERR("todd;suspect=0x%08X", pciMetrics[PCISPC_MXID].offset);
     // Dumping all register values to well known file
     if ((fd = open(FILENAME_DUMP_PCI_REGS, FILENAME_FLAGS,
         FILENAME_MODE)) == -1) {

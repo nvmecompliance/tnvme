@@ -152,10 +152,12 @@ bool
 Group::RunTest(TestRef &tr, vector<TestRef> &skipTest)
 {
     string work;
+    bool result = false;
 
     if (TestExists(tr) == false)
-        return false;
+        return result;
 
+    LOG_NRM("-----------------START TEST-----------------");
     FORMAT_GROUP_DESCRIPTION(work, this)
     LOG_NRM("%s", work.c_str());
 
@@ -168,9 +170,12 @@ Group::RunTest(TestRef &tr, vector<TestRef> &skipTest)
         mTests[tr.major][tr.minor]->GetLongDescription(false, 0).c_str());
 
     if (SkippingTest(tr, skipTest))
-        return true;
+        result = true;
     else
-        return mTests[tr.major][tr.minor]->Run();
+        result = mTests[tr.major][tr.minor]->Run();
+
+    LOG_NRM("------------------END TEST------------------");
+    return result;
 }
 
 

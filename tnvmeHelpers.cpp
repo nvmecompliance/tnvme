@@ -46,8 +46,6 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
                 LOG_NRM("Cmd line forces executing informative group");
                 testIter = groups[iGrp]->GetTestIterator();
                 while (allHaveRun == false) {
-                    if (cl.sticky)
-                        ResetStickyErrors();
                     locResult = groups[iGrp]->RunTest(testIter, cl.skiptest,
                         allHaveRun);
                     allTestsPass = allTestsPass ? locResult : allTestsPass;
@@ -55,6 +53,7 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
                         goto FAIL_OUT;
                 }
             }
+
 
             // Now handle anything spec'd in the --test cmd line option
             if (cl.test.t.group == ULONG_MAX) {
