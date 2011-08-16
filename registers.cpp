@@ -304,7 +304,7 @@ Registers::DiscoverPciCapabilities()
 
         // For each capability we find, log the order in which it was found
         capId = (unsigned char)REGMASK(nextCap, 1);
-        capOffset = (unsigned int)REGMASK((nextCap >> 8), 1);
+        capOffset = io.offset;
         switch (capId) {
 
         case 0x01:  // PCICAP_PMCAP
