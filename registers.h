@@ -22,12 +22,12 @@ using namespace std;
 class Registers
 {
 public:
-    /**
+    /** Enforce singleton design pattern.
      * @param fd Pass the opened file descriptor for the device under test
      * @param specRev Pass which compliance is needed to target
      */
-    Registers(int fd, SpecRev specRev);
-    virtual ~Registers();
+    static Registers* getInstance(int fd, SpecRev specRev);
+    ~Registers();
 
     /**
      * Read a register value from the appropriate address space.
@@ -106,7 +106,12 @@ public:
 
 
 private:
+    // Implement singleton design pattern
     Registers();
+    Registers(int fd, SpecRev specRev);
+    static bool mInstanceFlag;
+    static Registers *mSingleton;
+
 
     /// which spec release is being targeted
     SpecRev mSpecRev;

@@ -263,8 +263,8 @@ main(int argc, char *argv[])
 
     // Accessing hardware requires specific checks and inquiries before running
     if (accessingHdw) {
-        // Create globals here, stand alone objects which all tests will need
-        gRegisters = new Registers(fd, CmdLine.rev);
+        // Create globals/singletons here, which all tests objects will need
+        gRegisters = Registers::getInstance(fd, CmdLine.rev);
 
         LOG_NRM("Checking for unintended device under low powered states");
         if (gRegisters->Read(PCISPC_PMCS, regVal) == false) {

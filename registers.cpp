@@ -20,6 +20,19 @@ CtlSpcType Registers::mCtlSpcMetrics[] =
 #undef ZZ
 
 
+bool Registers::mInstanceFlag = false;
+Registers* Registers::mSingleton = NULL;
+Registers* Registers::getInstance(int fd, SpecRev specRev)
+{
+    if(mInstanceFlag == false) {
+        mSingleton = new Registers(fd, specRev);
+        mInstanceFlag = true;
+        return mSingleton;
+    } else {
+        return mSingleton;
+    }
+}
+
 
 Registers::Registers(int fd, SpecRev specRev)
 {
@@ -38,6 +51,7 @@ Registers::Registers(int fd, SpecRev specRev)
 
 Registers::~Registers()
 {
+    mInstanceFlag = false;
 }
 
 
