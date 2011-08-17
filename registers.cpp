@@ -170,6 +170,8 @@ Registers::Write(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
     int rc;
     struct rw_generic io = { regSpc, roffset, rsize, value };
 
+LOG_DBG("io.{type,offset,nBytes,buffer} = {%d, 0x%04X, 0x%04X, %p}",
+            io.type, io.offset, io.nBytes, io.buffer);
     if ((rc = ioctl(mFd, NVME_IOCTL_WRITE_GENERIC, &io)) < 0) {
         LOG_ERR("Error writing reg offset 0x%08X: %d returned", roffset, rc);
         LOG_DBG("io.{type,offset,nBytes,buffer} = {%d, 0x%04X, 0x%04X, %p}",

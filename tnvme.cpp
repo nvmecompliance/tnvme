@@ -15,6 +15,7 @@
 
 // ------------------------------EDIT HERE---------------------------------
 #include "GrpInformative/grpInformative.h"
+#include "GrpPciRegisters/grpPciRegisters.h"
 #include "GrpCtrlRegisters/grpCtrlRegisters.h"
 
 
@@ -41,6 +42,7 @@ Usage(void) {
     printf("                                      {all | spec'd_group | test_within_group}\n");
     printf("  -f(--informative)                   Run Group Informative tests in addition\n");
     printf("                                      to any test specified by -t(--test)\n");
+    printf("  -l(--list)                          List all devices available for test\n");
     printf("  -d(--device) <name>                 Device to open for testing: /dev/node\n");
     printf("                                      dflt=(1st device listed in --list)\n");
     printf("  -r(--rmmap) <space:offset:size>     Read memmap'd I/O registers from\n");
@@ -55,7 +57,6 @@ Usage(void) {
     printf("  -z(--reset) {<pci> | <ctrlr>}       Reset the device\n");
     printf("  -i(--ignore)                        Ignore detected errors\n");
     printf("  -p(--loop) <count>                  Loop test execution <count> times; dflt=1\n");
-    printf("  -l(--list)                          List all devices available for test\n");
     printf("  -k(--skiptest) <filename>           A file contains a list of tests to skip\n");
     printf("  -y(--sticky)                        Reset sticky error bits between tests\n");
 }
@@ -393,7 +394,8 @@ BuildTestInfrastructure(vector<Group *> &groups, int &fd,
     // tests get executed based upon the constructed 'specRev' being targeted.
     cl.informative.grpInfoIdx = groups.size();  // tied to the next statement
     groups.push_back(new GrpInformative(groups.size(), cl.rev, fd));       // 0
-    groups.push_back(new GrpCtrlRegisters(groups.size(), cl.rev, fd));     // 1
+    groups.push_back(new GrpPciRegisters(groups.size(), cl.rev, fd));      // 1
+    groups.push_back(new GrpCtrlRegisters(groups.size(), cl.rev, fd));     // 2
 
     return true;
 }

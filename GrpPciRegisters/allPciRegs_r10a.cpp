@@ -21,6 +21,7 @@ AllPciRegs_r10a::~AllPciRegs_r10a()
 bool
 AllPciRegs_r10a::RunCoreTest()
 {
+    LOG_ERR("Test not implemented");
     return false;   // todo; add some reset logic when available
 }
 

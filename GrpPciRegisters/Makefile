@@ -6,12 +6,12 @@ INCLUDES = -I. -I../ -I../../ -I/usr/local/include
 
 SRC = \
 	grpPciRegisters.cpp	\
-	allPciRegs_10a.cpp
+	allPciRegs_r10a.cpp
 
 .SUFFIXES: .cpp
 
 OBJ = $(SRC:.cpp=.o)
-OUT = libGrpCtrlRegisters.a
+OUT = libGrpPciRegisters.a
 
 all: $(OUT)
 

@@ -6,6 +6,7 @@ INCLUDE := -I./ -I../
 
 SUBDIRS:=				\
 	GrpInformative		\
+	GrpPciRegisters		\
 	GrpCtrlRegisters
 
 SOURCES:=				\
