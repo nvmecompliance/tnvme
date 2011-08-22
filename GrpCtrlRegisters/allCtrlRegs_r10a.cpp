@@ -8,8 +8,9 @@ AllCtrlRegs_r10a::AllCtrlRegs_r10a(int fd) : Test(fd)
     mTestDesc.SetShort(     "Validate all controller registers syntactically");
     // No string size limit for the long description
     mTestDesc.SetLong(
-        "Validates the following; the RO fields cannot be written; all ASCII "
-        "fields only contain chars 0x20 to 0x7e.");
+        "Validates the following; the RO fields which are not implementation "
+        "specific contain default values; The RO fields cannot be written; All "
+        "ASCII fields only contain chars 0x20 to 0x7e.");
 }
 
 

@@ -4,6 +4,9 @@
 #include "test.h"
 
 
+/**
+ * The purpose of this class resides in the constructor
+ */
 class AllCtrlRegs_r10a : public Test
 {
 public:

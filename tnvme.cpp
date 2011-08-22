@@ -54,7 +54,7 @@ Usage(void) {
     printf("                                      from start of space for <size> bytes\n");
     printf("                                      (Require: <size> < 8)\n");
     printf("                                      <offset:size> requires base 16 values\n");
-    printf("  -z(--reset) {<pci> | <ctrlr>}       Reset the device\n");
+    printf("  -z(--reset)                         Ctrl'r level reset via CC.EN\n");
     printf("  -i(--ignore)                        Ignore detected errors\n");
     printf("  -p(--loop) <count>                  Loop test execution <count> times; dflt=1\n");
     printf("  -k(--skiptest) <filename>           A file contains a list of tests to skip\n");
@@ -79,7 +79,7 @@ main(int argc, char *argv[])
     bool deviceFound = false;
     bool accessingHdw = true;
     unsigned long long regVal;
-    const char *short_opt = "hsyfliv:e::z:p:t::d:k:r:w:";
+    const char *short_opt = "hsyflziv:e::p:t::d:k:r:w:";
     static struct option long_opt[] = {
         // {name,           has_arg,            flag,   val}
         {   "help",         no_argument,        NULL,   'h'},
@@ -91,7 +91,7 @@ main(int argc, char *argv[])
         {   "device",       required_argument,  NULL,   'd'},
         {   "rmmap" ,       required_argument,  NULL,   'r'},
         {   "wmmap" ,       required_argument,  NULL,   'w'},
-        {   "reset",        required_argument,  NULL,   'z'},
+        {   "reset",        no_argument,        NULL,   'z'},
         {   "ignore",       no_argument,        NULL,   'i'},
         {   "loop",         required_argument,  NULL,   'p'},
         {   "skiptest",     required_argument,  NULL,   'k'},
@@ -104,7 +104,7 @@ main(int argc, char *argv[])
     CmdLine.rev = SPECREV_10a;
     CmdLine.detail.req = false;
     CmdLine.test.req = false;
-    CmdLine.reset = RESETTYPE_FENCE;
+    CmdLine.reset = false;
     CmdLine.summary = false;
     CmdLine.ignore = false;
     CmdLine.sticky = false;
@@ -198,17 +198,6 @@ main(int argc, char *argv[])
             }
             break;
 
-        case 'z':
-            if (strcmp("pci", optarg) == 0) {
-                CmdLine.reset = RESET_PCI;
-            } else if (strcmp("ctrlr", optarg) == 0) {
-                CmdLine.reset = RESET_CTRLR;
-            } else {
-                printf("Unrecognizable reset string\n");
-                exit(1);
-            }
-            break;
-
         case 'p':
             tmp = strtol(optarg, &endptr, 10);
             if (*endptr != '\0') {
@@ -241,6 +230,7 @@ main(int argc, char *argv[])
         case 'h':   Usage();                            exit(0);
         case '?':   Usage();                            exit(1);
         case 'f':   CmdLine.informative.req = true;     break;
+        case 'z':   CmdLine.reset = true;               break;
         case 'i':   CmdLine.ignore = true;              break;
         case 'y':   CmdLine.sticky = true;              break;
         }
@@ -325,7 +315,7 @@ main(int argc, char *argv[])
     } else if (CmdLine.wmmap.req) {
         gRegisters->Write(CmdLine.wmmap.space, CmdLine.wmmap.size,
             CmdLine.wmmap.offset, (unsigned char *)(&CmdLine.wmmap.value));
-    } else if (CmdLine.reset != RESETTYPE_FENCE) {
+    } else if (CmdLine.reset) {
         ;   // todo; add some reset logic when available
     } else if (CmdLine.test.req) {
         exitCode = ExecuteTests(CmdLine, groups) ? 0 : 1;

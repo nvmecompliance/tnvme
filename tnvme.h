@@ -8,6 +8,9 @@
 
 using namespace std;
 
+#define ULONGLONG       unsigned long long
+#define ULONG           unsigned long
+
 #define APPNAME         "tnvme"
 #define LEVEL           APPNAME
 #define LOG_NRM(fmt, ...)    \
@@ -27,12 +30,6 @@ typedef enum {
     SPECREV_10a,                // http://www.nvmexpress.org/ spec. rev. 1.0a
     SPECREVTYPE_FENCE           // always must be last element
 } SpecRev;
-
-typedef enum {
-    RESET_PCI,                  // via PXDCAP.FLRC bit
-    RESET_CTRLR,                // via CC.EN bit
-    RESETTYPE_FENCE             // always must be the last element
-} ResetType;
 
 struct TestRef {
     size_t  group;
@@ -79,12 +76,12 @@ struct CmdLine {
     bool            summary;
     bool            ignore;
     bool            sticky;
+    bool            reset;
     size_t          loop;
     SpecRev         rev;
     TestTarget      detail;
     TestTarget      test;
     string          device;
-    ResetType       reset;
     InformativeGrp  informative;
     vector<TestRef> skiptest;
     RmmapIo         rmmap;

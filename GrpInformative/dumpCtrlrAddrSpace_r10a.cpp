@@ -45,12 +45,15 @@ DumpCtrlrAddrSpace_r10a::RunCoreTest()
 
     // Read all registers in ctrlr space
     for (int i = 0; i < CTLSPC_FENCE; i++) {
+        if (pciMetrics[i].specRev != SPECREV_10a)
+            continue;
+
         if (pciMetrics[i].size > MAX_SUPPORTED_REG_SIZE) {
             unsigned char *buffer;
             buffer = new unsigned char[pciMetrics[i].size];
             if (gRegisters->Read(NVMEIO_BAR01, pciMetrics[i].size,
                 pciMetrics[i].offset, buffer) == false) {
-                goto EXIT;
+                goto ERROR_OUT;
             } else {
                 string work = "  ";
                 work += gRegisters->FormatRegister(NVMEIO_BAR01,
@@ -71,9 +74,12 @@ DumpCtrlrAddrSpace_r10a::RunCoreTest()
         }
     }
 
-EXIT:
     close(fd);
     return true;
+
+ERROR_OUT:
+    close(fd);
+    return false;
 }
 
 

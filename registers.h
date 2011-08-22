@@ -37,8 +37,8 @@ public:
      *          smaller than sizeof(value)
      * @return true upon success, otherwise false
      */
-    bool Read(PciSpc reg, unsigned long long &value);
-    bool Read(CtlSpc reg, unsigned long long &value);
+    bool Read(PciSpc reg, ULONGLONG &value);
+    bool Read(CtlSpc reg, ULONGLONG &value);
 
     /**
      * Generic read function, you supply ALL the necessary data to read at
@@ -59,8 +59,8 @@ public:
      * @param value Pass the value to write.
      * @return true upon success, otherwise false
      */
-    bool Write(PciSpc reg, unsigned long long value);
-    bool Write(CtlSpc reg, unsigned long long value);
+    bool Write(PciSpc reg, ULONGLONG value);
+    bool Write(CtlSpc reg, ULONGLONG value);
 
     /**
      * Generic write function, you supply ALL the necessary data to write at
@@ -100,7 +100,7 @@ public:
      * @return the formatted resulting string
      */
     string FormatRegister(unsigned int regSize, const char *regDesc,
-        unsigned long long regValue);
+        ULONGLONG regValue);
     string FormatRegister(nvme_io_space regSpc, unsigned int rsize,
         unsigned int roffset, unsigned char *value);
 
@@ -133,9 +133,9 @@ private:
     void DiscoverPciCapabilities();
 
     bool Read(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
-        unsigned long long &value, const char *rdesc);
+        ULONGLONG &value, const char *rdesc);
     bool Write(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
-        unsigned long long &value, const char *rdesc);
+        ULONGLONG &value, const char *rdesc);
 };
 
 

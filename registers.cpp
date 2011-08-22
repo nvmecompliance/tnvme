@@ -5,14 +5,14 @@
 
 
 // Register metrics (meta data) to aid interfacing with the kernel driver
-#define ZZ(a, b, c, d, e, f, g, h)          { b, c, d, e, f, g, h },
+#define ZZ(a, b, c, d, e, f, g, h, i)          { b, c, d, e, f, g, h, i },
 PciSpcType Registers::mPciSpcMetrics[] =
 {
     PCISPC_TABLE
 };
 #undef ZZ
 
-#define ZZ(a, b, c, d, e, f, g)             { b, c, d, e, f, g },
+#define ZZ(a, b, c, d, e, f, g, h)             { b, c, d, e, f, g, h },
 CtlSpcType Registers::mCtlSpcMetrics[] =
 {
     CTLSPC_TABLE
@@ -56,7 +56,7 @@ Registers::~Registers()
 
 
 bool
-Registers::Read(PciSpc reg, unsigned long long &value)
+Registers::Read(PciSpc reg, ULONGLONG &value)
 {
     if (mPciSpcMetrics[reg].specRev != mSpecRev) {
         LOG_ERR("Attempting reg (%d) access to incompatible spec release", reg);
@@ -68,7 +68,7 @@ Registers::Read(PciSpc reg, unsigned long long &value)
 
 
 bool
-Registers::Read(CtlSpc reg, unsigned long long &value)
+Registers::Read(CtlSpc reg, ULONGLONG &value)
 {
     if (mPciSpcMetrics[reg].specRev != mSpecRev) {
         LOG_ERR("Attempting reg (%d) access to incompatible spec release", reg);
@@ -81,7 +81,7 @@ Registers::Read(CtlSpc reg, unsigned long long &value)
 
 bool
 Registers::Read(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
-    unsigned long long &value, const char *rdesc)
+    ULONGLONG &value, const char *rdesc)
 {
     int rc;
     struct rw_generic io = { regSpc, roffset, rsize, (unsigned char *)&value };
@@ -127,7 +127,7 @@ Registers::Read(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
 
 
 bool
-Registers::Write(PciSpc reg, unsigned long long value)
+Registers::Write(PciSpc reg, ULONGLONG value)
 {
     if (mPciSpcMetrics[reg].specRev != mSpecRev) {
         LOG_ERR("Attempting reg (%d) access to incompatible spec release", reg);
@@ -139,7 +139,7 @@ Registers::Write(PciSpc reg, unsigned long long value)
 
 
 bool
-Registers::Write(CtlSpc reg, unsigned long long value)
+Registers::Write(CtlSpc reg, ULONGLONG value)
 {
     if (mPciSpcMetrics[reg].specRev != mSpecRev) {
         LOG_ERR("Attempting reg (%d) access to incompatible spec release", reg);
@@ -152,7 +152,7 @@ Registers::Write(CtlSpc reg, unsigned long long value)
 
 bool
 Registers::Write(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
-    unsigned long long &value, const char *rdesc)
+    ULONGLONG &value, const char *rdesc)
 {
     int rc;
     struct rw_generic io = { regSpc, roffset, rsize, (unsigned char *)&value };
@@ -184,8 +184,6 @@ Registers::Write(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
     int rc;
     struct rw_generic io = { regSpc, roffset, rsize, value };
 
-LOG_DBG("io.{type,offset,nBytes,buffer} = {%d, 0x%04X, 0x%04X, %p}",
-            io.type, io.offset, io.nBytes, io.buffer);
     if ((rc = ioctl(mFd, NVME_IOCTL_WRITE_GENERIC, &io)) < 0) {
         LOG_ERR("Error writing reg offset 0x%08X: %d returned", roffset, rc);
         LOG_DBG("io.{type,offset,nBytes,buffer} = {%d, 0x%04X, 0x%04X, %p}",
@@ -201,7 +199,7 @@ LOG_DBG("io.{type,offset,nBytes,buffer} = {%d, 0x%04X, 0x%04X, %p}",
 
 string
 Registers::FormatRegister(unsigned int regSize, const char *regDesc,
-    unsigned long long regValue)
+    ULONGLONG regValue)
 {
     string result;
     char buffer[80];
@@ -278,8 +276,8 @@ Registers::DiscoverPciCapabilities()
     int capIdx;
     unsigned int capId;
     unsigned int capOffset;
-    unsigned long long work;
-    unsigned long long nextCap;
+    ULONGLONG work;
+    ULONGLONG nextCap;
     struct rw_generic io = { NVMEIO_PCI_HDR, 0, 4, (unsigned char *)&nextCap };
 
 

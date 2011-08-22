@@ -48,9 +48,13 @@ DumpPciAddrSpace_r10a::RunCoreTest()
     work = "PCI header registers\n";
     write(fd, work.c_str(), work.size());
     for (int j = 0; j < PCISPC_FENCE; j++) {
+        if (pciMetrics[j].specRev != SPECREV_10a)
+            continue;
+
+        // All PCI hdr regs don't have an associated capability
         if (pciMetrics[j].cap == PCICAP_FENCE) {
             if (gRegisters->Read((PciSpc)j, value) == false)
-                goto EXIT;
+                goto ERROR_OUT;
             WriteToFile(fd, pciMetrics[j], value);
         }
     }
@@ -77,19 +81,24 @@ DumpPciAddrSpace_r10a::RunCoreTest()
         default:
             LOG_ERR("PCI space reporting an unknown capability: %d\n",
                 pciCap->at(i));
-            goto EXIT;
+            goto ERROR_OUT;
         }
         write(fd, work.c_str(), work.size());
 
         // Read all registers assoc with the discovered capability
         for (int j = 0; j < PCISPC_FENCE; j++) {
+            if (pciMetrics[j].specRev != SPECREV_10a)
+                continue;
+
             if (pciCap->at(i) == pciMetrics[j].cap) {
                 if (pciMetrics[j].size > MAX_SUPPORTED_REG_SIZE) {
+                    bool err = false;
                     unsigned char *buffer;
                     buffer = new unsigned char[pciMetrics[j].size];
+
                     if (gRegisters->Read(NVMEIO_PCI_HDR, pciMetrics[j].size,
                         pciMetrics[j].offset, buffer) == false) {
-                        goto EXIT;
+                        err = true;
                     } else {
                         string work = "  ";
                         work += gRegisters->FormatRegister(NVMEIO_PCI_HDR,
@@ -97,8 +106,11 @@ DumpPciAddrSpace_r10a::RunCoreTest()
                         work += "\n";
                         write(fd, work.c_str(), work.size());
                     }
+                    delete buffer;
+                    if (err)
+                        goto ERROR_OUT;
                 } else if (gRegisters->Read((PciSpc)j, value) == false) {
-                    goto EXIT;
+                    goto ERROR_OUT;
                 } else {
                     WriteToFile(fd, pciMetrics[j], value);
                 }
@@ -106,9 +118,12 @@ DumpPciAddrSpace_r10a::RunCoreTest()
         }
     }
 
-EXIT:
     close(fd);
     return true;
+
+ERROR_OUT:
+    close(fd);
+    return false;
 }
 
 

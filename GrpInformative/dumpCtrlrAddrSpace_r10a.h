@@ -4,6 +4,9 @@
 #include "test.h"
 
 
+/**
+ * The purpose of this class resides in the constructor
+ */
 class DumpCtrlrAddrSpace_r10a : public Test
 {
 public:
