@@ -6,7 +6,7 @@ INCLUDES = -I. -I../ -I../../ -I/usr/local/include
 
 SRC = \
 	grpPciRegisters.cpp	\
-	allPciRegs_r10a.cpp
+	allPciRegs_r10b.cpp
 
 .SUFFIXES: .cpp
 

@@ -1,5 +1,5 @@
 #include "grpCtrlRegisters.h"
-#include "allCtrlRegs_r10a.h"
+#include "allCtrlRegs_r10b.h"
 
 
 GrpCtrlRegisters::GrpCtrlRegisters(size_t grpNum, SpecRev specRev, int fd) :
@@ -13,8 +13,8 @@ GrpCtrlRegisters::GrpCtrlRegisters(size_t grpNum, SpecRev specRev, int fd) :
     //            Tests 0.0, 1.0, <next_test_num=2>.0  Major num; group level
     //            Tests x.0, x.1, x.<next_test_num=2>  Minor num; test level
     switch (mSpecRev) {
-    case SPECREV_10a:
-        APPEND_TEST_AT_GROUP_LEVEL(AllCtrlRegs_r10a, fd)
+    case SPECREV_10b:
+        APPEND_TEST_AT_GROUP_LEVEL(AllCtrlRegs_r10b, fd)
         break;
 
     default:

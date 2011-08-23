@@ -27,7 +27,7 @@ using namespace std;
 #define MAX_CHAR_PER_LINE_DESCRIPTION       66
 
 typedef enum {
-    SPECREV_10a,                // http://www.nvmexpress.org/ spec. rev. 1.0a
+    SPECREV_10b,                // http://www.nvmexpress.org/ spec. rev. 1.0b
     SPECREVTYPE_FENCE           // always must be last element
 } SpecRev;
 
@@ -75,7 +75,6 @@ struct WmmapIo {
 struct CmdLine {
     bool            summary;
     bool            ignore;
-    bool            sticky;
     bool            reset;
     size_t          loop;
     SpecRev         rev;

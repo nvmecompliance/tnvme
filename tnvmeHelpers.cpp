@@ -33,7 +33,6 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
         return false;
     }
 
-    ResetStickyErrors();
     for (size_t iLoop = 0; iLoop < cl.loop; iLoop++) {
         LOG_NRM("Start loop execution %ld", iLoop);
 
@@ -45,13 +44,8 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
             if (cl.informative.req && (iGrp == cl.informative.grpInfoIdx)) {
                 LOG_NRM("Cmd line forces executing informative group");
                 testIter = groups[iGrp]->GetTestIterator();
-                while (allHaveRun == false) {
-                    locResult = groups[iGrp]->RunTest(testIter, cl.skiptest,
-                        allHaveRun);
-                    allTestsPass = allTestsPass ? locResult : allTestsPass;
-                    if ((cl.ignore == false) && (allTestsPass == false))
-                        goto FAIL_OUT;
-                }
+                while (allHaveRun == false)
+                    groups[iGrp]->RunTest(testIter, cl.skiptest, allHaveRun);
             }
 
 
@@ -60,7 +54,7 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
                 // Run all tests within all groups
                 testIter = groups[iGrp]->GetTestIterator();
                 while (allHaveRun == false) {
-                    if (cl.sticky)
+                    if (cl.ignore)
                         ResetStickyErrors();
                     locResult = groups[iGrp]->RunTest(testIter, cl.skiptest,
                         allHaveRun);
@@ -75,7 +69,7 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
                 if (iGrp == cl.test.t.group) {
                     testIter = groups[iGrp]->GetTestIterator();
                     while (allHaveRun == false) {
-                        if (cl.sticky)
+                        if (cl.ignore)
                             ResetStickyErrors();
                         locResult = groups[iGrp]->RunTest(testIter, cl.skiptest,
                             allHaveRun);
@@ -89,6 +83,7 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
             } else {
                 // Run spec'd test within spec'd group
                 if (iGrp == cl.test.t.group) {
+                    ResetStickyErrors();
                     locResult = groups[iGrp]->RunTest(cl.test.t, cl.skiptest);
                     allTestsPass = allTestsPass ? locResult : allTestsPass;
                     if ((cl.ignore == false) && (allTestsPass == false))

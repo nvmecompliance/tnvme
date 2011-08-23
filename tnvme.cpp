@@ -34,7 +34,7 @@ Usage(void) {
     printf("%s (revision %d.%d)\n", APPNAME, VER_MAJOR, VER_MINOR);
     printf("  -h(--help)                          Display this help\n");
     printf("  -v(--rev) <spec>                    All options forced to target specified\n");
-    printf("                                      NVME revision {1.0a}; dflt=1.0a\n");
+    printf("                                      NVME revision {1.0b}; dflt=1.0b\n");
     printf("  -s(--summary)                       Summarize all groups and tests\n");
     printf("  -e(--detail) [<grp> | <grp>:<test>] Detailed group and test description for:\n");
     printf("                                      {all | spec'd_group | test_within_group}\n");
@@ -58,7 +58,6 @@ Usage(void) {
     printf("  -i(--ignore)                        Ignore detected errors\n");
     printf("  -p(--loop) <count>                  Loop test execution <count> times; dflt=1\n");
     printf("  -k(--skiptest) <filename>           A file contains a list of tests to skip\n");
-    printf("  -y(--sticky)                        Reset sticky error bits between tests\n");
 }
 
 
@@ -79,7 +78,7 @@ main(int argc, char *argv[])
     bool deviceFound = false;
     bool accessingHdw = true;
     unsigned long long regVal;
-    const char *short_opt = "hsyflziv:e::p:t::d:k:r:w:";
+    const char *short_opt = "hsflziv:e::p:t::d:k:r:w:";
     static struct option long_opt[] = {
         // {name,           has_arg,            flag,   val}
         {   "help",         no_argument,        NULL,   'h'},
@@ -96,18 +95,16 @@ main(int argc, char *argv[])
         {   "loop",         required_argument,  NULL,   'p'},
         {   "skiptest",     required_argument,  NULL,   'k'},
         {   "list",         no_argument,        NULL,   'l'},
-        {   "sticky",       no_argument,        NULL,   'y'},
         {   NULL,           no_argument,        NULL,    0}
     };
 
     // defaults if not spec'd on cmd line
-    CmdLine.rev = SPECREV_10a;
+    CmdLine.rev = SPECREV_10b;
     CmdLine.detail.req = false;
     CmdLine.test.req = false;
     CmdLine.reset = false;
     CmdLine.summary = false;
     CmdLine.ignore = false;
-    CmdLine.sticky = false;
     CmdLine.informative.req = false;
     CmdLine.loop = 1;
     CmdLine.device = NO_DEVICES;
@@ -142,7 +139,7 @@ main(int argc, char *argv[])
 
         case 'v':
             if (strcmp("1.0a", optarg) == 0) {
-                CmdLine.rev = SPECREV_10a;
+                CmdLine.rev = SPECREV_10b;
             }
             break;
 
@@ -232,7 +229,6 @@ main(int argc, char *argv[])
         case 'f':   CmdLine.informative.req = true;     break;
         case 'z':   CmdLine.reset = true;               break;
         case 'i':   CmdLine.ignore = true;              break;
-        case 'y':   CmdLine.sticky = true;              break;
         }
     }
 
