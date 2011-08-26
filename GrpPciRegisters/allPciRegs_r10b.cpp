@@ -5,7 +5,7 @@
 AllPciRegs_r10b::AllPciRegs_r10b(int fd) : Test(fd)
 {
     // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-    mTestDesc.SetCompliance("revision 1.0a, section 3");
+    mTestDesc.SetCompliance("revision 1.0b, section 3");
     mTestDesc.SetShort(     "Validate all PCI registers syntactically");
     // No string size limit for the long description
     mTestDesc.SetLong(
