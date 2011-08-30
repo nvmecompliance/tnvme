@@ -62,6 +62,7 @@ struct RmmapIo {
     nvme_io_space      space;
     size_t             offset;
     size_t             size;
+    nvme_acc_type      acc;
 };
 
 struct WmmapIo {
@@ -70,6 +71,7 @@ struct WmmapIo {
     size_t             offset;
     size_t             size;
     unsigned long long value;
+    nvme_acc_type      acc;
 };
 
 struct CmdLine {

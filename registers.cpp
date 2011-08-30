@@ -63,7 +63,7 @@ Registers::Read(PciSpc reg, ULONGLONG &value)
         return false;
     }
     return Read(NVMEIO_PCI_HDR, mPciSpcMetrics[reg].size,
-        mPciSpcMetrics[reg].offset, value, mPciSpcMetrics[reg].desc);
+        mPciSpcMetrics[reg].offset, value, BYTE_LEN, mPciSpcMetrics[reg].desc);
 }
 
 
@@ -75,16 +75,16 @@ Registers::Read(CtlSpc reg, ULONGLONG &value)
         return false;
     }
     return Read(NVMEIO_BAR01, mCtlSpcMetrics[reg].size,
-        mCtlSpcMetrics[reg].offset, value, mCtlSpcMetrics[reg].desc);
+        mCtlSpcMetrics[reg].offset, value, DWORD_LEN, mCtlSpcMetrics[reg].desc);
 }
 
 
 bool
 Registers::Read(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
-    ULONGLONG &value, const char *rdesc)
+    ULONGLONG &value, nvme_acc_type racc, const char *rdesc)
 {
     int rc;
-    struct rw_generic io = { regSpc, roffset, rsize, (unsigned char *)&value };
+    struct rw_generic io = { regSpc, roffset, rsize, racc, (unsigned char *)&value };
 
     // Verify we discovered the true offset of requested register
     if (roffset == INT_MAX) {
@@ -108,10 +108,10 @@ Registers::Read(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
 
 bool
 Registers::Read(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
-    unsigned char *value)
+    nvme_acc_type racc, unsigned char *value)
 {
     int rc;
-    struct rw_generic io = { regSpc, roffset, rsize, value };
+    struct rw_generic io = { regSpc, roffset, rsize, racc, value };
 
     if ((rc = ioctl(mFd, NVME_IOCTL_READ_GENERIC, &io)) < 0) {
         LOG_ERR("Error reading reg offset 0x%08X: %d returned", roffset, rc);
@@ -134,7 +134,7 @@ Registers::Write(PciSpc reg, ULONGLONG value)
         return false;
     }
     return Write(NVMEIO_PCI_HDR, mPciSpcMetrics[reg].size,
-        mPciSpcMetrics[reg].offset, value, mPciSpcMetrics[reg].desc);
+        mPciSpcMetrics[reg].offset, value, BYTE_LEN, mPciSpcMetrics[reg].desc);
 }
 
 
@@ -146,16 +146,16 @@ Registers::Write(CtlSpc reg, ULONGLONG value)
         return false;
     }
     return Write(NVMEIO_BAR01, mCtlSpcMetrics[reg].size,
-        mCtlSpcMetrics[reg].offset, value, mCtlSpcMetrics[reg].desc);
+        mCtlSpcMetrics[reg].offset, value, BYTE_LEN, mCtlSpcMetrics[reg].desc);
 }
 
 
 bool
 Registers::Write(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
-    ULONGLONG &value, const char *rdesc)
+    ULONGLONG &value, nvme_acc_type racc, const char *rdesc)
 {
     int rc;
-    struct rw_generic io = { regSpc, roffset, rsize, (unsigned char *)&value };
+    struct rw_generic io = { regSpc, roffset, rsize, racc, (unsigned char *)&value };
 
     // Verify we discovered the true offset of requested register
     if (roffset == INT_MAX) {
@@ -179,10 +179,10 @@ Registers::Write(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
 
 bool
 Registers::Write(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
-    unsigned char *value)
+    nvme_acc_type racc, unsigned char *value)
 {
     int rc;
-    struct rw_generic io = { regSpc, roffset, rsize, value };
+    struct rw_generic io = { regSpc, roffset, rsize, racc, value };
 
     if ((rc = ioctl(mFd, NVME_IOCTL_WRITE_GENERIC, &io)) < 0) {
         LOG_ERR("Error writing reg offset 0x%08X: %d returned", roffset, rc);
@@ -278,7 +278,7 @@ Registers::DiscoverPciCapabilities()
     unsigned int capOffset;
     ULONGLONG work;
     ULONGLONG nextCap;
-    struct rw_generic io = { NVMEIO_PCI_HDR, 0, 4, (unsigned char *)&nextCap };
+    struct rw_generic io = { NVMEIO_PCI_HDR, 0, 4, BYTE_LEN, (unsigned char *)&nextCap };
 
 
     // NOTE: We cannot report errors/violations of the spec as we parse PCI

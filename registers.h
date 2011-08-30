@@ -47,11 +47,12 @@ public:
      * @param rsize Pass the length in bytes of the register
      * @param roffset Pass the offset from start of spec'd address space to
      *        start reading.
+     * @param racc Pass the register access width to read.
      * @param value Returns the value read, if and only if successful.
      * @return true upon success, otherwise false
      */
     bool Read(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
-        unsigned char *value);
+        nvme_acc_type racc, unsigned char *value);
 
     /**
      * Write a register value to the appropriate address space.
@@ -69,11 +70,12 @@ public:
      * @param rsize Pass the length in bytes of the register
      * @param roffset Pass the offset from start of spec'd address space to
      *        start writing.
+     * @param racc Pass which register access width to write
      * @param value Pass the array of value(s) to write, must be of rsize size
      * @return true upon success, otherwise false
      */
     bool Write(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
-        unsigned char *value);
+        nvme_acc_type racc, unsigned char *value);
 
     /**
      * Returns the list of capabilities discovered by parsing PCI address
@@ -133,9 +135,9 @@ private:
     void DiscoverPciCapabilities();
 
     bool Read(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
-        ULONGLONG &value, const char *rdesc);
+        ULONGLONG &value, nvme_acc_type acc, const char *rdesc);
     bool Write(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
-        ULONGLONG &value, const char *rdesc);
+        ULONGLONG &value, nvme_acc_type acc, const char *rdesc);
 };
 
 

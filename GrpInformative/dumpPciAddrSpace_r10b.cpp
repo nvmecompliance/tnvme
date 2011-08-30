@@ -97,7 +97,7 @@ DumpPciAddrSpace_r10b::RunCoreTest()
                     buffer = new unsigned char[pciMetrics[j].size];
 
                     if (gRegisters->Read(NVMEIO_PCI_HDR, pciMetrics[j].size,
-                        pciMetrics[j].offset, buffer) == false) {
+                        pciMetrics[j].offset, BYTE_LEN, buffer) == false) {
                         err = true;
                     } else {
                         string work = "  ";

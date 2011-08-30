@@ -286,7 +286,7 @@ ParseTargetCmdLine(TestTarget &target, const char *optarg)
 
 /**
  * A function to specifically handle parsing cmd lines of the form
- * "<space:offset:num>".
+ * "<space:offset:num:acc>".
  * @param rmmap Pass a structure to populate with parsing results
  * @param optarg Pass the 'optarg' argument from the getopt_long() API.
  * @return true upon successful parsing, otherwise false.
@@ -298,17 +298,21 @@ ParseRmmapCmdLine(RmmapIo &rmmap, const char *optarg)
     char *endptr;
     string swork;
     size_t tmp;
+    string sacc;
 
 
     rmmap.req = true;
     rmmap.space = NVMEIO_FENCE;
     rmmap.offset = 0;
     rmmap.size = 0;
+    rmmap.acc = ACC_FENCE;
+
+    LOG_DBG("Option selected = %s", optarg);
 
     // Parsing <space:offset:size>
     swork = optarg;
     if ((ulwork = swork.find(":", 0)) == string::npos) {
-        LOG_ERR("Unrecognized format <space:offset:size>=%s", optarg);
+        LOG_ERR("Unrecognized format <space:off:size:acc>=%s", optarg);
         return false;
     }
     if (strcmp("PCI", swork.substr(0, ulwork).c_str()) == 0) {
@@ -320,27 +324,54 @@ ParseRmmapCmdLine(RmmapIo &rmmap, const char *optarg)
         return false;
     }
 
-    // Parsing <offset:size>
+    // Parsing <off:size:acc>
     swork = swork.substr(ulwork+1, swork.size());
     tmp = strtoul(swork.substr(0, swork.size()).c_str(), &endptr, 16);
     if (*endptr != ':') {
-        LOG_ERR("Unrecognized format <offset:size>=%s", optarg);
+        LOG_ERR("Unrecognized format <off:size:acc>=%s", optarg);
         return false;
     }
     rmmap.offset = tmp;
 
-    // Parsing <size>
+    // Parsing <size:acc>
     swork = swork.substr(swork.find_first_of(':') + 1, swork.length());
     if (swork.length() == 0) {
         LOG_ERR("Missing <size> format string");
         return false;
     }
     tmp = strtoul(swork.substr(0, swork.size()).c_str(), &endptr, 16);
-    if (*endptr != '\0') {
-        LOG_ERR("Unrecognized format <size>=%s", optarg);
+    if (*endptr != ':') {
+        LOG_ERR("Unrecognized format <size:acc>=%s", optarg);
         return false;
     }
     rmmap.size = tmp;
+
+    // Parsing <acc>
+    swork = swork.substr(swork.find_first_of(':') + 1, swork.length());
+    if (swork.length() == 0) {
+        LOG_ERR("Missing <acc> format string");
+        return false;
+    }
+
+    sacc = swork.substr(0, swork.size()).c_str();
+    tmp = strtoul(swork.substr(1, swork.size()).c_str(), &endptr, 16);
+    if (*endptr != '\0') {
+    	LOG_ERR("Unrecognized format <acc>=%s", optarg);
+        return false;
+    }
+    // Detect the access width passed.
+    if (sacc.compare("b") == 0) {
+    	rmmap.acc = BYTE_LEN;
+    } else if (sacc.compare("w") == 0) {
+    	rmmap.acc = WORD_LEN;
+    } else if (sacc.compare("l") == 0) {
+    	rmmap.acc = DWORD_LEN;
+    } else if (sacc.compare("q") == 0) {
+    	rmmap.acc = QUAD_LEN;
+    } else {
+    	LOG_ERR("Unrecognized access width to read.");
+    	return false;
+    }
 
     return true;
 }
@@ -348,7 +379,7 @@ ParseRmmapCmdLine(RmmapIo &rmmap, const char *optarg)
 
 /**
  * A function to specifically handle parsing cmd lines of the form
- * "<space:offset:num:val>".
+ * "<space:offset:num:val:acc>".
  * @param wmmap Pass a structure to populate with parsing results
  * @param optarg Pass the 'optarg' argument from the getopt_long() API.
  * @return true upon successful parsing, otherwise false.
@@ -361,18 +392,19 @@ ParseWmmapCmdLine(WmmapIo &wmmap, const char *optarg)
     string swork;
     size_t tmp;
     unsigned long long tmpVal;
-
+    string sacc;
 
     wmmap.req = true;
     wmmap.space = NVMEIO_FENCE;
     wmmap.offset = 0;
     wmmap.size = 0;
     wmmap.value = 0;
+    wmmap.acc = ACC_FENCE;
 
-    // Parsing <space:offset:size:val>
+    // Parsing <space:off:siz:val:acc>
     swork = optarg;
     if ((ulwork = swork.find(":", 0)) == string::npos) {
-        LOG_ERR("Unrecognized format <space:offset:size:val>=%s", optarg);
+        LOG_ERR("Unrecognized format <space:off:siz:val:acc>=%s", optarg);
         return false;
     }
     if (strcmp("PCI", swork.substr(0, ulwork).c_str()) == 0) {
@@ -384,20 +416,20 @@ ParseWmmapCmdLine(WmmapIo &wmmap, const char *optarg)
         return false;
     }
 
-    // Parsing <offset:size:val>
+    // Parsing <off:siz:val:acc>
     swork = swork.substr(ulwork+1, swork.size());
     tmp = strtoul(swork.substr(0, swork.size()).c_str(), &endptr, 16);
     if (*endptr != ':') {
-        LOG_ERR("Unrecognized format <offset:size:val>=%s", optarg);
+        LOG_ERR("Unrecognized format <off:siz:val:acc>=%s", optarg);
         return false;
     }
     wmmap.offset = tmp;
 
-    // Parsing <size:val>
+    // Parsing <size:val:acc>
     swork = swork.substr(swork.find_first_of(':') + 1, swork.length());
     tmp = strtoul(swork.substr(0, swork.size()).c_str(), &endptr, 16);
     if (*endptr != ':') {
-        LOG_ERR("Unrecognized format <size:val>=%s", optarg);
+        LOG_ERR("Unrecognized format <siz:val:acc>=%s", optarg);
         return false;
     } else if (tmp > MAX_SUPPORTED_REG_SIZE) {
         LOG_ERR("<size> > allowed value of max of %d bytes",
@@ -406,18 +438,45 @@ ParseWmmapCmdLine(WmmapIo &wmmap, const char *optarg)
     }
     wmmap.size = tmp;
 
-    // Parsing <val>
+    // Parsing <val:acc>
     swork = swork.substr(swork.find_first_of(':') + 1, swork.length());
     if (swork.length() == 0) {
         LOG_ERR("Missing <val> format string");
         return false;
     }
     tmpVal = strtoull(swork.substr(0, swork.size()).c_str(), &endptr, 16);
-    if (*endptr != '\0') {
-        LOG_ERR("Unrecognized format <val>=%s", optarg);
+    if (*endptr != ':') {
+        LOG_ERR("Unrecognized format <val:acc>=%s", optarg);
         return false;
     }
     wmmap.value = tmpVal;
+
+    // Parsing <acc>
+    swork = swork.substr(swork.find_first_of(':') + 1, swork.length());
+    if (swork.length() == 0) {
+        LOG_ERR("Missing <acc> format string");
+        return false;
+    }
+
+    sacc = swork.substr(0, swork.size()).c_str();
+    tmp = strtoul(swork.substr(1, swork.size()).c_str(), &endptr, 16);
+    if (*endptr != '\0') {
+        LOG_ERR("Unrecognized format <acc>=%s", optarg);
+        return false;
+    }
+
+    if (sacc.compare("b") == 0) {
+    	wmmap.acc = BYTE_LEN;
+    } else if (sacc.compare("w") == 0) {
+    	wmmap.acc = WORD_LEN;
+    } else if (sacc.compare("l") == 0) {
+    	wmmap.acc = DWORD_LEN;
+    } else if (sacc.compare("q") == 0) {
+    	wmmap.acc = QUAD_LEN;
+    } else {
+    	LOG_ERR("Unrecognized access width for writing.");
+    	return false;
+    }
 
     return true;
 }

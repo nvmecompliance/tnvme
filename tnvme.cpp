@@ -45,13 +45,15 @@ Usage(void) {
     printf("  -l(--list)                          List all devices available for test\n");
     printf("  -d(--device) <name>                 Device to open for testing: /dev/node\n");
     printf("                                      dflt=(1st device listed in --list)\n");
-    printf("  -r(--rmmap) <space:offset:size>     Read memmap'd I/O registers from\n");
-    printf("                                      <space>={PCI | BAR01} at <offset> bytes\n");
+    printf("  -r(--rmmap) <space:off:size:acc>    Read memmap'd I/O registers from\n");
+    printf("                                      <space>={PCI | BAR01} at <off> bytes\n");
     printf("                                      from start of space for <size> bytes\n");
-    printf("                                      <offset:size> require base 16 values\n");
-    printf("  -w(--wmmap) <space:offset:size:val> Write <val> data to memmap'd I/O reg from\n");
-    printf("                                      <space>={PCI | BAR01} at <offset> bytes\n");
-    printf("                                      from start of space for <size> bytes\n");
+    printf("                                      access width <acc>={l | w | b} type\n");
+    printf("                                      <off:size:acc> require base 16 values\n");
+    printf("  -w(--wmmap) <space:off:siz:val:acc> Write <val> data to memmap'd I/O reg from\n");
+    printf("                                      <space>={PCI | BAR01} at <off> bytes\n");
+    printf("                                      from start of space for <siz> bytes\n");
+    printf("                                      access width <acc>={l | w | b} type\n");
     printf("                                      (Require: <size> < 8)\n");
     printf("                                      <offset:size> requires base 16 values\n");
     printf("  -z(--reset)                         Ctrl'r level reset via CC.EN\n");
@@ -304,13 +306,13 @@ main(int argc, char *argv[])
     } else if (CmdLine.rmmap.req) {
         unsigned char *value = new unsigned char[CmdLine.rmmap.size];
         gRegisters->Read(CmdLine.rmmap.space, CmdLine.rmmap.size,
-            CmdLine.rmmap.offset, value);
+            CmdLine.rmmap.offset, CmdLine.rmmap.acc, value);
         string result = gRegisters->FormatRegister(CmdLine.rmmap.space,
             CmdLine.rmmap.size, CmdLine.rmmap.offset, value);
         printf("%s\n", result.c_str());
     } else if (CmdLine.wmmap.req) {
         gRegisters->Write(CmdLine.wmmap.space, CmdLine.wmmap.size,
-            CmdLine.wmmap.offset, (unsigned char *)(&CmdLine.wmmap.value));
+            CmdLine.wmmap.offset, CmdLine.wmmap.acc, (unsigned char *)(&CmdLine.wmmap.value));
     } else if (CmdLine.reset) {
         ;   // todo; add some reset logic when available
     } else if (CmdLine.test.req) {
