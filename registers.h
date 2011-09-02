@@ -47,6 +47,19 @@ public:
      * @param rsize Pass the length in bytes of the register
      * @param roffset Pass the offset from start of spec'd address space to
      *        start reading.
+     * @param value Returns the value read, if and only if successful.
+     * @return true upon success, otherwise false
+     */
+    bool Read(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
+        unsigned char *value);
+
+    /**
+     * Generic read function, you supply ALL the necessary data to read at
+     * specified offset, length of register, which address space to read, etc.
+     * @param regSpc Pass which register space to read
+     * @param rsize Pass the length in bytes of the register
+     * @param roffset Pass the offset from start of spec'd address space to
+     *        start reading.
      * @param racc Pass the register access width to read.
      * @param value Returns the value read, if and only if successful.
      * @return true upon success, otherwise false
@@ -62,6 +75,19 @@ public:
      */
     bool Write(PciSpc reg, ULONGLONG value);
     bool Write(CtlSpc reg, ULONGLONG value);
+
+    /**
+     * Generic write function, you supply ALL the necessary data to write at
+     * specified offset, length of register, which address space to write, etc.
+     * @param regSpc Pass which register space to write
+     * @param rsize Pass the length in bytes of the register
+     * @param roffset Pass the offset from start of spec'd address space to
+     *        start writing.
+     * @param value Pass the array of value(s) to write, must be of rsize size
+     * @return true upon success, otherwise false
+     */
+    bool Write(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
+        unsigned char *value);
 
     /**
      * Generic write function, you supply ALL the necessary data to write at
@@ -135,9 +161,9 @@ private:
     void DiscoverPciCapabilities();
 
     bool Read(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
-        ULONGLONG &value, nvme_acc_type acc, const char *rdesc);
+        ULONGLONG &value, const char *rdesc);
     bool Write(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
-        ULONGLONG &value, nvme_acc_type acc, const char *rdesc);
+        ULONGLONG &value, const char *rdesc);
 };
 
 

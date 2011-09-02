@@ -161,7 +161,7 @@ AllPciRegs_r10b::ValidatePciCapRegisterROAttribute(PciSpc reg)
         for (int k = 0; (k*sizeof(value)) < pciMetrics[reg].size; k++) {
 
             if (gRegisters->Read(NVMEIO_PCI_HDR, sizeof(value),
-                pciMetrics[reg].offset + (k * sizeof(value)), BYTE_LEN,
+                pciMetrics[reg].offset + (k * sizeof(value)),
                 (unsigned char *)&value) == false) {
 
                 return false;
@@ -222,7 +222,7 @@ AllPciRegs_r10b::ValidatePciHdrRegisterROAttribute(PciSpc reg)
         for (int k = 0; (k*sizeof(value)) < pciMetrics[reg].size; k++) {
 
             if (gRegisters->Read(NVMEIO_PCI_HDR, sizeof(value),
-                pciMetrics[reg].offset + (k * sizeof(value)), BYTE_LEN,
+                pciMetrics[reg].offset + (k * sizeof(value)),
                 (unsigned char *)&value) == false) {
 
                 return false;

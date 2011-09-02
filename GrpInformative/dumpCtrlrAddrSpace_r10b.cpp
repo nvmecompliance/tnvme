@@ -52,7 +52,7 @@ DumpCtrlrAddrSpace_r10b::RunCoreTest()
             unsigned char *buffer;
             buffer = new unsigned char[pciMetrics[i].size];
             if (gRegisters->Read(NVMEIO_BAR01, pciMetrics[i].size,
-                pciMetrics[i].offset, BYTE_LEN, buffer) == false) {
+                pciMetrics[i].offset, buffer) == false) {
                 goto ERROR_OUT;
             } else {
                 string work = "  ";
