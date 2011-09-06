@@ -84,16 +84,10 @@ Registers::Read(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
     ULONGLONG &value, const char *rdesc)
 {
     int rc;
-    struct rw_generic io = { regSpc, roffset, rsize, BYTE_LEN,
+    enum nvme_acc_type dftAcc = (regSpc == NVMEIO_BAR01) ? DWORD_LEN : BYTE_LEN;
+    struct rw_generic io = { regSpc, roffset, rsize, dftAcc,
         (unsigned char *)&value };
 
-    // Override access type to conform to register size.
-    switch (rsize)
-    {
-    case 2: io.acc_type = WORD_LEN;         break;
-    case 4: io.acc_type = DWORD_LEN;        break;
-    case 8: io.acc_type = QUAD_LEN;         break;
-    }
 
     // Verify we discovered the true offset of requested register
     if (roffset == INT_MAX) {
@@ -104,8 +98,9 @@ Registers::Read(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
         return false;
     } else if ((rc = ioctl(mFd, NVME_IOCTL_READ_GENERIC, &io)) < 0) {
         LOG_ERR("Error reading %s: %d returned", rdesc, rc);
-        LOG_DBG("io.{type,offset,nBytes,buffer} = {%d, 0x%04X, 0x%04X, %p}",
-            io.type, io.offset, io.nBytes, io.buffer);
+        LOG_DBG("io.{type,offset,nBytes,acc_type,buffer} = "
+            "{%d, 0x%04X, 0x%04X, 0x%04X, %p}",
+            io.type, io.offset, io.nBytes, io.type, io.buffer);
         return false;
     }
 
@@ -120,9 +115,10 @@ Registers::Read(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
     unsigned char *value)
 {
     int rc;
-    struct rw_generic io = { regSpc, roffset, rsize, BYTE_LEN, value };
+    enum nvme_acc_type dftAcc = (regSpc == NVMEIO_BAR01) ? DWORD_LEN : BYTE_LEN;
+    struct rw_generic io = { regSpc, roffset, rsize, dftAcc, value };
 
-    // Override access type to conform to register size.
+
     switch (rsize)
     {
     case 2: io.acc_type = WORD_LEN;         break;
@@ -132,8 +128,9 @@ Registers::Read(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
 
     if ((rc = ioctl(mFd, NVME_IOCTL_READ_GENERIC, &io)) < 0) {
         LOG_ERR("Error reading reg offset 0x%08X: %d returned", roffset, rc);
-        LOG_DBG("io.{type,offset,nBytes,buffer} = {%d, 0x%04X, 0x%04X, %p}",
-            io.type, io.offset, io.nBytes, io.buffer);
+        LOG_DBG("io.{type,offset,nBytes,acc_type,buffer} = "
+            "{%d, 0x%04X, 0x%04X, 0x%04X, %p}",
+            io.type, io.offset, io.nBytes, io.type, io.buffer);
         return false;
     }
 
@@ -152,8 +149,9 @@ Registers::Read(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
 
     if ((rc = ioctl(mFd, NVME_IOCTL_READ_GENERIC, &io)) < 0) {
         LOG_ERR("Error reading reg offset 0x%08X: %d returned", roffset, rc);
-        LOG_DBG("io.{type,offset,nBytes,buffer} = {%d, 0x%04X, 0x%04X, %p}",
-            io.type, io.offset, io.nBytes, io.buffer);
+        LOG_DBG("io.{type,offset,nBytes,acc_type,buffer} = "
+            "{%d, 0x%04X, 0x%04X, 0x%04X, %p}",
+            io.type, io.offset, io.nBytes, io.type, io.buffer);
         return false;
     }
 
@@ -192,10 +190,11 @@ Registers::Write(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
     ULONGLONG &value, const char *rdesc)
 {
     int rc;
-    struct rw_generic io = { regSpc, roffset, rsize, BYTE_LEN,
+    enum nvme_acc_type dftAcc = (regSpc == NVMEIO_BAR01) ? DWORD_LEN : BYTE_LEN;
+    struct rw_generic io = { regSpc, roffset, rsize, dftAcc,
         (unsigned char *)&value };
 
-    // Override access type to conform to register size.
+
     switch (rsize)
     {
     case 2: io.acc_type = WORD_LEN;         break;
@@ -212,8 +211,9 @@ Registers::Write(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
         return false;
     } else if ((rc = ioctl(mFd, NVME_IOCTL_WRITE_GENERIC, &io)) < 0) {
         LOG_ERR("Error writing %s: %d returned", rdesc, rc);
-        LOG_DBG("io.{type,offset,nBytes,buffer} = {%d, 0x%04X, 0x%04X, %p}",
-            io.type, io.offset, io.nBytes, io.buffer);
+        LOG_DBG("io.{type,offset,nBytes,acc_type,buffer} = "
+            "{%d, 0x%04X, 0x%04X, 0x%04X, %p}",
+            io.type, io.offset, io.nBytes, io.type, io.buffer);
         return false;
     }
 
@@ -228,9 +228,10 @@ Registers::Write(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
     unsigned char *value)
 {
     int rc;
-    struct rw_generic io = { regSpc, roffset, rsize, BYTE_LEN, value };
+    enum nvme_acc_type dftAcc = (regSpc == NVMEIO_BAR01) ? DWORD_LEN : BYTE_LEN;
+    struct rw_generic io = { regSpc, roffset, rsize, dftAcc, value };
 
-    // Override access type to conform to register size.
+
     switch (rsize)
     {
     case 2: io.acc_type = WORD_LEN;         break;
@@ -240,8 +241,9 @@ Registers::Write(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
 
     if ((rc = ioctl(mFd, NVME_IOCTL_WRITE_GENERIC, &io)) < 0) {
         LOG_ERR("Error writing reg offset 0x%08X: %d returned", roffset, rc);
-        LOG_DBG("io.{type,offset,nBytes,buffer} = {%d, 0x%04X, 0x%04X, %p}",
-            io.type, io.offset, io.nBytes, io.buffer);
+        LOG_DBG("io.{type,offset,nBytes,acc_type,buffer} = "
+            "{%d, 0x%04X, 0x%04X, 0x%04X, %p}",
+            io.type, io.offset, io.nBytes, io.type, io.buffer);
         return false;
     }
 
@@ -260,8 +262,9 @@ Registers::Write(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
 
     if ((rc = ioctl(mFd, NVME_IOCTL_WRITE_GENERIC, &io)) < 0) {
         LOG_ERR("Error writing reg offset 0x%08X: %d returned", roffset, rc);
-        LOG_DBG("io.{type,offset,nBytes,buffer} = {%d, 0x%04X, 0x%04X, %p}",
-            io.type, io.offset, io.nBytes, io.buffer);
+        LOG_DBG("io.{type,offset,nBytes,acc_type,buffer} = "
+            "{%d, 0x%04X, 0x%04X, 0x%04X, %p}",
+            io.type, io.offset, io.nBytes, io.type, io.buffer);
         return false;
     }
 

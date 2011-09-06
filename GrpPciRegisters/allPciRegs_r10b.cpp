@@ -37,6 +37,7 @@ AllPciRegs_r10b::ValidateDefaultValues()
     const PciSpcType *pciMetrics = gRegisters->GetPciMetrics();
     const vector<PciCapabilities> *pciCap = gRegisters->GetPciCapabilities();
 
+    LOG_NRM("Validating default register values");
 
     // Traverse the PCI header registers
     for (int j = 0; j < PCISPC_FENCE; j++) {
@@ -74,6 +75,7 @@ AllPciRegs_r10b::ValidateROBitsAfterWriting()
     const PciSpcType *pciMetrics = gRegisters->GetPciMetrics();
     const vector<PciCapabilities> *pciCap = gRegisters->GetPciCapabilities();
 
+    LOG_NRM("Validating RO bits after writing");
 
     // Traverse the PCI header registers
     for (int j = 0; j < PCISPC_FENCE; j++) {
@@ -158,10 +160,10 @@ AllPciRegs_r10b::ValidatePciCapRegisterROAttribute(PciSpc reg)
 
 
     if (pciMetrics[reg].size > MAX_SUPPORTED_REG_SIZE) {
-        for (int k = 0; (k*sizeof(value)) < pciMetrics[reg].size; k++) {
+        for (unsigned int k = 0; (k*DWORD_LEN) < pciMetrics[reg].size; k++) {
 
-            if (gRegisters->Read(NVMEIO_PCI_HDR, sizeof(value),
-                pciMetrics[reg].offset + (k * sizeof(value)),
+            if (gRegisters->Read(NVMEIO_PCI_HDR, DWORD_LEN,
+                pciMetrics[reg].offset + (k * DWORD_LEN),
                 (unsigned char *)&value) == false) {
 
                 return false;
