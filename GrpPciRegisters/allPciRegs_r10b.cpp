@@ -72,6 +72,7 @@ bool
 AllPciRegs_r10b::ValidateROBitsAfterWriting()
 {
     ULONGLONG value;
+    ULONGLONG origValue;
     const PciSpcType *pciMetrics = gRegisters->GetPciMetrics();
     const vector<PciCapabilities> *pciCap = gRegisters->GetPciCapabilities();
 
@@ -86,17 +87,27 @@ AllPciRegs_r10b::ValidateROBitsAfterWriting()
         if ((j == PCISPC_RES0) || (j == PCISPC_RES1))
             continue;
 
+// todo; remove after Sravan performs reserach. Qeustion is can we write to
+// BAR0 or BAR1 w/o changing the w/r bits and still leave this routine w/o
+// causeing a real OS on real hardware to inject a mapping scheme. This
+// anomaly in QEMU, thinking due to simulated environ, is causing all
+// subsequent tests to fail. so skip for now until research indicates.
+if ((j == PCISPC_BAR0) || (j == PCISPC_BAR1))
+    continue;
+
         // PCI hdr registers don't have an assoc capability
         if (pciMetrics[j].cap == PCICAP_FENCE) {
             LOG_NRM("Validate RO attribute after trying to write 1");
-            value = 0xffffffffffffffffULL;
+            if (gRegisters->Read((PciSpc)j, origValue) == false)
+                return false;
+            value = (origValue | pciMetrics[j].maskRO);
             if (gRegisters->Write((PciSpc)j, value) == false)
                 return false;
             if (ValidatePciHdrRegisterROAttribute((PciSpc)j) == false)
                 return false;
 
             LOG_NRM("Validate RO attribute after trying to write 0");
-            value = 0x0ULL;
+            value = (origValue & ~pciMetrics[j].maskRO);
             if (gRegisters->Write((PciSpc)j, value) == false)
                 return false;
             if (ValidatePciHdrRegisterROAttribute((PciSpc)j) == false)
@@ -117,14 +128,16 @@ AllPciRegs_r10b::ValidateROBitsAfterWriting()
 
             if (pciCap->at(i) == pciMetrics[j].cap) {
                 LOG_NRM("Validate RO attribute after trying to write 1");
-                value = 0xffffffffffffffffULL;
+                if (gRegisters->Read((PciSpc)j, origValue) == false)
+                    return false;
+                value = (origValue | pciMetrics[j].maskRO);
                 if (gRegisters->Write((PciSpc)j, value) == false)
                     return false;
                 if (ValidatePciCapRegisterROAttribute((PciSpc)j) == false)
                     return false;
 
                 LOG_NRM("Validate RO attribute after trying to write 0");
-                value = 0x0ULL;
+                value = (origValue & ~pciMetrics[j].maskRO);
                 if (gRegisters->Write((PciSpc)j, value) == false)
                     return false;
                 if (ValidatePciCapRegisterROAttribute((PciSpc)j) == false)
@@ -181,7 +194,8 @@ AllPciRegs_r10b::ValidatePciCapRegisterROAttribute(PciSpc reg)
                     pciMetrics[reg].maskRO);
 
                 if (value != expectedValue) {
-                    LOG_ERR("%s RO bit #%d has incorrect value", pciMetrics[reg].desc,
+                    LOG_ERR("%s RO bit #%d has incorrect value",
+                        pciMetrics[reg].desc,
                         ReportOffendingBitPos(value, expectedValue));
                     return false;
                 }
@@ -230,13 +244,14 @@ AllPciRegs_r10b::ValidatePciHdrRegisterROAttribute(PciSpc reg)
                 return false;
             } else {
                 // Ignore the implementation specific bits, and bits that the
-                // manufacturer can make a decision as to their type of access RW/RO
+                // manufacturer can make a decision as to their type of access
                 value &= ~pciMetrics[reg].impSpec;
 
                 // Verify that the RO bits are set to correct default values, no
                 // reset needed to achieve this because there's no way to change.
                 value &= pciMetrics[reg].maskRO;
-                expectedValue = (pciMetrics[reg].dfltValue & pciMetrics[reg].maskRO);
+                expectedValue =
+                    (pciMetrics[reg].dfltValue & pciMetrics[reg].maskRO);
 
                 // Take care of special cases 1st
                 if (reg == PCISPC_BAR2) {
@@ -252,7 +267,7 @@ AllPciRegs_r10b::ValidatePciHdrRegisterROAttribute(PciSpc reg)
                                 ReportOffendingBitPos(value, expectedValue));
                             return false;
                         }
-                    } else {    // Optional index/Data pair register not supported
+                    } else {  // Optional index/Data pair register not supported
                         expectedValue = 0;
                         if (value != expectedValue) {
                             LOG_ERR("%s RO bit #%d has incorrect value",
