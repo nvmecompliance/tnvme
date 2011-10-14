@@ -5,6 +5,7 @@ LDFLAGS=$(foreach stem, $(SUBDIRS),./$(stem)/lib$(stem).a)
 INCLUDE := -I./ -I../
 
 SUBDIRS:=				\
+	Singletons 			\
 	GrpInformative		\
 	GrpPciRegisters		\
 	GrpCtrlRegisters
@@ -12,7 +13,6 @@ SUBDIRS:=				\
 SOURCES:=				\
 	globals.cpp			\
 	group.cpp			\
-	registers.cpp		\
 	test.cpp			\
 	testDescribe.cpp	\
 	tnvme.cpp			\

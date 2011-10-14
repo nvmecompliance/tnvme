@@ -24,6 +24,9 @@
 bool
 ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
 {
+    size_t iLoop;
+    int numPassed = 0;
+    int numFailed = 0;
     bool allTestsPass = true;    // assuming success until we find otherwise
     TestIteratorType testIter;
 
@@ -33,19 +36,22 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
         return false;
     }
 
-    for (size_t iLoop = 0; iLoop < cl.loop; iLoop++) {
-        LOG_NRM("Start loop execution %ld", iLoop);
+    for (iLoop = 0; iLoop < cl.loop; iLoop++) {
+        LOG_NRM("Start loop execution #%ld", iLoop);
 
         for (size_t iGrp = 0; iGrp < groups.size(); iGrp++) {
             bool allHaveRun = false;
-            bool locResult;
 
             // Handle the --informative cmd line option
             if (cl.informative.req && (iGrp == cl.informative.grpInfoIdx)) {
                 LOG_NRM("Cmd line forces executing informative group");
                 testIter = groups[iGrp]->GetTestIterator();
-                while (allHaveRun == false)
-                    groups[iGrp]->RunTest(testIter, cl.skiptest, allHaveRun);
+                while (1) {
+                    if (groups[iGrp]->RunTest(testIter, cl.skiptest)
+                        == Group::TR_NOTFOUND) {
+                        break;
+                    }
+                }
             }
 
 
@@ -56,9 +62,20 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
                 while (allHaveRun == false) {
                     if (cl.ignore)
                         ResetStickyErrors();
-                    locResult = groups[iGrp]->RunTest(testIter, cl.skiptest,
-                        allHaveRun);
-                    allTestsPass = allTestsPass ? locResult : allTestsPass;
+                    switch (groups[iGrp]->RunTest(testIter, cl.skiptest)) {
+                    case Group::TR_SUCCESS:
+                        numPassed++;
+                        break;
+                    case Group::TR_FAIL:
+                        allTestsPass = false;
+                        numFailed++;
+                        break;
+                    case Group::TR_SKIPPING:
+                        break;
+                    case Group::TR_NOTFOUND:
+                        allHaveRun = true;
+                        break;
+                    }
                     if ((cl.ignore == false) && (allTestsPass == false))
                         goto FAIL_OUT;
                 }
@@ -71,9 +88,20 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
                     while (allHaveRun == false) {
                         if (cl.ignore)
                             ResetStickyErrors();
-                        locResult = groups[iGrp]->RunTest(testIter, cl.skiptest,
-                            allHaveRun);
-                        allTestsPass = allTestsPass ? locResult : allTestsPass;
+                        switch (groups[iGrp]->RunTest(testIter, cl.skiptest)) {
+                        case Group::TR_SUCCESS:
+                            numPassed++;
+                            break;
+                        case Group::TR_FAIL:
+                            allTestsPass = false;
+                            numFailed++;
+                            break;
+                        case Group::TR_SKIPPING:
+                            break;
+                        case Group::TR_NOTFOUND:
+                            allHaveRun = true;
+                            break;
+                        }
                         if ((cl.ignore == false) && (allTestsPass == false))
                             goto FAIL_OUT;
                     }
@@ -84,8 +112,20 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
                 // Run spec'd test within spec'd group
                 if (iGrp == cl.test.t.group) {
                     ResetStickyErrors();
-                    locResult = groups[iGrp]->RunTest(cl.test.t, cl.skiptest);
-                    allTestsPass = allTestsPass ? locResult : allTestsPass;
+                    switch (groups[iGrp]->RunTest(testIter, cl.skiptest)) {
+                    case Group::TR_SUCCESS:
+                        numPassed++;
+                        break;
+                    case Group::TR_FAIL:
+                        allTestsPass = false;
+                        numFailed++;
+                        break;
+                    case Group::TR_SKIPPING:   // a skiptest file was supplied
+                        break;
+                    case Group::TR_NOTFOUND:
+                        LOG_DBG("Internal programming error, unknown test");
+                        break;
+                    }
                     if ((cl.ignore == false) && (allTestsPass == false))
                         goto FAIL_OUT;
                     break;  // check if more loops must occur
@@ -93,10 +133,17 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
             }
         }
 
-        LOG_NRM("Stop loop execution %ld", iLoop);
+        LOG_NRM("Total passing tests: %d", numPassed);
+        LOG_NRM("Total failing tests: %d", numFailed);
+        LOG_NRM("Stop loop execution #%ld", iLoop);
     }
 
+    return allTestsPass;
+
 FAIL_OUT:
+    LOG_NRM("Total passing tests: %d", numPassed);
+    LOG_NRM("Total failing tests: %d", numFailed);
+    LOG_NRM("Stop loop execution #%ld", iLoop);
     return allTestsPass;
 }
 

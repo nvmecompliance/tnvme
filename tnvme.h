@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <string>
 #include <vector>
-#include "dnvme/dnvme_interface.h"
+#include "dnvme.h"
 
 using namespace std;
 

@@ -1,7 +1,7 @@
 #ifndef _GLOBALS_H_
 #define _GLOBALS_H_
 
-#include "registers.h"
+#include "Singletons/registers.h"
 
 // NOTE: To make it easier to decifer objects which are global, prepend 'g'
 

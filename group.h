@@ -44,6 +44,8 @@ typedef size_t TestIteratorType;
 * This class is the base/interface class for all groups. This class purposely
 * enforces children to conform and inherit certain functionality to handle
 * mundane tasks.
+*
+* @note This class will not throw exceptions.
 */
 class Group
 {
@@ -88,25 +90,28 @@ public:
      */
     TestIteratorType GetTestIterator() { return 0; }
 
+    typedef enum {
+        TR_SUCCESS,
+        TR_FAIL,
+        TR_SKIPPING,
+        TR_NOTFOUND
+    } TestResult;
+
     /**
      * Run a spec'd test case and report back.
      * @param testIter Pass the test case iterator
      * @param skipTest Pass the complete list of test which should be skipped
-     * @param done Returns true when testIter is pointing past the last possible
-     *          test case, i.e. all tests have run, otherwise false indicates
-     *          there could be more tests to execute within this group
-     * @return true upon success, otherwise false
+     * @return A TestResult
      */
-    bool RunTest(TestIteratorType &testIter, vector<TestRef> &skipTest,
-        bool &done);
+    TestResult RunTest(TestIteratorType &testIter, vector<TestRef> &skipTest);
 
     /**
      * Run a spec'd test case and report back.
      * @param tr Pass the test case number to execute
      * @param skipTest Pass the complete list of test which should be skipped
-     * @return true upon success, otherwise false
+     * @return A TestResult
      */
-    bool RunTest(TestRef &tr, vector<TestRef> &skipTest);
+    TestResult RunTest(TestRef &tr, vector<TestRef> &skipTest);
 
 
 protected:

@@ -41,7 +41,7 @@ DumpPciAddrSpace_r10b::RunCoreTest()
         FILENAME_MODE)) == -1) {
 
         LOG_ERR("file=%s: %s", FILENAME_DUMP_PCI_REGS, strerror(errno));
-        return false;
+        throw exception();
     }
 
     // Traverse the PCI header registers
@@ -123,7 +123,7 @@ DumpPciAddrSpace_r10b::RunCoreTest()
 
 ERROR_OUT:
     close(fd);
-    return false;
+    throw exception();
 }
 
 

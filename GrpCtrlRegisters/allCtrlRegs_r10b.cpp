@@ -23,15 +23,13 @@ AllCtrlRegs_r10b::~AllCtrlRegs_r10b()
 bool
 AllCtrlRegs_r10b::RunCoreTest()
 {
-    if (ValidateDefaultValues() == false)
-        return false;
-    else if (ValidateROBitsAfterWriting() == false)
-        return false;
+    ValidateDefaultValues();
+    ValidateROBitsAfterWriting();
     return true;
 }
 
 
-bool
+void
 AllCtrlRegs_r10b::ValidateDefaultValues()
 {
     const CtlSpcType *ctlMetrics = gRegisters->GetCtlMetrics();
@@ -42,16 +40,12 @@ AllCtrlRegs_r10b::ValidateDefaultValues()
     for (int j = 0; j < CTLSPC_FENCE; j++) {
         if (ctlMetrics[j].specRev != SPECREV_10b)
             continue;
-
-        if (ValidateCtlRegisterROAttribute((CtlSpc)j) == false)
-            return false;
+        ValidateCtlRegisterROAttribute((CtlSpc)j);
     }
-
-    return true;
 }
 
 
-bool
+void
 AllCtrlRegs_r10b::ValidateROBitsAfterWriting()
 {
     ULONGLONG value;
@@ -71,23 +65,18 @@ AllCtrlRegs_r10b::ValidateROBitsAfterWriting()
 
         LOG_NRM("Validate RO attribute after trying to write 1");
         if (gRegisters->Read((CtlSpc)j, origValue) == false)
-            return false;
+            throw exception();
         value = (origValue | ctlMetrics[j].maskRO);
         if (gRegisters->Write((CtlSpc)j, value) == false)
-            return false;
-        if (ValidateCtlRegisterROAttribute((CtlSpc)j) == false)
-            return false;
+            throw exception();
+        ValidateCtlRegisterROAttribute((CtlSpc)j);
 
         LOG_NRM("Validate RO attribute after trying to write 0");
         value = (origValue & ~ctlMetrics[j].maskRO);
         if (gRegisters->Write((CtlSpc)j, value) == false)
-            return false;
-        if (ValidateCtlRegisterROAttribute((CtlSpc)j) == false)
-            return false;
+            throw exception();
+        ValidateCtlRegisterROAttribute((CtlSpc)j);
     }
-
-
-    return true;
 }
 
 
@@ -105,7 +94,7 @@ AllCtrlRegs_r10b::ReportOffendingBitPos(ULONGLONG val, ULONGLONG expectedVal)
 }
 
 
-bool
+void
 AllCtrlRegs_r10b::ValidateCtlRegisterROAttribute(CtlSpc reg)
 {
     ULONGLONG value;
@@ -119,7 +108,7 @@ AllCtrlRegs_r10b::ValidateCtlRegisterROAttribute(CtlSpc reg)
                 ctlMetrics[reg].offset + (k * sizeof(value)),
                 (unsigned char *)&value) == false) {
 
-                return false;
+                throw exception();
             } else {
                 // Ignore the implementation specific bits, and bits that the
                 // manufacturer can make a decision as to their type of access
@@ -135,12 +124,12 @@ AllCtrlRegs_r10b::ValidateCtlRegisterROAttribute(CtlSpc reg)
                     LOG_ERR("%s RO bit #%d has incorrect value",
                         ctlMetrics[reg].desc,
                         ReportOffendingBitPos(value, expectedValue));
-                    return false;
+                    throw exception();
                 }
             }
         }
     } else if (gRegisters->Read(reg, value) == false) {
-        return false;
+        throw exception();
     } else {
         // Ignore the implementation specific bits, and bits that the
         // manufacturer can make a decision as to their type of access RW/RO
@@ -155,11 +144,9 @@ AllCtrlRegs_r10b::ValidateCtlRegisterROAttribute(CtlSpc reg)
             LOG_ERR("%s RO bit #%d has incorrect value",
                 ctlMetrics[reg].desc,
                 ReportOffendingBitPos(value, expectedValue));
-            return false;
+            throw exception();
         }
     }
-
-    return true;
 }
 
 

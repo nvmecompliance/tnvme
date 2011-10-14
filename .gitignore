@@ -6,6 +6,7 @@ rpmbuild/
 tnvme-*/
 
 tnvme
+tnvme.out
 .cproject
 .project
 *.a

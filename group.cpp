@@ -131,31 +131,26 @@ Group::IteraterToTestRef(TestIteratorType testIter, TestRef &tr)
 }
 
 
-bool
-Group::RunTest(TestIteratorType &testIter, vector<TestRef> &skipTest,
-    bool &done)
+Group::TestResult
+Group::RunTest(TestIteratorType &testIter, vector<TestRef> &skipTest)
 {
     TestRef tr;
-    done = false;
 
-    if (IteraterToTestRef(testIter, tr) == false) {
-        done = true;
-        return true;
-    }
+    if (IteraterToTestRef(testIter, tr) == false)
+        return TR_NOTFOUND;
 
     testIter++;     // next test to consider for execution in the future
     return RunTest(tr, skipTest);
 }
 
 
-bool
+Group::TestResult
 Group::RunTest(TestRef &tr, vector<TestRef> &skipTest)
 {
     string work;
-    bool result = false;
 
     if (TestExists(tr) == false)
-        return result;
+        return TR_NOTFOUND;
 
     LOG_NRM("-----------------START TEST-----------------");
     FORMAT_GROUP_DESCRIPTION(work, this)
@@ -169,10 +164,11 @@ Group::RunTest(TestRef &tr, vector<TestRef> &skipTest)
     LOG_NRM("%s",
         mTests[tr.major][tr.minor]->GetLongDescription(false, 0).c_str());
 
+    TestResult result;
     if (SkippingTest(tr, skipTest))
-        result = true;
+        result = TR_SKIPPING;
     else
-        result = mTests[tr.major][tr.minor]->Run();
+        result = mTests[tr.major][tr.minor]->Run() ? TR_SUCCESS: TR_FAIL;
 
     LOG_NRM("------------------END TEST------------------");
     return result;

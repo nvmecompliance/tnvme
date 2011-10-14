@@ -3,8 +3,8 @@
 
 #include <string>
 #include <vector>
-#include "regDefs.h"
-#include "dnvme/dnvme_interface.h"
+#include "../regDefs.h"
+#include "../dnvme.h"
 
 /**
  * @param regVal Pass the 64 bit register value to mask down to size.
@@ -17,7 +17,9 @@ using namespace std;
 
 
 /**
-* This class is meant to interface with PCI and/or ctrl'r registers
+* This class is meant to interface with PCI and/or ctrl'r registers.
+*
+* @note Singleton's are not allowed to throw exceptions.
 */
 class Registers
 {

@@ -8,6 +8,8 @@ using namespace std;
 
 /**
  * This class is meant to document/describe the each test case to completeness.
+ *
+ * @note This class will not throw exceptions.
  */
 class TestDescribe
 {

@@ -195,6 +195,13 @@ typedef enum STSBits {
     STS_DPE     = 0x8000
 } STSBits;
 
+typedef enum CSTSBits {
+    CSTS_RES0   = 0xfffffff0,
+    CSTS_SHST   = 0x0000000c,
+    CSTS_CFS    = 0x00000002,
+    CSTS_RDY    = 0x00000001
+} CSTSBits;
+
 typedef enum PXDSBits {
     PXDS_CED    = 0x0001,
     PXDS_NFED   = 0x0002,
