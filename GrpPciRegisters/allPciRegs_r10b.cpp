@@ -2,7 +2,7 @@
 #include "../globals.h"
 
 
-AllPciRegs_r10b::AllPciRegs_r10b(int fd) : Test(fd)
+AllPciRegs_r10b::AllPciRegs_r10b(int fd) : Test(fd, SPECREV_10b)
 {
     // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 3");
@@ -39,7 +39,7 @@ AllPciRegs_r10b::ValidateDefaultValues()
 
     // Traverse the PCI header registers
     for (int j = 0; j < PCISPC_FENCE; j++) {
-        if (pciMetrics[j].specRev != SPECREV_10b)
+        if (pciMetrics[j].specRev != mSpecRev)
             continue;
 
         // PCI hdr registers don't have an assoc capability
@@ -72,7 +72,7 @@ AllPciRegs_r10b::ValidateROBitsAfterWriting()
 
     // Traverse the PCI header registers
     for (int j = 0; j < PCISPC_FENCE; j++) {
-        if (pciMetrics[j].specRev != SPECREV_10b)
+        if (pciMetrics[j].specRev != mSpecRev)
             continue;
 
         // Reserved areas at NOT suppose to be written
@@ -101,7 +101,7 @@ AllPciRegs_r10b::ValidateROBitsAfterWriting()
     for (size_t i = 0; i < pciCap->size(); i++) {
         // Read all registers assoc with the discovered capability
         for (int j = 0; j < PCISPC_FENCE; j++) {
-            if (pciMetrics[j].specRev != SPECREV_10b)
+            if (pciMetrics[j].specRev != mSpecRev)
                 continue;
 
             // Reserved areas at NOT suppose to be written

@@ -21,8 +21,9 @@ class Test
 public:
     /**
      * @param fd Pass the opened file descriptor for the device under test
+     * @param specRev Provide the nvme spec rev. which is being targeted
      */
-    Test(int fd);
+    Test(int fd, SpecRev specRev);
     virtual ~Test();
 
     /**
@@ -59,6 +60,8 @@ public:
 protected:
     /// file descriptor to the device under test
     int mFd;
+    /// NVME spec rev being targeted
+    SpecRev mSpecRev;
     /// Children must populate this during construction
     TestDescribe mTestDesc;
 
@@ -69,6 +72,14 @@ protected:
      * acceptable. Throwing is considered an error.
      */
     virtual bool RunCoreTest() = 0;
+
+
+    /**
+     * Resets the sticky error bits of the PCI address space. Prior errors
+     * should not cause errors in subsequent tests, resetting to avoid
+     * incorrectly detected errors.
+     */
+    void ResetStatusRegErrors();
 
     /**
      * Check PCI and ctrl'r registers status registers for errors which may

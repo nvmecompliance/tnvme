@@ -9,7 +9,7 @@
 #include "../globals.h"
 
 
-DumpPciAddrSpace_r10b::DumpPciAddrSpace_r10b(int fd) : Test(fd)
+DumpPciAddrSpace_r10b::DumpPciAddrSpace_r10b(int fd) : Test(fd, SPECREV_10b)
 {
     // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section n/a");
@@ -48,7 +48,7 @@ DumpPciAddrSpace_r10b::RunCoreTest()
     work = "PCI header registers\n";
     write(fd, work.c_str(), work.size());
     for (int j = 0; j < PCISPC_FENCE; j++) {
-        if (pciMetrics[j].specRev != SPECREV_10b)
+        if (pciMetrics[j].specRev != mSpecRev)
             continue;
 
         // All PCI hdr regs don't have an associated capability
@@ -87,7 +87,7 @@ DumpPciAddrSpace_r10b::RunCoreTest()
 
         // Read all registers assoc with the discovered capability
         for (int j = 0; j < PCISPC_FENCE; j++) {
-            if (pciMetrics[j].specRev != SPECREV_10b)
+            if (pciMetrics[j].specRev != mSpecRev)
                 continue;
 
             if (pciCap->at(i) == pciMetrics[j].cap) {

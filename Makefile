@@ -8,7 +8,8 @@ SUBDIRS:=				\
 	Singletons 			\
 	GrpInformative		\
 	GrpPciRegisters		\
-	GrpCtrlRegisters
+	GrpCtrlRegisters	\
+	GrpBasicInit
 
 SOURCES:=				\
 	globals.cpp			\
@@ -48,7 +49,7 @@ clean: $(SUBDIRS)
 
 clobber: GOAL=clobber
 clobber: $(SUBDIRS) clean
-	rm -rf doc
+	rm -rf doc/html
 	rm -rf rpm
 	rm dump.reg.*
 	rm -f $(APP_NAME)

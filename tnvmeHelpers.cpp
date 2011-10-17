@@ -27,6 +27,7 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
     size_t iLoop;
     int numPassed = 0;
     int numFailed = 0;
+    int numSkipped = 0;
     bool allTestsPass = true;    // assuming success until we find otherwise
     TestIteratorType testIter;
 
@@ -60,8 +61,6 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
                 // Run all tests within all groups
                 testIter = groups[iGrp]->GetTestIterator();
                 while (allHaveRun == false) {
-                    if (cl.ignore)
-                        ResetStickyErrors();
                     switch (groups[iGrp]->RunTest(testIter, cl.skiptest)) {
                     case Group::TR_SUCCESS:
                         numPassed++;
@@ -71,6 +70,7 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
                         numFailed++;
                         break;
                     case Group::TR_SKIPPING:
+                        numSkipped++;
                         break;
                     case Group::TR_NOTFOUND:
                         allHaveRun = true;
@@ -86,8 +86,6 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
                 if (iGrp == cl.test.t.group) {
                     testIter = groups[iGrp]->GetTestIterator();
                     while (allHaveRun == false) {
-                        if (cl.ignore)
-                            ResetStickyErrors();
                         switch (groups[iGrp]->RunTest(testIter, cl.skiptest)) {
                         case Group::TR_SUCCESS:
                             numPassed++;
@@ -97,6 +95,7 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
                             numFailed++;
                             break;
                         case Group::TR_SKIPPING:
+                            numSkipped++;
                             break;
                         case Group::TR_NOTFOUND:
                             allHaveRun = true;
@@ -111,7 +110,6 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
             } else {
                 // Run spec'd test within spec'd group
                 if (iGrp == cl.test.t.group) {
-                    ResetStickyErrors();
                     switch (groups[iGrp]->RunTest(testIter, cl.skiptest)) {
                     case Group::TR_SUCCESS:
                         numPassed++;
@@ -120,7 +118,8 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
                         allTestsPass = false;
                         numFailed++;
                         break;
-                    case Group::TR_SKIPPING:   // a skiptest file was supplied
+                    case Group::TR_SKIPPING:
+                        numSkipped++;
                         break;
                     case Group::TR_NOTFOUND:
                         LOG_DBG("Internal programming error, unknown test");
@@ -133,16 +132,20 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
             }
         }
 
-        LOG_NRM("Total passing tests: %d", numPassed);
-        LOG_NRM("Total failing tests: %d", numFailed);
+        LOG_NRM("Tests  passed: %d", numPassed);
+        LOG_NRM("       failed: %d", numFailed);
+        LOG_NRM("      skipped: %d", numSkipped);
+        LOG_NRM("        total: %d", numPassed+numFailed+numSkipped);
         LOG_NRM("Stop loop execution #%ld", iLoop);
     }
 
     return allTestsPass;
 
 FAIL_OUT:
-    LOG_NRM("Total passing tests: %d", numPassed);
-    LOG_NRM("Total failing tests: %d", numFailed);
+    LOG_NRM("Tests  passed: %d", numPassed);
+    LOG_NRM("       failed: %d", numFailed);
+    LOG_NRM("      skipped: %d", numSkipped);
+    LOG_NRM("        total: %d", numPassed+numFailed+numSkipped);
     LOG_NRM("Stop loop execution #%ld", iLoop);
     return allTestsPass;
 }
@@ -526,30 +529,5 @@ ParseWmmapCmdLine(WmmapIo &wmmap, const char *optarg)
     }
 
     return true;
-}
-
-
-void
-ResetStickyErrors()
-{
-    unsigned long long maskSTS = (STS_DPE | STS_RMA | STS_RTA | STS_DPD);
-    unsigned long long maskPXDS = (PXDS_URD | PXDS_FED | PXDS_NFED | PXDS_CED);
-    unsigned long long maskAERUCES = 0xffff;
-    unsigned long long maskAERUCESEV = 0xffff;
-    const vector<PciCapabilities> *cap = gRegisters->GetPciCapabilities();
-
-    LOG_NRM("Reseting sticky PCI errors");
-    gRegisters->Write(PCISPC_STS, maskSTS);
-
-    for (unsigned int i = 0; i < cap->size(); i++) {
-        if (cap->at(i) == PCICAP_PXCAP) {
-            gRegisters->Write(PCISPC_PXDS, maskPXDS);
-        } else if (cap->at(i) == PCICAP_AERCAP) {
-            gRegisters->Write(PCISPC_AERUCES, maskAERUCES);
-            gRegisters->Write(PCISPC_AERUCESEV, maskAERUCESEV);
-        }
-    }
-
-
 }
 

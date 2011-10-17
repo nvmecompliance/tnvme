@@ -9,7 +9,7 @@
 #include "../globals.h"
 
 
-DumpCtrlrAddrSpace_r10b::DumpCtrlrAddrSpace_r10b(int fd) : Test(fd)
+DumpCtrlrAddrSpace_r10b::DumpCtrlrAddrSpace_r10b(int fd) : Test(fd, SPECREV_10b)
 {
     // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section n/a");
@@ -45,7 +45,7 @@ DumpCtrlrAddrSpace_r10b::RunCoreTest()
 
     // Read all registers in ctrlr space
     for (int i = 0; i < CTLSPC_FENCE; i++) {
-        if (pciMetrics[i].specRev != SPECREV_10b)
+        if (pciMetrics[i].specRev != mSpecRev)
             continue;
 
         if (pciMetrics[i].size > MAX_SUPPORTED_REG_SIZE) {

@@ -17,6 +17,7 @@
 #include "GrpInformative/grpInformative.h"
 #include "GrpPciRegisters/grpPciRegisters.h"
 #include "GrpCtrlRegisters/grpCtrlRegisters.h"
+#include "GrpBasicInit/grpBasicInit.h"
 
 
 #define NO_DEVICES     "no devices found"
@@ -384,6 +385,7 @@ BuildTestInfrastructure(vector<Group *> &groups, int &fd,
     groups.push_back(new GrpInformative(groups.size(), cl.rev, fd));       // 0
     groups.push_back(new GrpPciRegisters(groups.size(), cl.rev, fd));      // 1
     groups.push_back(new GrpCtrlRegisters(groups.size(), cl.rev, fd));     // 2
+    groups.push_back(new GrpBasicInit(groups.size(), cl.rev, fd));         // 3
 
     return true;
 }
