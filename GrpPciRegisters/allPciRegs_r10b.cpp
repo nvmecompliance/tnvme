@@ -63,8 +63,8 @@ AllPciRegs_r10b::ValidateDefaultValues()
 void
 AllPciRegs_r10b::ValidateROBitsAfterWriting()
 {
-    ULONGLONG value;
-    ULONGLONG origValue;
+    uint64_t value;
+    uint64_t origValue;
     const PciSpcType *pciMetrics = gRegisters->GetPciMetrics();
     const vector<PciCapabilities> *pciCap = gRegisters->GetPciCapabilities();
 
@@ -129,11 +129,11 @@ AllPciRegs_r10b::ValidateROBitsAfterWriting()
 
 
 int
-AllPciRegs_r10b::ReportOffendingBitPos(ULONGLONG val, ULONGLONG expectedVal)
+AllPciRegs_r10b::ReportOffendingBitPos(uint64_t val, uint64_t expectedVal)
 {
-    ULONGLONG bitMask;
+    uint64_t bitMask;
 
-    for (int i = 0; i < (int)(sizeof(ULONGLONG)*8); i++) {
+    for (int i = 0; i < (int)(sizeof(uint64_t)*8); i++) {
         bitMask = (1 << i);
         if ((val & bitMask) != (expectedVal & bitMask))
             return i;
@@ -145,17 +145,17 @@ AllPciRegs_r10b::ReportOffendingBitPos(ULONGLONG val, ULONGLONG expectedVal)
 void
 AllPciRegs_r10b::ValidatePciCapRegisterROAttribute(PciSpc reg)
 {
-    ULONGLONG value;
-    ULONGLONG expectedValue;
+    uint64_t value;
+    uint64_t expectedValue;
     const PciSpcType *pciMetrics = gRegisters->GetPciMetrics();
 
 
     if (pciMetrics[reg].size > MAX_SUPPORTED_REG_SIZE) {
-        for (unsigned int k = 0; (k*DWORD_LEN) < pciMetrics[reg].size; k++) {
+        for (uint16_t k = 0; (k*DWORD_LEN) < pciMetrics[reg].size; k++) {
 
             if (gRegisters->Read(NVMEIO_PCI_HDR, DWORD_LEN,
                 pciMetrics[reg].offset + (k * DWORD_LEN),
-                (unsigned char *)&value) == false) {
+                (uint8_t *)&value) == false) {
 
                 throw exception();
             } else {
@@ -206,8 +206,8 @@ AllPciRegs_r10b::ValidatePciCapRegisterROAttribute(PciSpc reg)
 void
 AllPciRegs_r10b::ValidatePciHdrRegisterROAttribute(PciSpc reg)
 {
-    ULONGLONG value;
-    ULONGLONG expectedValue;
+    uint64_t value;
+    uint64_t expectedValue;
     const PciSpcType *pciMetrics = gRegisters->GetPciMetrics();
 
     if (pciMetrics[reg].size > MAX_SUPPORTED_REG_SIZE) {
@@ -215,7 +215,7 @@ AllPciRegs_r10b::ValidatePciHdrRegisterROAttribute(PciSpc reg)
 
             if (gRegisters->Read(NVMEIO_PCI_HDR, sizeof(value),
                 pciMetrics[reg].offset + (k * sizeof(value)),
-                (unsigned char *)&value) == false) {
+                (uint8_t *)&value) == false) {
 
                 throw exception();
             } else {
@@ -232,7 +232,7 @@ AllPciRegs_r10b::ValidatePciHdrRegisterROAttribute(PciSpc reg)
                 // Take care of special cases 1st
                 if (reg == PCISPC_BAR2) {
                     // Learn the behavior of this register, supported or not?
-                    ULONGLONG cmdReg;
+                    uint64_t cmdReg;
                     if (gRegisters->Read(PCISPC_CMD, cmdReg) == false)
                         throw exception();
 
@@ -277,7 +277,7 @@ AllPciRegs_r10b::ValidatePciHdrRegisterROAttribute(PciSpc reg)
         // Take care of special cases 1st
         if (reg == PCISPC_BAR2) {
             // Learn the behavior of this register, supported or not?
-            ULONGLONG cmdReg;
+            uint64_t cmdReg;
             if (gRegisters->Read(PCISPC_CMD, cmdReg) == false)
                 throw exception();
 

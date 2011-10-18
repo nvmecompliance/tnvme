@@ -56,7 +56,7 @@ Registers::~Registers()
 
 
 bool
-Registers::Read(PciSpc reg, ULONGLONG &value)
+Registers::Read(PciSpc reg, uint64_t &value)
 {
     if (mPciSpcMetrics[reg].specRev != mSpecRev) {
         LOG_ERR("Attempting reg (%d) access to incompatible spec release", reg);
@@ -68,7 +68,7 @@ Registers::Read(PciSpc reg, ULONGLONG &value)
 
 
 bool
-Registers::Read(CtlSpc reg, ULONGLONG &value)
+Registers::Read(CtlSpc reg, uint64_t &value)
 {
     if (mPciSpcMetrics[reg].specRev != mSpecRev) {
         LOG_ERR("Attempting reg (%d) access to incompatible spec release", reg);
@@ -80,17 +80,17 @@ Registers::Read(CtlSpc reg, ULONGLONG &value)
 
 
 bool
-Registers::Read(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
-    ULONGLONG &value, const char *rdesc)
+Registers::Read(nvme_io_space regSpc, uint16_t rsize, uint16_t roffset,
+    uint64_t &value, const char *rdesc)
 {
     int rc;
     enum nvme_acc_type dftAcc = (regSpc == NVMEIO_BAR01) ? DWORD_LEN : BYTE_LEN;
     struct rw_generic io = { regSpc, roffset, rsize, dftAcc,
-        (unsigned char *)&value };
+        (uint8_t *)&value };
 
 
     // Verify we discovered the true offset of requested register
-    if (roffset == INT_MAX) {
+    if (roffset == USHRT_MAX) {
         LOG_ERR("Offset of %s could not be discovered", rdesc);
         return false;
     } else if (rsize > MAX_SUPPORTED_REG_SIZE) {
@@ -111,8 +111,8 @@ Registers::Read(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
 
 
 bool
-Registers::Read(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
-    unsigned char *value)
+Registers::Read(nvme_io_space regSpc, uint16_t rsize, uint16_t roffset,
+    uint8_t *value)
 {
     int rc;
     enum nvme_acc_type dftAcc = (regSpc == NVMEIO_BAR01) ? DWORD_LEN : BYTE_LEN;
@@ -141,8 +141,8 @@ Registers::Read(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
 
 
 bool
-Registers::Read(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
-    nvme_acc_type racc, unsigned char *value)
+Registers::Read(nvme_io_space regSpc, uint16_t rsize, uint16_t roffset,
+    nvme_acc_type racc, uint8_t *value)
 {
     int rc;
     struct rw_generic io = { regSpc, roffset, rsize, racc, value };
@@ -162,7 +162,7 @@ Registers::Read(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
 
 
 bool
-Registers::Write(PciSpc reg, ULONGLONG value)
+Registers::Write(PciSpc reg, uint64_t value)
 {
     if (mPciSpcMetrics[reg].specRev != mSpecRev) {
         LOG_ERR("Attempting reg (%d) access to incompatible spec release", reg);
@@ -174,7 +174,7 @@ Registers::Write(PciSpc reg, ULONGLONG value)
 
 
 bool
-Registers::Write(CtlSpc reg, ULONGLONG value)
+Registers::Write(CtlSpc reg, uint64_t value)
 {
     if (mPciSpcMetrics[reg].specRev != mSpecRev) {
         LOG_ERR("Attempting reg (%d) access to incompatible spec release", reg);
@@ -186,13 +186,13 @@ Registers::Write(CtlSpc reg, ULONGLONG value)
 
 
 bool
-Registers::Write(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
-    ULONGLONG &value, const char *rdesc)
+Registers::Write(nvme_io_space regSpc, uint16_t rsize, uint16_t roffset,
+    uint64_t &value, const char *rdesc)
 {
     int rc;
     enum nvme_acc_type dftAcc = (regSpc == NVMEIO_BAR01) ? DWORD_LEN : BYTE_LEN;
     struct rw_generic io = { regSpc, roffset, rsize, dftAcc,
-        (unsigned char *)&value };
+        (uint8_t *)&value };
 
 
     switch (rsize)
@@ -203,7 +203,7 @@ Registers::Write(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
     }
 
     // Verify we discovered the true offset of requested register
-    if (roffset == INT_MAX) {
+    if (roffset == USHRT_MAX) {
         LOG_ERR("Offset of %s could not be discovered", rdesc);
         return false;
     } else if (rsize > MAX_SUPPORTED_REG_SIZE) {
@@ -224,8 +224,8 @@ Registers::Write(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
 
 
 bool
-Registers::Write(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
-    unsigned char *value)
+Registers::Write(nvme_io_space regSpc, uint16_t rsize, uint16_t roffset,
+    uint8_t *value)
 {
     int rc;
     enum nvme_acc_type dftAcc = (regSpc == NVMEIO_BAR01) ? DWORD_LEN : BYTE_LEN;
@@ -254,8 +254,8 @@ Registers::Write(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
 
 
 bool
-Registers::Write(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
-    nvme_acc_type racc, unsigned char *value)
+Registers::Write(nvme_io_space regSpc, uint16_t rsize, uint16_t roffset,
+    nvme_acc_type racc, uint8_t *value)
 {
     int rc;
     struct rw_generic io = { regSpc, roffset, rsize, racc, value };
@@ -275,8 +275,8 @@ Registers::Write(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
 
 
 string
-Registers::FormatRegister(unsigned int regSize, const char *regDesc,
-    ULONGLONG regValue)
+Registers::FormatRegister(uint16_t regSize, const char *regDesc,
+    uint64_t regValue)
 {
     string result;
     char buffer[80];
@@ -308,14 +308,14 @@ Registers::FormatRegister(unsigned int regSize, const char *regDesc,
 
 
 string
-Registers::FormatRegister(nvme_io_space regSpc, unsigned int rsize,
-    unsigned int roffset, unsigned char *value)
+Registers::FormatRegister(nvme_io_space regSpc, uint16_t rsize,
+    uint16_t roffset, uint8_t *value)
 {
-    unsigned char *tmp = value;
+    uint8_t *tmp = value;
     char buffer[80];
     string result;
     int i;
-    unsigned int j;
+    uint16_t j;
 
     switch (regSpc) {
 
@@ -351,11 +351,11 @@ Registers::DiscoverPciCapabilities()
 {
     int rc;
     int capIdx;
-    unsigned int capId;
-    unsigned int capOffset;
-    ULONGLONG work;
-    ULONGLONG nextCap;
-    struct rw_generic io = { NVMEIO_PCI_HDR, 0, 4, BYTE_LEN, (unsigned char *)&nextCap };
+    uint16_t capId;
+    uint16_t capOffset;
+    uint64_t work;
+    uint64_t nextCap;
+    struct rw_generic io = { NVMEIO_PCI_HDR, 0, 4, BYTE_LEN, (uint8_t *)&nextCap };
 
 
     // NOTE: We cannot report errors/violations of the spec as we parse PCI
@@ -384,17 +384,17 @@ Registers::DiscoverPciCapabilities()
     // Traverse the link list of capabilities, PCI spec states when next ptr
     // becomes 0, then that is the capabilities among many.
     while (REGMASK((nextCap >> 8), 1)) {
-        io.offset = (unsigned int)REGMASK((nextCap >> 8), 1);
+        io.offset = (uint16_t)REGMASK((nextCap >> 8), 1);
         if ((rc = ioctl(mFd, NVME_IOCTL_READ_GENERIC, &io)) < 0) {
             LOG_ERR("Error reading offset 0x%08X from PCI space: %d returned",
                 io.offset, rc);
             return;
         }
         LOG_NRM("Reading PCI space offset 0x%04X=0x%04X", io.offset,
-            (unsigned int)REGMASK(nextCap, 2));
+            (uint16_t)REGMASK(nextCap, 2));
 
         // For each capability we find, log the order in which it was found
-        capId = (unsigned char)REGMASK(nextCap, 1);
+        capId = (uint8_t)REGMASK(nextCap, 1);
         capOffset = io.offset;
         switch (capId) {
 
@@ -451,9 +451,9 @@ Registers::DiscoverPciCapabilities()
         return;
     }
     LOG_NRM("Reading extended PCI space offset 0x%04X=0x%08X", io.offset,
-        (unsigned int)REGMASK(nextCap, 4));
-    capId = (unsigned int)REGMASK(nextCap, 2);
-    capOffset = (unsigned int)REGMASK((nextCap >> 20), 2);
+        (uint16_t)REGMASK(nextCap, 4));
+    capId = (uint16_t)REGMASK(nextCap, 2);
+    capOffset = (uint16_t)REGMASK((nextCap >> 20), 2);
     if (capId == 0x0001) {
         LOG_NRM("Decoding AERCAP capabilities");
         mPciCap.push_back(PCICAP_AERCAP);

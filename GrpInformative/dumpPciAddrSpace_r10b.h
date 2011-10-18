@@ -20,7 +20,7 @@ protected:
 
 private:
     void WriteToFile(int fd, const PciSpcType regMetrics,
-        unsigned long long value);
+        uint64_t value);
 };
 
 

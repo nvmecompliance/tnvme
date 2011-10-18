@@ -51,7 +51,7 @@ Test::ResetStatusRegErrors()
     LOG_NRM("Reseting sticky PCI errors");
     gRegisters->Write(PCISPC_STS, STS_ERRORS);
 
-    for (unsigned int i = 0; i < cap->size(); i++) {
+    for (uint16_t i = 0; i < cap->size(); i++) {
         if (cap->at(i) == PCICAP_PXCAP) {
             gRegisters->Write(PCISPC_PXDS, PXCAP_PXDS_ERRORS);
         } else if (cap->at(i) == PCICAP_AERCAP) {
@@ -65,8 +65,8 @@ Test::ResetStatusRegErrors()
 bool
 Test::GetStatusRegErrors()
 {
-    ULONGLONG value;
-    ULONGLONG expectedValue;
+    uint64_t value;
+    uint64_t expectedValue;
     const PciSpcType *pciMetrics = gRegisters->GetPciMetrics();
     const CtlSpcType *ctlMetrics = gRegisters->GetCtlMetrics();
     const vector<PciCapabilities> *cap = gRegisters->GetPciCapabilities();
@@ -85,7 +85,7 @@ Test::GetStatusRegErrors()
 
 
     // Other optional PCI errors
-    for (unsigned int i = 0; i < cap->size(); i++) {
+    for (uint16_t i = 0; i < cap->size(); i++) {
         if (cap->at(i) == PCICAP_PXCAP) {
             if (gRegisters->Read(PCISPC_PXDS, value) == false)
                 return false;
@@ -139,11 +139,11 @@ Test::GetStatusRegErrors()
 
 
 int
-Test::ReportOffendingBitPos(ULONGLONG val, ULONGLONG expectedVal)
+Test::ReportOffendingBitPos(uint64_t val, uint64_t expectedVal)
 {
-    ULONGLONG bitMask;
+    uint64_t bitMask;
 
-    for (int i = 0; i < (int)(sizeof(ULONGLONG)*8); i++) {
+    for (int i = 0; i < (int)(sizeof(uint64_t)*8); i++) {
         bitMask = (1 << i);
         if ((val & bitMask) != (expectedVal & bitMask))
             return i;

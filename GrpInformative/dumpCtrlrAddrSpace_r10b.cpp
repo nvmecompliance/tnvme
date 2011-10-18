@@ -31,7 +31,7 @@ DumpCtrlrAddrSpace_r10b::RunCoreTest()
 {
     int fd;
     string work;
-    unsigned long long value = 0;
+    uint64_t value = 0;
     const CtlSpcType *pciMetrics = gRegisters->GetCtlMetrics();
 
 
@@ -49,8 +49,8 @@ DumpCtrlrAddrSpace_r10b::RunCoreTest()
             continue;
 
         if (pciMetrics[i].size > MAX_SUPPORTED_REG_SIZE) {
-            unsigned char *buffer;
-            buffer = new unsigned char[pciMetrics[i].size];
+            uint8_t *buffer;
+            buffer = new uint8_t[pciMetrics[i].size];
             if (gRegisters->Read(NVMEIO_BAR01, pciMetrics[i].size,
                 pciMetrics[i].offset, buffer) == false) {
                 goto ERROR_OUT;

@@ -4,22 +4,22 @@
 #include <stdio.h>
 #include <string>
 #include <vector>
-#include "dnvme.h"
+#include <stdint.h>
+#include "dnvme/dnvme_interface.h"
 
 using namespace std;
-
-#define ULONGLONG       unsigned long long
-#define ULONG           unsigned long
 
 #define APPNAME         "tnvme"
 #define LEVEL           APPNAME
 #define LOG_NRM(fmt, ...)    \
     fprintf(stderr, "%s: " fmt "\n", LEVEL, ## __VA_ARGS__);
 #define LOG_ERR(fmt, ...)    \
-    fprintf(stderr, "%s-err:%s:%d: " fmt "\n", LEVEL, __FILE__, __LINE__, ## __VA_ARGS__);
+    fprintf(stderr, "%s-err:%s:%d: " fmt "\n", LEVEL, __FILE__, __LINE__,   \
+        ## __VA_ARGS__);
 #ifdef DEBUG
 #define LOG_DBG(fmt, ...)    \
-    fprintf(stderr, "%s-dbg:%s:%d: " fmt "\n", LEVEL, __FILE__, __LINE__, ## __VA_ARGS__);
+    fprintf(stderr, "%s-dbg:%s:%d: " fmt "\n", LEVEL, __FILE__, __LINE__,   \
+        ## __VA_ARGS__);
 #else
 #define LOG_DBG(fmt, ...)    ;
 #endif
@@ -43,35 +43,35 @@ struct TestRef {
  * req      group          major         minor     implies
  * -----------------------------------------------------------------------------
  * false     n/a            n/a           n/a      nothing has been requested
- * true   ==ULONG_MAX       n/a           n/a      request all groups all tests
- * true   !=ULONG_MAX  ==ULONG_MAX || ==ULONG_MAX  request spec'd group
- * true   !=ULONG_MAX  !=ULONG_MAX && !=ULONG_MAX  request spec'd test in group
+ * true   ==UINT_MAX        n/a           n/a      request all groups all tests
+ * true   !=UINT_MAX     ==UINT_MAX || ==UINT_MAX  request spec'd group
+ * true   !=UINT_MAX     !=UINT_MAX && !=UINT_MAX  request spec'd test in group
  */
 struct TestTarget {
-    bool    req;                // requested by cmd line
+    bool            req;     // requested by cmd line
     TestRef t;
 };
 
 struct InformativeGrp {
-    bool    req;                // requested by cmd line
-    size_t  grpInfoIdx;
+    bool            req;     // requested by cmd line
+    size_t          grpInfoIdx;
 };
 
 struct RmmapIo {
-    bool               req;     // requested by cmd line
-    nvme_io_space      space;
-    size_t             offset;
-    size_t             size;
-    nvme_acc_type      acc;
+    bool            req;     // requested by cmd line
+    nvme_io_space   space;
+    size_t          offset;
+    size_t          size;
+    nvme_acc_type   acc;
 };
 
 struct WmmapIo {
-    bool               req;     // requested by cmd line
-    nvme_io_space      space;
-    size_t             offset;
-    size_t             size;
-    unsigned long long value;
-    nvme_acc_type      acc;
+    bool            req;     // requested by cmd line
+    nvme_io_space   space;
+    size_t          offset;
+    size_t          size;
+    uint64_t        value;
+    nvme_acc_type   acc;
 };
 
 struct CmdLine {

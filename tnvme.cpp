@@ -80,7 +80,7 @@ main(int argc, char *argv[])
     struct dirent *dirEntry;
     bool deviceFound = false;
     bool accessingHdw = true;
-    unsigned long long regVal;
+    uint64_t regVal;
     const char *short_opt = "hsflziv:e::p:t::d:k:r:w:";
     static struct option long_opt[] = {
         // {name,           has_arg,            flag,   val}
@@ -272,7 +272,7 @@ main(int argc, char *argv[])
         }
 
     } else if (CmdLine.detail.req) {
-        if (CmdLine.detail.t.group == ULONG_MAX) {
+        if (CmdLine.detail.t.group == UINT_MAX) {
             for (size_t i = 0; i < groups.size(); i++) {
                 FORMAT_GROUP_DESCRIPTION(work, groups[i])
                 printf("%s\n", work.c_str());
@@ -289,8 +289,8 @@ main(int argc, char *argv[])
                         FORMAT_GROUP_DESCRIPTION(work, groups[i])
                         printf("%s\n", work.c_str());
 
-                        if ((CmdLine.detail.t.major == ULONG_MAX) ||
-                            (CmdLine.detail.t.minor == ULONG_MAX)) {
+                        if ((CmdLine.detail.t.major == UINT_MAX) ||
+                            (CmdLine.detail.t.minor == UINT_MAX)) {
                             // Want info on all tests within group
                             printf("%s",
                                 groups[i]->GetGroupSummary(true).c_str());
@@ -305,7 +305,7 @@ main(int argc, char *argv[])
             }
         }
     } else if (CmdLine.rmmap.req) {
-        unsigned char *value = new unsigned char[CmdLine.rmmap.size];
+        uint8_t *value = new uint8_t[CmdLine.rmmap.size];
         gRegisters->Read(CmdLine.rmmap.space, CmdLine.rmmap.size,
             CmdLine.rmmap.offset, CmdLine.rmmap.acc, value);
         string result = gRegisters->FormatRegister(CmdLine.rmmap.space,
@@ -313,7 +313,7 @@ main(int argc, char *argv[])
         printf("%s\n", result.c_str());
     } else if (CmdLine.wmmap.req) {
         gRegisters->Write(CmdLine.wmmap.space, CmdLine.wmmap.size,
-            CmdLine.wmmap.offset, CmdLine.wmmap.acc, (unsigned char *)(&CmdLine.wmmap.value));
+            CmdLine.wmmap.offset, CmdLine.wmmap.acc, (uint8_t *)(&CmdLine.wmmap.value));
     } else if (CmdLine.reset) {
         ;   // todo; add some reset logic when available
     } else if (CmdLine.test.req) {

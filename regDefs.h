@@ -38,63 +38,63 @@ typedef enum PciCapabilities {
  */
 /*     PciSpc,           cap,            offset,  size, specRev,     maskRO,             impSpec,            dfltValue,          desc */
 #define PCISPC_TABLE                                                                                                                                                                 \
-    ZZ(PCISPC_ID,        PCICAP_FENCE,   0x00,    4,    SPECREV_10b, 0x00000000ffffffff, 0x00000000ffffffff, 0x0000000000000000, "PCI hdr identifier register (ID)")                 \
-    ZZ(PCISPC_CMD,       PCICAP_FENCE,   0x04,    2,    SPECREV_10b, 0x000000000000fbb8, 0x0000000000000040, 0x0000000000000000, "PCI hdr cmd register (CMD)")                       \
-    ZZ(PCISPC_STS,       PCICAP_FENCE,   0x06,    2,    SPECREV_10b, 0x0000000000004eff, 0x00000000000006a0, 0x0000000000000010, "PCI hdr device status register (STS)")             \
-    ZZ(PCISPC_RID,       PCICAP_FENCE,   0x08,    1,    SPECREV_10b, 0x00000000000000ff, 0x00000000000000ff, 0x0000000000000000, "PCI hdr revision ID register (RID)")               \
-    ZZ(PCISPC_CC,        PCICAP_FENCE,   0x09,    3,    SPECREV_10b, 0x0000000000ffffff, 0x0000000000000000, 0x0000000000010802, "PCI hdr class codes register (CC)")                \
-    ZZ(PCISPC_CLS,       PCICAP_FENCE,   0x0c,    1,    SPECREV_10b, 0x00000000000000ff, 0x0000000000000000, 0x0000000000000000, "PCI hdr cache line size register (CLS)")           \
-    ZZ(PCISPC_MLT,       PCICAP_FENCE,   0x0d,    1,    SPECREV_10b, 0x00000000000000ff, 0x0000000000000000, 0x0000000000000000, "PCI hdr master latency timer reg (MLT)")           \
-    ZZ(PCISPC_HTYPE,     PCICAP_FENCE,   0x0e,    1,    SPECREV_10b, 0x00000000000000ff, 0x0000000000000080, 0x0000000000000000, "PCI hdr header type register (HTYPE)")             \
-    ZZ(PCISPC_BIST,      PCICAP_FENCE,   0x0f,    1,    SPECREV_10b, 0x00000000000000bf, 0x0000000000000080, 0x0000000000000000, "PCI hdr built in self test register (BIST)")       \
-    ZZ(PCISPC_BAR0,      PCICAP_FENCE,   0x10,    4,    SPECREV_10b, 0x0000000000003fff, 0x0000000000000000, 0x0000000000000004, "PCI hdr MLBAR register (BAR0)")                    \
-    ZZ(PCISPC_BAR1,      PCICAP_FENCE,   0x14,    4,    SPECREV_10b, 0x0000000000000000, 0x0000000000000000, 0x0000000000000000, "PCI hdr MUBAR register (BAR1)")                    \
-    ZZ(PCISPC_BAR2,      PCICAP_FENCE,   0x18,    4,    SPECREV_10b, 0x0000000000000007, 0x0000000000000000, 0x0000000000000001, "PCI hdr index/data pair register (BAR2)")          \
-    ZZ(PCISPC_BAR3,      PCICAP_FENCE,   0x1c,    5,    SPECREV_10b, 0x0000000000000000, 0x0000000000000000, 0x0000000000000000, "PCI hdr reserved area (BAR3)")                     \
-    ZZ(PCISPC_BAR4,      PCICAP_FENCE,   0x20,    4,    SPECREV_10b, 0x0000000000000000, 0x00000000ffffffff, 0x0000000000000000, "PCI hdr vendor specific register (BAR4)")          \
-    ZZ(PCISPC_BAR5,      PCICAP_FENCE,   0x24,    4,    SPECREV_10b, 0x0000000000000000, 0x00000000ffffffff, 0x0000000000000000, "PCI hdr vendor specific register (BAR5)")          \
-    ZZ(PCISPC_CCPTR,     PCICAP_FENCE,   0x28,    4,    SPECREV_10b, 0x00000000ffffffff, 0x0000000000000000, 0x0000000000000000, "PCI hdr CardBus CIS register (CCPTR)")             \
-    ZZ(PCISPC_SS,        PCICAP_FENCE,   0x2c,    4,    SPECREV_10b, 0x00000000ffffffff, 0x00000000ffffffff, 0x0000000000000000, "PCI hdr subsystem ID register (SS)")               \
-    ZZ(PCISPC_EROM,      PCICAP_FENCE,   0x30,    4,    SPECREV_10b, 0x0000000000000000, 0x00000000ffffffff, 0x0000000000000000, "PCI hdr expansion ROM register (EROM)")            \
-    ZZ(PCISPC_CAP,       PCICAP_FENCE,   0x34,    1,    SPECREV_10b, 0x00000000000000ff, 0x00000000000000ff, 0x0000000000000000, "PCI hdr CAP ptr register (CAP)")                   \
-    ZZ(PCISPC_RES0,      PCICAP_FENCE,   0x35,    7,    SPECREV_10b, 0x00ffffffffffffff, 0x0000000000000000, 0x0000000000000000, "PCI hdr reserved area #0")                         \
-    ZZ(PCISPC_INTR,      PCICAP_FENCE,   0x3c,    2,    SPECREV_10b, 0x000000000000ff00, 0x000000000000ff00, 0x0000000000000000, "PCI hdr interrupt register (INTR)")                \
-    ZZ(PCISPC_MGNT,      PCICAP_FENCE,   0x3e,    1,    SPECREV_10b, 0x00000000000000ff, 0x0000000000000000, 0x0000000000000000, "PCI hdr min grant register (MGMT)")                \
-    ZZ(PCISPC_MLAT,      PCICAP_FENCE,   0x3f,    1,    SPECREV_10b, 0x00000000000000ff, 0x0000000000000000, 0x0000000000000000, "PCI hdr max latency register (MLAT)")              \
-    ZZ(PCISPC_PID,       PCICAP_PMCAP,   INT_MAX, 2,    SPECREV_10b, 0x000000000000ffff, 0x000000000000fffe, 0x0000000000000001, "PCI power mgmt ID register (PID)")                 \
-    ZZ(PCISPC_PC,        PCICAP_PMCAP,   INT_MAX, 2,    SPECREV_10b, 0x000000000000ffff, 0x0000000000000027, 0x0000000000000000, "PCI power mgmt CAP register (PC)")                 \
-    ZZ(PCISPC_PMCS,      PCICAP_PMCAP,   INT_MAX, 2,    SPECREV_10b, 0x000000000000fffc, 0x0000000000000000, 0x0000000000000008, "PCI power mgmt ctrl & status reg (PMCS)")          \
-    ZZ(PCISPC_MID,       PCICAP_MSICAP,  INT_MAX, 2,    SPECREV_10b, 0x000000000000ffff, 0x000000000000ff00, 0x0000000000000005, "PCI MSI ID register (MID)")                        \
-    ZZ(PCISPC_MC,        PCICAP_MSICAP,  INT_MAX, 2,    SPECREV_10b, 0x000000000000ff8e, 0x000000000000000e, 0x0000000000000080, "PCI MSI msg ctrl register (MC)")                   \
-    ZZ(PCISPC_MA,        PCICAP_MSICAP,  INT_MAX, 4,    SPECREV_10b, 0x0000000000000003, 0x0000000000000000, 0x0000000000000000, "PCI MSI msg addr  register (MA)")                  \
-    ZZ(PCISPC_MUA,       PCICAP_MSICAP,  INT_MAX, 4,    SPECREV_10b, 0x0000000000000000, 0x0000000000000000, 0x0000000000000000, "PCI MSI msg upper addr register (MUA)")            \
-    ZZ(PCISPC_MD,        PCICAP_MSICAP,  INT_MAX, 2,    SPECREV_10b, 0x0000000000000000, 0x0000000000000000, 0x0000000000000000, "PCI MSI msg data register (MD)")                   \
-    ZZ(PCISPC_MMASK,     PCICAP_MSICAP,  INT_MAX, 4,    SPECREV_10b, 0x0000000000000000, 0x0000000000000000, 0x0000000000000000, "PCI MSI mask bits register (MMASK)")               \
-    ZZ(PCISPC_MPEND,     PCICAP_MSICAP,  INT_MAX, 4,    SPECREV_10b, 0x0000000000000000, 0x0000000000000000, 0x0000000000000000, "PCI MSI pending bits register (MPEND)")            \
-    ZZ(PCISPC_MXID,      PCICAP_MSIXCAP, INT_MAX, 2,    SPECREV_10b, 0x000000000000ffff, 0x000000000000ff00, 0x0000000000000011, "PCI MSI-X ID register (MXID)")                     \
-    ZZ(PCISPC_MXC,       PCICAP_MSIXCAP, INT_MAX, 2,    SPECREV_10b, 0x0000000000003fff, 0x00000000000003ff, 0x0000000000000000, "PCI MSI-X msg ctrl register (MXC)")                \
-    ZZ(PCISPC_MTAB,      PCICAP_MSIXCAP, INT_MAX, 4,    SPECREV_10b, 0x00000000ffffffff, 0x00000000ffffffff, 0x0000000000000000, "PCI MSI-X table offset/BIR register (MTAB)")       \
-    ZZ(PCISPC_MPBA,      PCICAP_MSIXCAP, INT_MAX, 4,    SPECREV_10b, 0x00000000ffffffff, 0x00000000ffffffff, 0x0000000000000000, "PCI MSI-X PBA offset/BIR register (MPBA)")         \
-    ZZ(PCISPC_PXID,      PCICAP_PXCAP,   INT_MAX, 2,    SPECREV_10b, 0x000000000000ffff, 0x000000000000ff00, 0x0000000000000010, "PCI express CAP ID register (PXID)")               \
-    ZZ(PCISPC_PXCAP,     PCICAP_PXCAP,   INT_MAX, 2,    SPECREV_10b, 0x000000000000ffff, 0x0000000000003e00, 0x0000000000000002, "PCI express CAP register (PXCAP)")                 \
-    ZZ(PCISPC_PXDCAP,    PCICAP_PXCAP,   INT_MAX, 4,    SPECREV_10b, 0x00000000ffffffff, 0x0000000000000fff, 0x0000000010008000, "PCI express device CAP register (PXDCAP)")         \
-    ZZ(PCISPC_PXDC,      PCICAP_PXCAP,   INT_MAX, 2,    SPECREV_10b, 0x0000000000000000, 0x000000000000fff0, 0x0000000000000000, "PCI express device ctrl register (PXDC)")          \
-    ZZ(PCISPC_PXDS,      PCICAP_PXCAP,   INT_MAX, 2,    SPECREV_10b, 0x000000000000fff0, 0x0000000000000010, 0x0000000000000000, "PCI express device status register (PXDS)")        \
-    ZZ(PCISPC_PXLCAP,    PCICAP_PXCAP,   INT_MAX, 4,    SPECREV_10b, 0x00000000ffffffff, 0x00000000ff07ffff, 0x0000000000000000, "PCI express link CAP register (PXLCAP)")           \
-    ZZ(PCISPC_PXLC,      PCICAP_PXCAP,   INT_MAX, 2,    SPECREV_10b, 0x000000000000fc34, 0x0000000000000200, 0x0000000000000000, "PCI express link ctrl register (PXLC)")            \
-    ZZ(PCISPC_PXLS,      PCICAP_PXCAP,   INT_MAX, 2,    SPECREV_10b, 0x000000000000ffff, 0x00000000000013ff, 0x0000000000000000, "PCI express link status register (PXLS)")          \
-    ZZ(PCISPC_RES1,      PCICAP_PXCAP,   INT_MAX, 16,   SPECREV_10b, 0xffffffffffffffff, 0x0000000000000000, 0x0000000000000000, "PCI hdr reserved area #1")                         \
-    ZZ(PCISPC_PXDCAP2,   PCICAP_PXCAP,   INT_MAX, 4,    SPECREV_10b, 0x00000000ffffffff, 0x0000000000fc3b8f, 0x0000000000000010, "PCI express device CAP2 register (PXDCAP2)")       \
-    ZZ(PCISPC_PXDC2,     PCICAP_PXCAP,   INT_MAX, 2,    SPECREV_10b, 0x00000000ffff9b0f, 0x000000000000700f, 0x0000000000000000, "PCI express device ctrl2 register (PXDC2)")        \
-    ZZ(PCISPC_AERID,     PCICAP_AERCAP,  INT_MAX, 4,    SPECREV_10b, 0x00000000ffffffff, 0x00000000fff00000, 0x0000000000020001, "PCI AER CAP ID register (AERID)")                  \
-    ZZ(PCISPC_AERUCES,   PCICAP_AERCAP,  INT_MAX, 4,    SPECREV_10b, 0x00000000fc0007ef, 0x00000000003fff0f, 0x0000000000000000, "PCI AER uncorrect err stat register (AERECES)")    \
-    ZZ(PCISPC_AERUCEM,   PCICAP_AERCAP,  INT_MAX, 4,    SPECREV_10b, 0x00000000fc000fef, 0x000000000000f1c1, 0x0000000000400000, "PCI AER uncorrect err mask register (AERUCEM)")    \
-    ZZ(PCISPC_AERUCESEV, PCICAP_AERCAP,  INT_MAX, 4,    SPECREV_10b, 0x00000000fc000fef, 0x0000000003eaa000, 0x0000000000462010, "PCI AER uncorrect err severity reg (AERECESEV)")   \
-    ZZ(PCISPC_AERCS,     PCICAP_AERCAP,  INT_MAX, 4,    SPECREV_10b, 0x00000000ffff0e3e, 0x000000000000c000, 0x0000000000000000, "PCI AER correctable err stat reg (AERCES)")        \
-    ZZ(PCISPC_AERCEM,    PCICAP_AERCAP,  INT_MAX, 4,    SPECREV_10b, 0x00000000ffff0e3e, 0x000000000000c000, 0x0000000000000000, "PCI AER correctable err mask reg (AERCEM)")        \
-    ZZ(PCISPC_AERCC,     PCICAP_AERCAP,  INT_MAX, 4,    SPECREV_10b, 0x00000000fffff8af, 0x00000000000007e0, 0x0000000000000000, "PCI AER adv err CAP & ctrl register AERCC)")       \
-    ZZ(PCISPC_AERHL,     PCICAP_AERCAP,  INT_MAX, 16,   SPECREV_10b, 0x000000000000ffff, 0x0000000000000000, 0x0000000000000000, "PCI AER header log register (AERHL)")              \
-    ZZ(PCISPC_AERTLP,    PCICAP_AERCAP,  INT_MAX, 16,   SPECREV_10b, 0x000000000000ffff, 0x0000000000000000, 0x0000000000000000, "PCI AER TLP prefix log register (AERTLP)")
+    ZZ(PCISPC_ID,        PCICAP_FENCE,   0x00,     4,    SPECREV_10b, 0x00000000ffffffff, 0x00000000ffffffff, 0x0000000000000000, "PCI hdr identifier register (ID)")                 \
+    ZZ(PCISPC_CMD,       PCICAP_FENCE,   0x04,     2,    SPECREV_10b, 0x000000000000fbb8, 0x0000000000000040, 0x0000000000000000, "PCI hdr cmd register (CMD)")                       \
+    ZZ(PCISPC_STS,       PCICAP_FENCE,   0x06,     2,    SPECREV_10b, 0x0000000000004eff, 0x00000000000006a0, 0x0000000000000010, "PCI hdr device status register (STS)")             \
+    ZZ(PCISPC_RID,       PCICAP_FENCE,   0x08,     1,    SPECREV_10b, 0x00000000000000ff, 0x00000000000000ff, 0x0000000000000000, "PCI hdr revision ID register (RID)")               \
+    ZZ(PCISPC_CC,        PCICAP_FENCE,   0x09,     3,    SPECREV_10b, 0x0000000000ffffff, 0x0000000000000000, 0x0000000000010802, "PCI hdr class codes register (CC)")                \
+    ZZ(PCISPC_CLS,       PCICAP_FENCE,   0x0c,     1,    SPECREV_10b, 0x00000000000000ff, 0x0000000000000000, 0x0000000000000000, "PCI hdr cache line size register (CLS)")           \
+    ZZ(PCISPC_MLT,       PCICAP_FENCE,   0x0d,     1,    SPECREV_10b, 0x00000000000000ff, 0x0000000000000000, 0x0000000000000000, "PCI hdr master latency timer reg (MLT)")           \
+    ZZ(PCISPC_HTYPE,     PCICAP_FENCE,   0x0e,     1,    SPECREV_10b, 0x00000000000000ff, 0x0000000000000080, 0x0000000000000000, "PCI hdr header type register (HTYPE)")             \
+    ZZ(PCISPC_BIST,      PCICAP_FENCE,   0x0f,     1,    SPECREV_10b, 0x00000000000000bf, 0x0000000000000080, 0x0000000000000000, "PCI hdr built in self test register (BIST)")       \
+    ZZ(PCISPC_BAR0,      PCICAP_FENCE,   0x10,     4,    SPECREV_10b, 0x0000000000003fff, 0x0000000000000000, 0x0000000000000004, "PCI hdr MLBAR register (BAR0)")                    \
+    ZZ(PCISPC_BAR1,      PCICAP_FENCE,   0x14,     4,    SPECREV_10b, 0x0000000000000000, 0x0000000000000000, 0x0000000000000000, "PCI hdr MUBAR register (BAR1)")                    \
+    ZZ(PCISPC_BAR2,      PCICAP_FENCE,   0x18,     4,    SPECREV_10b, 0x0000000000000007, 0x0000000000000000, 0x0000000000000001, "PCI hdr index/data pair register (BAR2)")          \
+    ZZ(PCISPC_BAR3,      PCICAP_FENCE,   0x1c,     5,    SPECREV_10b, 0x0000000000000000, 0x0000000000000000, 0x0000000000000000, "PCI hdr reserved area (BAR3)")                     \
+    ZZ(PCISPC_BAR4,      PCICAP_FENCE,   0x20,     4,    SPECREV_10b, 0x0000000000000000, 0x00000000ffffffff, 0x0000000000000000, "PCI hdr vendor specific register (BAR4)")          \
+    ZZ(PCISPC_BAR5,      PCICAP_FENCE,   0x24,     4,    SPECREV_10b, 0x0000000000000000, 0x00000000ffffffff, 0x0000000000000000, "PCI hdr vendor specific register (BAR5)")          \
+    ZZ(PCISPC_CCPTR,     PCICAP_FENCE,   0x28,     4,    SPECREV_10b, 0x00000000ffffffff, 0x0000000000000000, 0x0000000000000000, "PCI hdr CardBus CIS register (CCPTR)")             \
+    ZZ(PCISPC_SS,        PCICAP_FENCE,   0x2c,     4,    SPECREV_10b, 0x00000000ffffffff, 0x00000000ffffffff, 0x0000000000000000, "PCI hdr subsystem ID register (SS)")               \
+    ZZ(PCISPC_EROM,      PCICAP_FENCE,   0x30,     4,    SPECREV_10b, 0x0000000000000000, 0x00000000ffffffff, 0x0000000000000000, "PCI hdr expansion ROM register (EROM)")            \
+    ZZ(PCISPC_CAP,       PCICAP_FENCE,   0x34,     1,    SPECREV_10b, 0x00000000000000ff, 0x00000000000000ff, 0x0000000000000000, "PCI hdr CAP ptr register (CAP)")                   \
+    ZZ(PCISPC_RES0,      PCICAP_FENCE,   0x35,     7,    SPECREV_10b, 0x00ffffffffffffff, 0x0000000000000000, 0x0000000000000000, "PCI hdr reserved area #0")                         \
+    ZZ(PCISPC_INTR,      PCICAP_FENCE,   0x3c,     2,    SPECREV_10b, 0x000000000000ff00, 0x000000000000ff00, 0x0000000000000000, "PCI hdr interrupt register (INTR)")                \
+    ZZ(PCISPC_MGNT,      PCICAP_FENCE,   0x3e,     1,    SPECREV_10b, 0x00000000000000ff, 0x0000000000000000, 0x0000000000000000, "PCI hdr min grant register (MGMT)")                \
+    ZZ(PCISPC_MLAT,      PCICAP_FENCE,   0x3f,     1,    SPECREV_10b, 0x00000000000000ff, 0x0000000000000000, 0x0000000000000000, "PCI hdr max latency register (MLAT)")              \
+    ZZ(PCISPC_PID,       PCICAP_PMCAP,   USHRT_MAX, 2,    SPECREV_10b, 0x000000000000ffff, 0x000000000000fffe, 0x0000000000000001, "PCI power mgmt ID register (PID)")                 \
+    ZZ(PCISPC_PC,        PCICAP_PMCAP,   USHRT_MAX, 2,    SPECREV_10b, 0x000000000000ffff, 0x0000000000000027, 0x0000000000000000, "PCI power mgmt CAP register (PC)")                 \
+    ZZ(PCISPC_PMCS,      PCICAP_PMCAP,   USHRT_MAX, 2,    SPECREV_10b, 0x000000000000fffc, 0x0000000000000000, 0x0000000000000008, "PCI power mgmt ctrl & status reg (PMCS)")          \
+    ZZ(PCISPC_MID,       PCICAP_MSICAP,  USHRT_MAX, 2,    SPECREV_10b, 0x000000000000ffff, 0x000000000000ff00, 0x0000000000000005, "PCI MSI ID register (MID)")                        \
+    ZZ(PCISPC_MC,        PCICAP_MSICAP,  USHRT_MAX, 2,    SPECREV_10b, 0x000000000000ff8e, 0x000000000000000e, 0x0000000000000080, "PCI MSI msg ctrl register (MC)")                   \
+    ZZ(PCISPC_MA,        PCICAP_MSICAP,  USHRT_MAX, 4,    SPECREV_10b, 0x0000000000000003, 0x0000000000000000, 0x0000000000000000, "PCI MSI msg addr  register (MA)")                  \
+    ZZ(PCISPC_MUA,       PCICAP_MSICAP,  USHRT_MAX, 4,    SPECREV_10b, 0x0000000000000000, 0x0000000000000000, 0x0000000000000000, "PCI MSI msg upper addr register (MUA)")            \
+    ZZ(PCISPC_MD,        PCICAP_MSICAP,  USHRT_MAX, 2,    SPECREV_10b, 0x0000000000000000, 0x0000000000000000, 0x0000000000000000, "PCI MSI msg data register (MD)")                   \
+    ZZ(PCISPC_MMASK,     PCICAP_MSICAP,  USHRT_MAX, 4,    SPECREV_10b, 0x0000000000000000, 0x0000000000000000, 0x0000000000000000, "PCI MSI mask bits register (MMASK)")               \
+    ZZ(PCISPC_MPEND,     PCICAP_MSICAP,  USHRT_MAX, 4,    SPECREV_10b, 0x0000000000000000, 0x0000000000000000, 0x0000000000000000, "PCI MSI pending bits register (MPEND)")            \
+    ZZ(PCISPC_MXID,      PCICAP_MSIXCAP, USHRT_MAX, 2,    SPECREV_10b, 0x000000000000ffff, 0x000000000000ff00, 0x0000000000000011, "PCI MSI-X ID register (MXID)")                     \
+    ZZ(PCISPC_MXC,       PCICAP_MSIXCAP, USHRT_MAX, 2,    SPECREV_10b, 0x0000000000003fff, 0x00000000000003ff, 0x0000000000000000, "PCI MSI-X msg ctrl register (MXC)")                \
+    ZZ(PCISPC_MTAB,      PCICAP_MSIXCAP, USHRT_MAX, 4,    SPECREV_10b, 0x00000000ffffffff, 0x00000000ffffffff, 0x0000000000000000, "PCI MSI-X table offset/BIR register (MTAB)")       \
+    ZZ(PCISPC_MPBA,      PCICAP_MSIXCAP, USHRT_MAX, 4,    SPECREV_10b, 0x00000000ffffffff, 0x00000000ffffffff, 0x0000000000000000, "PCI MSI-X PBA offset/BIR register (MPBA)")         \
+    ZZ(PCISPC_PXID,      PCICAP_PXCAP,   USHRT_MAX, 2,    SPECREV_10b, 0x000000000000ffff, 0x000000000000ff00, 0x0000000000000010, "PCI express CAP ID register (PXID)")               \
+    ZZ(PCISPC_PXCAP,     PCICAP_PXCAP,   USHRT_MAX, 2,    SPECREV_10b, 0x000000000000ffff, 0x0000000000003e00, 0x0000000000000002, "PCI express CAP register (PXCAP)")                 \
+    ZZ(PCISPC_PXDCAP,    PCICAP_PXCAP,   USHRT_MAX, 4,    SPECREV_10b, 0x00000000ffffffff, 0x0000000000000fff, 0x0000000010008000, "PCI express device CAP register (PXDCAP)")         \
+    ZZ(PCISPC_PXDC,      PCICAP_PXCAP,   USHRT_MAX, 2,    SPECREV_10b, 0x0000000000000000, 0x000000000000fff0, 0x0000000000000000, "PCI express device ctrl register (PXDC)")          \
+    ZZ(PCISPC_PXDS,      PCICAP_PXCAP,   USHRT_MAX, 2,    SPECREV_10b, 0x000000000000fff0, 0x0000000000000010, 0x0000000000000000, "PCI express device status register (PXDS)")        \
+    ZZ(PCISPC_PXLCAP,    PCICAP_PXCAP,   USHRT_MAX, 4,    SPECREV_10b, 0x00000000ffffffff, 0x00000000ff07ffff, 0x0000000000000000, "PCI express link CAP register (PXLCAP)")           \
+    ZZ(PCISPC_PXLC,      PCICAP_PXCAP,   USHRT_MAX, 2,    SPECREV_10b, 0x000000000000fc34, 0x0000000000000200, 0x0000000000000000, "PCI express link ctrl register (PXLC)")            \
+    ZZ(PCISPC_PXLS,      PCICAP_PXCAP,   USHRT_MAX, 2,    SPECREV_10b, 0x000000000000ffff, 0x00000000000013ff, 0x0000000000000000, "PCI express link status register (PXLS)")          \
+    ZZ(PCISPC_RES1,      PCICAP_PXCAP,   USHRT_MAX, 16,   SPECREV_10b, 0xffffffffffffffff, 0x0000000000000000, 0x0000000000000000, "PCI hdr reserved area #1")                         \
+    ZZ(PCISPC_PXDCAP2,   PCICAP_PXCAP,   USHRT_MAX, 4,    SPECREV_10b, 0x00000000ffffffff, 0x0000000000fc3b8f, 0x0000000000000010, "PCI express device CAP2 register (PXDCAP2)")       \
+    ZZ(PCISPC_PXDC2,     PCICAP_PXCAP,   USHRT_MAX, 2,    SPECREV_10b, 0x00000000ffff9b0f, 0x000000000000700f, 0x0000000000000000, "PCI express device ctrl2 register (PXDC2)")        \
+    ZZ(PCISPC_AERID,     PCICAP_AERCAP,  USHRT_MAX, 4,    SPECREV_10b, 0x00000000ffffffff, 0x00000000fff00000, 0x0000000000020001, "PCI AER CAP ID register (AERID)")                  \
+    ZZ(PCISPC_AERUCES,   PCICAP_AERCAP,  USHRT_MAX, 4,    SPECREV_10b, 0x00000000fc0007ef, 0x00000000003fff0f, 0x0000000000000000, "PCI AER uncorrect err stat register (AERECES)")    \
+    ZZ(PCISPC_AERUCEM,   PCICAP_AERCAP,  USHRT_MAX, 4,    SPECREV_10b, 0x00000000fc000fef, 0x000000000000f1c1, 0x0000000000400000, "PCI AER uncorrect err mask register (AERUCEM)")    \
+    ZZ(PCISPC_AERUCESEV, PCICAP_AERCAP,  USHRT_MAX, 4,    SPECREV_10b, 0x00000000fc000fef, 0x0000000003eaa000, 0x0000000000462010, "PCI AER uncorrect err severity reg (AERECESEV)")   \
+    ZZ(PCISPC_AERCS,     PCICAP_AERCAP,  USHRT_MAX, 4,    SPECREV_10b, 0x00000000ffff0e3e, 0x000000000000c000, 0x0000000000000000, "PCI AER correctable err stat reg (AERCES)")        \
+    ZZ(PCISPC_AERCEM,    PCICAP_AERCAP,  USHRT_MAX, 4,    SPECREV_10b, 0x00000000ffff0e3e, 0x000000000000c000, 0x0000000000000000, "PCI AER correctable err mask reg (AERCEM)")        \
+    ZZ(PCISPC_AERCC,     PCICAP_AERCAP,  USHRT_MAX, 4,    SPECREV_10b, 0x00000000fffff8af, 0x00000000000007e0, 0x0000000000000000, "PCI AER adv err CAP & ctrl register AERCC)")       \
+    ZZ(PCISPC_AERHL,     PCICAP_AERCAP,  USHRT_MAX, 16,   SPECREV_10b, 0x000000000000ffff, 0x0000000000000000, 0x0000000000000000, "PCI AER header log register (AERHL)")              \
+    ZZ(PCISPC_AERTLP,    PCICAP_AERCAP,  USHRT_MAX, 16,   SPECREV_10b, 0x000000000000ffff, 0x0000000000000000, 0x0000000000000000, "PCI AER TLP prefix log register (AERTLP)")
 
 #define ZZ(a, b, c, d, e, f, g, h, i)      a,
 typedef enum PciSpc
@@ -105,14 +105,14 @@ typedef enum PciSpc
 #undef ZZ
 
 struct PciSpcType {
-    PciCapabilities     cap;
-    unsigned int        offset;     // ==INT_MAX implies offset is unknown
-    unsigned int        size;
-    SpecRev             specRev;
-    unsigned long long  maskRO;
-    unsigned long long  impSpec;    // implementation specific
-    unsigned long long  dfltValue;
-    const char         *desc;
+    PciCapabilities cap;
+    uint16_t        offset;     // ==USHRT_MAX implies offset is unknown
+    uint16_t        size;
+    SpecRev         specRev;
+    uint64_t        maskRO;
+    uint64_t        impSpec;    // implementation specific
+    uint64_t        dfltValue;
+    const char     *desc;
 };
 
 
@@ -156,18 +156,18 @@ struct PciSpcType {
 typedef enum CtlSpc
 {
     CTLSPC_TABLE
-    CTLSPC_FENCE        // always must be the last element
+    CTLSPC_FENCE                // always must be the last element
 } CtlSpc;
 #undef ZZ
 
 struct CtlSpcType {
-    unsigned int        offset;     // ==INT_MAX implies offset is unknown
-    unsigned int        size;
-    SpecRev             specRev;
-    unsigned long long  maskRO;
-    unsigned long long  impSpec;    // implementation specific
-    unsigned long long  dfltValue;
-    const char         *desc;
+    uint16_t        offset;     // ==USHRT_MAX implies offset is unknown
+    uint16_t        size;
+    SpecRev         specRev;
+    uint64_t        maskRO;
+    uint64_t        impSpec;    // implementation specific
+    uint64_t        dfltValue;
+    const char     *desc;
 };
 
 

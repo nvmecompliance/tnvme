@@ -31,7 +31,7 @@ DumpPciAddrSpace_r10b::RunCoreTest()
 {
     int fd;
     string work;
-    unsigned long long value;
+    uint64_t value;
     const PciSpcType *pciMetrics = gRegisters->GetPciMetrics();
     const vector<PciCapabilities> *pciCap = gRegisters->GetPciCapabilities();
 
@@ -93,8 +93,8 @@ DumpPciAddrSpace_r10b::RunCoreTest()
             if (pciCap->at(i) == pciMetrics[j].cap) {
                 if (pciMetrics[j].size > MAX_SUPPORTED_REG_SIZE) {
                     bool err = false;
-                    unsigned char *buffer;
-                    buffer = new unsigned char[pciMetrics[j].size];
+                    uint8_t *buffer;
+                    buffer = new uint8_t[pciMetrics[j].size];
 
                     if (gRegisters->Read(NVMEIO_PCI_HDR, pciMetrics[j].size,
                         pciMetrics[j].offset, buffer) == false) {
@@ -129,7 +129,7 @@ ERROR_OUT:
 
 void
 DumpPciAddrSpace_r10b::WriteToFile(int fd, const PciSpcType regMetrics,
-    unsigned long long value)
+    uint64_t value)
 {
     string work = "  ";    // indent reg values within each capability
     work += gRegisters->FormatRegister(regMetrics.size,

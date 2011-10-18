@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 #include "../regDefs.h"
-#include "../dnvme.h"
+#include "dnvme/dnvme_interface.h"
 
 /**
  * @param regVal Pass the 64 bit register value to mask down to size.
@@ -39,8 +39,8 @@ public:
      *          smaller than sizeof(value)
      * @return true upon success, otherwise false
      */
-    bool Read(PciSpc reg, ULONGLONG &value);
-    bool Read(CtlSpc reg, ULONGLONG &value);
+    bool Read(PciSpc reg, uint64_t &value);
+    bool Read(CtlSpc reg, uint64_t &value);
 
     /**
      * Generic read function, you supply ALL the necessary data to read at
@@ -52,8 +52,8 @@ public:
      * @param value Returns the value read, if and only if successful.
      * @return true upon success, otherwise false
      */
-    bool Read(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
-        unsigned char *value);
+    bool Read(nvme_io_space regSpc, uint16_t rsize, uint16_t roffset,
+        uint8_t *value);
 
     /**
      * Generic read function, you supply ALL the necessary data to read at
@@ -66,8 +66,8 @@ public:
      * @param value Returns the value read, if and only if successful.
      * @return true upon success, otherwise false
      */
-    bool Read(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
-        nvme_acc_type racc, unsigned char *value);
+    bool Read(nvme_io_space regSpc, uint16_t rsize, uint16_t roffset,
+        nvme_acc_type racc, uint8_t *value);
 
     /**
      * Write a register value to the appropriate address space.
@@ -75,8 +75,8 @@ public:
      * @param value Pass the value to write.
      * @return true upon success, otherwise false
      */
-    bool Write(PciSpc reg, ULONGLONG value);
-    bool Write(CtlSpc reg, ULONGLONG value);
+    bool Write(PciSpc reg, uint64_t value);
+    bool Write(CtlSpc reg, uint64_t value);
 
     /**
      * Generic write function, you supply ALL the necessary data to write at
@@ -88,8 +88,8 @@ public:
      * @param value Pass the array of value(s) to write, must be of rsize size
      * @return true upon success, otherwise false
      */
-    bool Write(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
-        unsigned char *value);
+    bool Write(nvme_io_space regSpc, uint16_t rsize, uint16_t roffset,
+        uint8_t *value);
 
     /**
      * Generic write function, you supply ALL the necessary data to write at
@@ -102,8 +102,8 @@ public:
      * @param value Pass the array of value(s) to write, must be of rsize size
      * @return true upon success, otherwise false
      */
-    bool Write(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
-        nvme_acc_type racc, unsigned char *value);
+    bool Write(nvme_io_space regSpc, uint16_t rsize, uint16_t roffset,
+        nvme_acc_type racc, uint8_t *value);
 
     /**
      * Returns the list of capabilities discovered by parsing PCI address
@@ -126,13 +126,13 @@ public:
      * @param regSize Pass the number of bytes of the register
      * @param regDesc Pass the description of this register
      * @param regValue Pass the value of the register, the regSize could be
-     *          smaller than the unsigned long long variable size.
+     *          smaller than the uint64_t variable size.
      * @return the formatted resulting string
      */
-    string FormatRegister(unsigned int regSize, const char *regDesc,
-        ULONGLONG regValue);
-    string FormatRegister(nvme_io_space regSpc, unsigned int rsize,
-        unsigned int roffset, unsigned char *value);
+    string FormatRegister(uint16_t regSize, const char *regDesc,
+        uint64_t regValue);
+    string FormatRegister(nvme_io_space regSpc, uint16_t rsize,
+        uint16_t roffset, uint8_t *value);
 
 
 private:
@@ -162,10 +162,10 @@ private:
      */
     void DiscoverPciCapabilities();
 
-    bool Read(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
-        ULONGLONG &value, const char *rdesc);
-    bool Write(nvme_io_space regSpc, unsigned int rsize, unsigned int roffset,
-        ULONGLONG &value, const char *rdesc);
+    bool Read(nvme_io_space regSpc, uint16_t rsize, uint16_t roffset,
+        uint64_t &value, const char *rdesc);
+    bool Write(nvme_io_space regSpc, uint16_t rsize, uint16_t roffset,
+        uint64_t &value, const char *rdesc);
 };
 
 

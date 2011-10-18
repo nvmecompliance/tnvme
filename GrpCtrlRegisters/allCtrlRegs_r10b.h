@@ -25,7 +25,7 @@ private:
      * @param expectedVal Pass the value to compare against for correctness
      * @return INT_MAX if they are equal, otherwise the bit position that isn't
      */
-    int ReportOffendingBitPos(ULONGLONG val, ULONGLONG expectedVal);
+    int ReportOffendingBitPos(uint64_t val, uint64_t expectedVal);
 
     /**
      * Validate the specified ctrl'r register RO bits report correct values if

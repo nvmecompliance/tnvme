@@ -48,8 +48,8 @@ AllCtrlRegs_r10b::ValidateDefaultValues()
 void
 AllCtrlRegs_r10b::ValidateROBitsAfterWriting()
 {
-    ULONGLONG value;
-    ULONGLONG origValue;
+    uint64_t value;
+    uint64_t origValue;
     const CtlSpcType *ctlMetrics = gRegisters->GetCtlMetrics();
 
     LOG_NRM("Validating RO bits after writing");
@@ -81,11 +81,11 @@ AllCtrlRegs_r10b::ValidateROBitsAfterWriting()
 
 
 int
-AllCtrlRegs_r10b::ReportOffendingBitPos(ULONGLONG val, ULONGLONG expectedVal)
+AllCtrlRegs_r10b::ReportOffendingBitPos(uint64_t val, uint64_t expectedVal)
 {
-    ULONGLONG bitMask;
+    uint64_t bitMask;
 
-    for (int i = 0; i < (int)(sizeof(ULONGLONG)*8); i++) {
+    for (int i = 0; i < (int)(sizeof(uint64_t)*8); i++) {
         bitMask = (1 << i);
         if ((val & bitMask) != (expectedVal & bitMask))
             return i;
@@ -97,8 +97,8 @@ AllCtrlRegs_r10b::ReportOffendingBitPos(ULONGLONG val, ULONGLONG expectedVal)
 void
 AllCtrlRegs_r10b::ValidateCtlRegisterROAttribute(CtlSpc reg)
 {
-    ULONGLONG value;
-    ULONGLONG expectedValue;
+    uint64_t value;
+    uint64_t expectedValue;
     const CtlSpcType *ctlMetrics = gRegisters->GetCtlMetrics();
 
     if (ctlMetrics[reg].size > MAX_SUPPORTED_REG_SIZE) {
@@ -106,7 +106,7 @@ AllCtrlRegs_r10b::ValidateCtlRegisterROAttribute(CtlSpc reg)
 
             if (gRegisters->Read(NVMEIO_BAR01, sizeof(value),
                 ctlMetrics[reg].offset + (k * sizeof(value)),
-                (unsigned char *)&value) == false) {
+                (uint8_t *)&value) == false) {
 
                 throw exception();
             } else {

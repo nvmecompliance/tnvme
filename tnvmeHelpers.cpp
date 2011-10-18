@@ -32,7 +32,7 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
     TestIteratorType testIter;
 
 
-    if ((cl.test.t.group != ULONG_MAX) && (cl.test.t.group >= groups.size())) {
+    if ((cl.test.t.group != UINT_MAX) && (cl.test.t.group >= groups.size())) {
         LOG_ERR("Specified test group does not exist");
         return false;
     }
@@ -57,7 +57,7 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
 
 
             // Now handle anything spec'd in the --test cmd line option
-            if (cl.test.t.group == ULONG_MAX) {
+            if (cl.test.t.group == UINT_MAX) {
                 // Run all tests within all groups
                 testIter = groups[iGrp]->GetTestIterator();
                 while (allHaveRun == false) {
@@ -80,8 +80,8 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
                         goto FAIL_OUT;
                 }
 
-            } else if ((cl.test.t.major == ULONG_MAX) ||
-                       (cl.test.t.minor == ULONG_MAX)) {
+            } else if ((cl.test.t.major == UINT_MAX) ||
+                       (cl.test.t.minor == UINT_MAX)) {
                 // Run all tests within spec'd group
                 if (iGrp == cl.test.t.group) {
                     testIter = groups[iGrp]->GetTestIterator();
@@ -253,9 +253,9 @@ ParseTargetCmdLine(TestTarget &target, const char *optarg)
 
 
     target.req = true;
-    target.t.group = ULONG_MAX;
-    target.t.major = ULONG_MAX;
-    target.t.minor = ULONG_MAX;
+    target.t.group = UINT_MAX;
+    target.t.major = UINT_MAX;
+    target.t.minor = UINT_MAX;
     if (optarg == NULL)
         return true;
 
@@ -319,13 +319,13 @@ ParseTargetCmdLine(TestTarget &target, const char *optarg)
         target.t.minor = tmp;
     }
 
-    if (target.t.group == ULONG_MAX) {
+    if (target.t.group == UINT_MAX) {
         LOG_ERR("Unrecognized format <grp>=%s\n", optarg);
         return false;
-    } else if (((target.t.major == ULONG_MAX) &&
-                (target.t.minor != ULONG_MAX)) ||
-               ((target.t.major != ULONG_MAX) &&
-                (target.t.minor == ULONG_MAX))) {
+    } else if (((target.t.major == UINT_MAX) &&
+                (target.t.minor != UINT_MAX)) ||
+               ((target.t.major != UINT_MAX) &&
+                (target.t.minor == UINT_MAX))) {
         LOG_ERR("Unrecognized format <grp>:<major>.<minor>=%s", optarg);
         return false;
     }
@@ -441,7 +441,7 @@ ParseWmmapCmdLine(WmmapIo &wmmap, const char *optarg)
     char *endptr;
     string swork;
     size_t tmp;
-    unsigned long long tmpVal;
+    uint64_t tmpVal;
     string sacc;
 
     wmmap.req = true;
