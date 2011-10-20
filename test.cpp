@@ -14,12 +14,16 @@ Test::Test(int fd, SpecRev specRev)
     mFd = fd;
     mSpecRev = specRev;
     if (mFd < 0)
-        LOG_DBG("Object created with a bad FD=%d", fd);
+        LOG_DBG("Object created with a bad fd=%d", fd);
 }
 
 
 Test::~Test()
 {
+    ///////////////////////////////////////////////////////////////////////////
+    // Allocations taken from the heap and not under the control of the
+    // RsrcMngr need to be freed/deleted here.
+    ///////////////////////////////////////////////////////////////////////////
 }
 
 
@@ -48,7 +52,7 @@ Test::ResetStatusRegErrors()
 {
     const vector<PciCapabilities> *cap = gRegisters->GetPciCapabilities();
 
-    LOG_NRM("Reseting sticky PCI errors");
+    LOG_NRM("Resetting sticky PCI errors");
     gRegisters->Write(PCISPC_STS, STS_ERRORS);
 
     for (uint16_t i = 0; i < cap->size(); i++) {
@@ -65,8 +69,8 @@ Test::ResetStatusRegErrors()
 bool
 Test::GetStatusRegErrors()
 {
-    uint64_t value;
-    uint64_t expectedValue;
+    uint64_t value = 0;
+    uint64_t expectedValue = 0;
     const PciSpcType *pciMetrics = gRegisters->GetPciMetrics();
     const CtlSpcType *ctlMetrics = gRegisters->GetCtlMetrics();
     const vector<PciCapabilities> *cap = gRegisters->GetPciCapabilities();
@@ -149,5 +153,13 @@ Test::ReportOffendingBitPos(uint64_t val, uint64_t expectedVal)
             return i;
     }
     return INT_MAX; // there is no mismatch
+}
+
+
+bool
+Test::RunCoreTest()
+{
+    LOG_ERR("Children must over ride to provide functionality");
+    return false;
 }
 

@@ -53,6 +53,7 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
                         break;
                     }
                 }
+                gRsrcMngr->FreeObjGrpLife();
             }
 
 
@@ -79,6 +80,7 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
                     if ((cl.ignore == false) && (allTestsPass == false))
                         goto FAIL_OUT;
                 }
+                gRsrcMngr->FreeObjGrpLife();
 
             } else if ((cl.test.t.major == UINT_MAX) ||
                        (cl.test.t.minor == UINT_MAX)) {
@@ -104,6 +106,7 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
                         if ((cl.ignore == false) && (allTestsPass == false))
                             goto FAIL_OUT;
                     }
+                    gRsrcMngr->FreeObjGrpLife();
                     break;  // check if more loops must occur
                 }
 
@@ -127,6 +130,7 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
                     }
                     if ((cl.ignore == false) && (allTestsPass == false))
                         goto FAIL_OUT;
+                    gRsrcMngr->FreeObjGrpLife();
                     break;  // check if more loops must occur
                 }
             }
@@ -322,10 +326,8 @@ ParseTargetCmdLine(TestTarget &target, const char *optarg)
     if (target.t.group == UINT_MAX) {
         LOG_ERR("Unrecognized format <grp>=%s\n", optarg);
         return false;
-    } else if (((target.t.major == UINT_MAX) &&
-                (target.t.minor != UINT_MAX)) ||
-               ((target.t.major != UINT_MAX) &&
-                (target.t.minor == UINT_MAX))) {
+    } else if (((target.t.major == UINT_MAX) && (target.t.minor != UINT_MAX)) ||
+               ((target.t.major != UINT_MAX) && (target.t.minor == UINT_MAX))) {
         LOG_ERR("Unrecognized format <grp>:<major>.<minor>=%s", optarg);
         return false;
     }

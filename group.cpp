@@ -1,5 +1,7 @@
 #include "tnvme.h"
 #include "group.h"
+#include "testNull.h"
+#include "globals.h"
 
 #define PAD_INDENT_LVL1         "    "
 #define PAD_INDENT_LVL2         "      "
@@ -149,28 +151,39 @@ Group::RunTest(TestRef &tr, vector<TestRef> &skipTest)
 {
     string work;
 
+    // Take out a valid deque<>::iterator to the test under execution
     if (TestExists(tr) == false)
         return TR_NOTFOUND;
+    deque<Test *>::iterator testCase = mTests[tr.major].begin();
+    advance(testCase, tr.minor);
 
     LOG_NRM("-----------------START TEST-----------------");
     FORMAT_GROUP_DESCRIPTION(work, this)
     LOG_NRM("%s", work.c_str());
 
     FORMAT_TEST_NUM(work, "", tr.major, tr.minor)
-    work += mTests[tr.major][tr.minor]->GetShortDescription();
+    work += (*testCase)->GetShortDescription();
     LOG_NRM("%s", work.c_str());
-    LOG_NRM("Compliance: %s",
-        mTests[tr.major][tr.minor]->GetComplianceDescription().c_str());
-    LOG_NRM("%s",
-        mTests[tr.major][tr.minor]->GetLongDescription(false, 0).c_str());
+    LOG_NRM("Compliance: %s", (*testCase)->GetComplianceDescription().c_str());
+    LOG_NRM("%s", (*testCase)->GetLongDescription(false, 0).c_str());
 
     TestResult result;
     if (SkippingTest(tr, skipTest))
         result = TR_SKIPPING;
     else
-        result = mTests[tr.major][tr.minor]->Run() ? TR_SUCCESS: TR_FAIL;
+        result = (*testCase)->Run() ? TR_SUCCESS: TR_FAIL;
 
     LOG_NRM("------------------END TEST------------------");
+
+    // Guarantee nothing residual or unintended is left around. Enforce this
+    // by destroying the existing test obj and replace it with a clone of itself
+    LOG_DBG("Enforcing test obj cleanup, cloning & destroying");
+    Test *cleanMeUp = (*testCase);  // Refer to test obj
+    deque<Test *>::iterator insertPos = mTests[tr.major].erase(testCase);
+    mTests[tr.major].insert(insertPos, cleanMeUp->Clone()); // cloning test obj
+    delete cleanMeUp;               // Destructing test obj
+    gRsrcMngr->FreeObjTestLife();   // Free resources alloc'd by test obj
+
     return result;
 }
 

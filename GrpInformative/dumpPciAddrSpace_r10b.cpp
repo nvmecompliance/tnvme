@@ -23,6 +23,10 @@ DumpPciAddrSpace_r10b::DumpPciAddrSpace_r10b(int fd) : Test(fd, SPECREV_10b)
 
 DumpPciAddrSpace_r10b::~DumpPciAddrSpace_r10b()
 {
+    ///////////////////////////////////////////////////////////////////////////
+    // Allocations taken from the heap and not under the control of the
+    // RsrcMngr need to be freed/deleted here.
+    ///////////////////////////////////////////////////////////////////////////
 }
 
 
@@ -106,7 +110,7 @@ DumpPciAddrSpace_r10b::RunCoreTest()
                         work += "\n";
                         write(fd, work.c_str(), work.size());
                     }
-                    delete buffer;
+                    delete [] buffer;
                     if (err)
                         goto ERROR_OUT;
                 } else if (gRegisters->Read((PciSpc)j, value) == false) {

@@ -1,0 +1,21 @@
+Singleton's should not be allowed to throw exceptions even if they use objects
+which do throw. Thus they must catch exceptions and return back booleans or
+return codes.
+
+Singleton's usually manage the IOCTL's into the driver and the decision as to
+whether an error is truly an error should be left up to the test case. Remember
+a test which seeks to cause an error and then sees that error is a sucessful 
+test case. So Singleton's should return failures and let higher level logic
+decifer if this is truely an error condition. The policy should be left up to
+the higher layers. Layers, i.e. Singleton's, which are closest to the hardware
+should not perform policy decisions.
+
+Additionally, the tnvme framework relies upon Singlton's as there are cmd line
+options to directly poke and peek at the hardware. If a singleton throws then
+the main() function must catch all exceptions. Currently the main framework
+assumes it will never see an exception. Each test case, which almost all do 
+throw, will catch and convert them to return codes so that the main() framework
+won't have to worry about exceptions. Again here, the policy of determining if
+an error really is an error is left up to the person executing the cmd line 
+option which directly drove the Singleton to interact with the hardware. It 
+could be that the error was expected.

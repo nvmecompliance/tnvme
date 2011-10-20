@@ -17,6 +17,10 @@ TestCase_r10b::TestCase_r10b(int fd) : Test(fd, SPECREV_10b)
 
 TestCase_r10b::~TestCase_r10b()
 {
+    ///////////////////////////////////////////////////////////////////////////
+    // Allocations taken from the heap and not under the control of the
+    // RsrcMngr need to be freed/deleted here.
+    ///////////////////////////////////////////////////////////////////////////
 }
 
 

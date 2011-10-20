@@ -2,7 +2,7 @@
 #define _GROUP_H_
 
 #include <string>
-#include <vector>
+#include <deque>
 #include "tnvme.h"
 #include "test.h"
 
@@ -11,7 +11,7 @@ using namespace std;
 /// Use to append a new x.0 test number at the group level
 #define APPEND_TEST_AT_GROUP_LEVEL(test, fd)        \
     {                                               \
-        vector<Test *> tmp;                         \
+        deque<Test *> tmp;                          \
         tmp.push_back(new test(fd));                \
         mTests.push_back(tmp);                      \
     }
@@ -105,24 +105,16 @@ public:
      */
     TestResult RunTest(TestIteratorType &testIter, vector<TestRef> &skipTest);
 
-    /**
-     * Run a spec'd test case and report back.
-     * @param tr Pass the test case number to execute
-     * @param skipTest Pass the complete list of test which should be skipped
-     * @return A TestResult
-     */
-    TestResult RunTest(TestRef &tr, vector<TestRef> &skipTest);
-
 
 protected:
     size_t      mGrpNum;
     string      mGrpDesc;
     SpecRev     mSpecRev;
 
-    /// vector[major][minor];
+    /// array[major][minor];
     /// major test number: are related at the group level; 1.0, 2.0, 3.0
     /// minor test number: are related at the test level; x.1, x.2, x.3
-    vector<vector<Test *> > mTests;
+    deque<deque<Test *> > mTests;
 
     /**
      * Validate whether or not the spec'd test case exists.
@@ -151,6 +143,14 @@ protected:
      * @return true upon success, otherwise false.
      */
     bool SkippingTest(TestRef &tr, vector<TestRef> &skipTest);
+
+    /**
+     * Run a spec'd test case and report back.
+     * @param tr Pass the test case number to execute
+     * @param skipTest Pass the complete list of test which should be skipped
+     * @return A TestResult
+     */
+    TestResult RunTest(TestRef &tr, vector<TestRef> &skipTest);
 
 
 private:

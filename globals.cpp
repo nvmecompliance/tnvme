@@ -2,4 +2,5 @@
 
 
 Registers *gRegisters;
+RsrcMngr *gRsrcMngr;
 

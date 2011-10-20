@@ -1,6 +1,6 @@
 #!/bin/bash
 
-TNVME_CMD_LINE=$1
+TNVME_CMD_LINE=$@
 
 Usage() {
 echo "usage...."
@@ -13,4 +13,5 @@ if [ -z $TNVME_CMD_LINE ]; then
   exit
 fi
 
-./tnvme -k skipqemu.cfg $TNVME_CMD_LINE 2>&1 1>/dev/null | tee tnvme.out
+echo ./tnvme -k skipqemu.cfg $TNVME_CMD_LINE 2>&1 | tee tnvme.out
+./tnvme -k skipqemu.cfg $TNVME_CMD_LINE 2>&1 | tee tnvme.out

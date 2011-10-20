@@ -24,6 +24,8 @@
 
 
 void Usage(void);
+void DestroySingletons();
+void BuildSingltons(int &fd, struct CmdLine &cl);
 void DestroyTestInfrastructure(vector<Group *> &groups, int &fd);
 bool BuildTestInfrastructure(vector<Group *> &groups, int &fd,
     struct CmdLine &cl);
@@ -80,7 +82,7 @@ main(int argc, char *argv[])
     struct dirent *dirEntry;
     bool deviceFound = false;
     bool accessingHdw = true;
-    uint64_t regVal;
+    uint64_t regVal = 0;
     const char *short_opt = "hsflziv:e::p:t::d:k:r:w:";
     static struct option long_opt[] = {
         // {name,           has_arg,            flag,   val}
@@ -134,6 +136,13 @@ main(int argc, char *argv[])
     }
     if (devices.size())
         CmdLine.device = devices[0];    // Default to 1st element listed
+
+
+    // Report what we are about to process
+    work = "";
+    for (int i = 0; i < argc; i++)
+        work += argv[i] + string(" ");
+    LOG_NRM("Parsing cmd line: %s", work.c_str());
 
 
     // Parse cmd line options
@@ -245,15 +254,13 @@ main(int argc, char *argv[])
         exit(1);
     }
 
-
     // Execute cmd line options which require the test infrastructure
     if (BuildTestInfrastructure(groups, fd, CmdLine) == false)
         exit(1);
 
     // Accessing hardware requires specific checks and inquiries before running
     if (accessingHdw) {
-        // Create globals/singletons here, which all tests objects will need
-        gRegisters = Registers::getInstance(fd, CmdLine.rev);
+        BuildSingltons(fd, CmdLine);
 
         LOG_NRM("Checking for unintended device under low powered states");
         if (gRegisters->Read(PCISPC_PMCS, regVal) == false) {
@@ -321,7 +328,23 @@ main(int argc, char *argv[])
     }
 
     DestroyTestInfrastructure(groups, fd);
+    DestroySingletons();
     exit(exitCode);
+}
+
+
+void BuildSingltons(int &fd, struct CmdLine &cl)
+{
+    // Create globals/singletons here, which all tests objects will need
+    gRegisters = Registers::GetInstance(fd, cl.rev);
+    gRsrcMngr = RsrcMngr::GetInstance(fd, cl.rev);
+}
+
+
+void DestroySingletons()
+{
+    Registers::KillInstance();
+    RsrcMngr::KillInstance();
 }
 
 

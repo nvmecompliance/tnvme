@@ -14,6 +14,19 @@ using namespace std;
 * This class purposely enforces children to conform and inherit certain
 * functionality to handle mundane tasks.
 *
+* -----------------------------------------------------------------------------
+* ----------------Mandatory rules for children to follow-----------------------
+* -----------------------------------------------------------------------------
+* 1) During construction populate member Test::mTestDesc
+* 2) Utilize class RsrcMngr to create objects to pass to subsequent tests
+* 3) Heap allocations taken during test execution, and not under the control
+*    of the RsrcMngr, must be deleted in destructor.
+* 4) Do not create member variables, rather use local variables with member
+*    functions. The reason for this is explained in Test::Clone().
+* 5) Execute dbgMemLeak.sh to find any memory leaks as a result of adding and
+*    running any new test cases.
+* -----------------------------------------------------------------------------
+*
 * @note This class will not throw exceptions.
 */
 class Test
@@ -24,6 +37,12 @@ public:
      * @param specRev Provide the nvme spec rev. which is being targeted
      */
     Test(int fd, SpecRev specRev);
+
+    /**
+     * Child derived Test:: objects are responsible for freeing all heap
+     * allocations back to the system in the destructor which are not under
+     * the control of the RsrcMngr.
+     */
     virtual ~Test();
 
     /**
@@ -56,8 +75,29 @@ public:
      */
     bool Run();
 
+    /**
+     * Cloning objects are necessary to support automated resource cleanup
+     * between successive test case runs. Objects are cloned, then freed after
+     * each test completes to force resource cleanup. This cloning uses
+     * default copy construction and thus forces restrictions onto
+     * class member variables in that pointers shouldn't be used unless they
+     * are weak_ptr's. The use of share_ptr member variables will cause objects
+     * to not be freed. Using regular C++ pointers have other considerations as
+     * to proper cleanup in the destructor and the use of shallow copies.
+     *
+     * To be safe, tests should only use local variables within member functions
+     * and utilize the RsrcMngr to pass objects between subsequent test cases
+     * within a group.
+     */
+    virtual Test *Clone() const { return new Test(*this); }
+
 
 protected:
+    ///////////////////////////////////////////////////////////////////////////
+    // Adding a member variable? Think carefully, see Test::Clone() hdr comment
+    // Adding a member functions is fine.
+    ///////////////////////////////////////////////////////////////////////////
+
     /// file descriptor to the device under test
     int mFd;
     /// NVME spec rev being targeted
@@ -71,7 +111,7 @@ protected:
      * throw exceptions also, either throwing or the use of return codes is
      * acceptable. Throwing is considered an error.
      */
-    virtual bool RunCoreTest() = 0;
+    virtual bool RunCoreTest();
 
 
     /**
@@ -97,6 +137,11 @@ protected:
 
 
 private:
+    ///////////////////////////////////////////////////////////////////////////
+    // Adding a member variable? Think carefully, see Test::Clone() hdr comment
+    // Adding a member functions is fine.
+    ///////////////////////////////////////////////////////////////////////////
+
     Test();
 };
 

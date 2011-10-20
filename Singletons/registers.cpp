@@ -22,7 +22,7 @@ CtlSpcType Registers::mCtlSpcMetrics[] =
 
 bool Registers::mInstanceFlag = false;
 Registers* Registers::mSingleton = NULL;
-Registers* Registers::getInstance(int fd, SpecRev specRev)
+Registers* Registers::GetInstance(int fd, SpecRev specRev)
 {
     if(mInstanceFlag == false) {
         mSingleton = new Registers(fd, specRev);
@@ -30,6 +30,14 @@ Registers* Registers::getInstance(int fd, SpecRev specRev)
         return mSingleton;
     } else {
         return mSingleton;
+    }
+}
+void Registers::KillInstance()
+{
+    if(mInstanceFlag) {
+        mInstanceFlag = false;
+        delete mSingleton;
+        mSingleton = NULL;
     }
 }
 
@@ -353,9 +361,10 @@ Registers::DiscoverPciCapabilities()
     int capIdx;
     uint16_t capId;
     uint16_t capOffset;
-    uint64_t work;
-    uint64_t nextCap;
-    struct rw_generic io = { NVMEIO_PCI_HDR, 0, 4, BYTE_LEN, (uint8_t *)&nextCap };
+    uint64_t work = 0;
+    uint64_t nextCap = 0;
+    struct rw_generic io = { NVMEIO_PCI_HDR, 0, 4, BYTE_LEN,
+        (uint8_t *)&nextCap };
 
 
     // NOTE: We cannot report errors/violations of the spec as we parse PCI

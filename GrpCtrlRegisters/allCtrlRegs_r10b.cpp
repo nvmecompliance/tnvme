@@ -17,6 +17,10 @@ AllCtrlRegs_r10b::AllCtrlRegs_r10b(int fd) : Test(fd, SPECREV_10b)
 
 AllCtrlRegs_r10b::~AllCtrlRegs_r10b()
 {
+    ///////////////////////////////////////////////////////////////////////////
+    // Allocations taken from the heap and not under the control of the
+    // RsrcMngr need to be freed/deleted here.
+    ///////////////////////////////////////////////////////////////////////////
 }
 
 
@@ -97,8 +101,8 @@ AllCtrlRegs_r10b::ReportOffendingBitPos(uint64_t val, uint64_t expectedVal)
 void
 AllCtrlRegs_r10b::ValidateCtlRegisterROAttribute(CtlSpc reg)
 {
-    uint64_t value;
-    uint64_t expectedValue;
+    uint64_t value = 0;
+    uint64_t expectedValue = 0;
     const CtlSpcType *ctlMetrics = gRegisters->GetCtlMetrics();
 
     if (ctlMetrics[reg].size > MAX_SUPPORTED_REG_SIZE) {

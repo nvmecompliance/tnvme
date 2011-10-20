@@ -17,6 +17,10 @@ AllPciRegs_r10b::AllPciRegs_r10b(int fd) : Test(fd, SPECREV_10b)
 
 AllPciRegs_r10b::~AllPciRegs_r10b()
 {
+    ///////////////////////////////////////////////////////////////////////////
+    // Allocations taken from the heap and not under the control of the
+    // RsrcMngr need to be freed/deleted here.
+    ///////////////////////////////////////////////////////////////////////////
 }
 
 

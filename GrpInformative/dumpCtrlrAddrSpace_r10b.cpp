@@ -23,6 +23,10 @@ DumpCtrlrAddrSpace_r10b::DumpCtrlrAddrSpace_r10b(int fd) : Test(fd, SPECREV_10b)
 
 DumpCtrlrAddrSpace_r10b::~DumpCtrlrAddrSpace_r10b()
 {
+    ///////////////////////////////////////////////////////////////////////////
+    // Allocations taken from the heap and not under the control of the
+    // RsrcMngr need to be freed/deleted here.
+    ///////////////////////////////////////////////////////////////////////////
 }
 
 
@@ -61,6 +65,7 @@ DumpCtrlrAddrSpace_r10b::RunCoreTest()
                 work += "\n";
                 write(fd, work.c_str(), work.size());
             }
+            delete [] buffer;
         } else if (pciMetrics[i].size > MAX_SUPPORTED_REG_SIZE) {
             continue;   // Don't care about really large areas, their reserved
         } else if (gRegisters->Read((CtlSpc)i, value) == false) {

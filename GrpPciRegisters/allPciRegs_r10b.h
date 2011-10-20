@@ -5,7 +5,10 @@
 
 
 /**
- * The purpose of this class resides in the constructor
+ * -----------------------------------------------------------------------------
+ * ----------------Mandatory rules for children to follow-----------------------
+ * -----------------------------------------------------------------------------
+ * 1) See notes in the header file of the Test base class
  */
 class AllPciRegs_r10b : public Test
 {
@@ -13,12 +16,20 @@ public:
     AllPciRegs_r10b(int fd);
     virtual ~AllPciRegs_r10b();
 
+    virtual AllPciRegs_r10b *Clone() const
+        { return new AllPciRegs_r10b(*this); }
+
 
 protected:
     virtual bool RunCoreTest();
 
 
 private:
+    ///////////////////////////////////////////////////////////////////////////
+    // Adding a member variable? Think carefully, see Test::Clone() hdr comment
+    // Adding a member functions is fine.
+    ///////////////////////////////////////////////////////////////////////////
+
     /**
      * Report bit position of val which is not like expectedVal
      * @param val Pass value to search against for inequality

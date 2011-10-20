@@ -5,7 +5,10 @@ LIBS = -L../ -L/usr/local/lib -lm
 INCLUDES = -I. -I../ -I../../ -I/usr/local/include
 
 SRC = \
-	registers.cpp
+	registers.cpp		\
+	trackable.cpp		\
+	memBuffer.cpp		\
+	rsrcMngr.cpp
 
 .SUFFIXES: .cpp
 
