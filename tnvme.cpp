@@ -338,6 +338,7 @@ void BuildSingltons(int &fd, struct CmdLine &cl)
     // Create globals/singletons here, which all tests objects will need
     gRegisters = Registers::GetInstance(fd, cl.rev);
     gRsrcMngr = RsrcMngr::GetInstance(fd, cl.rev);
+    gCtrlrConfig = CtrlrConfig::GetInstance(fd, cl.rev);
 }
 
 
@@ -345,6 +346,7 @@ void DestroySingletons()
 {
     Registers::KillInstance();
     RsrcMngr::KillInstance();
+    CtrlrConfig::KillInstance();
 }
 
 

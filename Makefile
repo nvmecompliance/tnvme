@@ -17,8 +17,7 @@ SOURCES:=				\
 	test.cpp			\
 	testDescribe.cpp	\
 	tnvme.cpp			\
-	tnvmeHelpers.cpp	\
-	testNull.cpp
+	tnvmeHelpers.cpp
 
 #
 # RPM build parameters

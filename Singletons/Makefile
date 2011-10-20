@@ -8,7 +8,8 @@ SRC = \
 	registers.cpp		\
 	trackable.cpp		\
 	memBuffer.cpp		\
-	rsrcMngr.cpp
+	rsrcMngr.cpp		\
+	ctrlrConfig.cpp
 
 .SUFFIXES: .cpp
 

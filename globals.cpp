@@ -3,4 +3,5 @@
 
 Registers *gRegisters;
 RsrcMngr *gRsrcMngr;
+CtrlrConfig *gCtrlrConfig;
 

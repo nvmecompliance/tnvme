@@ -4,7 +4,6 @@
 typedef pair<string, SharedTrackablePtr> TrackablePair;
 SharedTrackablePtr RsrcMngr::NullTrackablePtr;
 
-
 bool RsrcMngr::mInstanceFlag = false;
 RsrcMngr* RsrcMngr::mSingleton = NULL;
 RsrcMngr* RsrcMngr::GetInstance(int fd, SpecRev specRev)
