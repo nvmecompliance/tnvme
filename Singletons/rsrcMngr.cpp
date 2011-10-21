@@ -121,6 +121,9 @@ RsrcMngr::GetObjGrpLife(string lookupName)
 void
 RsrcMngr::FreeObjGrpLife()
 {
+    // Enforce that test lifetimes are shorter than group lifetimes.
+    FreeObjTestLife();
+
     // By removing all pointers contained within the container it will destroy
     // the contained share_ptr's and thus the objects being pointed to. This, of
     // course, assumes that all other shared_ptr's to those objects have been

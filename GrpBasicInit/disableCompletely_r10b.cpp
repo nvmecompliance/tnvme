@@ -121,9 +121,15 @@ DisableCompletely_r10b::RunCoreTest()
             throw exception();
         }
 
+
         // This won't go ready because we didn't create any ASQ or ACQ
         if (gCtrlrConfig->SetStateEnabled(ST_ENABLE) == true) {
-            LOG_DBG("Failed");
+            LOG_DBG("Ctrlr became ready and wasn't suppose to");
+            uint64_t someReg;
+            gRegisters->Read(CTLSPC_CSTS, someReg);
+            gRegisters->Read(CTLSPC_AQA, someReg);
+            gRegisters->Read(CTLSPC_ASQ, someReg);
+            gRegisters->Read(CTLSPC_ACQ, someReg);
             throw exception();
         }
 

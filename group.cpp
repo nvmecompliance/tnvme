@@ -175,7 +175,8 @@ Group::RunTest(TestRef &tr, vector<TestRef> &skipTest)
     LOG_NRM("------------------END TEST------------------");
 
     // Guarantee nothing residual or unintended is left around. Enforce this
-    // by destroying the existing test obj and replace it with a clone of itself
+    // by destroying the existing test obj and replace it with a clone of
+    // itself so looping tests over can still be supported.
     LOG_DBG("Enforcing test obj cleanup, cloning & destroying");
     Test *cleanMeUp = (*testCase);  // Refer to test obj
     deque<Test *>::iterator insertPos = mTests[tr.major].erase(testCase);

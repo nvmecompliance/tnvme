@@ -29,6 +29,14 @@ public:
     ~CtrlrConfig();
 
     /**
+     * Completely disable the NVME device so that no queues are left in place,
+     * and device registers are reset back to default values. The IRQ's are
+     * also disabled.
+     * @return true upon success, otherwise false.
+     */
+    bool SoftReset();
+
+    /**
      * Learns of the active IRQ scheme enabled in the device. It doesn't
      * indicate that IRQ's are being used, to use IRQ's CQ's must be created
      * to use IRQ's. The ACQ doesn't have a choice and always uses IRQ's if
@@ -61,7 +69,9 @@ public:
      *      ACQ/ASQ are also reset to the empty state. A re-enabling at this
      *      point would allow the immediate submission of admin cmds into ACQ.
      *      Pass ST_DISABLE_COMPLETELY to disable and nothing is left intact.
-     *      This is as close to a power up situation as one could achieve.
+     *      This is as close to a power up situation as one could achieve. The
+     *      NVME device resets all registers to default values and dnvme writes
+     *      admin Q base addresses and Q sizes to 0, nothing is truly enabled.
      * @return true if successful, otherwise false
      */
     bool SetStateEnabled(enum nvme_state state);

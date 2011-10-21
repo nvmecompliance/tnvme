@@ -47,20 +47,16 @@ CtrlrConfig::~CtrlrConfig()
 
 
 bool
-CtrlrConfig::ReadRegCC(uint32_t &regVal)
+CtrlrConfig::SoftReset()
 {
-    uint64_t tmp;
-    bool retVal = gRegisters->Read(CTLSPC_CC, tmp);
-    regVal  = (uint32_t)tmp;
-    return retVal;
-}
+    bool retVal;
 
-
-bool
-CtrlrConfig::WriteRegCC(uint32_t regVal)
-{
-    uint64_t tmp =  regVal;
-    bool retVal = gRegisters->Write(CTLSPC_CC, tmp);
+    // In user space, in kernel space and in hardware, nothing remains.
+    LOG_NRM("Performing soft reset");
+    gRsrcMngr->FreeObjGrpLife();
+    gCtrlrConfig->SetStateEnabled(ST_DISABLE_COMPLETELY);
+    if ((retVal = SetIrqScheme(INT_NONE)) == false)
+        LOG_ERR("Setting IRQ scheme failed");
     return retVal;
 }
 
@@ -90,7 +86,7 @@ CtrlrConfig::SetIrqScheme(enum nvme_irq_type newIrq)
     // todo Add logic to set the current IRQ scheme for this device,
     //      currently IRQ's are not supported by dnvme.
     //------------------------------------------------------------------------
-    LOG_DBG("todo not implemented yet");
+    LOG_DBG("todo SetIrqScheme() not implemented yet");
     newIrq = INT_NONE;  // satisfy compiler complaint
     return true;
 }
@@ -115,6 +111,25 @@ CtrlrConfig::SetStateEnabled(enum nvme_state state)
         return false;
     }
     return true;
+}
+
+
+bool
+CtrlrConfig::ReadRegCC(uint32_t &regVal)
+{
+    uint64_t tmp;
+    bool retVal = gRegisters->Read(CTLSPC_CC, tmp);
+    regVal  = (uint32_t)tmp;
+    return retVal;
+}
+
+
+bool
+CtrlrConfig::WriteRegCC(uint32_t regVal)
+{
+    uint64_t tmp =  regVal;
+    bool retVal = gRegisters->Write(CTLSPC_CC, tmp);
+    return retVal;
 }
 
 

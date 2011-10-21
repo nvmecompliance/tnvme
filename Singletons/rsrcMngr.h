@@ -75,7 +75,9 @@ public:
     GetObjGrpLife(string lookupName);
 
     /**
-     * Free all objects which were allocated for group lifetime.
+     * Free all objects which were allocated for group lifetime. This method
+     * automatically calls FreeObjTestLife() for test lifetimes are shorter
+     * than group lifetimes.
      */
     void FreeObjGrpLife();
 

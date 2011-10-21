@@ -37,6 +37,9 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
         return false;
     }
 
+    if (gCtrlrConfig->SoftReset() == false)
+        return false;
+
     for (iLoop = 0; iLoop < cl.loop; iLoop++) {
         LOG_NRM("Start loop execution #%ld", iLoop);
 
@@ -53,7 +56,7 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
                         break;
                     }
                 }
-                gRsrcMngr->FreeObjGrpLife();
+                // No need to do soft reset, Informative group is non-intrusive
             }
 
 
@@ -80,7 +83,10 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
                     if ((cl.ignore == false) && (allTestsPass == false))
                         goto FAIL_OUT;
                 }
-                gRsrcMngr->FreeObjGrpLife();
+
+                // Prepare for next loop/group, is known starting point
+                if (gCtrlrConfig->SoftReset() == false)
+                    return false;
 
             } else if ((cl.test.t.major == UINT_MAX) ||
                        (cl.test.t.minor == UINT_MAX)) {
@@ -106,7 +112,10 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
                         if ((cl.ignore == false) && (allTestsPass == false))
                             goto FAIL_OUT;
                     }
-                    gRsrcMngr->FreeObjGrpLife();
+
+                    // Prepare for next loop/group, is known starting point
+                    if (gCtrlrConfig->SoftReset() == false)
+                        return false;
                     break;  // check if more loops must occur
                 }
 
@@ -130,7 +139,10 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
                     }
                     if ((cl.ignore == false) && (allTestsPass == false))
                         goto FAIL_OUT;
-                    gRsrcMngr->FreeObjGrpLife();
+
+                    // Prepare for next loop/group, is known starting point
+                    if (gCtrlrConfig->SoftReset() == false)
+                        return false;
                     break;  // check if more loops must occur
                 }
             }
