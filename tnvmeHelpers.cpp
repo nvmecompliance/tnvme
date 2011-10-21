@@ -113,7 +113,7 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
             } else {
                 // Run spec'd test within spec'd group
                 if (iGrp == cl.test.t.group) {
-                    switch (groups[iGrp]->RunTest(testIter, cl.skiptest)) {
+                    switch (groups[iGrp]->RunTest(cl.test.t, cl.skiptest)) {
                     case Group::TR_SUCCESS:
                         numPassed++;
                         break;
@@ -137,7 +137,11 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
         }
 
         LOG_NRM("Tests  passed: %d", numPassed);
-        LOG_NRM("       failed: %d", numFailed);
+        if (numFailed) {
+            LOG_NRM("       failed: %d    <--------------", numFailed);
+        } else {
+            LOG_NRM("       failed: 0");
+        }
         LOG_NRM("      skipped: %d", numSkipped);
         LOG_NRM("        total: %d", numPassed+numFailed+numSkipped);
         LOG_NRM("Stop loop execution #%ld", iLoop);
@@ -147,7 +151,11 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
 
 FAIL_OUT:
     LOG_NRM("Tests  passed: %d", numPassed);
-    LOG_NRM("       failed: %d", numFailed);
+    if (numFailed) {
+        LOG_NRM("       failed: %d    <--------------", numFailed);
+    } else {
+        LOG_NRM("       failed: 0");
+    }
     LOG_NRM("      skipped: %d", numSkipped);
     LOG_NRM("        total: %d", numPassed+numFailed+numSkipped);
     LOG_NRM("Stop loop execution #%ld", iLoop);

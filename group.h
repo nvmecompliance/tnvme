@@ -105,6 +105,14 @@ public:
      */
     TestResult RunTest(TestIteratorType &testIter, vector<TestRef> &skipTest);
 
+    /**
+     * Run a spec'd test case and report back.
+     * @param tr Pass the test case number to execute
+     * @param skipTest Pass the complete list of test which should be skipped
+     * @return A TestResult
+     */
+    TestResult RunTest(TestRef &tr, vector<TestRef> &skipTest);
+
 
 protected:
     size_t      mGrpNum;
@@ -143,14 +151,6 @@ protected:
      * @return true upon success, otherwise false.
      */
     bool SkippingTest(TestRef &tr, vector<TestRef> &skipTest);
-
-    /**
-     * Run a spec'd test case and report back.
-     * @param tr Pass the test case number to execute
-     * @param skipTest Pass the complete list of test which should be skipped
-     * @return A TestResult
-     */
-    TestResult RunTest(TestRef &tr, vector<TestRef> &skipTest);
 
 
 private:

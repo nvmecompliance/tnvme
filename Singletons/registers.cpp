@@ -1,7 +1,5 @@
-#include <sys/ioctl.h>
 #include "registers.h"
 #include "tnvme.h"
-#include "dnvme/dnvme_ioctls.h"
 
 
 // Register metrics (meta data) to aid interfacing with the kernel driver

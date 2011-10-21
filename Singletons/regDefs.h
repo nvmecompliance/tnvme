@@ -211,5 +211,17 @@ typedef enum PXDSBits {
     PXDS_TP     = 0x0040
 } PXDSBits;
 
+typedef enum CCBits {
+    CC_RES0     = 0xff000000,
+    CC_IOCQES   = 0x00f00000,
+    CC_IOSQES   = 0x000f0000,
+    CC_SHN      = 0x0000C000,
+    CC_AMS      = 0x00003800,
+    CC_MPS      = 0x00000710,
+    CC_CSS      = 0x00000070,
+    CC_RES1     = 0x0000000e,
+    CC_EN       = 0000000001
+} CCBits;
+
 
 #endif

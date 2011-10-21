@@ -3,8 +3,8 @@
 
 #include <string>
 #include <vector>
-#include "../regDefs.h"
-#include "dnvme/dnvme_interface.h"
+#include "regDefs.h"
+#include "dnvme.h"
 
 /**
  * @param regVal Pass the 64 bit register value to mask down to size.

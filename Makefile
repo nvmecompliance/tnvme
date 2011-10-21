@@ -1,8 +1,8 @@
-CC=g++
-CFLAGS=-g -O0 -W -Wall -Werror -DDEBUG
-APP_NAME:=tnvme
-LDFLAGS=$(foreach stem, $(SUBDIRS),./$(stem)/lib$(stem).a)
-INCLUDE := -I./ -I../
+CC = g++
+CFLAGS = -g -O0 -W -Wall -Werror -DDEBUG
+APP_NAME = tnvme
+LDFLAGS = $(foreach stem, $(SUBDIRS),./$(stem)/lib$(stem).a)
+INCLUDES = -I./ -I../
 
 SUBDIRS:=				\
 	Singletons 			\
@@ -62,7 +62,7 @@ $(SUBDIRS):
 	$(MAKE) -C $@ $(GOAL)
 
 $(APP_NAME): $(SUBDIRS) $(SOURCES)
-	$(CC) $(CFLAGS) -I$(INCLUDE) $(SOURCES) -o $(APP_NAME) $(LDFLAGS)
+	$(CC) $(CFLAGS) $(INCLUDES) $(SOURCES) -o $(APP_NAME) $(LDFLAGS)
 
 # Specify a custom source c:ompile dir: "make src SRCDIR=../compile/dir"
 # If the specified dir could cause recursive copies, then specify w/o './'
