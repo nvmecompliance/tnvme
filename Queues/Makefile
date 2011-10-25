@@ -5,15 +5,14 @@ LIBS = -L../ -L/usr/local/lib -lm
 INCLUDES = -I. -I../ -I../../ -I/usr/local/include
 
 SRC = \
-	registers.cpp		\
-	memBuffer.cpp		\
-	rsrcMngr.cpp		\
-	ctrlrConfig.cpp
+	queue.cpp		\
+	cq.cpp			\
+	sq.cpp
 
 .SUFFIXES: .cpp
 
 OBJ = $(SRC:.cpp=.o)
-OUT = libSingletons.a
+OUT = libQueues.a
 
 all: $(OUT)
 

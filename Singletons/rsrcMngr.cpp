@@ -45,14 +45,14 @@ RsrcMngr::~RsrcMngr()
 
 
 SharedTrackablePtr
-RsrcMngr::AllocObj(Trackable::ObjType type, bool testLifeTime)
+RsrcMngr::AllocObj(Trackable::ObjType type, Trackable::Lifetime life)
 {
-    string lt = (testLifeTime == true) ? "test" : "group";
+    string lt = (life == Trackable::LIFE_TEST) ? "test" : "group";
 
     switch (type) {
     case Trackable::OBJ_MEMBUFFER:
         LOG_NRM("Obj MemBuffer is created with %s lifetime", lt.c_str());
-        return SharedTrackablePtr(new MemBuffer());
+        return SharedTrackablePtr(new MemBuffer(life, true));
         break;
 
     default:
@@ -72,7 +72,7 @@ RsrcMngr::AllocObjGrpLife(Trackable::ObjType type, string lookupName)
         return NullTrackablePtr;
     }
 
-    SharedTrackablePtr newObj = AllocObj(type, false);
+    SharedTrackablePtr newObj = AllocObj(type, Trackable::LIFE_GROUP);
     if (newObj == NullTrackablePtr) {
         LOG_DBG("System unable to create object from heap");
         return NullTrackablePtr;
@@ -94,7 +94,7 @@ RsrcMngr::AllocObjGrpLife(Trackable::ObjType type, string lookupName)
 SharedTrackablePtr
 RsrcMngr::AllocObjTestLife(Trackable::ObjType type)
 {
-    SharedTrackablePtr newObj = AllocObj(type, true);
+    SharedTrackablePtr newObj = AllocObj(type, Trackable::LIFE_TEST);
     if (newObj == NullTrackablePtr) {
         LOG_DBG("System unable to create object from heap");
         return NullTrackablePtr;

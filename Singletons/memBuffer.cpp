@@ -3,7 +3,15 @@
 #include <string.h>
 
 
-MemBuffer::MemBuffer() : Trackable(Trackable::OBJ_MEMBUFFER)
+MemBuffer::MemBuffer() :
+    Trackable(Trackable::OBJTYPE_FENCE, Trackable::LIFETIME_FENCE, false)
+{
+    // This constructor will throw
+}
+
+
+MemBuffer::MemBuffer(Trackable::Lifetime life, bool ownByRsrcMngr) :
+    Trackable(Trackable::OBJ_MEMBUFFER, life, ownByRsrcMngr)
 {
     InitMemberVariables();
 }
@@ -22,6 +30,15 @@ MemBuffer::InitMemberVariables()
     mRealBaseAddr = NULL;
     mVirBaseAddr = NULL;
     mVirBufSize = 0;
+    mAlignment = 0;
+}
+
+
+void
+MemBuffer::Reset()
+{
+    if (mRealBaseAddr)
+        memset(mVirBaseAddr, 0, mVirBufSize);
 }
 
 
@@ -54,6 +71,10 @@ MemBuffer::InitOffset1stPage(uint32_t bufSize, bool initMem, uint8_t initVal,
         throw exception();
     }
     mVirBaseAddr = (mRealBaseAddr + offset1stPg);
+    if (offset1stPg)
+        mAlignment = offset1stPg;
+    else
+        mAlignment = align;
 
     if (initMem)
         memset(mVirBaseAddr, initVal, mVirBufSize);
@@ -83,6 +104,7 @@ MemBuffer::InitAlignment(uint32_t bufSize, bool initMem, uint8_t initVal,
         throw exception();
     }
     mVirBaseAddr = mRealBaseAddr;
+    mAlignment = align;
 
     if (initMem)
         memset(mVirBaseAddr, initVal, mVirBufSize);

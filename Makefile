@@ -9,7 +9,8 @@ SUBDIRS:=				\
 	GrpInformative		\
 	GrpPciRegisters		\
 	GrpCtrlRegisters	\
-	GrpBasicInit
+	GrpBasicInit		\
+	Queues
 
 SOURCES:=				\
 	globals.cpp			\
@@ -17,7 +18,8 @@ SOURCES:=				\
 	test.cpp			\
 	testDescribe.cpp	\
 	tnvme.cpp			\
-	tnvmeHelpers.cpp
+	tnvmeHelpers.cpp	\
+	trackable.cpp
 
 #
 # RPM build parameters

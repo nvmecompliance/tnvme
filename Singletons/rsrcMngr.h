@@ -108,10 +108,10 @@ private:
     /**
      * Perform all the underlying allocation tasks for this class.
      * @param type Pass the type of default object to allocate/construct
-     * @param testLifeTime Pass true to test lifetime, false for group lifetime
+     * @param life Pass the lifetime of the obj being created
      */
     SharedTrackablePtr
-    AllocObj(Trackable::ObjType type, bool testLifeTime);
+    AllocObj(Trackable::ObjType type, Trackable::Lifetime life);
 };
 
 

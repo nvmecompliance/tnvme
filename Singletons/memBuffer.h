@@ -17,7 +17,12 @@
 class MemBuffer : public Trackable
 {
 public:
-    MemBuffer();
+    /**
+     * @param life Pass the lifetime of the object being created
+     * @param ownByRsrcMngr Pass true if the RsrcMngr created this obj,
+     *      otherwise false.
+     */
+    MemBuffer(Trackable::Lifetime life, bool ownByRsrcMngr = false);
     virtual ~MemBuffer();
 
     /**
@@ -26,7 +31,7 @@ public:
      * may be allocated than requested to satisfy the request. If a specific
      * offset into a page is not strictly necessary then calling
      * InitAlignment() should be more efficient at allocations, because entire
-     * pages of memory won't be required to satisfy the request.
+     * pages of memory may not be required to satisfy the request.
      * @param bufSize Pass the minimum number of bytes for buffer creation
      * @param initMem Pass true to initialize all elements, otherwise don't init
      * @param initVal Pass the init value if suppose to init the buffer
@@ -42,8 +47,8 @@ public:
      * Allocates memory allowing to specify the alignment of that buffer, but
      * not the offset into the 1st page of the allocation. Residual memory
      * may be consumed to satisfy this request since entire pages of memory
-     * are not necessary, and therefore the allocation of more memory than what
-     * was requested will not be necessary.
+     * may not be necessary, and therefore the allocation of > what was
+     * requested will not be necessary.
      * @param bufSize Pass the number of bytes for buffer creation
      * @param initMem Pass true to initialize all elements, otherwise don't init
      * @param initVal Pass the init value if suppose to init the buffer
@@ -55,12 +60,21 @@ public:
 
     uint8_t *GetBuffer() { return mVirBaseAddr; }
     uint32_t GetBufSize() { return mVirBufSize; }
+    uint32_t GetAlignment() { return mAlignment; }
+
+    /**
+     * Zero out all memory bytes
+     */
+    void Reset();
 
 
 private:
+    MemBuffer();
+
     uint8_t *mRealBaseAddr;     // System address returned by posix_memalign()
     uint8_t *mVirBaseAddr;      // User buffer address to satisfy mOffset1stPg
     uint32_t mVirBufSize;       // User request buffer size
+    uint32_t mAlignment;
 
     void InitMemberVariables();
 };
