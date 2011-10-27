@@ -1,5 +1,10 @@
 #include "rsrcMngr.h"
 #include "memBuffer.h"
+#include "../Queues/acq.h"
+#include "../Queues/asq.h"
+#include "../Queues/iocq.h"
+#include "../Queues/iosq.h"
+
 
 typedef pair<string, SharedTrackablePtr> TrackablePair;
 SharedTrackablePtr RsrcMngr::NullTrackablePtr;
@@ -51,8 +56,28 @@ RsrcMngr::AllocObj(Trackable::ObjType type, Trackable::Lifetime life)
 
     switch (type) {
     case Trackable::OBJ_MEMBUFFER:
-        LOG_NRM("Obj MemBuffer is created with %s lifetime", lt.c_str());
+        LOG_NRM("Obj MemBuffer is born with %s lifetime", lt.c_str());
         return SharedTrackablePtr(new MemBuffer(life, true));
+        break;
+
+    case Trackable::OBJ_ACQ:
+        LOG_NRM("Obj ACQ is born with %s lifetime", lt.c_str());
+        return SharedTrackablePtr(new ACQ(mFd, life, true));
+        break;
+
+    case Trackable::OBJ_ASQ:
+        LOG_NRM("Obj ASQ is born with %s lifetime", lt.c_str());
+        return SharedTrackablePtr(new ASQ(mFd, life, true));
+        break;
+
+    case Trackable::OBJ_IOCQ:
+        LOG_NRM("Obj IOCQ is born with %s lifetime", lt.c_str());
+        return SharedTrackablePtr(new IOCQ(mFd, life, true));
+        break;
+
+    case Trackable::OBJ_IOSQ:
+        LOG_NRM("Obj IOSQ is born with %s lifetime", lt.c_str());
+        return SharedTrackablePtr(new IOSQ(mFd, life, true));
         break;
 
     default:

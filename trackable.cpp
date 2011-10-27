@@ -18,7 +18,11 @@ Trackable::Trackable(ObjType objBeingCreated, Lifetime objLife,
 Trackable::~Trackable()
 {
     switch (mObjType) {
-    case OBJ_MEMBUFFER:     LOG_DBG("Destructing obj MemBuffer");       break;
-    default:                LOG_DBG("Destructing obj unknown");         break;
+    case OBJ_MEMBUFFER:     LOG_DBG("Destroying obj MemBuffer");       break;
+    case OBJ_ACQ:           LOG_DBG("Destroying obj ACQ");             break;
+    case OBJ_ASQ:           LOG_DBG("Destroying obj ASQ");             break;
+    case OBJ_IOCQ:          LOG_DBG("Destroying obj IOCQ");            break;
+    case OBJ_IOSQ:          LOG_DBG("Destroying obj IOSQ");            break;
+    default:                LOG_DBG("Destroying obj unknown");         break;
     }
 }

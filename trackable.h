@@ -18,6 +18,10 @@ public:
      */
     typedef enum {
         OBJ_MEMBUFFER,
+        OBJ_ACQ,
+        OBJ_ASQ,
+        OBJ_IOCQ,
+        OBJ_IOSQ,
         OBJTYPE_FENCE           // always must be last element
     } ObjType;
 

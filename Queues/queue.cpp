@@ -36,10 +36,10 @@ bool
 Queue::GetIsContig()
 {
     if ((mContigBuf == NULL) && (mDiscontigBuf == NULL)) {
-        LOG_DBG("Uninitialized Q");
+        LOG_DBG("Detected an uninitialized Q");
         throw exception();
     } else if ((mContigBuf != NULL) && (mDiscontigBuf != NULL)) {
-        LOG_DBG("Illegally configured Q");
+        LOG_DBG("Detected an illegally configured Q");
         throw exception();
     }
     return (mContigBuf != NULL);

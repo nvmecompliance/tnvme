@@ -37,9 +37,6 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
         return false;
     }
 
-    if (gCtrlrConfig->SoftReset() == false)
-        return false;
-
     for (iLoop = 0; iLoop < cl.loop; iLoop++) {
         LOG_NRM("Start loop execution #%ld", iLoop);
 
@@ -48,6 +45,10 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
 
             // Handle the --informative cmd line option
             if (cl.informative.req && (iGrp == cl.informative.grpInfoIdx)) {
+                // Each test group starts from known starting point
+                if (gCtrlrConfig->SoftReset() == false)
+                    return false;
+
                 LOG_NRM("Cmd line forces executing informative group");
                 testIter = groups[iGrp]->GetTestIterator();
                 while (1) {
@@ -62,6 +63,10 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
 
             // Now handle anything spec'd in the --test cmd line option
             if (cl.test.t.group == UINT_MAX) {
+                // Each test group starts from known starting point
+                if (gCtrlrConfig->SoftReset() == false)
+                    return false;
+
                 // Run all tests within all groups
                 testIter = groups[iGrp]->GetTestIterator();
                 while (allHaveRun == false) {
@@ -84,12 +89,12 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
                         goto FAIL_OUT;
                 }
 
-                // Prepare for next loop/group, is known starting point
+            } else if ((cl.test.t.major == UINT_MAX) ||
+                       (cl.test.t.minor == UINT_MAX)) {
+                // Each test group starts from known starting point
                 if (gCtrlrConfig->SoftReset() == false)
                     return false;
 
-            } else if ((cl.test.t.major == UINT_MAX) ||
-                       (cl.test.t.minor == UINT_MAX)) {
                 // Run all tests within spec'd group
                 if (iGrp == cl.test.t.group) {
                     testIter = groups[iGrp]->GetTestIterator();
@@ -112,16 +117,16 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
                         if ((cl.ignore == false) && (allTestsPass == false))
                             goto FAIL_OUT;
                     }
-
-                    // Prepare for next loop/group, is known starting point
-                    if (gCtrlrConfig->SoftReset() == false)
-                        return false;
                     break;  // check if more loops must occur
                 }
 
             } else {
                 // Run spec'd test within spec'd group
                 if (iGrp == cl.test.t.group) {
+                    // Each test run starts from known starting point
+                    if (gCtrlrConfig->SoftReset() == false)
+                        return false;
+
                     switch (groups[iGrp]->RunTest(cl.test.t, cl.skiptest)) {
                     case Group::TR_SUCCESS:
                         numPassed++;
@@ -140,9 +145,6 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
                     if ((cl.ignore == false) && (allTestsPass == false))
                         goto FAIL_OUT;
 
-                    // Prepare for next loop/group, is known starting point
-                    if (gCtrlrConfig->SoftReset() == false)
-                        return false;
                     break;  // check if more loops must occur
                 }
             }

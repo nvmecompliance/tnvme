@@ -7,6 +7,7 @@ SQ::SQ() :
     Queue(0, Trackable::OBJTYPE_FENCE, Trackable::LIFETIME_FENCE, false),
     MMAP_QTYPE_BITMASK(0x10000)
 {
+    // This constructor will throw
 }
 
 
@@ -16,48 +17,44 @@ SQ::SQ(int fd, Trackable::ObjType objBeingCreated, Trackable::Lifetime life,
         MMAP_QTYPE_BITMASK(0x10000)
 {
     mCqId = 0;
-    mPriority = 0;
 }
 
 
 SQ::~SQ()
 {
-    // Cleanup duties for this Q's buffer
-    if (GetIsContig()) {
-        // Contiguous memory is alloc'd and owned by the kernel
-        munmap(mContigBuf, GetQSize());
-    } else {
-        // Only assume ownership if and only if the RsrcMngr doesn't own it
-        if (mDiscontigBuf->GetOwnByRsrcMngr() == false)
-            delete mDiscontigBuf;
+    try {
+        // Cleanup duties for this Q's buffer
+        if (GetIsContig()) {
+            // Contiguous memory is alloc'd and owned by the kernel
+            munmap(mContigBuf, GetQSize());
+        } else {
+            // Only assume ownership if and only if the RsrcMngr doesn't own it
+            if (mDiscontigBuf->GetOwnByRsrcMngr() == false)
+                delete mDiscontigBuf;
+        }
+    } catch (...) {
+        ;   // Destructors should never throw. If the object is deleted B4
+            // it is Init'd() properly, it could throw, so catch and ignore
     }
 }
 
 
 void
 SQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
-    uint16_t cqId, uint8_t priority)
+    uint16_t cqId)
 {
     Queue::Init(qId, entrySize, numEntries);
     mCqId = cqId;
 
-    switch (priority) {
-    case 0x00:
-    case 0x01:
-    case 0x10:
-    case 0x11:
-        mPriority = priority;
-        break;
-
-    default:
-        LOG_DBG("Illegal priority value, can't fit within 2 bits");
-        throw exception();
-        break;
-    }
-
-
     // dnvme guarantees page aligned memory allocation and zero's it out.
     if (GetIsAdmin()) {
+        if (gCtrlrConfig->GetStateEnabled()) {
+            // At best this will cause tnvme to seg fault or a kernel crash
+            // The NVME spec states unpredictable outcomes will occur.
+            LOG_DBG("Creating an ASQ while ctrlr is enabled is a shall not");
+            throw exception();
+        }
+
         // We are creating a contiguous ASQ. ASQ's have a constant well known
         // element size and no setup is required for this type of Q.
         int ret;
@@ -110,24 +107,10 @@ SQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
 
 void
 SQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
-    MemBuffer &memBuffer, uint16_t cqId, uint8_t priority)
+    MemBuffer &memBuffer, uint16_t cqId)
 {
     Queue::Init(qId, entrySize, numEntries);
     mCqId = cqId;
-
-    switch (priority) {
-    case 0x00:
-    case 0x01:
-    case 0x10:
-    case 0x11:
-        mPriority = priority;
-        break;
-
-    default:
-        LOG_DBG("Illegal priority value, can't fit within 2 bits");
-        throw exception();
-        break;
-    }
 
     if (GetIsAdmin()) {
         // There are no appropriate methods for an NVME device to report ASC/ACQ

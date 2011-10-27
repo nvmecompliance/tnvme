@@ -26,8 +26,6 @@ public:
     /// All SQ's have an associated CQ to where its completions will be placed
     uint16_t GetCqId() { return mCqId; }
 
-    uint8_t GetPriority() { return mPriority; }
-
 
 protected:
     /**
@@ -36,10 +34,9 @@ protected:
      * @param entrySize Pass the number of bytes encompassing each element
      * @param numEntries Pass the number of elements within the Q
      * @param cqId Pass the assoc CQ ID to which this SQ will be associated
-     * @param priority Pass this Q's priority value, must be a 2 bit value
      */
     void Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
-        uint16_t cqId, uint8_t priority);
+        uint16_t cqId);
 
     /**
      * Initialize this object and allocates discontiguous Q content memory.
@@ -54,10 +51,9 @@ protected:
      *        It will also become owned by this object, it won't have to be
      *        explicitly deleted when this object goes out of scope.
      * @param cqId Pass the assoc CQ ID to which this SQ will be associated
-     * @param priority Pass this Q's priority value, must be a 2 bit value
      */
     void Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
-        MemBuffer &memBuffer, uint16_t cqId, uint8_t priority);
+        MemBuffer &memBuffer, uint16_t cqId);
 
 
 private:
@@ -65,7 +61,6 @@ private:
 
     const uint64_t MMAP_QTYPE_BITMASK;
     uint16_t mCqId;
-    uint8_t mPriority;
 
     /**
      * Create an IOSQ

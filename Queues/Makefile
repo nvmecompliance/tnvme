@@ -7,7 +7,11 @@ INCLUDES = -I. -I../ -I../../ -I/usr/local/include
 SRC = \
 	queue.cpp		\
 	cq.cpp			\
-	sq.cpp
+	sq.cpp			\
+	acq.cpp			\
+	asq.cpp			\
+	iocq.cpp		\
+	iosq.cpp
 
 .SUFFIXES: .cpp
 

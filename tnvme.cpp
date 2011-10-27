@@ -271,6 +271,7 @@ main(int argc, char *argv[])
     }
 
 
+    fflush(stdout);
     if (CmdLine.summary) {
         for (size_t i = 0; i < groups.size(); i++) {
             FORMAT_GROUP_DESCRIPTION(work, groups[i])
@@ -320,9 +321,12 @@ main(int argc, char *argv[])
         printf("%s\n", result.c_str());
     } else if (CmdLine.wmmap.req) {
         gRegisters->Write(CmdLine.wmmap.space, CmdLine.wmmap.size,
-            CmdLine.wmmap.offset, CmdLine.wmmap.acc, (uint8_t *)(&CmdLine.wmmap.value));
+            CmdLine.wmmap.offset, CmdLine.wmmap.acc,
+            (uint8_t *)(&CmdLine.wmmap.value));
     } else if (CmdLine.reset) {
-        ;   // todo; add some reset logic when available
+        gCtrlrConfig->SoftReset();
+        // At this point we cannot enable the ctrlr because that requires
+        // ACQ/ASQ's to be created, ctrlr simply won't become ready w/o these.
     } else if (CmdLine.test.req) {
         exitCode = ExecuteTests(CmdLine, groups) ? 0 : 1;
     }
@@ -363,6 +367,7 @@ bool
 BuildTestInfrastructure(vector<Group *> &groups, int &fd,
     struct CmdLine &cl)
 {
+    int ret;
     struct flock fdlock = {F_WRLCK, SEEK_SET, 0, 0, 0};
 
 
@@ -393,6 +398,20 @@ BuildTestInfrastructure(vector<Group *> &groups, int &fd,
                 cl.device.c_str());
         }
         LOG_ERR("%s", strerror(errno));
+    }
+
+    // Validate the dnvme was compiled with the same version of API as tnvme
+    if ((ret = ioctl(fd, NVME_IOCTL_GET_DRIVER_METRICS, &gDriverMetrics)) < 0) {
+        printf("Unable to extract driver version information");
+        return false;
+    }
+    printf("tnvme v/%d.%d.%d\n", ((API_VERSION >> 16) & 0xFF),
+        ((API_VERSION >> 8) & 0xFF), ((API_VERSION >> 0) & 0xFF));
+    printf("dnvme v/%d.%d.%d\n", ((gDriverMetrics.api_version >> 16) & 0xFF),
+        ((gDriverMetrics.api_version >> 8) & 0xFF),
+        ((gDriverMetrics.api_version >> 0) & 0xFF));
+    if (gDriverMetrics.api_version != API_VERSION) {
+        printf("dnvme vs tnvme version mismatch, refusing to execute");
     }
 
 

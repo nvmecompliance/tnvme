@@ -105,9 +105,11 @@ CtrlrConfig::GetStateEnabled()
 bool
 CtrlrConfig::SetStateEnabled(enum nvme_state state)
 {
+    LOG_NRM("Enabling NVME device");
     if (ioctl(mFd, NVME_IOCTL_DEVICE_STATE, &state) < 0) {
-        LOG_ERR("Could not set controller state");
-        LOG_NRM("dnvme waits a TO period for CC.EN to signal ready");
+        LOG_ERR("Could not set ctrlr state, currently %s",
+            GetStateEnabled() ? "enabled" : "disabled");
+        LOG_NRM("dnvme waits a TO period for CC.RDY to indicate ready" );
         return false;
     }
     return true;

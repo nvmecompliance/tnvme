@@ -7,6 +7,7 @@ CQ::CQ() :
     Queue(0, Trackable::OBJTYPE_FENCE, Trackable::LIFETIME_FENCE, false),
     MMAP_QTYPE_BITMASK(0x00000)
 {
+    // This constructor will throw
 }
 
 
@@ -22,14 +23,19 @@ CQ::CQ(int fd, Trackable::ObjType objBeingCreated, Trackable::Lifetime life,
 
 CQ::~CQ()
 {
-    // Cleanup duties for this Q's buffer
-    if (GetIsContig()) {
-        // Contiguous memory is alloc'd and owned by the kernel
-        munmap(mContigBuf, GetQSize());
-    } else {
-        // Only assume ownership if and only if the RsrcMngr doesn't own it
-        if (mDiscontigBuf->GetOwnByRsrcMngr() == false)
-            delete mDiscontigBuf;
+    try {
+        // Cleanup duties for this Q's buffer
+        if (GetIsContig()) {
+            // Contiguous memory is alloc'd and owned by the kernel
+            munmap(mContigBuf, GetQSize());
+        } else {
+            // Only assume ownership if and only if the RsrcMngr doesn't own it
+            if (mDiscontigBuf->GetOwnByRsrcMngr() == false)
+                delete mDiscontigBuf;
+        }
+    } catch (...) {
+        ;   // Destructors should never throw. If the object is deleted B4
+            // it is Init'd() properly, it could throw, so catch and ignore
     }
 }
 
@@ -44,6 +50,13 @@ CQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
 
     // dnvme guarantees page aligned memory allocation and zero's it out.
     if (GetIsAdmin()) {
+        if (gCtrlrConfig->GetStateEnabled()) {
+            // At best this will cause tnvme to seg fault or a kernel crash
+            // The NVME spec states unpredictable outcomes will occur.
+            LOG_DBG("Creating an ASQ while ctrlr is enabled is a shall not");
+            throw exception();
+        }
+
         // We are creating a contiguous ACQ. ACQ's have a constant well known
         // element size and no setup is required for this type of Q.
         int ret;
