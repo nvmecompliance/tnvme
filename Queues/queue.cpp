@@ -1,16 +1,14 @@
 #include "queue.h"
 
 
-Queue::Queue() :
-    Trackable(Trackable::OBJTYPE_FENCE, Trackable::LIFETIME_FENCE, false)
+Queue::Queue() : Trackable(Trackable::OBJTYPE_FENCE)
 {
     // This constructor will throw
 }
 
 
-Queue::Queue(int fd, Trackable::ObjType objBeingCreated,
-    Trackable::Lifetime life, bool ownByRsrcMngr) :
-        Trackable(objBeingCreated, life, ownByRsrcMngr)
+Queue::Queue(int fd, Trackable::ObjType objBeingCreated) :
+    Trackable(objBeingCreated)
 {
     mFd = fd;
     if (mFd < 0) {
@@ -21,7 +19,7 @@ Queue::Queue(int fd, Trackable::ObjType objBeingCreated,
     mQId = 0;
     mEntrySize = 0;
     mNumEntries = 0;
-    mDiscontigBuf = NULL;
+    mDiscontigBuf = MemBuffer::NullMemBufferPtr;
     mContigBuf = NULL;
 }
 
@@ -35,10 +33,14 @@ Queue::~Queue()
 bool
 Queue::GetIsContig()
 {
-    if ((mContigBuf == NULL) && (mDiscontigBuf == NULL)) {
+    if ((mContigBuf == NULL) &&
+        (mDiscontigBuf == MemBuffer::NullMemBufferPtr)) {
+
         LOG_DBG("Detected an uninitialized Q");
         throw exception();
-    } else if ((mContigBuf != NULL) && (mDiscontigBuf != NULL)) {
+    } else if ((mContigBuf != NULL) &&
+        (mDiscontigBuf != MemBuffer::NullMemBufferPtr)) {
+
         LOG_DBG("Detected an illegally configured Q");
         throw exception();
     }
@@ -59,7 +61,7 @@ Queue::GetQBuffer()
 void
 Queue::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries)
 {
-    if (mDiscontigBuf != NULL) {
+    if (mDiscontigBuf != MemBuffer::NullMemBufferPtr) {
         LOG_DBG("Obj already init'd for discontiguous parameters");
         throw exception();
     } else if (mContigBuf != NULL) {

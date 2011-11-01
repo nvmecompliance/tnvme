@@ -47,21 +47,6 @@ CtrlrConfig::~CtrlrConfig()
 
 
 bool
-CtrlrConfig::SoftReset()
-{
-    bool retVal;
-
-    // In user space, in kernel space and in hardware, nothing remains.
-    LOG_NRM("Performing soft reset");
-    gRsrcMngr->FreeObjGrpLife();
-    gCtrlrConfig->SetStateEnabled(ST_DISABLE_COMPLETELY);
-    if ((retVal = SetIrqScheme(INT_NONE)) == false)
-        LOG_ERR("Setting IRQ scheme failed");
-    return retVal;
-}
-
-
-bool
 CtrlrConfig::GetIrqScheme(enum nvme_irq_type &irq)
 {
     //------------------------------------------------------------------------

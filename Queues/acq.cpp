@@ -1,16 +1,16 @@
 #include "acq.h"
 #include "globals.h"
 
+SharedACQPtr ACQ::NullACQPtr;
 
-ACQ::ACQ() :
-    CQ(0, Trackable::OBJTYPE_FENCE, Trackable::LIFETIME_FENCE, false)
+
+ACQ::ACQ() : CQ(0, Trackable::OBJTYPE_FENCE)
 {
     // This constructor will throw
 }
 
 
-ACQ::ACQ(int fd, Trackable::Lifetime life, bool ownByRsrcMngr) :
-    CQ(fd, Trackable::OBJ_ACQ, life, ownByRsrcMngr)
+ACQ::ACQ(int fd) : CQ(fd, Trackable::OBJ_ACQ)
 {
 }
 
@@ -28,7 +28,7 @@ ACQ::Init(uint16_t numEntries)
 
 
 void
-ACQ::Init(uint16_t numEntries, MemBuffer &memBuffer)
+ACQ::Init(uint16_t numEntries, SharedMemBufferPtr memBuffer)
 {
     CQ::Init(0, 16, numEntries, memBuffer, true, 0);
 }

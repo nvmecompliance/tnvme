@@ -30,6 +30,28 @@ DumpPciAddrSpace_r10b::~DumpPciAddrSpace_r10b()
 }
 
 
+DumpPciAddrSpace_r10b::
+DumpPciAddrSpace_r10b(const DumpPciAddrSpace_r10b &other) : Test(other)
+{
+    ///////////////////////////////////////////////////////////////////////////
+    // All pointers in this object must be NULL, never allow shallow or deep
+    // copies, see Test::Clone() header comment.
+    ///////////////////////////////////////////////////////////////////////////
+}
+
+
+DumpPciAddrSpace_r10b &
+DumpPciAddrSpace_r10b::operator=(const DumpPciAddrSpace_r10b &other)
+{
+    ///////////////////////////////////////////////////////////////////////////
+    // All pointers in this object must be NULL, never allow shallow or deep
+    // copies, see Test::Clone() header comment.
+    ///////////////////////////////////////////////////////////////////////////
+    Test::operator=(other);
+    return *this;
+}
+
+
 bool
 DumpPciAddrSpace_r10b::RunCoreTest()
 {

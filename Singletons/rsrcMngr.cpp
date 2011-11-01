@@ -7,7 +7,7 @@
 
 
 typedef pair<string, SharedTrackablePtr> TrackablePair;
-SharedTrackablePtr RsrcMngr::NullTrackablePtr;
+
 
 bool RsrcMngr::mInstanceFlag = false;
 RsrcMngr* RsrcMngr::mSingleton = NULL;
@@ -50,34 +50,32 @@ RsrcMngr::~RsrcMngr()
 
 
 SharedTrackablePtr
-RsrcMngr::AllocObj(Trackable::ObjType type, Trackable::Lifetime life)
+RsrcMngr::Allocate(Trackable::ObjType type)
 {
-    string lt = (life == Trackable::LIFE_TEST) ? "test" : "group";
-
     switch (type) {
     case Trackable::OBJ_MEMBUFFER:
-        LOG_NRM("Obj MemBuffer is born with %s lifetime", lt.c_str());
-        return SharedTrackablePtr(new MemBuffer(life, true));
+        LOG_NRM("Obj MemBuffer is born with group lifetime");
+        return SharedTrackablePtr(new MemBuffer());
         break;
 
     case Trackable::OBJ_ACQ:
-        LOG_NRM("Obj ACQ is born with %s lifetime", lt.c_str());
-        return SharedTrackablePtr(new ACQ(mFd, life, true));
+        LOG_NRM("Obj ACQ is born with group lifetime");
+        return SharedTrackablePtr(new ACQ(mFd));
         break;
 
     case Trackable::OBJ_ASQ:
-        LOG_NRM("Obj ASQ is born with %s lifetime", lt.c_str());
-        return SharedTrackablePtr(new ASQ(mFd, life, true));
+        LOG_NRM("Obj ASQ is born with group lifetime");
+        return SharedTrackablePtr(new ASQ(mFd));
         break;
 
     case Trackable::OBJ_IOCQ:
-        LOG_NRM("Obj IOCQ is born with %s lifetime", lt.c_str());
-        return SharedTrackablePtr(new IOCQ(mFd, life, true));
+        LOG_NRM("Obj IOCQ is born with group lifetime");
+        return SharedTrackablePtr(new IOCQ(mFd));
         break;
 
     case Trackable::OBJ_IOSQ:
-        LOG_NRM("Obj IOSQ is born with %s lifetime", lt.c_str());
-        return SharedTrackablePtr(new IOSQ(mFd, life, true));
+        LOG_NRM("Obj IOSQ is born with group lifetime");
+        return SharedTrackablePtr(new IOSQ(mFd));
         break;
 
     default:
@@ -85,22 +83,22 @@ RsrcMngr::AllocObj(Trackable::ObjType type, Trackable::Lifetime life)
         break;
     }
 
-    return NullTrackablePtr;
+    return Trackable::NullTrackablePtr;
 }
 
 
 SharedTrackablePtr
-RsrcMngr::AllocObjGrpLife(Trackable::ObjType type, string lookupName)
+RsrcMngr::AllocObj(Trackable::ObjType type, string lookupName)
 {
     if (lookupName.length() == 0) {
         LOG_DBG("Parameter lookupName has no value");
-        return NullTrackablePtr;
+        return Trackable::NullTrackablePtr;
     }
 
-    SharedTrackablePtr newObj = AllocObj(type, Trackable::LIFE_GROUP);
-    if (newObj == NullTrackablePtr) {
+    SharedTrackablePtr newObj = Allocate(type);
+    if (newObj == Trackable::NullTrackablePtr) {
         LOG_DBG("System unable to create object from heap");
-        return NullTrackablePtr;
+        return Trackable::NullTrackablePtr;
     }
 
     // Store this allocated object in a more permanent container
@@ -109,30 +107,15 @@ RsrcMngr::AllocObjGrpLife(Trackable::ObjType type, string lookupName)
     if (result.second == false) {
         LOG_DBG("Created object with collisions in lookupName: %s",
             lookupName.c_str());
-        return NullTrackablePtr;
+        return Trackable::NullTrackablePtr;
     }
 
-    return GetObjGrpLife(lookupName);
+    return GetObj(lookupName);
 }
 
 
 SharedTrackablePtr
-RsrcMngr::AllocObjTestLife(Trackable::ObjType type)
-{
-    SharedTrackablePtr newObj = AllocObj(type, Trackable::LIFE_TEST);
-    if (newObj == NullTrackablePtr) {
-        LOG_DBG("System unable to create object from heap");
-        return NullTrackablePtr;
-    }
-
-    // Store this allocated object in a more permanent container
-    mObjTesLife.push_back(newObj);
-    return newObj;
-}
-
-
-SharedTrackablePtr
-RsrcMngr::GetObjGrpLife(string lookupName)
+RsrcMngr::GetObj(string lookupName)
 {
     TrackableMap::iterator item;
 
@@ -144,11 +127,8 @@ RsrcMngr::GetObjGrpLife(string lookupName)
 
 
 void
-RsrcMngr::FreeObjGrpLife()
+RsrcMngr::FreeObj()
 {
-    // Enforce that test lifetimes are shorter than group lifetimes.
-    FreeObjTestLife();
-
     // By removing all pointers contained within the container it will destroy
     // the contained share_ptr's and thus the objects being pointed to. This, of
     // course, assumes that all other shared_ptr's to those objects have been
@@ -157,18 +137,4 @@ RsrcMngr::FreeObjGrpLife()
     // deleted after they complete, i.e. replace with TestNULL objects.
     LOG_NRM("Group level resources are being freed: %ld", mObjGrpLife.size());
     mObjGrpLife.clear();
-}
-
-
-void
-RsrcMngr::FreeObjTestLife()
-{
-    // By removing all pointers contained within the container it will destroy
-    // the contained share_ptr's and thus the objects being pointed to. This, of
-    // course, assumes that all other shared_ptr's to those objects have been
-    // destroyed. This should be the case since the resource manager creates
-    // objects on behalf of tests and all test objects within a group are
-    // deleted after they complete, i.e. replace with TestNULL objects.
-    LOG_NRM("Test level resources are being freed: %ld", mObjTesLife.size());
-    mObjTesLife.clear();
 }

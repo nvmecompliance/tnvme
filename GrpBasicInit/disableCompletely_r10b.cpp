@@ -24,6 +24,28 @@ DisableCompletely_r10b::~DisableCompletely_r10b()
 }
 
 
+DisableCompletely_r10b::
+DisableCompletely_r10b(const DisableCompletely_r10b &other) : Test(other)
+{
+    ///////////////////////////////////////////////////////////////////////////
+    // All pointers in this object must be NULL, never allow shallow or deep
+    // copies, see Test::Clone() header comment.
+    ///////////////////////////////////////////////////////////////////////////
+}
+
+
+DisableCompletely_r10b &
+DisableCompletely_r10b::operator=(const DisableCompletely_r10b &other)
+{
+    ///////////////////////////////////////////////////////////////////////////
+    // All pointers in this object must be NULL, never allow shallow or deep
+    // copies, see Test::Clone() header comment.
+    ///////////////////////////////////////////////////////////////////////////
+    Test::operator=(other);
+    return *this;
+}
+
+
 // todo remove after temporary unit tests are exhibited and accepted.
 #include "../Queues/acq.h"
 #include "../Queues/asq.h"
@@ -34,31 +56,41 @@ bool
 DisableCompletely_r10b::RunCoreTest()
 {
     {
-        LOG_NRM("Test RsrcMngr");
+        LOG_NRM("Testing RsrcMngr: creating memBuffer obj for group life");
+        LOG_NRM("Pause until keypress");
+        getchar();
 
         // Create an object we expect to be freed after this test ends
-        SharedTrackablePtr someMemory1;
-        someMemory1 = gRsrcMngr->AllocObjTestLife(Trackable::OBJ_MEMBUFFER);
-        if (someMemory1 == RsrcMngr::NullTrackablePtr) {
+        SharedTrackablePtr memBuf1;
+        memBuf1 = gRsrcMngr->AllocObj(Trackable::OBJ_MEMBUFFER, "memBuf1");
+        if (memBuf1 == Trackable::NullTrackablePtr) {
             LOG_DBG("Allocation of object failed");
             throw exception();
         }
-
-        // Create an object we expect to be freed after this group ends
-        SharedTrackablePtr someMemory2;
-        someMemory2 = gRsrcMngr->AllocObjGrpLife(Trackable::OBJ_MEMBUFFER,
-            "MyObj");
-        if (someMemory2 == RsrcMngr::NullTrackablePtr) {
-            LOG_DBG("Allocation of object failed");
-            throw exception();
-        }
+        SharedMemBufferPtr memBuf2 = CAST_TO_SMBP(memBuf1);
     }
+
+    {
+        LOG_NRM("Testing creating memBuffer obj for test life");
+        LOG_NRM("Pause until keypress");
+        getchar();
+
+        // Create an object we expect to be freed after this test ends
+        SharedMemBufferPtr memBuf1 = SharedMemBufferPtr(new MemBuffer());
+    }
+    LOG_NRM("Pointer is now out of scope, did it die?");
+    LOG_NRM("Pause until keypress");
+    getchar();
+
 
     {
         uint8_t cmpVal;
         uint8_t regVal;
 
-        LOG_NRM("Test CtrlrConfig");
+        LOG_NRM("Test CtrlrConfig: r/w to CC register, throws upon errors");
+        LOG_NRM("Pause until keypress");
+        getchar();
+
         regVal = 0x0e;
         gCtrlrConfig->SetIOCQES(regVal);
         if (gCtrlrConfig->GetIOCQES(cmpVal) == false) {
@@ -126,11 +158,10 @@ DisableCompletely_r10b::RunCoreTest()
             LOG_DBG("Should be disabled");
             throw exception();
         }
-#if 0
-// Nisheeth needs to fix bug in QEMU, NVME comes ready when it is not suppose to
+
         // This won't go ready because we didn't create any ASQ or ACQ
-        if (gCtrlrConfig->SetStateEnabled(ST_ENABLE) == true) {
-            LOG_DBG("Ctrlr became ready and wasn't suppose to");
+        if (gCtrlrConfig->SetStateEnabled(ST_ENABLE) == false) {
+            LOG_DBG("Ctrlr dind't became ready and was suppose to");
             uint64_t someReg;
             gRegisters->Read(CTLSPC_CSTS, someReg);
             gRegisters->Read(CTLSPC_AQA, someReg);
@@ -146,62 +177,69 @@ DisableCompletely_r10b::RunCoreTest()
             LOG_DBG("Should be disabled");
             throw exception();
         }
-#endif
     }
+    LOG_NRM("If program still executing then test has passed");
+    LOG_NRM("Pause until keypress");
+    getchar();
+
 
     {
-        // Create an object we expect to be freed after this test ends
-        SharedTrackablePtr someACQ1;
-        someACQ1 = gRsrcMngr->AllocObjTestLife(Trackable::OBJ_ACQ);
-        if (someACQ1 == RsrcMngr::NullTrackablePtr) {
-            LOG_DBG("Allocation of object failed");
-            throw exception();
-        }
-        SharedTrackablePtr someASQ1;
-        someASQ1 = gRsrcMngr->AllocObjTestLife(Trackable::OBJ_ASQ);
-        if (someASQ1 == RsrcMngr::NullTrackablePtr) {
-            LOG_DBG("Allocation of object failed");
-            throw exception();
-        }
-        SharedTrackablePtr someIOCQ1;
-        someIOCQ1 = gRsrcMngr->AllocObjTestLife(Trackable::OBJ_IOCQ);
-        if (someIOCQ1 == RsrcMngr::NullTrackablePtr) {
-            LOG_DBG("Allocation of object failed");
-            throw exception();
-        }
-        SharedTrackablePtr someIOCS1;
-        someIOCS1 = gRsrcMngr->AllocObjTestLife(Trackable::OBJ_IOSQ);
-        if (someIOCS1 == RsrcMngr::NullTrackablePtr) {
-            LOG_DBG("Allocation of object failed");
-            throw exception();
-        }
+        LOG_NRM("Testing RsrcMngr: creating ACQ/ASQ/IOCQ/IOSQ obj's for group life");
+        LOG_NRM("Pause until keypress");
+        getchar();
 
-        // Create an object we expect to be freed after this group ends
-        SharedTrackablePtr someACQ10;
-        someACQ10 = gRsrcMngr->AllocObjGrpLife(Trackable::OBJ_ACQ, "MyACQ");
-        if (someACQ10 == RsrcMngr::NullTrackablePtr) {
+        // Create an object we expect to be freed after this test ends
+        SharedTrackablePtr ACQ1;
+        ACQ1 = gRsrcMngr->AllocObj(Trackable::OBJ_ACQ, "ACQ1");
+        if (ACQ1 == Trackable::NullTrackablePtr) {
             LOG_DBG("Allocation of object failed");
             throw exception();
         }
-        SharedTrackablePtr someASQ10;
-        someASQ10 = gRsrcMngr->AllocObjGrpLife(Trackable::OBJ_ACQ, "MyASQ");
-        if (someASQ10 == RsrcMngr::NullTrackablePtr) {
+        SharedACQPtr ACQ2 = CAST_TO_ACQP(ACQ1);
+
+        // Create an object we expect to be freed after this test ends
+        SharedTrackablePtr ASQ1;
+        ASQ1 = gRsrcMngr->AllocObj(Trackable::OBJ_ASQ, "ASQ1");
+        if (ASQ1 == Trackable::NullTrackablePtr) {
             LOG_DBG("Allocation of object failed");
             throw exception();
         }
-        SharedTrackablePtr someIOCQ10;
-        someIOCQ10 = gRsrcMngr->AllocObjGrpLife(Trackable::OBJ_IOCQ, "MyIOCQ");
-        if (someIOCQ10 == RsrcMngr::NullTrackablePtr) {
+        SharedASQPtr ASQ2 = CAST_TO_ASQP(ASQ1);
+
+        // Create an object we expect to be freed after this test ends
+        SharedTrackablePtr IOSQ1;
+        IOSQ1 = gRsrcMngr->AllocObj(Trackable::OBJ_IOSQ, "IOSQ1");
+        if (IOSQ1 == Trackable::NullTrackablePtr) {
             LOG_DBG("Allocation of object failed");
             throw exception();
         }
-        SharedTrackablePtr someIOSQ10;
-        someIOSQ10 = gRsrcMngr->AllocObjGrpLife(Trackable::OBJ_IOSQ, "MyIOSQ");
-        if (someIOSQ10 == RsrcMngr::NullTrackablePtr) {
+        SharedIOSQPtr IOSQ2 = CAST_TO_IOSQP(IOSQ1);
+
+        // Create an object we expect to be freed after this test ends
+        SharedTrackablePtr IOCQ1;
+        IOCQ1 = gRsrcMngr->AllocObj(Trackable::OBJ_IOCQ, "IOCQ1");
+        if (IOCQ1 == Trackable::NullTrackablePtr) {
             LOG_DBG("Allocation of object failed");
             throw exception();
         }
+        SharedIOCQPtr IOCQ2 = CAST_TO_IOCQP(IOCQ1);
     }
+
+
+    {
+        LOG_NRM("Testing creating ACQ/ASQ/IOCQ/IOSQ obj's for test life");
+        LOG_NRM("Pause until keypress");
+        getchar();
+
+        // Create an object we expect to be freed after this test ends
+        SharedACQPtr ACQ1 = SharedACQPtr(new ACQ(mFd));
+        SharedASQPtr ASQ1 = SharedASQPtr(new ASQ(mFd));
+        SharedIOCQPtr IOCQ1 = SharedIOCQPtr(new IOCQ(mFd));
+        SharedIOSQPtr IOSQ1 = SharedIOSQPtr(new IOSQ(mFd));
+    }
+    LOG_NRM("Pointers are now out of scope, did they die?");
+    LOG_NRM("Pause until keypress");
+    getchar();
 
     return true;
 }

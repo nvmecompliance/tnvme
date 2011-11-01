@@ -3,6 +3,11 @@
 
 #include "sq.h"
 
+class ASQ;    // forward definition
+typedef boost::shared_ptr<ASQ>        SharedASQPtr;
+#define CAST_TO_ASQP(shared_trackable_ptr)  \
+        boost::shared_polymorphic_downcast<ASQ>(shared_trackable_ptr)
+
 
 /**
 * This class is meant to be instantiated and represents an ASQ. After
@@ -15,12 +20,12 @@ class ASQ : public SQ
 public:
     /**
      * @param fd Pass the opened file descriptor for the device under test
-     * @param life Pass the lifetime of the object being created
-     * @param ownByRsrcMngr Pass true if the RsrcMngr created this obj,
-     *      otherwise false.
      */
-    ASQ(int fd, Trackable::Lifetime life, bool ownByRsrcMngr);
+    ASQ(int fd);
     virtual ~ASQ();
+
+    /// Used to compare for NULL pointers being returned by allocations
+    static SharedASQPtr NullASQPtr;
 
     /**
      * Initialize this object and allocates a contiguous ACQ
@@ -31,15 +36,13 @@ public:
     /**
      * Initialize this object and allocates discontiguous ACQ.
      * @param numEntries Pass the number of elements within the Q
-     * @param memBuffer Hand off a buffer which must satisfy
-     *        MemBuffer.GetBufSize()>=(numEntries * entrySize). It must have
-     *        the same life span as this object, it must have been created
-     *        by the same means as this object, and must only ever be accessed
-     *        as RO. Writing to this buffer will have unpredictable results.
-     *        It will also become owned by this object, it won't have to be
-     *        explicitly deleted when this object goes out of scope.
+     * @param memBuffer Hand off this Q's memory. It must satisfy
+     *      MemBuffer.GetBufSize()>=(numEntries * entrySize). It must only ever
+     *      be accessed as RO. Writing to this buffer will have unpredictable
+     *      results. It will also become owned by this object, it won't have to
+     *      be explicitly deleted when this object goes out of scope.
      */
-    void Init(uint16_t numEntries, MemBuffer &memBuffer);
+    void Init(uint16_t numEntries, SharedMemBufferPtr memBuffer);
 
 
 private:

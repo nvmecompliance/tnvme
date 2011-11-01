@@ -24,6 +24,28 @@ AllCtrlRegs_r10b::~AllCtrlRegs_r10b()
 }
 
 
+AllCtrlRegs_r10b::
+AllCtrlRegs_r10b(const AllCtrlRegs_r10b &other) : Test(other)
+{
+    ///////////////////////////////////////////////////////////////////////////
+    // All pointers in this object must be NULL, never allow shallow or deep
+    // copies, see Test::Clone() header comment.
+    ///////////////////////////////////////////////////////////////////////////
+}
+
+
+AllCtrlRegs_r10b &
+AllCtrlRegs_r10b::operator=(const AllCtrlRegs_r10b &other)
+{
+    ///////////////////////////////////////////////////////////////////////////
+    // All pointers in this object must be NULL, never allow shallow or deep
+    // copies, see Test::Clone() header comment.
+    ///////////////////////////////////////////////////////////////////////////
+    Test::operator=(other);
+    return *this;
+}
+
+
 bool
 AllCtrlRegs_r10b::RunCoreTest()
 {

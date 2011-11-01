@@ -4,17 +4,16 @@
 
 
 SQ::SQ() :
-    Queue(0, Trackable::OBJTYPE_FENCE, Trackable::LIFETIME_FENCE, false),
+    Queue(0, Trackable::OBJTYPE_FENCE),
     MMAP_QTYPE_BITMASK(0x10000)
 {
     // This constructor will throw
 }
 
 
-SQ::SQ(int fd, Trackable::ObjType objBeingCreated, Trackable::Lifetime life,
-    bool ownByRsrcMngr) :
-        Queue(fd, objBeingCreated, life, ownByRsrcMngr),
-        MMAP_QTYPE_BITMASK(0x10000)
+SQ::SQ(int fd, Trackable::ObjType objBeingCreated) :
+    Queue(fd, objBeingCreated),
+    MMAP_QTYPE_BITMASK(0x10000)
 {
     mCqId = 0;
 }
@@ -27,10 +26,6 @@ SQ::~SQ()
         if (GetIsContig()) {
             // Contiguous memory is alloc'd and owned by the kernel
             munmap(mContigBuf, GetQSize());
-        } else {
-            // Only assume ownership if and only if the RsrcMngr doesn't own it
-            if (mDiscontigBuf->GetOwnByRsrcMngr() == false)
-                delete mDiscontigBuf;
         }
     } catch (...) {
         ;   // Destructors should never throw. If the object is deleted B4
@@ -46,7 +41,8 @@ SQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
     Queue::Init(qId, entrySize, numEntries);
     mCqId = cqId;
 
-    // dnvme guarantees page aligned memory allocation and zero's it out.
+
+    // NOTE: This method creates contiguous Q's only
     if (GetIsAdmin()) {
         if (gCtrlrConfig->GetStateEnabled()) {
             // At best this will cause tnvme to seg fault or a kernel crash
@@ -62,10 +58,9 @@ SQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
         q.elements = GetNumEntries();
         q.type = ADMIN_SQ;
 
-        LOG_NRM(
-            "Init contig ASQ: (id, cqid, entrySize, numEntries) = "
-            "(%d, %d, %d, %d)",
-            GetQId(), GetCqId(), GetEntrySize(), GetNumEntries());
+        LOG_NRM("Init contig ASQ: (id, cqid, entrySize, numEntries) = "
+            "(%d, %d, %d, %d)", GetQId(), GetCqId(), GetEntrySize(),
+            GetNumEntries());
 
         if ((ret = ioctl(mFd, NVME_IOCTL_CREATE_ADMN_Q, &q)) < 0) {
             LOG_DBG("Q Creation failed by dnvme with error: 0x%02X", ret);
@@ -107,42 +102,36 @@ SQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
 
 void
 SQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
-    MemBuffer &memBuffer, uint16_t cqId)
+    SharedMemBufferPtr memBuffer, uint16_t cqId)
 {
     Queue::Init(qId, entrySize, numEntries);
     mCqId = cqId;
 
+
+    // NOTE: This method creates discontiguous Q's only
     if (GetIsAdmin()) {
         // There are no appropriate methods for an NVME device to report ASC/ACQ
-        // creation errors, thus don't allow these problems to be injected, at
-        // best they will only succeed to seg fault the app or crash the kernel.
-        // IOQ's do have ways to report these types of errors, thus allow it.
+        // creation errors, thus since ASC/ASQ may only be contiguous then don't
+        // allow these problems to be injected, at best they will only succeed
+        // to seg fault the app or crash the kernel.
         LOG_DBG("Illegal memory alignment will corrupt");
         throw exception();
-    } else if (memBuffer.GetBufSize() < GetQSize()) {
+    } else  if (mDiscontigBuf->GetBufSize() < GetQSize()) {
         LOG_DBG("Q buffer memory ambiguous to passed params");
         throw exception();
-    } else if (memBuffer.GetAlignment() != sysconf(_SC_PAGESIZE)) {
+    } else if (mDiscontigBuf->GetAlignment() != sysconf(_SC_PAGESIZE)) {
         // Nonconformance to page alignment will seg fault the app or crash
         // the kernel. This state is not testable since no errors can be
         // reported by hdw, thus disallow this attempt.
         LOG_DBG("Q content memory shall be page aligned");
-        throw exception();
-    } else if (memBuffer.GetOwnByRsrcMngr() != this->GetOwnByRsrcMngr()) {
-        // If one obj is created by RsrcMngr then all its member must also
-        LOG_DBG("MemBuffer wasn't created via same means as Q object");
-        throw exception();
-    } else if (memBuffer.GetObjLife() != this->GetObjLife()) {
-        // Can't have the memory of the Q live shorter than the Q itself
-        LOG_DBG("MemBuffer doesn't have same life span as Q object");
         throw exception();
     }
 
     // Zero out the content memory so the P-bit correlates to a newly alloc'd Q.
     // Also assuming life time ownership of this object if it wasn't created
     // by the RsrcMngr.
-    mDiscontigBuf = &memBuffer;
-    memBuffer.Reset();
+    mDiscontigBuf = memBuffer;
+    mDiscontigBuf->Reset();
 
     // We are creating a contiguous IOSQ. IOSQ's have variable entry
     // sizes which must be setup beforehand.

@@ -24,6 +24,28 @@ AllPciRegs_r10b::~AllPciRegs_r10b()
 }
 
 
+AllPciRegs_r10b::
+AllPciRegs_r10b(const AllPciRegs_r10b &other) : Test(other)
+{
+    ///////////////////////////////////////////////////////////////////////////
+    // All pointers in this object must be NULL, never allow shallow or deep
+    // copies, see Test::Clone() header comment.
+    ///////////////////////////////////////////////////////////////////////////
+}
+
+
+AllPciRegs_r10b &
+AllPciRegs_r10b::operator=(const AllPciRegs_r10b &other)
+{
+    ///////////////////////////////////////////////////////////////////////////
+    // All pointers in this object must be NULL, never allow shallow or deep
+    // copies, see Test::Clone() header comment.
+    ///////////////////////////////////////////////////////////////////////////
+    Test::operator=(other);
+    return *this;
+}
+
+
 bool
 AllPciRegs_r10b::RunCoreTest()
 {

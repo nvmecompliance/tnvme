@@ -18,11 +18,13 @@ using namespace std;
 * ----------------Mandatory rules for children to follow-----------------------
 * -----------------------------------------------------------------------------
 * 1) During construction populate member Test::mTestDesc
-* 2) Utilize class RsrcMngr to create objects to pass to subsequent tests
+* 2) Utilize class RsrcMngr to create objects to pass to subsequent tests which
+*    are all part of the same group.
 * 3) Heap allocations taken during test execution, and not under the control
 *    of the RsrcMngr, must be deleted in destructor.
-* 4) Do not create member variables, rather use local variables with member
-*    functions. The reason for this is explained in Test::Clone().
+* 4) The creation of member variables is allowed but special attention to
+*    copy construction and operator=() must be implemented in all children.
+*    See the comment in Test::Clone() for complete details.
 * 5) Execute dbgMemLeak.sh to find any memory leaks as a result of adding and
 *    running any new test cases.
 * -----------------------------------------------------------------------------
@@ -77,25 +79,27 @@ public:
 
     /**
      * Cloning objects are necessary to support automated resource cleanup
-     * between successive test case runs. Objects are cloned, then freed after
-     * each test completes to force resource cleanup. This cloning uses
-     * default copy construction and thus forces restrictions onto
-     * class member variables in that pointers shouldn't be used unless they
-     * are weak_ptr's. The use of share_ptr member variables will cause objects
-     * to not be freed. Using regular C++ pointers have other considerations as
-     * to proper cleanup in the destructor and the use of shallow copies.
-     *
-     * To be safe, tests should only use local variables within member functions
-     * and utilize the RsrcMngr to pass objects between subsequent test cases
-     * within a group.
+     * between successive test case runs. This is the cleanup action of test
+     * lifetimes. Objects are cloned, then freed after each test completes to
+     * force resource cleanup. This cloning uses special copy construction and
+     * operator=() to achieve proper resource cleanup. The end result of a
+     * clone action should be to re-create a new object w/o doing any copying of pointer. Do not do deep nor shallow copies of any
+     * pointers. Do not do shallow or deep copies of any pointer. Any pointer
+     * is one of the following: share_ptr, weak_ptr, or C++ pointers using the
+     * new operator. All cloned objects must achieve NULL pointers or resource
+     * cleanup will not be possible. Thus default copy constructors and
+     * operator=() cannot be used because they do bitwise copying. Thus all
+     * children must implement copy constructors and operator=() to achieve this
+     * requirement to allow proper resource cleanup.
      */
     virtual Test *Clone() const { return new Test(*this); }
+    Test &operator=(const Test &other);
+    Test(const Test &other);
 
 
 protected:
     ///////////////////////////////////////////////////////////////////////////
-    // Adding a member variable? Think carefully, see Test::Clone() hdr comment
-    // Adding a member functions is fine.
+    // Adding a member variable? Then edit the copy constructor and operator().
     ///////////////////////////////////////////////////////////////////////////
 
     /// file descriptor to the device under test
@@ -138,8 +142,7 @@ protected:
 
 private:
     ///////////////////////////////////////////////////////////////////////////
-    // Adding a member variable? Think carefully, see Test::Clone() hdr comment
-    // Adding a member functions is fine.
+    // Adding a member variable? Then edit the copy constructor and operator().
     ///////////////////////////////////////////////////////////////////////////
 
     Test();

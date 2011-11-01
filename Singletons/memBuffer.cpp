@@ -2,16 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-
-MemBuffer::MemBuffer() :
-    Trackable(Trackable::OBJTYPE_FENCE, Trackable::LIFETIME_FENCE, false)
-{
-    // This constructor will throw
-}
+SharedMemBufferPtr MemBuffer::NullMemBufferPtr;
 
 
-MemBuffer::MemBuffer(Trackable::Lifetime life, bool ownByRsrcMngr) :
-    Trackable(Trackable::OBJ_MEMBUFFER, life, ownByRsrcMngr)
+MemBuffer::MemBuffer() : Trackable(Trackable::OBJ_MEMBUFFER)
 {
     InitMemberVariables();
 }
@@ -19,14 +13,21 @@ MemBuffer::MemBuffer(Trackable::Lifetime life, bool ownByRsrcMngr) :
 
 MemBuffer::~MemBuffer()
 {
-    if (mRealBaseAddr)
-        free(mRealBaseAddr);
+    // Either new or posix_memalign() was used to allocate memory
+    if (mAllocByNewOperator) {
+        if (mRealBaseAddr)
+            delete [] mRealBaseAddr;
+    } else {
+        if (mRealBaseAddr)
+            free(mRealBaseAddr);
+    }
 }
 
 
 void
 MemBuffer::InitMemberVariables()
 {
+    mAllocByNewOperator = true;
     mRealBaseAddr = NULL;
     mVirBaseAddr = NULL;
     mVirBufSize = 0;
@@ -58,6 +59,7 @@ MemBuffer::InitOffset1stPage(uint32_t bufSize, bool initMem, uint8_t initVal,
         LOG_DBG("Offset into page 1 not aligned to: 0x%02lX", sizeof(uint32_t));
         throw exception();
     }
+    mAllocByNewOperator = false;  // using posix_memalign()
 
     // All memory is allocated page aligned, offsets into the 1st page requires
     // asking for more memory than the caller desires and then tracking the
@@ -95,6 +97,7 @@ MemBuffer::InitAlignment(uint32_t bufSize, bool initMem, uint8_t initVal,
         LOG_DBG("Requested alignment not aligned to: 0x%02lX", sizeof(void *));
         throw exception();
     }
+    mAllocByNewOperator = false;  // using posix_memalign()
 
     mVirBufSize = bufSize;
     err = posix_memalign((void **)&mRealBaseAddr, align, mVirBufSize);
@@ -105,6 +108,30 @@ MemBuffer::InitAlignment(uint32_t bufSize, bool initMem, uint8_t initVal,
     }
     mVirBaseAddr = mRealBaseAddr;
     mAlignment = align;
+
+    if (initMem)
+        memset(mVirBaseAddr, initVal, mVirBufSize);
+}
+
+
+void
+MemBuffer::Init(uint32_t bufSize, bool initMem, uint8_t initVal)
+{
+    if (mRealBaseAddr != NULL) {
+        LOG_DBG("Reallocating a previously allocated buffer not supported");
+        throw exception();
+    }
+    mAllocByNewOperator = true;
+
+    mVirBufSize = bufSize;
+    mRealBaseAddr = new (nothrow) uint8_t[mVirBufSize];
+    if (mRealBaseAddr == NULL) {
+        LOG_DBG("Memory allocation failed");
+        InitMemberVariables();
+        throw exception();
+    }
+    mVirBaseAddr = mRealBaseAddr;
+    mAlignment = 0;
 
     if (initMem)
         memset(mVirBaseAddr, initVal, mVirBufSize);

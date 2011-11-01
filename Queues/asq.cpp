@@ -1,16 +1,16 @@
 #include "asq.h"
 #include "globals.h"
 
+SharedASQPtr ASQ::NullASQPtr;
 
-ASQ::ASQ() :
-    SQ(0, Trackable::OBJTYPE_FENCE, Trackable::LIFETIME_FENCE, false)
+
+ASQ::ASQ() : SQ(0, Trackable::OBJTYPE_FENCE)
 {
     // This constructor will throw
 }
 
 
-ASQ::ASQ(int fd, Trackable::Lifetime life, bool ownByRsrcMngr) :
-    SQ(fd, Trackable::OBJ_ASQ, life, ownByRsrcMngr)
+ASQ::ASQ(int fd) : SQ(fd, Trackable::OBJ_ASQ)
 {
 }
 
@@ -28,7 +28,7 @@ ASQ::Init(uint16_t numEntries)
 
 
 void
-ASQ::Init(uint16_t numEntries, MemBuffer &memBuffer)
+ASQ::Init(uint16_t numEntries, SharedMemBufferPtr memBuffer)
 {
     SQ::Init(0, 16, numEntries, memBuffer, 0);
 }

@@ -1,16 +1,16 @@
 #include "iosq.h"
 #include "globals.h"
 
+SharedIOSQPtr IOSQ::NullIOSQPtr;
 
-IOSQ::IOSQ() :
-    SQ(0, Trackable::OBJTYPE_FENCE, Trackable::LIFETIME_FENCE, false)
+
+IOSQ::IOSQ() : SQ(0, Trackable::OBJTYPE_FENCE)
 {
     // This constructor will throw
 }
 
 
-IOSQ::IOSQ(int fd, Trackable::Lifetime life, bool ownByRsrcMngr) :
-    SQ(fd, Trackable::OBJ_IOSQ, life, ownByRsrcMngr)
+IOSQ::IOSQ(int fd) : SQ(fd, Trackable::OBJ_IOSQ)
 {
 	mPriority = 0;
 }
@@ -49,7 +49,7 @@ IOSQ::Init(uint16_t qId, uint16_t numEntries, uint16_t cqId,
 
 
 void
-IOSQ::Init(uint16_t qId, uint16_t numEntries, MemBuffer &memBuffer,
+IOSQ::Init(uint16_t qId, uint16_t numEntries, SharedMemBufferPtr memBuffer,
     uint16_t cqId, uint8_t priority)
 {
     uint8_t entrySize;

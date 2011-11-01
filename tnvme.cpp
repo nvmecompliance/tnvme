@@ -324,7 +324,7 @@ main(int argc, char *argv[])
             CmdLine.wmmap.offset, CmdLine.wmmap.acc,
             (uint8_t *)(&CmdLine.wmmap.value));
     } else if (CmdLine.reset) {
-        gCtrlrConfig->SoftReset();
+        SoftReset();
         // At this point we cannot enable the ctrlr because that requires
         // ACQ/ASQ's to be created, ctrlr simply won't become ready w/o these.
     } else if (CmdLine.test.req) {

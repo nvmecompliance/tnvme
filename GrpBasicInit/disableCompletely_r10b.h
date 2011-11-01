@@ -16,8 +16,13 @@ public:
     DisableCompletely_r10b(int fd);
     virtual ~DisableCompletely_r10b();
 
+    /**
+     * IMPORTANT: Read Test::Clone() header comment.
+     */
     virtual DisableCompletely_r10b *Clone() const
         { return new DisableCompletely_r10b(*this); }
+    DisableCompletely_r10b &operator=(const DisableCompletely_r10b &other);
+    DisableCompletely_r10b(const DisableCompletely_r10b &other);
 
 
 protected:
@@ -26,8 +31,7 @@ protected:
 
 private:
     ///////////////////////////////////////////////////////////////////////////
-    // Adding a member variable? Think carefully, see Test::Clone() hdr comment
-    // Adding a member functions is fine.
+    // Adding a member variable? Then edit the copy constructor and operator().
     ///////////////////////////////////////////////////////////////////////////
 };
 

@@ -16,8 +16,13 @@ public:
     TestCase_r10b(int fd);
     virtual ~TestCase_r10b();
 
+    /**
+     * IMPORTANT: Read Test::Clone() header comment.
+     */
     virtual TestCase_r10b *Clone() const
         { return new TestCase_r10b(*this); }
+    TestCase_r10b &operator=(const TestCase_r10b &other);
+    TestCase_r10b(const TestCase_r10b &other);
 
 
 protected:
@@ -26,8 +31,7 @@ protected:
 
 private:
     ///////////////////////////////////////////////////////////////////////////
-    // Adding a member variable? Think carefully, see Test::Clone() hdr comment
-    // Adding a member functions is fine.
+    // Adding a member variable? Then edit the copy constructor and operator().
     ///////////////////////////////////////////////////////////////////////////
 };
 

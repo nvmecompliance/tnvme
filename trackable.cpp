@@ -2,16 +2,17 @@
 #include "tnvme.h"
 
 
-Trackable::Trackable(ObjType objBeingCreated, Lifetime objLife,
-    bool ownByRsrcMngr)
+SharedTrackablePtr Trackable::NullTrackablePtr;
+
+
+Trackable::Trackable(ObjType objBeingCreated)
 {
     if (objBeingCreated >= OBJTYPE_FENCE) {
         LOG_DBG("Illegal constructor");
         throw exception();
     }
+
     mObjType = objBeingCreated;
-    mObjLife = objLife;
-    mOwnByRsrcMngr = ownByRsrcMngr;
 }
 
 

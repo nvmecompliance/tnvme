@@ -4,9 +4,9 @@
 
 #define STS_ERRORS             (STS_DPE | STS_SSE | STS_RMA | STS_RTA | STS_DPD)
 #define PXCAP_PXDS_ERRORS      (PXDS_URD | PXDS_FED | PXDS_NFED | PXDS_CED)
-#define AERCAP_AERUCES_ERRORS    0xffff
-#define AERCAP_AERUCESEV_ERRORS  0xffff
-#define CSTS_ERRORS              CSTS_CFS
+#define AERCAP_AERUCES_ERRORS       0xffff
+#define AERCAP_AERUCESEV_ERRORS     0xffff
+#define CSTS_ERRORS                 CSTS_CFS
 
 
 Test::Test(int fd, SpecRev specRev)
@@ -24,6 +24,30 @@ Test::~Test()
     // Allocations taken from the heap and not under the control of the
     // RsrcMngr need to be freed/deleted here.
     ///////////////////////////////////////////////////////////////////////////
+}
+
+
+Test::Test(const Test &other) :
+    mFd(other.mFd), mSpecRev(other.mSpecRev), mTestDesc(other.mTestDesc)
+{
+    ///////////////////////////////////////////////////////////////////////////
+    // All pointers in this object must be NULL, never allow shallow or deep
+    // copies, see Test::Clone() header comment.
+    ///////////////////////////////////////////////////////////////////////////
+}
+
+
+Test &
+Test::operator=(const Test &other)
+{
+    ///////////////////////////////////////////////////////////////////////////
+    // All pointers in this object must be NULL, never allow shallow or deep
+    // copies, see Test::Clone() header comment.
+    ///////////////////////////////////////////////////////////////////////////
+    mFd = other.mFd;
+    mSpecRev = other.mSpecRev;
+    mTestDesc = other.mTestDesc;
+    return *this;
 }
 
 

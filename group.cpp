@@ -182,7 +182,6 @@ Group::RunTest(TestRef &tr, vector<TestRef> &skipTest)
     deque<Test *>::iterator insertPos = mTests[tr.major].erase(testCase);
     mTests[tr.major].insert(insertPos, cleanMeUp->Clone()); // cloning test obj
     delete cleanMeUp;               // Destructing test obj
-    gRsrcMngr->FreeObjTestLife();   // Free resources alloc'd by test obj
 
     return result;
 }

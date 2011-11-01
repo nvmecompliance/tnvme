@@ -20,12 +20,8 @@ public:
     /**
      * @param fd Pass the opened file descriptor for the device under test
      * @param objBeingCreated Pass the type of object this child class is
-     * @param life Pass the lifetime of the object being create
-     * @param ownByRsrcMngr Pass true if the RsrcMngr created this obj,
-     *      otherwise false.
      */
-    Queue(int fd, Trackable::ObjType objBeingCreated, Trackable::Lifetime life,
-        bool ownByRsrcMngr);
+    Queue(int fd, Trackable::ObjType objBeingCreated);
     virtual ~Queue();
 
     /// A Q can either be a CQ or an SQ
@@ -58,7 +54,7 @@ protected:
     /// dnvme alloc'd Q memory which is mmap'd back into user space as RO
     uint8_t *mContigBuf;
     /// tnvme alloc'd Q memory, handed off to this obj during init'ing
-    MemBuffer *mDiscontigBuf;
+    SharedMemBufferPtr mDiscontigBuf;
 
     /**
      * Initialize this object

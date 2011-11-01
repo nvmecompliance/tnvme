@@ -3,11 +3,17 @@
 
 #include "../tnvme.h"
 #include "trackable.h"
+#include <boost/shared_ptr.hpp>
+
+class MemBuffer;    // forward definition
+typedef boost::shared_ptr<MemBuffer>        SharedMemBufferPtr;
+#define CAST_TO_SMBP(shared_trackable_ptr)  \
+        boost::shared_polymorphic_downcast<MemBuffer>(shared_trackable_ptr)
 
 
 /**
 * This class is a wrapper for a raw heap allocated memory buffer. It may
-* be created and destroyed by the RsrcMngr:: however that is not strictly
+* be created and destroyed by the RsrcMngr, however that is not strictly
 * necessary. These buffers can be specified to have certain alignment criteria
 * to be used for CQ/SQ memory and user data buffers. After instantiation the
 * Initxxxxxx() methods must be called to attain something useful.
@@ -17,13 +23,11 @@
 class MemBuffer : public Trackable
 {
 public:
-    /**
-     * @param life Pass the lifetime of the object being created
-     * @param ownByRsrcMngr Pass true if the RsrcMngr created this obj,
-     *      otherwise false.
-     */
-    MemBuffer(Trackable::Lifetime life, bool ownByRsrcMngr = false);
+    MemBuffer();
     virtual ~MemBuffer();
+
+    /// Used to compare for NULL pointers being returned by allocations
+    static SharedMemBufferPtr NullMemBufferPtr;
 
     /**
      * Allocates memory allowing to specify an offset into the 1st page of
@@ -58,6 +62,16 @@ public:
     void InitAlignment(uint32_t bufSize, bool initMem = false,
         uint8_t initVal = 0, uint32_t align = 0);
 
+    /**
+     * Allocates memory not allowed to specify anything, heap memory is taken
+     * and alignment and offset into the 1st page is not guaranteed.  Residual
+     * memory will most likely be consumed.
+     * @param bufSize Pass the number of bytes for buffer creation
+     * @param initMem Pass true to initialize all elements, otherwise don't init
+     * @param initVal Pass the init value if suppose to init the buffer
+     */
+    void Init(uint32_t bufSize, bool initMem = false, uint8_t initVal = 0);
+
     uint8_t *GetBuffer() { return mVirBaseAddr; }
     uint32_t GetBufSize() { return mVirBufSize; }
     uint32_t GetAlignment() { return mAlignment; }
@@ -69,8 +83,7 @@ public:
 
 
 private:
-    MemBuffer();
-
+    bool mAllocByNewOperator;
     uint8_t *mRealBaseAddr;     // System address returned by posix_memalign()
     uint8_t *mVirBaseAddr;      // User buffer address to satisfy mOffset1stPg
     uint32_t mVirBufSize;       // User request buffer size

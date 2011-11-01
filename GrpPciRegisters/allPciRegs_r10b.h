@@ -16,8 +16,13 @@ public:
     AllPciRegs_r10b(int fd);
     virtual ~AllPciRegs_r10b();
 
+    /**
+     * IMPORTANT: Read Test::Clone() header comment.
+     */
     virtual AllPciRegs_r10b *Clone() const
         { return new AllPciRegs_r10b(*this); }
+    AllPciRegs_r10b &operator=(const AllPciRegs_r10b &other);
+    AllPciRegs_r10b(const AllPciRegs_r10b &other);
 
 
 protected:
@@ -26,8 +31,7 @@ protected:
 
 private:
     ///////////////////////////////////////////////////////////////////////////
-    // Adding a member variable? Think carefully, see Test::Clone() hdr comment
-    // Adding a member functions is fine.
+    // Adding a member variable? Then edit the copy constructor and operator().
     ///////////////////////////////////////////////////////////////////////////
 
     /**

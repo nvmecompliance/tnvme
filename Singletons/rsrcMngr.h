@@ -5,24 +5,25 @@
 #include <vector>
 #include <string>
 #include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
+#include "tnvme.h"
 #include "trackable.h"
-#include "../tnvme.h"
 
 using namespace std;
 
-typedef boost::shared_ptr<Trackable>        SharedTrackablePtr;
 typedef map<string, SharedTrackablePtr>     TrackableMap;
-typedef vector<SharedTrackablePtr>          TrackableVector;
-
 
 
 /**
 * This class will automate the creation and deletion of system resources to
 * aid in test development. The mundane task of cleaning up utilized resources
-* after a single test or group of tests has run is made easier. This object
-* will destroy resources that it creates automatically when their lifetimes
-* have expired.
+* after a single test or group of tests can be made easier. Any object created
+* by the RsrcMngr will have group lifetime, meaning its life will be guaranteed
+* for the full duration of any single execution group. Test lifetimes will be
+* controlled by using shared_ptr's within the Test child class since those
+* objects are destroyed completely after they execute, thus any share_ptr will
+* also be destroyed and thus so will the objects they point to. Group lifetime
+* allows creating objects that will be persistent through all the tests within
+* any single execution group.
 *
 * @note Singleton's are not allowed to throw exceptions.
 */
@@ -38,9 +39,6 @@ public:
     static void KillInstance();
     ~RsrcMngr();
 
-    /// Used to compare for NULL pointers being returned by allocations
-    static SharedTrackablePtr NullTrackablePtr;
-
     /**
      * Allocate a heap object of the 'type' specified and associate that
      * object with the 'lookupName' to aid for future retrieval. This object
@@ -52,39 +50,21 @@ public:
      *         upon errors.
      */
     SharedTrackablePtr
-    AllocObjGrpLife(Trackable::ObjType type, string lookupName);
+    AllocObj(Trackable::ObjType type, string lookupName);
 
     /**
-     * Allocate a heap object of the 'type' specified. This object will have
-     * test lifetime in that it will be freed back to the system after the
-     * test which performs the allocation completes.
-     * @param type Pass the type of default object to allocate/construct
-     * @return Pointer to the allocated object, otherwise NullTrackablePtr
-     *         upon errors.
-     */
-    SharedTrackablePtr
-    AllocObjTestLife(Trackable::ObjType type);
-
-    /**
-     * Returns a previously allocated object from AllocObjGrpLife().
+     * Returns a previously allocated object from AllocObj().
      * @param lookupName Pass the associated ID of the object to return
      * @return Pointer to the allocated object, otherwise NullTrackablePtr
      *         upon errors.
      */
     SharedTrackablePtr
-    GetObjGrpLife(string lookupName);
+    GetObj(string lookupName);
 
     /**
-     * Free all objects which were allocated for group lifetime. This method
-     * automatically calls FreeObjTestLife() for test lifetimes are shorter
-     * than group lifetimes.
+     * Free all objects which were allocated for group lifetime.
      */
-    void FreeObjGrpLife();
-
-    /**
-     * Free all objects which were allocated for test lifetime.
-     */
-    void FreeObjTestLife();
+    void FreeObj();
 
 
 private:
@@ -101,17 +81,14 @@ private:
 
     /// Storehouse for Group:: lifetime objects
     TrackableMap mObjGrpLife;
-    /// Storehouse for Test:: lifetime objects
-    TrackableVector mObjTesLife;
 
 
     /**
      * Perform all the underlying allocation tasks for this class.
      * @param type Pass the type of default object to allocate/construct
-     * @param life Pass the lifetime of the obj being created
      */
     SharedTrackablePtr
-    AllocObj(Trackable::ObjType type, Trackable::Lifetime life);
+    Allocate(Trackable::ObjType type);
 };
 
 

@@ -16,8 +16,13 @@ public:
     DumpCtrlrAddrSpace_r10b(int fd);
     virtual ~DumpCtrlrAddrSpace_r10b();
 
+    /**
+     * IMPORTANT: Read Test::Clone() header comment.
+     */
     virtual DumpCtrlrAddrSpace_r10b *Clone() const
         { return new DumpCtrlrAddrSpace_r10b(*this); }
+    DumpCtrlrAddrSpace_r10b &operator=(const DumpCtrlrAddrSpace_r10b &other);
+    DumpCtrlrAddrSpace_r10b(const DumpCtrlrAddrSpace_r10b &other);
 
 
 protected:
@@ -26,8 +31,7 @@ protected:
 
 private:
     ///////////////////////////////////////////////////////////////////////////
-    // Adding a member variable? Think carefully, see Test::Clone() hdr comment
-    // Adding a member functions is fine.
+    // Adding a member variable? Then edit the copy constructor and operator().
     ///////////////////////////////////////////////////////////////////////////
 };
 

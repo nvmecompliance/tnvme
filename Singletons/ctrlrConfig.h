@@ -29,14 +29,6 @@ public:
     ~CtrlrConfig();
 
     /**
-     * Completely disable the NVME device so that no queues are left in place,
-     * and device registers are reset back to default values. The IRQ's are
-     * also disabled.
-     * @return true upon success, otherwise false.
-     */
-    bool SoftReset();
-
-    /**
      * Learns of the active IRQ scheme enabled in the device. It doesn't
      * indicate that IRQ's are being used, to use IRQ's CQ's must be created
      * to use IRQ's. The ACQ doesn't have a choice and always uses IRQ's if

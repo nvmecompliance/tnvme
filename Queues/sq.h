@@ -15,8 +15,11 @@
 class SQ : public Queue
 {
 public:
-    SQ(int fd, Trackable::ObjType objBeingCreated, Trackable::Lifetime life,
-        bool ownByRsrcMngr);
+    /**
+     * @param fd Pass the opened file descriptor for the device under test
+     * @param objBeingCreated Pass the type of object this child class is
+     */
+    SQ(int fd, Trackable::ObjType objBeingCreated);
     virtual ~SQ();
 
     virtual bool GetIsCQ() { return false; }
@@ -43,17 +46,15 @@ protected:
      * @param qId Pass the queue's ID
      * @param entrySize Pass the number of bytes encompassing each element
      * @param numEntries Pass the number of elements within the Q
-     * @param memBuffer Hand off a buffer which must satisfy
-     *        MemBuffer.GetBufSize()>=(numEntries * entrySize). It must have
-     *        the same life span as this object, it must have been created
-     *        by the same means as this object, and must only ever be accessed
-     *        as RO. Writing to this buffer will have unpredictable results.
-     *        It will also become owned by this object, it won't have to be
-     *        explicitly deleted when this object goes out of scope.
+     * @param memBuffer Hand off this Q's memory. It must satisfy
+     *      MemBuffer.GetBufSize()>=(numEntries * entrySize). It must only ever
+     *      be accessed as RO. Writing to this buffer will have unpredictable
+     *      results. It will also become owned by this object, it won't have to
+     *      be explicitly deleted when this object goes out of scope.
      * @param cqId Pass the assoc CQ ID to which this SQ will be associated
      */
     void Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
-        MemBuffer &memBuffer, uint16_t cqId);
+        SharedMemBufferPtr memBuffer, uint16_t cqId);
 
 
 private:

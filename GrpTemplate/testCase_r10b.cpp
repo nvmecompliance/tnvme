@@ -24,6 +24,28 @@ TestCase_r10b::~TestCase_r10b()
 }
 
 
+TestCase_r10b::
+TestCase_r10b(const TestCase_r10b &other) : Test(other)
+{
+    ///////////////////////////////////////////////////////////////////////////
+    // All pointers in this object must be NULL, never allow shallow or deep
+    // copies, see Test::Clone() header comment.
+    ///////////////////////////////////////////////////////////////////////////
+}
+
+
+TestCase_r10b &
+TestCase_r10b::operator=(const TestCase_r10b &other)
+{
+    ///////////////////////////////////////////////////////////////////////////
+    // All pointers in this object must be NULL, never allow shallow or deep
+    // copies, see Test::Clone() header comment.
+    ///////////////////////////////////////////////////////////////////////////
+    Test::operator=(other);
+    return *this;
+}
+
+
 bool
 TestCase_r10b::RunCoreTest()
 {
