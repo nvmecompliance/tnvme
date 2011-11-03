@@ -10,7 +10,8 @@ SUBDIRS:=				\
 	GrpPciRegisters		\
 	GrpCtrlRegisters	\
 	GrpBasicInit		\
-	Queues
+	Queues				\
+	Cmds
 
 SOURCES:=				\
 	globals.cpp			\

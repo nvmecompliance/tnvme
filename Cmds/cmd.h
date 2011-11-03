@@ -28,12 +28,8 @@ public:
     /**
      * @param fd Pass the opened file descriptor for the device under test
      * @param objBeingCreated Pass the type of object this child class is
-     * @param life Pass the lifetime of the object being create
-     * @param ownByRsrcMngr Pass true if the RsrcMngr created this obj,
-     *      otherwise false.
      */
-    Cmd(int fd, Trackable::ObjType objBeingCreated, Trackable::Lifetime life,
-        bool ownByRsrcMngr);
+    Cmd(int fd, Trackable::ObjType objBeingCreated);
     virtual ~Cmd();
 
     uint16_t  GetCmdSizeB() { return mCmdBuf.GetBufSize(); }

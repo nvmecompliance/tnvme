@@ -564,7 +564,7 @@ SoftReset()
     // In user space, in kernel space and in hardware, nothing remains.
     LOG_NRM("Performing soft reset");
     gRsrcMngr->FreeObj();
-    gCtrlrConfig->SetStateEnabled(ST_DISABLE_COMPLETELY);
+    gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY);
     if ((retVal = gCtrlrConfig->SetIrqScheme(INT_NONE)) == false)
         LOG_ERR("Setting IRQ scheme failed");
     return retVal;

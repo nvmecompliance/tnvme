@@ -51,22 +51,25 @@ public:
      * Is the controller enabled?
      * @return true if enabled, otherwise false
      */
-    bool GetStateEnabled();
+    bool IsStateEnabled();
 
     /**
-     * Set the enabled state of the controller.
-     * @param state Pass ST_ENABLE to enable the controller;
-     *      Pass ST_DISABLE to disable, free all kernel memory except what is
-     *      needed by the ACQ/ASQ, because those entities remain intact. The
-     *      ACQ/ASQ are also reset to the empty state. A re-enabling at this
-     *      point would allow the immediate submission of admin cmds into ACQ.
-     *      Pass ST_DISABLE_COMPLETELY to disable and nothing is left intact.
-     *      This is as close to a power up situation as one could achieve. The
-     *      NVME device resets all registers to default values and dnvme writes
-     *      admin Q base addresses and Q sizes to 0, nothing is truly enabled.
+     * Set the state of the controller.
+     * @param state Pass {ST_ENABLE | ST_DISABLE | ST_DISABLE_COMPLETELY}
+     *      ST_ENABLE to enable the controller;
+     *      ST_DISABLE to disable, free all kernel memory except what is
+     *          needed by the ACQ/ASQ, because those entities remain intact.
+     *          The ACQ/ASQ are also reset to the empty state. A re-enabling at
+     *          this point would allow the immediate submission of admin cmds
+     *          into ACQ.
+     *      ST_DISABLE_COMPLETELY to disable and nothing is left intact. This
+     *          is as close to a power up situation as one could achieve. The
+     *          NVME device resets all registers to default values and dnvme
+     *          writes admin Q base addresses and Q sizes to 0, nothing is truly
+     *          enabled.
      * @return true if successful, otherwise false
      */
-    bool SetStateEnabled(enum nvme_state state);
+    bool SetState(enum nvme_state state);
 
     bool ReadRegCC(uint32_t &regVal);
     bool WriteRegCC(uint32_t regVal);

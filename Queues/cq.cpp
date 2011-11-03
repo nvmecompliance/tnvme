@@ -46,7 +46,7 @@ CQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
 
     // NOTE: This method creates contiguous Q's only
     if (GetIsAdmin()) {
-        if (gCtrlrConfig->GetStateEnabled()) {
+        if (gCtrlrConfig->IsStateEnabled()) {
             // At best this will cause tnvme to seg fault or a kernel crash
             // The NVME spec states unpredictable outcomes will occur.
             LOG_DBG("Creating an ASQ while ctrlr is enabled is a shall not");
@@ -68,18 +68,7 @@ CQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
             throw exception();
         }
     } else {
-        // We are creating a contiguous IOCQ. IOCQ's have variable entry
-        // sizes which must be setup beforehand.
-        uint8_t value;
-        if (gCtrlrConfig->GetIOCQES(value) == false) {
-            LOG_ERR("Unable to determine Q entry size");
-            throw exception();
-        } else if ((2^value) != GetEntrySize()) {
-            LOG_DBG("Q entry sizes do not match %d != %d", 2^value,
-                GetEntrySize());
-            throw exception();
-        }
-
+        // We are creating a contiguous IOCQ.
         struct nvme_prep_cq q;
         q.cq_id = GetQId();
         q.elements = GetNumEntries();
@@ -102,7 +91,7 @@ CQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
 
 void
 CQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
-    SharedMemBufferPtr memBuffer, bool irqEnabled, uint16_t irqVec)
+    const SharedMemBufferPtr memBuffer, bool irqEnabled, uint16_t irqVec)
 {
     Queue::Init(qId, entrySize, numEntries);
     mIrqEnabled = irqEnabled;
@@ -110,17 +99,20 @@ CQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
 
 
     // NOTE: This method creates discontiguous Q's only
-    if (GetIsAdmin()) {
+    if (memBuffer == MemBuffer::NullMemBufferPtr) {
+        LOG_DBG("Passing an uninitialized SharedMemBufferPtr");
+        throw exception();
+    } else if (GetIsAdmin()) {
         // There are no appropriate methods for an NVME device to report ASC/ACQ
         // creation errors, thus since ASC/ASQ may only be contiguous then don't
         // allow these problems to be injected, at best they will only succeed
         // to seg fault the app or crash the kernel.
         LOG_DBG("Illegal memory alignment will corrupt");
         throw exception();
-    } else  if (mDiscontigBuf->GetBufSize() < GetQSize()) {
+    } else  if (memBuffer->GetBufSize() < GetQSize()) {
         LOG_DBG("Q buffer memory ambiguous to passed params");
         throw exception();
-    } else if (mDiscontigBuf->GetAlignment() != sysconf(_SC_PAGESIZE)) {
+    } else if (memBuffer->GetAlignment() != sysconf(_SC_PAGESIZE)) {
         // Nonconformance to page alignment will seg fault the app or crash
         // the kernel. This state is not testable since no errors can be
         // reported by hdw, thus disallow this attempt.
@@ -132,18 +124,7 @@ CQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
     // Also assuming life time ownership of this object if it wasn't created
     // by the RsrcMngr.
     mDiscontigBuf = memBuffer;
-    mDiscontigBuf->Reset();
-
-    // We are creating a contiguous IOCQ. IOCQ's have variable entry
-    // sizes which must be setup beforehand.
-    uint8_t value;
-    if (gCtrlrConfig->GetIOCQES(value) == false) {
-        LOG_ERR("Unable to determine Q entry size");
-        throw exception();
-    } else if ((2^value) != GetEntrySize()) {
-        LOG_DBG("Q entry sizes do not match %d != %d", 2^value, GetEntrySize());
-        throw exception();
-    }
+    mDiscontigBuf->Zero();
 
     // We are creating a discontiguous IOCQ
     struct nvme_prep_cq q;
@@ -208,3 +189,4 @@ CQ::GetCE(uint16_t indexPtr)
     LOG_DBG("Unable to locate index within Q");
     throw exception();
 }
+

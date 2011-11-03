@@ -44,13 +44,13 @@ IOSQ::Init(uint16_t qId, uint16_t numEntries, uint16_t cqId,
         LOG_ERR("Unable to learn IOSQ entry size");
         throw exception();
     }
-    SQ::Init(qId, entrySize, numEntries, cqId);
+    SQ::Init(qId, 2^entrySize, numEntries, cqId);
 }
 
 
 void
-IOSQ::Init(uint16_t qId, uint16_t numEntries, SharedMemBufferPtr memBuffer,
-    uint16_t cqId, uint8_t priority)
+IOSQ::Init(uint16_t qId, uint16_t numEntries,
+    const SharedMemBufferPtr memBuffer, uint16_t cqId, uint8_t priority)
 {
     uint8_t entrySize;
 
@@ -71,5 +71,5 @@ IOSQ::Init(uint16_t qId, uint16_t numEntries, SharedMemBufferPtr memBuffer,
         LOG_ERR("Unable to learn IOSQ entry size");
         throw exception();
     }
-    SQ::Init(qId, entrySize, numEntries, memBuffer, cqId);
+    SQ::Init(qId, 2^entrySize, numEntries, memBuffer, cqId);
 }

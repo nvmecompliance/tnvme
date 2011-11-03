@@ -44,7 +44,7 @@ SQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
 
     // NOTE: This method creates contiguous Q's only
     if (GetIsAdmin()) {
-        if (gCtrlrConfig->GetStateEnabled()) {
+        if (gCtrlrConfig->IsStateEnabled()) {
             // At best this will cause tnvme to seg fault or a kernel crash
             // The NVME spec states unpredictable outcomes will occur.
             LOG_DBG("Creating an ASQ while ctrlr is enabled is a shall not");
@@ -67,18 +67,7 @@ SQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
             throw exception();
         }
     } else {
-        // We are creating a contiguous IOSQ. IOSQ's have variable entry
-        // sizes which must be setup beforehand.
-        uint8_t value;
-        if (gCtrlrConfig->GetIOSQES(value) == false) {
-            LOG_ERR("Unable to determine Q entry size");
-            throw exception();
-        } else if ((2^value) != GetEntrySize()) {
-            LOG_DBG("Q entry sizes do not match %d != %d", 2^value,
-                GetEntrySize());
-            throw exception();
-        }
-
+        // We are creating a contiguous IOSQ.
         struct nvme_prep_sq q;
         q.sq_id = GetQId();
         q.cq_id = GetCqId();
@@ -102,24 +91,27 @@ SQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
 
 void
 SQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
-    SharedMemBufferPtr memBuffer, uint16_t cqId)
+    const SharedMemBufferPtr memBuffer, uint16_t cqId)
 {
     Queue::Init(qId, entrySize, numEntries);
     mCqId = cqId;
 
 
     // NOTE: This method creates discontiguous Q's only
-    if (GetIsAdmin()) {
+    if (memBuffer == MemBuffer::NullMemBufferPtr) {
+        LOG_DBG("Passing an uninitialized SharedMemBufferPtr");
+        throw exception();
+    } else if (GetIsAdmin()) {
         // There are no appropriate methods for an NVME device to report ASC/ACQ
         // creation errors, thus since ASC/ASQ may only be contiguous then don't
         // allow these problems to be injected, at best they will only succeed
         // to seg fault the app or crash the kernel.
         LOG_DBG("Illegal memory alignment will corrupt");
         throw exception();
-    } else  if (mDiscontigBuf->GetBufSize() < GetQSize()) {
+    } else  if (memBuffer->GetBufSize() < GetQSize()) {
         LOG_DBG("Q buffer memory ambiguous to passed params");
         throw exception();
-    } else if (mDiscontigBuf->GetAlignment() != sysconf(_SC_PAGESIZE)) {
+    } else if (memBuffer->GetAlignment() != sysconf(_SC_PAGESIZE)) {
         // Nonconformance to page alignment will seg fault the app or crash
         // the kernel. This state is not testable since no errors can be
         // reported by hdw, thus disallow this attempt.
@@ -131,18 +123,7 @@ SQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
     // Also assuming life time ownership of this object if it wasn't created
     // by the RsrcMngr.
     mDiscontigBuf = memBuffer;
-    mDiscontigBuf->Reset();
-
-    // We are creating a contiguous IOSQ. IOSQ's have variable entry
-    // sizes which must be setup beforehand.
-    uint8_t value;
-    if (gCtrlrConfig->GetIOSQES(value) == false) {
-        LOG_ERR("Unable to determine Q entry size");
-        throw exception();
-    } else if ((2^value) != GetEntrySize()) {
-        LOG_DBG("Q entry sizes do not match %d != %d", 2^value, GetEntrySize());
-        throw exception();
-    }
+    mDiscontigBuf->Zero();
 
     // We are creating a discontiguous IOSQ
     struct nvme_prep_sq q;
@@ -187,4 +168,24 @@ SQ::GetQMetrics()
         throw exception();
     }
     return qMetrics;
+}
+
+
+union SE
+SQ::GetSE(uint16_t indexPtr)
+{
+    union SE *dataPtr;
+
+    if (GetIsContig())
+        dataPtr = (union SE *)mContigBuf;
+    else
+        dataPtr = (union SE *)mDiscontigBuf->GetBuffer();
+
+    for (int i = 0; i < GetNumEntries(); i++, dataPtr++) {
+        if (i == indexPtr)
+            return *dataPtr;
+    }
+
+    LOG_DBG("Unable to locate index within Q");
+    throw exception();
 }

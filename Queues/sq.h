@@ -2,6 +2,7 @@
 #define _SQ_H_
 
 #include "queue.h"
+#include "se.h"
 
 
 /**
@@ -29,6 +30,13 @@ public:
     /// All SQ's have an associated CQ to where its completions will be placed
     uint16_t GetCqId() { return mCqId; }
 
+    /**
+     * Get a Submission Element (SE) at SQ position indicated by indexPtr.
+     * @param indexPtr Pass [0 to (GetNumEntries()-1)] as the index into the SQ.
+     * @return The SE requested.
+     */
+    union SE GetSE(uint16_t indexPtr);
+
 
 protected:
     /**
@@ -49,12 +57,11 @@ protected:
      * @param memBuffer Hand off this Q's memory. It must satisfy
      *      MemBuffer.GetBufSize()>=(numEntries * entrySize). It must only ever
      *      be accessed as RO. Writing to this buffer will have unpredictable
-     *      results. It will also become owned by this object, it won't have to
-     *      be explicitly deleted when this object goes out of scope.
+     *      results.
      * @param cqId Pass the assoc CQ ID to which this SQ will be associated
      */
     void Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
-        SharedMemBufferPtr memBuffer, uint16_t cqId);
+        const SharedMemBufferPtr memBuffer, uint16_t cqId);
 
 
 private:

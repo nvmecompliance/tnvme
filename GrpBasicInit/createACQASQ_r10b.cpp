@@ -1,21 +1,19 @@
-#include "disableCompletely_r10b.h"
+#include "createACQASQ_r10b.h"
 #include "../globals.h"
 
 
-DisableCompletely_r10b::DisableCompletely_r10b(int fd) : Test(fd, SPECREV_10b)
+CreateACQASQ_r10b::CreateACQASQ_r10b(int fd) : Test(fd, SPECREV_10b)
 {
     // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 7");
     mTestDesc.SetShort(     "Validate basic hardware initialization duties");
     // No string size limit for the long description
     mTestDesc.SetLong(
-        "Setup for forthcoming tests. It will completely disabled the "
-        "controller. All driver and NVME device memory is freed to the system, "
-        "nothing will be operational, not even IRQ's");
+        "Create ACQ & ASQ kernel objects with group lifespan.");
 }
 
 
-DisableCompletely_r10b::~DisableCompletely_r10b()
+CreateACQASQ_r10b::~CreateACQASQ_r10b()
 {
     ///////////////////////////////////////////////////////////////////////////
     // Allocations taken from the heap and not under the control of the
@@ -24,8 +22,8 @@ DisableCompletely_r10b::~DisableCompletely_r10b()
 }
 
 
-DisableCompletely_r10b::
-DisableCompletely_r10b(const DisableCompletely_r10b &other) : Test(other)
+CreateACQASQ_r10b::
+CreateACQASQ_r10b(const CreateACQASQ_r10b &other) : Test(other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -34,8 +32,8 @@ DisableCompletely_r10b(const DisableCompletely_r10b &other) : Test(other)
 }
 
 
-DisableCompletely_r10b &
-DisableCompletely_r10b::operator=(const DisableCompletely_r10b &other)
+CreateACQASQ_r10b &
+CreateACQASQ_r10b::operator=(const CreateACQASQ_r10b &other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -53,7 +51,7 @@ DisableCompletely_r10b::operator=(const DisableCompletely_r10b &other)
 #include "../Queues/iosq.h"
 
 bool
-DisableCompletely_r10b::RunCoreTest()
+CreateACQASQ_r10b::RunCoreTest()
 {
     {
         LOG_NRM("Testing RsrcMngr: creating memBuffer obj for group life");
@@ -151,17 +149,17 @@ DisableCompletely_r10b::RunCoreTest()
             throw exception();
         }
 
-        if (gCtrlrConfig->SetStateEnabled(ST_DISABLE) == false) {
+        if (gCtrlrConfig->SetState(ST_DISABLE) == false) {
             LOG_DBG("Failed");
             throw exception();
-        } else if (gCtrlrConfig->GetStateEnabled() == true) {
+        } else if (gCtrlrConfig->IsStateEnabled() == true) {
             LOG_DBG("Should be disabled");
             throw exception();
         }
 
         // This won't go ready because we didn't create any ASQ or ACQ
-        if (gCtrlrConfig->SetStateEnabled(ST_ENABLE) == false) {
-            LOG_DBG("Ctrlr dind't became ready and was suppose to");
+        if (gCtrlrConfig->SetState(ST_ENABLE) == true) {
+            LOG_DBG("Ctrlr became ready and wasn't suppose to");
             uint64_t someReg;
             gRegisters->Read(CTLSPC_CSTS, someReg);
             gRegisters->Read(CTLSPC_AQA, someReg);
@@ -170,10 +168,10 @@ DisableCompletely_r10b::RunCoreTest()
             throw exception();
         }
 
-        if (gCtrlrConfig->SetStateEnabled(ST_DISABLE_COMPLETELY) == false) {
+        if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false) {
             LOG_DBG("Failed");
             throw exception();
-        } else if (gCtrlrConfig->GetStateEnabled() == true) {
+        } else if (gCtrlrConfig->IsStateEnabled() == true) {
             LOG_DBG("Should be disabled");
             throw exception();
         }
@@ -236,6 +234,10 @@ DisableCompletely_r10b::RunCoreTest()
         SharedASQPtr ASQ1 = SharedASQPtr(new ASQ(mFd));
         SharedIOCQPtr IOCQ1 = SharedIOCQPtr(new IOCQ(mFd));
         SharedIOSQPtr IOSQ1 = SharedIOSQPtr(new IOSQ(mFd));
+
+        SharedMemBufferPtr memBuf1 = SharedMemBufferPtr(new MemBuffer());
+        memBuf1->InitAlignment(4096, true, 0, 4096);
+        IOCQ1->Init(1, 4, memBuf1, false, 0);
     }
     LOG_NRM("Pointers are now out of scope, did they die?");
     LOG_NRM("Pause until keypress");

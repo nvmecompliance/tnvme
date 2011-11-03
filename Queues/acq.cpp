@@ -25,10 +25,3 @@ ACQ::Init(uint16_t numEntries)
 {
     CQ::Init(0, 16, numEntries, true, 0);
 }
-
-
-void
-ACQ::Init(uint16_t numEntries, SharedMemBufferPtr memBuffer)
-{
-    CQ::Init(0, 16, numEntries, memBuffer, true, 0);
-}

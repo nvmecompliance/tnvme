@@ -62,7 +62,7 @@ CtrlrConfig::GetIrqScheme(enum nvme_irq_type &irq)
 bool
 CtrlrConfig::SetIrqScheme(enum nvme_irq_type newIrq)
 {
-    if (GetStateEnabled()) {
+    if (IsStateEnabled()) {
         LOG_DBG("The NVMe must be disabled in order to change the IRQ scheme");
         return false;
     }
@@ -78,7 +78,7 @@ CtrlrConfig::SetIrqScheme(enum nvme_irq_type newIrq)
 
 
 bool
-CtrlrConfig::GetStateEnabled()
+CtrlrConfig::IsStateEnabled()
 {
     uint64_t tmp = 0;
     if (gRegisters->Read(CTLSPC_CSTS, tmp))
@@ -88,12 +88,23 @@ CtrlrConfig::GetStateEnabled()
 
 
 bool
-CtrlrConfig::SetStateEnabled(enum nvme_state state)
+CtrlrConfig::SetState(enum nvme_state state)
 {
-    LOG_NRM("Enabling NVME device");
+    string toState;
+
+    switch (state) {
+    case ST_ENABLE:             toState = "Enabling";               break;
+    case ST_DISABLE:            toState = "Disabling";              break;
+    case ST_DISABLE_COMPLETELY: toState = "Disabling completely";   break;
+    default:
+        LOG_DBG("Illegal state detected = %d", state);
+        throw exception();
+    }
+
+    LOG_NRM("%s the NVME device", toState.c_str());
     if (ioctl(mFd, NVME_IOCTL_DEVICE_STATE, &state) < 0) {
-        LOG_ERR("Could not set ctrlr state, currently %s",
-            GetStateEnabled() ? "enabled" : "disabled");
+        LOG_ERR("Could not set state, currently %s",
+            IsStateEnabled() ? "enabled" : "disabled");
         LOG_NRM("dnvme waits a TO period for CC.RDY to indicate ready" );
         return false;
     }

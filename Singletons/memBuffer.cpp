@@ -36,7 +36,7 @@ MemBuffer::InitMemberVariables()
 
 
 void
-MemBuffer::Reset()
+MemBuffer::Zero()
 {
     if (mRealBaseAddr)
         memset(mVirBaseAddr, 0, mVirBufSize);

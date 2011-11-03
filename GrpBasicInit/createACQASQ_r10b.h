@@ -1,5 +1,5 @@
-#ifndef _DISABLECOMPLETELY_r10b_H_
-#define _DISABLECOMPLETELY_r10b_H_
+#ifndef _CREATEACQASQ_r10b_H_
+#define _CREATEACQASQ_r10b_H_
 
 #include "test.h"
 
@@ -10,19 +10,19 @@
  * -----------------------------------------------------------------------------
  * 1) See notes in the header file of the Test base class
  */
-class DisableCompletely_r10b : public Test
+class CreateACQASQ_r10b : public Test
 {
 public:
-    DisableCompletely_r10b(int fd);
-    virtual ~DisableCompletely_r10b();
+    CreateACQASQ_r10b(int fd);
+    virtual ~CreateACQASQ_r10b();
 
     /**
      * IMPORTANT: Read Test::Clone() header comment.
      */
-    virtual DisableCompletely_r10b *Clone() const
-        { return new DisableCompletely_r10b(*this); }
-    DisableCompletely_r10b &operator=(const DisableCompletely_r10b &other);
-    DisableCompletely_r10b(const DisableCompletely_r10b &other);
+    virtual CreateACQASQ_r10b *Clone() const
+        { return new CreateACQASQ_r10b(*this); }
+    CreateACQASQ_r10b &operator=(const CreateACQASQ_r10b &other);
+    CreateACQASQ_r10b(const CreateACQASQ_r10b &other);
 
 
 protected:

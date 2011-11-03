@@ -9,19 +9,14 @@ const uint32_t Cmd::BITMASK_CID_DW = 0xffff0000;
 
 
 Cmd::Cmd() :
-    Trackable(Trackable::OBJTYPE_FENCE, Trackable::LIFETIME_FENCE, false),
-    PrpData(Trackable::LIFETIME_FENCE, false),
-    mCmdBuf(Trackable::LIFETIME_FENCE, false)
+    Trackable(Trackable::OBJTYPE_FENCE)
 {
     // This constructor will throw
 }
 
 
-Cmd::Cmd(int fd, Trackable::ObjType objBeingCreated, Trackable::Lifetime life,
-    bool ownByRsrcMngr) :
-        Trackable(objBeingCreated, life, ownByRsrcMngr),
-        PrpData(life, ownByRsrcMngr),
-        mCmdBuf(life, false)
+Cmd::Cmd(int fd, Trackable::ObjType objBeingCreated) :
+    Trackable(objBeingCreated)
 {
     mFd = fd;
     if (mFd < 0) {

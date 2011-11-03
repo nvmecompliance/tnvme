@@ -79,7 +79,7 @@ public:
     /**
      * Zero out all memory bytes
      */
-    void Reset();
+    void Zero();
 
 
 private:

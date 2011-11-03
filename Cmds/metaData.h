@@ -1,5 +1,5 @@
-#ifndef _PRPDATA_H_
-#define _PRPDATA_H_
+#ifndef _METADATA_H_
+#define _METADATA_H_
 
 #include "tnvme.h"
 #include "dnvme.h"
@@ -7,12 +7,31 @@
 
 
 /**
-* This class is the interface for the user data buffer associated with the PRP
-* entries of a cmd.
+* This class is the interface for the meta data buffer associated with the MPTR
+* entry of a cmd. According to the NVME spec. meta data memory can only be
+* contiguous as it is handed off to the NVME device. However, user space apps
+* want access to this memory as RW also, but user space allocated memory is not
+* guaranteed to be contiguous if it crosses page boundaries. The maximum
+* size of meta data is allowed to be 16KB, and thus could cross page boundaries.
+* Thus meta data memory is allocated contiguously in the kernel and mmap'd back
+* into user space for RW accesses.
+*
+* The allocation technique has some guidelines to follow in order to allow
+* the allocation of the correct sizes. The allocation are always DWORD aligned
+* per the NVME spec, otherwise we would only succeed in crashing the kernel or
+* seg faulting tnvme. There is nothing to gain by supplying a NVME device non
+* properly aligned meta data buffers. Thus this is enforced always.
+*
+* There are 3 basic steps to force dnvme to provide a properly sized and aligned
+* contiguous meta data buffer. 1st we have to notify dnvme which size of
+* allocations we would like. 2nd we have to ask dvnme to allocate and track
+* the memory for us, upon success tnvme must mmap that memory into user space.
+* 3rd we must delete the allocation when we are done using it. It should be
+* deleted when this object goes out of scope.
 *
 * @note This class may throw exceptions.
 */
-class PrpData
+class MetaData
 {
 public:
     PrpData();
@@ -37,11 +56,9 @@ public:
      * @param prpFields Pass the appropriate combination of bitfields to
      *      indicate to dnvme how to populate the PRP fields of a cmd with
      *      this the buffer.
-     * @param bufSize Pass the number of bytes consisting of memBuffer
      * @param memBuffer Point to an IOQ's RO memory.
      */
-    void SetBuffer(send_64b_bitmask prpFields, uint8_t const *memBuffer,
-        uint64_t bufSize);
+    void SetBuffer(send_64b_bitmask prpFields, uint8_t const *memBuffer);
 
     /**
      * This method will return a non MemBuffer::NullMemBufferPtr if and only if
@@ -58,7 +75,6 @@ public:
      *      setup, i.e. there is no user data at all for the PRP fields.
      */
     uint8_t const *GetROBuffer();
-    uint64_t       GetROBufferSize() { return mBufROSize; }
 
     /**
      * The PRP fields are dnvme specific, they notify dnvme which PRP fields
@@ -73,10 +89,8 @@ public:
 private:
     /// Used for RW memory for a cmd's user data
     SharedMemBufferPtr mBufRW;
-    /// Used for RO memory assoc with a IOQ's data memory
+    /// Ussed for RO memory assoc with a IOQ's data memory
     uint8_t const *mBufRO;
-    /// Number of bytes consisting of mBufRO
-    uint64_t mBufROSize;
 
     /// What fields in a cmd can we populate for the buffer?
     send_64b_bitmask mPrpFields;

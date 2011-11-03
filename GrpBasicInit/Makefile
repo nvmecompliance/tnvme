@@ -6,7 +6,7 @@ INCLUDES = -I. -I../ -I../../ -I/usr/local/include
 
 SRC = \
 	grpBasicInit.cpp		\
-	disableCompletely_r10b.cpp
+	createACQASQ_r10b.cpp
 
 .SUFFIXES: .cpp
 

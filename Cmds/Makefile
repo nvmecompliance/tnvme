@@ -6,7 +6,9 @@ INCLUDES = -I. -I../ -I../../ -I/usr/local/include
 
 SRC = \
 	cmd.cpp			\
-	prpData.cpp
+	prpData.cpp		\
+	adminCmd.cpp	\
+	nvmeCmd.cpp
 
 .SUFFIXES: .cpp
 

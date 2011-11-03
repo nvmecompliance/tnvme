@@ -58,13 +58,12 @@ protected:
      * @param memBuffer Hand off this Q's memory. It must satisfy
      *      MemBuffer.GetBufSize()>=(numEntries * entrySize). It must only ever
      *      be accessed as RO. Writing to this buffer will have unpredictable
-     *      results. It will also become owned by this object, it won't have to
-     *      be explicitly deleted when this object goes out of scope.
+     *      results.
      * @param irqEnabled Pass true if IRQ's are to be enabled for this Q
      * @param irqVec if (irqEnabled==true) then what the IRQ's vector
      */
     void Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
-        SharedMemBufferPtr memBuffer, bool irqEnabled, uint16_t irqVec);
+        const SharedMemBufferPtr memBuffer, bool irqEnabled, uint16_t irqVec);
 
 
 private:

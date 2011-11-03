@@ -25,10 +25,3 @@ ASQ::Init(uint16_t numEntries)
 {
     SQ::Init(0, 16, numEntries, 0);
 }
-
-
-void
-ASQ::Init(uint16_t numEntries, SharedMemBufferPtr memBuffer)
-{
-    SQ::Init(0, 16, numEntries, memBuffer, 0);
-}

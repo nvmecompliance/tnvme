@@ -46,13 +46,12 @@ public:
      * @param memBuffer Hand off this Q's memory. It must satisfy
      *      MemBuffer.GetBufSize()>=(numEntries * entrySize). It must only ever
      *      be accessed as RO. Writing to this buffer will have unpredictable
-     *      results. It will also become owned by this object, it won't have to
-     *      be explicitly deleted when this object goes out of scope.
+     *      results.
      * @param cqId Pass the assoc CQ ID to which this SQ will be associated
      * @param priority Pass this Q's priority value, must be a 2 bit value
      */
-    void Init(uint16_t qId, uint16_t numEntries, SharedMemBufferPtr memBuffer,
-        uint16_t cqId, uint8_t priority);
+    void Init(uint16_t qId, uint16_t numEntries,
+        const SharedMemBufferPtr memBuffer, uint16_t cqId, uint8_t priority);
 
 
 private:
