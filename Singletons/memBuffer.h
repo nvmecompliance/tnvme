@@ -7,7 +7,7 @@
 
 class MemBuffer;    // forward definition
 typedef boost::shared_ptr<MemBuffer>        SharedMemBufferPtr;
-#define CAST_TO_SMBP(shared_trackable_ptr)  \
+#define CAST_TO_MB(shared_trackable_ptr)  \
         boost::shared_polymorphic_downcast<MemBuffer>(shared_trackable_ptr)
 
 

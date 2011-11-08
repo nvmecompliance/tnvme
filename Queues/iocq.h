@@ -5,7 +5,7 @@
 
 class IOCQ;    // forward definition
 typedef boost::shared_ptr<IOCQ>        SharedIOCQPtr;
-#define CAST_TO_IOCQP(shared_trackable_ptr)  \
+#define CAST_TO_IOCQ(shared_trackable_ptr)  \
         boost::shared_polymorphic_downcast<IOCQ>(shared_trackable_ptr)
 
 
@@ -42,9 +42,9 @@ public:
      * @param qId Pass the queue's ID
      * @param numEntries Pass the number of elements within the Q
      * @param memBuffer Hand off this Q's memory. It must satisfy
-     *      MemBuffer.GetBufSize()>=(numEntries * entrySize). It must only ever
-     *      be accessed as RO. Writing to this buffer will have unpredictable
-     *      results.
+     *      MemBuffer.GetBufSize()>=(numEntries * gCtrlrConfig->GetIOCQES(). It
+     *      must only ever be accessed as RO. Writing to this buffer will have
+     *      unpredictable results.
      * @param irqEnabled Pass true if IRQ's are to be enabled for this Q
      * @param irqVec If (irqEnabled==true) then what the IRQ's vector
      */

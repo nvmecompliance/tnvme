@@ -2,8 +2,7 @@
 #define _TESTDESCRIBE_H_
 
 #include <string>
-
-using namespace std;
+#include "tnvme.h"
 
 
 /**

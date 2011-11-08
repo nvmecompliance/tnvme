@@ -1,19 +1,17 @@
-#include <sys/mman.h>
 #include "cq.h"
 #include "globals.h"
+#include "../Utils/kernelAPI.h"
 
 
 CQ::CQ() :
-    Queue(0, Trackable::OBJTYPE_FENCE),
-    MMAP_QTYPE_BITMASK(0x00000)
+    Queue(0, Trackable::OBJTYPE_FENCE)
 {
     // This constructor will throw
 }
 
 
 CQ::CQ(int fd, Trackable::ObjType objBeingCreated) :
-    Queue(fd, objBeingCreated),
-    MMAP_QTYPE_BITMASK(0x00000)
+    Queue(fd, objBeingCreated)
 {
     mIrqEnabled = false;
     mIrqVec = 0;
@@ -26,7 +24,7 @@ CQ::~CQ()
         // Cleanup duties for this Q's buffer
         if (GetIsContig()) {
             // Contiguous memory is alloc'd and owned by the kernel
-            munmap(mContigBuf, GetQSize());
+            KernelAPI::munmap(mContigBuf, GetQSize());
         }
     } catch (...) {
         ;   // Destructors should never throw. If the object is deleted B4
@@ -77,11 +75,7 @@ CQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
     }
 
     // Contiguous Q's are created in dnvme and must be mapped back to user space
-    off_t encodeOffset = GetQId();
-    encodeOffset |= MMAP_QTYPE_BITMASK;
-    encodeOffset *= sysconf(_SC_PAGESIZE);
-    mContigBuf = (uint8_t *)mmap(0, GetQSize(), PROT_READ, MAP_SHARED, mFd,
-        encodeOffset);
+    mContigBuf = KernelAPI::mmap(mFd, GetQSize(), GetQId(), KernelAPI::MMR_CQ);
     if (mContigBuf == NULL) {
         LOG_DBG("Unable to mmap contig memory to user space");
         throw exception();

@@ -69,8 +69,6 @@ protected:
 private:
     CQ();
 
-    const uint64_t MMAP_QTYPE_BITMASK;
-
     bool mIrqEnabled;
     uint16_t mIrqVec;
 

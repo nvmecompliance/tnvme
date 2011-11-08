@@ -67,7 +67,6 @@ protected:
 private:
     SQ();
 
-    const uint64_t MMAP_QTYPE_BITMASK;
     uint16_t mCqId;
 
     /**

@@ -8,6 +8,7 @@
 #include <vector>
 #include "tnvmeHelpers.h"
 #include "globals.h"
+#include "Utils/kernelAPI.h"
 
 
 /**
@@ -46,7 +47,7 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
             // Handle the --informative cmd line option
             if (cl.informative.req && (iGrp == cl.informative.grpInfoIdx)) {
                 // Each test group starts from known starting point
-                if (SoftReset() == false)
+                if (KernelAPI::SoftReset() == false)
                     return false;
 
                 LOG_NRM("Cmd line forces executing informative group");
@@ -64,7 +65,7 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
             // Now handle anything spec'd in the --test cmd line option
             if (cl.test.t.group == UINT_MAX) {
                 // Each test group starts from known starting point
-                if (SoftReset() == false)
+                if (KernelAPI::SoftReset() == false)
                     return false;
 
                 // Run all tests within all groups
@@ -92,7 +93,7 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
             } else if ((cl.test.t.major == UINT_MAX) ||
                        (cl.test.t.minor == UINT_MAX)) {
                 // Each test group starts from known starting point
-                if (SoftReset() == false)
+                if (KernelAPI::SoftReset() == false)
                     return false;
 
                 // Run all tests within spec'd group
@@ -124,7 +125,7 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
                 // Run spec'd test within spec'd group
                 if (iGrp == cl.test.t.group) {
                     // Each test run starts from known starting point
-                    if (SoftReset() == false)
+                    if (KernelAPI::SoftReset() == false)
                         return false;
 
                     switch (groups[iGrp]->RunTest(cl.test.t, cl.skiptest)) {
@@ -555,18 +556,4 @@ ParseWmmapCmdLine(WmmapIo &wmmap, const char *optarg)
     return true;
 }
 
-
-bool
-SoftReset()
-{
-    bool retVal;
-
-    // In user space, in kernel space and in hardware, nothing remains.
-    LOG_NRM("Performing soft reset");
-    gRsrcMngr->FreeObj();
-    gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY);
-    if ((retVal = gCtrlrConfig->SetIrqScheme(INT_NONE)) == false)
-        LOG_ERR("Setting IRQ scheme failed");
-    return retVal;
-}
 

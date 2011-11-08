@@ -5,7 +5,7 @@
 
 class IOSQ;    // forward definition
 typedef boost::shared_ptr<IOSQ>        SharedIOSQPtr;
-#define CAST_TO_IOSQP(shared_trackable_ptr)  \
+#define CAST_TO_IOSQ(shared_trackable_ptr)  \
         boost::shared_polymorphic_downcast<IOSQ>(shared_trackable_ptr)
 
 
@@ -44,9 +44,9 @@ public:
      * @param qId Pass the queue's ID
      * @param numEntries Pass the number of elements within the Q
      * @param memBuffer Hand off this Q's memory. It must satisfy
-     *      MemBuffer.GetBufSize()>=(numEntries * entrySize). It must only ever
-     *      be accessed as RO. Writing to this buffer will have unpredictable
-     *      results.
+     *      MemBuffer.GetBufSize()>=(numEntries * gCtrlrConfig->GetIOSQES(). It
+     *      must only ever be accessed as RO. Writing to this buffer will have
+     *      unpredictable results.
      * @param cqId Pass the assoc CQ ID to which this SQ will be associated
      * @param priority Pass this Q's priority value, must be a 2 bit value
      */

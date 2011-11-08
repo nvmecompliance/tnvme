@@ -1,16 +1,10 @@
 #ifndef _RSRCMNGR_H_
 #define _RSRCMNGR_H_
 
-#include <map>
-#include <vector>
-#include <string>
-#include <boost/shared_ptr.hpp>
 #include "tnvme.h"
-#include "trackable.h"
-
-using namespace std;
-
-typedef map<string, SharedTrackablePtr>     TrackableMap;
+#include "objRsrc.h"
+#include "metaRsrc.h"
+#include "ctrlrConfig.h"
 
 
 /**
@@ -27,7 +21,8 @@ typedef map<string, SharedTrackablePtr>     TrackableMap;
 *
 * @note Singleton's are not allowed to throw exceptions.
 */
-class RsrcMngr
+class RsrcMngr : public ObjRsrc, public MetaRsrc,
+    public ObserverCtrlrStateDisable
 {
 public:
     /**
@@ -39,32 +34,8 @@ public:
     static void KillInstance();
     ~RsrcMngr();
 
-    /**
-     * Allocate a heap object of the 'type' specified and associate that
-     * object with the 'lookupName' to aid for future retrieval. This object
-     * will have group lifetime in that it will be freed back to the system
-     * after the group has complete executing all of its tests.
-     * @param type Pass the type of default object to allocate/construct
-     * @param lookupName Pass the associated ID of this object
-     * @return Pointer to the allocated object, otherwise NullTrackablePtr
-     *         upon errors.
-     */
-    SharedTrackablePtr
-    AllocObj(Trackable::ObjType type, string lookupName);
-
-    /**
-     * Returns a previously allocated object from AllocObj().
-     * @param lookupName Pass the associated ID of the object to return
-     * @return Pointer to the allocated object, otherwise NullTrackablePtr
-     *         upon errors.
-     */
-    SharedTrackablePtr
-    GetObj(string lookupName);
-
-    /**
-     * Free all objects which were allocated for group lifetime.
-     */
-    void FreeObj();
+    /// Base class observer pattern requirement, do not call directly.
+    void Update(const bool &disabled);
 
 
 private:
@@ -78,17 +49,6 @@ private:
     SpecRev mSpecRev;
     /// file descriptor to the device under test
     int mFd;
-
-    /// Storehouse for Group:: lifetime objects
-    TrackableMap mObjGrpLife;
-
-
-    /**
-     * Perform all the underlying allocation tasks for this class.
-     * @param type Pass the type of default object to allocate/construct
-     */
-    SharedTrackablePtr
-    Allocate(Trackable::ObjType type);
 };
 
 

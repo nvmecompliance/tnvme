@@ -11,7 +11,8 @@ SUBDIRS:=				\
 	GrpCtrlRegisters	\
 	GrpBasicInit		\
 	Queues				\
-	Cmds
+	Cmds				\
+	Utils
 
 SOURCES:=				\
 	globals.cpp			\
@@ -54,7 +55,7 @@ clobber: GOAL=clobber
 clobber: $(SUBDIRS) clean
 	rm -rf doc/html
 	rm -rf rpm
-	rm dump.reg.*
+	rm -f dump.reg.*
 	rm -f $(APP_NAME)
 
 doc: GOAL=doc

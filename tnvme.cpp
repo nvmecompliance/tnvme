@@ -11,6 +11,7 @@
 #include "tnvmeHelpers.h"
 #include "version.h"
 #include "globals.h"
+#include "Utils/kernelAPI.h"
 
 
 // ------------------------------EDIT HERE---------------------------------
@@ -25,7 +26,7 @@
 
 void Usage(void);
 void DestroySingletons();
-void BuildSingltons(int &fd, struct CmdLine &cl);
+void BuildSingletons(int &fd, struct CmdLine &cl);
 void DestroyTestInfrastructure(vector<Group *> &groups, int &fd);
 bool BuildTestInfrastructure(vector<Group *> &groups, int &fd,
     struct CmdLine &cl);
@@ -260,7 +261,7 @@ main(int argc, char *argv[])
 
     // Accessing hardware requires specific checks and inquiries before running
     if (accessingHdw) {
-        BuildSingltons(fd, CmdLine);
+        BuildSingletons(fd, CmdLine);
 
         LOG_NRM("Checking for unintended device under low powered states");
         if (gRegisters->Read(PCISPC_PMCS, regVal) == false) {
@@ -324,7 +325,7 @@ main(int argc, char *argv[])
             CmdLine.wmmap.offset, CmdLine.wmmap.acc,
             (uint8_t *)(&CmdLine.wmmap.value));
     } else if (CmdLine.reset) {
-        SoftReset();
+        KernelAPI::SoftReset();
         // At this point we cannot enable the ctrlr because that requires
         // ACQ/ASQ's to be created, ctrlr simply won't become ready w/o these.
     } else if (CmdLine.test.req) {
@@ -337,12 +338,24 @@ main(int argc, char *argv[])
 }
 
 
-void BuildSingltons(int &fd, struct CmdLine &cl)
+void BuildSingletons(int &fd, struct CmdLine &cl)
 {
     // Create globals/singletons here, which all tests objects will need
+
+    // The Register singleton should be created 1st because all other Singletons
+    // use it directly to become init'd or they rely on it heavily soon after.
     gRegisters = Registers::GetInstance(fd, cl.rev);
-    gRsrcMngr = RsrcMngr::GetInstance(fd, cl.rev);
+
+    // The CtrlrConfig singleton should be created 2nd because it's subject base
+    // class is used by just about every other object in the framework to learn
+    // of state changes within the ctrlr. Disabling the ctrlr is extremely
+    // destructive of all resources in user space and in kernel space.
     gCtrlrConfig = CtrlrConfig::GetInstance(fd, cl.rev);
+
+    // Create the remainder at will...
+    gRsrcMngr = RsrcMngr::GetInstance(fd, cl.rev);
+    gCtrlrConfig->Attach(*gRsrcMngr);
+
 }
 
 

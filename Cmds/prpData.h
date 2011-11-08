@@ -60,15 +60,6 @@ public:
     uint8_t const *GetROBuffer();
     uint64_t       GetROBufferSize() { return mBufROSize; }
 
-    /**
-     * The PRP fields are dnvme specific, they notify dnvme which PRP fields
-     * of this cmd may be touched by the dnvme to populate those respective
-     * fields with physical pointers. The physical pointers point to either
-     * a PRP list or the actual physical memory as set by SetBuffer().
-     * @return The allowed PRP fields which can touched when sent to dnvme
-     */
-    send_64b_bitmask GetPrpFields() { return mPrpFields; }
-
 
 private:
     /// Used for RW memory for a cmd's user data

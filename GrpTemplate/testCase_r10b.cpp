@@ -1,5 +1,5 @@
 #include "testCase_r10b.h"
-#include "../globals.h"
+#include "globals.h"
 
 
 TestCase_r10b::TestCase_r10b(int fd) : Test(fd, SPECREV_10b)

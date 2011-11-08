@@ -1,5 +1,5 @@
 #include "allPciRegs_r10b.h"
-#include "../globals.h"
+#include "globals.h"
 
 
 AllPciRegs_r10b::AllPciRegs_r10b(int fd) : Test(fd, SPECREV_10b)

@@ -6,7 +6,6 @@
 #include "tnvme.h"
 #include "test.h"
 
-using namespace std;
 
 /// Use to append a new x.0 test number at the group level
 #define APPEND_TEST_AT_GROUP_LEVEL(test, fd)        \

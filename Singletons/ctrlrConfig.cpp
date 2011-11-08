@@ -24,7 +24,8 @@ void CtrlrConfig::KillInstance()
 }
 
 
-CtrlrConfig::CtrlrConfig(int fd, SpecRev specRev)
+CtrlrConfig::CtrlrConfig(int fd, SpecRev specRev) :
+    SubjectCtrlrStateDisable(true)
 {
     mFd = fd;
     if (mFd < 0) {
@@ -91,11 +92,21 @@ bool
 CtrlrConfig::SetState(enum nvme_state state)
 {
     string toState;
+    bool disable;
 
     switch (state) {
-    case ST_ENABLE:             toState = "Enabling";               break;
-    case ST_DISABLE:            toState = "Disabling";              break;
-    case ST_DISABLE_COMPLETELY: toState = "Disabling completely";   break;
+    case ST_ENABLE:
+        disable = false;
+        toState = "Enabling";
+        break;
+    case ST_DISABLE:
+        disable = true;
+        toState = "Disabling";
+        break;
+    case ST_DISABLE_COMPLETELY:
+        disable = true;
+        toState = "Disabling completely";
+        break;
     default:
         LOG_DBG("Illegal state detected = %d", state);
         throw exception();
@@ -108,6 +119,10 @@ CtrlrConfig::SetState(enum nvme_state state)
         LOG_NRM("dnvme waits a TO period for CC.RDY to indicate ready" );
         return false;
     }
+
+    // The state of the ctrlr is important to many objects
+    Notify(disable);
+
     return true;
 }
 
@@ -156,5 +171,18 @@ CtrlrConfig::SetRegValue(uint8_t value, uint8_t valueMask, uint64_t regMask,
     regVal &= ~regMask;
     regVal |= ((uint32_t)value << bitShift);
     return WriteRegCC(regVal);
+}
+
+
+bool
+CtrlrConfig::SetMPS()
+{
+    switch (sysconf(_SC_PAGESIZE)) {
+    case 4096:      return SetRegValue(0, 0x0f, CC_MPS, 7);
+    default:
+        LOG_DBG("Kernel reporting unsupported page size: 0x%08lX",
+            sysconf(_SC_PAGESIZE));
+        return false;
+    }
 }
 

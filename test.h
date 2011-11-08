@@ -5,8 +5,7 @@
 #include <exception>
 #include "testDescribe.h"
 #include "Singletons/registers.h"
-
-using namespace std;
+#include "tnvme.h"
 
 
 /**

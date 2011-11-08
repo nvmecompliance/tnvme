@@ -13,8 +13,6 @@
 #define REGMASK(regval, bytes)  \
         (regval & (0xffffffffffffffffULL >> (64 - (bytes * 8))))
 
-using namespace std;
-
 
 /**
 * This class is meant to interface with PCI and/or ctrl'r registers.

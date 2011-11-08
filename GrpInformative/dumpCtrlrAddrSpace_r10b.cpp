@@ -6,7 +6,7 @@
 #include <errno.h>
 #include "dumpCtrlrAddrSpace_r10b.h"
 #include "grpInformative.h"
-#include "../globals.h"
+#include "globals.h"
 
 
 DumpCtrlrAddrSpace_r10b::DumpCtrlrAddrSpace_r10b(int fd) : Test(fd, SPECREV_10b)

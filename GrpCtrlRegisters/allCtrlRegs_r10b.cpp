@@ -1,5 +1,5 @@
 #include "allCtrlRegs_r10b.h"
-#include "../globals.h"
+#include "globals.h"
 
 
 AllCtrlRegs_r10b::AllCtrlRegs_r10b(int fd) : Test(fd, SPECREV_10b)

@@ -4,6 +4,11 @@
 #include "tnvme.h"
 #include "dnvme.h"
 #include "regDefs.h"
+#include "subject.h"
+
+/// Subject/Observer pattern for SetState() actions within CtrlrConfig
+typedef StateObserver<bool> ObserverCtrlrStateDisable;
+typedef StateSubject<bool>  SubjectCtrlrStateDisable;
 
 
 /**
@@ -16,7 +21,7 @@
 *
 * @note Singleton's are not allowed to throw exceptions.
 */
-class CtrlrConfig
+class CtrlrConfig : public SubjectCtrlrStateDisable
 {
 public:
     /**
@@ -98,6 +103,8 @@ public:
         { return GetRegValue(value, CC_MPS, 7); }
     bool SetMPS(uint8_t value)
         { return SetRegValue(value, 0x0f, CC_MPS, 7); }
+    /// Set page size according to what sysconf(_SC_PAGESIZE) returns
+    bool SetMPS();
 
     bool GetCSS(uint8_t &value)
         { return GetRegValue(value, CC_CSS, 4); }

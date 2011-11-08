@@ -6,7 +6,7 @@
 #include <errno.h>
 #include "dumpPciAddrSpace_r10b.h"
 #include "grpInformative.h"
-#include "../globals.h"
+#include "globals.h"
 
 
 DumpPciAddrSpace_r10b::DumpPciAddrSpace_r10b(int fd) : Test(fd, SPECREV_10b)
