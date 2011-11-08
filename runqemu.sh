@@ -13,5 +13,5 @@ if [ -z $TNVME_CMD_LINE ]; then
   exit
 fi
 
-echo ./tnvme -k skipqemu.cfg $TNVME_CMD_LINE 2>&1 | tee tnvme.out
-./tnvme -k skipqemu.cfg $TNVME_CMD_LINE 2>&1 | tee tnvme.out
+echo ./tnvme -k skipqemu.cfg $TNVME_CMD_LINE 2>&1 | tee ./Logs/tnvme.out
+./tnvme -k skipqemu.cfg $TNVME_CMD_LINE 2>&1 | tee ./Logs/tnvme.out

@@ -59,10 +59,10 @@ KernelAPI::munmap(uint8_t *memPtr, size_t bufLength)
 
 
 void
-KernelAPI::DumpKernelMetrics(int fd, string &filename)
+KernelAPI::DumpKernelMetrics(int fd, string filename)
 {
     int rc;
-    struct nvme_file dumpMe = { filename.size(), filename.c_str() };
+    struct nvme_file dumpMe = { filename.length(), filename.c_str() };
 
 
     LOG_NRM("Dump dnvme metrics to filename: %s", filename.c_str());

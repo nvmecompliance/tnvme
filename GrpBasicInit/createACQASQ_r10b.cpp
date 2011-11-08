@@ -2,6 +2,7 @@
 #include "globals.h"
 #include "../Queues/acq.h"
 #include "../Queues/asq.h"
+#include "../Utils/kernelAPI.h"
 
 
 CreateACQASQ_r10b::CreateACQASQ_r10b(int fd) : Test(fd, SPECREV_10b)
@@ -67,6 +68,8 @@ CreateACQASQ_r10b::RunCoreTest()
 
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
         throw exception();
+
+    KernelAPI::DumpKernelMetrics(mFd, string(FORM_LOGNAME(CreateACQASQ)));
 
     return true;
 }

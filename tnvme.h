@@ -25,6 +25,8 @@ using namespace std;
 
 #define MAX_CHAR_PER_LINE_DESCRIPTION       66
 
+#define FORM_LOGNAME(baseName)     "./Logs/" #baseName ".out"
+
 typedef enum {
     SPECREV_10b,                // http://www.nvmexpress.org/ spec. rev. 1.0b
     SPECREVTYPE_FENCE           // always must be last element

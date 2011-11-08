@@ -57,7 +57,7 @@ public:
      * @param fd Pass the device FD, not the filename, to extract dump data from
      * @param filename Pass the filename in the current directory to write into
      */
-    static void DumpKernelMetrics(int fd, string &filename);
+    static void DumpKernelMetrics(int fd, string filename);
 };
 
 
