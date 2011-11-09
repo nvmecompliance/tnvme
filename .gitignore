@@ -1,8 +1,8 @@
-doc/html
 src/
 rpm/
 Debug/
 rpmbuild/
+Logs/
 tnvme-*/
 
 tnvme

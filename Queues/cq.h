@@ -31,11 +31,65 @@ public:
     uint16_t GetIrqVector() { return mIrqVec; }
 
     /**
-     * Get a Completion Element (CE) at CQ position indicated by indexPtr.
+     * Peek at a Completion Element (CE) at CQ position indicated by indexPtr.
+     * Only dnvme can reap CE's from a CQ by calling Reap(), however user space
+     * does have eyes into that CQ's memory, and thus allows peeking at any CE
+     * at any time without reaping anything.
      * @param indexPtr Pass [0 to (GetNumEntries()-1)] as the index into the CQ.
      * @return The CE requested.
      */
-    union CE GetCE(uint16_t indexPtr);
+    union CE PeekCE(uint16_t indexPtr);
+
+    /**
+     * Dump the entire contents of CE at CQ position indicated by indexPtr to
+     * the logging endpoint. Similar to PeekCE() but logs the CE instead.
+     */
+    void LogCE(uint16_t indexPtr);
+
+    /**
+     * Inquire as to the number of CE's which are present in this CQ. Returns
+     * immediately, does not block.
+     * @return The number of unreap'd CE's awaiting
+     */
+    uint16_t ReapInquiry();
+
+    /**
+     * Inquire as to the number of CE's which are present in this CQ. If the
+     * number of CE's are 0, then a wait period is entered until such time
+     * a CE arrives or a timeout period expires.
+     * @param ms Pass the max number of milliseconds to wait until CE's arrive.
+     * @param numCE Returns the number of unreap'd CE's awaiting
+     * @return true when CE's are awaiting to be reaped, otherwise a timeout
+     */
+    bool ReapInquiryWaitAny(uint16_t ms, uint16_t &numCE);
+
+    /**
+     * Wait until at least the specified number of CE's become available or
+     * until a time out period expires.
+     * @param ms Pass the max number of milliseconds to wait until numTil CE's
+     *      arrive.
+     * @param numTil Pass the number of CE's that need to become available
+     * @param numCE Returns the number of unreap'd CE's awaiting
+     * @return true when CE's are awaiting to be reaped, otherwise a timeout
+     */
+    bool ReapInquiryWaitSpecify(uint16_t ms, uint16_t numTil, uint16_t &numCE);
+
+    /**
+     * Reap a specified number of Completion Elements (CE) from this CQ. The
+     * memBuffer will be resized. Calling this method when (ReapInquiry() == 0)
+     * is fine.
+     * @param ceRemain Returns the number of CE's left in the CQ after reaping
+     * @param memBuffer Pass a buffer to contain the CE's requested. The
+     *      contents of the buffer will be lost and the buffer will be resized
+     *      to fulfill ceDesire.
+     * @param ceDesire Pass the number of CE's desired to be reaped, 0 indicates
+     *      reap all which can be reaped.
+     * @param zeroMem Pass true to zero out memBuffer before reaping, otherwise
+     *      the buffer is not modified.
+     * @return Returns the actual number of CE's reaped
+     */
+    uint16_t Reap(uint16_t &ceRemain, SharedMemBufferPtr memBuffer,
+        uint16_t ceDesire = 0, bool zeroMem = false);
 
 
 protected:

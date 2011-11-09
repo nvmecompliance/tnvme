@@ -49,6 +49,11 @@ AllCtrlRegs_r10b::operator=(const AllCtrlRegs_r10b &other)
 bool
 AllCtrlRegs_r10b::RunCoreTest()
 {
+    /** \verbatim
+     * Assumptions:
+     * 1) none
+     *  \endverbatim
+     */
     ValidateDefaultValues();
     ValidateROBitsAfterWriting();
     return true;

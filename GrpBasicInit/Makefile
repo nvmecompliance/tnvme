@@ -6,7 +6,8 @@ INCLUDES = -I. -I../ -I../../ -I/usr/local/include
 
 SRC = \
 	grpBasicInit.cpp		\
-	createACQASQ_r10b.cpp
+	createACQASQ_r10b.cpp	\
+	identifyCmd_r10b.cpp
 
 .SUFFIXES: .cpp
 

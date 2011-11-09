@@ -21,8 +21,7 @@
 *
 * @note Singleton's are not allowed to throw exceptions.
 */
-class RsrcMngr : public ObjRsrc, public MetaRsrc,
-    public ObserverCtrlrStateDisable
+class RsrcMngr : public ObjRsrc, public MetaRsrc, public ObserverCtrlrState
 {
 public:
     /**
@@ -35,7 +34,7 @@ public:
     ~RsrcMngr();
 
     /// Base class observer pattern requirement, do not call directly.
-    void Update(const bool &disabled);
+    void Update(const enum nvme_state &state);
 
 
 private:

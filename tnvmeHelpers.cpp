@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#include <dirent.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -92,12 +93,13 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
 
             } else if ((cl.test.t.major == UINT_MAX) ||
                        (cl.test.t.minor == UINT_MAX)) {
-                // Each test group starts from known starting point
-                if (KernelAPI::SoftReset() == false)
-                    return false;
 
                 // Run all tests within spec'd group
                 if (iGrp == cl.test.t.group) {
+                    // Each test group starts from known starting point
+                    if (KernelAPI::SoftReset() == false)
+                        return false;
+
                     testIter = groups[iGrp]->GetTestIterator();
                     while (allHaveRun == false) {
                         switch (groups[iGrp]->RunTest(testIter, cl.skiptest)) {
@@ -553,6 +555,24 @@ ParseWmmapCmdLine(WmmapIo &wmmap, const char *optarg)
     	return false;
     }
 
+    return true;
+}
+
+
+bool
+CreateLogDir()
+{
+    DIR *dir;
+
+    // This must correlate to macro FORM_LOGNAME(), please verify B4 changing
+    if ((dir = opendir("./Logs")) == NULL) {
+        if (mkdir("./Logs", S_IRWXU | S_IRWXG | S_IRWXO) != 0) {
+            LOG_ERR("Unable to create ./Logs directory, errno = %d", errno);
+            return false;
+        }
+    }
+
+    closedir(dir);
     return true;
 }
 

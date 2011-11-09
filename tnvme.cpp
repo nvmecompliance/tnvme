@@ -269,6 +269,9 @@ main(int argc, char *argv[])
         } else if (regVal & 0x03) {
             LOG_ERR("PCI power state not fully operational, is this intended?");
         }
+
+        if (CreateLogDir() == false)
+            exit(1);
     }
 
 

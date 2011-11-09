@@ -9,7 +9,8 @@ SRC = \
 	prpData.cpp		\
 	adminCmd.cpp	\
 	nvmeCmd.cpp		\
-	createIOCQ.cpp
+	createIOCQ.cpp	\
+	identify.cpp
 
 .SUFFIXES: .cpp
 

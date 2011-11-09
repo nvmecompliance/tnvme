@@ -49,5 +49,10 @@ TestCase_r10b::operator=(const TestCase_r10b &other)
 bool
 TestCase_r10b::RunCoreTest()
 {
+    /** \verbatim
+     * Assumptions:
+     * 1) none
+     *  \endverbatim
+     */
     return true;
 }

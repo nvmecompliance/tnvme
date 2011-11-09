@@ -4,11 +4,12 @@
 #include "test.h"
 
 
-/**
+/** \verbatim
  * -----------------------------------------------------------------------------
  * ----------------Mandatory rules for children to follow-----------------------
  * -----------------------------------------------------------------------------
  * 1) See notes in the header file of the Test base class
+ * \endverbatim
  */
 class AllCtrlRegs_r10b : public Test
 {

@@ -183,3 +183,40 @@ SQ::GetSE(uint16_t indexPtr)
     LOG_DBG("Unable to locate index within Q");
     throw exception();
 }
+
+
+void
+SQ::Send(SharedCmdPtr cmd)
+{
+    int rc;
+    struct nvme_64b_send io;
+
+    io.q_id = GetQId();
+    io.bit_mask = cmd->GetPrpFields();
+    io.data_buf_size = cmd->GetROBufferSize();
+    io.data_buf_ptr = cmd->GetROBuffer();
+    io.cmd_buf_ptr = cmd->GetCmd()->GetBuffer();
+    io.cmd_set = cmd->GetCmdSet();
+    io.data_dir = cmd->GetDataDir();
+
+    LOG_NRM("Send cmd set %d, opcode 0x%02X, data buf size %d, to SQ id 0x%02X",
+        io.cmd_set, cmd->GetOpcode(), io.data_buf_size, io.q_id);
+    cmd->LogCmd();
+    if ((rc = ioctl(mFd, NVME_IOCTL_SEND_64B_CMD, &io)) < 0) {
+        LOG_ERR("Error sending cmd, rc =%d", rc);
+        throw exception();
+    }
+}
+
+
+void
+SQ::Ring()
+{
+    int rc;
+    uint16_t sqId = GetQId();
+
+    if ((rc = ioctl(mFd, NVME_IOCTL_RING_SQ_DOORBELL, sqId)) < 0) {
+        LOG_ERR("Error ringing doorbell, rc =%d", rc);
+        throw exception();
+    }
+}

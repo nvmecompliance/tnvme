@@ -26,6 +26,8 @@ public:
         OBJ_ASQ,
         OBJ_IOCQ,
         OBJ_IOSQ,
+        OBJ_IDENTIFY,
+        OBJ_CREATEIOCQ,
         OBJTYPE_FENCE           // always must be last element
     } ObjType;
 

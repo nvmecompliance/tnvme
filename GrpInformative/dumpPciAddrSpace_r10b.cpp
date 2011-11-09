@@ -61,6 +61,11 @@ DumpPciAddrSpace_r10b::RunCoreTest()
     const PciSpcType *pciMetrics = gRegisters->GetPciMetrics();
     const vector<PciCapabilities> *pciCap = gRegisters->GetPciCapabilities();
 
+    /** \verbatim
+     * Assumptions:
+     * 1) none
+     *  \endverbatim
+     */
 
     // Dumping all register values to well known file
     if ((fd = open(FILENAME_DUMP_PCI_REGS, FILENAME_FLAGS,

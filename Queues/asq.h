@@ -6,7 +6,7 @@
 class ASQ;    // forward definition
 typedef boost::shared_ptr<ASQ>        SharedASQPtr;
 #define CAST_TO_ASQ(shared_trackable_ptr)  \
-        boost::shared_polymorphic_downcast<ASQ>(shared_trackable_ptr)
+        boost::shared_polymorphic_downcast<ASQ>(shared_trackable_ptr);
 
 
 /**

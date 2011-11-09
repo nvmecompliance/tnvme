@@ -46,6 +46,9 @@ public:
     /// Free all objects which were allocated for group lifetime.
     void FreeAllObj();
 
+    /// Free all objects which were allocated for group lifetime, except ACQ/ASQ
+    void FreeAllObjNotASQACQ();
+
 
 private:
     // Implement singleton design pattern
@@ -63,7 +66,7 @@ private:
      * @param type Pass the type of default object to allocate/construct
      */
     SharedTrackablePtr
-    Allocate(Trackable::ObjType type);
+    AllocWorker(Trackable::ObjType type);
 };
 
 

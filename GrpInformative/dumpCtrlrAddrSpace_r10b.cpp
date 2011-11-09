@@ -60,6 +60,11 @@ DumpCtrlrAddrSpace_r10b::RunCoreTest()
     uint64_t value = 0;
     const CtlSpcType *pciMetrics = gRegisters->GetCtlMetrics();
 
+    /** \verbatim
+     * Assumptions:
+     * 1) none
+     *  \endverbatim
+     */
 
     // Dumping all register values to well known file
     if ((fd = open(FILENAME_DUMP_CTRLR_REGS, FILENAME_FLAGS,

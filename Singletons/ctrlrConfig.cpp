@@ -25,7 +25,7 @@ void CtrlrConfig::KillInstance()
 
 
 CtrlrConfig::CtrlrConfig(int fd, SpecRev specRev) :
-    SubjectCtrlrStateDisable(true)
+    SubjectCtrlrState(ST_DISABLE_COMPLETELY)
 {
     mFd = fd;
     if (mFd < 0) {
@@ -92,21 +92,11 @@ bool
 CtrlrConfig::SetState(enum nvme_state state)
 {
     string toState;
-    bool disable;
 
     switch (state) {
-    case ST_ENABLE:
-        disable = false;
-        toState = "Enabling";
-        break;
-    case ST_DISABLE:
-        disable = true;
-        toState = "Disabling";
-        break;
-    case ST_DISABLE_COMPLETELY:
-        disable = true;
-        toState = "Disabling completely";
-        break;
+    case ST_ENABLE:             toState = "Enabling";               break;
+    case ST_DISABLE:            toState = "Disabling";              break;
+    case ST_DISABLE_COMPLETELY: toState = "Disabling completely";   break;
     default:
         LOG_DBG("Illegal state detected = %d", state);
         throw exception();
@@ -121,7 +111,7 @@ CtrlrConfig::SetState(enum nvme_state state)
     }
 
     // The state of the ctrlr is important to many objects
-    Notify(disable);
+    Notify(state);
 
     return true;
 }

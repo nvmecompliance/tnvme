@@ -13,14 +13,7 @@ MemBuffer::MemBuffer() : Trackable(Trackable::OBJ_MEMBUFFER)
 
 MemBuffer::~MemBuffer()
 {
-    // Either new or posix_memalign() was used to allocate memory
-    if (mAllocByNewOperator) {
-        if (mRealBaseAddr)
-            delete [] mRealBaseAddr;
-    } else {
-        if (mRealBaseAddr)
-            free(mRealBaseAddr);
-    }
+    DeallocateResources();
 }
 
 
@@ -36,6 +29,21 @@ MemBuffer::InitMemberVariables()
 
 
 void
+MemBuffer::DeallocateResources()
+{
+    // Either new or posix_memalign() was used to allocate memory
+    if (mAllocByNewOperator) {
+        if (mRealBaseAddr)
+            delete [] mRealBaseAddr;
+    } else {
+        if (mRealBaseAddr)
+            free(mRealBaseAddr);
+    }
+    InitMemberVariables();
+}
+
+
+void
 MemBuffer::Zero()
 {
     if (mRealBaseAddr)
@@ -44,21 +52,24 @@ MemBuffer::Zero()
 
 
 void
-MemBuffer::InitOffset1stPage(uint32_t bufSize, bool initMem, uint8_t initVal,
-    uint32_t offset1stPg)
+MemBuffer::InitOffset1stPage(uint32_t bufSize, uint32_t offset1stPg,
+    bool initMem, uint8_t initVal)
 {
     int err;
     uint32_t realBufSize;
     uint32_t align = sysconf(_SC_PAGESIZE);
 
 
-    if (mRealBaseAddr != NULL) {
-        LOG_DBG("Reallocating a previously allocated buffer not supported");
-        throw exception();
-    } else if (offset1stPg % sizeof(uint32_t) != 0) {
+    LOG_NRM("Init buffer; size: %d, offset: 0x%08X, init: %d, value: 0x%02X",
+        bufSize, offset1stPg, initMem, initVal);
+    if (offset1stPg % sizeof(uint32_t) != 0) {
         LOG_DBG("Offset into page 1 not aligned to: 0x%02lX", sizeof(uint32_t));
         throw exception();
     }
+
+    // Support resizing/reallocation
+    if (mRealBaseAddr != NULL)
+        DeallocateResources();
     mAllocByNewOperator = false;  // using posix_memalign()
 
     // All memory is allocated page aligned, offsets into the 1st page requires
@@ -84,19 +95,22 @@ MemBuffer::InitOffset1stPage(uint32_t bufSize, bool initMem, uint8_t initVal,
 
 
 void
-MemBuffer::InitAlignment(uint32_t bufSize, bool initMem, uint8_t initVal,
-    uint32_t align)
+MemBuffer::InitAlignment(uint32_t bufSize, uint32_t align, bool initMem,
+    uint8_t initVal)
 {
     int err;
 
-
-    if (mRealBaseAddr != NULL) {
-        LOG_DBG("Reallocating a previously allocated buffer not supported");
-        throw exception();
-    } else if (align % sizeof(void *) != 0) {
-        LOG_DBG("Requested alignment not aligned to: 0x%02lX", sizeof(void *));
+    LOG_NRM("Init buffer; size: %d, align: 0x%08X, init: %d, value: 0x%02X",
+        bufSize, align, initMem, initVal);
+    if (align % sizeof(void *) != 0) {
+        LOG_DBG("Req'd alignment 0x%08X, is not modulo 0x%02lX",
+            align, sizeof(void *));
         throw exception();
     }
+
+    // Support resizing/reallocation
+    if (mRealBaseAddr != NULL)
+        DeallocateResources();
     mAllocByNewOperator = false;  // using posix_memalign()
 
     mVirBufSize = bufSize;
@@ -117,10 +131,12 @@ MemBuffer::InitAlignment(uint32_t bufSize, bool initMem, uint8_t initVal,
 void
 MemBuffer::Init(uint32_t bufSize, bool initMem, uint8_t initVal)
 {
-    if (mRealBaseAddr != NULL) {
-        LOG_DBG("Reallocating a previously allocated buffer not supported");
-        throw exception();
-    }
+    LOG_NRM("Init buffer; size: %d, init: %d, value: 0x%02X",
+        bufSize, initMem, initVal);
+
+    // Support resizing/reallocation
+    if (mRealBaseAddr != NULL)
+        DeallocateResources();
     mAllocByNewOperator = true;
 
     mVirBufSize = bufSize;

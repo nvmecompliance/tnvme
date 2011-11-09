@@ -6,6 +6,10 @@
 #include "prpData.h"
 #include "../Singletons/memBuffer.h"
 
+class Cmd;    // forward definition
+typedef boost::shared_ptr<Cmd>              SharedCmdPtr;
+#define CAST_TO_Cmd(shared_trackable_ptr)   \
+        boost::shared_polymorphic_downcast<Cmd>(shared_trackable_ptr);
 
 typedef enum {
     DATADIR_NONE,
@@ -32,11 +36,17 @@ public:
     Cmd(int fd, Trackable::ObjType objBeingCreated);
     virtual ~Cmd();
 
-    uint16_t  GetCmdSizeB() { return mCmdBuf.GetBufSize(); }
-    uint8_t   GetCmdSizeDW() { return (mCmdBuf.GetBufSize() % 4); }
-    nvme_cmds GetCmdSet() { return mCmdSet; }
+    /// Dump the entire contents of the cmd buffer to the logging endpoint
+    void LogCmd();
 
-    uint8_t  GetOpcode() { return GetByte(0, 0); }
+    /// Access to the actual cmd bytes
+    SharedMemBufferPtr GetCmd() { return mCmdBuf; }
+
+    uint16_t  GetCmdSizeB() { return mCmdBuf->GetBufSize(); }
+    uint8_t   GetCmdSizeDW() { return (mCmdBuf->GetBufSize() / 4); }
+    nvme_cmds GetCmdSet() { return mCmdSet; }
+    DataDir   GetDataDir() { return mDataDir; }
+    uint8_t   GetOpcode() { return GetByte(0, 0); }
 
     static const uint8_t BITMASK_FUSE_B;
     static const uint32_t BITMASK_FUSE_DW;
@@ -90,7 +100,7 @@ private:
     Cmd();
 
     nvme_cmds mCmdSet;
-    MemBuffer mCmdBuf;
+    SharedMemBufferPtr mCmdBuf;
     DataDir mDataDir;
 };
 

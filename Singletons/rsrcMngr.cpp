@@ -43,16 +43,24 @@ RsrcMngr::~RsrcMngr()
 
 
 void
-RsrcMngr::Update(const bool &disabled)
+RsrcMngr::Update(const enum nvme_state &state)
 {
-    // The disabling of the ctrlr causes all kernel objects to be dealloc'd...
-    if (disabled == true) {
+    // The disabling of the ctrlr causes kernel objects to be dealloc'd...
+    if (state == ST_DISABLE_COMPLETELY) {
         // All outstanding Q memory will be released.
-        LOG_DBG("Disabling causes all Q memory to be released");
+        LOG_DBG("Disabling causes all Q mem freed");
         FreeAllObj();
 
         // All outstanding meta data buffer ID's will be released.
-        LOG_DBG("Disabling causes all meta unique ID's to be released");
+        LOG_DBG("Disabling causes all meta unique ID's freed");
+        ReleaseAllMetaId();
+    } else if (state == ST_DISABLE) {
+        // Only ACQ/ASQ objects remain, all others must be released
+        LOG_DBG("Disabling causes all Q mem freed, but not ACQ/ASQ");
+        FreeAllObjNotASQACQ();
+
+        // All outstanding meta data buffer ID's will be released.
+        LOG_DBG("Disabling causes all meta unique ID's freed");
         ReleaseAllMetaId();
     }
 }

@@ -32,12 +32,13 @@ MetaData::~MetaData()
 {
     int rc;
 
-    if (mBuf != NULL)
+    if (mBuf != NULL) {
         KernelAPI::munmap(mBuf, mBufSize);
 
-    // Request dnvme to release our contiguous memory
-    if ((rc = ioctl(mFd, NVME_IOCTL_METABUF_DELETE, mBufId)) < 0)
-        LOG_ERR("Meta data free request denied with error: %d", rc);
+        // Request dnvme to release our contiguous memory
+        if ((rc = ioctl(mFd, NVME_IOCTL_METABUF_DELETE, mBufId)) < 0)
+            LOG_ERR("Meta data free request denied with error: %d", rc);
+    }
 }
 
 

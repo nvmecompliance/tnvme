@@ -58,7 +58,9 @@ public:
      *      setup, i.e. there is no user data at all for the PRP fields.
      */
     uint8_t const *GetROBuffer();
-    uint64_t       GetROBufferSize() { return mBufROSize; }
+    uint64_t       GetROBufferSize() { return mBufSize; }
+
+    send_64b_bitmask GetPrpFields() { return mPrpFields; }
 
 
 private:
@@ -66,8 +68,8 @@ private:
     SharedMemBufferPtr mBufRW;
     /// Used for RO memory assoc with a IOQ's data memory
     uint8_t const *mBufRO;
-    /// Number of bytes consisting of mBufRO
-    uint64_t mBufROSize;
+    /// Number of bytes consisting of either mBufRO or mBufRW
+    uint64_t mBufSize;
 
     /// What fields in a cmd can we populate for the buffer?
     send_64b_bitmask mPrpFields;

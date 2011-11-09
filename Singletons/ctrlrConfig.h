@@ -7,8 +7,8 @@
 #include "subject.h"
 
 /// Subject/Observer pattern for SetState() actions within CtrlrConfig
-typedef StateObserver<bool> ObserverCtrlrStateDisable;
-typedef StateSubject<bool>  SubjectCtrlrStateDisable;
+typedef StateObserver<enum nvme_state> ObserverCtrlrState;
+typedef StateSubject<enum nvme_state>  SubjectCtrlrState;
 
 
 /**
@@ -21,7 +21,7 @@ typedef StateSubject<bool>  SubjectCtrlrStateDisable;
 *
 * @note Singleton's are not allowed to throw exceptions.
 */
-class CtrlrConfig : public SubjectCtrlrStateDisable
+class CtrlrConfig : public SubjectCtrlrState
 {
 public:
     /**

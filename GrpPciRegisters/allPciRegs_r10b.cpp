@@ -49,6 +49,11 @@ AllPciRegs_r10b::operator=(const AllPciRegs_r10b &other)
 bool
 AllPciRegs_r10b::RunCoreTest()
 {
+    /** \verbatim
+     * Assumptions:
+     * 1) none
+     *  \endverbatim
+     */
     ValidateDefaultValues();
     ValidateROBitsAfterWriting();
     return true;

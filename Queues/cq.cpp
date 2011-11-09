@@ -2,6 +2,8 @@
 #include "globals.h"
 #include "../Utils/kernelAPI.h"
 
+#define NUM_TIME_SEGMENTS      10
+
 
 CQ::CQ() :
     Queue(0, Trackable::OBJTYPE_FENCE)
@@ -166,7 +168,7 @@ CQ::GetQMetrics()
 
 
 union CE
-CQ::GetCE(uint16_t indexPtr)
+CQ::PeekCE(uint16_t indexPtr)
 {
     union CE *dataPtr;
 
@@ -183,4 +185,110 @@ CQ::GetCE(uint16_t indexPtr)
     LOG_DBG("Unable to locate index within Q");
     throw exception();
 }
+
+
+void
+CQ::LogCE(uint16_t indexPtr)
+{
+    union CE ce = PeekCE(indexPtr);
+    LOG_NRM("CQ %d, CE %d, DWORD0: 0x%08X", GetQId(), indexPtr, ce.d.dw0);
+    LOG_NRM("CQ %d, CE %d, DWORD1: 0x%08X", GetQId(), indexPtr, ce.d.dw1);
+    LOG_NRM("CQ %d, CE %d, DWORD2: 0x%08X", GetQId(), indexPtr, ce.d.dw2);
+    LOG_NRM("CQ %d, CE %d, DWORD3: 0x%08X", GetQId(), indexPtr, ce.d.dw3);
+}
+
+
+uint16_t
+CQ::ReapInquiry()
+{
+    int rc;
+    struct nvme_reap_inquiry inq;
+
+    inq.q_id = GetQId();
+    if ((rc = ioctl(mFd, NVME_IOCTL_REAP_INQUIRY, &inq)) < 0) {
+        LOG_ERR("Error during reap inquiry, rc =%d", rc);
+        throw exception();
+    }
+
+    LOG_NRM("%d CE's awaiting attention in SQ %d", inq.num_remaining, inq.q_id);
+    return inq.num_remaining;
+}
+
+
+bool
+CQ::ReapInquiryWaitAny(uint16_t ms, uint16_t &numCE)
+{
+    // Chunk the wait period up into equal segments, until such time there
+    // can be time to develop a select() solution in dnvme
+    useconds_t segments = ((ms * 1000) / NUM_TIME_SEGMENTS);
+
+    for (int i = 0; i < NUM_TIME_SEGMENTS; i++) {
+        if ((numCE = ReapInquiry()) != 0) {
+            return true;
+        }
+        usleep(segments);
+    }
+    return false;
+}
+
+
+bool
+CQ::ReapInquiryWaitSpecify(uint16_t ms, uint16_t numTil, uint16_t &numCE)
+{
+    // Chunk the wait period up into equal segments, until such time there
+    // can be time to develop a select() solution in dnvme
+    useconds_t segments = ((ms * 1000) / NUM_TIME_SEGMENTS);
+
+    for (int i = 0; i < NUM_TIME_SEGMENTS; i++) {
+        if ((numCE = ReapInquiry()) != 0) {
+            if (numCE >= numTil)
+                return true;
+        }
+        usleep(segments);
+    }
+    return false;
+}
+
+
+uint16_t
+CQ::Reap(uint16_t &ceRemain, SharedMemBufferPtr memBuffer,
+    uint16_t ceDesire, bool zeroMem)
+{
+    int rc;
+    struct nvme_reap reap;
+
+    // The tough part of reaping all which can be reaped, indicated by
+    // (ceDesire == 0), is that CE's can be arriving from hdw between the time
+    // one calls ReapInquiry() and Reap(). In essence this indicates we really
+    // can never know for certain how many there are to be reaped, and thus
+    // never really knowing how large to make a buffer to reap CE's into.
+    // The solution is to enforce brute force methods by allocating max CE's
+    if (ceDesire == 0) {
+        // Per NVME spec: 1 empty CE implies a full CQ, can't truly fill all
+        ceDesire = (GetNumEntries() - 1);
+    } else if (ceDesire > (GetNumEntries() - 1)) {
+        // Per NVME spec: 1 empty CE implies a full CQ, can't truly fill all
+        LOG_NRM("Requested num of CE's exceeds max can fit, resizing");
+        ceDesire = (GetNumEntries() - 1);
+    }
+    LOG_NRM("Reaping %d CE's from CQ %d", ceDesire, GetQId());
+
+    // Allocate enough space to contain the CE's
+    memBuffer->Init(GetEntrySize()*ceDesire);
+    if (zeroMem)
+        memBuffer->Zero();
+
+    reap.q_id = GetQId();
+    reap.elements = ceDesire;
+    reap.size = memBuffer->GetBufSize();
+    reap.buffer = memBuffer->GetBuffer();
+    if ((rc = ioctl(mFd, NVME_IOCTL_REAP, &reap)) < 0) {
+        LOG_ERR("Error during reaping CE's, rc =%d", rc);
+        throw exception();
+    }
+
+    ceRemain = reap.num_remaining;
+    return reap.num_reaped;
+}
+
 

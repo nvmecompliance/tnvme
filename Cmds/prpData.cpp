@@ -11,7 +11,7 @@ PrpData::PrpData()
 {
     mBufRW = MemBuffer::NullMemBufferPtr;
     mBufRO = NULL;
-    mBufROSize = 0;
+    mBufSize = 0;
     mPrpFields = (send_64b_bitmask)0;
 }
 
@@ -39,6 +39,7 @@ PrpData::SetBuffer(send_64b_bitmask prpFields, SharedMemBufferPtr memBuffer)
         mBufRW.reset();
 
     mBufRW = memBuffer;
+    mBufSize = memBuffer->GetBufSize();
     mPrpFields = prpFields;
 }
 
@@ -73,7 +74,7 @@ PrpData::SetBuffer(send_64b_bitmask prpFields, uint8_t const *memBuffer,
     }
 
     mBufRO = memBuffer;
-    mBufROSize = bufSize;
+    mBufSize = bufSize;
     mPrpFields = prpFields;
 }
 

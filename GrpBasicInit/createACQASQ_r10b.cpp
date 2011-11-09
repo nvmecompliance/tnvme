@@ -9,10 +9,11 @@ CreateACQASQ_r10b::CreateACQASQ_r10b(int fd) : Test(fd, SPECREV_10b)
 {
     // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 7");
-    mTestDesc.SetShort(     "Validate basic hardware initialization duties");
+    mTestDesc.SetShort(     "Create an ACQ & ASQ");
     // No string size limit for the long description
     mTestDesc.SetLong(
-        "Create ACQ & ASQ kernel objects with group lifespan.");
+        "Create ACQ & ASQ kernel objects with group lifespan. Report this data "
+        "to the log directory filename: CreateACQASQ_r10b");
 }
 
 
@@ -50,26 +51,29 @@ CreateACQASQ_r10b::operator=(const CreateACQASQ_r10b &other)
 bool
 CreateACQASQ_r10b::RunCoreTest()
 {
-    // Assumptions: (KernelAPI::SoftReset() does the following)
-    // 1) This is the 1st within GrpBasicInit.
-    // 2) The NVME device is disabled
-    // 3) All interrupts are disabled.
+    /** \verbatim
+     * Assumptions: (KernelAPI::SoftReset() does the following)
+     * 1) This is the 1st within GrpBasicInit.
+     * 2) The NVME device is disabled
+     * 3) All interrupts are disabled.
+     * \endverbatim
+     */
 
+    // After disabling the defaults for AMS & CSS are fine, no need to modify
     if (gCtrlrConfig->SetMPS() == false)
         throw exception();
 
     SharedACQPtr acq = CAST_TO_ACQ(
-        gRsrcMngr->AllocObj(Trackable::OBJ_ACQ, "ACQ"));
+        gRsrcMngr->AllocObj(Trackable::OBJ_ACQ, "ACQ"))
     acq->Init(5);
 
     SharedASQPtr asq = CAST_TO_ASQ(
-        gRsrcMngr->AllocObj(Trackable::OBJ_ASQ, "ASQ"));
+        gRsrcMngr->AllocObj(Trackable::OBJ_ASQ, "ASQ"))
     asq->Init(5);
 
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
         throw exception();
 
-    KernelAPI::DumpKernelMetrics(mFd, string(FORM_LOGNAME(CreateACQASQ)));
-
+    KernelAPI::DumpKernelMetrics(mFd, string(FORM_LOGNAME(CreateACQASQ_r10b)));
     return true;
 }

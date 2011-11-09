@@ -1,5 +1,5 @@
-#ifndef _DUMPPCIADDRSPACE_r10b_H_
-#define _DUMPPCIADDRSPACE_r10b_H_
+#ifndef _IDENTIFYCMD_r10b_H_
+#define _IDENTIFYCMD_r10b_H_
 
 #include "test.h"
 
@@ -11,19 +11,19 @@
  * 1) See notes in the header file of the Test base class
  * \endverbatim
  */
-class DumpPciAddrSpace_r10b : public Test
+class IdentifyCmd_r10b : public Test
 {
 public:
-    DumpPciAddrSpace_r10b(int fd);
-    virtual ~DumpPciAddrSpace_r10b();
+    IdentifyCmd_r10b(int fd);
+    virtual ~IdentifyCmd_r10b();
 
     /**
      * IMPORTANT: Read Test::Clone() header comment.
      */
-    virtual DumpPciAddrSpace_r10b *Clone() const
-        { return new DumpPciAddrSpace_r10b(*this); }
-    DumpPciAddrSpace_r10b &operator=(const DumpPciAddrSpace_r10b &other);
-    DumpPciAddrSpace_r10b(const DumpPciAddrSpace_r10b &other);
+    virtual IdentifyCmd_r10b *Clone() const
+        { return new IdentifyCmd_r10b(*this); }
+    IdentifyCmd_r10b &operator=(const IdentifyCmd_r10b &other);
+    IdentifyCmd_r10b(const IdentifyCmd_r10b &other);
 
 
 protected:
@@ -34,8 +34,6 @@ private:
     ///////////////////////////////////////////////////////////////////////////
     // Adding a member variable? Then edit the copy constructor and operator().
     ///////////////////////////////////////////////////////////////////////////
-
-    void WriteToFile(int fd, const PciSpcType regMetrics,  uint64_t value);
 };
 
 

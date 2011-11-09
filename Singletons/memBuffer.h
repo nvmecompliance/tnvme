@@ -8,7 +8,7 @@
 class MemBuffer;    // forward definition
 typedef boost::shared_ptr<MemBuffer>        SharedMemBufferPtr;
 #define CAST_TO_MB(shared_trackable_ptr)  \
-        boost::shared_polymorphic_downcast<MemBuffer>(shared_trackable_ptr)
+        boost::shared_polymorphic_downcast<MemBuffer>(shared_trackable_ptr);
 
 
 /**
@@ -37,15 +37,15 @@ public:
      * InitAlignment() should be more efficient at allocations, because entire
      * pages of memory may not be required to satisfy the request.
      * @param bufSize Pass the minimum number of bytes for buffer creation
-     * @param initMem Pass true to initialize all elements, otherwise don't init
-     * @param initVal Pass the init value if suppose to init the buffer
      * @param offset1stPg Pass the byte offset into the 1st page of allocated
      *        memory which the buffer is intended to start. offset == 0 implies
      *        page aligned memory. This value is enforced to a multiple of 32
      *        bit alignment.
+     * @param initMem Pass true to initialize all elements, otherwise don't init
+     * @param initVal Pass the init value if suppose to init the buffer
      */
-    void InitOffset1stPage(uint32_t bufSize, bool initMem = false,
-        uint8_t initVal = 0, uint32_t offset1stPg = 0);
+    void InitOffset1stPage(uint32_t bufSize, uint32_t offset1stPg = 0,
+        bool initMem = false, uint8_t initVal = 0);
 
     /**
      * Allocates memory allowing to specify the alignment of that buffer, but
@@ -54,17 +54,17 @@ public:
      * may not be necessary, and therefore the allocation of > what was
      * requested will not be necessary.
      * @param bufSize Pass the number of bytes for buffer creation
-     * @param initMem Pass true to initialize all elements, otherwise don't init
-     * @param initVal Pass the init value if suppose to init the buffer
      * @param align Pass the alignment requirements of the buffer. This value
      *        is enforced to a multiple of sizeof(void *) alignment.
+     * @param initMem Pass true to initialize all elements, otherwise don't init
+     * @param initVal Pass the init value if suppose to init the buffer
      */
-    void InitAlignment(uint32_t bufSize, bool initMem = false,
-        uint8_t initVal = 0, uint32_t align = 0);
+    void InitAlignment(uint32_t bufSize, uint32_t align = sizeof(void *),
+        bool initMem = false, uint8_t initVal = 0);
 
     /**
      * Allocates memory not allowed to specify anything, heap memory is taken
-     * and alignment and offset into the 1st page is not guaranteed.  Residual
+     * and alignment and offset into the 1st page is not guaranteed. Residual
      * memory will most likely be consumed.
      * @param bufSize Pass the number of bytes for buffer creation
      * @param initMem Pass true to initialize all elements, otherwise don't init
@@ -76,9 +76,7 @@ public:
     uint32_t GetBufSize() { return mVirBufSize; }
     uint32_t GetAlignment() { return mAlignment; }
 
-    /**
-     * Zero out all memory bytes
-     */
+    /// Zero out all memory bytes
     void Zero();
 
 
@@ -90,6 +88,7 @@ private:
     uint32_t mAlignment;
 
     void InitMemberVariables();
+    void DeallocateResources();
 };
 
 

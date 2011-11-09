@@ -3,6 +3,11 @@
 
 #include "cmd.h"
 
+class CreateIOCQ;    // forward definition
+typedef boost::shared_ptr<CreateIOCQ>               SharedCreateIOCQPtr;
+#define CAST_TO_CreateIOCQ(shared_trackable_ptr)    \
+        boost::shared_polymorphic_downcast<CreateIOCQ>(shared_trackable_ptr);
+
 
 /**
 * This class implements the Create IO Completion Queue admin cmd

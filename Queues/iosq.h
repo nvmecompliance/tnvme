@@ -6,7 +6,7 @@
 class IOSQ;    // forward definition
 typedef boost::shared_ptr<IOSQ>        SharedIOSQPtr;
 #define CAST_TO_IOSQ(shared_trackable_ptr)  \
-        boost::shared_polymorphic_downcast<IOSQ>(shared_trackable_ptr)
+        boost::shared_polymorphic_downcast<IOSQ>(shared_trackable_ptr);
 
 
 /**
