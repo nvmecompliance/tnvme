@@ -6,6 +6,22 @@
 
 #define METADATA_UNIQUE_ID_BITS         18      // 18 bits to rep a unique ID
 
+struct MetaDataBuf {
+    uint8_t *buf;
+    uint16_t size;
+    uint32_t ID;
+
+    MetaDataBuf() : buf(NULL), size(0), ID(0) {}
+    MetaDataBuf(uint8_t *b, uint16_t s, uint32_t i) : buf(b), size(s), ID(i) {}
+    bool operator==(const MetaDataBuf &other) const {
+        if ((other.buf == buf) && (other.size == size) && (other.ID == ID))
+            return true;
+        return false;
+    }
+    bool operator!=(const MetaDataBuf &other) const { return !(*this == other);
+ }
+};
+
 
 /**
 * This base class will handle the controlling aspect of meta data management in
@@ -20,9 +36,14 @@
 *
 * This class also tracks in use meta data IDs. These IDs are used to reference
 * allocated meta data buffers. The disabling of the controller releases all
-* memory and meta data IDs. If a new ID is desired this class will yield a
-* non-reserved unique meta data ID. Remember to release previously reserved ID's
-* because they are limited in number.
+* meta data memory and meta data IDs. If a new meta data buffer is desired this
+* class will yield a non-reserved unique meta data ID and attach kernel
+* memory to it. Remember to release previously reserved ID's/buffers because
+* they are limited in number.
+*
+* Allocations occur in the kernel and the kernel always enforces DWORD
+* alignment. There is nothing to be gained by testing non properly aligned meta
+* data buffers, but it will most certainly cause tnvme to eg fault or core dump.
 *
 * @note This class does not throw exceptions.
 */
@@ -52,19 +73,20 @@ public:
     /**
      * Meta data buffer's are tracked within the kernel by a unique reference
      * number. The burden of managing these ID's is left to user space, and this
-     * object tracks all meta data unique ID's. Thus, if a meta data buffer is
-     * needed an object must first reserve a unique ID to pass to the kernel
-     * which will associate the allocated memory to this ID. Henceforth that
-     * kernel memory is referenced by its ID.
-     * @param uniqueId Returns the next available unique ID
-     * @return true when a unique ID is available, otherwise false
+     * object tracks all meta data unique ID's/buffers. Thus, if a meta data
+     * buffer is needed an object must reserve a unique ID to which an
+     * associated meta data buffer will be attached. Henceforth that kernel
+     * memory is referenced by its ID.
+     * @param metaBuf Returns the description of contiguous kernel meta data buf
+     * @return true when a buffer has been allocated, otherwise false
      */
-    bool ReserveMetaId(uint32_t &uniqueId);
-    void ReleaseMetaId(uint32_t uniqueId);
+    bool ReserveMetaBuf(MetaDataBuf &metaBuf);
+    void ReleaseMetaBuf(MetaDataBuf metaBuf);
 
 
 protected:
-    void ReleaseAllMetaId();
+    /// Releases all kernel meta data memory back to the system
+    void FreeAllMetaBuf();
 
 
 private:
@@ -75,8 +97,11 @@ private:
 
     /// Stores the size of each meta data allocation
     uint16_t mMetaAllocSize;
+
     /// Track all outstanding/reserved meta data unique IDs
-    deque<uint32_t> mMetaUniqueIds;
+    deque<MetaDataBuf> mMetaReserved;
+    /// Previously reserved, but no longer in use, can be easily reserved again
+    deque<MetaDataBuf> mMetaReleased;
 };
 
 

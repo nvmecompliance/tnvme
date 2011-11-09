@@ -53,7 +53,7 @@ RsrcMngr::Update(const enum nvme_state &state)
 
         // All outstanding meta data buffer ID's will be released.
         LOG_DBG("Disabling causes all meta unique ID's freed");
-        ReleaseAllMetaId();
+        FreeAllMetaBuf();
     } else if (state == ST_DISABLE) {
         // Only ACQ/ASQ objects remain, all others must be released
         LOG_DBG("Disabling causes all Q mem freed, but not ACQ/ASQ");
@@ -61,6 +61,6 @@ RsrcMngr::Update(const enum nvme_state &state)
 
         // All outstanding meta data buffer ID's will be released.
         LOG_DBG("Disabling causes all meta unique ID's freed");
-        ReleaseAllMetaId();
+        FreeAllMetaBuf();
     }
 }

@@ -18,27 +18,18 @@
 *
 * Meta data buffers are separated into 2 components. The controlling component
 * is located in RsrcMngr. Please see RsrcMngr class header for those details.
-* The working component is this class. This class requests unique meta data ID's
-* from the RsrcMngr because unique ID's are how user space tracks and
-* identifies meta data buffers after they have been allocated by the kernel.
-* After a buffer is allocated it will and must be inserted into the cmd. If
-* no meta data buffers are desired, then don't allocate one. There is no way
-* to deallocated a buffer once allocated, simply destroying the cmd and
-* creating a new one should suffice.
-*
-* Allocations occur in the kernel and the kernel always enforces DWORD
-* alignment. There is nothing to be gained by testing non properly aligned meta
-* data buffers, but it will most certainly cause tnvme to eg fault or core dump.
+* The working component is this class. This class requests meta data buffers
+* from the RsrcMngr. After a buffer is allocated it will and must be inserted
+* into the cmd. If no meta data buffers are desired, then don't allocate one.
+* Meta data buffers are reserved and solely associated with the cmd for the
+* entire lifetime of that cmd.
 *
 * @note This class may throw exceptions.
 */
 class MetaData
 {
 public:
-    /**
-     * @param fd Pass the opened file descriptor for the device under test
-     */
-    MetaData(int fd);
+    MetaData();
     virtual ~MetaData();
 
     /**
@@ -50,27 +41,19 @@ public:
     void AllocBuffer();
 
     /**
-     * This method will return a previously allocated meta data buffer for RW
-     * access. If no meta data buffer has been allocated, then no meta data
-     * buffer will be associated with this cmd.
+     * This method will return a previously allocated meta data buffer from a
+     * call to AllocBuffer() for RW user space access. If no meta data buffer
+     * has been allocated, then no meta data buffer will be associated with
+     * this cmd.
      * @return The pointer to the memory, otherwise NULL indicates that no meta
-     *      data buffer is in use.
+     *      data buffer is in use/allocated.
      */
-    uint8_t *GetBuffer() { return mBuf; }
-    uint16_t GetBufferSize() { return mBufSize; }
+    uint8_t *GetBuffer() { return mMetaData.buf; }
+    uint16_t GetBufferSize() { return mMetaData.size; }
 
 
 private:
-    MetaData();
-
-    /// file descriptor to the device under test
-    int mFd;
-
-    uint8_t *mBuf;
-    uint32_t mBufId;
-    uint16_t mBufSize;
-
-    static const send_64b_bitmask ALLOWED_BITS;
+    MetaDataBuf mMetaData;
 };
 
 

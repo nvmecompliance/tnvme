@@ -1,4 +1,5 @@
 #include "metaRsrc.h"
+#include "../Utils/kernelAPI.h"
 
 
 MetaRsrc::MetaRsrc()
@@ -22,6 +23,7 @@ MetaRsrc::MetaRsrc(int fd)
 
 MetaRsrc::~MetaRsrc()
 {
+    FreeAllMetaBuf();
 }
 
 
@@ -55,51 +57,111 @@ MetaRsrc::SetMetaAllocSize(uint16_t allocSize)
 
 
 bool
-MetaRsrc::ReserveMetaId(uint32_t &uniqueId)
+MetaRsrc::ReserveMetaBuf(MetaDataBuf &metaBuf)
 {
-    uniqueId = 0;
-    deque<uint32_t>::iterator iter = mMetaUniqueIds.begin();
+    int rc;
+    metaBuf.ID = 0;
+    metaBuf.size = mMetaAllocSize;
+    deque<MetaDataBuf>::iterator resIter = mMetaReserved.begin();
+    deque<MetaDataBuf>::iterator relIter = mMetaReleased.begin();
 
-    // Search the ordered elements
-    while (iter != mMetaUniqueIds.end()) {
-        if (*iter == uniqueId)
-            uniqueId++;
-        else if (*iter > uniqueId)
-            break;
-        iter++;
-    }
 
-    if (uniqueId < (2 ^ METADATA_UNIQUE_ID_BITS)) {
-        mMetaUniqueIds.insert(iter, uniqueId);
+    // If meta buffers were previously alloc'd and then subsequently released,
+    // we can quickly turn them back into usability again; saves calls to dnvme
+    if (relIter != mMetaReleased.end()) {
+        // Search the ordered elements for a place to insert into Reserved
+        while (resIter != mMetaReserved.end()) {
+            if ((*resIter).ID > (*relIter).ID)
+                break;
+            resIter++;
+        }
+
+        metaBuf = *relIter;
+        LOG_NRM("Alloc meta data buf: size: 0x%08X, ID: 0x%06X",
+            metaBuf.size, metaBuf.ID);
+
+        mMetaReserved.insert(resIter, metaBuf);
+        mMetaReleased.erase(relIter);
         return true;
-    }
 
+    } else {
+        // Search the ordered elements, need to find a unique ID
+        while (resIter != mMetaReserved.end()) {
+            if ((*resIter).ID == metaBuf.ID)
+                metaBuf.ID++;
+            else if ((*resIter).ID > metaBuf.ID)
+                break;
+            resIter++;
+        }
+
+        if (metaBuf.ID < (2 ^ METADATA_UNIQUE_ID_BITS)) {
+            LOG_NRM("Alloc meta data buf: size: 0x%08X, ID: 0x%06X",
+                metaBuf.size, metaBuf.ID);
+
+            // Request dnvme to reserve us some contiguous memory
+            if ((rc = ioctl(mFd, NVME_IOCTL_METABUF_ALLOC, metaBuf.ID)) < 0) {
+                LOG_ERR("Meta data alloc request denied with error: %d", rc);
+                throw exception();
+            }
+
+            // Map that memory back to user space for RW access
+            metaBuf.buf = KernelAPI::mmap(mFd, metaBuf.size, metaBuf.ID,
+                KernelAPI::MMR_META);
+            if (metaBuf.buf == NULL) {
+                LOG_DBG("Unable to mmap contig memory to user space");
+                // Have to free the memory, not useful if we can't access it
+                if ((rc =ioctl(mFd, NVME_IOCTL_METABUF_DELETE, metaBuf.ID)) < 0)
+                    LOG_ERR("Meta data free request denied with error: %d", rc);
+                throw exception();
+            }
+
+            mMetaReserved.insert(resIter, metaBuf);
+            return true;
+        }
+    }
     return false;
 }
 
 
 void
-MetaRsrc::ReleaseMetaId(uint32_t uniqueId)
+MetaRsrc::ReleaseMetaBuf(MetaDataBuf metaBuf)
 {
-    deque<uint32_t>::iterator iter = mMetaUniqueIds.begin();
+    deque<MetaDataBuf>::iterator resIter = mMetaReserved.begin();
+
+    // Are we trying to release a default constructed MetaDataBuf, or illegal 1
+    if (metaBuf == MetaDataBuf())
+        return;
 
     // Search the ordered elements
-    while (iter != mMetaUniqueIds.end()) {
-        if (*iter == uniqueId) {
-            mMetaUniqueIds.erase(iter);
+    while (resIter != mMetaReserved.end()) {
+        if ((*resIter).ID == metaBuf.ID) {
+            mMetaReleased.push_back(*resIter);
+            mMetaReserved.erase(resIter);
             break;
         }
-        iter++;
+        resIter++;
     }
 }
 
 
 void
-MetaRsrc::ReleaseAllMetaId()
+MetaRsrc::FreeAllMetaBuf()
 {
-    deque<uint32_t>::iterator iter = mMetaUniqueIds.begin();
+    int rc;
+    deque<MetaDataBuf>::iterator resIter = mMetaReserved.begin();
 
-    // Search the ordered elements
-    while (iter != mMetaUniqueIds.end())
-        ReserveMetaId(*iter);
+    // Search the ordered elements, moves every reserved item into released
+    while (resIter != mMetaReserved.end())
+        ReleaseMetaBuf(*resIter);
+
+    // Now we have to free all the elements in the reserved list
+    while (mMetaReleased.size()) {
+        MetaDataBuf tmp = mMetaReleased.back();
+        mMetaReleased.pop_back();
+
+        // Undo all which was done to create/reserve kernel meta data buffers
+        KernelAPI::munmap(tmp.buf, tmp.size);
+        if ((rc = ioctl(mFd, NVME_IOCTL_METABUF_DELETE, tmp.ID)) < 0)
+            LOG_ERR("Meta data free request denied with error: %d", rc);
+    }
 }
