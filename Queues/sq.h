@@ -32,11 +32,21 @@ public:
     uint16_t GetCqId() { return mCqId; }
 
     /**
-     * Get a Submission Element (SE) at SQ position indicated by indexPtr.
+     * Peek at a Submission Element (CE) at SQ position indicated by indexPtr.
+     * Only dnvme can issue SE's into a SQ by calling Send(), however user space
+     * does have eyes into that SQ's memory, and thus allows peeking at any SE
+     * at any time without reaping anything.
      * @param indexPtr Pass [0 to (GetNumEntries()-1)] as the index into the SQ.
      * @return The SE requested.
      */
-    union SE GetSE(uint16_t indexPtr);
+    union SE PeekSE(uint16_t indexPtr);
+
+    /**
+     * Dump the entire contents of SE at SQ position indicated by indexPtr to
+     * the logging endpoint. Similar to PeekSE() but logs the SE instead.
+     * param indexPtr Pass the index into the Q for which element to log
+     */
+    void LogSE(uint16_t indexPtr);
 
     /**
      * Issue the specified cmd to this queue, but does not ring any doorbell.

@@ -2,6 +2,11 @@
 #define _IDENTIFYCMD_r10b_H_
 
 #include "test.h"
+#include "../Queues/asq.h"
+#include "../Queues/acq.h"
+
+#define IDENTIFY_CTRLR_STRUCT_GROUP_ID      "IdentifyCmdCap"
+#define IDENTIFY_NAMESPACE_STRUCT_GROUP_ID  "IdentifyCmdNamSpc"
 
 
 /** \verbatim
@@ -14,7 +19,7 @@
 class IdentifyCmd_r10b : public Test
 {
 public:
-    IdentifyCmd_r10b(int fd);
+    IdentifyCmd_r10b(int fd, string grpName, string testName);
     virtual ~IdentifyCmd_r10b();
 
     /**
@@ -34,6 +39,8 @@ private:
     ///////////////////////////////////////////////////////////////////////////
     // Adding a member variable? Then edit the copy constructor and operator().
     ///////////////////////////////////////////////////////////////////////////
+    void SendIdentifyCtrlrStruct(SharedASQPtr asq, SharedACQPtr acq);
+    void SendIdentifyNamespaceStruct(SharedASQPtr asq, SharedACQPtr acq);
 };
 
 

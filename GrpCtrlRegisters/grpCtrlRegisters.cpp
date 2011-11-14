@@ -14,7 +14,7 @@ GrpCtrlRegisters::GrpCtrlRegisters(size_t grpNum, SpecRev specRev, int fd) :
     //            Tests x.0, x.1, x.<next_test_num=2>  Minor num; test level
     switch (mSpecRev) {
     case SPECREV_10b:
-        APPEND_TEST_AT_GROUP_LEVEL(AllCtrlRegs_r10b, fd)
+        APPEND_TEST_AT_GROUP_LEVEL(AllCtrlRegs_r10b, fd, GrpCtrlRegisters)
         break;
 
     default:

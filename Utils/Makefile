@@ -5,7 +5,9 @@ LIBS = -L../ -L/usr/local/lib -lm
 INCLUDES = -I. -I../ -I../../ -I/usr/local/include
 
 SRC = \
-	kernelAPI.cpp
+	kernelAPI.cpp	\
+	buffers.cpp		\
+	fileSystem.cpp
 
 .SUFFIXES: .cpp
 

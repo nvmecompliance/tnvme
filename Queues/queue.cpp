@@ -1,4 +1,5 @@
 #include "queue.h"
+#include "../Utils/buffers.h"
 
 
 Queue::Queue() : Trackable(Trackable::OBJTYPE_FENCE)
@@ -72,4 +73,18 @@ Queue::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries)
     mQId = qId;
     mEntrySize = entrySize;
     mNumEntries = numEntries;
+}
+
+
+void
+Queue::Log(uint32_t bufOffset, unsigned long length)
+{
+    Buffers::Log(GetQBuffer(), bufOffset, length, GetQSize(), "Queue");
+}
+
+
+void
+Queue::Dump(LogFilename filename, string fileHdr)
+{
+    Buffers::Dump(filename, GetQBuffer(), 0, ULONG_MAX, GetQSize(), fileHdr);
 }

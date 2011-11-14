@@ -166,7 +166,7 @@ SQ::GetQMetrics()
 
 
 union SE
-SQ::GetSE(uint16_t indexPtr)
+SQ::PeekSE(uint16_t indexPtr)
 {
     union SE *dataPtr;
 
@@ -186,22 +186,46 @@ SQ::GetSE(uint16_t indexPtr)
 
 
 void
+SQ::LogSE(uint16_t indexPtr)
+{
+    union SE se = PeekSE(indexPtr);
+    LOG_NRM("Logging Submission Element (SE)...");
+    LOG_NRM("SQ %d, SE %d, DWORD0:  0x%08X", GetQId(), indexPtr, se.d.dw0);
+    LOG_NRM("SQ %d, SE %d, DWORD1:  0x%08X", GetQId(), indexPtr, se.d.dw1);
+    LOG_NRM("SQ %d, SE %d, DWORD2:  0x%08X", GetQId(), indexPtr, se.d.dw2);
+    LOG_NRM("SQ %d, SE %d, DWORD3:  0x%08X", GetQId(), indexPtr, se.d.dw3);
+    LOG_NRM("SQ %d, SE %d, DWORD4:  0x%08X", GetQId(), indexPtr, se.d.dw4);
+    LOG_NRM("SQ %d, SE %d, DWORD5:  0x%08X", GetQId(), indexPtr, se.d.dw5);
+    LOG_NRM("SQ %d, SE %d, DWORD6:  0x%08X", GetQId(), indexPtr, se.d.dw6);
+    LOG_NRM("SQ %d, SE %d, DWORD7:  0x%08X", GetQId(), indexPtr, se.d.dw7);
+    LOG_NRM("SQ %d, SE %d, DWORD8:  0x%08X", GetQId(), indexPtr, se.d.dw8);
+    LOG_NRM("SQ %d, SE %d, DWORD9:  0x%08X", GetQId(), indexPtr, se.d.dw9);
+    LOG_NRM("SQ %d, SE %d, DWORD10: 0x%08X", GetQId(), indexPtr, se.d.dw10);
+    LOG_NRM("SQ %d, SE %d, DWORD11: 0x%08X", GetQId(), indexPtr, se.d.dw11);
+    LOG_NRM("SQ %d, SE %d, DWORD12: 0x%08X", GetQId(), indexPtr, se.d.dw12);
+    LOG_NRM("SQ %d, SE %d, DWORD13: 0x%08X", GetQId(), indexPtr, se.d.dw13);
+    LOG_NRM("SQ %d, SE %d, DWORD14: 0x%08X", GetQId(), indexPtr, se.d.dw14);
+    LOG_NRM("SQ %d, SE %d, DWORD15: 0x%08X", GetQId(), indexPtr, se.d.dw15);
+}
+
+
+void
 SQ::Send(SharedCmdPtr cmd)
 {
     int rc;
     struct nvme_64b_send io;
 
     io.q_id = GetQId();
-    io.bit_mask = cmd->GetPrpFields();
-    io.data_buf_size = cmd->GetROBufferSize();
-    io.data_buf_ptr = cmd->GetROBuffer();
+    io.bit_mask = (send_64b_bitmask)(cmd->GetPrpBitmask() | cmd->GetMetaBitmask());
+    io.meta_buf_id = cmd->GetMetaBufferID();
+    io.data_buf_size = cmd->GetROPrpBufferSize();
+    io.data_buf_ptr = cmd->GetROPrpBuffer();
     io.cmd_buf_ptr = cmd->GetCmd()->GetBuffer();
     io.cmd_set = cmd->GetCmdSet();
     io.data_dir = cmd->GetDataDir();
 
     LOG_NRM("Send cmd set %d, opcode 0x%02X, data buf size %d, to SQ id 0x%02X",
         io.cmd_set, cmd->GetOpcode(), io.data_buf_size, io.q_id);
-    cmd->LogCmd();
     if ((rc = ioctl(mFd, NVME_IOCTL_SEND_64B_CMD, &io)) < 0) {
         LOG_ERR("Error sending cmd, rc =%d", rc);
         throw exception();
@@ -215,6 +239,7 @@ SQ::Ring()
     int rc;
     uint16_t sqId = GetQId();
 
+    LOG_NRM("Ring doorbell for SQ %d", sqId);
     if ((rc = ioctl(mFd, NVME_IOCTL_RING_SQ_DOORBELL, sqId)) < 0) {
         LOG_ERR("Error ringing doorbell, rc =%d", rc);
         throw exception();

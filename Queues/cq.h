@@ -43,6 +43,7 @@ public:
     /**
      * Dump the entire contents of CE at CQ position indicated by indexPtr to
      * the logging endpoint. Similar to PeekCE() but logs the CE instead.
+     * @param indexPtr Pass the index into the Q for which element to log
      */
     void LogCE(uint16_t indexPtr);
 

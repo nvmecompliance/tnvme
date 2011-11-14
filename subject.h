@@ -14,9 +14,10 @@ template <class TSubject, class TData>
 class Subject
 {
 public:
-    Subject(TSubject *subject, TData initialState = TData()) :
+    Subject(TSubject *subject, TData initState = TData(), bool delta = false) :
         mSubject(subject),
-        mCurState(initialState) { firstTime = true; }
+        mCurState(initState),
+        mDeltaCheck(delta) { mFirstTime = true; }
     virtual ~Subject() {}
 
     void Attach(Observer<TSubject, TData> &observer)
@@ -26,8 +27,13 @@ public:
 
     void Notify(const TData& newSt)
     {
-        if ((mCurState != newSt) || firstTime) {
-            firstTime = false;
+        bool doUpdate = true;
+        if (mDeltaCheck) {
+            if ((mCurState == newSt) && (mFirstTime == false))
+                doUpdate = false;
+        }
+        mFirstTime = false;
+        if (doUpdate) {
             mCurState = newSt;
             LOG_DBG("Subject notifying observers of event");
             for (size_t i = 0; i < mObservers.size(); i++)
@@ -40,8 +46,10 @@ private:
     TData mCurState;
     std::vector<Observer<TSubject, TData> *> mObservers;
 
-    /// Only Update() Observers when state changed, but always on 1st state
-    bool firstTime;
+    /// Update() all observers on 1st Notify regardless of all other options
+    bool mFirstTime;
+    /// Update() all observers only when the state changes value
+    bool mDeltaCheck;
 };
 
 
@@ -53,8 +61,8 @@ template<class TSSData>
 class StateSubject : public Subject<void, TSSData>
 {
 public:
-    StateSubject(TSSData initialState = TSSData()) :
-        Subject<void, TSSData>(NULL, initialState) {}
+    StateSubject(TSSData initState = TSSData()) :
+        Subject<void, TSSData>(NULL, initState) {}
     virtual ~StateSubject() {}
 
 };

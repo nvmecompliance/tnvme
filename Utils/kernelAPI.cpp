@@ -4,7 +4,6 @@
 #include <fcntl.h>
 #include "kernelAPI.h"
 #include "globals.h"
-#include "../Singletons/rsrcMngr.h"
 
 
 KernelAPI::KernelAPI()
@@ -24,7 +23,6 @@ KernelAPI::SoftReset()
 
     // In user space, in kernel space and in hardware, nothing remains.
     LOG_NRM("Performing soft reset");
-    gRsrcMngr->FreeAllObj();
     gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY);
     if ((retVal = gCtrlrConfig->SetIrqScheme(INT_NONE)) == false)
         LOG_ERR("Setting IRQ scheme failed");
@@ -60,11 +58,11 @@ KernelAPI::munmap(uint8_t *memPtr, size_t bufLength)
 
 
 void
-KernelAPI::DumpKernelMetrics(int fd, string filename)
+KernelAPI::DumpKernelMetrics(int fd, LogFilename filename)
 {
     int rc;
-    struct nvme_file dumpMe = { filename.length(), filename.c_str() };
 
+    struct nvme_file dumpMe = { filename.length(), filename.c_str() };
 
     LOG_NRM("Dump dnvme metrics to filename: %s", filename.c_str());
     if ((rc = ioctl(fd, NVME_IOCTL_DUMP_METRICS, &dumpMe)) < 0) {

@@ -147,6 +147,7 @@ Cmd::SetNSID(uint32_t newVal)
 void
 Cmd::LogCmd()
 {
+    LOG_NRM("Logging Cmd obj contents....");
     for (int i = 0; i < GetCmdSizeDW(); i++)
         LOG_NRM("Cmd DWORD%d: %s0x%08X", i, (i < 10) ? " " : "", GetDword(i));
 }

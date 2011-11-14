@@ -14,7 +14,7 @@
 class TestCase_r10b : public Test
 {
 public:
-    TestCase_r10b(int fd);
+    TestCase_r10b(int fd, string grpName, string testName);
     virtual ~TestCase_r10b();
 
     /**

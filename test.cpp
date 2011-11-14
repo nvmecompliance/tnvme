@@ -9,12 +9,16 @@
 #define CSTS_ERRORS                 CSTS_CFS
 
 
-Test::Test(int fd, SpecRev specRev)
+Test::Test(int fd, string grpName, string testName, SpecRev specRev)
 {
     mFd = fd;
-    mSpecRev = specRev;
     if (mFd < 0)
         LOG_DBG("Object created with a bad fd=%d", fd);
+
+    mSpecRev = specRev;
+    mGrpName = grpName;
+    mTestName = testName;
+
 }
 
 
@@ -28,7 +32,8 @@ Test::~Test()
 
 
 Test::Test(const Test &other) :
-    mFd(other.mFd), mSpecRev(other.mSpecRev), mTestDesc(other.mTestDesc)
+    mFd(other.mFd), mSpecRev(other.mSpecRev), mTestDesc(other.mTestDesc),
+    mGrpName(other.mGrpName), mTestName(other.mTestName)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -47,6 +52,8 @@ Test::operator=(const Test &other)
     mFd = other.mFd;
     mSpecRev = other.mSpecRev;
     mTestDesc = other.mTestDesc;
+    mGrpName = other.mGrpName;
+    mTestName = other.mTestName;
     return *this;
 }
 

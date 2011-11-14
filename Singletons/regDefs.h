@@ -36,31 +36,31 @@ typedef enum PciCapabilities {
  *  ZZ(PCISPC_CC_1,      PCICAP_FENCE,   0x09,    3,    SPECREV_10c, 0xffff00000fffffff, 0x0000000000000000, 0x0000000000000000, "PCI hdr class codes register (CC)")
  *  ZZ(PCISPC_CC_2,      PCICAP_FENCE,   0x09,    3,    SPECREV_10d, 0x0000000000000000, 0x0ffffffffff00000, 0x0000000000000000, "PCI hdr class codes register (CC)")
  */
-/*     PciSpc,           cap,            offset,  size, specRev,     maskRO,             impSpec,            dfltValue,          desc */
-#define PCISPC_TABLE                                                                                                                                                                 \
-    ZZ(PCISPC_ID,        PCICAP_FENCE,   0x00,     4,    SPECREV_10b, 0x00000000ffffffff, 0x00000000ffffffff, 0x0000000000000000, "PCI hdr identifier register (ID)")                 \
-    ZZ(PCISPC_CMD,       PCICAP_FENCE,   0x04,     2,    SPECREV_10b, 0x000000000000fbb8, 0x0000000000000040, 0x0000000000000000, "PCI hdr cmd register (CMD)")                       \
-    ZZ(PCISPC_STS,       PCICAP_FENCE,   0x06,     2,    SPECREV_10b, 0x0000000000004eff, 0x00000000000006a0, 0x0000000000000010, "PCI hdr device status register (STS)")             \
-    ZZ(PCISPC_RID,       PCICAP_FENCE,   0x08,     1,    SPECREV_10b, 0x00000000000000ff, 0x00000000000000ff, 0x0000000000000000, "PCI hdr revision ID register (RID)")               \
-    ZZ(PCISPC_CC,        PCICAP_FENCE,   0x09,     3,    SPECREV_10b, 0x0000000000ffffff, 0x0000000000000000, 0x0000000000010802, "PCI hdr class codes register (CC)")                \
-    ZZ(PCISPC_CLS,       PCICAP_FENCE,   0x0c,     1,    SPECREV_10b, 0x00000000000000ff, 0x0000000000000000, 0x0000000000000000, "PCI hdr cache line size register (CLS)")           \
-    ZZ(PCISPC_MLT,       PCICAP_FENCE,   0x0d,     1,    SPECREV_10b, 0x00000000000000ff, 0x0000000000000000, 0x0000000000000000, "PCI hdr master latency timer reg (MLT)")           \
-    ZZ(PCISPC_HTYPE,     PCICAP_FENCE,   0x0e,     1,    SPECREV_10b, 0x00000000000000ff, 0x0000000000000080, 0x0000000000000000, "PCI hdr header type register (HTYPE)")             \
-    ZZ(PCISPC_BIST,      PCICAP_FENCE,   0x0f,     1,    SPECREV_10b, 0x00000000000000bf, 0x0000000000000080, 0x0000000000000000, "PCI hdr built in self test register (BIST)")       \
-    ZZ(PCISPC_BAR0,      PCICAP_FENCE,   0x10,     4,    SPECREV_10b, 0x0000000000003fff, 0x0000000000000000, 0x0000000000000004, "PCI hdr MLBAR register (BAR0)")                    \
-    ZZ(PCISPC_BAR1,      PCICAP_FENCE,   0x14,     4,    SPECREV_10b, 0x0000000000000000, 0x0000000000000000, 0x0000000000000000, "PCI hdr MUBAR register (BAR1)")                    \
-    ZZ(PCISPC_BAR2,      PCICAP_FENCE,   0x18,     4,    SPECREV_10b, 0x0000000000000007, 0x0000000000000000, 0x0000000000000001, "PCI hdr index/data pair register (BAR2)")          \
-    ZZ(PCISPC_BAR3,      PCICAP_FENCE,   0x1c,     5,    SPECREV_10b, 0x0000000000000000, 0x0000000000000000, 0x0000000000000000, "PCI hdr reserved area (BAR3)")                     \
-    ZZ(PCISPC_BAR4,      PCICAP_FENCE,   0x20,     4,    SPECREV_10b, 0x0000000000000000, 0x00000000ffffffff, 0x0000000000000000, "PCI hdr vendor specific register (BAR4)")          \
-    ZZ(PCISPC_BAR5,      PCICAP_FENCE,   0x24,     4,    SPECREV_10b, 0x0000000000000000, 0x00000000ffffffff, 0x0000000000000000, "PCI hdr vendor specific register (BAR5)")          \
-    ZZ(PCISPC_CCPTR,     PCICAP_FENCE,   0x28,     4,    SPECREV_10b, 0x00000000ffffffff, 0x0000000000000000, 0x0000000000000000, "PCI hdr CardBus CIS register (CCPTR)")             \
-    ZZ(PCISPC_SS,        PCICAP_FENCE,   0x2c,     4,    SPECREV_10b, 0x00000000ffffffff, 0x00000000ffffffff, 0x0000000000000000, "PCI hdr subsystem ID register (SS)")               \
-    ZZ(PCISPC_EROM,      PCICAP_FENCE,   0x30,     4,    SPECREV_10b, 0x0000000000000000, 0x00000000ffffffff, 0x0000000000000000, "PCI hdr expansion ROM register (EROM)")            \
-    ZZ(PCISPC_CAP,       PCICAP_FENCE,   0x34,     1,    SPECREV_10b, 0x00000000000000ff, 0x00000000000000ff, 0x0000000000000000, "PCI hdr CAP ptr register (CAP)")                   \
-    ZZ(PCISPC_RES0,      PCICAP_FENCE,   0x35,     7,    SPECREV_10b, 0x00ffffffffffffff, 0x0000000000000000, 0x0000000000000000, "PCI hdr reserved area #0")                         \
-    ZZ(PCISPC_INTR,      PCICAP_FENCE,   0x3c,     2,    SPECREV_10b, 0x000000000000ff00, 0x000000000000ff00, 0x0000000000000000, "PCI hdr interrupt register (INTR)")                \
-    ZZ(PCISPC_MGNT,      PCICAP_FENCE,   0x3e,     1,    SPECREV_10b, 0x00000000000000ff, 0x0000000000000000, 0x0000000000000000, "PCI hdr min grant register (MGMT)")                \
-    ZZ(PCISPC_MLAT,      PCICAP_FENCE,   0x3f,     1,    SPECREV_10b, 0x00000000000000ff, 0x0000000000000000, 0x0000000000000000, "PCI hdr max latency register (MLAT)")              \
+/*     PciSpc,           cap,            offset,    size, specRev,     maskRO,             impSpec,            dfltValue,          desc */
+#define PCISPC_TABLE                                                                                                                                                                   \
+    ZZ(PCISPC_ID,        PCICAP_FENCE,   0x00,      4,    SPECREV_10b, 0x00000000ffffffff, 0x00000000ffffffff, 0x0000000000000000, "PCI hdr identifier register (ID)")                 \
+    ZZ(PCISPC_CMD,       PCICAP_FENCE,   0x04,      2,    SPECREV_10b, 0x000000000000fbb8, 0x0000000000000040, 0x0000000000000000, "PCI hdr cmd register (CMD)")                       \
+    ZZ(PCISPC_STS,       PCICAP_FENCE,   0x06,      2,    SPECREV_10b, 0x0000000000004eff, 0x00000000000006a0, 0x0000000000000010, "PCI hdr device status register (STS)")             \
+    ZZ(PCISPC_RID,       PCICAP_FENCE,   0x08,      1,    SPECREV_10b, 0x00000000000000ff, 0x00000000000000ff, 0x0000000000000000, "PCI hdr revision ID register (RID)")               \
+    ZZ(PCISPC_CC,        PCICAP_FENCE,   0x09,      3,    SPECREV_10b, 0x0000000000ffffff, 0x0000000000000000, 0x0000000000010802, "PCI hdr class codes register (CC)")                \
+    ZZ(PCISPC_CLS,       PCICAP_FENCE,   0x0c,      1,    SPECREV_10b, 0x00000000000000ff, 0x0000000000000000, 0x0000000000000000, "PCI hdr cache line size register (CLS)")           \
+    ZZ(PCISPC_MLT,       PCICAP_FENCE,   0x0d,      1,    SPECREV_10b, 0x00000000000000ff, 0x0000000000000000, 0x0000000000000000, "PCI hdr master latency timer reg (MLT)")           \
+    ZZ(PCISPC_HTYPE,     PCICAP_FENCE,   0x0e,      1,    SPECREV_10b, 0x00000000000000ff, 0x0000000000000080, 0x0000000000000000, "PCI hdr header type register (HTYPE)")             \
+    ZZ(PCISPC_BIST,      PCICAP_FENCE,   0x0f,      1,    SPECREV_10b, 0x00000000000000bf, 0x0000000000000080, 0x0000000000000000, "PCI hdr built in self test register (BIST)")       \
+    ZZ(PCISPC_BAR0,      PCICAP_FENCE,   0x10,      4,    SPECREV_10b, 0x0000000000003fff, 0x0000000000000000, 0x0000000000000004, "PCI hdr MLBAR register (BAR0)")                    \
+    ZZ(PCISPC_BAR1,      PCICAP_FENCE,   0x14,      4,    SPECREV_10b, 0x0000000000000000, 0x0000000000000000, 0x0000000000000000, "PCI hdr MUBAR register (BAR1)")                    \
+    ZZ(PCISPC_BAR2,      PCICAP_FENCE,   0x18,      4,    SPECREV_10b, 0x0000000000000007, 0x0000000000000000, 0x0000000000000001, "PCI hdr index/data pair register (BAR2)")          \
+    ZZ(PCISPC_BAR3,      PCICAP_FENCE,   0x1c,      5,    SPECREV_10b, 0x0000000000000000, 0x0000000000000000, 0x0000000000000000, "PCI hdr reserved area (BAR3)")                     \
+    ZZ(PCISPC_BAR4,      PCICAP_FENCE,   0x20,      4,    SPECREV_10b, 0x0000000000000000, 0x00000000ffffffff, 0x0000000000000000, "PCI hdr vendor specific register (BAR4)")          \
+    ZZ(PCISPC_BAR5,      PCICAP_FENCE,   0x24,      4,    SPECREV_10b, 0x0000000000000000, 0x00000000ffffffff, 0x0000000000000000, "PCI hdr vendor specific register (BAR5)")          \
+    ZZ(PCISPC_CCPTR,     PCICAP_FENCE,   0x28,      4,    SPECREV_10b, 0x00000000ffffffff, 0x0000000000000000, 0x0000000000000000, "PCI hdr CardBus CIS register (CCPTR)")             \
+    ZZ(PCISPC_SS,        PCICAP_FENCE,   0x2c,      4,    SPECREV_10b, 0x00000000ffffffff, 0x00000000ffffffff, 0x0000000000000000, "PCI hdr subsystem ID register (SS)")               \
+    ZZ(PCISPC_EROM,      PCICAP_FENCE,   0x30,      4,    SPECREV_10b, 0x0000000000000000, 0x00000000ffffffff, 0x0000000000000000, "PCI hdr expansion ROM register (EROM)")            \
+    ZZ(PCISPC_CAP,       PCICAP_FENCE,   0x34,      1,    SPECREV_10b, 0x00000000000000ff, 0x00000000000000ff, 0x0000000000000000, "PCI hdr CAP ptr register (CAP)")                   \
+    ZZ(PCISPC_RES0,      PCICAP_FENCE,   0x35,      7,    SPECREV_10b, 0x00ffffffffffffff, 0x0000000000000000, 0x0000000000000000, "PCI hdr reserved area #0")                         \
+    ZZ(PCISPC_INTR,      PCICAP_FENCE,   0x3c,      2,    SPECREV_10b, 0x000000000000ff00, 0x000000000000ff00, 0x0000000000000000, "PCI hdr interrupt register (INTR)")                \
+    ZZ(PCISPC_MGNT,      PCICAP_FENCE,   0x3e,      1,    SPECREV_10b, 0x00000000000000ff, 0x0000000000000000, 0x0000000000000000, "PCI hdr min grant register (MGMT)")                \
+    ZZ(PCISPC_MLAT,      PCICAP_FENCE,   0x3f,      1,    SPECREV_10b, 0x00000000000000ff, 0x0000000000000000, 0x0000000000000000, "PCI hdr max latency register (MLAT)")              \
     ZZ(PCISPC_PID,       PCICAP_PMCAP,   USHRT_MAX, 2,    SPECREV_10b, 0x000000000000ffff, 0x000000000000fffe, 0x0000000000000001, "PCI power mgmt ID register (PID)")                 \
     ZZ(PCISPC_PC,        PCICAP_PMCAP,   USHRT_MAX, 2,    SPECREV_10b, 0x000000000000ffff, 0x0000000000000027, 0x0000000000000000, "PCI power mgmt CAP register (PC)")                 \
     ZZ(PCISPC_PMCS,      PCICAP_PMCAP,   USHRT_MAX, 2,    SPECREV_10b, 0x000000000000fffc, 0x0000000000000000, 0x0000000000000008, "PCI power mgmt ctrl & status reg (PMCS)")          \

@@ -1,15 +1,15 @@
 #include <unistd.h>
 #include "identifyCmd_r10b.h"
 #include "globals.h"
-#include "../Queues/asq.h"
-#include "../Queues/acq.h"
+#include "createACQASQ_r10b.h"
 #include "../Cmds/identify.h"
 #include "../Utils/kernelAPI.h"
 
 #define DEFAULT_CMD_WAIT_ms       2000
 
 
-IdentifyCmd_r10b::IdentifyCmd_r10b(int fd) : Test(fd, SPECREV_10b)
+IdentifyCmd_r10b::IdentifyCmd_r10b(int fd, string grpName, string testName) :
+    Test(fd, grpName, testName, SPECREV_10b)
 {
     // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 7");
@@ -62,40 +62,131 @@ IdentifyCmd_r10b::RunCoreTest()
      *  \endverbatim
      */
 
-    // Create the Identify cmd and assoc some buffer memory to it
-    SharedIdentifyPtr idCmd = SharedIdentifyPtr(new Identify(mFd));
-    idCmd->SetCNS(true);
-    SharedMemBufferPtr idMem = SharedMemBufferPtr(new MemBuffer());
-    idMem->Init(Identify::IDEAL_DATA_SIZE, sysconf(_SC_PAGESIZE));
-    send_64b_bitmask idPrp =
-        (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE);
-    idCmd->SetBuffer(idPrp, idMem);
+    KernelAPI::DumpKernelMetrics(mFd,
+        FileSystem::PrepLogFile(mGrpName, mTestName, "kmetrics", "before"));
 
-    // Send the identify cmd to hdw
-    SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj("ASQ"))
-    asq->Send(idCmd);
+    // Lookup objs which were created in a prior test within group
+    SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
+    SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
+
+    SendIdentifyCtrlrStruct(asq, acq);
+    SendIdentifyNamespaceStruct(asq, acq);
+
+    KernelAPI::DumpKernelMetrics(mFd,
+        FileSystem::PrepLogFile(mGrpName, mTestName, "kmetrics", "after"));
+    return true;
+}
+
+
+void
+IdentifyCmd_r10b::SendIdentifyCtrlrStruct(SharedASQPtr asq, SharedACQPtr acq)
+{
+    uint16_t numCE;
+    uint16_t ceRemain;
+    uint16_t numReaped;
+
+
+    LOG_NRM("Create 1st identify cmd and assoc some buffer memory");
+    SharedIdentifyPtr idCmdCap = CAST_TO_IDENTIFY(
+        gRsrcMngr->AllocObj(Trackable::OBJ_IDENTIFY,
+        IDENTIFY_CTRLR_STRUCT_GROUP_ID));
+    LOG_NRM("Force identify to request ctrlr capabilities struct");
+    idCmdCap->SetCNS(true);
+    SharedMemBufferPtr idMemCap = SharedMemBufferPtr(new MemBuffer());
+    idMemCap->Init(Identify::IDEAL_DATA_SIZE, sysconf(_SC_PAGESIZE));
+    send_64b_bitmask idPrpCap =
+        (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE);
+    idCmdCap->SetPrpBuffer(idPrpCap, idMemCap);
+
+
+    LOG_NRM("Send the 1st identify cmd to hdw");
+    asq->Send(idCmdCap);
+    asq->LogSE(0);
+    asq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "asq", "idMemCap"),
+        "Just B4 ringing SQ0 doorbell, dump entire SQ contents");
     asq->Ring();
 
-    // Wait for the CE back from hdw
-    uint16_t numCE;
-    SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj("ACQ"))
+
+    LOG_NRM("Wait for the CE to arrive in ACQ");
     if (acq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE) == false) {
         LOG_ERR("Unable to see completion of identify cmd");
+        acq->Dump(
+            FileSystem::PrepLogFile(mGrpName, mTestName, "acq", "idMemCap"),
+            "Unable to see any CE's in CQ0, dump entire CQ contents");
         throw exception();
     }
     acq->LogCE(0);
+    acq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "acq", "idMemCap"),
+        "Just B4 reaping CQ0, dump entire CQ contents");
 
-    // Extract the CE from the CQ
-    uint16_t ceRemain;
-    uint16_t numReaped;
-    SharedMemBufferPtr ceMem = SharedMemBufferPtr(new MemBuffer());
-    if ((numReaped = acq->Reap(ceRemain, ceMem, numCE, true)) != 1) {
+
+    LOG_NRM("Reaping CE from ACQ, requires memory to hold reaped CE");
+    SharedMemBufferPtr ceMemCap = SharedMemBufferPtr(new MemBuffer());
+    if ((numReaped = acq->Reap(ceRemain, ceMemCap, numCE, true)) != 1) {
         LOG_ERR("Verified there was 1 CE, but reaping produced %d", numReaped);
         throw exception();
     }
+    LOG_NRM("The reaped identify CE is...");
+    ceMemCap->Log();
+    idCmdCap->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "idMemCap"),
+        "The complete admin cmd identify controller data structure decoded:");
+}
 
 
+void
+IdentifyCmd_r10b::SendIdentifyNamespaceStruct(SharedASQPtr asq,
+    SharedACQPtr acq)
+{
+    uint16_t numCE;
+    uint16_t ceRemain;
+    uint16_t numReaped;
 
-KernelAPI::DumpKernelMetrics(mFd, string(FORM_LOGNAME(IdentifyCmd_r10b)));
-    return true;
+
+    LOG_NRM("Create 2nd identify cmd and assoc some buffer memory");
+    SharedIdentifyPtr idCmdNamSpc = CAST_TO_IDENTIFY(
+        gRsrcMngr->AllocObj(Trackable::OBJ_IDENTIFY,
+        IDENTIFY_NAMESPACE_STRUCT_GROUP_ID));
+    LOG_NRM("Force identify to request namespace struct");
+    idCmdNamSpc->SetCNS(false);
+    SharedMemBufferPtr idMemNamSpc = SharedMemBufferPtr(new MemBuffer());
+    idMemNamSpc->Init(Identify::IDEAL_DATA_SIZE, sysconf(_SC_PAGESIZE));
+    send_64b_bitmask idPrpNamSpc =
+        (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE);
+    idCmdNamSpc->SetPrpBuffer(idPrpNamSpc, idMemNamSpc);
+
+
+    LOG_NRM("Send the 1st identify cmd to hdw");
+    asq->Send(idCmdNamSpc);
+    asq->LogSE(1);
+    asq->Dump(
+        FileSystem::PrepLogFile(mGrpName, mTestName, "asq", "idCmdNamSpc"),
+        "Just B4 ringing SQ0 doorbell, dump entire SQ contents");
+    asq->Ring();
+
+
+    LOG_NRM("Wait for the CE to arrive in ACQ");
+    if (acq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE) == false) {
+        LOG_ERR("Unable to see completion of identify cmd");
+        acq->Dump(
+            FileSystem::PrepLogFile(mGrpName, mTestName, "acq", "idCmdNamSpc"),
+            "Unable to see any CE's in CQ0, dump entire CQ contents");
+        throw exception();
+    }
+    acq->LogCE(1);
+    acq->Dump(
+        FileSystem::PrepLogFile(mGrpName, mTestName, "acq", "idCmdNamSpc"),
+        "Just B4 reaping CQ0, dump entire CQ contents");
+
+
+    LOG_NRM("Reaping CE from ACQ, requires memory to hold reaped CE");
+    SharedMemBufferPtr ceMemNamSpc = SharedMemBufferPtr(new MemBuffer());
+    if ((numReaped = acq->Reap(ceRemain, ceMemNamSpc, numCE, true)) != 1) {
+        LOG_ERR("Verified there was 1 CE, but reaping produced %d", numReaped);
+        throw exception();
+    }
+    LOG_NRM("The reaped identify CE is...");
+    ceMemNamSpc->Log();
+    idCmdNamSpc->Dump(
+        FileSystem::PrepLogFile(mGrpName, mTestName, "idMemNamSpc"),
+        "The complete admin cmd identify namespace structure decoded:");
 }

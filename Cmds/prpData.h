@@ -26,7 +26,7 @@ public:
      *      this the buffer.
      * @param memBuffer Hand off this cmds data buffer.
      */
-    void SetBuffer(send_64b_bitmask prpFields, SharedMemBufferPtr memBuffer);
+    void SetPrpBuffer(send_64b_bitmask prpFields, SharedMemBufferPtr memBuffer);
 
     /**
      * Accept a previously created Read Only (RO) IOQ buffer as the user data to
@@ -40,7 +40,7 @@ public:
      * @param bufSize Pass the number of bytes consisting of memBuffer
      * @param memBuffer Point to an IOQ's RO memory.
      */
-    void SetBuffer(send_64b_bitmask prpFields, uint8_t const *memBuffer,
+    void SetPrpBuffer(send_64b_bitmask prpFields, uint8_t const *memBuffer,
         uint64_t bufSize);
 
     /**
@@ -48,7 +48,7 @@ public:
      * the SetBuffer(SharedMemBufferPtr) version is used to set the buffer.
      * @return A pointer to RW memory, otherwise MemBuffer::NullMemBufferPtr.
      */
-    SharedMemBufferPtr GetRWBuffer() { return mBufRW; }
+    SharedMemBufferPtr GetRWPrpBuffer() { return mBufRW; }
 
     /**
      * This method will always return a buffer if any of the SetBuffer() methods
@@ -57,10 +57,11 @@ public:
      * @return A pointer to the buffer, otherwise NULL indicates no buffer was
      *      setup, i.e. there is no user data at all for the PRP fields.
      */
-    uint8_t const *GetROBuffer();
-    uint64_t       GetROBufferSize() { return mBufSize; }
+    uint8_t const *GetROPrpBuffer();
+    uint64_t       GetROPrpBufferSize() { return mBufSize; }
 
-    send_64b_bitmask GetPrpFields() { return mPrpFields; }
+    /// Solely used to notify dnvme how to issue a PRP data buffer
+    send_64b_bitmask GetPrpBitmask() { return mPrpFields; }
 
 
 private:

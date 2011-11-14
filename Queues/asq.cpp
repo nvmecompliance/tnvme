@@ -23,5 +23,5 @@ ASQ::~ASQ()
 void
 ASQ::Init(uint16_t numEntries)
 {
-    SQ::Init(0, 16, numEntries, 0);
+    SQ::Init(0, 64, numEntries, 0);
 }

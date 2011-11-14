@@ -2,7 +2,8 @@
 #include "globals.h"
 
 
-AllPciRegs_r10b::AllPciRegs_r10b(int fd) : Test(fd, SPECREV_10b)
+AllPciRegs_r10b::AllPciRegs_r10b(int fd, string grpName, string testName) :
+    Test(fd, grpName, testName, SPECREV_10b)
 {
     // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 3");
@@ -54,6 +55,7 @@ AllPciRegs_r10b::RunCoreTest()
      * 1) none
      *  \endverbatim
      */
+
     ValidateDefaultValues();
     ValidateROBitsAfterWriting();
     return true;

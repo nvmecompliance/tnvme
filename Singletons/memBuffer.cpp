@@ -1,6 +1,8 @@
-#include "memBuffer.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
+#include "memBuffer.h"
+#include "../Utils/buffers.h"
 
 SharedMemBufferPtr MemBuffer::NullMemBufferPtr;
 
@@ -40,14 +42,6 @@ MemBuffer::DeallocateResources()
             free(mRealBaseAddr);
     }
     InitMemberVariables();
-}
-
-
-void
-MemBuffer::Zero()
-{
-    if (mRealBaseAddr)
-        memset(mVirBaseAddr, 0, mVirBufSize);
 }
 
 
@@ -151,4 +145,27 @@ MemBuffer::Init(uint32_t bufSize, bool initMem, uint8_t initVal)
 
     if (initMem)
         memset(mVirBaseAddr, initVal, mVirBufSize);
+}
+
+
+void
+MemBuffer::Zero()
+{
+    if (mRealBaseAddr)
+        memset(mVirBaseAddr, 0, mVirBufSize);
+}
+
+
+void
+MemBuffer::Log(uint32_t bufOffset, unsigned long length)
+{
+    Buffers::Log(GetBuffer(), bufOffset, length, GetBufSize(), "MemBuffer");
+}
+
+
+void
+MemBuffer::Dump(LogFilename filename, string fileHdr)
+{
+    Buffers::Dump(filename, GetBuffer(), 0, ULONG_MAX, GetBufSize(), fileHdr);
+
 }

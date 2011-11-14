@@ -9,7 +9,9 @@
 #include "globals.h"
 
 
-DumpPciAddrSpace_r10b::DumpPciAddrSpace_r10b(int fd) : Test(fd, SPECREV_10b)
+DumpPciAddrSpace_r10b::DumpPciAddrSpace_r10b(int fd, string grpName,
+    string testName) :
+    Test(fd, grpName, testName, SPECREV_10b)
 {
     // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section n/a");
@@ -55,17 +57,18 @@ DumpPciAddrSpace_r10b::operator=(const DumpPciAddrSpace_r10b &other)
 bool
 DumpPciAddrSpace_r10b::RunCoreTest()
 {
+    /** \verbatim
+     * Assumptions:
+     * 1) none
+     *  \endverbatim
+     */
+
     int fd;
     string work;
     uint64_t value;
     const PciSpcType *pciMetrics = gRegisters->GetPciMetrics();
     const vector<PciCapabilities> *pciCap = gRegisters->GetPciCapabilities();
 
-    /** \verbatim
-     * Assumptions:
-     * 1) none
-     *  \endverbatim
-     */
 
     // Dumping all register values to well known file
     if ((fd = open(FILENAME_DUMP_PCI_REGS, FILENAME_FLAGS,

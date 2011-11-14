@@ -9,7 +9,9 @@
 #include "globals.h"
 
 
-DumpCtrlrAddrSpace_r10b::DumpCtrlrAddrSpace_r10b(int fd) : Test(fd, SPECREV_10b)
+DumpCtrlrAddrSpace_r10b::DumpCtrlrAddrSpace_r10b(int fd, string grpName,
+    string testName) :
+    Test(fd, grpName, testName, SPECREV_10b)
 {
     // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section n/a");
@@ -55,16 +57,17 @@ DumpCtrlrAddrSpace_r10b::operator=(const DumpCtrlrAddrSpace_r10b &other)
 bool
 DumpCtrlrAddrSpace_r10b::RunCoreTest()
 {
-    int fd;
-    string work;
-    uint64_t value = 0;
-    const CtlSpcType *pciMetrics = gRegisters->GetCtlMetrics();
-
     /** \verbatim
      * Assumptions:
      * 1) none
      *  \endverbatim
      */
+
+    int fd;
+    string work;
+    uint64_t value = 0;
+    const CtlSpcType *pciMetrics = gRegisters->GetCtlMetrics();
+
 
     // Dumping all register values to well known file
     if ((fd = open(FILENAME_DUMP_CTRLR_REGS, FILENAME_FLAGS,

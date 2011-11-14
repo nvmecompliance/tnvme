@@ -4,7 +4,8 @@
 #include "tnvme.h"
 #include "trackable.h"
 #include "prpData.h"
-#include "../Singletons/memBuffer.h"
+#include "metaData.h"
+#include "globals.h"
 
 class Cmd;    // forward definition
 typedef boost::shared_ptr<Cmd>              SharedCmdPtr;
@@ -26,7 +27,7 @@ typedef enum {
 *
 * @note This class may throw exceptions.
 */
-class Cmd : public Trackable, public PrpData
+class Cmd : public Trackable, public PrpData, public MetaData
 {
 public:
     /**

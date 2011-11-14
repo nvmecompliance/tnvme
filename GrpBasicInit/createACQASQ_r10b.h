@@ -3,6 +3,9 @@
 
 #include "test.h"
 
+#define ACQ_GROUP_ID      "ACQ"
+#define ASQ_GROUP_ID      "ASQ"
+
 
 /** \verbatim
  * -----------------------------------------------------------------------------
@@ -14,7 +17,7 @@
 class CreateACQASQ_r10b : public Test
 {
 public:
-    CreateACQASQ_r10b(int fd);
+    CreateACQASQ_r10b(int fd, string grpName, string testName);
     virtual ~CreateACQASQ_r10b();
 
     /**

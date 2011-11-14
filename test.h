@@ -35,9 +35,11 @@ class Test
 public:
     /**
      * @param fd Pass the opened file descriptor for the device under test
+     * @param grpName Pass the name of the group to which this test belongs
+     * @param testName Pass the name of the child class
      * @param specRev Provide the nvme spec rev. which is being targeted
      */
-    Test(int fd, SpecRev specRev);
+    Test(int fd, string grpName, string testName, SpecRev specRev);
 
     /**
      * Child derived Test:: objects are responsible for freeing all heap
@@ -107,6 +109,10 @@ protected:
     SpecRev mSpecRev;
     /// Children must populate this during construction
     TestDescribe mTestDesc;
+    /// The name of the parent container object, i.e. the group name
+    string mGrpName;
+    /// The name of the child
+    string mTestName;
 
     /**
      * Forcing children to implement the core logic of each test case.

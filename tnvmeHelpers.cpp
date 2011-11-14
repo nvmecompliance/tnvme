@@ -1,12 +1,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
-#include <dirent.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <vector>
+#include <unistd.h>
 #include "tnvmeHelpers.h"
 #include "globals.h"
 #include "Utils/kernelAPI.h"
@@ -557,23 +555,3 @@ ParseWmmapCmdLine(WmmapIo &wmmap, const char *optarg)
 
     return true;
 }
-
-
-bool
-CreateLogDir()
-{
-    DIR *dir;
-
-    // This must correlate to macro FORM_LOGNAME(), please verify B4 changing
-    if ((dir = opendir("./Logs")) == NULL) {
-        if (mkdir("./Logs", S_IRWXU | S_IRWXG | S_IRWXO) != 0) {
-            LOG_ERR("Unable to create ./Logs directory, errno = %d", errno);
-            return false;
-        }
-    }
-
-    closedir(dir);
-    return true;
-}
-
-

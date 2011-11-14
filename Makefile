@@ -1,7 +1,10 @@
+# Compiling tnvme requires the boost libraries to be installed
+# Ubuntu: sudo apt-get install libboost1.42-all-dev
 CC = g++
 CFLAGS = -g -O0 -W -Wall -Werror -DDEBUG
 APP_NAME = tnvme
 LDFLAGS = $(foreach stem, $(SUBDIRS),./$(stem)/lib$(stem).a)
+LDFLAGS += -lboost_filesystem
 INCLUDES = -I./ -I../
 
 SUBDIRS:=				\
@@ -68,7 +71,7 @@ $(SUBDIRS):
 $(APP_NAME): $(SUBDIRS) $(SOURCES)
 	$(CC) $(CFLAGS) $(INCLUDES) $(SOURCES) -o $(APP_NAME) $(LDFLAGS)
 
-# Specify a custom source c:ompile dir: "make src SRCDIR=../compile/dir"
+# Specify a custom source compile dir: "make src SRCDIR=../compile/dir"
 # If the specified dir could cause recursive copies, then specify w/o './'
 # "make src SRCDIR=src" will copy all except "src" dir.
 src:

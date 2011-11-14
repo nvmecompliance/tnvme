@@ -191,6 +191,7 @@ void
 CQ::LogCE(uint16_t indexPtr)
 {
     union CE ce = PeekCE(indexPtr);
+    LOG_NRM("Logging Completion Element (CE)...");
     LOG_NRM("CQ %d, CE %d, DWORD0: 0x%08X", GetQId(), indexPtr, ce.d.dw0);
     LOG_NRM("CQ %d, CE %d, DWORD1: 0x%08X", GetQId(), indexPtr, ce.d.dw1);
     LOG_NRM("CQ %d, CE %d, DWORD2: 0x%08X", GetQId(), indexPtr, ce.d.dw2);

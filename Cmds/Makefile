@@ -7,6 +7,7 @@ INCLUDES = -I. -I../ -I../../ -I/usr/local/include
 SRC = \
 	cmd.cpp			\
 	prpData.cpp		\
+	metaData.cpp	\
 	adminCmd.cpp	\
 	nvmeCmd.cpp		\
 	createIOCQ.cpp	\

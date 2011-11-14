@@ -12,6 +12,7 @@
 #include "version.h"
 #include "globals.h"
 #include "Utils/kernelAPI.h"
+#include "Utils/fileSystem.h"
 
 
 // ------------------------------EDIT HERE---------------------------------
@@ -270,8 +271,7 @@ main(int argc, char *argv[])
             LOG_ERR("PCI power state not fully operational, is this intended?");
         }
 
-        if (CreateLogDir() == false)
-            exit(1);
+        FileSystem::AssureDirectoryExists(BASE_LOG_DIR);
     }
 
 

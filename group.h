@@ -8,15 +8,16 @@
 
 
 /// Use to append a new x.0 test number at the group level
-#define APPEND_TEST_AT_GROUP_LEVEL(test, fd)        \
-    {                                               \
-        deque<Test *> tmp;                          \
-        tmp.push_back(new test(fd));                \
-        mTests.push_back(tmp);                      \
+#define APPEND_TEST_AT_GROUP_LEVEL(test, fd, grpName)       \
+    {                                                       \
+        deque<Test *> tmp;                                  \
+        tmp.push_back(new test(fd, #grpName, #test));       \
+        mTests.push_back(tmp);                              \
     }
 
 /// Use to append a new x.y test number at the last appended group level
-#define APPEND_TEST_AT_LAST_LEVEL(test)     mTests.back().push_back(new test());
+#define APPEND_TEST_AT_LAST_LEVEL(test, fd, grpName)        \
+    mTests.back().push_back(new test(fd, #grpName));
 
 /// To allow formatting the group information string
 #define FORMAT_GROUP_DESCRIPTION(stdStr, grpObjPtr)                 \

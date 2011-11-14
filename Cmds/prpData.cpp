@@ -22,7 +22,7 @@ PrpData::~PrpData()
 
 
 void
-PrpData::SetBuffer(send_64b_bitmask prpFields, SharedMemBufferPtr memBuffer)
+PrpData::SetPrpBuffer(send_64b_bitmask prpFields, SharedMemBufferPtr memBuffer)
 {
     if (prpFields & ~ALLOWED_BITS) {
         LOG_DBG("Param prpFields only supports bits specific to PRP fields");
@@ -45,7 +45,7 @@ PrpData::SetBuffer(send_64b_bitmask prpFields, SharedMemBufferPtr memBuffer)
 
 
 void
-PrpData::SetBuffer(send_64b_bitmask prpFields, uint8_t const *memBuffer,
+PrpData::SetPrpBuffer(send_64b_bitmask prpFields, uint8_t const *memBuffer,
     uint64_t bufSize)
 {
     if (prpFields & ~ALLOWED_BITS) {
@@ -80,7 +80,7 @@ PrpData::SetBuffer(send_64b_bitmask prpFields, uint8_t const *memBuffer,
 
 
 uint8_t const *
-PrpData::GetROBuffer()
+PrpData::GetROPrpBuffer()
 {
     if (mBufRW != MemBuffer::NullMemBufferPtr)
         return mBufRW->GetBuffer();

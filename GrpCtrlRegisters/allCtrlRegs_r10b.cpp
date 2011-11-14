@@ -2,7 +2,8 @@
 #include "globals.h"
 
 
-AllCtrlRegs_r10b::AllCtrlRegs_r10b(int fd) : Test(fd, SPECREV_10b)
+AllCtrlRegs_r10b::AllCtrlRegs_r10b(int fd, string grpName, string testName) :
+    Test(fd, grpName, testName, SPECREV_10b)
 {
     // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 3");

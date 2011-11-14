@@ -3,7 +3,7 @@
 
 #include "tnvme.h"
 #include "dnvme.h"
-#include "../Singletons/memBuffer.h"
+#include "globals.h"
 
 
 /**
@@ -38,7 +38,7 @@ public:
      * are forced to be of equal size until such time the ctrlr becomes
      * disabled and a new size can be set in method RsrcMngr::SetMetaAllocSize()
      */
-    void AllocBuffer();
+    void AllocMetaBuffer();
 
     /**
      * This method will return a previously allocated meta data buffer from a
@@ -48,8 +48,12 @@ public:
      * @return The pointer to the memory, otherwise NULL indicates that no meta
      *      data buffer is in use/allocated.
      */
-    uint8_t *GetBuffer() { return mMetaData.buf; }
-    uint16_t GetBufferSize() { return mMetaData.size; }
+    uint8_t *GetMetaBuffer() { return mMetaData.buf; }
+    uint16_t GetMetaBufferSize() { return mMetaData.size; }
+    uint32_t GetMetaBufferID() { return mMetaData.ID; }
+
+    /// Solely used to notify dnvme how to issue a PRP data buffer
+    send_64b_bitmask GetMetaBitmask();
 
 
 private:
