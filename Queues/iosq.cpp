@@ -1,7 +1,10 @@
+#include <math.h>
 #include "iosq.h"
 #include "globals.h"
 
 SharedIOSQPtr IOSQ::NullIOSQPtr;
+const uint16_t IOSQ::COMMON_ELEMENT_SIZE = 64;
+const uint8_t  IOSQ::COMMON_ELEMENT_SIZE_PWR_OF_2 = 6;
 
 
 IOSQ::IOSQ() : SQ(0, Trackable::OBJTYPE_FENCE)
@@ -44,7 +47,7 @@ IOSQ::Init(uint16_t qId, uint16_t numEntries, uint16_t cqId,
         LOG_ERR("Unable to learn IOSQ entry size");
         throw exception();
     }
-    SQ::Init(qId, 2^entrySize, numEntries, cqId);
+    SQ::Init(qId, (uint16_t)pow(2, entrySize), numEntries, cqId);
 }
 
 
@@ -71,5 +74,5 @@ IOSQ::Init(uint16_t qId, uint16_t numEntries,
         LOG_ERR("Unable to learn IOSQ entry size");
         throw exception();
     }
-    SQ::Init(qId, 2^entrySize, numEntries, memBuffer, cqId);
+    SQ::Init(qId, (uint16_t)pow(2, entrySize), numEntries, memBuffer, cqId);
 }

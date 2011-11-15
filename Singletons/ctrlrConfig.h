@@ -81,35 +81,30 @@ public:
 
     bool GetIOCQES(uint8_t &value)
         { return GetRegValue(value, CC_IOCQES, 20); }
-    bool SetIOCQES(uint8_t value)
-        { return SetRegValue(value, 0x0f, CC_IOCQES, 20); }
+    bool SetIOCQES(uint8_t value);
 
     bool GetIOSQES(uint8_t &value)
         { return GetRegValue(value, CC_IOSQES, 16); }
-    bool SetIOSQES(uint8_t value)
-        { return SetRegValue(value, 0x0f, CC_IOSQES, 16); }
+    bool SetIOSQES(uint8_t value);
 
     bool GetSHN(uint8_t &value)
         { return GetRegValue(value, CC_SHN, 14); }
-    bool SetSHN(uint8_t value)
-        { return SetRegValue(value, 0x03, CC_SHN, 14); }
+    bool SetSHN(uint8_t value);
 
     bool GetAMS(uint8_t &value)
         { return GetRegValue(value, CC_AMS, 11); }
-    bool SetAMS(uint8_t value)
-        { return SetRegValue(value, 0x07, CC_AMS, 11); }
+    bool SetAMS(uint8_t value);
 
     bool GetMPS(uint8_t &value)
         { return GetRegValue(value, CC_MPS, 7); }
-    bool SetMPS(uint8_t value)
-        { return SetRegValue(value, 0x0f, CC_MPS, 7); }
+    /// Set page size to custom value
+    bool SetMPS(uint8_t value);
     /// Set page size according to what sysconf(_SC_PAGESIZE) returns
     bool SetMPS();
 
     bool GetCSS(uint8_t &value)
         { return GetRegValue(value, CC_CSS, 4); }
-    bool SetCSS(uint8_t value)
-        { return SetRegValue(value, 0x07, CC_CSS, 4); }
+    bool SetCSS(uint8_t value);
 
 
 private:

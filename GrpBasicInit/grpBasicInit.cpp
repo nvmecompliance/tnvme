@@ -1,6 +1,7 @@
 #include "grpBasicInit.h"
 #include "createACQASQ_r10b.h"
 #include "identifyCmd_r10b.h"
+#include "createIOQContigPoll_r10b.h"
 
 
 GrpBasicInit::GrpBasicInit(size_t grpNum, SpecRev specRev, int fd) :
@@ -17,6 +18,7 @@ GrpBasicInit::GrpBasicInit(size_t grpNum, SpecRev specRev, int fd) :
     case SPECREV_10b:
         APPEND_TEST_AT_GROUP_LEVEL(CreateACQASQ_r10b, fd, GrpBasicInit)
         APPEND_TEST_AT_GROUP_LEVEL(IdentifyCmd_r10b, fd, GrpBasicInit)
+        APPEND_TEST_AT_GROUP_LEVEL(CreateIOQContigPoll_r10b, fd, GrpBasicInit)
         break;
 
     default:

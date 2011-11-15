@@ -44,7 +44,7 @@ CQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
     mIrqVec = irqVec;
 
 
-    // NOTE: This method creates contiguous Q's only
+    LOG_NRM("Allocating contiguous CQ memory in dnvme");
     if (GetIsAdmin()) {
         if (gCtrlrConfig->IsStateEnabled()) {
             // At best this will cause tnvme to seg fault or a kernel crash
@@ -94,7 +94,7 @@ CQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
     mIrqVec = irqVec;
 
 
-    // NOTE: This method creates discontiguous Q's only
+    LOG_NRM("Allocating discontiguous CQ memory in tnvme");
     if (memBuffer == MemBuffer::NullMemBufferPtr) {
         LOG_DBG("Passing an uninitialized SharedMemBufferPtr");
         throw exception();

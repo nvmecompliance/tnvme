@@ -1,5 +1,6 @@
 #include "testCase_r10b.h"
 #include "globals.h"
+#include "../Utils/kernelAPI.h"
 
 
 TestCase_r10b::TestCase_r10b(int fd, string grpName, string testName) :

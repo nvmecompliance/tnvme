@@ -40,7 +40,7 @@ SQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
     mCqId = cqId;
 
 
-    // NOTE: This method creates contiguous Q's only
+    LOG_NRM("Allocating contiguous SQ memory in dnvme");
     if (GetIsAdmin()) {
         if (gCtrlrConfig->IsStateEnabled()) {
             // At best this will cause tnvme to seg fault or a kernel crash
@@ -91,7 +91,7 @@ SQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
     mCqId = cqId;
 
 
-    // NOTE: This method creates discontiguous Q's only
+    LOG_NRM("Allocating discontiguous SQ memory in tnvme");
     if (memBuffer == MemBuffer::NullMemBufferPtr) {
         LOG_DBG("Passing an uninitialized SharedMemBufferPtr");
         throw exception();
@@ -218,7 +218,7 @@ SQ::Send(SharedCmdPtr cmd)
     io.q_id = GetQId();
     io.bit_mask = (send_64b_bitmask)(cmd->GetPrpBitmask() | cmd->GetMetaBitmask());
     io.meta_buf_id = cmd->GetMetaBufferID();
-    io.data_buf_size = cmd->GetROPrpBufferSize();
+    io.data_buf_size = cmd->GetPrpBufferSize();
     io.data_buf_ptr = cmd->GetROPrpBuffer();
     io.cmd_buf_ptr = cmd->GetCmd()->GetBuffer();
     io.cmd_set = cmd->GetCmdSet();

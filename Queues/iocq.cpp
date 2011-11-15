@@ -1,7 +1,10 @@
+#include <math.h>
 #include "iocq.h"
 #include "globals.h"
 
 SharedIOCQPtr IOCQ::NullIOCQPtr;
+const uint16_t IOCQ::COMMON_ELEMENT_SIZE = 16;
+const uint8_t  IOCQ::COMMON_ELEMENT_SIZE_PWR_OF_2 = 4;
 
 
 IOCQ::IOCQ() : CQ(0, Trackable::OBJTYPE_FENCE)
@@ -30,7 +33,7 @@ IOCQ::Init(uint16_t qId, uint16_t numEntries, bool irqEnabled,
         LOG_ERR("Unable to learn IOCQ entry size");
         throw exception();
     }
-    CQ::Init(qId, 2^entrySize, numEntries, irqEnabled, irqVec);
+    CQ::Init(qId, (uint16_t)pow(2, entrySize), numEntries, irqEnabled, irqVec);
 }
 
 
@@ -44,5 +47,6 @@ IOCQ::Init(uint16_t qId, uint16_t numEntries,
         LOG_ERR("Unable to learn IOCQ entry size");
         throw exception();
     }
-    CQ::Init(qId, 2^entrySize, numEntries, memBuffer, irqEnabled, irqVec);
+    CQ::Init(qId, (uint16_t)pow(2, numEntries), numEntries, memBuffer,
+        irqEnabled, irqVec);
 }

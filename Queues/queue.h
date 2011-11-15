@@ -37,10 +37,11 @@ public:
     uint16_t GetQId() { return mQId; }
     uint16_t GetNumEntries() { return mNumEntries; }
     uint16_t GetEntrySize() { return mEntrySize; }
-    uint64_t GetQSize() { return (mEntrySize * mNumEntries); }
 
     /// Get the memory which encompasses the Q's contents
     uint8_t const *GetQBuffer();
+    /// Get the total size in bytes of the Q's memory contents
+    uint64_t GetQSize() { return (mEntrySize * mNumEntries); }
 
     /**
      * Send the entire contents of this Q to the logging endpoint

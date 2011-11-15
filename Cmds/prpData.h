@@ -29,6 +29,38 @@ public:
     void SetPrpBuffer(send_64b_bitmask prpFields, SharedMemBufferPtr memBuffer);
 
     /**
+     * This method is only safe to use if and only if the
+     * SetBuffer(SharedMemBufferPtr) was used to setup a buffer. This allows
+     * access to that RW buffer, however some commands must enforce RO buffers
+     * and thus this method won't be useful because it cannot guarantee RO
+     * access. A MemBuffer::NullMemBufferPtr will be returned if the
+     * the SetBuffer(SharedMemBufferPtr) version wasn't used to setup a buffer,
+     * or there is no buffer setup at all.
+     * @return A pointer to RW memory, otherwise MemBuffer::NullMemBufferPtr.
+     */
+    SharedMemBufferPtr GetRWPrpBuffer() { return mBufRW; }
+
+    /**
+     * This method will always return a buffer if one is presently setup. Any
+     * of the SetPrpBuffer() methods can be used to setup a buffer. This is
+     * safe due to the const return pointer.
+     * @return A pointer to the buffer, otherwise NULL indicates no buffer was
+     *      setup, i.e. there is no user data at all for the PRP fields.
+     */
+    uint8_t const *GetROPrpBuffer();
+
+    /**
+     * This methods will always return a size if a buffer is presently setup.
+     * @return The number of bytes encompassing any buffer which has been setup
+     */
+    uint64_t GetPrpBufferSize() { return mBufSize; }
+
+    /// Solely used to notify dnvme how to issue a PRP data buffer
+    send_64b_bitmask GetPrpBitmask() { return mPrpFields; }
+
+
+protected:
+    /**
      * Accept a previously created Read Only (RO) IOQ buffer as the user data to
      * be populated in the PRP fields of a cmd. This method is only intended to
      * be used with the creation of IOQ's because those memories are never
@@ -42,26 +74,6 @@ public:
      */
     void SetPrpBuffer(send_64b_bitmask prpFields, uint8_t const *memBuffer,
         uint64_t bufSize);
-
-    /**
-     * This method will return a non MemBuffer::NullMemBufferPtr if and only if
-     * the SetBuffer(SharedMemBufferPtr) version is used to set the buffer.
-     * @return A pointer to RW memory, otherwise MemBuffer::NullMemBufferPtr.
-     */
-    SharedMemBufferPtr GetRWPrpBuffer() { return mBufRW; }
-
-    /**
-     * This method will always return a buffer if any of the SetBuffer() methods
-     * have been used. This is always safe to return because the caller may
-     * not change the associated user data buffer.
-     * @return A pointer to the buffer, otherwise NULL indicates no buffer was
-     *      setup, i.e. there is no user data at all for the PRP fields.
-     */
-    uint8_t const *GetROPrpBuffer();
-    uint64_t       GetROPrpBufferSize() { return mBufSize; }
-
-    /// Solely used to notify dnvme how to issue a PRP data buffer
-    send_64b_bitmask GetPrpBitmask() { return mPrpFields; }
 
 
 private:

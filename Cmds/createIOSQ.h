@@ -1,36 +1,36 @@
-#ifndef _CREATEIOCQ_H_
-#define _CREATEIOCQ_H_
+#ifndef _CREATEIOSQ_H_
+#define _CREATEIOSQ_H_
 
 #include "adminCmd.h"
-#include "../Queues/iocq.h"
+#include "../Queues/iosq.h"
 
 
-class CreateIOCQ;    // forward definition
-typedef boost::shared_ptr<CreateIOCQ>             SharedCreateIOCQPtr;
-#define CAST_TO_CREATEIOCQ(shared_trackable_ptr)  \
-        boost::shared_polymorphic_downcast<CreateIOCQ>(shared_trackable_ptr);
+class CreateIOSQ;    // forward definition
+typedef boost::shared_ptr<CreateIOSQ>             SharedCreateIOSQPtr;
+#define CAST_TO_CREATEIOSQ(shared_trackable_ptr)  \
+        boost::shared_polymorphic_downcast<CreateIOSQ>(shared_trackable_ptr);
 
 
 /**
-* This class implements the Create IO Completion Queue admin cmd. After
+* This class implements the Create IO Submission Queue admin cmd. After
 * instantiation the Init() methods must be called to attain something useful.
 *
 * @note This class may throw exceptions.
 */
-class CreateIOCQ : public AdminCmd
+class CreateIOSQ : public AdminCmd
 {
 public:
-    CreateIOCQ(int fd);
-    virtual ~CreateIOCQ();
+    CreateIOSQ(int fd);
+    virtual ~CreateIOSQ();
 
     /// Used to compare for NULL pointers being returned by allocations
-    static SharedCreateIOCQPtr NullCreateIOCQPtr;
+    static SharedCreateIOSQPtr NullCreateIOSQPtr;
 
     /**
      * Initialize this object and prepares it to send to the hdw.
-     * @param iocq Pass the IOCQ object which will initialize this cmd.
+     * @param iosq Pass the IOSQ object which will initialize this cmd.
      */
-    void Init(const SharedIOCQPtr iocq);
+    void Init(const SharedIOSQPtr iosq);
 
     /**
      * Send the entire contents of this cmds PRP payload to the named file.
@@ -42,7 +42,7 @@ public:
 
 
 private:
-    CreateIOCQ();
+    CreateIOSQ();
 };
 
 

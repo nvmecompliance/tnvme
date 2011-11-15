@@ -1,3 +1,4 @@
+#include <math.h>
 #include "ctrlrConfig.h"
 #include "globals.h"
 
@@ -164,15 +165,66 @@ CtrlrConfig::SetRegValue(uint8_t value, uint8_t valueMask, uint64_t regMask,
 }
 
 
+
+bool
+CtrlrConfig::SetIOCQES(uint8_t value)
+{
+    LOG_NRM("Writing CC.IOCQES = 0x%02X; effectively (2^%d) = %d", value, value,
+        (int)pow(2, value));
+    return SetRegValue(value, 0x0f, CC_IOCQES, 20);
+}
+
+
+bool
+CtrlrConfig::SetIOSQES(uint8_t value)
+{
+    LOG_NRM("Writing CC.IOSQES = 0x%02X; effectively (2^%d) = %d", value, value,
+        (int)pow(2, value));
+    return SetRegValue(value, 0x0f, CC_IOSQES, 16);
+}
+
+
+bool
+CtrlrConfig::SetSHN(uint8_t value)
+{
+    LOG_NRM("Writing CC.SHN = 0x%02X", value);
+    return SetRegValue(value, 0x03, CC_SHN, 14);
+}
+
+
+bool
+CtrlrConfig::SetAMS(uint8_t value)
+{
+    LOG_NRM("Writing CC.AMS = 0x%02X", value);
+    return SetRegValue(value, 0x07, CC_AMS, 11);
+}
+
+
+bool
+CtrlrConfig::SetMPS(uint8_t value)
+{
+    LOG_NRM("Writing CC.MPS = 0x%02X", value);
+    return SetRegValue(value, 0x0f, CC_MPS, 7);
+}
 bool
 CtrlrConfig::SetMPS()
 {
     switch (sysconf(_SC_PAGESIZE)) {
-    case 4096:      return SetRegValue(0, 0x0f, CC_MPS, 7);
+    case 4096:
+        LOG_NRM("Writing CC.MPS for a 4096B page size");
+        return SetRegValue(0, 0x0f, CC_MPS, 7);
     default:
         LOG_DBG("Kernel reporting unsupported page size: 0x%08lX",
             sysconf(_SC_PAGESIZE));
         return false;
     }
+}
+
+
+bool
+CtrlrConfig::SetCSS(uint8_t value)
+{
+    LOG_NRM("Writing CC.CSS = 0x%02X", value);
+    return SetRegValue(value, 0x07, CC_CSS, 4);
 }
 

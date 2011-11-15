@@ -11,6 +11,7 @@ SRC = \
 	adminCmd.cpp	\
 	nvmeCmd.cpp		\
 	createIOCQ.cpp	\
+	createIOSQ.cpp	\
 	identify.cpp
 
 .SUFFIXES: .cpp

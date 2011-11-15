@@ -1,7 +1,7 @@
 #ifndef _IDENTIFY_H_
 #define _IDENTIFY_H_
 
-#include "cmd.h"
+#include "adminCmd.h"
 #include "identifyDefs.h"
 #include "../Utils/fileSystem.h"
 
@@ -17,7 +17,7 @@ typedef boost::shared_ptr<Identify>             SharedIdentifyPtr;
 *
 * @note This class may throw exceptions.
 */
-class Identify : public Cmd
+class Identify : public AdminCmd
 {
 public:
     Identify(int fd);

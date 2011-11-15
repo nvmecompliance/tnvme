@@ -4,7 +4,7 @@
 #include "cq.h"
 
 class IOCQ;    // forward definition
-typedef boost::shared_ptr<IOCQ>        SharedIOCQPtr;
+typedef boost::shared_ptr<IOCQ>             SharedIOCQPtr;
 #define CAST_TO_IOCQ(shared_trackable_ptr)  \
         boost::shared_polymorphic_downcast<IOCQ>(shared_trackable_ptr);
 
@@ -26,6 +26,8 @@ public:
 
     /// Used to compare for NULL pointers being returned by allocations
     static SharedIOCQPtr NullIOCQPtr;
+    static const uint16_t COMMON_ELEMENT_SIZE;
+    static const uint8_t  COMMON_ELEMENT_SIZE_PWR_OF_2;
 
     /**
      * Initialize this object and allocates contiguous Q content memory.

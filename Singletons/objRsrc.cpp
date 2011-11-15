@@ -6,6 +6,7 @@
 #include "../Queues/iosq.h"
 #include "../Cmds/identify.h"
 #include "../Cmds/createIOCQ.h"
+#include "../Cmds/createIOSQ.h"
 
 
 typedef pair<string, SharedTrackablePtr> TrackablePair;
@@ -61,8 +62,12 @@ ObjRsrc::AllocWorker(Trackable::ObjType type)
         return SharedTrackablePtr(new Identify(mFd));
         break;
     case Trackable::OBJ_CREATEIOCQ:
-        LOG_NRM("Obj IOSQ is born with group lifetime");
+        LOG_NRM("Obj IOCQ is born with group lifetime");
         return SharedTrackablePtr(new CreateIOCQ(mFd));
+        break;
+    case Trackable::OBJ_CREATEIOSQ:
+        LOG_NRM("Obj IOSQ is born with group lifetime");
+        return SharedTrackablePtr(new CreateIOSQ(mFd));
         break;
     default:
         LOG_DBG("Unknown obj type specified: 0x%02X", type);

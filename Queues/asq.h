@@ -26,6 +26,7 @@ public:
 
     /// Used to compare for NULL pointers being returned by allocations
     static SharedASQPtr NullASQPtr;
+    static const uint16_t IDEAL_ELEMENT_SIZE;
 
     /**
      * Initialize this object and allocates a contiguous ACQ
