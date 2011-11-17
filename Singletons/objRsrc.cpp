@@ -7,6 +7,8 @@
 #include "../Cmds/identify.h"
 #include "../Cmds/createIOCQ.h"
 #include "../Cmds/createIOSQ.h"
+#include "../Cmds/deleteIOCQ.h"
+#include "../Cmds/deleteIOSQ.h"
 
 
 typedef pair<string, SharedTrackablePtr> TrackablePair;
@@ -58,16 +60,24 @@ ObjRsrc::AllocWorker(Trackable::ObjType type)
         return SharedTrackablePtr(new IOSQ(mFd));
         break;
     case Trackable::OBJ_IDENTIFY:
-        LOG_NRM("Obj IOSQ is born with group lifetime");
+        LOG_NRM("Obj Cmd Idendify is born with group lifetime");
         return SharedTrackablePtr(new Identify(mFd));
         break;
     case Trackable::OBJ_CREATEIOCQ:
-        LOG_NRM("Obj IOCQ is born with group lifetime");
+        LOG_NRM("Obj Cmd Create IOCQ is born with group lifetime");
         return SharedTrackablePtr(new CreateIOCQ(mFd));
         break;
     case Trackable::OBJ_CREATEIOSQ:
-        LOG_NRM("Obj IOSQ is born with group lifetime");
+        LOG_NRM("Obj Cmd Create IOSQ is born with group lifetime");
         return SharedTrackablePtr(new CreateIOSQ(mFd));
+        break;
+    case Trackable::OBJ_DELETEIOCQ:
+        LOG_NRM("Obj Cmd Delete IOCQ is born with group lifetime");
+        return SharedTrackablePtr(new DeleteIOCQ(mFd));
+        break;
+    case Trackable::OBJ_DELETEIOSQ:
+        LOG_NRM("Obj Cmd Delete IOSQ is born with group lifetime");
+        return SharedTrackablePtr(new DeleteIOSQ(mFd));
         break;
     default:
         LOG_DBG("Unknown obj type specified: 0x%02X", type);

@@ -103,7 +103,9 @@ SQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
         LOG_DBG("Illegal memory alignment will corrupt");
         throw exception();
     } else  if (memBuffer->GetBufSize() < GetQSize()) {
-        LOG_DBG("Q buffer memory ambiguous to passed params");
+        LOG_DBG("Q buffer memory ambiguous to passed size params");
+        LOG_DBG("Mem buffer size = %d, Q size = %d", memBuffer->GetBufSize(),
+            GetQSize());
         throw exception();
     } else if (memBuffer->GetAlignment() != sysconf(_SC_PAGESIZE)) {
         // Nonconformance to page alignment will seg fault the app or crash

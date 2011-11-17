@@ -1,32 +1,34 @@
-#include "createIOQContigPoll_r10b.h"
+#include "deleteIOQContigPoll_r10b.h"
 #include "globals.h"
 #include "../Queues/iocq.h"
 #include "../Queues/iosq.h"
 #include "../Utils/kernelAPI.h"
-#include "../Cmds/createIOCQ.h"
-#include "../Cmds/createIOSQ.h"
+#include "../Cmds/deleteIOCQ.h"
+#include "../Cmds/deleteIOSQ.h"
 #include "createACQASQ_r10b.h"
+#include "createIOQContigPoll_r10b.h"
 
 #define DEFAULT_CMD_WAIT_ms         2000
-#define IOQ_NUM_ENTRIES             5
 
 
-CreateIOQContigPoll_r10b::CreateIOQContigPoll_r10b(int fd, string grpName,
+DeleteIOQContigPoll_r10b::DeleteIOQContigPoll_r10b(int fd, string grpName,
     string testName) :
     Test(fd, grpName, testName, SPECREV_10b)
 {
     // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 7");
-    mTestDesc.SetShort(     "Create contiguous IOCQ and IOSQ's");
+    mTestDesc.SetShort(     "Delete contiguous IOCQ and IOSQ's");
     // No string size limit for the long description
     mTestDesc.SetLong(
-        "Issue the admin commands Create contiguous I/O SQ and Create I/Q "
-        "CQ to the ASQ and reap the resulting CE's from the ACQ to certify "
-        "those Q's have been created.");
+        "Issue the admin commands Delete I/O SQ and Delete I/Q CQ"
+        "to the ASQ and reap the resulting CE's from the ACQ to certify "
+        "those the discontiguous IOQ's have been deleted. Dumping driver "
+        "metrics before and after the deletion will prove the dnvme/hdw has "
+        "removed those Q's");
 }
 
 
-CreateIOQContigPoll_r10b::~CreateIOQContigPoll_r10b()
+DeleteIOQContigPoll_r10b::~DeleteIOQContigPoll_r10b()
 {
     ///////////////////////////////////////////////////////////////////////////
     // Allocations taken from the heap and not under the control of the
@@ -35,8 +37,8 @@ CreateIOQContigPoll_r10b::~CreateIOQContigPoll_r10b()
 }
 
 
-CreateIOQContigPoll_r10b::
-CreateIOQContigPoll_r10b(const CreateIOQContigPoll_r10b &other) : Test(other)
+DeleteIOQContigPoll_r10b::
+DeleteIOQContigPoll_r10b(const DeleteIOQContigPoll_r10b &other) : Test(other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -45,8 +47,8 @@ CreateIOQContigPoll_r10b(const CreateIOQContigPoll_r10b &other) : Test(other)
 }
 
 
-CreateIOQContigPoll_r10b &
-CreateIOQContigPoll_r10b::operator=(const CreateIOQContigPoll_r10b &other)
+DeleteIOQContigPoll_r10b &
+DeleteIOQContigPoll_r10b::operator=(const DeleteIOQContigPoll_r10b &other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -58,12 +60,14 @@ CreateIOQContigPoll_r10b::operator=(const CreateIOQContigPoll_r10b &other)
 
 
 bool
-CreateIOQContigPoll_r10b::RunCoreTest()
+DeleteIOQContigPoll_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions: (KernelAPI::SoftReset() does the following)
      * 1) The ASQ & ACQ's have been created by the RsrcMngr for group lifetime
      * 2) All interrupts are disabled.
+     * 3) CreateIOQContigPoll_r10b test case has setup the Q's to delete
+     * 4) CC.IOCQES and CC.IOSQES are already setup with correct values.
      * \endverbatim
      */
 
@@ -74,8 +78,8 @@ CreateIOQContigPoll_r10b::RunCoreTest()
     SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
     SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
 
-    CreateIOCQContigPoll(asq, acq);
-    CreateIOSQContigPoll(asq, acq);
+    DeleteIOCQContigPoll(asq, acq);
+    DeleteIOSQContigPoll(asq, acq);
 
     KernelAPI::DumpKernelMetrics(mFd,
         FileSystem::PrepLogFile(mGrpName, mTestName, "kmetrics", "after"));
@@ -84,44 +88,38 @@ CreateIOQContigPoll_r10b::RunCoreTest()
 
 
 void
-CreateIOQContigPoll_r10b::CreateIOCQContigPoll(SharedASQPtr asq,
+DeleteIOQContigPoll_r10b::DeleteIOCQContigPoll(SharedASQPtr asq,
     SharedACQPtr acq)
 {
     uint16_t numCE;
 
-    gCtrlrConfig->SetIOCQES(IOCQ::COMMON_ELEMENT_SIZE_PWR_OF_2);
+    LOG_NRM("Lookup IOCQ which was created in a prior test within group");
+    SharedIOCQPtr iocq = CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_CONTIG_GROUP_ID))
 
-    LOG_NRM("Create an IOCQ object with group lifetime");
-    SharedIOCQPtr iocq = CAST_TO_IOCQ(
-        gRsrcMngr->AllocObj(Trackable::OBJ_IOCQ, IOCQ_CONTIG_GROUP_ID));
-    LOG_NRM("Allocate contiguous memory, ID=%d for the IOCQ", IOQ_CONTIG_ID);
-    iocq->Init(IOQ_CONTIG_ID, IOQ_NUM_ENTRIES, false, 0);
-
-
-    LOG_NRM("Create a Create IOCQ cmd to perform the IOCQ creation");
-    SharedCreateIOCQPtr createIOCQCmd =
-        SharedCreateIOCQPtr(new CreateIOCQ(mFd));
-    createIOCQCmd->Init(iocq);
+    LOG_NRM("Create a Delete IOCQ cmd to perform the IOCQ deletion");
+    SharedDeleteIOCQPtr deleteIOCQCmd =
+        SharedDeleteIOCQPtr(new DeleteIOCQ(mFd));
+    deleteIOCQCmd->Init(iocq);
 
 
-    LOG_NRM("Send the Create IOCQ cmd to hdw");
-    asq->Send(createIOCQCmd);
+    LOG_NRM("Send the Delete IOCQ cmd to hdw");
+    asq->Send(deleteIOCQCmd);
     asq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "asq",
-        "createIOCQCmd"),
+        "deleteIOCQCmd"),
         "Just B4 ringing SQ0 doorbell, dump entire SQ contents");
     asq->Ring();
 
 
     LOG_NRM("Wait for the CE to arrive in ACQ");
     if (acq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE) == false) {
-        LOG_ERR("Unable to see completion of Create IOCQ cmd");
+        LOG_ERR("Unable to see completion of Delete IOCQ cmd");
         acq->Dump(
-            FileSystem::PrepLogFile(mGrpName, mTestName, "acq","createIOCQCmd"),
+            FileSystem::PrepLogFile(mGrpName, mTestName, "acq","deleteIOCQCmd"),
             "Unable to see any CE's in CQ0, dump entire CQ contents");
         throw exception();
     }
     acq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "acq",
-        "createIOCQCmd"), "Just B4 reaping CQ0, dump entire CQ contents");
+        "deleteIOCQCmd"), "Just B4 reaping CQ0, dump entire CQ contents");
 
 
     {
@@ -137,53 +135,43 @@ CreateIOQContigPoll_r10b::CreateIOCQContigPoll(SharedASQPtr asq,
         }
         LOG_NRM("The reaped identify CE is...");
         ceMemIOCQ->Log();
-        // The PRP payload is in fact the memory backing the Q
-        createIOCQCmd->Dump(
-            FileSystem::PrepLogFile(mGrpName, mTestName, "IOCQ"),
-            "The complete IOCQ contents, not yet used, but is created.");
     }
 }
 
 
 void
-CreateIOQContigPoll_r10b::CreateIOSQContigPoll(SharedASQPtr asq,
+DeleteIOQContigPoll_r10b::DeleteIOSQContigPoll(SharedASQPtr asq,
     SharedACQPtr acq)
 {
     uint16_t numCE;
 
-    gCtrlrConfig->SetIOSQES(IOSQ::COMMON_ELEMENT_SIZE_PWR_OF_2);
+    LOG_NRM("Lookup IOSQ which was created in a prior test within group");
+    SharedIOSQPtr iosq = CAST_TO_IOSQ(gRsrcMngr->GetObj(IOSQ_CONTIG_GROUP_ID))
 
-    LOG_NRM("Create an IOSQ object with group lifetime");
-    SharedIOSQPtr iosq = CAST_TO_IOSQ(
-        gRsrcMngr->AllocObj(Trackable::OBJ_IOSQ, IOSQ_CONTIG_GROUP_ID));
-    LOG_NRM("Allocate contiguous memory, ID=%d for the IOSQ", IOQ_CONTIG_ID);
-    iosq->Init(IOQ_CONTIG_ID, IOQ_NUM_ENTRIES, false, 0);
-
-
-    LOG_NRM("Create a Create IOSQ cmd to perform the IOSQ creation");
-    SharedCreateIOSQPtr createIOSQCmd =
-        SharedCreateIOSQPtr(new CreateIOSQ(mFd));
-    createIOSQCmd->Init(iosq);
+    LOG_NRM("Create a Delete IOSQ cmd to perform the IOSQ deletion");
+    SharedDeleteIOSQPtr deleteIOSQCmd =
+        SharedDeleteIOSQPtr(new DeleteIOSQ(mFd));
+    deleteIOSQCmd->Init(iosq);
 
 
-    LOG_NRM("Send the Create IOSQ cmd to hdw");
-    asq->Send(createIOSQCmd);
+    LOG_NRM("Send the Delete IOSQ cmd to hdw");
+    asq->Send(deleteIOSQCmd);
     asq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "asq",
-        "createIOSQCmd"),
+        "deleteIOSQCmd"),
         "Just B4 ringing SQ0 doorbell, dump entire SQ contents");
     asq->Ring();
 
 
     LOG_NRM("Wait for the CE to arrive in ACQ");
     if (acq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE) == false) {
-        LOG_ERR("Unable to see completion of Create IOSQ cmd");
+        LOG_ERR("Unable to see completion of Delete IOSQ cmd");
         acq->Dump(
-            FileSystem::PrepLogFile(mGrpName, mTestName, "acq","createIOSQCmd"),
+            FileSystem::PrepLogFile(mGrpName, mTestName, "acq","deleteIOSQCmd"),
             "Unable to see any CE's in CQ0, dump entire CQ contents");
         throw exception();
     }
     acq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "acq",
-        "createIOSQCmd"), "Just B4 reaping CQ0, dump entire CQ contents");
+        "deleteIOSQCmd"), "Just B4 reaping CQ0, dump entire CQ contents");
 
 
     {
@@ -199,9 +187,5 @@ CreateIOQContigPoll_r10b::CreateIOSQContigPoll(SharedASQPtr asq,
         }
         LOG_NRM("The reaped identify CE is...");
         ceMemIOSQ->Log();
-        // The PRP payload is in fact the memory backing the Q
-        createIOSQCmd->Dump(
-            FileSystem::PrepLogFile(mGrpName, mTestName, "IOSQ"),
-            "The complete IOSQ contents, not yet used, but is created.");
     }
 }

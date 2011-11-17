@@ -122,7 +122,7 @@ private:
     /// Current value of controller capabilities register
     uint32_t mRegCAP;
 
-    bool GetRegValue(uint8_t &value, uint64_t regMask, uint8_t bitShift);
+    bool GetRegValue(uint8_t &value, uint32_t regMask, uint8_t bitShift);
     bool SetRegValue(uint8_t value, uint8_t valueMask, uint64_t regMask,
         uint8_t bitShift);
 };

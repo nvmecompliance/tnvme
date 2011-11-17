@@ -5,10 +5,13 @@ LIBS = -L../ -L/usr/local/lib -lm
 INCLUDES = -I. -I../ -I../../ -I/usr/local/include
 
 SRC = \
-	grpBasicInit.cpp		\
-	createACQASQ_r10b.cpp	\
-	identifyCmd_r10b.cpp	\
-	createIOQContigPoll_r10b.cpp
+	grpBasicInit.cpp					\
+	createACQASQ_r10b.cpp				\
+	identifyCmd_r10b.cpp				\
+	createIOQContigPoll_r10b.cpp		\
+	deleteIOQContigPoll_r10b.cpp		\
+	createIOQDiscontigPoll_r10b.cpp		\
+	deleteIOQDiscontigPoll_r10b.cpp
 
 .SUFFIXES: .cpp
 

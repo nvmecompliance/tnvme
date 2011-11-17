@@ -1,13 +1,9 @@
-#ifndef _CREATEIOQCONTOGPOLL_r10b_H_
-#define _CREATEIOQCONTOGPOLL_r10b_H_
+#ifndef _DELETEIOQDISCONTOGPOLL_r10b_H_
+#define _DELETEIOQDISCONTOGPOLL_r10b_H_
 
 #include "test.h"
 #include "../Queues/asq.h"
 #include "../Queues/acq.h"
-
-#define IOQ_CONTIG_ID             1
-#define IOCQ_CONTIG_GROUP_ID      "IOCQContigPoll"
-#define IOSQ_CONTIG_GROUP_ID      "IOSQContigPoll"
 
 
 /** \verbatim
@@ -17,19 +13,20 @@
  * 1) See notes in the header file of the Test base class
  * \endverbatim
  */
-class CreateIOQContigPoll_r10b : public Test
+class DeleteIOQDiscontigPoll_r10b : public Test
 {
 public:
-    CreateIOQContigPoll_r10b(int fd, string grpName, string testName);
-    virtual ~CreateIOQContigPoll_r10b();
+    DeleteIOQDiscontigPoll_r10b(int fd, string grpName, string testName);
+    virtual ~DeleteIOQDiscontigPoll_r10b();
 
     /**
      * IMPORTANT: Read Test::Clone() header comment.
      */
-    virtual CreateIOQContigPoll_r10b *Clone() const
-        { return new CreateIOQContigPoll_r10b(*this); }
-    CreateIOQContigPoll_r10b &operator=(const CreateIOQContigPoll_r10b &other);
-    CreateIOQContigPoll_r10b(const CreateIOQContigPoll_r10b &other);
+    virtual DeleteIOQDiscontigPoll_r10b *Clone() const
+        { return new DeleteIOQDiscontigPoll_r10b(*this); }
+    DeleteIOQDiscontigPoll_r10b &operator=(
+        const DeleteIOQDiscontigPoll_r10b &other);
+    DeleteIOQDiscontigPoll_r10b(const DeleteIOQDiscontigPoll_r10b &other);
 
 
 protected:
@@ -40,8 +37,8 @@ private:
     ///////////////////////////////////////////////////////////////////////////
     // Adding a member variable? Then edit the copy constructor and operator().
     ///////////////////////////////////////////////////////////////////////////
-    void CreateIOCQContigPoll(SharedASQPtr asq, SharedACQPtr acq);
-    void CreateIOSQContigPoll(SharedASQPtr asq, SharedACQPtr acq);
+    void DeleteIOCQDiscontigPoll(SharedASQPtr asq, SharedACQPtr acq);
+    void DeleteIOSQDiscontigPoll(SharedASQPtr asq, SharedACQPtr acq);
 };
 
 

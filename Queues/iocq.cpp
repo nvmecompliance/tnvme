@@ -47,6 +47,6 @@ IOCQ::Init(uint16_t qId, uint16_t numEntries,
         LOG_ERR("Unable to learn IOCQ entry size");
         throw exception();
     }
-    CQ::Init(qId, (uint16_t)pow(2, numEntries), numEntries, memBuffer,
+    CQ::Init(qId, (uint16_t)pow(2, entrySize), numEntries, memBuffer,
         irqEnabled, irqVec);
 }

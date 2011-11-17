@@ -1,5 +1,5 @@
 #!/bin/bash
 
-firefox ./Doc/html/index.html
+firefox ./Doc/HTML/index.html
 
 exit

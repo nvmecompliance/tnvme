@@ -92,7 +92,8 @@ IdentifyCmd_r10b::SendIdentifyCtrlrStruct(SharedASQPtr asq, SharedACQPtr acq)
     LOG_NRM("Force identify to request ctrlr capabilities struct");
     idCmdCap->SetCNS(true);
     SharedMemBufferPtr idMemCap = SharedMemBufferPtr(new MemBuffer());
-    idMemCap->Init(Identify::IDEAL_DATA_SIZE, sysconf(_SC_PAGESIZE));
+    idMemCap->InitAlignment(Identify::IDEAL_DATA_SIZE, sizeof(uint64_t),
+        true, 0);
     send_64b_bitmask idPrpCap =
         (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE);
     idCmdCap->SetPrpBuffer(idPrpCap, idMemCap);
@@ -151,7 +152,8 @@ IdentifyCmd_r10b::SendIdentifyNamespaceStruct(SharedASQPtr asq,
     LOG_NRM("Force identify to request namespace struct");
     idCmdNamSpc->SetCNS(false);
     SharedMemBufferPtr idMemNamSpc = SharedMemBufferPtr(new MemBuffer());
-    idMemNamSpc->Init(Identify::IDEAL_DATA_SIZE, sysconf(_SC_PAGESIZE));
+    idMemNamSpc->InitAlignment(Identify::IDEAL_DATA_SIZE, sizeof(uint64_t),
+        true, 0);
     send_64b_bitmask idPrpNamSpc =
         (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE);
     idCmdNamSpc->SetPrpBuffer(idPrpNamSpc, idMemNamSpc);

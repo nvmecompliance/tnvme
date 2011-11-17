@@ -10,7 +10,7 @@ CreateIOCQ::CreateIOCQ() :
 
 
 CreateIOCQ::CreateIOCQ(int fd) :
-    AdminCmd(fd, Trackable::OBJ_IOCQ)
+    AdminCmd(fd, Trackable::OBJ_CREATEIOCQ)
 {
     AdminCmd::Init(0x05, DATADIR_TO_DEVICE);
 }
@@ -24,7 +24,11 @@ CreateIOCQ::~CreateIOCQ()
 void
 CreateIOCQ::Init(const SharedIOCQPtr iocq)
 {
-    SetPrpBuffer((send_64b_bitmask)MASK_PRP1_PAGE, iocq->GetQBuffer(),
+    // Setup the PRP buffer based upon contig or non-contig memory
+    int prpField = MASK_PRP1_PAGE;
+    if (iocq->GetIsContig() == false)
+        prpField |= MASK_PRP1_LIST;
+    SetPrpBuffer((send_64b_bitmask)prpField, iocq->GetQBuffer(),
         iocq->GetQSize());
 
     {   // Handle DWORD 10
@@ -87,7 +91,5 @@ void
 CreateIOCQ::Dump(LogFilename filename, string fileHdr)
 {
     const uint8_t *buf = GetROPrpBuffer();
-
-    // Do a raw dump of the data
     Buffers::Dump(filename, buf, 0, ULONG_MAX, GetPrpBufferSize(), fileHdr);
 }

@@ -1,4 +1,4 @@
-#include "createIOQContigPoll_r10b.h"
+#include "createIOQDiscontigPoll_r10b.h"
 #include "globals.h"
 #include "../Queues/iocq.h"
 #include "../Queues/iosq.h"
@@ -11,22 +11,22 @@
 #define IOQ_NUM_ENTRIES             5
 
 
-CreateIOQContigPoll_r10b::CreateIOQContigPoll_r10b(int fd, string grpName,
+CreateIOQDiscontigPoll_r10b::CreateIOQDiscontigPoll_r10b(int fd, string grpName,
     string testName) :
     Test(fd, grpName, testName, SPECREV_10b)
 {
     // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 7");
-    mTestDesc.SetShort(     "Create contiguous IOCQ and IOSQ's");
+    mTestDesc.SetShort(     "Create discontiguous IOCQ and IOSQ's");
     // No string size limit for the long description
     mTestDesc.SetLong(
-        "Issue the admin commands Create contiguous I/O SQ and Create I/Q "
+        "Issue the admin commands Create discontiguous I/O SQ and Create I/Q "
         "CQ to the ASQ and reap the resulting CE's from the ACQ to certify "
         "those Q's have been created.");
 }
 
 
-CreateIOQContigPoll_r10b::~CreateIOQContigPoll_r10b()
+CreateIOQDiscontigPoll_r10b::~CreateIOQDiscontigPoll_r10b()
 {
     ///////////////////////////////////////////////////////////////////////////
     // Allocations taken from the heap and not under the control of the
@@ -35,8 +35,9 @@ CreateIOQContigPoll_r10b::~CreateIOQContigPoll_r10b()
 }
 
 
-CreateIOQContigPoll_r10b::
-CreateIOQContigPoll_r10b(const CreateIOQContigPoll_r10b &other) : Test(other)
+CreateIOQDiscontigPoll_r10b::
+CreateIOQDiscontigPoll_r10b(const CreateIOQDiscontigPoll_r10b &other) :
+    Test(other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -45,8 +46,8 @@ CreateIOQContigPoll_r10b(const CreateIOQContigPoll_r10b &other) : Test(other)
 }
 
 
-CreateIOQContigPoll_r10b &
-CreateIOQContigPoll_r10b::operator=(const CreateIOQContigPoll_r10b &other)
+CreateIOQDiscontigPoll_r10b &
+CreateIOQDiscontigPoll_r10b::operator=(const CreateIOQDiscontigPoll_r10b &other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -58,7 +59,7 @@ CreateIOQContigPoll_r10b::operator=(const CreateIOQContigPoll_r10b &other)
 
 
 bool
-CreateIOQContigPoll_r10b::RunCoreTest()
+CreateIOQDiscontigPoll_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions: (KernelAPI::SoftReset() does the following)
@@ -74,8 +75,8 @@ CreateIOQContigPoll_r10b::RunCoreTest()
     SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
     SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
 
-    CreateIOCQContigPoll(asq, acq);
-    CreateIOSQContigPoll(asq, acq);
+    CreateIOCQDiscontigPoll(asq, acq);
+    CreateIOSQDiscontigPoll(asq, acq);
 
     KernelAPI::DumpKernelMetrics(mFd,
         FileSystem::PrepLogFile(mGrpName, mTestName, "kmetrics", "after"));
@@ -84,7 +85,7 @@ CreateIOQContigPoll_r10b::RunCoreTest()
 
 
 void
-CreateIOQContigPoll_r10b::CreateIOCQContigPoll(SharedASQPtr asq,
+CreateIOQDiscontigPoll_r10b::CreateIOCQDiscontigPoll(SharedASQPtr asq,
     SharedACQPtr acq)
 {
     uint16_t numCE;
@@ -93,9 +94,13 @@ CreateIOQContigPoll_r10b::CreateIOCQContigPoll(SharedASQPtr asq,
 
     LOG_NRM("Create an IOCQ object with group lifetime");
     SharedIOCQPtr iocq = CAST_TO_IOCQ(
-        gRsrcMngr->AllocObj(Trackable::OBJ_IOCQ, IOCQ_CONTIG_GROUP_ID));
-    LOG_NRM("Allocate contiguous memory, ID=%d for the IOCQ", IOQ_CONTIG_ID);
-    iocq->Init(IOQ_CONTIG_ID, IOQ_NUM_ENTRIES, false, 0);
+        gRsrcMngr->AllocObj(Trackable::OBJ_IOCQ, IOCQ_DISCONTIG_GROUP_ID));
+    LOG_NRM("Allocate discontiguous memory, ID=%d for the IOCQ",
+        IOQ_DISCONTIG_ID);
+    SharedMemBufferPtr iocqMem = SharedMemBufferPtr(new MemBuffer());
+    iocqMem->InitAlignment((IOQ_NUM_ENTRIES * IOCQ::COMMON_ELEMENT_SIZE),
+        sysconf(_SC_PAGESIZE), true, 0);
+    iocq->Init(IOQ_DISCONTIG_ID, IOQ_NUM_ENTRIES, iocqMem, false, 0);
 
 
     LOG_NRM("Create a Create IOCQ cmd to perform the IOCQ creation");
@@ -146,7 +151,7 @@ CreateIOQContigPoll_r10b::CreateIOCQContigPoll(SharedASQPtr asq,
 
 
 void
-CreateIOQContigPoll_r10b::CreateIOSQContigPoll(SharedASQPtr asq,
+CreateIOQDiscontigPoll_r10b::CreateIOSQDiscontigPoll(SharedASQPtr asq,
     SharedACQPtr acq)
 {
     uint16_t numCE;
@@ -155,9 +160,13 @@ CreateIOQContigPoll_r10b::CreateIOSQContigPoll(SharedASQPtr asq,
 
     LOG_NRM("Create an IOSQ object with group lifetime");
     SharedIOSQPtr iosq = CAST_TO_IOSQ(
-        gRsrcMngr->AllocObj(Trackable::OBJ_IOSQ, IOSQ_CONTIG_GROUP_ID));
-    LOG_NRM("Allocate contiguous memory, ID=%d for the IOSQ", IOQ_CONTIG_ID);
-    iosq->Init(IOQ_CONTIG_ID, IOQ_NUM_ENTRIES, false, 0);
+        gRsrcMngr->AllocObj(Trackable::OBJ_IOSQ, IOSQ_DISCONTIG_GROUP_ID));
+    LOG_NRM("Allocate discontiguous memory, ID=%d for the IOSQ",
+        IOQ_DISCONTIG_ID);
+    SharedMemBufferPtr iosqMem = SharedMemBufferPtr(new MemBuffer());
+    iosqMem->InitAlignment((IOQ_NUM_ENTRIES * IOSQ::COMMON_ELEMENT_SIZE),
+        sysconf(_SC_PAGESIZE), true, 0);
+    iosq->Init(IOQ_DISCONTIG_ID, IOQ_NUM_ENTRIES, iosqMem, false, 0);
 
 
     LOG_NRM("Create a Create IOSQ cmd to perform the IOSQ creation");

@@ -138,7 +138,7 @@ CtrlrConfig::WriteRegCC(uint32_t regVal)
 
 
 bool
-CtrlrConfig::GetRegValue(uint8_t &value, uint64_t regMask, uint8_t bitShift)
+CtrlrConfig::GetRegValue(uint8_t &value, uint32_t regMask, uint8_t bitShift)
 {
     uint32_t regVal;
     bool retVal = ReadRegCC(regVal);
