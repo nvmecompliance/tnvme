@@ -61,7 +61,7 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
             }
 
 
-            // Now handle anything spec'd in the --test cmd line option
+            // Now handle anything spec'd in the --test <cmd line option>
             if (cl.test.t.group == UINT_MAX) {
                 // Each test group starts from known starting point
                 if (KernelAPI::SoftReset() == false)
@@ -251,8 +251,13 @@ ParseSkipTestCmdLine(vector<TestRef> &skipTest, const char *optarg)
     string output = "Execution will skip test case(s): <grp>:<major>.<minor>=";
     char work[20];
     for (size_t i = 0; i < skipTest.size(); i++ ) {
-        snprintf(work, sizeof(work), "%ld:%ld.%ld, ",
-            skipTest[i].group, skipTest[i].major, skipTest[i].minor);
+        if ((skipTest[i].major == UINT_MAX) &&
+            (skipTest[i].minor == UINT_MAX)) {
+            snprintf(work, sizeof(work), "%ld:ALL.ALL, ", skipTest[i].group);
+        } else {
+            snprintf(work, sizeof(work), "%ld:%ld.%ld, ",
+                skipTest[i].group, skipTest[i].major, skipTest[i].minor);
+        }
         output += work;
     }
     LOG_NRM("%s", output.c_str());

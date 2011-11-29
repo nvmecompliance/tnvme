@@ -195,8 +195,15 @@ Group::SkippingTest(TestRef &tr, vector<TestRef> &skipTest)
              (tr.major == skipTest[i].major) &&
              (tr.minor == skipTest[i].minor)) {
 
-            LOG_NRM("Instructed to skip test: %ld:%ld.%ld", tr.group, tr.major,
-                tr.minor);
+            LOG_NRM("Instructed to skip specific test: %ld:%ld.%ld",
+                tr.group, tr.major, tr.minor);
+            return true;
+         } else if ((tr.group == skipTest[i].group) &&
+             (UINT_MAX == skipTest[i].major) &&
+             (UINT_MAX == skipTest[i].minor)) {
+
+            LOG_NRM("Instructed to skip entire group: %ld (test:%ld.%ld)",
+                tr.group, tr.major, tr.minor);
             return true;
          }
     }
