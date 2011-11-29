@@ -3,8 +3,6 @@
 
 #include "../group.h"
 
-#define FILENAME_DUMP_PCI_REGS      "./dump.reg.pci"
-#define FILENAME_DUMP_CTRLR_REGS    "./dump.reg.ctrl"
 #define FILENAME_FLAGS         (O_RDWR | O_TRUNC | O_CREAT)
 #define FILENAME_MODE          (S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH)
 

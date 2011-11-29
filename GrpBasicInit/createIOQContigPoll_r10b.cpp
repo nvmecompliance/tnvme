@@ -7,6 +7,7 @@
 #include "../Cmds/createIOSQ.h"
 #include "createACQASQ_r10b.h"
 
+#define IOQ_ID                      1
 #define DEFAULT_CMD_WAIT_ms         2000
 #define IOQ_NUM_ENTRIES             5
 
@@ -93,9 +94,9 @@ CreateIOQContigPoll_r10b::CreateIOCQContigPoll(SharedASQPtr asq,
 
     LOG_NRM("Create an IOCQ object with group lifetime");
     SharedIOCQPtr iocq = CAST_TO_IOCQ(
-        gRsrcMngr->AllocObj(Trackable::OBJ_IOCQ, IOCQ_CONTIG_GROUP_ID));
-    LOG_NRM("Allocate contiguous memory, ID=%d for the IOCQ", IOQ_CONTIG_ID);
-    iocq->Init(IOQ_CONTIG_ID, IOQ_NUM_ENTRIES, false, 0);
+        gRsrcMngr->AllocObj(Trackable::OBJ_IOCQ, IOCQ_CONTIG_POLL_GROUP_ID));
+    LOG_NRM("Allocate contiguous memory, ID=%d for the IOCQ", IOQ_ID);
+    iocq->Init(IOQ_ID, IOQ_NUM_ENTRIES, false, 0);
 
 
     LOG_NRM("Create a Create IOCQ cmd to perform the IOCQ creation");
@@ -155,9 +156,9 @@ CreateIOQContigPoll_r10b::CreateIOSQContigPoll(SharedASQPtr asq,
 
     LOG_NRM("Create an IOSQ object with group lifetime");
     SharedIOSQPtr iosq = CAST_TO_IOSQ(
-        gRsrcMngr->AllocObj(Trackable::OBJ_IOSQ, IOSQ_CONTIG_GROUP_ID));
-    LOG_NRM("Allocate contiguous memory, ID=%d for the IOSQ", IOQ_CONTIG_ID);
-    iosq->Init(IOQ_CONTIG_ID, IOQ_NUM_ENTRIES, false, 0);
+        gRsrcMngr->AllocObj(Trackable::OBJ_IOSQ, IOSQ_CONTIG_POLL_GROUP_ID));
+    LOG_NRM("Allocate contiguous memory, ID=%d for the IOSQ", IOQ_ID);
+    iosq->Init(IOQ_ID, IOQ_NUM_ENTRIES, false, 0);
 
 
     LOG_NRM("Create a Create IOSQ cmd to perform the IOSQ creation");

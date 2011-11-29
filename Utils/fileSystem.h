@@ -43,7 +43,7 @@ public:
      * @param grpName Pass the name of the group, i.e. Test::mGrpName, required
      * @param className Pass the test cast class name, required
      * @param objName Pass the name of the object being dumped, required
-     * @param qualifier Pass any extra qualifications, not Required.
+     * @param qualifier (optional) Pass any extra qualifications
      * @return A properly formated filename for logging purposes
      */
     static LogFilename PrepLogFile(string grpName, string className,

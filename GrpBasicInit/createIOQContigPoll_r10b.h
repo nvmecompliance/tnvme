@@ -5,9 +5,8 @@
 #include "../Queues/asq.h"
 #include "../Queues/acq.h"
 
-#define IOQ_CONTIG_ID             1
-#define IOCQ_CONTIG_GROUP_ID      "IOCQContigPoll"
-#define IOSQ_CONTIG_GROUP_ID      "IOSQContigPoll"
+#define IOCQ_CONTIG_POLL_GROUP_ID      "IOCQContigPoll"
+#define IOSQ_CONTIG_POLL_GROUP_ID      "IOSQContigPoll"
 
 
 /** \verbatim

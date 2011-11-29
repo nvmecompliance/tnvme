@@ -7,6 +7,7 @@
 #include "dumpCtrlrAddrSpace_r10b.h"
 #include "grpInformative.h"
 #include "globals.h"
+#include "../Utils/fileSystem.h"
 
 
 DumpCtrlrAddrSpace_r10b::DumpCtrlrAddrSpace_r10b(int fd, string grpName,
@@ -19,7 +20,7 @@ DumpCtrlrAddrSpace_r10b::DumpCtrlrAddrSpace_r10b(int fd, string grpName,
     // No string size limit for the long description
     mTestDesc.SetLong(
         "Dumps the values of every controller address space register, offset "
-        "from PCI BAR0/BAR1 address, to the file: " FILENAME_DUMP_CTRLR_REGS);
+        "from PCI BAR0/BAR1 address, to a file");
 }
 
 
@@ -66,14 +67,14 @@ DumpCtrlrAddrSpace_r10b::RunCoreTest()
     int fd;
     string work;
     uint64_t value = 0;
+    string outFile;
     const CtlSpcType *pciMetrics = gRegisters->GetCtlMetrics();
 
 
     // Dumping all register values to well known file
-    if ((fd = open(FILENAME_DUMP_CTRLR_REGS, FILENAME_FLAGS,
-        FILENAME_MODE)) == -1) {
-
-        LOG_ERR("file=%s: %s", FILENAME_DUMP_CTRLR_REGS, strerror(errno));
+    outFile = FileSystem::PrepLogFile(mGrpName, mTestName, "ctrl", "registers");
+    if ((fd = open(outFile.c_str(), FILENAME_FLAGS, FILENAME_MODE)) == -1) {
+        LOG_ERR("file=%s: %s", outFile.c_str(), strerror(errno));
         throw exception();
     }
 

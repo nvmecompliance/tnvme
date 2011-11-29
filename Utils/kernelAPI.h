@@ -23,7 +23,8 @@ public:
 
     /**
      * Disables the NVME device completely, disables IRQ's, and clears out
-     * group level resources upon each call.
+     * group level resources upon each call. After this call nothing in dnvme
+     * will remain, and only test lifetime variables in tnvme will remain.
      * @note This method will not throw
      * @return true upon success, otherwise false
      */

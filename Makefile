@@ -58,7 +58,7 @@ clobber: GOAL=clobber
 clobber: $(SUBDIRS) clean
 	rm -rf doc/html
 	rm -rf rpm
-	rm -f dump.reg.*
+	rm -rf Logs
 	rm -f $(APP_NAME)
 
 doc: GOAL=doc

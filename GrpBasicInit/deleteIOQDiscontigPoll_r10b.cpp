@@ -96,7 +96,7 @@ DeleteIOQDiscontigPoll_r10b::DeleteIOCQDiscontigPoll(SharedASQPtr asq,
 
     LOG_NRM("Lookup IOCQ which was created in a prior test within group");
     SharedIOCQPtr iocq = CAST_TO_IOCQ(
-        gRsrcMngr->GetObj(IOCQ_DISCONTIG_GROUP_ID))
+        gRsrcMngr->GetObj(IOCQ_DISCONTIG_POLL_GROUP_ID))
 
     LOG_NRM("Create a Delete IOCQ cmd to perform the IOCQ deletion");
     SharedDeleteIOCQPtr deleteIOCQCmd =
@@ -149,7 +149,7 @@ DeleteIOQDiscontigPoll_r10b::DeleteIOSQDiscontigPoll(SharedASQPtr asq,
 
     LOG_NRM("Lookup IOSQ which was created in a prior test within group");
     SharedIOSQPtr iosq = CAST_TO_IOSQ(
-        gRsrcMngr->GetObj(IOSQ_DISCONTIG_GROUP_ID))
+        gRsrcMngr->GetObj(IOSQ_DISCONTIG_POLL_GROUP_ID))
 
     LOG_NRM("Create a Delete IOSQ cmd to perform the IOSQ deletion");
     SharedDeleteIOSQPtr deleteIOSQCmd =

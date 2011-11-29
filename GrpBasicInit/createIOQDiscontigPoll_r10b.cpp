@@ -7,6 +7,7 @@
 #include "../Cmds/createIOSQ.h"
 #include "createACQASQ_r10b.h"
 
+#define IOQ_ID                      2
 #define DEFAULT_CMD_WAIT_ms         2000
 #define IOQ_NUM_ENTRIES             5
 
@@ -94,13 +95,12 @@ CreateIOQDiscontigPoll_r10b::CreateIOCQDiscontigPoll(SharedASQPtr asq,
 
     LOG_NRM("Create an IOCQ object with group lifetime");
     SharedIOCQPtr iocq = CAST_TO_IOCQ(
-        gRsrcMngr->AllocObj(Trackable::OBJ_IOCQ, IOCQ_DISCONTIG_GROUP_ID));
-    LOG_NRM("Allocate discontiguous memory, ID=%d for the IOCQ",
-        IOQ_DISCONTIG_ID);
+        gRsrcMngr->AllocObj(Trackable::OBJ_IOCQ, IOCQ_DISCONTIG_POLL_GROUP_ID));
+    LOG_NRM("Allocate discontiguous memory, ID=%d for the IOCQ", IOQ_ID);
     SharedMemBufferPtr iocqMem = SharedMemBufferPtr(new MemBuffer());
     iocqMem->InitAlignment((IOQ_NUM_ENTRIES * IOCQ::COMMON_ELEMENT_SIZE),
         sysconf(_SC_PAGESIZE), true, 0);
-    iocq->Init(IOQ_DISCONTIG_ID, IOQ_NUM_ENTRIES, iocqMem, false, 0);
+    iocq->Init(IOQ_ID, IOQ_NUM_ENTRIES, iocqMem, false, 0);
 
 
     LOG_NRM("Create a Create IOCQ cmd to perform the IOCQ creation");
@@ -160,13 +160,12 @@ CreateIOQDiscontigPoll_r10b::CreateIOSQDiscontigPoll(SharedASQPtr asq,
 
     LOG_NRM("Create an IOSQ object with group lifetime");
     SharedIOSQPtr iosq = CAST_TO_IOSQ(
-        gRsrcMngr->AllocObj(Trackable::OBJ_IOSQ, IOSQ_DISCONTIG_GROUP_ID));
-    LOG_NRM("Allocate discontiguous memory, ID=%d for the IOSQ",
-        IOQ_DISCONTIG_ID);
+        gRsrcMngr->AllocObj(Trackable::OBJ_IOSQ, IOSQ_DISCONTIG_POLL_GROUP_ID));
+    LOG_NRM("Allocate discontiguous memory, ID=%d for the IOSQ", IOQ_ID);
     SharedMemBufferPtr iosqMem = SharedMemBufferPtr(new MemBuffer());
     iosqMem->InitAlignment((IOQ_NUM_ENTRIES * IOSQ::COMMON_ELEMENT_SIZE),
         sysconf(_SC_PAGESIZE), true, 0);
-    iosq->Init(IOQ_DISCONTIG_ID, IOQ_NUM_ENTRIES, iosqMem, false, 0);
+    iosq->Init(IOQ_ID, IOQ_NUM_ENTRIES, iosqMem, false, 0);
 
 
     LOG_NRM("Create a Create IOSQ cmd to perform the IOSQ creation");

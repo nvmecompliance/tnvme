@@ -7,6 +7,7 @@
 #include "dumpPciAddrSpace_r10b.h"
 #include "grpInformative.h"
 #include "globals.h"
+#include "../Utils/fileSystem.h"
 
 
 DumpPciAddrSpace_r10b::DumpPciAddrSpace_r10b(int fd, string grpName,
@@ -18,8 +19,7 @@ DumpPciAddrSpace_r10b::DumpPciAddrSpace_r10b(int fd, string grpName,
     mTestDesc.SetShort(     "Dump all PCI address space registers");
     // No string size limit for the long description
     mTestDesc.SetLong(
-        "Dumps the values of every PCI address space register to the file: "
-        FILENAME_DUMP_PCI_REGS);
+        "Dumps the values of every PCI address space register to a file");
 }
 
 
@@ -66,15 +66,15 @@ DumpPciAddrSpace_r10b::RunCoreTest()
     int fd;
     string work;
     uint64_t value;
+    string outFile;
     const PciSpcType *pciMetrics = gRegisters->GetPciMetrics();
     const vector<PciCapabilities> *pciCap = gRegisters->GetPciCapabilities();
 
 
     // Dumping all register values to well known file
-    if ((fd = open(FILENAME_DUMP_PCI_REGS, FILENAME_FLAGS,
-        FILENAME_MODE)) == -1) {
-
-        LOG_ERR("file=%s: %s", FILENAME_DUMP_PCI_REGS, strerror(errno));
+    outFile = FileSystem::PrepLogFile(mGrpName, mTestName, "ctrl", "registers");
+    if ((fd = open(outFile.c_str(), FILENAME_FLAGS, FILENAME_MODE)) == -1) {
+        LOG_ERR("file=%s: %s", outFile.c_str(), strerror(errno));
         throw exception();
     }
 
