@@ -62,7 +62,9 @@ Usage(void) {
     printf("                                      (Require: <size> < 8)\n");
     printf("                                      <offset:size> requires base 16 values\n");
     printf("  -z(--reset)                         Ctrl'r level reset via CC.EN\n");
-    printf("  -i(--ignore)                        Ignore detected errors\n");
+    printf("  -i(--ignore)                        Ignore detected errors; An error causes\n");
+    printf("                                      the next test within the next group to\n");
+    printf("                                      execute, not next test within same group.\n");
     printf("  -p(--loop) <count>                  Loop test execution <count> times; dflt=1\n");
     printf("  -k(--skiptest) <filename>           A file contains a list of tests to skip\n");
 }

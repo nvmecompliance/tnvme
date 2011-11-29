@@ -91,7 +91,6 @@ CreateIOQContigPoll_r10b::CreateIOCQContigPoll(SharedASQPtr asq,
     uint16_t numCE;
 
     gCtrlrConfig->SetIOCQES(IOCQ::COMMON_ELEMENT_SIZE_PWR_OF_2);
-
     LOG_NRM("Create an IOCQ object with group lifetime");
     SharedIOCQPtr iocq = CAST_TO_IOCQ(
         gRsrcMngr->AllocObj(Trackable::OBJ_IOCQ, IOCQ_CONTIG_POLL_GROUP_ID));

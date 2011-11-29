@@ -29,6 +29,7 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
     int numFailed = 0;
     int numSkipped = 0;
     bool allTestsPass = true;    // assuming success until we find otherwise
+    bool thisTestPass;
     TestIteratorType testIter;
 
 
@@ -70,12 +71,15 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
                 // Run all tests within all groups
                 testIter = groups[iGrp]->GetTestIterator();
                 while (allHaveRun == false) {
+                    thisTestPass = true;
+
                     switch (groups[iGrp]->RunTest(testIter, cl.skiptest)) {
                     case Group::TR_SUCCESS:
                         numPassed++;
                         break;
                     case Group::TR_FAIL:
                         allTestsPass = false;
+                        thisTestPass = false;
                         numFailed++;
                         break;
                     case Group::TR_SKIPPING:
@@ -85,8 +89,12 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
                         allHaveRun = true;
                         break;
                     }
-                    if ((cl.ignore == false) && (allTestsPass == false))
+                    if ((cl.ignore == false) && (allTestsPass == false)) {
                         goto FAIL_OUT;
+                    } else if (cl.ignore && (thisTestPass == false)) {
+                        LOG_NRM("Detected error, but forced to ignore");
+                        break;  // continue with next test in next group
+                    }
                 }
 
             } else if ((cl.test.t.major == UINT_MAX) ||
@@ -98,14 +106,18 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
                     if (KernelAPI::SoftReset() == false)
                         return false;
 
+                    // Run all tests within this group
                     testIter = groups[iGrp]->GetTestIterator();
                     while (allHaveRun == false) {
+                        thisTestPass = true;
+
                         switch (groups[iGrp]->RunTest(testIter, cl.skiptest)) {
                         case Group::TR_SUCCESS:
                             numPassed++;
                             break;
                         case Group::TR_FAIL:
                             allTestsPass = false;
+                            thisTestPass = false;
                             numFailed++;
                             break;
                         case Group::TR_SKIPPING:
@@ -115,8 +127,12 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
                             allHaveRun = true;
                             break;
                         }
-                        if ((cl.ignore == false) && (allTestsPass == false))
+                        if ((cl.ignore == false) && (allTestsPass == false)) {
                             goto FAIL_OUT;
+                        } else if (cl.ignore && (thisTestPass == false)) {
+                            LOG_NRM("Detected error, but forced to ignore");
+                            break;  // continue with next test in next group
+                        }
                     }
                     break;  // check if more loops must occur
                 }
@@ -151,14 +167,15 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
             }
         }
 
-        LOG_NRM("Tests  passed: %d", numPassed);
+        LOG_NRM("Iteration SUMMARY passed : %d", numPassed);
         if (numFailed) {
-            LOG_NRM("       failed: %d    <--------------", numFailed);
+            LOG_NRM("                  failed : %d  <----------", numFailed);
         } else {
-            LOG_NRM("       failed: 0");
+            LOG_NRM("                  failed : 0");
         }
-        LOG_NRM("      skipped: %d", numSkipped);
-        LOG_NRM("        total: %d", numPassed+numFailed+numSkipped);
+        LOG_NRM("                  skipped: %d", numSkipped);
+        LOG_NRM("                  total  : %d",
+            numPassed+numFailed+numSkipped);
         LOG_NRM("Stop loop execution #%ld", iLoop);
     }
 
@@ -251,7 +268,7 @@ ParseSkipTestCmdLine(vector<TestRef> &skipTest, const char *optarg)
     string output = "Execution will skip test case(s): <grp>:<major>.<minor>=";
     char work[20];
     for (size_t i = 0; i < skipTest.size(); i++ ) {
-        if ((skipTest[i].major == UINT_MAX) &&
+        if ((skipTest[i].major == UINT_MAX) ||
             (skipTest[i].minor == UINT_MAX)) {
             snprintf(work, sizeof(work), "%ld:ALL.ALL, ", skipTest[i].group);
         } else {
