@@ -30,5 +30,5 @@ Trackable::~Trackable()
     case OBJ_CREATEIOCQ:    obj = "CreateIOCQ";         break;
     default:                obj = "unknown";            break;
     }
-    LOG_DBG("Destroying obj: %s", obj.c_str());
+    LOG_DBG("Destroying trackable obj: %s", obj.c_str());
 }

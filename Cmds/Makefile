@@ -9,7 +9,7 @@ SRC = \
 	prpData.cpp		\
 	metaData.cpp	\
 	adminCmd.cpp	\
-	nvmeCmd.cpp		\
+	nvmCmd.cpp		\
 	createIOCQ.cpp	\
 	deleteIOCQ.cpp	\
 	createIOSQ.cpp	\

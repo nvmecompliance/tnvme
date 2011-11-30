@@ -34,7 +34,7 @@ protected:
 
 private:
     ///////////////////////////////////////////////////////////////////////////
-    // Adding a member variable? Then edit the copy constructor and operator().
+    // Adding a member variable? Then edit the copy constructor and operator=().
     ///////////////////////////////////////////////////////////////////////////
     void DeleteIOCQContigPoll(SharedASQPtr asq, SharedACQPtr acq);
     void DeleteIOSQContigPoll(SharedASQPtr asq, SharedACQPtr acq);

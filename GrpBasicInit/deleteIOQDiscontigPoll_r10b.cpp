@@ -64,13 +64,22 @@ bool
 DeleteIOQDiscontigPoll_r10b::RunCoreTest()
 {
     /** \verbatim
-     * Assumptions: (KernelAPI::SoftReset() does the following)
+     * Assumptions:
      * 1) The ASQ & ACQ's have been created by the RsrcMngr for group lifetime
      * 2) All interrupts are disabled.
-     * 3) CreateIOQDisontigPoll_r10b test case has setup the Q's to delete
+     * 3) CreateIOQDiscontigPoll_r10b test case has setup the Q's to delete
      * 4) CC.IOCQES and CC.IOSQES are already setup with correct values.
      * \endverbatim
      */
+
+    uint64_t regVal;
+    if (gRegisters->Read(CTLSPC_CAP, regVal) == false) {
+        LOG_ERR("Unable to determine Q memory requirements");
+        throw exception();
+    } else if (regVal & CAP_CQR) {
+        LOG_NRM("Unable to utilize discontig Q's, DUT requires contig");
+        return true;
+    }
 
     KernelAPI::DumpKernelMetrics(mFd,
         FileSystem::PrepLogFile(mGrpName, mTestName, "kmetrics", "before"));
@@ -138,6 +147,9 @@ DeleteIOQDiscontigPoll_r10b::DeleteIOCQDiscontigPoll(SharedASQPtr asq,
         LOG_NRM("The reaped identify CE is...");
         ceMemIOCQ->Log();
     }
+
+    // Not explicitly necessary, but is more clean to free what is not needed
+    gRsrcMngr->FreeObj(IOCQ_DISCONTIG_POLL_GROUP_ID);
 }
 
 
@@ -191,4 +203,7 @@ DeleteIOQDiscontigPoll_r10b::DeleteIOSQDiscontigPoll(SharedASQPtr asq,
         LOG_NRM("The reaped identify CE is...");
         ceMemIOSQ->Log();
     }
+
+    // Not explicitly necessary, but is more clean to free what is not needed
+    gRsrcMngr->FreeObj(IOSQ_DISCONTIG_POLL_GROUP_ID);
 }

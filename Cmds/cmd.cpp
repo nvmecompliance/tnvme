@@ -41,7 +41,7 @@ Cmd::Init(nvme_cmds cmdSet, uint8_t opcode, DataDir dataDir, uint16_t cmdSize)
 {
     switch (cmdSet) {
     case CMD_ADMIN:
-    case CMD_NVME:
+    case CMD_NVM:
     case CMD_AON:
         mCmdSet = cmdSet;
         break;

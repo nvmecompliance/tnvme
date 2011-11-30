@@ -37,7 +37,7 @@ protected:
 
 private:
     ///////////////////////////////////////////////////////////////////////////
-    // Adding a member variable? Then edit the copy constructor and operator().
+    // Adding a member variable? Then edit the copy constructor and operator=().
     ///////////////////////////////////////////////////////////////////////////
     void CreateIOCQContigPoll(SharedASQPtr asq, SharedACQPtr acq);
     void CreateIOSQContigPoll(SharedASQPtr asq, SharedACQPtr acq);

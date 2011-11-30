@@ -53,7 +53,7 @@ bool
 CreateACQASQ_r10b::RunCoreTest()
 {
     /** \verbatim
-     * Assumptions: (KernelAPI::SoftReset() does the following)
+     * Assumptions:
      * 1) This is the 1st within GrpBasicInit.
      * 2) The NVME device is disabled
      * 3) All interrupts are disabled.

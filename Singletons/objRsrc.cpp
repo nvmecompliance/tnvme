@@ -40,43 +40,43 @@ ObjRsrc::AllocWorker(Trackable::ObjType type)
 {
     switch (type) {
     case Trackable::OBJ_MEMBUFFER:
-        LOG_NRM("Obj MemBuffer is born with group lifetime");
+        LOG_NRM("MemBuffer is born with group lifetime");
         return SharedTrackablePtr(new MemBuffer());
         break;
     case Trackable::OBJ_ACQ:
-        LOG_NRM("Obj ACQ is born with group lifetime");
+        LOG_NRM("ACQ is born with group lifetime");
         return SharedTrackablePtr(new ACQ(mFd));
         break;
     case Trackable::OBJ_ASQ:
-        LOG_NRM("Obj ASQ is born with group lifetime");
+        LOG_NRM("ASQ is born with group lifetime");
         return SharedTrackablePtr(new ASQ(mFd));
         break;
     case Trackable::OBJ_IOCQ:
-        LOG_NRM("Obj IOCQ is born with group lifetime");
+        LOG_NRM("IOCQ is born with group lifetime");
         return SharedTrackablePtr(new IOCQ(mFd));
         break;
     case Trackable::OBJ_IOSQ:
-        LOG_NRM("Obj IOSQ is born with group lifetime");
+        LOG_NRM("IOSQ is born with group lifetime");
         return SharedTrackablePtr(new IOSQ(mFd));
         break;
     case Trackable::OBJ_IDENTIFY:
-        LOG_NRM("Obj Cmd Idendify is born with group lifetime");
+        LOG_NRM("Cmd Identify is born with group lifetime");
         return SharedTrackablePtr(new Identify(mFd));
         break;
     case Trackable::OBJ_CREATEIOCQ:
-        LOG_NRM("Obj Cmd Create IOCQ is born with group lifetime");
+        LOG_NRM("Cmd Create IOCQ is born with group lifetime");
         return SharedTrackablePtr(new CreateIOCQ(mFd));
         break;
     case Trackable::OBJ_CREATEIOSQ:
-        LOG_NRM("Obj Cmd Create IOSQ is born with group lifetime");
+        LOG_NRM("Cmd Create IOSQ is born with group lifetime");
         return SharedTrackablePtr(new CreateIOSQ(mFd));
         break;
     case Trackable::OBJ_DELETEIOCQ:
-        LOG_NRM("Obj Cmd Delete IOCQ is born with group lifetime");
+        LOG_NRM("Cmd Delete IOCQ is born with group lifetime");
         return SharedTrackablePtr(new DeleteIOCQ(mFd));
         break;
     case Trackable::OBJ_DELETEIOSQ:
-        LOG_NRM("Obj Cmd Delete IOSQ is born with group lifetime");
+        LOG_NRM("Cmd Delete IOSQ is born with group lifetime");
         return SharedTrackablePtr(new DeleteIOSQ(mFd));
         break;
     default:
@@ -169,4 +169,18 @@ ObjRsrc::FreeAllObjNotASQACQ()
     LOG_NRM("Group level resources are being freed: %ld",
         (numB4 - mObjGrpLife.size()));
     LOG_NRM("Group level resources remaining: %ld", mObjGrpLife.size());
+}
+
+
+void
+ObjRsrc::FreeObj(string lookupName)
+{
+    TrackableMap::iterator item;
+
+    item = mObjGrpLife.find(lookupName);
+    if (item == mObjGrpLife.end()) {
+        LOG_DBG("Cannot free obj, name %s was not found", lookupName.c_str());
+        return;
+    }
+    mObjGrpLife.erase(item);
 }

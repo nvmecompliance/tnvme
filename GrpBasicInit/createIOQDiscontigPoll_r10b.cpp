@@ -7,7 +7,7 @@
 #include "../Cmds/createIOSQ.h"
 #include "createACQASQ_r10b.h"
 
-#define IOQ_ID                      2
+#define IOQ_ID                      1
 #define DEFAULT_CMD_WAIT_ms         2000
 #define IOQ_NUM_ENTRIES             5
 
@@ -63,11 +63,20 @@ bool
 CreateIOQDiscontigPoll_r10b::RunCoreTest()
 {
     /** \verbatim
-     * Assumptions: (KernelAPI::SoftReset() does the following)
+     * Assumptions:
      * 1) The ASQ & ACQ's have been created by the RsrcMngr for group lifetime
      * 2) All interrupts are disabled.
      * \endverbatim
      */
+
+    uint64_t regVal;
+    if (gRegisters->Read(CTLSPC_CAP, regVal) == false) {
+        LOG_ERR("Unable to determine Q memory requirements");
+        throw exception();
+    } else if (regVal & CAP_CQR) {
+        LOG_NRM("Unable to utilize discontig Q's, DUT requires contig");
+        return true;
+    }
 
     KernelAPI::DumpKernelMetrics(mFd,
         FileSystem::PrepLogFile(mGrpName, mTestName, "kmetrics", "before"));

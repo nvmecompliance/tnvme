@@ -51,11 +51,17 @@ public:
 
     static const uint8_t BITMASK_FUSE_B;
     static const uint32_t BITMASK_FUSE_DW;
-    uint8_t  GetFUSE()   { return (GetByte(0, 1) & BITMASK_FUSE_B); }
     void     SetFUSE(uint8_t newVal);
+    uint8_t  GetFUSE()   { return (GetByte(0, 1) & BITMASK_FUSE_B); }
 
-    uint32_t  GetNSID()   { return GetDword(1); }
+    /**
+     * Namespace ID (NSID). A value of 0 is used when this field is not
+     * utilized for the present cmd, and a value of 0xffffffff refers to all
+     * namespaces within the DUT.
+     * @param newVal Pass the new value to set for the NSID
+     */
     void      SetNSID(uint32_t newVal);
+    uint32_t  GetNSID()   { return GetDword(1); }
 
     /**
      * This value cannot be set because dnvme overwrites any value we would

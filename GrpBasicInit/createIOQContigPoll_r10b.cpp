@@ -62,7 +62,7 @@ bool
 CreateIOQContigPoll_r10b::RunCoreTest()
 {
     /** \verbatim
-     * Assumptions: (KernelAPI::SoftReset() does the following)
+     * Assumptions:
      * 1) The ASQ & ACQ's have been created by the RsrcMngr for group lifetime
      * 2) All interrupts are disabled.
      * \endverbatim

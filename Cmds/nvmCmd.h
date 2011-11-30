@@ -1,23 +1,23 @@
-#ifndef _NVMECMD_H_
-#define _NVMECMD_H_
+#ifndef _NVMCMD_H_
+#define _NVMCMD_H_
 
 #include "cmd.h"
 
 
 /**
-* This class is the base class to NVME cmd set.
+* This class is the base class to NVM cmd set.
 *
 * @note This class may throw exceptions.
 */
-class NVMECmd : public Cmd
+class NVMCmd : public Cmd
 {
 public:
     /**
      * @param fd Pass the opened file descriptor for the device under test
      * @param objBeingCreated Pass the type of object this child class is
      */
-    NVMECmd(int fd, Trackable::ObjType objBeingCreated);
-    virtual ~NVMECmd();
+    NVMCmd(int fd, Trackable::ObjType objBeingCreated);
+    virtual ~NVMCmd();
 
 
 protected:
@@ -30,7 +30,7 @@ protected:
 
 
 private:
-    NVMECmd();
+    NVMCmd();
 };
 
 

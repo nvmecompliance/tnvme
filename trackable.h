@@ -21,16 +21,17 @@ public:
      * created and destroyed by RsrcMngr:: must be listed here.
      */
     typedef enum {
-        OBJ_MEMBUFFER,
-        OBJ_ACQ,
-        OBJ_ASQ,
-        OBJ_IOCQ,
-        OBJ_IOSQ,
-        OBJ_IDENTIFY,
-        OBJ_CREATEIOCQ,
-        OBJ_CREATEIOSQ,
-        OBJ_DELETEIOCQ,
-        OBJ_DELETEIOSQ,
+        OBJ_MEMBUFFER,          // C++ obj represents kernel or user space mem
+        OBJ_ACQ,                // C++ obj represents an ACQ within dnvme
+        OBJ_ASQ,                // C++ obj represents an ASQ within dnvme
+        OBJ_IOCQ,               // C++ obj represents an IOCQ within dnvme
+        OBJ_IOSQ,               // C++ obj represents an IOSQ within dnvme
+        OBJ_IDENTIFY,           // Admin cmd set identify cmd
+        OBJ_CREATEIOCQ,         // Admin cmd set create IOCQ cmd
+        OBJ_CREATEIOSQ,         // Admin cmd set create IOSQ cmd
+        OBJ_DELETEIOCQ,         // Admin cmd set delete IOCQ cmd
+        OBJ_DELETEIOSQ,         // Admin cmd set delete IOSQ cmd
+
         OBJTYPE_FENCE           // always must be last element
     } ObjType;
 

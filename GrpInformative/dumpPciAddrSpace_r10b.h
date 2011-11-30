@@ -32,7 +32,7 @@ protected:
 
 private:
     ///////////////////////////////////////////////////////////////////////////
-    // Adding a member variable? Then edit the copy constructor and operator().
+    // Adding a member variable? Then edit the copy constructor and operator=().
     ///////////////////////////////////////////////////////////////////////////
 
     void WriteToFile(int fd, const PciSpcType regMetrics,  uint64_t value);

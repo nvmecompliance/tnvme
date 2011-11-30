@@ -63,7 +63,7 @@ bool
 DeleteIOQContigPoll_r10b::RunCoreTest()
 {
     /** \verbatim
-     * Assumptions: (KernelAPI::SoftReset() does the following)
+     * Assumptions:
      * 1) The ASQ & ACQ's have been created by the RsrcMngr for group lifetime
      * 2) All interrupts are disabled.
      * 3) CreateIOQContigPoll_r10b test case has setup the Q's to delete
@@ -137,6 +137,9 @@ DeleteIOQContigPoll_r10b::DeleteIOCQContigPoll(SharedASQPtr asq,
         LOG_NRM("The reaped identify CE is...");
         ceMemIOCQ->Log();
     }
+
+    // Not explicitly necessary, but is more clean to free what is not needed
+    gRsrcMngr->FreeObj(IOCQ_CONTIG_POLL_GROUP_ID);
 }
 
 
@@ -190,4 +193,7 @@ DeleteIOQContigPoll_r10b::DeleteIOSQContigPoll(SharedASQPtr asq,
         LOG_NRM("The reaped identify CE is...");
         ceMemIOSQ->Log();
     }
+
+    // Not explicitly necessary, but is more clean to free what is not needed
+    gRsrcMngr->FreeObj(IOSQ_CONTIG_POLL_GROUP_ID);
 }

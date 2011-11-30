@@ -86,9 +86,10 @@ Group::TestExists(TestRef tr)
     if ((tr.group != mGrpNum) ||
         (tr.major >= mTests.size()) ||
         (tr.minor >= mTests[tr.major].size())) {
-
-        LOG_DBG("Test case %ld:%ld.%ld does not exist within group %ld",
-            tr.group, tr.major, tr.minor, mGrpNum);
+        // Uncomment to track down iterator issues, otherwise it ends up being
+        // a nuisance in the logs, cluttering the readability.
+        //LOG_DBG("Test case %ld:%ld.%ld does not exist within group %ld",
+        //    tr.group, tr.major, tr.minor, mGrpNum);
         return false;
     }
     return true;

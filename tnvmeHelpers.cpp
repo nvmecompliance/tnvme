@@ -46,7 +46,7 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
 
             // Handle the --informative cmd line option
             if (cl.informative.req && (iGrp == cl.informative.grpInfoIdx)) {
-                // Each test group starts from known starting point
+                LOG_NRM("Executing a new group, start from known point");
                 if (KernelAPI::SoftReset() == false)
                     return false;
 
@@ -64,7 +64,7 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
 
             // Now handle anything spec'd in the --test <cmd line option>
             if (cl.test.t.group == UINT_MAX) {
-                // Each test group starts from known starting point
+                LOG_NRM("Executing a new group, start from known point");
                 if (KernelAPI::SoftReset() == false)
                     return false;
 
@@ -102,7 +102,7 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
 
                 // Run all tests within spec'd group
                 if (iGrp == cl.test.t.group) {
-                    // Each test group starts from known starting point
+                    LOG_NRM("Executing a new group, start from known point");
                     if (KernelAPI::SoftReset() == false)
                         return false;
 
@@ -140,7 +140,7 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
             } else {
                 // Run spec'd test within spec'd group
                 if (iGrp == cl.test.t.group) {
-                    // Each test run starts from known starting point
+                    LOG_NRM("Executing a new group, start from known point");
                     if (KernelAPI::SoftReset() == false)
                         return false;
 

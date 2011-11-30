@@ -149,8 +149,9 @@ IdentifyCmd_r10b::SendIdentifyNamespaceStruct(SharedASQPtr asq,
     SharedIdentifyPtr idCmdNamSpc = CAST_TO_IDENTIFY(
         gRsrcMngr->AllocObj(Trackable::OBJ_IDENTIFY,
         IDENTIFY_NAMESPACE_STRUCT_GROUP_ID));
-    LOG_NRM("Force identify to request namespace struct");
+    LOG_NRM("Force identify to request 1st namespace struct");
     idCmdNamSpc->SetCNS(false);
+    idCmdNamSpc->SetNSID(1);
     SharedMemBufferPtr idMemNamSpc = SharedMemBufferPtr(new MemBuffer());
     idMemNamSpc->InitAlignment(Identify::IDEAL_DATA_SIZE, sizeof(uint64_t),
         true, 0);

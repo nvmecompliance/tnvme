@@ -29,7 +29,11 @@ public:
     /// The perfectly sized data buffer should be of this size
     static const uint16_t IDEAL_DATA_SIZE;
 
-    /// @param ctrlr Pass true for controller, otherwise false for namespace
+    /**
+     * Set which structure of data to retrieve from the DUT.
+     * @note See base class for access to the NSID field if passing false
+     * @param ctrlr Pass true for controller, otherwise false for namespace
+     */
     void SetCNS(bool ctrlr);
     /// @return true for controller data, false for namespace data
     bool GetCNS();
@@ -63,7 +67,7 @@ private:
     static IdentifyDataType mIdNamespcType[];
 
 
-    /// General GetValue function to support the more specific public versions
+    /// General functions to support the more specific public versions
     uint64_t GetValue(int field, IdentifyDataType *idData);
     void Dump(FILE *fp, int field, IdentifyDataType *idData);
 };

@@ -171,7 +171,7 @@ struct CtlSpcType {
 };
 
 
-//------------------------------------------------------------------------------
+/// Bit definitions for PCISPC_CMD
 typedef enum CMDBits {
     CMD_IOSE    = 0x0001,
     CMD_MSE     = 0x0002,
@@ -179,6 +179,8 @@ typedef enum CMDBits {
     CMD_SCE     = 0x0008
 } CMDBits;
 
+
+/// Bit definitions for PCISPC_STS
 typedef enum STSBits {
     STS_RES0    = 0x0007,
     STS_IS      = 0x0008,
@@ -195,13 +197,8 @@ typedef enum STSBits {
     STS_DPE     = 0x8000
 } STSBits;
 
-typedef enum CSTSBits {
-    CSTS_RES0   = 0xfffffff0,
-    CSTS_SHST   = 0x0000000c,
-    CSTS_CFS    = 0x00000002,
-    CSTS_RDY    = 0x00000001
-} CSTSBits;
 
+/// Bit definitions for PCISPC_PXDS
 typedef enum PXDSBits {
     PXDS_CED    = 0x0001,
     PXDS_NFED   = 0x0002,
@@ -211,6 +208,17 @@ typedef enum PXDSBits {
     PXDS_TP     = 0x0040
 } PXDSBits;
 
+
+/// Bit definitions for CTLSPC_CSTS
+typedef enum CSTSBits {
+    CSTS_RES0   = 0xfffffff0,
+    CSTS_SHST   = 0x0000000c,
+    CSTS_CFS    = 0x00000002,
+    CSTS_RDY    = 0x00000001
+} CSTSBits;
+
+
+/// Bit definitions for CTLSPC_CC
 typedef enum CCBits {
     CC_RES0     = 0xff000000,
     CC_IOCQES   = 0x00f00000,
@@ -222,6 +230,23 @@ typedef enum CCBits {
     CC_RES1     = 0x0000000e,
     CC_EN       = 0000000001
 } CCBits;
+
+
+/// Bit definitions for CTLSPC_CAP
+typedef enum CAPBits {
+    CAP_RES0    = 0xff00000000000000,
+    CAP_MPSMAX  = 0x00f0000000000000,
+    CAP_MPSMIN  = 0x000f000000000000,
+    CAP_RES1    = 0x0000fe0000000000,
+    CAP_CSS     = 0x000001e000000000,
+    CAP_RES2    = 0x0000001000000000,
+    CAP_DSTRD   = 0x0000000f00000000,
+    CAP_TO      = 0x00000000ff000000,
+    CAP_RES3    = 0x0000000000f10000,
+    CAP_AMS     = 0x0000000000060000,
+    CAP_CQR     = 0x0000000000010000,
+    CAP_MQES    = 0x000000000000ffff
+} CAPBits;
 
 
 #endif
