@@ -52,7 +52,7 @@ clean: $(SUBDIRS)
 	rm -rf $(RPMFILE)
 	rm -rf $(RPMCOMPILEDIR)
 	rm -rf $(RPMSRCFILE)
-	rm -f $(RPMSRCFILE).tar*
+	rm -f tnvme-*.tar*
 
 clobber: GOAL=clobber
 clobber: $(SUBDIRS) clean
