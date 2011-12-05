@@ -135,7 +135,7 @@ main(int argc, char *argv[])
     }
     while ((dirEntry = readdir(devDir)) != NULL) {
         work = dirEntry->d_name;
-        if (work.find("qnvme") != string::npos)
+        if (work.find("nvme") != string::npos)
             devices.push_back("/dev/" + work);
     }
     if (devices.size())
