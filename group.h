@@ -15,8 +15,8 @@
         mTests.push_back(tmp);                              \
     }
 
-/// Use to append a new x.y test number at the last appended group level
-#define APPEND_TEST_AT_LAST_LEVEL(test, fd, grpName)        \
+/// Use to append a new x.y test number at the test level
+#define APPEND_TEST_AT_TEST_LEVEL(test, fd, grpName)        \
     mTests.back().push_back(new test(fd, #grpName));
 
 /// To allow formatting the group information string

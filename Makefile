@@ -56,7 +56,7 @@ clean: $(SUBDIRS)
 
 clobber: GOAL=clobber
 clobber: $(SUBDIRS) clean
-	rm -rf doc/html
+	rm -rf Doc/HTML
 	rm -rf rpm
 	rm -rf Logs
 	rm -f $(APP_NAME)
