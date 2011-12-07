@@ -1,3 +1,18 @@
+# Copyright (c) 2011, Intel Corporation.
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+
 # Compiling tnvme requires the boost libraries to be installed
 # Ubuntu: sudo apt-get install libboost1.42-all-dev
 CC = g++
@@ -30,8 +45,8 @@ SOURCES:=				\
 # RPM build parameters
 #
 RPMBASE=tnvme
-MAJOR=$(shell awk 'FNR==5' version.h)
-MINOR=$(shell awk 'FNR==8' version.h)
+MAJOR=$(shell awk 'FNR==27' version.h)
+MINOR=$(shell awk 'FNR==30' version.h)
 SOFTREV=$(MAJOR).$(MINOR)
 RPMFILE=$(RPMBASE)-$(SOFTREV)
 RPMCOMPILEDIR=$(PWD)/rpmbuild
