@@ -19,7 +19,7 @@
 
 
 GrpTemplate::GrpTemplate(size_t grpNum, SpecRev specRev, int fd) :
-    Group(grpNum, specRev, "Template Group Description")
+    Group(grpNum, specRev, "Template Group")
 {
     // IMPORTANT: Once a test case is assigned a position in the vector, i.e.
     //            a test index/number of the form major.minor, then it should

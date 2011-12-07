@@ -69,7 +69,8 @@ public:
     /**
      * @param grpNum Pass the assigned group number, globally unique ID
      * @param specRev Pass which compliance is needed to target
-     * @param desc Pass a 1-line comment describing group purpose
+     * @param desc Pass a 1-line comment describing group purpose, maximum
+     *      number of characters allowed: MAX_CHAR_PER_LINE_DESCRIPTION
      */
     Group(size_t grpNum, SpecRev specRev, string desc);
     virtual ~Group();
