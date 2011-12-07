@@ -80,16 +80,16 @@ public:
 
     /**
      * Cloning objects are necessary to support automated resource cleanup
-     * between successive test case runs. This is the cleanup action of test
+     * between subsequent test case runs. This is the cleanup action of test
      * lifetimes. Objects are cloned, then freed after each test completes to
      * force resource cleanup. This cloning uses special copy construction and
      * operator=() to achieve proper resource cleanup. The end result of a
-     * clone action should be to re-create a new object w/o doing any copying of pointer. Do not do deep nor shallow copies of any
+     * clone action should be to re-create a new object w/o doing any copying of
      * pointers. Do not do shallow or deep copies of any pointer. Any pointer
      * is one of the following: share_ptr, weak_ptr, or C++ pointers using the
-     * new operator. All cloned objects must achieve NULL pointers or resource
-     * cleanup will not be possible. Thus default copy constructors and
-     * operator=() cannot be used because they do bitwise copying. Thus all
+     * new operator or malloc(). All cloned objects must achieve NULL pointers
+     * or resource cleanup will not be possible. Thus default copy constructors
+     * and operator=() cannot be used because they do bitwise copying. Thus all
      * children must implement copy constructors and operator=() to achieve this
      * requirement to allow proper resource cleanup.
      */

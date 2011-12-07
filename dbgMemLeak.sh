@@ -13,6 +13,8 @@ if [ -z $TNVME_CMD_LINE ]; then
   exit
 fi
 
-echo ./tnvme -k skipqemu.cfg $TNVME_CMD_LINE 2>&1 | tee tnvme.out
-valgrind --tool=memcheck ./tnvme -k skipqemu.cfg $TNVME_CMD_LINE 2>&1 | tee tnvme.out
-#valgrind --tool=memcheck --leak-check=full --track-origins=yes -v --show-reachable=yes ./tnvme -k skipqemu.cfg $TNVME_CMD_LINE 2>&1 | tee tnvme.out
+rm -rf ./Logs
+mkdir -m 0777 ./Logs
+echo ./tnvme -k skipqemu.cfg $TNVME_CMD_LINE 2>&1 | tee ./Logs/tnvme.out
+valgrind --tool=memcheck ./tnvme -k skipqemu.cfg $TNVME_CMD_LINE 2>&1 | tee ./Logs/tnvme.out
+#valgrind --tool=memcheck --leak-check=full --track-origins=yes -v --show-reachable=yes ./tnvme -k skipqemu.cfg $TNVME_CMD_LINE 2>&1 | tee ./Logs/tnvme.out

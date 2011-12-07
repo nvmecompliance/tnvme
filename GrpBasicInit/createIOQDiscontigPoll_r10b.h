@@ -1,5 +1,5 @@
-#ifndef _CREATEIOQDISCONTOGPOLL_r10b_H_
-#define _CREATEIOQDISCONTOGPOLL_r10b_H_
+#ifndef _CREATEIOQDISCONTIGPOLL_r10b_H_
+#define _CREATEIOQDISCONTIGPOLL_r10b_H_
 
 #include "test.h"
 #include "../Queues/asq.h"

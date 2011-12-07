@@ -1,5 +1,5 @@
-#ifndef _DELETEIOQCONTOGPOLL_r10b_H_
-#define _DELETEIOQCONTOGPOLL_r10b_H_
+#ifndef _DELETEIOQCONTIGPOLL_r10b_H_
+#define _DELETEIOQCONTIGPOLL_r10b_H_
 
 #include "test.h"
 #include "../Queues/asq.h"

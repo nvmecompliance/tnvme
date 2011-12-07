@@ -158,7 +158,7 @@ Test::GetStatusRegErrors()
     }
 
 
-    // PCI STS register may indicate some error
+    // Ctrl'r STS register may indicate some error
     if (gRegisters->Read(CTLSPC_CSTS, value) == false)
         return false;
     expectedValue = (value & ~CSTS_ERRORS);
