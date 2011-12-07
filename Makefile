@@ -45,8 +45,8 @@ SOURCES:=				\
 # RPM build parameters
 #
 RPMBASE=tnvme
-MAJOR=$(shell awk 'FNR==26' version.h)
-MINOR=$(shell awk 'FNR==29' version.h)
+MAJOR=$(shell awk 'FNR==27' version.h)
+MINOR=$(shell awk 'FNR==30' version.h)
 SOFTREV=$(MAJOR).$(MINOR)
 RPMFILE=$(RPMBASE)-$(SOFTREV)
 RPMCOMPILEDIR=$(PWD)/rpmbuild

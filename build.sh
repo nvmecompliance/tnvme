@@ -40,8 +40,8 @@ if [ -z $RPMCOMPILEDIR ] || [ -z $RPMSPECFILE ] || [ -z $RPMSRCFILE ]; then
 fi
 
 # Setup a fresh RPM build environment, and then build
-MAJOR=`awk 'FNR == 26' version.h`
-MINOR=`awk 'FNR == 29' version.h`
+MAJOR=`awk 'FNR == 27' version.h`
+MINOR=`awk 'FNR == 30' version.h`
 rm -rf $RPMCOMPILEDIR
 mkdir -p $RPMCOMPILEDIR/{BUILDROOT,BUILD,RPMS,S{OURCE,PEC,RPM}S}
 cp -p $RPMSRCFILE.tar.gz  $RPMCOMPILEDIR
