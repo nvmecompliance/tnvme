@@ -26,7 +26,7 @@
 /**
 * This base class will handle object resources.
 *
-* @note @note This class does not throw exceptions.
+* @note This class does not throw exceptions.
 */
 class ObjRsrc
 {
@@ -59,15 +59,15 @@ public:
     SharedTrackablePtr
     GetObj(string lookupName);
 
-    /// Free all objects which were allocated for group lifetime.
+    /// Free all objects which were allocated.
     void FreeAllObj();
 
-    /// Free all objects which were allocated for group lifetime, except ACQ/ASQ
+    /// Free all objects which were allocated, except ACQ/ASQ
     void FreeAllObjNotASQACQ();
 
     /**
      * Free specified object which was allocated for group lifetime
-     * * @param lookupName Pass the associated ID of the object to free
+     * @param lookupName Pass the associated ID of the object to free
      */
     void FreeObj(string lookupName);
 
