@@ -40,7 +40,7 @@ KernelAPI::SoftReset()
     // In user space, in kernel space and in hardware, nothing remains.
     LOG_NRM("Performing soft reset");
     gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY);
-    if ((retVal = gCtrlrConfig->SetIrqScheme(INT_NONE)) == false)
+    if ((retVal = gCtrlrConfig->SetIrqScheme(INT_NONE, 0)) == false)
         LOG_ERR("Setting IRQ scheme failed");
     return retVal;
 }

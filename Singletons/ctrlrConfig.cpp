@@ -65,21 +65,25 @@ CtrlrConfig::~CtrlrConfig()
 
 
 bool
-CtrlrConfig::GetIrqScheme(enum nvme_irq_type &irq)
+CtrlrConfig::GetIrqScheme(enum nvme_irq_type &irq, uint16_t &numIrqs)
 {
     //------------------------------------------------------------------------
     // todo Add logic to gather the current IRQ being supported for this device,
     //      rather than just assigning some constant we must ask the device.
+    //      Use IOCTL_GET_DEVICE_METRICS to gather this data
     //------------------------------------------------------------------------
     LOG_DBG("todo not implemented yet");
     irq = INT_NONE;
+    numIrqs = 0;
     return true;
 }
 
 
 bool
-CtrlrConfig::SetIrqScheme(enum nvme_irq_type newIrq)
+CtrlrConfig::SetIrqScheme(enum nvme_irq_type newIrq, uint16_t numIrqs)
 {
+    struct interrupts irq;
+
     if (IsStateEnabled()) {
         LOG_DBG("The NVMe must be disabled in order to change the IRQ scheme");
         return false;
@@ -90,7 +94,8 @@ CtrlrConfig::SetIrqScheme(enum nvme_irq_type newIrq)
     //      currently IRQ's are not supported by dnvme.
     //------------------------------------------------------------------------
     LOG_DBG("todo SetIrqScheme() not implemented yet");
-    newIrq = INT_NONE;  // satisfy compiler complaint
+    irq.irq_type = newIrq;
+    irq.num_irqs = numIrqs;
     return true;
 }
 

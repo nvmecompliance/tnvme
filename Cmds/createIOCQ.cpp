@@ -76,7 +76,8 @@ CreateIOCQ::Init(const SharedIOCQPtr iocq)
             dword11 &= ~0xffff0000;    // clear it, then set it
 
             enum nvme_irq_type irq;
-            if (gCtrlrConfig->GetIrqScheme(irq) == false) {
+            uint16_t numIrqs;
+            if (gCtrlrConfig->GetIrqScheme(irq, numIrqs) == false) {
                 LOG_DBG("Unable to retrieve current IRQ scheme");
                 throw exception();
             }

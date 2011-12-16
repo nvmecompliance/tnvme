@@ -54,19 +54,21 @@ public:
      * indicate that IRQ's are being used, to use IRQ's CQ's must be created
      * to use IRQ's. The ACQ doesn't have a choice and always uses IRQ's if
      * there is a CQ created in the controller.
-     * @param irq Pass reference to receive the active IRQ scheme
+     * @param irq Returns wich IRQ scheme is active
+     * @param numIrqs Returns the number of IRQ's which are active
      * @return true upon success, otherwise ignore parameter irq.
      */
-    bool GetIrqScheme(enum nvme_irq_type &irq);
+    bool GetIrqScheme(enum nvme_irq_type &irq, uint16_t &numIrqs);
 
     /**
      * Set the active IRQ scheme in the device. This only sets up the controller
      * to use this IRQ scheme, in order to use the scheme CQ's must be created.
      * The controller must be disable for this call to succeed.
      * @param newIrq Pass the new IRQ scheme which the controller should use.
+     * @param numIrqs Pass the total number of IRQ's to request
      * @return true upon success, otherwise false.
      */
-    bool SetIrqScheme(enum nvme_irq_type newIrq);
+    bool SetIrqScheme(enum nvme_irq_type newIrq, uint16_t numIrqs);
 
     /**
      * Is the controller enabled?
