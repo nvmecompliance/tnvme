@@ -462,13 +462,17 @@ BuildTestInfrastructure(vector<Group *> &groups, int &fd,
         printf("Unable to extract driver version information");
         return false;
     }
-    printf("tnvme v/%d.%d.%d\n", ((API_VERSION >> 16) & 0xFF),
+    printf("tnvme binary: v/%d.%d\n", VER_MAJOR, VER_MINOR);
+    printf("tnvme compiled against dnvme API: v/%d.%d.%d\n",
+        ((API_VERSION >> 16) & 0xFF),
         ((API_VERSION >> 8) & 0xFF), ((API_VERSION >> 0) & 0xFF));
-    printf("dnvme v/%d.%d.%d\n", ((gDriverMetrics.api_version >> 16) & 0xFF),
+    printf("dnvme API residing within kernel: v/%d.%d.%d\n",
+        ((gDriverMetrics.api_version >> 16) & 0xFF),
         ((gDriverMetrics.api_version >> 8) & 0xFF),
         ((gDriverMetrics.api_version >> 0) & 0xFF));
     if (gDriverMetrics.api_version != API_VERSION) {
-        printf("dnvme vs tnvme version mismatch, refusing to execute");
+        printf("dnvme vs tnvme version mismatch, refusing to execute\n");
+        return false;
     }
 
 
