@@ -61,11 +61,19 @@ Usage(void) {
     printf("                                      {all | spec'd_group | test_within_group}\n");
     printf("  -t(--test) [<grp> | <grp>:<test>]   Execute tests for:\n");
     printf("                                      {all | spec'd_group | test_within_group}\n");
-    printf("  -f(--informative)                   Run Group Informative tests in addition\n");
-    printf("                                      to any test specified by -t(--test)\n");
     printf("  -l(--list)                          List all devices available for test\n");
     printf("  -d(--device) <name>                 Device to open for testing: /dev/node\n");
     printf("                                      dflt=(1st device listed in --list)\n");
+    printf("  -z(--reset)                         Ctrl'r level reset via CC.EN\n");
+    printf("  -p(--loop) <count>                  Loop test execution <count> times; dflt=1\n");
+    printf("  -k(--skiptest) <filename>           A file contains a list of tests to skip\n");
+    printf("  -q(--queues) <ncqr:nsqr>            Write <ncqr> and <nsqr> as values by the\n");
+    printf("                                      Set Features, ID=7. Must be only option,\n");
+    printf("                                      value set is used subsequently by tnvme\n");
+    printf("                                      until next power cycle. Requires base 16\n");
+    printf("  -i(--ignore)                        Ignore detected errors; An error causes\n");
+    printf("                                      the next test within the next group to\n");
+    printf("                                      execute, not next test within same group.\n");
     printf("  -r(--rmmap) <space:off:size:acc>    Read memmap'd I/O registers from\n");
     printf("                                      <space>={PCI | BAR01} at <off> bytes\n");
     printf("                                      from start of space for <size> bytes\n");
@@ -77,12 +85,6 @@ Usage(void) {
     printf("                                      access width <acc>={l | w | b} type\n");
     printf("                                      (Require: <size> < 8)\n");
     printf("                                      <offset:size> requires base 16 values\n");
-    printf("  -z(--reset)                         Ctrl'r level reset via CC.EN\n");
-    printf("  -i(--ignore)                        Ignore detected errors; An error causes\n");
-    printf("                                      the next test within the next group to\n");
-    printf("                                      execute, not next test within same group.\n");
-    printf("  -p(--loop) <count>                  Loop test execution <count> times; dflt=1\n");
-    printf("  -k(--skiptest) <filename>           A file contains a list of tests to skip\n");
 }
 
 
@@ -111,7 +113,6 @@ main(int argc, char *argv[])
         {   "rev",          required_argument,  NULL,   'v'},
         {   "detail",       optional_argument,  NULL,   'e'},
         {   "test",         optional_argument,  NULL,   't'},
-        {   "informative",  no_argument,        NULL,   'f'},
         {   "device",       required_argument,  NULL,   'd'},
         {   "rmmap" ,       required_argument,  NULL,   'r'},
         {   "wmmap" ,       required_argument,  NULL,   'w'},
@@ -120,6 +121,7 @@ main(int argc, char *argv[])
         {   "loop",         required_argument,  NULL,   'p'},
         {   "skiptest",     required_argument,  NULL,   'k'},
         {   "list",         no_argument,        NULL,   'l'},
+        {   "queues",       required_argument,  NULL,   'q'},
         {   NULL,           no_argument,        NULL,    0}
     };
 
@@ -130,11 +132,13 @@ main(int argc, char *argv[])
     CmdLine.reset = false;
     CmdLine.summary = false;
     CmdLine.ignore = false;
-    CmdLine.informative.req = false;
     CmdLine.loop = 1;
     CmdLine.device = NO_DEVICES;
     CmdLine.rmmap.req = false;
     CmdLine.wmmap.req = false;
+    CmdLine.queues.req = false;
+    CmdLine.queues.ncqr = 0;
+    CmdLine.queues.nsqr = 0;
 
     if (argc == 1) {
         printf("%s is a compliance test suite for NVM Express hardware.\n",
@@ -250,6 +254,13 @@ main(int argc, char *argv[])
             }
             exit(0);
 
+        case 'q':
+            if (ParseQueuesCmdLine(CmdLine.queues, optarg) == false) {
+                printf("Unable to parse --queues cmd line\n");
+                exit(1);
+            }
+            break;
+
         case 's':
             CmdLine.summary = true;
             accessingHdw = false;
@@ -258,7 +269,6 @@ main(int argc, char *argv[])
         default:
         case 'h':   Usage();                            exit(0);
         case '?':   Usage();                            exit(1);
-        case 'f':   CmdLine.informative.req = true;     break;
         case 'z':   CmdLine.reset = true;               break;
         case 'i':   CmdLine.ignore = true;              break;
         }
@@ -286,7 +296,7 @@ main(int argc, char *argv[])
         if (gRegisters->Read(PCISPC_PMCS, regVal) == false) {
             exit(1);
         } else if (regVal & 0x03) {
-            LOG_ERR("PCI power state not fully operational, is this intended?");
+            LOG_ERR("WARNING: PCI power state not fully operational");
         }
 
         FileSystem::AssureDirectoryExists(BASE_LOG_DIR);
@@ -294,7 +304,12 @@ main(int argc, char *argv[])
 
 
     fflush(stdout);
-    if (CmdLine.summary) {
+    if (CmdLine.queues.req) {
+        if ((exitCode = !SetFeaturesNumberOfQueues(CmdLine.queues, fd)))
+            printf("FAILURE: Setting number of queues\n");
+        else
+            printf("SUCCESS: Setting number of queues\n");
+    } else if (CmdLine.summary) {
         for (size_t i = 0; i < groups.size(); i++) {
             FORMAT_GROUP_DESCRIPTION(work, groups[i])
             printf("%s\n", work.c_str());
@@ -346,11 +361,17 @@ main(int argc, char *argv[])
             CmdLine.wmmap.offset, CmdLine.wmmap.acc,
             (uint8_t *)(&CmdLine.wmmap.value));
     } else if (CmdLine.reset) {
-        KernelAPI::SoftReset();
+        if ((exitCode = !KernelAPI::SoftReset()))
+            printf("FAILURE: reset\n");
+        else
+            printf("SUCCESS: reset\n");
         // At this point we cannot enable the ctrlr because that requires
         // ACQ/ASQ's to be created, ctrlr simply won't become ready w/o these.
     } else if (CmdLine.test.req) {
-        exitCode = ExecuteTests(CmdLine, groups) ? 0 : 1;
+        if ((exitCode = !ExecuteTests(CmdLine, groups)))
+            printf("FAILURE: testing\n");
+        else
+            printf("SUCCESS: testing\n");
     }
 
     DestroyTestInfrastructure(groups, fd);
@@ -377,6 +398,7 @@ void BuildSingletons(int &fd, struct CmdLine &cl)
     gRsrcMngr = RsrcMngr::GetInstance(fd, cl.rev);
     gCtrlrConfig->Attach(*gRsrcMngr);
 
+    gInformative = Informative::GetInstance(fd, cl.rev);
 }
 
 
@@ -385,6 +407,7 @@ void DestroySingletons()
     Registers::KillInstance();
     RsrcMngr::KillInstance();
     CtrlrConfig::KillInstance();
+    Informative::KillInstance();
 }
 
 
@@ -459,7 +482,6 @@ BuildTestInfrastructure(vector<Group *> &groups, int &fd,
     //
     // All groups will be pushed here. The groups themselves dictate which
     // tests get executed based upon the constructed 'specRev' being targeted.
-    cl.informative.grpInfoIdx = groups.size();  // tied to the next statement
     groups.push_back(new GrpInformative(groups.size(), cl.rev, fd));       // 0
     groups.push_back(new GrpPciRegisters(groups.size(), cl.rev, fd));      // 1
     groups.push_back(new GrpCtrlRegisters(groups.size(), cl.rev, fd));     // 2

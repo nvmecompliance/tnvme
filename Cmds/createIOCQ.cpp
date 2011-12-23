@@ -15,6 +15,7 @@
  */
 
 #include "createIOCQ.h"
+#include "globals.h"
 #include "../Utils/buffers.h"
 
 
@@ -105,8 +106,9 @@ CreateIOCQ::Init(const SharedIOCQPtr iocq)
 
 
 void
-CreateIOCQ::Dump(LogFilename filename, string fileHdr)
+CreateIOCQ::Dump(LogFilename filename, string fileHdr) const
 {
-    const uint8_t *buf = GetROPrpBuffer();
-    Buffers::Dump(filename, buf, 0, ULONG_MAX, GetPrpBufferSize(), fileHdr);
+    Cmd::Dump(filename, fileHdr);
+    PrpData::Dump(filename, "Payload contents:");
+    MetaData::Dump(filename, "Meta data contents:");
 }

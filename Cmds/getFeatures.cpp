@@ -14,48 +14,32 @@
  *  limitations under the License.
  */
 
-#include "deleteIOSQ.h"
+#include "getFeatures.h"
 #include "../Utils/buffers.h"
 
 
-DeleteIOSQ::DeleteIOSQ() :
-    AdminCmd(0, Trackable::OBJTYPE_FENCE)
+GetFeatures::GetFeatures() : BaseFeatures(0, Trackable::OBJTYPE_FENCE)
 {
     // This constructor will throw
 }
 
 
-DeleteIOSQ::DeleteIOSQ(int fd) :
-    AdminCmd(fd, Trackable::OBJ_DELETEIOSQ)
+GetFeatures::GetFeatures(int fd) : BaseFeatures(fd, Trackable::OBJ_GETFEATURES)
 {
-    AdminCmd::Init(0x00, DATADIR_NONE);
+    Init(0x0a, DATADIR_FROM_DEVICE);
 }
 
 
-DeleteIOSQ::~DeleteIOSQ()
+GetFeatures::~GetFeatures()
 {
-}
-
-
-void
-DeleteIOSQ::Init(const SharedIOSQPtr iosq)
-{
-    {   // Handle DWORD 10
-        uint32_t dword10 = GetDword(10);
-
-        // Handle Q ID
-        dword10 &= ~0x0000ffff;
-        dword10 |= (uint32_t)iosq->GetQId();
-
-        SetDword(dword10, 10);
-    }   // Handle DWORD 10
 }
 
 
 void
-DeleteIOSQ::Dump(LogFilename filename, string fileHdr) const
+GetFeatures::Dump(LogFilename filename, string fileHdr) const
 {
     Cmd::Dump(filename, fileHdr);
     PrpData::Dump(filename, "Payload contents:");
     MetaData::Dump(filename, "Meta data contents:");
 }
+

@@ -156,7 +156,7 @@ struct IdCtrlrCapStruct {
     ZZ(IDNAMESPC_MC,        27,     1,      "Metadata Capabilities (MC)")           \
     ZZ(IDNAMESPC_DPC,       28,     1,      "End 2 End Data Protection Cap (DPC)")  \
     ZZ(IDNAMESPC_DPS,       29,     1,      "End 2 End Prot Type Settings (DPS)")   \
-    ZZ(IDNAMESPC_RES1E,     30,     98,     "Reserved area @ 1e")                   \
+    ZZ(IDNAMESPC_RES1E,     30,     98,     "Reserved area @ 0x1e")                 \
     ZZ(IDNAMESPC_LBAF0,     128,    4,      "LBA Format 0 Support (LBAF0)")         \
     ZZ(IDNAMESPC_LBAF1,     132,    4,      "LBA Format 1 Support (LBAF1)")         \
     ZZ(IDNAMESPC_LBAF2,     136,    4,      "LBA Format 2 Support (LBAF2)")         \
@@ -173,7 +173,7 @@ struct IdCtrlrCapStruct {
     ZZ(IDNAMESPC_LBAF13,    180,    4,      "LBA Format 13 Support (LBAF13)")       \
     ZZ(IDNAMESPC_LBAF14,    184,    4,      "LBA Format 14 Support (LBAF14)")       \
     ZZ(IDNAMESPC_LBAF15,    188,    4,      "LBA Format 15 Support (LBAF15)")       \
-    ZZ(IDNAMESPC_RESC0,     192,    192,    "Reserved area @ c0")                   \
+    ZZ(IDNAMESPC_RESC0,     192,    192,    "Reserved area @ 0xc0")                 \
     ZZ(IDNAMESPC_VS,        384,    3712,   "Vendor Specific (VS)")
 
 #define ZZ(a, b, c, d)         a,

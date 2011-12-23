@@ -19,7 +19,6 @@
 #include "../Queues/acq.h"
 #include "../Queues/asq.h"
 #include "../Utils/kernelAPI.h"
-#include "../Singletons/informative.h"
 
 
 CreateACQASQ_r10b::CreateACQASQ_r10b(int fd, string grpName, string testName) :

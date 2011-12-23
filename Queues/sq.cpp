@@ -57,6 +57,9 @@ SQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
 
 
     LOG_NRM("Allocating contiguous SQ memory in dnvme");
+    if (numEntries < 2)
+        LOG_NRM("WARNING: Number elements breaches spec requirement");
+
     if (GetIsAdmin()) {
         if (gCtrlrConfig->IsStateEnabled()) {
             // At best this will cause tnvme to seg fault or a kernel crash
@@ -108,6 +111,9 @@ SQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
 
 
     LOG_NRM("Allocating discontiguous SQ memory in tnvme");
+    if (numEntries < 2)
+        LOG_NRM("WARNING: Number elements breaches spec requirement");
+
     if (memBuffer == MemBuffer::NullMemBufferPtr) {
         LOG_DBG("Passing an uninitialized SharedMemBufferPtr");
         throw exception();
@@ -172,7 +178,7 @@ SQ::GetQMetrics()
 
     getQMetrics.q_id = GetQId();
     getQMetrics.type = METRICS_SQ;
-    getQMetrics.nBytes = GetQSize();
+    getQMetrics.nBytes = sizeof(qMetrics);
     getQMetrics.buffer = (uint8_t *)&qMetrics;
 
     if ((ret = ioctl(mFd, NVME_IOCTL_GET_Q_METRICS, &getQMetrics)) < 0) {

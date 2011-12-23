@@ -15,6 +15,7 @@
  */
 
 #include "cmd.h"
+#include "../Utils/buffers.h"
 
 using namespace std;
 
@@ -90,7 +91,7 @@ Cmd::Init(nvme_cmds cmdSet, uint8_t opcode, DataDir dataDir, uint16_t cmdSize)
 
 
 uint32_t
-Cmd::GetDword(uint8_t whichDW)
+Cmd::GetDword(uint8_t whichDW) const
 {
     if (whichDW >= GetCmdSizeDW()) {
         LOG_DBG("Cmd is not large enough to get requested value");
@@ -101,7 +102,7 @@ Cmd::GetDword(uint8_t whichDW)
 
 
 uint8_t
-Cmd::GetByte(uint8_t whichDW, uint8_t dwOffset)
+Cmd::GetByte(uint8_t whichDW, uint8_t dwOffset) const
 {
     if (whichDW >= GetCmdSizeB()) {
         LOG_DBG("Cmd is not large enough to get requested value");
@@ -147,23 +148,57 @@ Cmd::SetByte(uint8_t newVal, uint8_t whichDW, uint8_t dwOffset)
 void
 Cmd::SetFUSE(uint8_t newVal)
 {
+    LOG_NRM("Setting FUSE");
     uint8_t b1 = (GetByte(0, 1) & ~BITMASK_FUSE_B);
     b1 |= (newVal & BITMASK_FUSE_B);
     SetByte(b1, 0, 1);
 }
 
 
-void
-Cmd::SetNSID(uint32_t newVal)
+uint8_t
+Cmd::GetFUSE() const
 {
-    SetDword(newVal, 1);
+    LOG_NRM("Getting FUSE");
+    return (GetByte(0, 1) & BITMASK_FUSE_B);
 }
 
 
 void
-Cmd::LogCmd()
+Cmd::SetNSID(uint32_t newVal)
+{
+    LOG_NRM("Setting NSID");
+    SetDword(newVal, 1);
+}
+
+
+uint32_t
+Cmd::GetNSID() const
+{
+    LOG_NRM("Getting NSID");
+    return GetDword(1);
+}
+
+
+void
+Cmd::LogCmd() const
 {
     LOG_NRM("Logging Cmd obj contents....");
     for (int i = 0; i < GetCmdSizeDW(); i++)
         LOG_NRM("Cmd DWORD%d: %s0x%08X", i, (i < 10) ? " " : "", GetDword(i));
+}
+
+
+uint16_t
+Cmd::GetCID() const
+{
+    LOG_NRM("Getting CID");
+    return (uint16_t)(GetDword(0) & BITMASK_CID_DW) >> 16;
+}
+
+
+void
+Cmd::Dump(LogFilename filename, string fileHdr) const
+{
+    Buffers::Dump(filename, (uint8_t *)mCmdBuf->GetBuffer(), 0, ULONG_MAX,
+        mCmdBuf->GetBufSize(), fileHdr);
 }

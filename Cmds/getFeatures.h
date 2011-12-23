@@ -14,40 +14,32 @@
  *  limitations under the License.
  */
 
-#ifndef _DELETEIOCQ_H_
-#define _DELETEIOCQ_H_
+#ifndef _GETFEATURES_H_
+#define _GETFEATURES_H_
 
-#include "adminCmd.h"
-#include "../Queues/iocq.h"
+#include "baseFeatures.h"
 
 
-class DeleteIOCQ;    // forward definition
-typedef boost::shared_ptr<DeleteIOCQ>             SharedDeleteIOCQPtr;
-typedef boost::shared_ptr<const DeleteIOCQ>       ConstSharedDeleteIOCQPtr;
-#define CAST_TO_DELETEIOCQ(shared_trackable_ptr)  \
-        boost::shared_polymorphic_downcast<DeleteIOCQ>(shared_trackable_ptr);
+class GetFeatures;    // forward definition
+typedef boost::shared_ptr<GetFeatures>              SharedGetFeaturesPtr;
+typedef boost::shared_ptr<const GetFeatures>        ConstSharedGetFeaturesPtr;
+#define CAST_TO_GETFEATURES(shared_trackable_ptr)   \
+        boost::shared_polymorphic_downcast<GetFeatures>(shared_trackable_ptr);
 
 
 /**
-* This class implements the Delete IO Completion Queue admin cmd. After
-* instantiation the Init() methods must be called to attain something useful.
+* This class implements the GetFeatures admin cmd
 *
 * @note This class may throw exceptions.
 */
-class DeleteIOCQ : public AdminCmd
+class GetFeatures : public BaseFeatures
 {
 public:
-    DeleteIOCQ(int fd);
-    virtual ~DeleteIOCQ();
+    GetFeatures(int fd);
+    virtual ~GetFeatures();
 
     /// Used to compare for NULL pointers being returned by allocations
-    static SharedDeleteIOCQPtr NullDeleteIOCQPtr;
-
-    /**
-     * Initialize this object and prepares it to send to the hdw.
-     * @param iocq Pass the IOCQ object which will initialize this cmd.
-     */
-    void Init(const SharedIOCQPtr iocq);
+    static SharedGetFeaturesPtr NullGetFeaturesPtr;
 
     /**
      * Append the entire contents of this cmds' contents, any PRP payload,
@@ -60,7 +52,7 @@ public:
 
 
 private:
-    DeleteIOCQ();
+    GetFeatures();
 };
 
 

@@ -16,12 +16,13 @@
 
 #include "createIOQDiscontigPoll_r10b.h"
 #include "globals.h"
+#include "createACQASQ_r10b.h"
 #include "../Queues/iocq.h"
 #include "../Queues/iosq.h"
 #include "../Utils/kernelAPI.h"
 #include "../Cmds/createIOCQ.h"
 #include "../Cmds/createIOSQ.h"
-#include "createACQASQ_r10b.h"
+#include "../Singletons/informative.h"
 
 #define IOQ_ID                      1
 #define DEFAULT_CMD_WAIT_ms         2000
@@ -82,6 +83,7 @@ CreateIOQDiscontigPoll_r10b::RunCoreTest()
      * Assumptions:
      * 1) The ASQ & ACQ's have been created by the RsrcMngr for group lifetime
      * 2) All interrupts are disabled.
+     * 3) Empty ASQ & ACQ's
      * \endverbatim
      */
 
@@ -100,6 +102,12 @@ CreateIOQDiscontigPoll_r10b::RunCoreTest()
     // Lookup objs which were created in a prior test within group
     SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
     SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
+
+    // Assuming a clean admin Q for our operations
+    if (acq->ReapInquiry() != 0) {
+        LOG_ERR("The ACQ should not have any CE's waiting before testing");
+        throw exception();
+    }
 
     CreateIOCQDiscontigPoll(asq, acq);
     CreateIOSQDiscontigPoll(asq, acq);
@@ -149,6 +157,9 @@ CreateIOQDiscontigPoll_r10b::CreateIOCQDiscontigPoll(SharedASQPtr asq,
             FileSystem::PrepLogFile(mGrpName, mTestName, "acq","createIOCQCmd"),
             "Unable to see any CE's in CQ0, dump entire CQ contents");
         throw exception();
+    } else if (numCE != 1) {
+        LOG_ERR("The ACQ should only have 1 CE as a result of a cmd");
+        throw exception();
     }
     acq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "acq",
         "createIOCQCmd"), "Just B4 reaping CQ0, dump entire CQ contents");
@@ -158,6 +169,10 @@ CreateIOQDiscontigPoll_r10b::CreateIOCQDiscontigPoll(SharedASQPtr asq,
         uint16_t ceRemain;
         uint16_t numReaped;
 
+        LOG_NRM("The CQ's metrics before reaping holds head_ptr needed");
+        struct nvme_gen_cq acqMetrics = acq->GetQMetrics();
+        KernelAPI::LogCQMetrics(acqMetrics);
+
         LOG_NRM("Reaping CE from ACQ, requires memory to hold reaped CE");
         SharedMemBufferPtr ceMemIOCQ = SharedMemBufferPtr(new MemBuffer());
         if ((numReaped = acq->Reap(ceRemain, ceMemIOCQ, numCE, true)) != 1) {
@@ -165,8 +180,16 @@ CreateIOQDiscontigPoll_r10b::CreateIOCQDiscontigPoll(SharedASQPtr asq,
                 numReaped);
             throw exception();
         }
-        LOG_NRM("The reaped identify CE is...");
-        ceMemIOCQ->Log();
+        LOG_NRM("The reaped get features CE is...");
+        acq->LogCE(acqMetrics.head_ptr);
+
+        union CE ce = acq->PeekCE(acqMetrics.head_ptr);
+        if (ce.n.status != 0) {
+            LOG_ERR("CE shows cmd failed: status = 0x%02X", ce.n.status);
+            throw exception();
+        }
+        LOG_NRM("The CE indicates a successful completion");
+
         // The PRP payload is in fact the memory backing the Q
         createIOCQCmd->Dump(
             FileSystem::PrepLogFile(mGrpName, mTestName, "IOCQ"),
@@ -214,6 +237,9 @@ CreateIOQDiscontigPoll_r10b::CreateIOSQDiscontigPoll(SharedASQPtr asq,
             FileSystem::PrepLogFile(mGrpName, mTestName, "acq","createIOSQCmd"),
             "Unable to see any CE's in CQ0, dump entire CQ contents");
         throw exception();
+    } else if (numCE != 1) {
+        LOG_ERR("The ACQ should only have 1 CE as a result of a cmd");
+        throw exception();
     }
     acq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "acq",
         "createIOSQCmd"), "Just B4 reaping CQ0, dump entire CQ contents");
@@ -223,6 +249,10 @@ CreateIOQDiscontigPoll_r10b::CreateIOSQDiscontigPoll(SharedASQPtr asq,
         uint16_t ceRemain;
         uint16_t numReaped;
 
+        LOG_NRM("The CQ's metrics before reaping holds head_ptr needed");
+        struct nvme_gen_cq acqMetrics = acq->GetQMetrics();
+        KernelAPI::LogCQMetrics(acqMetrics);
+
         LOG_NRM("Reaping CE from ACQ, requires memory to hold reaped CE");
         SharedMemBufferPtr ceMemIOSQ = SharedMemBufferPtr(new MemBuffer());
         if ((numReaped = acq->Reap(ceRemain, ceMemIOSQ, numCE, true)) != 1) {
@@ -230,8 +260,16 @@ CreateIOQDiscontigPoll_r10b::CreateIOSQDiscontigPoll(SharedASQPtr asq,
                 numReaped);
             throw exception();
         }
-        LOG_NRM("The reaped identify CE is...");
-        ceMemIOSQ->Log();
+        LOG_NRM("The reaped get features CE is...");
+        acq->LogCE(acqMetrics.head_ptr);
+
+        union CE ce = acq->PeekCE(acqMetrics.head_ptr);
+        if (ce.n.status != 0) {
+            LOG_ERR("CE shows cmd failed: status = 0x%02X", ce.n.status);
+            throw exception();
+        }
+        LOG_NRM("The CE indicates a successful completion");
+
         // The PRP payload is in fact the memory backing the Q
         createIOSQCmd->Dump(
             FileSystem::PrepLogFile(mGrpName, mTestName, "IOSQ"),

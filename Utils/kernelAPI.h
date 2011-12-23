@@ -25,7 +25,7 @@
 /**
 * This class is meant not be instantiated because it should only ever contain
 * static members. These utility functions can be viewed as wrappers to
-* perform common, repetitous tasks which avoids coping the same chunks of
+* perform common, repetitious tasks which avoids coping the same chunks of
 * code throughout the framework.
 *
 * @note This class may throw exceptions, please see comment within specific
@@ -77,6 +77,14 @@ public:
      *      FileSystem::PrepLogFile().
      */
     static void DumpKernelMetrics(int fd, LogFilename filename);
+
+    /// Log the contents of the specified SQ metrics struct
+    static void LogCQMetrics(struct nvme_gen_cq &cqMetrics);
+    /// Log the contents of the specified SQ metrics struct
+    static void LogSQMetrics(struct nvme_gen_sq &sqMetrics);
+
+
+
 };
 
 

@@ -25,7 +25,7 @@ struct CEbyDW {
     uint32_t dw1;
     uint32_t dw2;
     uint32_t dw3;
-};
+} __attribute__((__packed__));
 
 struct CEbyName {
     uint32_t cmdSpec;
@@ -35,10 +35,11 @@ struct CEbyName {
     uint16_t cmdId;
     uint16_t pBit   : 1;
     uint16_t status : 15;
-};
+} __attribute__((__packed__));
 
 /**
  * Completion Element (CE) definition.
+ * @note: For convenient methods to log/dump/peek; refer to class CQ
  */
 union CE {
     struct CEbyDW   d;

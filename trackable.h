@@ -47,6 +47,8 @@ public:
         OBJ_CREATEIOSQ,         // Admin cmd set create IOSQ cmd
         OBJ_DELETEIOCQ,         // Admin cmd set delete IOCQ cmd
         OBJ_DELETEIOSQ,         // Admin cmd set delete IOSQ cmd
+        OBJ_GETFEATURES,        // Admin cmd set get features cmd
+        OBJ_SETFEATURES,        // Admin cmd set get features cmd
 
         OBJTYPE_FENCE           // always must be last element
     } ObjType;
@@ -64,7 +66,7 @@ public:
     Trackable(ObjType objBeingCreated);
     virtual ~Trackable();
 
-    ObjType GetObjType() { return mObjType; }
+    ObjType GetObjType() const { return mObjType; }
 
 
 private:

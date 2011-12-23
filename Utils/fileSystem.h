@@ -32,7 +32,7 @@ typedef string                      LogFilename;
 /**
 * This class is meant not be instantiated because it should only ever contain
 * static members. These utility functions can be viewed as wrappers to
-* perform common, repetitous tasks which avoids coping the same chunks of
+* perform common, repetitious tasks which avoids coping the same chunks of
 * code throughout the framework.
 *
 * @note This class may throw exceptions, please see comment within specific

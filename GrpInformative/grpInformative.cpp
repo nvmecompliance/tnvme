@@ -17,6 +17,9 @@
 #include "grpInformative.h"
 #include "dumpPciAddrSpace_r10b.h"
 #include "dumpCtrlrAddrSpace_r10b.h"
+#include "createACQASQ_r10b.h"
+#include "dumpIdentifyData_r10b.h"
+#include "dumpGetFeatures_r10b.h"
 
 
 GrpInformative::GrpInformative(size_t grpNum, SpecRev specRev, int fd) :
@@ -33,6 +36,9 @@ GrpInformative::GrpInformative(size_t grpNum, SpecRev specRev, int fd) :
     case SPECREV_10b:
         APPEND_TEST_AT_GROUP_LEVEL(DumpPciAddrSpace_r10b, fd, GrpInformative)
         APPEND_TEST_AT_GROUP_LEVEL(DumpCtrlrAddrSpace_r10b, fd, GrpInformative)
+        APPEND_TEST_AT_GROUP_LEVEL(CreateACQASQ_r10b, fd, GrpInformative)
+        APPEND_TEST_AT_GROUP_LEVEL(DumpIdentifyData_r10b, fd, GrpInformative)
+        APPEND_TEST_AT_GROUP_LEVEL(DumpGetFeatures_r10b, fd, GrpInformative)
         break;
 
     default:

@@ -50,3 +50,12 @@ DeleteIOCQ::Init(const SharedIOCQPtr iocq)
         SetDword(dword10, 10);
     }   // Handle DWORD 10
 }
+
+
+void
+DeleteIOCQ::Dump(LogFilename filename, string fileHdr) const
+{
+    Cmd::Dump(filename, fileHdr);
+    PrpData::Dump(filename, "Payload contents:");
+    MetaData::Dump(filename, "Meta data contents:");
+}

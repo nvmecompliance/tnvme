@@ -20,12 +20,13 @@
 #include <limits.h>
 #include "tnvme.h"
 #include "fileSystem.h"
+#include "../Queues/ce.h"
 
 
 /**
 * This class is meant not be instantiated because it should only ever contain
 * static members. These utility functions can be viewed as wrappers to
-* perform common, repetitous tasks which avoids coping the same chunks of
+* perform common, repetitious tasks which avoids coping the same chunks of
 * code throughout the framework.
 *
 * @note This class may throw exceptions, please see comment within specific
@@ -52,7 +53,7 @@ public:
 
     /**
      * Send the entire contents of this buf starting a bufOffset and continue
-     * for length bytes to the file named by filename.
+     * for length bytes to the file named by filename. The file is appended.
      * @note This method may throw
      * @param filename Pass the name of a file to open for dumping buffer
      * @param buf Pass a pointer to the buffer to dump
@@ -61,8 +62,9 @@ public:
      * @param totalBufSize Pass the total number of bytes within the buffer
      * @param fileHdr Pass a custom file header description to dump
      */
-    static void Dump(LogFilename filename, const uint8_t *buf, uint32_t bufOffset,
-     unsigned long length, uint32_t totalBufSize, string fileHdr);
+    static void Dump(LogFilename filename, const uint8_t *buf,
+        uint32_t bufOffset, unsigned long length, uint32_t totalBufSize,
+        string fileHdr);
 };
 
 

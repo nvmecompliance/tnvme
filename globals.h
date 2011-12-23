@@ -21,6 +21,7 @@
 #include "Singletons/registers.h"
 #include "Singletons/rsrcMngr.h"
 #include "Singletons/ctrlrConfig.h"
+#include "Singletons/informative.h"
 
 // NOTE: To make it easier to decifer objects which are global, prepend 'g'
 
@@ -32,6 +33,8 @@ extern Registers *gRegisters;
 extern RsrcMngr *gRsrcMngr;
 /// Tests are encouraged to use this instance to interface with ctrlr config
 extern CtrlrConfig *gCtrlrConfig;
+/// Tests are encouraged to use this instance to learn common DUT parameters
+extern Informative *gInformative;
 
 
 #endif

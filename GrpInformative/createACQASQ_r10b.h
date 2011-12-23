@@ -14,15 +14,13 @@
  *  limitations under the License.
  */
 
-#ifndef _IDENTIFYCMD_r10b_H_
-#define _IDENTIFYCMD_r10b_H_
+#ifndef _CREATEACQASQ_r10b_H_
+#define _CREATEACQASQ_r10b_H_
 
 #include "test.h"
-#include "../Queues/asq.h"
-#include "../Queues/acq.h"
 
-#define IDENTIFY_CTRLR_STRUCT_GROUP_ID      "IdentifyCmdCap"
-#define IDENTIFY_NAMESPACE_STRUCT_GROUP_ID  "IdentifyCmdNamSpc"
+#define ACQ_GROUP_ID      "ACQ"
+#define ASQ_GROUP_ID      "ASQ"
 
 
 /** \verbatim
@@ -32,19 +30,19 @@
  * 1) See notes in the header file of the Test base class
  * \endverbatim
  */
-class IdentifyCmd_r10b : public Test
+class CreateACQASQ_r10b : public Test
 {
 public:
-    IdentifyCmd_r10b(int fd, string grpName, string testName);
-    virtual ~IdentifyCmd_r10b();
+    CreateACQASQ_r10b(int fd, string grpName, string testName);
+    virtual ~CreateACQASQ_r10b();
 
     /**
      * IMPORTANT: Read Test::Clone() header comment.
      */
-    virtual IdentifyCmd_r10b *Clone() const
-        { return new IdentifyCmd_r10b(*this); }
-    IdentifyCmd_r10b &operator=(const IdentifyCmd_r10b &other);
-    IdentifyCmd_r10b(const IdentifyCmd_r10b &other);
+    virtual CreateACQASQ_r10b *Clone() const
+        { return new CreateACQASQ_r10b(*this); }
+    CreateACQASQ_r10b &operator=(const CreateACQASQ_r10b &other);
+    CreateACQASQ_r10b(const CreateACQASQ_r10b &other);
 
 
 protected:
@@ -53,10 +51,8 @@ protected:
 
 private:
     ///////////////////////////////////////////////////////////////////////////
-    // Adding a member variable? Then edit the copy constructor and operator().
+    // Adding a member variable? Then edit the copy constructor and operator=().
     ///////////////////////////////////////////////////////////////////////////
-    void SendIdentifyCtrlrStruct(SharedASQPtr asq, SharedACQPtr acq);
-    void SendIdentifyNamespaceStruct(SharedASQPtr asq, SharedACQPtr acq);
 };
 
 

@@ -15,6 +15,7 @@
  */
 
 #include "prpData.h"
+#include "../Utils/buffers.h"
 
 using namespace std;
 
@@ -96,11 +97,19 @@ PrpData::SetPrpBuffer(send_64b_bitmask prpFields, uint8_t const *memBuffer,
 
 
 uint8_t const *
-PrpData::GetROPrpBuffer()
+PrpData::GetROPrpBuffer() const
 {
     if (mBufRW != MemBuffer::NullMemBufferPtr)
         return mBufRW->GetBuffer();
     else if (mBufRO != NULL)
         return mBufRO;
     return NULL;
+}
+
+
+void
+PrpData::Dump(LogFilename filename, string fileHdr) const
+{
+    const uint8_t *buf = GetROPrpBuffer();
+    Buffers::Dump(filename, buf, 0, ULONG_MAX, GetPrpBufferSize(), fileHdr);
 }

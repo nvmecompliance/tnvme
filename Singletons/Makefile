@@ -25,7 +25,8 @@ SRC = \
 	objRsrc.cpp			\
 	metaRsrc.cpp		\
 	rsrcMngr.cpp		\
-	ctrlrConfig.cpp
+	ctrlrConfig.cpp		\
+	informative.cpp
 
 .SUFFIXES: .cpp
 

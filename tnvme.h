@@ -65,17 +65,12 @@ struct TestRef {
  * true   !=UINT_MAX     !=UINT_MAX && !=UINT_MAX  request spec'd test in group
  */
 struct TestTarget {
-    bool            req;     // requested by cmd line
+    bool            req;    // requested by cmd line
     TestRef t;
 };
 
-struct InformativeGrp {
-    bool            req;     // requested by cmd line
-    size_t          grpInfoIdx;
-};
-
 struct RmmapIo {
-    bool            req;     // requested by cmd line
+    bool            req;    // requested by cmd line
     nvme_io_space   space;
     size_t          offset;
     size_t          size;
@@ -83,12 +78,18 @@ struct RmmapIo {
 };
 
 struct WmmapIo {
-    bool            req;     // requested by cmd line
+    bool            req;    // requested by cmd line
     nvme_io_space   space;
     size_t          offset;
     size_t          size;
     uint64_t        value;
     nvme_acc_type   acc;
+};
+
+struct Queues {
+    bool            req;    // requested by cmd line
+    uint16_t        ncqr;   // Number of IOCQ's requested
+    uint16_t        nsqr;   // Number of IOSQ's requested
 };
 
 struct CmdLine {
@@ -100,10 +101,10 @@ struct CmdLine {
     TestTarget      detail;
     TestTarget      test;
     string          device;
-    InformativeGrp  informative;
     vector<TestRef> skiptest;
     RmmapIo         rmmap;
     WmmapIo         wmmap;
+    Queues          queues;
 };
 
 

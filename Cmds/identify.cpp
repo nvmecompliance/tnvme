@@ -16,6 +16,7 @@
 
 #include "identify.h"
 #include "../Utils/buffers.h"
+#include "../Utils/fileSystem.h"
 
 
 #define CNS_BITMASK         0x01
@@ -64,6 +65,7 @@ Identify::~Identify()
 void
 Identify::SetCNS(bool ctrlr)
 {
+    LOG_NRM("Setting CNS");
     uint8_t curVal = GetByte(10, 0);
     if (ctrlr)
         curVal |= CNS_BITMASK;
@@ -74,8 +76,9 @@ Identify::SetCNS(bool ctrlr)
 
 
 bool
-Identify::GetCNS()
+Identify::GetCNS() const
 {
+    LOG_NRM("Getting CNS");
     uint8_t curVal = GetByte(10, 0);
     if (curVal & CNS_BITMASK)
         return true;
@@ -84,7 +87,7 @@ Identify::GetCNS()
 
 
 uint64_t
-Identify::GetValue(IdCtrlrCap field)
+Identify::GetValue(IdCtrlrCap field) const
 {
     if (field >= IDCTRLRCAP_FENCE) {
         LOG_DBG("Unknown ctrlr cap field: %d", field);
@@ -96,7 +99,7 @@ Identify::GetValue(IdCtrlrCap field)
 
 
 uint64_t
-Identify::GetValue(IdNamespc field)
+Identify::GetValue(IdNamespc field) const
 {
     if (field >= IDNAMESPC_FENCE) {
         LOG_DBG("Unknown namespace field: %d", field);
@@ -107,7 +110,7 @@ Identify::GetValue(IdNamespc field)
 
 
 uint64_t
-Identify::GetValue(int field, IdentifyDataType *idData)
+Identify::GetValue(int field, IdentifyDataType *idData) const
 {
     uint8_t byte;
     uint64_t value = 0;
@@ -133,14 +136,14 @@ Identify::GetValue(int field, IdentifyDataType *idData)
 
 
 void
-Identify::Dump(LogFilename filename, string fileHdr)
+Identify::Dump(LogFilename filename, string fileHdr) const
 {
     FILE *fp;
-    const uint8_t *buf = GetROPrpBuffer();
 
+    Cmd::Dump(filename, fileHdr);
+    PrpData::Dump(filename, "Payload contents:");
+    MetaData::Dump(filename, "Meta data contents:");
 
-    // Do a raw dump of the data
-    Buffers::Dump(filename, buf, 0, ULONG_MAX, GetPrpBufferSize(), fileHdr);
 
     // Reopen the file and append the same data in a different format
     if ((fp = fopen(filename.c_str(), "a")) == NULL) {
@@ -161,7 +164,7 @@ Identify::Dump(LogFilename filename, string fileHdr)
 
 
 void
-Identify::Dump(FILE *fp, int field, IdentifyDataType *idData)
+Identify::Dump(FILE *fp, int field, IdentifyDataType *idData) const
 {
     const uint8_t *data;
     const int BUF_SIZE = 20;

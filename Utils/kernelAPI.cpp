@@ -87,3 +87,29 @@ KernelAPI::DumpKernelMetrics(int fd, LogFilename filename)
     }
 }
 
+
+void
+KernelAPI::LogCQMetrics(struct nvme_gen_cq &cqMetrics)
+{
+    LOG_NRM("CQMetrics.q_id           = 0x%04X", cqMetrics.q_id);
+    LOG_NRM("CQMetrics.tail_ptr       = 0x%04X", cqMetrics.tail_ptr);
+    LOG_NRM("CQMetrics.head_ptr       = 0x%04X", cqMetrics.head_ptr);
+    LOG_NRM("CQMetrics.elements       = 0x%04X", cqMetrics.elements);
+    LOG_NRM("CQMetrics.irq_enabled    = 0x%02X", cqMetrics.irq_enabled);
+    LOG_NRM("CQMetrics.irq_no         = 0x%04X", cqMetrics.irq_no);
+    LOG_NRM("CQMetrics.int_vec        = 0x%04X", cqMetrics.int_vec);
+    LOG_NRM("CQMetrics.pbit_new_entry = 0x%02X", cqMetrics.pbit_new_entry);
+}
+
+
+void
+KernelAPI::LogSQMetrics(struct nvme_gen_sq &sqMetrics)
+{
+    LOG_NRM("CQMetrics.sq_id          = 0x%04X", sqMetrics.sq_id);
+    LOG_NRM("CQMetrics.cq_id          = 0x%04X", sqMetrics.cq_id);
+    LOG_NRM("CQMetrics.tail_ptr       = 0x%04X", sqMetrics.tail_ptr);
+    LOG_NRM("CQMetrics.tail_ptr_virt  = 0x%04X", sqMetrics.tail_ptr_virt);
+    LOG_NRM("CQMetrics.head_ptr       = 0x%04X", sqMetrics.head_ptr);
+    LOG_NRM("CQMetrics.elements       = 0x%04X", sqMetrics.elements);
+}
+

@@ -16,6 +16,7 @@
 
 #include "metaData.h"
 #include "globals.h"
+#include "../Utils/buffers.h"
 
 using namespace std;
 
@@ -42,10 +43,18 @@ MetaData::AllocMetaBuffer()
 
 
 send_64b_bitmask
-MetaData::GetMetaBitmask()
+MetaData::GetMetaBitmask() const
 {
     // If its still a default object then nothing has allocated a meta data buf
     if (mMetaData == MetaDataBuf())
         return (send_64b_bitmask)0;
     return MASK_MPTR;
+}
+
+
+void
+MetaData::Dump(LogFilename filename, string fileHdr) const
+{
+    Buffers::Dump(filename, mMetaData.buf, 0, ULONG_MAX, GetMetaBufferSize(),
+        fileHdr);
 }

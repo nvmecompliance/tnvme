@@ -14,40 +14,41 @@
  *  limitations under the License.
  */
 
-#ifndef _DELETEIOCQ_H_
-#define _DELETEIOCQ_H_
+#ifndef _SETFEATURES_H_
+#define _SETFEATURES_H_
 
-#include "adminCmd.h"
-#include "../Queues/iocq.h"
+#include "baseFeatures.h"
 
 
-class DeleteIOCQ;    // forward definition
-typedef boost::shared_ptr<DeleteIOCQ>             SharedDeleteIOCQPtr;
-typedef boost::shared_ptr<const DeleteIOCQ>       ConstSharedDeleteIOCQPtr;
-#define CAST_TO_DELETEIOCQ(shared_trackable_ptr)  \
-        boost::shared_polymorphic_downcast<DeleteIOCQ>(shared_trackable_ptr);
+class SetFeatures;    // forward definition
+typedef boost::shared_ptr<SetFeatures>              SharedSetFeaturesPtr;
+typedef boost::shared_ptr<const SetFeatures>        ConstSharedSetFeaturesPtr;
+#define CAST_TO_SETFEATURES(shared_trackable_ptr)   \
+        boost::shared_polymorphic_downcast<SetFeatures>(shared_trackable_ptr);
 
 
 /**
-* This class implements the Delete IO Completion Queue admin cmd. After
-* instantiation the Init() methods must be called to attain something useful.
+* This class implements the SetFeatures admin cmd
 *
 * @note This class may throw exceptions.
 */
-class DeleteIOCQ : public AdminCmd
+class SetFeatures : public BaseFeatures
 {
 public:
-    DeleteIOCQ(int fd);
-    virtual ~DeleteIOCQ();
+    SetFeatures(int fd);
+    virtual ~SetFeatures();
 
     /// Used to compare for NULL pointers being returned by allocations
-    static SharedDeleteIOCQPtr NullDeleteIOCQPtr;
+    static SharedSetFeaturesPtr NullSetFeaturesPtr;
 
     /**
-     * Initialize this object and prepares it to send to the hdw.
-     * @param iocq Pass the IOCQ object which will initialize this cmd.
+     * Set the number of IO queues desired.
+     * @note Spec states  "shall only" be set after a power cycle, not resets
+     * @param ncqr Pass the number of IOCQ's desired
+     * @param nsqr Pass the number of IOSQ's desired
      */
-    void Init(const SharedIOCQPtr iocq);
+    void SetNumberOfQueues(uint16_t ncqr, uint16_t nsqr);
+    uint32_t GetNumberOfQueues() const;
 
     /**
      * Append the entire contents of this cmds' contents, any PRP payload,
@@ -60,7 +61,7 @@ public:
 
 
 private:
-    DeleteIOCQ();
+    SetFeatures();
 };
 
 

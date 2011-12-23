@@ -17,6 +17,7 @@
 #include "cq.h"
 #include "globals.h"
 #include "../Utils/kernelAPI.h"
+#include "../Utils/buffers.h"
 
 #define NUM_TIME_SEGMENTS      10
 
@@ -61,6 +62,9 @@ CQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
 
 
     LOG_NRM("Allocating contiguous CQ memory in dnvme");
+    if (numEntries < 2)
+        LOG_NRM("WARNING: Number elements breaches spec requirement");
+
     if (GetIsAdmin()) {
         if (gCtrlrConfig->IsStateEnabled()) {
             // At best this will cause tnvme to seg fault or a kernel crash
@@ -111,6 +115,9 @@ CQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
 
 
     LOG_NRM("Allocating discontiguous CQ memory in tnvme");
+    if (numEntries < 2)
+        LOG_NRM("WARNING: Number elements breaches spec requirement");
+
     if (memBuffer == MemBuffer::NullMemBufferPtr) {
         LOG_DBG("Passing an uninitialized SharedMemBufferPtr");
         throw exception();
@@ -174,7 +181,7 @@ CQ::GetQMetrics()
 
     getQMetrics.q_id = GetQId();
     getQMetrics.type = METRICS_CQ;
-    getQMetrics.nBytes = GetQSize();
+    getQMetrics.nBytes = sizeof(qMetrics);
     getQMetrics.buffer = (uint8_t *)&qMetrics;
 
     if ((ret = ioctl(mFd, NVME_IOCTL_GET_Q_METRICS, &getQMetrics)) < 0) {
@@ -214,6 +221,15 @@ CQ::LogCE(uint16_t indexPtr)
     LOG_NRM("CQ %d, CE %d, DWORD1: 0x%08X", GetQId(), indexPtr, ce.d.dw1);
     LOG_NRM("CQ %d, CE %d, DWORD2: 0x%08X", GetQId(), indexPtr, ce.d.dw2);
     LOG_NRM("CQ %d, CE %d, DWORD3: 0x%08X", GetQId(), indexPtr, ce.d.dw3);
+}
+
+
+void
+CQ::DumpCE(uint16_t indexPtr, LogFilename filename, string fileHdr)
+{
+    union CE ce = PeekCE(indexPtr);
+    Buffers::Dump(filename, (const uint8_t *)&ce, 0, sizeof(CE), sizeof(CE),
+        fileHdr);
 }
 
 

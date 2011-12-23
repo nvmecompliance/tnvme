@@ -22,4 +22,5 @@ struct metrics_driver gDriverMetrics;
 Registers *gRegisters;
 RsrcMngr *gRsrcMngr;
 CtrlrConfig *gCtrlrConfig;
+Informative *gInformative;
 
