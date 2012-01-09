@@ -14,29 +14,31 @@
  *  limitations under the License.
  */
 
-#include "writeDataPat_r10b.h"
+#include "verifyDataPat_r10b.h"
 #include "globals.h"
 #include "../Utils/kernelAPI.h"
 #include "createIOQContigPoll_r10b.h"
 #include "createIOQDiscontigPoll_r10b.h"
+#include "writeDataPat_r10b.h"
 
 #define DEFAULT_CMD_WAIT_ms         2000
 
 
-WriteDataPat_r10b::WriteDataPat_r10b(int fd, string grpName, string testName) :
+VerifyDataPat_r10b::VerifyDataPat_r10b(int fd, string grpName, string testName) :
     Test(fd, grpName, testName, SPECREV_10b)
 {
     // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 6");
-    mTestDesc.SetShort(     "Write a well known data pattern to media");
+    mTestDesc.SetShort(     "Verify a well known data pattern from media");
     // No string size limit for the long description
     mTestDesc.SetLong(
-        "Issue an NVM cmd set write command with a well known data pattern "
-        "to namespace #1. The write command shall be completely generic.");
+        "Issue an NVM cmd set read command and compare the data payload with a "
+        "previsouly written and well known data pattern from namespace #1. The "
+        "read command shall be completely generic.");
 }
 
 
-WriteDataPat_r10b::~WriteDataPat_r10b()
+VerifyDataPat_r10b::~VerifyDataPat_r10b()
 {
     ///////////////////////////////////////////////////////////////////////////
     // Allocations taken from the heap and not under the control of the
@@ -45,8 +47,8 @@ WriteDataPat_r10b::~WriteDataPat_r10b()
 }
 
 
-WriteDataPat_r10b::
-WriteDataPat_r10b(const WriteDataPat_r10b &other) : Test(other)
+VerifyDataPat_r10b::
+VerifyDataPat_r10b(const VerifyDataPat_r10b &other) : Test(other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -55,8 +57,8 @@ WriteDataPat_r10b(const WriteDataPat_r10b &other) : Test(other)
 }
 
 
-WriteDataPat_r10b &
-WriteDataPat_r10b::operator=(const WriteDataPat_r10b &other)
+VerifyDataPat_r10b &
+VerifyDataPat_r10b::operator=(const VerifyDataPat_r10b &other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -68,7 +70,7 @@ WriteDataPat_r10b::operator=(const WriteDataPat_r10b &other)
 
 
 bool
-WriteDataPat_r10b::RunCoreTest()
+VerifyDataPat_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
@@ -81,7 +83,7 @@ WriteDataPat_r10b::RunCoreTest()
     KernelAPI::DumpKernelMetrics(mFd,
         FileSystem::PrepLogFile(mGrpName, mTestName, "kmetrics", "before"));
 
-    WriteDataPattern();
+    VerifyDataPattern();
 
     KernelAPI::DumpKernelMetrics(mFd,
         FileSystem::PrepLogFile(mGrpName, mTestName, "kmetrics", "after"));
@@ -90,9 +92,9 @@ WriteDataPat_r10b::RunCoreTest()
 
 
 void
-WriteDataPat_r10b::WriteDataPattern()
+VerifyDataPat_r10b::VerifyDataPattern()
 {
-    LOG_NRM("Calc buffer size to write %d logical blks to media",
+    LOG_NRM("Calc buffer size to read %d log blks from media",
         WRITE_DATA_PAT_NUM_BLKS);
     ConstSharedIdentifyPtr namSpcPtr = gInformative->GetIdentifyCmdNamespace(1);
     if (namSpcPtr == Identify::NullIdentifyPtr) {
@@ -102,21 +104,24 @@ WriteDataPat_r10b::WriteDataPattern()
     uint64_t lbaDataSize = namSpcPtr->GetLBADataSize();
 
 
-    LOG_NRM("Create data pattern to write to media");
+    LOG_NRM("Create data pattern to compare against");
     SharedMemBufferPtr dataPat = SharedMemBufferPtr(new MemBuffer());
     dataPat->Init(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize);
     dataPat->SetDataPattern(MemBuffer::DATAPAT_INC_16BIT);
     dataPat->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "DataPat"),
-        "Write buffer's data pattern");
+        "Verify buffer's data pattern");
     
+    LOG_NRM("Create memory to contain read payload");
+    SharedMemBufferPtr readMem = SharedMemBufferPtr(new MemBuffer());
+    readMem->Init(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize);
 
-    LOG_NRM("Create a generic write cmd to send data pattern to namspc 1");
-    SharedWritePtr writeCmd = SharedWritePtr(new Write(mFd));
+    LOG_NRM("Create a generic read cmd to read data from namspc 1");
+    SharedReadPtr readCmd = SharedReadPtr(new Read(mFd));
     send_64b_bitmask prpBitmask = (send_64b_bitmask)
         (MASK_PRP1_PAGE | MASK_PRP2_PAGE | MASK_PRP2_LIST);
-    writeCmd->SetPrpBuffer(prpBitmask, dataPat);
-    writeCmd->SetNSID(1);
-    writeCmd->SetNLB(WRITE_DATA_PAT_NUM_BLKS);
+    readCmd->SetPrpBuffer(prpBitmask, readMem);
+    readCmd->SetNSID(1);
+    readCmd->SetNLB(WRITE_DATA_PAT_NUM_BLKS);
 
     // Lookup objs which were created in a prior test within group
     SharedIOSQPtr iosqContig = CAST_TO_IOSQ(
@@ -129,15 +134,17 @@ WriteDataPat_r10b::WriteDataPattern()
         gRsrcMngr->GetObj(IOCQ_DISCONTIG_POLL_GROUP_ID))
 
     LOG_NRM("Send the cmd to hdw via the contiguous IOQ's");
-    SendToIOSQ(iosqContig, iocqContig, writeCmd, "contig");
+    SendToIOSQ(iosqContig, iocqContig, readCmd, "contig", dataPat, readMem);
     LOG_NRM("Send the cmd to hdw via the discontiguous IOQ's");
-    SendToIOSQ(iosqDiscontig, iocqDiscontig, writeCmd, "discontig");
+    SendToIOSQ(iosqDiscontig, iocqDiscontig, readCmd, "discontig", dataPat,
+        readMem);
 }
 
 
 void
-WriteDataPat_r10b::SendToIOSQ(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
-    SharedWritePtr writeCmd, string qualifier)
+VerifyDataPat_r10b::SendToIOSQ(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
+    SharedReadPtr readCmd, string qualifier, SharedMemBufferPtr writtenPayload,
+    SharedMemBufferPtr readPayload)
 {
     uint16_t numCE;
     uint16_t ceRemain;
@@ -145,7 +152,7 @@ WriteDataPat_r10b::SendToIOSQ(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
 
 
     LOG_NRM("Send the cmd to hdw via %s IOSQ", qualifier.c_str());
-    iosq->Send(writeCmd);
+    iosq->Send(readCmd);
     iosq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "iosq", qualifier),
         "Just B4 ringing SQ doorbell, dump entire IOSQ contents");
     iosq->Ring();
@@ -184,5 +191,15 @@ WriteDataPat_r10b::SendToIOSQ(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
         LOG_ERR("CE shows cmd failed: status = 0x%02X", ce.n.status);
         throw exception();
     }
-    LOG_NRM("The CE indicates a successful completion");
+
+
+    LOG_NRM("Compare read vs written data to verify");
+    if (readPayload->Compare(writtenPayload) == false) {
+        readPayload->Dump(
+            FileSystem::PrepLogFile(mGrpName, mTestName, "ReadPayload"),
+            "Data read from media miscompared from written");
+        writtenPayload->Dump(
+            FileSystem::PrepLogFile(mGrpName, mTestName, "WrittenPayload"),
+            "Data read from media miscompared from written");
+    }
 }

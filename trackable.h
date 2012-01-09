@@ -50,6 +50,7 @@ public:
         OBJ_GETFEATURES,        // Admin cmd set get features cmd
         OBJ_SETFEATURES,        // Admin cmd set get features cmd
         OBJ_WRITE,              // NVM cmd set write cmd
+        OBJ_READ,               // NVM cmd set write cmd
 
         OBJTYPE_FENCE           // always must be last element
     } ObjType;

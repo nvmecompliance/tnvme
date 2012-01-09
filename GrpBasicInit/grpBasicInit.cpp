@@ -19,6 +19,7 @@
 #include "createIOQContigPoll_r10b.h"
 #include "createIOQDiscontigPoll_r10b.h"
 #include "writeDataPat_r10b.h"
+#include "verifyDataPat_r10b.h"
 #include "deleteIOQContig_r10b.h"
 #include "deleteIOQDiscontig_r10b.h"
 
@@ -39,6 +40,7 @@ GrpBasicInit::GrpBasicInit(size_t grpNum, SpecRev specRev, int fd) :
         APPEND_TEST_AT_GROUP_LEVEL(CreateIOQContigPoll_r10b, fd, GrpBasicInit)
         APPEND_TEST_AT_GROUP_LEVEL(CreateIOQDiscontigPoll_r10b, fd,GrpBasicInit)
         APPEND_TEST_AT_GROUP_LEVEL(WriteDataPat_r10b, fd, GrpBasicInit)
+        APPEND_TEST_AT_GROUP_LEVEL(VerifyDataPat_r10b, fd, GrpBasicInit)
         APPEND_TEST_AT_GROUP_LEVEL(DeleteIOQContig_r10b, fd, GrpBasicInit)
         APPEND_TEST_AT_GROUP_LEVEL(DeleteIOQDiscontig_r10b, fd,GrpBasicInit)
         break;

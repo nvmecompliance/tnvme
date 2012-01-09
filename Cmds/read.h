@@ -14,32 +14,32 @@
  *  limitations under the License.
  */
 
-#ifndef _WRITE_H_
-#define _WRITE_H_
+#ifndef _READ_H_
+#define _READ_H_
 
 #include "nvmCmd.h"
 
 
-class Write;    // forward definition
-typedef boost::shared_ptr<Write>             SharedWritePtr;
-typedef boost::shared_ptr<const Write>       ConstSharedWritePtr;
-#define CAST_TO_WRITE(shared_trackable_ptr)  \
-        boost::shared_polymorphic_downcast<Write>(shared_trackable_ptr);
+class Read;    // forward definition
+typedef boost::shared_ptr<Read>             SharedReadPtr;
+typedef boost::shared_ptr<const Read>       ConstSharedReadPtr;
+#define CAST_TO_READ(shared_trackable_ptr)  \
+        boost::shared_polymorphic_downcast<Read>(shared_trackable_ptr);
 
 
 /**
-* This class implements the write admin cmd
+* This class implements the read admin cmd
 *
 * @note This class may throw exceptions.
 */
-class Write : public NVMCmd
+class Read : public NVMCmd
 {
 public:
-    Write(int fd);
-    virtual ~Write();
+    Read(int fd);
+    virtual ~Read();
 
     /// Used to compare for NULL pointers being returned by allocations
-    static SharedWritePtr NullWritePtr;
+    static SharedReadPtr NullReadPtr;
 
     /**
      * Set the Starting Logical Block Address (SLBA).
@@ -105,25 +105,25 @@ public:
     uint8_t GetDSMAccessFreq() const;
 
     /**
-     * Set the Initial Logical Block Reference Tag (ILBRT)
-     * @param ilbrt Pass the new value to set
+     * Set the Expected Initial Logical Block Reference Tag (EILBRT)
+     * @param eilbrt Pass the new value to set
      */
-    void     SetILBRT(uint32_t ilbrt);
-    uint32_t GetILBRT() const;
+    void     SetEILBRT(uint32_t eilbrt);
+    uint32_t GetEILBRT() const;
 
     /**
-     * Set the Logcial Block Application Tag Mask (LBATM)
-     * @param lbatm Pass the new value to set
+     * Set the Expected Logical Block Application Tag Mask (ELBATM)
+     * @param elbatm Pass the new value to set
      */
-    void     SetLBATM(uint16_t lbatm);
-    uint16_t GetLBATM() const;
+    void     SetELBATM(uint16_t elbatm);
+    uint16_t GetELBATM() const;
 
     /**
-     * Set the Logcial Block Application Tag (LBAT)
-     * @param lbat Pass the new value to set
+     * Set the Expected Logical Block Application Tag (ELBAT)
+     * @param elbat Pass the new value to set
      */
-    void     SetLBAT(uint16_t lbat);
-    uint16_t GetLBAT() const;
+    void     SetELBAT(uint16_t elbat);
+    uint16_t GetELBAT() const;
 
     /**
      * Append the entire contents of this cmds' contents, any PRP payload,
@@ -136,7 +136,7 @@ public:
 
 
 private:
-    Write();
+    Read();
 };
 
 

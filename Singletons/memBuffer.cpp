@@ -247,3 +247,20 @@ MemBuffer::SetDataPattern(DataPattern dataPat, uint64_t initVal)
         throw exception();
     }
 }
+
+
+bool
+MemBuffer::Compare(SharedMemBufferPtr compTo)
+{
+    if (compTo->GetBufSize() != GetBufSize()) {
+        LOG_ERR("Compare buffers not same size: %d != %d", compTo->GetBufSize(),
+            GetBufSize());
+        throw exception();
+    }
+
+    if (memcmp(compTo->GetBuffer(), GetBuffer(), GetBufSize()) != 0) {
+        LOG_ERR("Detected data miscompare");
+        return false;
+    }
+    return true;
+}

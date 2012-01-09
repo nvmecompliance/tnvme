@@ -28,7 +28,23 @@
 #include "../Cmds/getFeatures.h"
 #include "../Cmds/setFeatures.h"
 #include "../Cmds/write.h"
+#include "../Cmds/read.h"
 
+/**
+ * Instantiate a class.
+ * @param capital Pass the class name in all CAPITAL letters
+ * @param proper Pass the proper name of the class to instantiate
+ */
+#define INSTANTIATE_OBJ(capital, proper)                            \
+    case Trackable::OBJ_ ## capital:                                \
+        LOG_NRM("Cmd %s is born with group lifetime", #proper);     \
+        return SharedTrackablePtr(new proper());                    \
+        break;
+#define INSTANTIATE_OBJ_w_fd(capital, proper)                       \
+    case Trackable::OBJ_ ## capital:                                \
+        LOG_NRM("Cmd %s is born with group lifetime", #proper);     \
+        return SharedTrackablePtr(new proper(mFd));                 \
+        break;
 
 typedef pair<string, SharedTrackablePtr> TrackablePair;
 
@@ -58,58 +74,21 @@ SharedTrackablePtr
 ObjRsrc::AllocWorker(Trackable::ObjType type)
 {
     switch (type) {
-    case Trackable::OBJ_MEMBUFFER:
-        LOG_NRM("MemBuffer is born with group lifetime");
-        return SharedTrackablePtr(new MemBuffer());
-        break;
-    case Trackable::OBJ_ACQ:
-        LOG_NRM("ACQ is born with group lifetime");
-        return SharedTrackablePtr(new ACQ(mFd));
-        break;
-    case Trackable::OBJ_ASQ:
-        LOG_NRM("ASQ is born with group lifetime");
-        return SharedTrackablePtr(new ASQ(mFd));
-        break;
-    case Trackable::OBJ_IOCQ:
-        LOG_NRM("IOCQ is born with group lifetime");
-        return SharedTrackablePtr(new IOCQ(mFd));
-        break;
-    case Trackable::OBJ_IOSQ:
-        LOG_NRM("IOSQ is born with group lifetime");
-        return SharedTrackablePtr(new IOSQ(mFd));
-        break;
-    case Trackable::OBJ_IDENTIFY:
-        LOG_NRM("Cmd Identify is born with group lifetime");
-        return SharedTrackablePtr(new Identify(mFd));
-        break;
-    case Trackable::OBJ_CREATEIOCQ:
-        LOG_NRM("Cmd Create IOCQ is born with group lifetime");
-        return SharedTrackablePtr(new CreateIOCQ(mFd));
-        break;
-    case Trackable::OBJ_CREATEIOSQ:
-        LOG_NRM("Cmd Create IOSQ is born with group lifetime");
-        return SharedTrackablePtr(new CreateIOSQ(mFd));
-        break;
-    case Trackable::OBJ_DELETEIOCQ:
-        LOG_NRM("Cmd Delete IOCQ is born with group lifetime");
-        return SharedTrackablePtr(new DeleteIOCQ(mFd));
-        break;
-    case Trackable::OBJ_DELETEIOSQ:
-        LOG_NRM("Cmd Delete IOSQ is born with group lifetime");
-        return SharedTrackablePtr(new DeleteIOSQ(mFd));
-        break;
-    case Trackable::OBJ_GETFEATURES:
-        LOG_NRM("Cmd Get Features is born with group lifetime");
-        return SharedTrackablePtr(new GetFeatures(mFd));
-        break;
-    case Trackable::OBJ_SETFEATURES:
-        LOG_NRM("Cmd Set Features is born with group lifetime");
-        return SharedTrackablePtr(new SetFeatures(mFd));
-        break;
-    case Trackable::OBJ_WRITE:
-        LOG_NRM("Cmd Write is born with group lifetime");
-        return SharedTrackablePtr(new Write(mFd));
-        break;
+    INSTANTIATE_OBJ(MEMBUFFER, MemBuffer)
+    INSTANTIATE_OBJ_w_fd(ACQ, ACQ)
+    INSTANTIATE_OBJ_w_fd(ASQ, ASQ)
+    INSTANTIATE_OBJ_w_fd(IOCQ, IOCQ)
+    INSTANTIATE_OBJ_w_fd(IOSQ, IOSQ)
+    INSTANTIATE_OBJ_w_fd(IDENTIFY, Identify)
+    INSTANTIATE_OBJ_w_fd(CREATEIOCQ, CreateIOCQ)
+    INSTANTIATE_OBJ_w_fd(CREATEIOSQ, CreateIOSQ)
+    INSTANTIATE_OBJ_w_fd(DELETEIOCQ, DeleteIOCQ)
+    INSTANTIATE_OBJ_w_fd(DELETEIOSQ, DeleteIOSQ)
+    INSTANTIATE_OBJ_w_fd(GETFEATURES, GetFeatures)
+    INSTANTIATE_OBJ_w_fd(SETFEATURES, SetFeatures)
+    INSTANTIATE_OBJ_w_fd(WRITE, Write)
+    INSTANTIATE_OBJ_w_fd(READ, Read)
+
     default:
         LOG_DBG("Unknown obj type specified: 0x%02X", type);
         break;

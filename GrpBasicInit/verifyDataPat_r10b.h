@@ -14,17 +14,15 @@
  *  limitations under the License.
  */
 
-#ifndef _WRITEDATAPATTERN_r10b_H_
-#define _WRITEDATAPATTERN_r10b_H_
+#ifndef _VERIFYDATAPATTERN_r10b_H_
+#define _VERIFYDATAPATTERN_r10b_H_
 
 #include "test.h"
 #include "../Queues/iocq.h"
 #include "../Queues/iosq.h"
-#include "../Cmds/write.h"
+#include "../Cmds/read.h"
 
 using namespace std;
-
-#define WRITE_DATA_PAT_NUM_BLKS     5
 
 
 /** \verbatim
@@ -34,19 +32,19 @@ using namespace std;
  * 1) See notes in the header file of the Test base class
  * \endverbatim
  */
-class WriteDataPat_r10b : public Test
+class VerifyDataPat_r10b : public Test
 {
 public:
-    WriteDataPat_r10b(int fd, string grpName, string testName);
-    virtual ~WriteDataPat_r10b();
+    VerifyDataPat_r10b(int fd, string grpName, string testName);
+    virtual ~VerifyDataPat_r10b();
 
     /**
-     * IMPORTANT: Read Test::Clone() header comment.
+     * IMPORTANT: Verify Test::Clone() header comment.
      */
-    virtual WriteDataPat_r10b *Clone() const
-        { return new WriteDataPat_r10b(*this); }
-    WriteDataPat_r10b &operator=(const WriteDataPat_r10b &other);
-    WriteDataPat_r10b(const WriteDataPat_r10b &other);
+    virtual VerifyDataPat_r10b *Clone() const
+        { return new VerifyDataPat_r10b(*this); }
+    VerifyDataPat_r10b &operator=(const VerifyDataPat_r10b &other);
+    VerifyDataPat_r10b(const VerifyDataPat_r10b &other);
 
 
 protected:
@@ -57,9 +55,10 @@ private:
     ///////////////////////////////////////////////////////////////////////////
     // Adding a member variable? Then edit the copy constructor and operator=().
     ///////////////////////////////////////////////////////////////////////////
-    void WriteDataPattern();
+    void VerifyDataPattern();
     void SendToIOSQ(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
-        SharedWritePtr writeCmd, string qualifier);
+        SharedReadPtr readCmd, string qualifier,
+        SharedMemBufferPtr writtenPayload, SharedMemBufferPtr readPayload);
 };
 
 

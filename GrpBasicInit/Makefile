@@ -26,7 +26,8 @@ SRC =						\
 	createIOQDiscontigPoll_r10b.cpp		\
 	deleteIOQContig_r10b.cpp		\
 	deleteIOQDiscontig_r10b.cpp		\
-	writeDataPat_r10b.cpp
+	writeDataPat_r10b.cpp			\
+	verifyDataPat_r10b.cpp
 
 .SUFFIXES: .cpp
 

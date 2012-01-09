@@ -33,7 +33,8 @@ SRC =				\
 	baseFeatures.cpp	\
 	getFeatures.cpp		\
 	setFeatures.cpp		\
-	write.cpp		
+	write.cpp		\
+	read.cpp		
 
 .SUFFIXES: .cpp
 

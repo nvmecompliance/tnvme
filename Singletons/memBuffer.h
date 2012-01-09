@@ -118,6 +118,15 @@ public:
     void Zero() { SetDataPattern(DATAPAT_CONST_8BIT, 0); }
 
     /**
+     * Compare a specified MemBuffer to this one.
+     * @param compTo Pass a reference to the memory to compare against
+     * @return true upon all data exactly identical, false is miscompare, and
+     *      throws when buffers are not of same size or other serious error
+     *      which causes the inability to compare data.
+     */
+    bool Compare(SharedMemBufferPtr compTo);
+
+    /**
      * Send the entire contents of this buffer to the logging endpoint
      * @param bufOffset Pass the offset byte for which to start dumping
      * @param length Pass the number of bytes to dump, ULONG_MAX implies all
