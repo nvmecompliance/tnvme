@@ -19,12 +19,12 @@ LDFLAGS=-lm
 LIBS = -L../ -L/usr/local/lib -lm
 INCLUDES = -I. -I../ -I../../ -I/usr/local/include
 
-SRC = \
-	cmd.cpp				\
-	prpData.cpp			\
+SRC =				\
+	cmd.cpp			\
+	prpData.cpp		\
 	metaData.cpp		\
 	adminCmd.cpp		\
-	nvmCmd.cpp			\
+	nvmCmd.cpp		\
 	createIOCQ.cpp		\
 	deleteIOCQ.cpp		\
 	createIOSQ.cpp		\
@@ -32,7 +32,8 @@ SRC = \
 	identify.cpp		\
 	baseFeatures.cpp	\
 	getFeatures.cpp		\
-	setFeatures.cpp
+	setFeatures.cpp		\
+	write.cpp		
 
 .SUFFIXES: .cpp
 

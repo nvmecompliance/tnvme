@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-#include "deleteIOQDiscontigPoll_r10b.h"
+#include "deleteIOQContig_r10b.h"
 #include "globals.h"
 #include "../Queues/iocq.h"
 #include "../Queues/iosq.h"
@@ -22,29 +22,29 @@
 #include "../Cmds/deleteIOCQ.h"
 #include "../Cmds/deleteIOSQ.h"
 #include "createACQASQ_r10b.h"
-#include "createIOQDiscontigPoll_r10b.h"
+#include "createIOQContigPoll_r10b.h"
 
 #define DEFAULT_CMD_WAIT_ms         2000
 
 
-DeleteIOQDiscontigPoll_r10b::DeleteIOQDiscontigPoll_r10b(int fd, string grpName,
+DeleteIOQContig_r10b::DeleteIOQContig_r10b(int fd, string grpName,
     string testName) :
     Test(fd, grpName, testName, SPECREV_10b)
 {
     // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 7");
-    mTestDesc.SetShort(     "Delete discontiguous IOCQ and IOSQ's");
+    mTestDesc.SetShort(     "Delete contiguous IOCQ and IOSQ's");
     // No string size limit for the long description
     mTestDesc.SetLong(
         "Issue the admin commands Delete I/O SQ and Delete I/Q CQ"
         "to the ASQ and reap the resulting CE's from the ACQ to certify "
-        "those the discontiguous IOQ's have been deleted. Dumping driver "
+        "those the contiguous IOQ's have been deleted. Dumping driver "
         "metrics before and after the deletion will prove the dnvme/hdw has "
         "removed those Q's");
 }
 
 
-DeleteIOQDiscontigPoll_r10b::~DeleteIOQDiscontigPoll_r10b()
+DeleteIOQContig_r10b::~DeleteIOQContig_r10b()
 {
     ///////////////////////////////////////////////////////////////////////////
     // Allocations taken from the heap and not under the control of the
@@ -53,9 +53,8 @@ DeleteIOQDiscontigPoll_r10b::~DeleteIOQDiscontigPoll_r10b()
 }
 
 
-DeleteIOQDiscontigPoll_r10b::
-DeleteIOQDiscontigPoll_r10b(const DeleteIOQDiscontigPoll_r10b &other) :
-    Test(other)
+DeleteIOQContig_r10b::
+DeleteIOQContig_r10b(const DeleteIOQContig_r10b &other) : Test(other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -64,8 +63,8 @@ DeleteIOQDiscontigPoll_r10b(const DeleteIOQDiscontigPoll_r10b &other) :
 }
 
 
-DeleteIOQDiscontigPoll_r10b &
-DeleteIOQDiscontigPoll_r10b::operator=(const DeleteIOQDiscontigPoll_r10b &other)
+DeleteIOQContig_r10b &
+DeleteIOQContig_r10b::operator=(const DeleteIOQContig_r10b &other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -77,25 +76,16 @@ DeleteIOQDiscontigPoll_r10b::operator=(const DeleteIOQDiscontigPoll_r10b &other)
 
 
 bool
-DeleteIOQDiscontigPoll_r10b::RunCoreTest()
+DeleteIOQContig_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
      * 1) The ASQ & ACQ's have been created by the RsrcMngr for group lifetime
      * 2) All interrupts are disabled.
-     * 3) CreateIOQDiscontigPoll_r10b test case has setup the Q's to delete
+     * 3) CreateIOQContigPoll_r10b test case has setup the Q's to delete
      * 4) CC.IOCQES and CC.IOSQES are already setup with correct values.
      * \endverbatim
      */
-
-    uint64_t regVal;
-    if (gRegisters->Read(CTLSPC_CAP, regVal) == false) {
-        LOG_ERR("Unable to determine Q memory requirements");
-        throw exception();
-    } else if (regVal & CAP_CQR) {
-        LOG_NRM("Unable to utilize discontig Q's, DUT requires contig");
-        return true;
-    }
 
     KernelAPI::DumpKernelMetrics(mFd,
         FileSystem::PrepLogFile(mGrpName, mTestName, "kmetrics", "before"));
@@ -104,8 +94,8 @@ DeleteIOQDiscontigPoll_r10b::RunCoreTest()
     SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
     SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
 
-    DeleteIOCQDiscontigPoll(asq, acq);
-    DeleteIOSQDiscontigPoll(asq, acq);
+    DeleteIOCQContig(asq, acq);
+    DeleteIOSQContig(asq, acq);
 
     KernelAPI::DumpKernelMetrics(mFd,
         FileSystem::PrepLogFile(mGrpName, mTestName, "kmetrics", "after"));
@@ -114,14 +104,14 @@ DeleteIOQDiscontigPoll_r10b::RunCoreTest()
 
 
 void
-DeleteIOQDiscontigPoll_r10b::DeleteIOCQDiscontigPoll(SharedASQPtr asq,
+DeleteIOQContig_r10b::DeleteIOCQContig(SharedASQPtr asq,
     SharedACQPtr acq)
 {
     uint16_t numCE;
 
     LOG_NRM("Lookup IOCQ which was created in a prior test within group");
-    SharedIOCQPtr iocq = CAST_TO_IOCQ(
-        gRsrcMngr->GetObj(IOCQ_DISCONTIG_POLL_GROUP_ID))
+    SharedIOCQPtr iocq =
+        CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_CONTIG_POLL_GROUP_ID))
 
     LOG_NRM("Create a Delete IOCQ cmd to perform the IOCQ deletion");
     SharedDeleteIOCQPtr deleteIOCQCmd =
@@ -165,19 +155,19 @@ DeleteIOQDiscontigPoll_r10b::DeleteIOCQDiscontigPoll(SharedASQPtr asq,
     }
 
     // Not explicitly necessary, but is more clean to free what is not needed
-    gRsrcMngr->FreeObj(IOCQ_DISCONTIG_POLL_GROUP_ID);
+    gRsrcMngr->FreeObj(IOCQ_CONTIG_POLL_GROUP_ID);
 }
 
 
 void
-DeleteIOQDiscontigPoll_r10b::DeleteIOSQDiscontigPoll(SharedASQPtr asq,
+DeleteIOQContig_r10b::DeleteIOSQContig(SharedASQPtr asq,
     SharedACQPtr acq)
 {
     uint16_t numCE;
 
     LOG_NRM("Lookup IOSQ which was created in a prior test within group");
-    SharedIOSQPtr iosq = CAST_TO_IOSQ(
-        gRsrcMngr->GetObj(IOSQ_DISCONTIG_POLL_GROUP_ID))
+    SharedIOSQPtr iosq =
+        CAST_TO_IOSQ(gRsrcMngr->GetObj(IOSQ_CONTIG_POLL_GROUP_ID))
 
     LOG_NRM("Create a Delete IOSQ cmd to perform the IOSQ deletion");
     SharedDeleteIOSQPtr deleteIOSQCmd =
@@ -221,5 +211,5 @@ DeleteIOQDiscontigPoll_r10b::DeleteIOSQDiscontigPoll(SharedASQPtr asq,
     }
 
     // Not explicitly necessary, but is more clean to free what is not needed
-    gRsrcMngr->FreeObj(IOSQ_DISCONTIG_POLL_GROUP_ID);
+    gRsrcMngr->FreeObj(IOSQ_CONTIG_POLL_GROUP_ID);
 }

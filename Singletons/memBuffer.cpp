@@ -165,14 +165,6 @@ MemBuffer::Init(uint32_t bufSize, bool initMem, uint8_t initVal)
 
 
 void
-MemBuffer::Zero()
-{
-    if (mRealBaseAddr)
-        memset(mVirBaseAddr, 0, mVirBufSize);
-}
-
-
-void
 MemBuffer::Log(uint32_t bufOffset, unsigned long length)
 {
     Buffers::Log(GetBuffer(), bufOffset, length, GetBufSize(), "MemBuffer");
@@ -184,4 +176,74 @@ MemBuffer::Dump(LogFilename filename, string fileHdr)
 {
     Buffers::Dump(filename, GetBuffer(), 0, ULONG_MAX, GetBufSize(), fileHdr);
 
+}
+
+
+void
+MemBuffer::SetDataPattern(DataPattern dataPat, uint64_t initVal)
+{
+    LOG_NRM("Write data pattern: initial value = 0x%016llX",
+        (long long unsigned int)dataPat);
+
+    if (mRealBaseAddr == NULL)
+        return;
+
+    switch (dataPat)
+    {
+    case DATAPAT_CONST_8BIT:
+        {
+            LOG_NRM("Write data pattern: constant 8 bit");
+            memset(mVirBaseAddr, (uint8_t)initVal, mVirBufSize);
+        }
+        break;
+
+    case DATAPAT_CONST_16BIT:
+        {
+            LOG_NRM("Write data pattern: constant 16 bit");
+            uint16_t *rawPtr = (uint16_t *)GetBuffer();
+            for (uint64_t i = 0; i < GetBufSize(); i++)
+                *rawPtr++ = (uint16_t)initVal;
+        }
+        break;
+
+    case DATAPAT_CONST_32BIT:
+        {
+            LOG_NRM("Write data pattern: constant 32 bit");
+            uint32_t *rawPtr = (uint32_t *)GetBuffer();
+            for (uint64_t i = 0; i < GetBufSize(); i++)
+                *rawPtr++ = (uint32_t)initVal;
+        }
+        break;
+
+    case DATAPAT_INC_8BIT:
+        {
+            LOG_NRM("Write data pattern: incrementing 8 bit");
+            uint8_t *rawPtr = (uint8_t *)GetBuffer();
+            for (uint64_t i = 0; i < GetBufSize(); i++)
+                *rawPtr++ = (uint8_t)initVal++;
+        }
+        break;
+
+    case DATAPAT_INC_16BIT:
+        {
+            LOG_NRM("Write data pattern: incrementing 16 bit");
+            uint16_t *rawPtr = (uint16_t *)GetBuffer();
+            for (uint64_t i = 0; i < GetBufSize(); i++)
+                *rawPtr++ = (uint16_t)initVal++;
+        }
+        break;
+
+    case DATAPAT_INC_32BIT:
+        {
+            LOG_NRM("Write data pattern: incrementing 32 bit");
+            uint32_t *rawPtr = (uint32_t *)GetBuffer();
+            for (uint64_t i = 0; i < GetBufSize(); i++)
+                *rawPtr++ = (uint32_t)initVal++;
+        }
+        break;
+
+    default:
+        LOG_DBG("Unsupported data pattern %d", dataPat);
+        throw exception();
+    }
 }

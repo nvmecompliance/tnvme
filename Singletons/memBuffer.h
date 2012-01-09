@@ -25,8 +25,8 @@
 
 
 class MemBuffer;    // forward definition
-typedef boost::shared_ptr<MemBuffer>        SharedMemBufferPtr;
-#define CAST_TO_MB(shared_trackable_ptr)  \
+typedef boost::shared_ptr<MemBuffer>            SharedMemBufferPtr;
+#define CAST_TO_MEMBUFFER(shared_trackable_ptr) \
         boost::shared_polymorphic_downcast<MemBuffer>(shared_trackable_ptr);
 
 
@@ -95,8 +95,27 @@ public:
     uint32_t GetBufSize() { return mVirBufSize; }
     uint32_t GetAlignment() { return mAlignment; }
 
+    typedef enum {
+        DATAPAT_CONST_8BIT,
+        DATAPAT_CONST_16BIT,
+        DATAPAT_CONST_32BIT,
+        DATAPAT_INC_8BIT,
+        DATAPAT_INC_16BIT,
+        DATAPAT_INC_32BIT,
+
+        DATAPATTERN_FENCE           // always must be last element
+    } DataPattern;
+
+    /**
+     * Write all the data consisting of this buffer starting with the stated
+     * initial value and progressing according to the desired pattern/series.
+     * @param dataPat Pass the desired data pattern/series to calc next value
+     * @param initVal Pass the 1st value of the pattern/series
+     */
+    void SetDataPattern(DataPattern dataPat, uint64_t initVal = 0);
+
     /// Zero out all memory bytes
-    void Zero();
+    void Zero() { SetDataPattern(DATAPAT_CONST_8BIT, 0); }
 
     /**
      * Send the entire contents of this buffer to the logging endpoint

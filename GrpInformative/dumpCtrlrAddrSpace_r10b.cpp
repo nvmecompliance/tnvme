@@ -31,7 +31,7 @@ DumpCtrlrAddrSpace_r10b::DumpCtrlrAddrSpace_r10b(int fd, string grpName,
     Test(fd, grpName, testName, SPECREV_10b)
 {
     // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-    mTestDesc.SetCompliance("revision 1.0b, section n/a");
+    mTestDesc.SetCompliance("revision 1.0b, section 3");
     mTestDesc.SetShort(     "Dump all controller address space registers");
     // No string size limit for the long description
     mTestDesc.SetLong(

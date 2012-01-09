@@ -19,6 +19,9 @@
 #include "globals.h"
 
 
+const uint8_t CtrlrConfig::CSS_NVM_CMDSET   = 0x00;
+
+
 bool CtrlrConfig::mInstanceFlag = false;
 CtrlrConfig* CtrlrConfig::mSingleton = NULL;
 CtrlrConfig* CtrlrConfig::GetInstance(int fd, SpecRev specRev)

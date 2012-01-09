@@ -123,6 +123,7 @@ public:
     bool GetCSS(uint8_t &value)
         { return GetRegValue(value, CC_CSS, 4); }
     bool SetCSS(uint8_t value);
+    static const uint8_t CSS_NVM_CMDSET;
 
 
 private:

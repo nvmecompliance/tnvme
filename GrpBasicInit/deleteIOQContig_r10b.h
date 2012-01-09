@@ -14,15 +14,12 @@
  *  limitations under the License.
  */
 
-#ifndef _CREATEIOQDISCONTIGPOLL_r10b_H_
-#define _CREATEIOQDISCONTIGPOLL_r10b_H_
+#ifndef _DELETEIOQCONTIG_r10b_H_
+#define _DELETEIOQCONTIG_r10b_H_
 
 #include "test.h"
 #include "../Queues/asq.h"
 #include "../Queues/acq.h"
-
-#define IOCQ_DISCONTIG_POLL_GROUP_ID      "IOCQDiscontigPoll"
-#define IOSQ_DISCONTIG_POLL_GROUP_ID      "IOSQDiscontigPoll"
 
 
 /** \verbatim
@@ -32,20 +29,19 @@
  * 1) See notes in the header file of the Test base class
  * \endverbatim
  */
-class CreateIOQDiscontigPoll_r10b : public Test
+class DeleteIOQContig_r10b : public Test
 {
 public:
-    CreateIOQDiscontigPoll_r10b(int fd, string grpName, string testName);
-    virtual ~CreateIOQDiscontigPoll_r10b();
+    DeleteIOQContig_r10b(int fd, string grpName, string testName);
+    virtual ~DeleteIOQContig_r10b();
 
     /**
      * IMPORTANT: Read Test::Clone() header comment.
      */
-    virtual CreateIOQDiscontigPoll_r10b *Clone() const
-        { return new CreateIOQDiscontigPoll_r10b(*this); }
-    CreateIOQDiscontigPoll_r10b &operator=(
-        const CreateIOQDiscontigPoll_r10b &other);
-    CreateIOQDiscontigPoll_r10b(const CreateIOQDiscontigPoll_r10b &other);
+    virtual DeleteIOQContig_r10b *Clone() const
+        { return new DeleteIOQContig_r10b(*this); }
+    DeleteIOQContig_r10b &operator=(const DeleteIOQContig_r10b &other);
+    DeleteIOQContig_r10b(const DeleteIOQContig_r10b &other);
 
 
 protected:
@@ -56,8 +52,8 @@ private:
     ///////////////////////////////////////////////////////////////////////////
     // Adding a member variable? Then edit the copy constructor and operator=().
     ///////////////////////////////////////////////////////////////////////////
-    void CreateIOCQDiscontigPoll(SharedASQPtr asq, SharedACQPtr acq);
-    void CreateIOSQDiscontigPoll(SharedASQPtr asq, SharedACQPtr acq);
+    void DeleteIOCQContig(SharedASQPtr asq, SharedACQPtr acq);
+    void DeleteIOSQContig(SharedASQPtr asq, SharedACQPtr acq);
 };
 
 

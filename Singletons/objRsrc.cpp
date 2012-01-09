@@ -27,6 +27,7 @@
 #include "../Cmds/deleteIOSQ.h"
 #include "../Cmds/getFeatures.h"
 #include "../Cmds/setFeatures.h"
+#include "../Cmds/write.h"
 
 
 typedef pair<string, SharedTrackablePtr> TrackablePair;
@@ -104,6 +105,10 @@ ObjRsrc::AllocWorker(Trackable::ObjType type)
     case Trackable::OBJ_SETFEATURES:
         LOG_NRM("Cmd Set Features is born with group lifetime");
         return SharedTrackablePtr(new SetFeatures(mFd));
+        break;
+    case Trackable::OBJ_WRITE:
+        LOG_NRM("Cmd Write is born with group lifetime");
+        return SharedTrackablePtr(new Write(mFd));
         break;
     default:
         LOG_DBG("Unknown obj type specified: 0x%02X", type);

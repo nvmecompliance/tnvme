@@ -101,17 +101,45 @@ Cmd::GetDword(uint8_t whichDW) const
 }
 
 
+uint16_t
+Cmd::GetWord(uint8_t whichDW, uint8_t dwOffset) const
+{
+    if (whichDW >= GetCmdSizeDW()) {
+        LOG_DBG("Cmd is not large enough to get requested value");
+        throw exception();
+    } else if (dwOffset > 1) {
+        LOG_DBG("Illegal DW offset parameter passed: %d", dwOffset);
+        throw exception();
+    }
+    return (uint16_t)(GetDword(whichDW) >> (dwOffset * 16));
+}
+
+
 uint8_t
 Cmd::GetByte(uint8_t whichDW, uint8_t dwOffset) const
 {
-    if (whichDW >= GetCmdSizeB()) {
+    if (whichDW >= GetCmdSizeDW()) {
         LOG_DBG("Cmd is not large enough to get requested value");
         throw exception();
-    } else if (dwOffset > 4) {
+    } else if (dwOffset > 3) {
         LOG_DBG("Illegal DW offset parameter passed: %d", dwOffset);
         throw exception();
     }
     return (uint8_t)(GetDword(whichDW) >> (dwOffset * 8));
+}
+
+
+bool
+Cmd::GetBit(uint8_t whichDW, uint8_t dwOffset) const
+{
+    if (whichDW >= GetCmdSizeDW()) {
+        LOG_DBG("Cmd is not large enough to get requested value");
+        throw exception();
+    } else if (dwOffset > 31) {
+        LOG_DBG("Illegal DW offset parameter passed: %d", dwOffset);
+        throw exception();
+    }
+    return (GetDword(whichDW) & (0x00000001 << dwOffset));
 }
 
 
@@ -128,19 +156,56 @@ Cmd::SetDword(uint32_t newVal, uint8_t whichDW)
 
 
 void
+Cmd::SetWord(uint16_t newVal, uint8_t whichDW, uint8_t dwOffset)
+{
+    if (whichDW >= GetCmdSizeDW()) {
+        LOG_DBG("Cmd is not large enough (%d DWORDS) to set req'd DWORD %d",
+            GetCmdSizeDW(), whichDW);
+        throw exception();
+    } else if (dwOffset > 1) {
+        LOG_DBG("Illegal DW offset parameter passed: %d", dwOffset);
+        throw exception();
+    }
+    uint32_t dw = GetDword(whichDW);
+    dw &= ~(0x0000ffff << (dwOffset * 16));
+    dw |= ((uint32_t)newVal << (dwOffset * 16));
+    SetDword(dw, whichDW);
+}
+
+
+void
 Cmd::SetByte(uint8_t newVal, uint8_t whichDW, uint8_t dwOffset)
 {
     if (whichDW >= GetCmdSizeDW()) {
         LOG_DBG("Cmd is not large enough (%d DWORDS) to set req'd DWORD %d",
             GetCmdSizeDW(), whichDW);
         throw exception();
-    } else if (dwOffset > 4) {
+    } else if (dwOffset > 3) {
         LOG_DBG("Illegal DW offset parameter passed: %d", dwOffset);
         throw exception();
     }
     uint32_t dw = GetDword(whichDW);
     dw &= ~(0x000000ff << (dwOffset * 8));
     dw |= ((uint32_t)newVal << (dwOffset * 8));
+    SetDword(dw, whichDW);
+}
+
+
+void
+Cmd::SetBit(bool newVal, uint8_t whichDW, uint8_t dwOffset)
+{
+    if (whichDW >= GetCmdSizeDW()) {
+        LOG_DBG("Cmd is not large enough (%d DWORDS) to set req'd DWORD %d",
+            GetCmdSizeDW(), whichDW);
+        throw exception();
+    } else if (dwOffset > 31) {
+        LOG_DBG("Illegal DW offset parameter passed: %d", dwOffset);
+        throw exception();
+    }
+    uint32_t dw = GetDword(whichDW);
+    dw &= ~(0x00000001 << dwOffset);
+    if (newVal)
+        dw |= (0x00000001 << dwOffset);
     SetDword(dw, whichDW);
 }
 
@@ -166,7 +231,7 @@ Cmd::GetFUSE() const
 void
 Cmd::SetNSID(uint32_t newVal)
 {
-    LOG_NRM("Setting NSID");
+    LOG_NRM("Setting NSID = %d (0x%08X)", newVal, newVal);
     SetDword(newVal, 1);
 }
 

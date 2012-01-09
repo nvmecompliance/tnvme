@@ -24,9 +24,10 @@
 #include "../Cmds/createIOSQ.h"
 #include "../Singletons/informative.h"
 
-#define IOQ_ID                      1
+#define IOQ_ID                      2
 #define DEFAULT_CMD_WAIT_ms         2000
-#define IOQ_NUM_ENTRIES             5
+
+static uint16_t NumEntriesIOQ =     5;
 
 
 CreateIOQDiscontigPoll_r10b::CreateIOQDiscontigPoll_r10b(int fd, string grpName,
@@ -35,12 +36,12 @@ CreateIOQDiscontigPoll_r10b::CreateIOQDiscontigPoll_r10b(int fd, string grpName,
 {
     // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 7");
-    mTestDesc.SetShort(     "Create discontiguous IOCQ and IOSQ's");
+    mTestDesc.SetShort(     "Create discontiguous IOCQ(poll) and IOSQ's");
     // No string size limit for the long description
     mTestDesc.SetLong(
         "Issue the admin commands Create discontiguous I/O SQ and Create I/Q "
-        "CQ to the ASQ and reap the resulting CE's from the ACQ to certify "
-        "those Q's have been created.");
+        "CQ(poll) to the ASQ and reap the resulting CE's from the ACQ to "
+        "certify those Q's have been created.");
 }
 
 
@@ -86,15 +87,9 @@ CreateIOQDiscontigPoll_r10b::RunCoreTest()
      * 3) Empty ASQ & ACQ's
      * \endverbatim
      */
-
     uint64_t regVal;
-    if (gRegisters->Read(CTLSPC_CAP, regVal) == false) {
-        LOG_ERR("Unable to determine Q memory requirements");
-        throw exception();
-    } else if (regVal & CAP_CQR) {
-        LOG_NRM("Unable to utilize discontig Q's, DUT requires contig");
-        return true;
-    }
+    uint64_t work;
+
 
     KernelAPI::DumpKernelMetrics(mFd,
         FileSystem::PrepLogFile(mGrpName, mTestName, "kmetrics", "before"));
@@ -103,9 +98,32 @@ CreateIOQDiscontigPoll_r10b::RunCoreTest()
     SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
     SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
 
-    // Assuming a clean admin Q for our operations
+    // Verify assumptions are active/enabled/present/setup
     if (acq->ReapInquiry() != 0) {
         LOG_ERR("The ACQ should not have any CE's waiting before testing");
+        throw exception();
+    } else if (gRegisters->Read(CTLSPC_CAP, regVal) == false) {
+        LOG_ERR("Unable to determine Q memory requirements");
+        throw exception();
+    } else if (regVal & CAP_CQR) {
+        LOG_NRM("Unable to utilize discontig Q's, DUT requires contig");
+        return true;
+    } if (gRegisters->Read(CTLSPC_CAP, work) == false) {
+        LOG_ERR("Unable to determine MQES");
+        throw exception();
+    }
+
+    // Verify the min requirements for this test are supported by DUT
+    work &= CAP_MQES;
+    if (work < (uint64_t)NumEntriesIOQ) {
+        LOG_NRM("Changing number of Q element from %d to %d",
+            NumEntriesIOQ, (uint16_t)work);
+        NumEntriesIOQ = work;
+    } else if (gInformative->GetFeaturesNumOfIOCQs() < IOQ_ID) {
+        LOG_ERR("DUT doesn't support %d IOCQ's", IOQ_ID);
+        throw exception();
+    } else if (gInformative->GetFeaturesNumOfIOSQs() < IOQ_ID) {
+        LOG_ERR("DUT doesn't support %d IOSQ's", IOQ_ID);
         throw exception();
     }
 
@@ -131,9 +149,9 @@ CreateIOQDiscontigPoll_r10b::CreateIOCQDiscontigPoll(SharedASQPtr asq,
         gRsrcMngr->AllocObj(Trackable::OBJ_IOCQ, IOCQ_DISCONTIG_POLL_GROUP_ID));
     LOG_NRM("Allocate discontiguous memory, ID=%d for the IOCQ", IOQ_ID);
     SharedMemBufferPtr iocqMem = SharedMemBufferPtr(new MemBuffer());
-    iocqMem->InitAlignment((IOQ_NUM_ENTRIES * IOCQ::COMMON_ELEMENT_SIZE),
+    iocqMem->InitAlignment((NumEntriesIOQ * IOCQ::COMMON_ELEMENT_SIZE),
         sysconf(_SC_PAGESIZE), true, 0);
-    iocq->Init(IOQ_ID, IOQ_NUM_ENTRIES, iocqMem, false, 0);
+    iocq->Init(IOQ_ID, NumEntriesIOQ, iocqMem, false, 0);
 
 
     LOG_NRM("Create a Create IOCQ cmd to perform the IOCQ creation");
@@ -211,9 +229,9 @@ CreateIOQDiscontigPoll_r10b::CreateIOSQDiscontigPoll(SharedASQPtr asq,
         gRsrcMngr->AllocObj(Trackable::OBJ_IOSQ, IOSQ_DISCONTIG_POLL_GROUP_ID));
     LOG_NRM("Allocate discontiguous memory, ID=%d for the IOSQ", IOQ_ID);
     SharedMemBufferPtr iosqMem = SharedMemBufferPtr(new MemBuffer());
-    iosqMem->InitAlignment((IOQ_NUM_ENTRIES * IOSQ::COMMON_ELEMENT_SIZE),
+    iosqMem->InitAlignment((NumEntriesIOQ * IOSQ::COMMON_ELEMENT_SIZE),
         sysconf(_SC_PAGESIZE), true, 0);
-    iosq->Init(IOQ_ID, IOQ_NUM_ENTRIES, iosqMem, false, 0);
+    iosq->Init(IOQ_ID, NumEntriesIOQ, iosqMem, false, 0);
 
 
     LOG_NRM("Create a Create IOSQ cmd to perform the IOSQ creation");

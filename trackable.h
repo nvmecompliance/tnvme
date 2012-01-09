@@ -49,6 +49,7 @@ public:
         OBJ_DELETEIOSQ,         // Admin cmd set delete IOSQ cmd
         OBJ_GETFEATURES,        // Admin cmd set get features cmd
         OBJ_SETFEATURES,        // Admin cmd set get features cmd
+        OBJ_WRITE,              // NVM cmd set write cmd
 
         OBJTYPE_FENCE           // always must be last element
     } ObjType;

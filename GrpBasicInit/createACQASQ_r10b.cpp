@@ -92,6 +92,8 @@ CreateACQASQ_r10b::RunCoreTest()
         gRsrcMngr->AllocObj(Trackable::OBJ_ASQ, ASQ_GROUP_ID))
     asq->Init(5);
 
+    gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
+
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
         throw exception();
 

@@ -59,6 +59,7 @@ public:
     SharedMemBufferPtr GetCmd() const { return mCmdBuf; }
 
     uint16_t  GetCmdSizeB() const { return mCmdBuf->GetBufSize(); }
+    uint16_t  GetCmdSizeW() const { return (mCmdBuf->GetBufSize() / 2); }
     uint8_t   GetCmdSizeDW() const { return (mCmdBuf->GetBufSize() / 4); }
     nvme_cmds GetCmdSet() const { return mCmdSet; }
     DataDir   GetDataDir() const { return mDataDir; }
@@ -75,8 +76,8 @@ public:
      * namespaces within the DUT.
      * @param newVal Pass the new value to set for the NSID
      */
-    void      SetNSID(uint32_t newVal);
-    uint32_t  GetNSID() const;
+    void     SetNSID(uint32_t newVal);
+    uint32_t GetNSID() const;
 
     /**
      * This value cannot be set because dnvme overwrites any value we would
@@ -94,6 +95,15 @@ public:
      */
     void SetDword(uint32_t newVal, uint8_t whichDW);
     uint32_t GetDword(uint8_t whichDW) const;
+
+    /**
+     * @param newVal Pass the new WORD value to set in the cmd buffer
+     * @param whichDW Pass [0->(GetCmdSizeDW()-1)] which DWORD to set
+     * @param dwOffset Pass [0->1] for which word offset within the DW to set
+     */
+    void SetWord(uint16_t newVal, uint8_t whichDW, uint8_t dwOffset);
+    uint16_t GetWord(uint8_t whichDW, uint8_t dwOffset) const;
+
     /**
      * @param newVal Pass the new DWORD value to set in the cmd buffer
      * @param whichDW Pass [0->(GetCmdSizeDW()-1)] which DWORD to set
@@ -101,6 +111,14 @@ public:
      */
     void SetByte(uint8_t newVal, uint8_t whichDW, uint8_t dwOffset);
     uint8_t GetByte(uint8_t whichDW, uint8_t dwOffset) const;
+
+    /**
+     * @param newVal Pass true to set, false to reset in the cmd buffer
+     * @param whichDW Pass [0->(GetCmdSizeDW()-1)] which DWORD to set
+     * @param dwOffset Pass [0->31] for which bit offset within the DW to set
+     */
+    void SetBit(bool newVal, uint8_t whichDW, uint8_t dwOffset);
+    bool GetBit(uint8_t whichDW, uint8_t dwOffset) const;
 
     /**
      * Append the entire contents of this cmd's command bytes to the named file.
@@ -119,7 +137,10 @@ protected:
      * Initialize this object.
      * @param cmdSet Pass which cmd set this cmd belongs
      * @param opcode Pass the opcode defining this cmd, per NVME spec.
-     * @param dataDir Pass the direction of data for this cmd
+     * @param dataDir Pass the direction of data for this cmd. This is used
+     *      to notify dnvme which way to send base classes PrpData. The kernel
+     *      requires special calls dependant upon the direction of xfer. If this
+     *      is not correct, unknown outcomes will be observed.
      * @param cmdSize Pass the number of bytes consisting of a single cmd.
      */
     void Init(nvme_cmds cmdSet, uint8_t opcode, DataDir dataDir,

@@ -14,6 +14,8 @@
  *  limitations under the License.
  */
 
+#include <string.h>
+#include <math.h>
 #include "identify.h"
 #include "../Utils/buffers.h"
 #include "../Utils/fileSystem.h"
@@ -42,15 +44,13 @@ IdentifyDataType Identify::mIdNamespcType[] =
 #undef ZZ
 
 
-Identify::Identify() :
-    AdminCmd(0, Trackable::OBJTYPE_FENCE)
+Identify::Identify() : AdminCmd(0, Trackable::OBJTYPE_FENCE)
 {
     // This constructor will throw
 }
 
 
-Identify::Identify(int fd) :
-    AdminCmd(fd, Trackable::OBJ_IDENTIFY)
+Identify::Identify(int fd) : AdminCmd(fd, Trackable::OBJ_IDENTIFY)
 {
     Init(0x06, DATADIR_FROM_DEVICE);
     SetCNS(true);
@@ -120,7 +120,7 @@ Identify::GetValue(int field, IdentifyDataType *idData) const
         throw exception();
     } else if ((idData[field].length + idData[field].offset) >=
         GetPrpBufferSize()) {
-        LOG_DBG("Detected illegal definition in IDxxxxx_TABLE");
+        LOG_DBG("Detected illegal def in IDxxxxx_TABLE or buffer is to small");
         LOG_DBG("Reference calc (%d): %d + %d >= %ld", field,
             idData[field].length, idData[field].offset, GetPrpBufferSize());
         throw exception();
@@ -200,4 +200,43 @@ Identify::Dump(FILE *fp, int field, IdentifyDataType *idData) const
     }
     if (output.length() != 0)
         fprintf(fp, "%s\n", output.c_str());
+}
+
+
+LBAFormat
+Identify::GetLBAFormat() const
+{
+    LBAFormat lbaFormat;
+
+    if (GetCNS()) {
+        LOG_DBG("This cmd does not contain a namespace data struct");
+        throw exception();
+    }
+
+    uint64_t flbas = GetValue(IDNAMESPC_FLBAS);
+    uint8_t formatIdx = (uint8_t)(flbas & 0x0f);
+    uint64_t work = GetValue((IDNAMESPC_LBAF0 + formatIdx), mIdNamespcType);
+    memcpy(&lbaFormat, &work, sizeof(lbaFormat));
+
+    LOG_NRM("Active LBA format:");
+    LOG_NRM("  MS    = 0x%04X", lbaFormat.MS);
+    LOG_NRM("  LBADS = 0x%02X", lbaFormat.LBADS);
+    LOG_NRM("  RP    = 0x%01X", lbaFormat.RP);
+    return lbaFormat;
+}
+
+
+uint64_t
+Identify::GetLBADataSize() const
+{
+    if (GetCNS()) {
+        LOG_DBG("This cmd does not contain a namespace data struct");
+        throw exception();
+    }
+
+    LBAFormat lbaFormat = GetLBAFormat();
+    uint64_t lbaDataSize = (uint64_t)pow(2.0, lbaFormat.LBADS);
+    LOG_NRM("Active logical blk size = 0x%016llX",
+        (long long unsigned int)lbaDataSize);
+    return lbaDataSize;
 }

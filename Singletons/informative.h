@@ -70,11 +70,15 @@ public:
 
     /**
      * Retrieve a previously fetched get features's number of queues feature ID.
-     * @note This is DW0 of the CE which results from a Get FEatures. The spec
-     *      states this is a 0-based value, thus 1 IOQ will always be supported
-     * @return The last known value returned by the DUT.
+     * This is DW0 of the CE which results from a Get FEatures. The spec
+     * states this is a 0-based value, thus 1 IOQ will always be supported
+     * @return The last known DW0 of the CE returned by the DUT.
      */
-    uint32_t GetFeaturesNumberOfQueues() { return mGetFeaturesNumOfQ; }
+    uint32_t GetFeaturesNumOfQueues();
+    /// @return Derives the value from DW0 of the CE & converts to a 1-base val
+    uint16_t GetFeaturesNumOfIOCQs();
+    /// @return Derives the value from DW0 of the CE & converts to a 1-base val
+    uint16_t GetFeaturesNumOfIOSQs();
 
 
 private:

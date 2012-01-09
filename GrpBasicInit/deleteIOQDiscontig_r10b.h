@@ -14,15 +14,12 @@
  *  limitations under the License.
  */
 
-#ifndef _CREATEIOQDISCONTIGPOLL_r10b_H_
-#define _CREATEIOQDISCONTIGPOLL_r10b_H_
+#ifndef _DELETEIOQDISCONTIG_r10b_H_
+#define _DELETEIOQDISCONTIG_r10b_H_
 
 #include "test.h"
 #include "../Queues/asq.h"
 #include "../Queues/acq.h"
-
-#define IOCQ_DISCONTIG_POLL_GROUP_ID      "IOCQDiscontigPoll"
-#define IOSQ_DISCONTIG_POLL_GROUP_ID      "IOSQDiscontigPoll"
 
 
 /** \verbatim
@@ -32,20 +29,20 @@
  * 1) See notes in the header file of the Test base class
  * \endverbatim
  */
-class CreateIOQDiscontigPoll_r10b : public Test
+class DeleteIOQDiscontig_r10b : public Test
 {
 public:
-    CreateIOQDiscontigPoll_r10b(int fd, string grpName, string testName);
-    virtual ~CreateIOQDiscontigPoll_r10b();
+    DeleteIOQDiscontig_r10b(int fd, string grpName, string testName);
+    virtual ~DeleteIOQDiscontig_r10b();
 
     /**
      * IMPORTANT: Read Test::Clone() header comment.
      */
-    virtual CreateIOQDiscontigPoll_r10b *Clone() const
-        { return new CreateIOQDiscontigPoll_r10b(*this); }
-    CreateIOQDiscontigPoll_r10b &operator=(
-        const CreateIOQDiscontigPoll_r10b &other);
-    CreateIOQDiscontigPoll_r10b(const CreateIOQDiscontigPoll_r10b &other);
+    virtual DeleteIOQDiscontig_r10b *Clone() const
+        { return new DeleteIOQDiscontig_r10b(*this); }
+    DeleteIOQDiscontig_r10b &operator=(
+        const DeleteIOQDiscontig_r10b &other);
+    DeleteIOQDiscontig_r10b(const DeleteIOQDiscontig_r10b &other);
 
 
 protected:
@@ -54,10 +51,10 @@ protected:
 
 private:
     ///////////////////////////////////////////////////////////////////////////
-    // Adding a member variable? Then edit the copy constructor and operator=().
+    // Adding a member variable? Then edit the copy constructor and operator().
     ///////////////////////////////////////////////////////////////////////////
-    void CreateIOCQDiscontigPoll(SharedASQPtr asq, SharedACQPtr acq);
-    void CreateIOSQDiscontigPoll(SharedASQPtr asq, SharedACQPtr acq);
+    void DeleteIOCQDiscontig(SharedASQPtr asq, SharedACQPtr acq);
+    void DeleteIOSQDiscontig(SharedASQPtr asq, SharedACQPtr acq);
 };
 
 

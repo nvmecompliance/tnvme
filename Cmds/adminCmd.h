@@ -40,7 +40,10 @@ protected:
     /**
      * Initialize this object.
      * @param opcode Pass the opcode defining this cmd, per NVME spec.
-     * @param dataDir Pass the direction of data for this cmd
+     * @param dataDir Pass the direction of data for this cmd. This is used
+     *      to notify dnvme which way to send base classes PrpData. The kernel
+     *      requires special calls dependant upon the direction of xfer. If this
+     *      is not correct, unknown outcomes will be observed.
      */
     void Init(uint8_t opcode, DataDir dataDir);
 

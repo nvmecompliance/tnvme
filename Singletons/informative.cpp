@@ -69,7 +69,37 @@ Informative::GetIdentifyCmdNamespace(uint64_t namspcId)
         LOG_DBG("Requested Identify namespace struct %llu, out of %lu",
             (long long unsigned int)namspcId, mIdentifyCmdNamspc.size());
         return Identify::NullIdentifyPtr;
+    } else if (namspcId == 0) {
+        LOG_DBG("Namespace ID 0 is illegal, must start at 1");
+        return Identify::NullIdentifyPtr;
     }
 
     return mIdentifyCmdNamspc[namspcId-1];
+}
+
+
+uint32_t
+Informative::GetFeaturesNumOfQueues()
+{
+    // Call these 2 methods for logging purposes only
+    GetFeaturesNumOfIOCQs();
+    GetFeaturesNumOfIOSQs();
+
+    return mGetFeaturesNumOfQ;
+}
+
+
+uint16_t
+Informative::GetFeaturesNumOfIOCQs()
+{
+    LOG_NRM("Max # of IOCQs alloc'd by DUT = %d", (mGetFeaturesNumOfQ >> 16));
+    return (uint16_t)(mGetFeaturesNumOfQ >> 16);
+}
+
+
+uint16_t
+Informative::GetFeaturesNumOfIOSQs()
+{
+    LOG_NRM("Max # of IOSQs alloc'd by DUT = %d", (mGetFeaturesNumOfQ & 0xff));
+    return (uint16_t)(mGetFeaturesNumOfQ & 0xff);
 }
