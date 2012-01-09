@@ -52,13 +52,28 @@ void
 SQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
     uint16_t cqId)
 {
+    uint64_t work;
+
+
     Queue::Init(qId, entrySize, numEntries);
     mCqId = cqId;
 
 
     LOG_NRM("Allocating contiguous SQ memory in dnvme");
-    if (numEntries < 2)
-        LOG_NRM("WARNING: Number elements breaches spec requirement");
+    if (numEntries < 2) {
+        LOG_WARN("Number elements breaches spec requirement");
+    } else if (gRegisters->Read(CTLSPC_CAP, work) == false) {
+        LOG_ERR("Unable to determine MQES");
+        throw exception();
+    }
+
+    // Warn if doing something that looks suspicious
+    work &= CAP_MQES;
+    if (work < (uint64_t)numEntries) {
+        LOG_WARN("Creating Q with %d entries, but DUT only allows %d",
+            numEntries, (uint32_t)work);
+    }
+
 
     if (GetIsAdmin()) {
         if (gCtrlrConfig->IsStateEnabled()) {
@@ -106,13 +121,27 @@ void
 SQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
     const SharedMemBufferPtr memBuffer, uint16_t cqId)
 {
+    uint64_t work;
+
+
     Queue::Init(qId, entrySize, numEntries);
     mCqId = cqId;
 
-
     LOG_NRM("Allocating discontiguous SQ memory in tnvme");
-    if (numEntries < 2)
-        LOG_NRM("WARNING: Number elements breaches spec requirement");
+    if (numEntries < 2) {
+        LOG_WARN("Number elements breaches spec requirement");
+    } else if (gRegisters->Read(CTLSPC_CAP, work) == false) {
+        LOG_ERR("Unable to determine MQES");
+        throw exception();
+    }
+
+    // Warn if doing something that looks suspicious
+    work &= CAP_MQES;
+    if (work < (uint64_t)numEntries) {
+        LOG_WARN("Creating Q with %d entries, but DUT only allows %d",
+            numEntries, (uint32_t)work);
+    }
+
 
     if (memBuffer == MemBuffer::NullMemBufferPtr) {
         LOG_DBG("Passing an uninitialized SharedMemBufferPtr");

@@ -63,7 +63,7 @@ CQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
 
     LOG_NRM("Allocating contiguous CQ memory in dnvme");
     if (numEntries < 2)
-        LOG_NRM("WARNING: Number elements breaches spec requirement");
+        LOG_WARN("Number elements breaches spec requirement");
 
     if (GetIsAdmin()) {
         if (gCtrlrConfig->IsStateEnabled()) {
@@ -116,7 +116,7 @@ CQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
 
     LOG_NRM("Allocating discontiguous CQ memory in tnvme");
     if (numEntries < 2)
-        LOG_NRM("WARNING: Number elements breaches spec requirement");
+        LOG_WARN("Number elements breaches spec requirement");
 
     if (memBuffer == MemBuffer::NullMemBufferPtr) {
         LOG_DBG("Passing an uninitialized SharedMemBufferPtr");

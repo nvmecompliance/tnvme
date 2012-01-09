@@ -296,7 +296,7 @@ main(int argc, char *argv[])
         if (gRegisters->Read(PCISPC_PMCS, regVal) == false) {
             exit(1);
         } else if (regVal & 0x03) {
-            LOG_ERR("WARNING: PCI power state not fully operational");
+            LOG_WARN("PCI power state not fully operational");
         }
 
         FileSystem::AssureDirectoryExists(BASE_LOG_DIR);

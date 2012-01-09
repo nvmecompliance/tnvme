@@ -44,6 +44,18 @@ IOCQ::Init(uint16_t qId, uint16_t numEntries, bool irqEnabled,
     uint16_t irqVec)
 {
     uint8_t entrySize;
+    uint64_t work;
+
+    if (gRegisters->Read(CTLSPC_CAP, work) == false) {
+        LOG_ERR("Unable to determine MQES");
+        throw exception();
+    }
+    // Warn if doing something that looks suspicious
+    work &= CAP_MQES;
+    if (work < (uint64_t)numEntries) {
+        LOG_WARN("Creating Q with %d entries, but DUT only allows %d",
+            numEntries, (uint32_t)work);
+    }
 
     if (gCtrlrConfig->GetIOCQES(entrySize) == false) {
         LOG_ERR("Unable to learn IOCQ entry size");
@@ -58,6 +70,18 @@ IOCQ::Init(uint16_t qId, uint16_t numEntries,
     const SharedMemBufferPtr memBuffer, bool irqEnabled, uint16_t irqVec)
 {
     uint8_t entrySize;
+    uint64_t work;
+
+    if (gRegisters->Read(CTLSPC_CAP, work) == false) {
+        LOG_ERR("Unable to determine MQES");
+        throw exception();
+    }
+    // Warn if doing something that looks suspicious
+    work &= CAP_MQES;
+    if (work < (uint64_t)numEntries) {
+        LOG_WARN("Creating Q with %d entries, but DUT only allows %d",
+            numEntries, (uint32_t)work);
+    }
 
     if (gCtrlrConfig->GetIOCQES(entrySize) == false) {
         LOG_ERR("Unable to learn IOCQ entry size");
