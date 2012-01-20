@@ -18,14 +18,9 @@
 #include "test.h"
 #include "globals.h"
 
-#define STS_ERRORS             (STS_DPE | STS_SSE | STS_RMA | STS_RTA | STS_DPD)
-#define PXCAP_PXDS_ERRORS      (PXDS_URD | PXDS_FED | PXDS_NFED | PXDS_CED)
-#define AERCAP_AERUCES_ERRORS       0xffff
-#define AERCAP_AERUCESEV_ERRORS     0xffff
-#define CSTS_ERRORS                 CSTS_CFS
 
-
-Test::Test(int fd, string grpName, string testName, SpecRev specRev)
+Test::Test(int fd, string grpName, string testName, SpecRev specRev,
+    ErrorRegs errRegs)
 {
     mFd = fd;
     if (mFd < 0)
@@ -34,7 +29,7 @@ Test::Test(int fd, string grpName, string testName, SpecRev specRev)
     mSpecRev = specRev;
     mGrpName = grpName;
     mTestName = testName;
-
+    mErrRegs = errRegs;
 }
 
 
@@ -99,16 +94,16 @@ Test::ResetStatusRegErrors()
 {
     const vector<PciCapabilities> *cap = gRegisters->GetPciCapabilities();
 
+    // The following algo is taking advantage of the fact that writing
+    // RO register bits have no effect, but will have effect on RWC bits
     LOG_NRM("Resetting sticky PCI errors");
-    gRegisters->Write(PCISPC_STS, STS_ERRORS);
+    gRegisters->Write(PCISPC_STS, 0xffff);
 
     for (uint16_t i = 0; i < cap->size(); i++) {
-        if (cap->at(i) == PCICAP_PXCAP) {
-            gRegisters->Write(PCISPC_PXDS, PXCAP_PXDS_ERRORS);
-        } else if (cap->at(i) == PCICAP_AERCAP) {
-            gRegisters->Write(PCISPC_AERUCES, AERCAP_AERUCES_ERRORS);
-            gRegisters->Write(PCISPC_AERUCESEV, AERCAP_AERUCESEV_ERRORS);
-        }
+        if (cap->at(i) == PCICAP_PXCAP)
+            gRegisters->Write(PCISPC_PXDS, 0xffff);
+        else if (cap->at(i) == PCICAP_AERCAP)
+            gRegisters->Write(PCISPC_AERUCES, 0xffffffff);
     }
 }
 
@@ -126,7 +121,7 @@ Test::GetStatusRegErrors()
     // PCI STS register may indicate some error
     if (gRegisters->Read(PCISPC_STS, value) == false)
         return false;
-    expectedValue = (value & ~STS_ERRORS);
+    expectedValue = (value & ~((uint64_t)mErrRegs.sts));
     if (value != expectedValue) {
         LOG_ERR("%s error bit #%d indicates test failure",
             pciMetrics[PCISPC_STS].desc,
@@ -140,7 +135,7 @@ Test::GetStatusRegErrors()
         if (cap->at(i) == PCICAP_PXCAP) {
             if (gRegisters->Read(PCISPC_PXDS, value) == false)
                 return false;
-            expectedValue = (value & ~PXCAP_PXDS_ERRORS);
+            expectedValue = (value & ~((uint64_t)mErrRegs.pxds));
             if (value != expectedValue) {
                 LOG_ERR("%s error bit #%d indicates test failure",
                     pciMetrics[PCISPC_PXDS].desc,
@@ -150,25 +145,12 @@ Test::GetStatusRegErrors()
         } else if (cap->at(i) == PCICAP_AERCAP) {
             if (gRegisters->Read(PCISPC_AERUCES, value) == false)
                 return false;
-            expectedValue = (value & ~AERCAP_AERUCES_ERRORS);
+            expectedValue = (value & ~((uint64_t)mErrRegs.aeruces));
             if (value != expectedValue) {
                 LOG_ERR("%s error bit #%d indicates test failure",
                     pciMetrics[PCISPC_PXDS].desc,
                     ReportOffendingBitPos(value, expectedValue));
                 return false;
-
-            }
-
-
-            if (gRegisters->Read(PCISPC_AERUCESEV, value) == false)
-                return false;
-            expectedValue = (value & ~AERCAP_AERUCESEV_ERRORS);
-            if (value != expectedValue) {
-                LOG_ERR("%s error bit #%d indicates test failure",
-                    pciMetrics[PCISPC_PXDS].desc,
-                    ReportOffendingBitPos(value, expectedValue));
-                return false;
-
             }
         }
     }
@@ -177,7 +159,7 @@ Test::GetStatusRegErrors()
     // Ctrl'r STS register may indicate some error
     if (gRegisters->Read(CTLSPC_CSTS, value) == false)
         return false;
-    expectedValue = (value & ~CSTS_ERRORS);
+    expectedValue = (value & ~((uint64_t)mErrRegs.csts));
     if (value != expectedValue) {
         LOG_ERR("%s error bit #%d indicates test failure",
             ctlMetrics[CTLSPC_CSTS].desc,

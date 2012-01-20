@@ -22,7 +22,8 @@
 #include "dumpGetFeatures_r10b.h"
 
 
-GrpInformative::GrpInformative(size_t grpNum, SpecRev specRev, int fd) :
+GrpInformative::GrpInformative(size_t grpNum, SpecRev specRev,
+    ErrorRegs errRegs, int fd) :
     Group(grpNum, specRev, "Informative")
 {
     // IMPORTANT: Once a test case is assigned a position in the vector, i.e.
@@ -34,11 +35,11 @@ GrpInformative::GrpInformative(size_t grpNum, SpecRev specRev, int fd) :
     //            Tests x.0, x.1, x.<next_test_num=2>  Minor num; test level
     switch (mSpecRev) {
     case SPECREV_10b:
-        APPEND_TEST_AT_GROUP_LEVEL(DumpPciAddrSpace_r10b, fd, GrpInformative)
-        APPEND_TEST_AT_GROUP_LEVEL(DumpCtrlrAddrSpace_r10b, fd, GrpInformative)
-        APPEND_TEST_AT_GROUP_LEVEL(CreateACQASQ_r10b, fd, GrpInformative)
-        APPEND_TEST_AT_GROUP_LEVEL(DumpIdentifyData_r10b, fd, GrpInformative)
-        APPEND_TEST_AT_GROUP_LEVEL(DumpGetFeatures_r10b, fd, GrpInformative)
+        APPEND_TEST_AT_GROUP_LEVEL(DumpPciAddrSpace_r10b, fd, GrpInformative, errRegs)
+        APPEND_TEST_AT_GROUP_LEVEL(DumpCtrlrAddrSpace_r10b, fd, GrpInformative, errRegs)
+        APPEND_TEST_AT_GROUP_LEVEL(CreateACQASQ_r10b, fd, GrpInformative, errRegs)
+        APPEND_TEST_AT_GROUP_LEVEL(DumpIdentifyData_r10b, fd, GrpInformative, errRegs)
+        APPEND_TEST_AT_GROUP_LEVEL(DumpGetFeatures_r10b, fd, GrpInformative, errRegs)
         break;
 
     default:

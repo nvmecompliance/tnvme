@@ -32,7 +32,8 @@
 class DumpIdentifyData_r10b : public Test
 {
 public:
-    DumpIdentifyData_r10b(int fd, string grpName, string testName);
+    DumpIdentifyData_r10b(int fd, string grpName, string testName,
+        ErrorRegs errRegs);
     virtual ~DumpIdentifyData_r10b();
 
     /**

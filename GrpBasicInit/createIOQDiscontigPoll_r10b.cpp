@@ -31,8 +31,8 @@ static uint16_t NumEntriesIOQ =     5;
 
 
 CreateIOQDiscontigPoll_r10b::CreateIOQDiscontigPoll_r10b(int fd, string grpName,
-    string testName) :
-    Test(fd, grpName, testName, SPECREV_10b)
+    string testName, ErrorRegs errRegs) :
+    Test(fd, grpName, testName, SPECREV_10b, errRegs)
 {
     // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 7");
@@ -202,11 +202,7 @@ CreateIOQDiscontigPoll_r10b::CreateIOCQDiscontigPoll(SharedASQPtr asq,
         acq->LogCE(acqMetrics.head_ptr);
 
         union CE ce = acq->PeekCE(acqMetrics.head_ptr);
-        if (ce.n.status != 0) {
-            LOG_ERR("CE shows cmd failed: status = 0x%02X", ce.n.status);
-            throw exception();
-        }
-        LOG_NRM("The CE indicates a successful completion");
+        ProcessCE::ValidateStatus(ce);  // throws upon error
 
         // The PRP payload is in fact the memory backing the Q
         createIOCQCmd->Dump(
@@ -231,7 +227,7 @@ CreateIOQDiscontigPoll_r10b::CreateIOSQDiscontigPoll(SharedASQPtr asq,
     SharedMemBufferPtr iosqMem = SharedMemBufferPtr(new MemBuffer());
     iosqMem->InitAlignment((NumEntriesIOQ * IOSQ::COMMON_ELEMENT_SIZE),
         sysconf(_SC_PAGESIZE), true, 0);
-    iosq->Init(IOQ_ID, NumEntriesIOQ, iosqMem, false, 0);
+    iosq->Init(IOQ_ID, NumEntriesIOQ, iosqMem, IOQ_ID, 0);
 
 
     LOG_NRM("Create a Create IOSQ cmd to perform the IOSQ creation");
@@ -282,11 +278,7 @@ CreateIOQDiscontigPoll_r10b::CreateIOSQDiscontigPoll(SharedASQPtr asq,
         acq->LogCE(acqMetrics.head_ptr);
 
         union CE ce = acq->PeekCE(acqMetrics.head_ptr);
-        if (ce.n.status != 0) {
-            LOG_ERR("CE shows cmd failed: status = 0x%02X", ce.n.status);
-            throw exception();
-        }
-        LOG_NRM("The CE indicates a successful completion");
+        ProcessCE::ValidateStatus(ce);  // throws upon error
 
         // The PRP payload is in fact the memory backing the Q
         createIOSQCmd->Dump(

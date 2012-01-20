@@ -35,7 +35,8 @@
 class CreateIOQDiscontigPoll_r10b : public Test
 {
 public:
-    CreateIOQDiscontigPoll_r10b(int fd, string grpName, string testName);
+    CreateIOQDiscontigPoll_r10b(int fd, string grpName, string testName,
+        ErrorRegs errRegs);
     virtual ~CreateIOQDiscontigPoll_r10b();
 
     /**

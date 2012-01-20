@@ -35,7 +35,8 @@ using namespace std;
 class VerifyDataPat_r10b : public Test
 {
 public:
-    VerifyDataPat_r10b(int fd, string grpName, string testName);
+    VerifyDataPat_r10b(int fd, string grpName, string testName,
+        ErrorRegs errRegs);
     virtual ~VerifyDataPat_r10b();
 
     /**

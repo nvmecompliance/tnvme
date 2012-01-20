@@ -18,9 +18,29 @@
 #define _CE_H_
 
 #include <stdint.h>
+#include "ceDefs.h"
 
 
-struct CEbyDW {
+struct StatbyBits {
+    uint16_t P        : 1;      // phase bit
+    uint16_t SC       : 8;      // status code
+    uint16_t SCT      : 3;      // status code type
+    uint16_t reserved : 2;
+    uint16_t M        : 1;      // more
+    uint16_t DNR      : 1;      // do not retry
+} __attribute__((__packed__));
+
+struct StatbyType {
+    uint16_t P        : 1;      // phase bit
+    uint16_t status   : 15;     // status field
+} __attribute__((__packed__));
+
+union StatField {
+    struct StatbyBits   b;
+    struct StatbyType   t;
+};
+
+struct CEbyType {
     uint32_t dw0;
     uint32_t dw1;
     uint32_t dw2;
@@ -28,13 +48,12 @@ struct CEbyDW {
 } __attribute__((__packed__));
 
 struct CEbyName {
-    uint32_t cmdSpec;
-    uint32_t reserved;
-    uint16_t sqHdPtr;
-    uint16_t sqId;
-    uint16_t cmdId;
-    uint16_t pBit   : 1;
-    uint16_t status : 15;
+    uint32_t  cmdSpec;
+    uint32_t  reserved;
+    uint16_t  SQHD;
+    uint16_t  SQID;
+    uint16_t  CID;
+    StatField SF;
 } __attribute__((__packed__));
 
 /**
@@ -42,8 +61,45 @@ struct CEbyName {
  * @note: For convenient methods to log/dump/peek; refer to class CQ
  */
 union CE {
-    struct CEbyDW   d;
+    struct CEbyType t;
     struct CEbyName n;
+};
+
+
+/**
+* This class is meant not be instantiated because it should only ever contain
+* static members. These helper methods/functions can be viewed as wrappers to
+* perform common, repetitious tasks to act upon a CE object.
+*
+* @note This class may throw exceptions, please see comment within specific
+*       methods.
+*/
+class ProcessCE
+{
+public:
+    ProcessCE();
+    virtual ~ProcessCE();
+
+    /**
+     * Peeks at the status field of the CE, logs a human readable description
+     * of the status and returns when (status == success), otherwise it
+     * will throw.
+     * @note This method will throw when (status != 0)
+     * @param ce Pass the CE to perform the interrogation against
+     */
+    static void ValidateStatus(union CE &ce);
+
+    /**
+     * Indicate the status of the CE in the log file, i.e. stderr.
+     * @note This method may throw
+     * @param ce Pass the CE to perform the interrogation against
+     * @return true if (status == success), otherwise false.
+     */
+    static bool LogStatus(union CE &ce);
+
+private:
+    /// Contains details about every CE status field
+    static CEStatType mCEStatMetrics[];
 };
 
 

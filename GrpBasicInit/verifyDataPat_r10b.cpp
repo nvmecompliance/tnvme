@@ -24,8 +24,9 @@
 #define DEFAULT_CMD_WAIT_ms         2000
 
 
-VerifyDataPat_r10b::VerifyDataPat_r10b(int fd, string grpName, string testName) :
-    Test(fd, grpName, testName, SPECREV_10b)
+VerifyDataPat_r10b::VerifyDataPat_r10b(int fd, string grpName, string testName,
+    ErrorRegs errRegs) :
+    Test(fd, grpName, testName, SPECREV_10b, errRegs)
 {
     // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 6");
@@ -121,7 +122,7 @@ VerifyDataPat_r10b::VerifyDataPattern()
         (MASK_PRP1_PAGE | MASK_PRP2_PAGE | MASK_PRP2_LIST);
     readCmd->SetPrpBuffer(prpBitmask, readMem);
     readCmd->SetNSID(1);
-    readCmd->SetNLB(WRITE_DATA_PAT_NUM_BLKS);
+    readCmd->SetNLB(WRITE_DATA_PAT_NUM_BLKS - 1);    // convert to 0-based value
 
     // Lookup objs which were created in a prior test within group
     SharedIOSQPtr iosqContig = CAST_TO_IOSQ(
@@ -187,10 +188,7 @@ VerifyDataPat_r10b::SendToIOSQ(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
     iocq->LogCE(iocqMetrics.head_ptr);
 
     union CE ce = iocq->PeekCE(iocqMetrics.head_ptr);
-    if (ce.n.status != 0) {
-        LOG_ERR("CE shows cmd failed: status = 0x%02X", ce.n.status);
-        throw exception();
-    }
+    ProcessCE::ValidateStatus(ce);  // throws upon error
 
 
     LOG_NRM("Compare read vs written data to verify");

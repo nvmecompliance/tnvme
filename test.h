@@ -54,8 +54,11 @@ public:
      * @param grpName Pass the name of the group to which this test belongs
      * @param testName Pass the name of the child class
      * @param specRev Provide the nvme spec rev. which is being targeted
+     * @param errRegs Pass the reg bitmask to indicate which errors need to be
+     *          flagged after each test completes execution.
      */
-    Test(int fd, string grpName, string testName, SpecRev specRev);
+    Test(int fd, string grpName, string testName, SpecRev specRev,
+        ErrorRegs errRegs);
 
     /**
      * Child derived Test:: objects are responsible for freeing all heap
@@ -129,6 +132,8 @@ protected:
     string mGrpName;
     /// The name of the child
     string mTestName;
+    /// Which bits in contained registers indicate error conditions to be flag'd
+    ErrorRegs mErrRegs;
 
     /**
      * Forcing children to implement the core logic of each test case.

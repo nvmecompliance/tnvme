@@ -18,7 +18,8 @@
 #include "allPciRegs_r10b.h"
 
 
-GrpPciRegisters::GrpPciRegisters(size_t grpNum, SpecRev specRev, int fd) :
+GrpPciRegisters::GrpPciRegisters(size_t grpNum, SpecRev specRev,
+    ErrorRegs errRegs, int fd) :
     Group(grpNum, specRev, "PCI registers syntactic")
 {
     // IMPORTANT: Once a test case is assigned a position in the vector, i.e.
@@ -30,7 +31,7 @@ GrpPciRegisters::GrpPciRegisters(size_t grpNum, SpecRev specRev, int fd) :
     //            Tests x.0, x.1, x.<next_test_num=2>  Minor num; test level
     switch (mSpecRev) {
     case SPECREV_10b:
-        APPEND_TEST_AT_GROUP_LEVEL(AllPciRegs_r10b, fd, GrpPciRegisters)
+        APPEND_TEST_AT_GROUP_LEVEL(AllPciRegs_r10b, fd, GrpPciRegisters, errRegs)
         break;
 
     default:

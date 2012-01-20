@@ -72,7 +72,7 @@ public:
 
     /**
      * If this cmd's payload contains a namespace data structure, then this
-     * method uses GetLBAFormat() to calcu and return the active LBA data size.
+     * method uses GetLBAFormat() to calc and return the active LBA data size.
      * @return The correctly calc'd data, otherwise throws
      */
     uint64_t GetLBADataSize() const;

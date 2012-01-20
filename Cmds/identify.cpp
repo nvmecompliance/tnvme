@@ -78,10 +78,12 @@ Identify::SetCNS(bool ctrlr)
 bool
 Identify::GetCNS() const
 {
-    LOG_NRM("Getting CNS");
     uint8_t curVal = GetByte(10, 0);
-    if (curVal & CNS_BITMASK)
+    if (curVal & CNS_BITMASK) {
+        LOG_NRM("Getting CNS=1");
         return true;
+    }
+    LOG_NRM("Getting CNS=0");
     return false;
 }
 
@@ -128,7 +130,7 @@ Identify::GetValue(int field, IdentifyDataType *idData) const
 
     for (int i = 0; i < idData[field].length; i++) {
         byte = (GetROPrpBuffer())[idData[field].offset + i];
-        value |= ((uint64_t)byte << i);
+        value |= ((uint64_t)byte << (i*8));
     }
     LOG_NRM("%s = 0x%08lX", idData[field].desc, value);
     return value;
@@ -219,9 +221,9 @@ Identify::GetLBAFormat() const
     memcpy(&lbaFormat, &work, sizeof(lbaFormat));
 
     LOG_NRM("Active LBA format:");
-    LOG_NRM("  MS    = 0x%04X", lbaFormat.MS);
-    LOG_NRM("  LBADS = 0x%02X", lbaFormat.LBADS);
-    LOG_NRM("  RP    = 0x%01X", lbaFormat.RP);
+    LOG_NRM("  MS (Metadata Size)        = 0x%04X", lbaFormat.MS);
+    LOG_NRM("  LBADS (LBA Data Size)     = 0x%02X", lbaFormat.LBADS);
+    LOG_NRM("  RP (Relative Performance) = 0x%01X", lbaFormat.RP);
     return lbaFormat;
 }
 
@@ -229,11 +231,6 @@ Identify::GetLBAFormat() const
 uint64_t
 Identify::GetLBADataSize() const
 {
-    if (GetCNS()) {
-        LOG_DBG("This cmd does not contain a namespace data struct");
-        throw exception();
-    }
-
     LBAFormat lbaFormat = GetLBAFormat();
     uint64_t lbaDataSize = (uint64_t)pow(2.0, lbaFormat.LBADS);
     LOG_NRM("Active logical blk size = 0x%016llX",

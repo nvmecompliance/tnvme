@@ -30,7 +30,8 @@
 class DumpPciAddrSpace_r10b : public Test
 {
 public:
-    DumpPciAddrSpace_r10b(int fd, string grpName, string testName);
+    DumpPciAddrSpace_r10b(int fd, string grpName, string testName,
+        ErrorRegs errRegs);
     virtual ~DumpPciAddrSpace_r10b();
 
     /**

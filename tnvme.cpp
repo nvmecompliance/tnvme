@@ -57,7 +57,7 @@ Usage(void) {
     printf("  -v(--rev) <spec>                    All options forced to target specified\n");
     printf("                                      NVME revision {1.0b}; dflt=1.0b\n");
     printf("  -s(--summary)                       Summarize all groups and tests\n");
-    printf("  -e(--detail) [<grp> | <grp>:<test>] Detailed group and test description for:\n");
+    printf("  -a(--detail) [<grp> | <grp>:<test>] Detailed group and test description for:\n");
     printf("                                      {all | spec'd_group | test_within_group}\n");
     printf("  -t(--test) [<grp> | <grp>:<test>]   Execute tests for:\n");
     printf("                                      {all | spec'd_group | test_within_group}\n");
@@ -68,12 +68,17 @@ Usage(void) {
     printf("  -p(--loop) <count>                  Loop test execution <count> times; dflt=1\n");
     printf("  -k(--skiptest) <filename>           A file contains a list of tests to skip\n");
     printf("  -q(--queues) <ncqr:nsqr>            Write <ncqr> and <nsqr> as values by the\n");
-    printf("                                      Set Features, ID=7. Must be only option,\n");
-    printf("                                      value set is used subsequently by tnvme\n");
+    printf("                                      Set Features, ID=7. Must be only option.\n");
+    printf("                                      Option missing indicates tnvme to read\n");
+    printf("                                      and learn a previous set value.\n");
     printf("                                      until next power cycle. Requires base 16\n");
     printf("  -i(--ignore)                        Ignore detected errors; An error causes\n");
     printf("                                      the next test within the next group to\n");
     printf("                                      execute, not next test within same group.\n");
+    printf("  -e(--error) <STS:PXDS:AERUCES:CSTS> Set reg bitmask for bits indicating error\n");
+    printf("                                      state after each test completes.\n");
+    printf("                                      Value=0 indicates ignore all errors.\n");
+    printf("                                      Require base 16 values.\n");
     printf("  -r(--rmmap) <space:off:size:acc>    Read memmap'd I/O registers from\n");
     printf("                                      <space>={PCI | BAR01} at <off> bytes\n");
     printf("                                      from start of space for <size> bytes\n");
@@ -105,13 +110,13 @@ main(int argc, char *argv[])
     bool deviceFound = false;
     bool accessingHdw = true;
     uint64_t regVal = 0;
-    const char *short_opt = "hsflziv:e::p:t::d:k:r:w:";
+    const char *short_opt = "hslzia::t::v:p:d:k:r:w:q:e:";
     static struct option long_opt[] = {
         // {name,           has_arg,            flag,   val}
         {   "help",         no_argument,        NULL,   'h'},
         {   "summary",      no_argument,        NULL,   's'},
         {   "rev",          required_argument,  NULL,   'v'},
-        {   "detail",       optional_argument,  NULL,   'e'},
+        {   "detail",       optional_argument,  NULL,   'a'},
         {   "test",         optional_argument,  NULL,   't'},
         {   "device",       required_argument,  NULL,   'd'},
         {   "rmmap" ,       required_argument,  NULL,   'r'},
@@ -122,6 +127,7 @@ main(int argc, char *argv[])
         {   "skiptest",     required_argument,  NULL,   'k'},
         {   "list",         no_argument,        NULL,   'l'},
         {   "queues",       required_argument,  NULL,   'q'},
+        {   "error",        required_argument,  NULL,   'e'},
         {   NULL,           no_argument,        NULL,    0}
     };
 
@@ -139,6 +145,10 @@ main(int argc, char *argv[])
     CmdLine.queues.req = false;
     CmdLine.queues.ncqr = 0;
     CmdLine.queues.nsqr = 0;
+    CmdLine.errRegs.sts = (STS_SSE | STS_STA | STS_RMA | STS_RTA);
+    CmdLine.errRegs.pxds = (PXDS_TP | PXDS_FED);
+    CmdLine.errRegs.aeruces = 0;
+    CmdLine.errRegs.csts = CSTS_CFS;
 
     if (argc == 1) {
         printf("%s is a compliance test suite for NVM Express hardware.\n",
@@ -179,7 +189,7 @@ main(int argc, char *argv[])
             }
             break;
 
-        case 'e':
+        case 'a':
             if (ParseTargetCmdLine(CmdLine.detail, optarg) == false) {
                 printf("Unable to parse --detail cmd line\n");
                 exit(1);
@@ -211,6 +221,13 @@ main(int argc, char *argv[])
         case 'w':
             if (ParseWmmapCmdLine(CmdLine.wmmap, optarg) == false) {
                 printf("Unable to parse --wmmap cmd line\n");
+                exit(1);
+            }
+            break;
+
+        case 'e':
+            if (ParseErrorCmdLine(CmdLine.errRegs, optarg) == false) {
+                printf("Unable to parse --error cmd line\n");
                 exit(1);
             }
             break;
@@ -421,8 +438,7 @@ void DestroySingletons()
  * @return true upon success, otherwise false
  */
 bool
-BuildTestInfrastructure(vector<Group *> &groups, int &fd,
-    struct CmdLine &cl)
+BuildTestInfrastructure(vector<Group *> &groups, int &fd, struct CmdLine &cl)
 {
     int ret;
     struct flock fdlock = {F_WRLCK, SEEK_SET, 0, 0, 0};
@@ -486,10 +502,10 @@ BuildTestInfrastructure(vector<Group *> &groups, int &fd,
     //
     // All groups will be pushed here. The groups themselves dictate which
     // tests get executed based upon the constructed 'specRev' being targeted.
-    groups.push_back(new GrpInformative(groups.size(), cl.rev, fd));       // 0
-    groups.push_back(new GrpPciRegisters(groups.size(), cl.rev, fd));      // 1
-    groups.push_back(new GrpCtrlRegisters(groups.size(), cl.rev, fd));     // 2
-    groups.push_back(new GrpBasicInit(groups.size(), cl.rev, fd));         // 3
+    groups.push_back(new GrpInformative(groups.size(), cl.rev, cl.errRegs, fd));    // 0
+    groups.push_back(new GrpPciRegisters(groups.size(), cl.rev, cl.errRegs, fd));   // 1
+    groups.push_back(new GrpCtrlRegisters(groups.size(), cl.rev, cl.errRegs, fd));  // 2
+    groups.push_back(new GrpBasicInit(groups.size(), cl.rev, cl.errRegs, fd));      // 3
 
     return true;
 }

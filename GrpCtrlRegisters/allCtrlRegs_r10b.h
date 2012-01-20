@@ -30,7 +30,8 @@
 class AllCtrlRegs_r10b : public Test
 {
 public:
-    AllCtrlRegs_r10b(int fd, string grpName, string testName);
+    AllCtrlRegs_r10b(int fd, string grpName, string testName,
+        ErrorRegs errRegs);
     virtual ~AllCtrlRegs_r10b();
 
     /**

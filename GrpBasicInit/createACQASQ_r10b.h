@@ -33,7 +33,8 @@
 class CreateACQASQ_r10b : public Test
 {
 public:
-    CreateACQASQ_r10b(int fd, string grpName, string testName);
+    CreateACQASQ_r10b(int fd, string grpName, string testName,
+        ErrorRegs errRegs);
     virtual ~CreateACQASQ_r10b();
 
     /**

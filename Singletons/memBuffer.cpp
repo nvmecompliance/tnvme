@@ -70,7 +70,8 @@ MemBuffer::InitOffset1stPage(uint32_t bufSize, uint32_t offset1stPg,
     uint32_t align = sysconf(_SC_PAGESIZE);
 
 
-    LOG_NRM("Init buffer; size: %d, offset: 0x%08X, init: %d, value: 0x%02X",
+    LOG_NRM(
+        "Init buffer; size: 0x%08X, offset: 0x%08X, init: %d, value: 0x%02X",
         bufSize, offset1stPg, initMem, initVal);
     if (offset1stPg % sizeof(uint32_t) != 0) {
         LOG_DBG("Offset into page 1 not aligned to: 0x%02lX", sizeof(uint32_t));
@@ -110,7 +111,7 @@ MemBuffer::InitAlignment(uint32_t bufSize, uint32_t align, bool initMem,
 {
     int err;
 
-    LOG_NRM("Init buffer; size: %d, align: 0x%08X, init: %d, value: 0x%02X",
+    LOG_NRM("Init buffer; size: 0x%08X, align: 0x%08X, init: %d, value: 0x%02X",
         bufSize, align, initMem, initVal);
     if (align % sizeof(void *) != 0) {
         LOG_DBG("Req'd alignment 0x%08X, is not modulo 0x%02lX",
@@ -141,7 +142,7 @@ MemBuffer::InitAlignment(uint32_t bufSize, uint32_t align, bool initMem,
 void
 MemBuffer::Init(uint32_t bufSize, bool initMem, uint8_t initVal)
 {
-    LOG_NRM("Init buffer; size: %d, init: %d, value: 0x%02X",
+    LOG_NRM("Init buffer; size: 0x%08X, init: %d, value: 0x%02X",
         bufSize, initMem, initVal);
 
     // Support resizing/reallocation
@@ -183,7 +184,7 @@ void
 MemBuffer::SetDataPattern(DataPattern dataPat, uint64_t initVal)
 {
     LOG_NRM("Write data pattern: initial value = 0x%016llX",
-        (long long unsigned int)dataPat);
+        (long long unsigned int)initVal);
 
     if (mRealBaseAddr == NULL)
         return;
@@ -201,7 +202,7 @@ MemBuffer::SetDataPattern(DataPattern dataPat, uint64_t initVal)
         {
             LOG_NRM("Write data pattern: constant 16 bit");
             uint16_t *rawPtr = (uint16_t *)GetBuffer();
-            for (uint64_t i = 0; i < GetBufSize(); i++)
+            for (uint64_t i = 0; (GetBufSize() / sizeof(uint16_t)); i++)
                 *rawPtr++ = (uint16_t)initVal;
         }
         break;
@@ -210,7 +211,7 @@ MemBuffer::SetDataPattern(DataPattern dataPat, uint64_t initVal)
         {
             LOG_NRM("Write data pattern: constant 32 bit");
             uint32_t *rawPtr = (uint32_t *)GetBuffer();
-            for (uint64_t i = 0; i < GetBufSize(); i++)
+            for (uint64_t i = 0; (GetBufSize() / sizeof(uint32_t)); i++)
                 *rawPtr++ = (uint32_t)initVal;
         }
         break;
@@ -219,7 +220,7 @@ MemBuffer::SetDataPattern(DataPattern dataPat, uint64_t initVal)
         {
             LOG_NRM("Write data pattern: incrementing 8 bit");
             uint8_t *rawPtr = (uint8_t *)GetBuffer();
-            for (uint64_t i = 0; i < GetBufSize(); i++)
+            for (uint64_t i = 0; (GetBufSize() / sizeof(uint8_t)); i++)
                 *rawPtr++ = (uint8_t)initVal++;
         }
         break;
@@ -228,7 +229,7 @@ MemBuffer::SetDataPattern(DataPattern dataPat, uint64_t initVal)
         {
             LOG_NRM("Write data pattern: incrementing 16 bit");
             uint16_t *rawPtr = (uint16_t *)GetBuffer();
-            for (uint64_t i = 0; i < GetBufSize(); i++)
+            for (uint64_t i = 0; i < (GetBufSize() / sizeof(uint16_t)); i++)
                 *rawPtr++ = (uint16_t)initVal++;
         }
         break;
@@ -237,7 +238,7 @@ MemBuffer::SetDataPattern(DataPattern dataPat, uint64_t initVal)
         {
             LOG_NRM("Write data pattern: incrementing 32 bit");
             uint32_t *rawPtr = (uint32_t *)GetBuffer();
-            for (uint64_t i = 0; i < GetBufSize(); i++)
+            for (uint64_t i = 0; (GetBufSize() / sizeof(uint32_t)); i++)
                 *rawPtr++ = (uint32_t)initVal++;
         }
         break;

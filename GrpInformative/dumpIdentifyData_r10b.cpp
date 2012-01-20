@@ -25,8 +25,8 @@
 
 
 DumpIdentifyData_r10b::DumpIdentifyData_r10b(int fd, string grpName,
-    string testName) :
-    Test(fd, grpName, testName, SPECREV_10b)
+    string testName, ErrorRegs errRegs) :
+    Test(fd, grpName, testName, SPECREV_10b, errRegs)
 {
     // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 7");
@@ -160,10 +160,7 @@ DumpIdentifyData_r10b::SendIdentifyCtrlrStruct(SharedASQPtr asq,
         acq->LogCE(acqMetrics.head_ptr);
 
         union CE ce = acq->PeekCE(acqMetrics.head_ptr);
-        if (ce.n.status != 0) {
-            LOG_ERR("CE shows cmd failed: status = 0x%02X", ce.n.status);
-            throw exception();
-        }
+        ProcessCE::ValidateStatus(ce);  // throws upon error
 
         idCmdCap->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "idCmdCap"),
             "The complete admin cmd identify ctgrlr data structure decoded:");
@@ -257,11 +254,7 @@ DumpIdentifyData_r10b::SendIdentifyNamespaceStruct(SharedASQPtr asq,
             acq->LogCE(acqMetrics.head_ptr);
 
             union CE ce = acq->PeekCE(acqMetrics.head_ptr);
-            if (ce.n.status != 0) {
-                LOG_ERR("CE shows cmd failed: status = 0x%02X", ce.n.status);
-                throw exception();
-            }
-            LOG_NRM("The CE indicates a successful completion");
+            ProcessCE::ValidateStatus(ce);  // throws upon error
 
             idCmdNamSpc->Dump(
                 FileSystem::PrepLogFile(mGrpName, mTestName, qualifier),

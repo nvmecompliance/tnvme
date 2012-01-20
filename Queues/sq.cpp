@@ -277,7 +277,8 @@ SQ::Send(SharedCmdPtr cmd)
     io.cmd_set = cmd->GetCmdSet();
     io.data_dir = cmd->GetDataDir();
 
-    LOG_NRM("Send cmd set %d, opcode 0x%02X, data buf size %d, to SQ id 0x%02X",
+    LOG_NRM(
+        "Send cmd set %d, opcode 0x%02X, payload size %04X, to SQ id 0x%02X",
         io.cmd_set, cmd->GetOpcode(), io.data_buf_size, io.q_id);
     if ((rc = ioctl(mFd, NVME_IOCTL_SEND_64B_CMD, &io)) < 0) {
         LOG_ERR("Error sending cmd, rc =%d", rc);

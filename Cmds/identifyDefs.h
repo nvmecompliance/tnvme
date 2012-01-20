@@ -107,7 +107,7 @@ struct IdPowerStateDesc {
     uint8_t     RRL;
     uint8_t     RWT;
     uint8_t     RWL;
-};
+} __attribute__((__packed__));
 
 struct IdCtrlrCapStruct {
     uint16_t    VID;
@@ -142,7 +142,7 @@ struct IdCtrlrCapStruct {
     uint8_t     RES_2C0[1344];
     struct IdPowerStateDesc PSD[32];
     uint8_t     VS[1024];
-};
+} __attribute__((__packed__));
 
 
 /*     IdNamespc,           offset, length, desc                                   */
@@ -188,7 +188,7 @@ struct LBAFormat {
     uint16_t    MS;
     uint8_t     LBADS;
     uint8_t     RP;
-};
+} __attribute__((__packed__));
 
 struct IdNamespcStruct {
     uint64_t    NSZE;
@@ -204,7 +204,7 @@ struct IdNamespcStruct {
     struct LBAFormat LBAF[16];
     uint8_t     RES_C0[192];
     uint8_t     VS[3712];
-};
+} __attribute__((__packed__));
 
 
 #endif

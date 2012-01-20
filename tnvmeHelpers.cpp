@@ -541,7 +541,7 @@ ParseWmmapCmdLine(WmmapIo &wmmap, const char *optarg)
     wmmap.value = 0;
     wmmap.acc = ACC_FENCE;
 
-    // Parsing <space:off:siz:val:acc>
+    // Parsing <space:off:size:val:acc>
     swork = optarg;
     if ((ulwork = swork.find(":", 0)) == string::npos) {
         LOG_ERR("Unrecognized format <space:off:siz:val:acc>=%s", optarg);
@@ -556,7 +556,7 @@ ParseWmmapCmdLine(WmmapIo &wmmap, const char *optarg)
         return false;
     }
 
-    // Parsing <off:siz:val:acc>
+    // Parsing <off:size:val:acc>
     swork = swork.substr(ulwork+1, swork.size());
     tmp = strtoul(swork.substr(0, swork.size()).c_str(), &endptr, 16);
     if (*endptr != ':') {
@@ -673,6 +673,78 @@ ParseQueuesCmdLine(Queues &queues, const char *optarg)
 }
 
 
+/**
+ * A function to specifically handle parsing cmd lines of the form
+ * "<STS:PXDS:AERUCES:CSTS>".
+ * @param errRegs Pass a structure to populate with parsing results
+ * @param optarg Pass the 'optarg' argument from the getopt_long() API.
+ * @return true upon successful parsing, otherwise false.
+ */
+bool
+ParseErrorCmdLine(ErrorRegs &errRegs, const char *optarg)
+{
+    char *endptr;
+    string swork;
+    size_t tmp;
+    string sacc;
+
+    errRegs.sts = 0;
+    errRegs.pxds = 0;
+    errRegs.aeruces = 0;
+    errRegs.csts = 0;
+
+    // Parsing <STS:PXDS:AERUCES:CSTS>
+    swork = optarg;
+    tmp = strtoul(swork.substr(0, swork.size()).c_str(), &endptr, 16);
+    if (*endptr != ':') {
+        LOG_ERR("Unrecognized format <STS:PXDS:AERUCES:CSTS>=%s", optarg);
+        return false;
+    } else if (tmp > ((uint16_t)(-1))) {
+        LOG_ERR("<STS> > allowed max value of 0x%04X", ((uint16_t)(-1)));
+        return false;
+    }
+    errRegs.sts = (uint16_t)tmp;
+
+    // Parsing <PXDS:AERUCES:CSTS>
+    swork = swork.substr(swork.find_first_of(':') + 1, swork.length());
+    tmp = strtoul(swork.substr(0, swork.size()).c_str(), &endptr, 16);
+    if (*endptr != ':') {
+        LOG_ERR("Unrecognized format <PXDS:AERUCES:CSTS>=%s", optarg);
+        return false;
+    } else if (tmp > ((uint16_t)(-1))) {
+        LOG_ERR("<PXDS> > allowed max value of 0x%04X", ((uint16_t)(-1)));
+        return false;
+    }
+    errRegs.pxds = (uint16_t)tmp;
+
+    // Parsing <AERUCES:CSTS>
+    swork = swork.substr(swork.find_first_of(':') + 1, swork.length());
+    tmp = strtoul(swork.substr(0, swork.size()).c_str(), &endptr, 16);
+    if (*endptr != ':') {
+        LOG_ERR("Unrecognized format <AERUCES:CSTS>=%s", optarg);
+        return false;
+    } else if (tmp > ((uint16_t)(-1))) {
+        LOG_ERR("<AERUCES> > allowed max value of 0x%04X", ((uint16_t)(-1)));
+        return false;
+    }
+    errRegs.aeruces = (uint16_t)tmp;
+
+    // Parsing <CSTS>
+    swork = swork.substr(swork.find_first_of(':') + 1, swork.length());
+    tmp = strtoul(swork.substr(0, swork.size()).c_str(), &endptr, 16);
+    if (*endptr != '\0') {
+        LOG_ERR("Unrecognized format <CSTS>=%s", optarg);
+        return false;
+    } else if (tmp > ((uint16_t)(-1))) {
+        LOG_ERR("<CSTS> > allowed max value of 0x%08X", ((uint32_t)(-1)));
+        return false;
+    }
+    errRegs.csts = (uint16_t)tmp;
+
+    return true;
+}
+
+
 bool SetFeaturesNumberOfQueues(Queues &queues, int fd)
 {
     uint16_t numCE;
@@ -725,10 +797,7 @@ bool SetFeaturesNumberOfQueues(Queues &queues, int fd)
         acq->LogCE(acqMetrics.head_ptr);
 
         union CE ce = acq->PeekCE(acqMetrics.head_ptr);
-        if (ce.n.status != 0) {
-            LOG_ERR("CE shows cmd failed: status = 0x%02X", ce.n.status);
-            throw exception();
-        }
+        ProcessCE::ValidateStatus(ce);  // throws upon error
         printf("The operation succeeded to set number of queues\n");
     } catch (...) {
         printf("Operation failed to set number of queues\n");

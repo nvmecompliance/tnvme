@@ -21,6 +21,7 @@ INCLUDES = -I. -I../ -I../../ -I/usr/local/include
 
 SRC = \
 	queue.cpp		\
+	ce.cpp			\
 	cq.cpp			\
 	sq.cpp			\
 	acq.cpp			\

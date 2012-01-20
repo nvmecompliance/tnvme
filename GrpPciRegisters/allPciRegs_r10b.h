@@ -30,7 +30,7 @@
 class AllPciRegs_r10b : public Test
 {
 public:
-    AllPciRegs_r10b(int fd, string grpName, string testName);
+    AllPciRegs_r10b(int fd, string grpName, string testName, ErrorRegs errRegs);
     virtual ~AllPciRegs_r10b();
 
     /**

@@ -47,7 +47,7 @@ public:
     /**
      * Certifies that a directory is located in the current working directory,
      * otherwise it is created.
-     * @note This method wil not throw
+     * @note This method will not throw
      * @param dir Pass the name of the directory to certify
      */
     static void AssureDirectoryExists(string dir);

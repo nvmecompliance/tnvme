@@ -32,7 +32,8 @@
 class DeleteIOQContig_r10b : public Test
 {
 public:
-    DeleteIOQContig_r10b(int fd, string grpName, string testName);
+    DeleteIOQContig_r10b(int fd, string grpName, string testName,
+        ErrorRegs errRegs);
     virtual ~DeleteIOQContig_r10b();
 
     /**

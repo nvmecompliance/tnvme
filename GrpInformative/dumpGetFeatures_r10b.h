@@ -32,7 +32,8 @@
 class DumpGetFeatures_r10b : public Test
 {
 public:
-    DumpGetFeatures_r10b(int fd, string grpName, string testName);
+    DumpGetFeatures_r10b(int fd, string grpName, string testName,
+        ErrorRegs errRegs);
     virtual ~DumpGetFeatures_r10b();
 
     /**

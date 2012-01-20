@@ -47,8 +47,8 @@ using namespace std;
 
 
 typedef enum {
-    SPECREV_10b,                // http://www.nvmexpress.org/ spec. rev. 1.0b
-    SPECREVTYPE_FENCE           // always must be last element
+    SPECREV_10b,             // http://www.nvmexpress.org/ spec. rev. 1.0b
+    SPECREVTYPE_FENCE        // always must be last element
 } SpecRev;
 
 struct TestRef {
@@ -68,12 +68,12 @@ struct TestRef {
  * true   !=UINT_MAX     !=UINT_MAX && !=UINT_MAX  request spec'd test in group
  */
 struct TestTarget {
-    bool            req;    // requested by cmd line
+    bool            req;     // requested by cmd line
     TestRef t;
 };
 
 struct RmmapIo {
-    bool            req;    // requested by cmd line
+    bool            req;     // requested by cmd line
     nvme_io_space   space;
     size_t          offset;
     size_t          size;
@@ -81,7 +81,7 @@ struct RmmapIo {
 };
 
 struct WmmapIo {
-    bool            req;    // requested by cmd line
+    bool            req;     // requested by cmd line
     nvme_io_space   space;
     size_t          offset;
     size_t          size;
@@ -90,9 +90,16 @@ struct WmmapIo {
 };
 
 struct Queues {
-    bool            req;    // requested by cmd line
-    uint16_t        ncqr;   // Number of IOCQ's requested
-    uint16_t        nsqr;   // Number of IOSQ's requested
+    bool            req;     // requested by cmd line
+    uint16_t        ncqr;    // Number of IOCQ's requested
+    uint16_t        nsqr;    // Number of IOSQ's requested
+};
+
+struct ErrorRegs {
+    uint16_t        sts;     // PCI addr space STS regr bitmask
+    uint16_t        pxds;    // PCI addr space PCICAP.PXDS reg bitmask
+    uint16_t        aeruces; // PCI addr space AERCAP.AERUCES reg bitmask
+    uint32_t        csts;    // Ctrl'r addr space CSTS reg bitmask
 };
 
 struct CmdLine {
@@ -108,6 +115,7 @@ struct CmdLine {
     RmmapIo         rmmap;
     WmmapIo         wmmap;
     Queues          queues;
+    ErrorRegs       errRegs;
 };
 
 

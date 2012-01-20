@@ -30,7 +30,8 @@
 class DumpCtrlrAddrSpace_r10b : public Test
 {
 public:
-    DumpCtrlrAddrSpace_r10b(int fd, string grpName, string testName);
+    DumpCtrlrAddrSpace_r10b(int fd, string grpName, string testName,
+        ErrorRegs errRegs);
     virtual ~DumpCtrlrAddrSpace_r10b();
 
     /**

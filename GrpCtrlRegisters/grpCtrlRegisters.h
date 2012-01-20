@@ -29,7 +29,7 @@
 class GrpCtrlRegisters : public Group
 {
 public:
-    GrpCtrlRegisters(size_t grpNum, SpecRev specRev, int fd);
+    GrpCtrlRegisters(size_t grpNum, SpecRev specRev, ErrorRegs errRegs, int fd);
     virtual ~GrpCtrlRegisters();
 };
 

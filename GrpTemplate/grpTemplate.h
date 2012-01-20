@@ -26,7 +26,7 @@
 class GrpTemplate : public Group
 {
 public:
-    GrpTemplate(size_t grpNum, SpecRev specRev, int fd);
+    GrpTemplate(size_t grpNum, SpecRev specRev, ErrorRegs errRegs, int fd);
     virtual ~GrpTemplate();
 };
 

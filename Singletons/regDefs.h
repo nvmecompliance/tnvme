@@ -189,79 +189,102 @@ struct CtlSpcType {
 
 /// Bit definitions for PCISPC_CMD
 typedef enum CMDBits {
-    CMD_IOSE    = 0x0001,
-    CMD_MSE     = 0x0002,
-    CMD_BME     = 0x0004,
-    CMD_SCE     = 0x0008
+    CMD_IOSE       = 0x0001,
+    CMD_MSE        = 0x0002,
+    CMD_BME        = 0x0004,
+    CMD_SCE        = 0x0008
 } CMDBits;
 
 
 /// Bit definitions for PCISPC_STS
 typedef enum STSBits {
-    STS_RES0    = 0x0007,
-    STS_IS      = 0x0008,
-    STS_CL      = 0x0010,
-    STS_C66     = 0x0020,
-    STS_RES1    = 0x0040,
-    STS_FBC     = 0x0080,
-    STS_DPD     = 0x0100,
-    STS_DEVT    = 0x0600,
-    STS_STA     = 0x0800,
-    STS_RTA     = 0x1000,
-    STS_RMA     = 0x2000,
-    STS_SSE     = 0x4000,
-    STS_DPE     = 0x8000
+    STS_RES0       = 0x0007,
+    STS_IS         = 0x0008,
+    STS_CL         = 0x0010,
+    STS_C66        = 0x0020,
+    STS_RES1       = 0x0040,
+    STS_FBC        = 0x0080,
+    STS_DPD        = 0x0100,
+    STS_DEVT       = 0x0600,
+    STS_STA        = 0x0800,
+    STS_RTA        = 0x1000,
+    STS_RMA        = 0x2000,
+    STS_SSE        = 0x4000,
+    STS_DPE        = 0x8000
 } STSBits;
 
 
 /// Bit definitions for PCISPC_PXDS
 typedef enum PXDSBits {
-    PXDS_CED    = 0x0001,
-    PXDS_NFED   = 0x0002,
-    PXDS_FED    = 0x0004,
-    PXDS_URD    = 0x0008,
-    PXDS_APD    = 0x0010,
-    PXDS_TP     = 0x0040
+    PXDS_CED       = 0x0001,
+    PXDS_NFED      = 0x0002,
+    PXDS_FED       = 0x0004,
+    PXDS_URD       = 0x0008,
+    PXDS_APD       = 0x0010,
+    PXDS_TP        = 0x0040
 } PXDSBits;
+
+
+/// Bit definitions for PCISPC_AERUCES
+typedef enum AERUCESBits {
+    AERUCES_RES0   = 0x0000000f,
+    AERUCES_DLPES  = 0x00000010,
+    AERUCES_RES1   = 0x00000fe0,
+    AERUCES_PTS    = 0x00001000,
+    AERUCES_FCPES  = 0x00002000,
+    AERUCES_CTS    = 0x00004000,
+    AERUCES_CAS    = 0x00008000,
+    AERUCES_UCS    = 0x00010000,
+    AERUCES_ROS    = 0x00020000,
+    AERUCES_MTS    = 0x00040000,
+    AERUCES_ECRCES = 0x00080000,
+    AERUCES_URES   = 0x00100000,
+    AERUCES_ACSVS  = 0x00200000,
+    AERUCES_UIES   = 0x00400000,
+    AERUCES_MCBTS  = 0x00800000,
+    AERUCES_AOEBS  = 0x01000000,
+    AERUCES_TPBES  = 0x02000000,
+    AERUCES_RES2   = 0xfc000000
+} AERUCESBits;
 
 
 /// Bit definitions for CTLSPC_CSTS
 typedef enum CSTSBits {
-    CSTS_RES0   = 0xfffffff0,
-    CSTS_SHST   = 0x0000000c,
-    CSTS_CFS    = 0x00000002,
-    CSTS_RDY    = 0x00000001
+    CSTS_RES0      = 0xfffffff0,
+    CSTS_SHST      = 0x0000000c,
+    CSTS_CFS       = 0x00000002,
+    CSTS_RDY       = 0x00000001
 } CSTSBits;
 
 
 /// Bit definitions for CTLSPC_CC
 typedef enum CCBits {
-    CC_RES0     = 0xff000000,
-    CC_IOCQES   = 0x00f00000,
-    CC_IOSQES   = 0x000f0000,
-    CC_SHN      = 0x0000C000,
-    CC_AMS      = 0x00003800,
-    CC_MPS      = 0x00000710,
-    CC_CSS      = 0x00000070,
-    CC_RES1     = 0x0000000e,
-    CC_EN       = 0000000001
+    CC_RES0        = 0xff000000,
+    CC_IOCQES      = 0x00f00000,
+    CC_IOSQES      = 0x000f0000,
+    CC_SHN         = 0x0000C000,
+    CC_AMS         = 0x00003800,
+    CC_MPS         = 0x00000710,
+    CC_CSS         = 0x00000070,
+    CC_RES1        = 0x0000000e,
+    CC_EN          = 0000000001
 } CCBits;
 
 
 /// Bit definitions for CTLSPC_CAP
 typedef enum CAPBits {
-    CAP_RES0    = 0xff00000000000000,
-    CAP_MPSMAX  = 0x00f0000000000000,
-    CAP_MPSMIN  = 0x000f000000000000,
-    CAP_RES1    = 0x0000fe0000000000,
-    CAP_CSS     = 0x000001e000000000,
-    CAP_RES2    = 0x0000001000000000,
-    CAP_DSTRD   = 0x0000000f00000000,
-    CAP_TO      = 0x00000000ff000000,
-    CAP_RES3    = 0x0000000000f10000,
-    CAP_AMS     = 0x0000000000060000,
-    CAP_CQR     = 0x0000000000010000,
-    CAP_MQES    = 0x000000000000ffff
+    CAP_RES0       = 0xff00000000000000,
+    CAP_MPSMAX     = 0x00f0000000000000,
+    CAP_MPSMIN     = 0x000f000000000000,
+    CAP_RES1       = 0x0000fe0000000000,
+    CAP_CSS        = 0x000001e000000000,
+    CAP_RES2       = 0x0000001000000000,
+    CAP_DSTRD      = 0x0000000f00000000,
+    CAP_TO         = 0x00000000ff000000,
+    CAP_RES3       = 0x0000000000f10000,
+    CAP_AMS        = 0x0000000000060000,
+    CAP_CQR        = 0x0000000000010000,
+    CAP_MQES       = 0x000000000000ffff
 } CAPBits;
 
 

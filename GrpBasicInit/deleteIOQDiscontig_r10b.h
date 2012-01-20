@@ -32,7 +32,8 @@
 class DeleteIOQDiscontig_r10b : public Test
 {
 public:
-    DeleteIOQDiscontig_r10b(int fd, string grpName, string testName);
+    DeleteIOQDiscontig_r10b(int fd, string grpName, string testName,
+        ErrorRegs errRegs);
     virtual ~DeleteIOQDiscontig_r10b();
 
     /**

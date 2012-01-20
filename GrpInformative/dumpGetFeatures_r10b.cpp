@@ -23,8 +23,9 @@
 #define DEFAULT_CMD_WAIT_ms         2000
 
 
-DumpGetFeatures_r10b::DumpGetFeatures_r10b(int fd, string grpName, string testName) :
-    Test(fd, grpName, testName, SPECREV_10b)
+DumpGetFeatures_r10b::DumpGetFeatures_r10b(int fd, string grpName,
+    string testName, ErrorRegs errRegs) :
+    Test(fd, grpName, testName, SPECREV_10b, errRegs)
 {
     // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 7");
@@ -161,13 +162,9 @@ DumpGetFeatures_r10b::SendGetFeaturesNumOfQueues(SharedASQPtr asq,
             "The CE of the Get Features cmd; Number of Q's feature ID:");
 
         union CE ce = acq->PeekCE(acqMetrics.head_ptr);
-        if (ce.n.status != 0) {
-            LOG_ERR("CE shows cmd failed: status = 0x%02X", ce.n.status);
-            throw exception();
-        }
-        LOG_NRM("The CE indicates a successful completion");
+        ProcessCE::ValidateStatus(ce);  // throws upon error
 
         // Update the Informative singleton for all tests to see and use
-        gInformative->SetGetFeaturesNumberOfQueues(ce.d.dw0);
+        gInformative->SetGetFeaturesNumberOfQueues(ce.t.dw0);
     }
 }

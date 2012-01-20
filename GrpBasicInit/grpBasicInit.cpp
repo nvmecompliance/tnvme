@@ -24,7 +24,8 @@
 #include "deleteIOQDiscontig_r10b.h"
 
 
-GrpBasicInit::GrpBasicInit(size_t grpNum, SpecRev specRev, int fd) :
+GrpBasicInit::GrpBasicInit(size_t grpNum, SpecRev specRev, ErrorRegs errRegs,
+    int fd) :
     Group(grpNum, specRev, "Basic Initialization")
 {
     // IMPORTANT: Once a test case is assigned a position in the vector, i.e.
@@ -36,13 +37,13 @@ GrpBasicInit::GrpBasicInit(size_t grpNum, SpecRev specRev, int fd) :
     //            Tests x.0, x.1, x.<next_test_num=2>  Minor num; test level
     switch (mSpecRev) {
     case SPECREV_10b:
-        APPEND_TEST_AT_GROUP_LEVEL(CreateACQASQ_r10b, fd, GrpBasicInit)
-        APPEND_TEST_AT_GROUP_LEVEL(CreateIOQContigPoll_r10b, fd, GrpBasicInit)
-        APPEND_TEST_AT_GROUP_LEVEL(CreateIOQDiscontigPoll_r10b, fd,GrpBasicInit)
-        APPEND_TEST_AT_GROUP_LEVEL(WriteDataPat_r10b, fd, GrpBasicInit)
-        APPEND_TEST_AT_GROUP_LEVEL(VerifyDataPat_r10b, fd, GrpBasicInit)
-        APPEND_TEST_AT_GROUP_LEVEL(DeleteIOQContig_r10b, fd, GrpBasicInit)
-        APPEND_TEST_AT_GROUP_LEVEL(DeleteIOQDiscontig_r10b, fd,GrpBasicInit)
+        APPEND_TEST_AT_GROUP_LEVEL(CreateACQASQ_r10b, fd, GrpBasicInit, errRegs)
+        APPEND_TEST_AT_GROUP_LEVEL(CreateIOQContigPoll_r10b, fd, GrpBasicInit, errRegs)
+        APPEND_TEST_AT_GROUP_LEVEL(CreateIOQDiscontigPoll_r10b, fd, GrpBasicInit, errRegs)
+        APPEND_TEST_AT_GROUP_LEVEL(WriteDataPat_r10b, fd, GrpBasicInit, errRegs)
+        APPEND_TEST_AT_GROUP_LEVEL(VerifyDataPat_r10b, fd, GrpBasicInit, errRegs)
+        APPEND_TEST_AT_GROUP_LEVEL(DeleteIOQContig_r10b, fd, GrpBasicInit, errRegs)
+        APPEND_TEST_AT_GROUP_LEVEL(DeleteIOQDiscontig_r10b, fd, GrpBasicInit, errRegs)
         break;
 
     default:

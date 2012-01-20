@@ -18,7 +18,8 @@
 #include "allCtrlRegs_r10b.h"
 
 
-GrpCtrlRegisters::GrpCtrlRegisters(size_t grpNum, SpecRev specRev, int fd) :
+GrpCtrlRegisters::GrpCtrlRegisters(size_t grpNum, SpecRev specRev,
+    ErrorRegs errRegs, int fd) :
     Group(grpNum, specRev, "Controller registers syntactic")
 {
     // IMPORTANT: Once a test case is assigned a position in the vector, i.e.
@@ -30,7 +31,7 @@ GrpCtrlRegisters::GrpCtrlRegisters(size_t grpNum, SpecRev specRev, int fd) :
     //            Tests x.0, x.1, x.<next_test_num=2>  Minor num; test level
     switch (mSpecRev) {
     case SPECREV_10b:
-        APPEND_TEST_AT_GROUP_LEVEL(AllCtrlRegs_r10b, fd, GrpCtrlRegisters)
+        APPEND_TEST_AT_GROUP_LEVEL(AllCtrlRegs_r10b, fd, GrpCtrlRegisters, errRegs)
         break;
 
     default:

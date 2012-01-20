@@ -27,7 +27,7 @@
 class GrpPciRegisters : public Group
 {
 public:
-    GrpPciRegisters(size_t grpNum, SpecRev specRev, int fd);
+    GrpPciRegisters(size_t grpNum, SpecRev specRev, ErrorRegs errRegs, int fd);
     virtual ~GrpPciRegisters();
 };
 

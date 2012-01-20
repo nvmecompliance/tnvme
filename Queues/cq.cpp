@@ -217,10 +217,10 @@ CQ::LogCE(uint16_t indexPtr)
 {
     union CE ce = PeekCE(indexPtr);
     LOG_NRM("Logging Completion Element (CE)...");
-    LOG_NRM("CQ %d, CE %d, DWORD0: 0x%08X", GetQId(), indexPtr, ce.d.dw0);
-    LOG_NRM("CQ %d, CE %d, DWORD1: 0x%08X", GetQId(), indexPtr, ce.d.dw1);
-    LOG_NRM("CQ %d, CE %d, DWORD2: 0x%08X", GetQId(), indexPtr, ce.d.dw2);
-    LOG_NRM("CQ %d, CE %d, DWORD3: 0x%08X", GetQId(), indexPtr, ce.d.dw3);
+    LOG_NRM("  CQ %d, CE %d, DWORD0: 0x%08X", GetQId(), indexPtr, ce.t.dw0);
+    LOG_NRM("  CQ %d, CE %d, DWORD1: 0x%08X", GetQId(), indexPtr, ce.t.dw1);
+    LOG_NRM("  CQ %d, CE %d, DWORD2: 0x%08X", GetQId(), indexPtr, ce.t.dw2);
+    LOG_NRM("  CQ %d, CE %d, DWORD3: 0x%08X", GetQId(), indexPtr, ce.t.dw3);
 }
 
 
@@ -256,6 +256,8 @@ CQ::ReapInquiryWaitAny(uint16_t ms, uint16_t &numCE)
     // Chunk the wait period up into equal segments, until such time there
     // can be time to develop a select() solution in dnvme
     useconds_t segments = ((ms * 1000) / NUM_TIME_SEGMENTS);
+    LOG_DBG("Waiting %d iters of %f s each", NUM_TIME_SEGMENTS,
+        (double)segments/1000000.0);
 
     for (int i = 0; i < NUM_TIME_SEGMENTS; i++) {
         if ((numCE = ReapInquiry()) != 0) {
@@ -273,6 +275,8 @@ CQ::ReapInquiryWaitSpecify(uint16_t ms, uint16_t numTil, uint16_t &numCE)
     // Chunk the wait period up into equal segments, until such time there
     // can be time to develop a select() solution in dnvme
     useconds_t segments = ((ms * 1000) / NUM_TIME_SEGMENTS);
+    LOG_DBG("Waiting %d iters of %f s each", NUM_TIME_SEGMENTS,
+        (double)segments/1000000.0);
 
     for (int i = 0; i < NUM_TIME_SEGMENTS; i++) {
         if ((numCE = ReapInquiry()) != 0) {

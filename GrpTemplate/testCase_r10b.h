@@ -30,7 +30,7 @@
 class TestCase_r10b : public Test
 {
 public:
-    TestCase_r10b(int fd, string grpName, string testName);
+    TestCase_r10b(int fd, string grpName, string testName, ErrorRegs errRegs);
     virtual ~TestCase_r10b();
 
     /**

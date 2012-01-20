@@ -28,8 +28,8 @@
 
 
 DeleteIOQContig_r10b::DeleteIOQContig_r10b(int fd, string grpName,
-    string testName) :
-    Test(fd, grpName, testName, SPECREV_10b)
+    string testName, ErrorRegs errRegs) :
+    Test(fd, grpName, testName, SPECREV_10b, errRegs)
 {
     // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 7");

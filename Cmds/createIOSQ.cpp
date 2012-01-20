@@ -76,7 +76,7 @@ CreateIOSQ::Init(const SharedIOSQPtr iosq)
 
         // Handle CQ ID
         dword11 &= ~0xffff0000;
-        dword11 |= iosq->GetCqId();
+        dword11 |= (((uint32_t)iosq->GetCqId()) << 16);
 
         SetDword(dword11, 11);
     }   // Handle DWORD 11

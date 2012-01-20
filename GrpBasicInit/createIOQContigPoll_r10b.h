@@ -35,7 +35,8 @@
 class CreateIOQContigPoll_r10b : public Test
 {
 public:
-    CreateIOQContigPoll_r10b(int fd, string grpName, string testName);
+    CreateIOQContigPoll_r10b(int fd, string grpName, string testName,
+        ErrorRegs errRegs);
     virtual ~CreateIOQContigPoll_r10b();
 
     /**

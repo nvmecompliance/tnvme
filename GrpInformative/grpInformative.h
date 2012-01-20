@@ -34,7 +34,7 @@
 class GrpInformative : public Group
 {
 public:
-    GrpInformative(size_t grpNum, SpecRev specRev, int fd);
+    GrpInformative(size_t grpNum, SpecRev specRev, ErrorRegs errRegs, int fd);
     virtual ~GrpInformative();
 };
 
