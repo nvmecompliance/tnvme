@@ -477,7 +477,9 @@ Registers::DiscoverPciCapabilities()
         (uint16_t)REGMASK(nextCap, 4));
     capId = (uint16_t)REGMASK(nextCap, 2);
     capOffset = (uint16_t)REGMASK((nextCap >> 20), 2);
-    if (capId == 0x0001) {
+    if (nextCap == 0) {
+        LOG_NRM("No extended PCI capabilities supported");
+    } else if (capId == 0x0001) {
         LOG_NRM("Decoding AERCAP capabilities");
         mPciCap.push_back(PCICAP_AERCAP);
         mPciSpcMetrics[PCISPC_AERID].offset = capOffset;
