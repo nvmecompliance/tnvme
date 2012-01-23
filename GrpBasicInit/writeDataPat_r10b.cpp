@@ -78,7 +78,6 @@ WriteDataPat_r10b::RunCoreTest()
      * 3) The NVM cmd set is the active cmd set.
      * \endverbatim
      */
-
     KernelAPI::DumpKernelMetrics(mFd,
         FileSystem::PrepLogFile(mGrpName, mTestName, "kmetrics", "before"));
 
@@ -93,6 +92,9 @@ WriteDataPat_r10b::RunCoreTest()
 void
 WriteDataPat_r10b::WriteDataPattern()
 {
+    uint64_t regVal;
+
+
     LOG_NRM("Calc buffer size to write %d logical blks to media",
         WRITE_DATA_PAT_NUM_BLKS);
     ConstSharedIdentifyPtr namSpcPtr = gInformative->GetIdentifyCmdNamespace(1);
@@ -131,6 +133,16 @@ WriteDataPat_r10b::WriteDataPattern()
 
     LOG_NRM("Send the cmd to hdw via the contiguous IOQ's");
     SendToIOSQ(iosqContig, iocqContig, writeCmd, "contig");
+
+    // To run the discontig part of this test, the hdw must support that feature
+    if (gRegisters->Read(CTLSPC_CAP, regVal) == false) {
+        LOG_ERR("Unable to determine Q memory requirements");
+        throw exception();
+    } else if (regVal & CAP_CQR) {
+        LOG_NRM("Unable to utilize discontig Q's, DUT requires contig");
+        return;
+    }
+
     LOG_NRM("Send the cmd to hdw via the discontiguous IOQ's");
     SendToIOSQ(iosqDiscontig, iocqDiscontig, writeCmd, "discontig");
 }

@@ -87,8 +87,9 @@ DeleteIOQDiscontig_r10b::RunCoreTest()
      * 4) CC.IOCQES and CC.IOSQES are already setup with correct values.
      * \endverbatim
      */
-
     uint64_t regVal;
+
+
     if (gRegisters->Read(CTLSPC_CAP, regVal) == false) {
         LOG_ERR("Unable to determine Q memory requirements");
         throw exception();
@@ -103,6 +104,15 @@ DeleteIOQDiscontig_r10b::RunCoreTest()
     // Lookup objs which were created in a prior test within group
     SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
     SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
+
+    // Verify assumptions are active/enabled/present/setup
+    if (gRegisters->Read(CTLSPC_CAP, regVal) == false) {
+        LOG_ERR("Unable to determine Q memory requirements");
+        throw exception();
+    } else if (regVal & CAP_CQR) {
+        LOG_NRM("Unable to utilize discontig Q's, DUT requires contig");
+        return true;
+    }
 
     DeleteIOCQDiscontig(asq, acq);
     DeleteIOSQDiscontig(asq, acq);
