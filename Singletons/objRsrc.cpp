@@ -170,11 +170,12 @@ ObjRsrc::FreeAllObjNotASQACQ()
     size_t numB4 = mObjGrpLife.size();
 
     item = mObjGrpLife.begin();
-    while (item == mObjGrpLife.end()) {
+    while (item != mObjGrpLife.end()) {
         SharedTrackablePtr tPtr = (*item).second;
         Trackable::ObjType obj = tPtr->GetObjType();
-        if ((obj != Trackable::OBJ_ACQ) && (obj != Trackable::OBJ_ACQ))
+        if ((obj != Trackable::OBJ_ACQ) && (obj != Trackable::OBJ_ASQ))
             mObjGrpLife.erase(item);
+        item++;
     }
     LOG_NRM("Group level resources are being freed: %ld",
         (numB4 - mObjGrpLife.size()));
