@@ -94,7 +94,8 @@ KernelAPI::DumpKernelMetrics(int fd, LogFilename filename)
 
 
 void
-KernelAPI::DumpCtrlrSpaceRegs(SpecRev specRev, LogFilename filename)
+KernelAPI::DumpCtrlrSpaceRegs(SpecRev specRev, LogFilename filename,
+    bool verbose)
 {
     int fd;
     string work;
@@ -117,7 +118,7 @@ KernelAPI::DumpCtrlrSpaceRegs(SpecRev specRev, LogFilename filename)
             uint8_t *buffer;
             buffer = new uint8_t[pciMetrics[i].size];
             if (gRegisters->Read(NVMEIO_BAR01, pciMetrics[i].size,
-                pciMetrics[i].offset, buffer) == false) {
+                pciMetrics[i].offset, buffer, verbose) == false) {
                 goto ERROR_OUT;
             } else {
                 string work = "  ";
@@ -129,7 +130,7 @@ KernelAPI::DumpCtrlrSpaceRegs(SpecRev specRev, LogFilename filename)
             delete [] buffer;
         } else if (pciMetrics[i].size > MAX_SUPPORTED_REG_SIZE) {
             continue;   // Don't care about really large areas, their reserved
-        } else if (gRegisters->Read((CtlSpc)i, value) == false) {
+        } else if (gRegisters->Read((CtlSpc)i, value, verbose) == false) {
             break;
         } else {
             work = "  ";    // indent reg values within each capability
@@ -150,7 +151,8 @@ ERROR_OUT:
 
 
 void
-KernelAPI::DumpPciSpaceRegs(SpecRev specRev, LogFilename filename)
+KernelAPI::DumpPciSpaceRegs(SpecRev specRev, LogFilename filename,
+    bool verbose)
 {
     int fd;
     string work;
@@ -174,7 +176,7 @@ KernelAPI::DumpPciSpaceRegs(SpecRev specRev, LogFilename filename)
 
         // All PCI hdr regs don't have an associated capability
         if (pciMetrics[j].cap == PCICAP_FENCE) {
-            if (gRegisters->Read((PciSpc)j, value) == false)
+            if (gRegisters->Read((PciSpc)j, value, verbose) == false)
                 goto ERROR_OUT;
             RegToFile(fd, pciMetrics[j], value);
         }
@@ -218,7 +220,7 @@ KernelAPI::DumpPciSpaceRegs(SpecRev specRev, LogFilename filename)
                     buffer = new uint8_t[pciMetrics[j].size];
 
                     if (gRegisters->Read(NVMEIO_PCI_HDR, pciMetrics[j].size,
-                        pciMetrics[j].offset, buffer) == false) {
+                        pciMetrics[j].offset, buffer, verbose) == false) {
                         err = true;
                     } else {
                         string work = "  ";
@@ -230,7 +232,8 @@ KernelAPI::DumpPciSpaceRegs(SpecRev specRev, LogFilename filename)
                     delete [] buffer;
                     if (err)
                         goto ERROR_OUT;
-                } else if (gRegisters->Read((PciSpc)j, value) == false) {
+                } else if (gRegisters->Read((PciSpc)j, value, verbose) ==
+                    false) {
                     goto ERROR_OUT;
                 } else {
                     RegToFile(fd, pciMetrics[j], value);
