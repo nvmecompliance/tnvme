@@ -19,10 +19,9 @@ LDFLAGS=-lm
 LIBS = -L../ -L/usr/local/lib -lm
 INCLUDES = -I. -I../ -I../../ -I/usr/local/include
 
-SRC = \
-	grpInformative.cpp			\
-	dumpPciAddrSpace_r10b.cpp	\
-	dumpCtrlrAddrSpace_r10b.cpp	\
+SRC =					\
+	grpInformative.cpp		\
+	dumpRegisters_r10b.cpp		\
 	createACQASQ_r10b.cpp		\
 	dumpIdentifyData_r10b.cpp	\
 	dumpGetFeatures_r10b.cpp

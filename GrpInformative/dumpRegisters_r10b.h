@@ -14,8 +14,8 @@
  *  limitations under the License.
  */
 
-#ifndef _DUMPCTRLRADDRSPACE_r10b_H_
-#define _DUMPPCIADDRSPACE_r10b_H_
+#ifndef _DUMPREGISTERS_r10b_H_
+#define _DUMPREGISTERS_r10b_H_
 
 #include "test.h"
 
@@ -27,20 +27,20 @@
  * 1) See notes in the header file of the Test base class
  * \endverbatim
  */
-class DumpCtrlrAddrSpace_r10b : public Test
+class DumpRegisters_r10b : public Test
 {
 public:
-    DumpCtrlrAddrSpace_r10b(int fd, string grpName, string testName,
+    DumpRegisters_r10b(int fd, string grpName, string testName,
         ErrorRegs errRegs);
-    virtual ~DumpCtrlrAddrSpace_r10b();
+    virtual ~DumpRegisters_r10b();
 
     /**
      * IMPORTANT: Read Test::Clone() header comment.
      */
-    virtual DumpCtrlrAddrSpace_r10b *Clone() const
-        { return new DumpCtrlrAddrSpace_r10b(*this); }
-    DumpCtrlrAddrSpace_r10b &operator=(const DumpCtrlrAddrSpace_r10b &other);
-    DumpCtrlrAddrSpace_r10b(const DumpCtrlrAddrSpace_r10b &other);
+    virtual DumpRegisters_r10b *Clone() const
+        { return new DumpRegisters_r10b(*this); }
+    DumpRegisters_r10b &operator=(const DumpRegisters_r10b &other);
+    DumpRegisters_r10b(const DumpRegisters_r10b &other);
 
 
 protected:
