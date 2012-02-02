@@ -28,6 +28,7 @@ SUBDIRS:=				\
 	GrpPciRegisters		\
 	GrpCtrlRegisters	\
 	GrpBasicInit		\
+	GrpResets		\
 	Queues				\
 	Cmds				\
 	Utils

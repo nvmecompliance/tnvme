@@ -36,6 +36,7 @@
 #include "GrpPciRegisters/grpPciRegisters.h"
 #include "GrpCtrlRegisters/grpCtrlRegisters.h"
 #include "GrpBasicInit/grpBasicInit.h"
+#include "GrpResets/grpResets.h"
 
 
 #define NO_DEVICES     "no devices found"
@@ -506,6 +507,7 @@ BuildTestInfrastructure(vector<Group *> &groups, int &fd, struct CmdLine &cl)
     groups.push_back(new GrpPciRegisters(groups.size(), cl.rev, cl.errRegs, fd));   // 1
     groups.push_back(new GrpCtrlRegisters(groups.size(), cl.rev, cl.errRegs, fd));  // 2
     groups.push_back(new GrpBasicInit(groups.size(), cl.rev, cl.errRegs, fd));      // 3
+    groups.push_back(new GrpResets(groups.size(), cl.rev, cl.errRegs, fd));         // 4
 
     return true;
 }
