@@ -17,10 +17,9 @@
 #include "dumpGetFeatures_r10b.h"
 #include "globals.h"
 #include "createACQASQ_r10b.h"
+#include "grpDefs.h"
 #include "../Cmds/getFeatures.h"
 #include "../Utils/kernelAPI.h"
-
-#define DEFAULT_CMD_WAIT_ms         2000
 
 
 DumpGetFeatures_r10b::DumpGetFeatures_r10b(int fd, string grpName,
@@ -155,7 +154,7 @@ DumpGetFeatures_r10b::SendGetFeaturesNumOfQueues(SharedASQPtr asq,
                 numReaped);
             throw exception();
         }
-        LOG_NRM("The reaped get features CE is...");
+        LOG_NRM("The reaped CE is...");
         acq->LogCE(acqMetrics.head_ptr);
         acq->DumpCE(acqMetrics.head_ptr, FileSystem::PrepLogFile
             (mGrpName, mTestName, "CE", "GetFeat.NumOfQueue"),

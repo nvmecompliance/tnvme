@@ -41,8 +41,7 @@ public:
      */
     virtual DeleteIOQDiscontig_r10b *Clone() const
         { return new DeleteIOQDiscontig_r10b(*this); }
-    DeleteIOQDiscontig_r10b &operator=(
-        const DeleteIOQDiscontig_r10b &other);
+    DeleteIOQDiscontig_r10b &operator=(const DeleteIOQDiscontig_r10b &other);
     DeleteIOQDiscontig_r10b(const DeleteIOQDiscontig_r10b &other);
 
 
@@ -54,8 +53,6 @@ private:
     ///////////////////////////////////////////////////////////////////////////
     // Adding a member variable? Then edit the copy constructor and operator().
     ///////////////////////////////////////////////////////////////////////////
-    void DeleteIOCQDiscontig(SharedASQPtr asq, SharedACQPtr acq);
-    void DeleteIOSQDiscontig(SharedASQPtr asq, SharedACQPtr acq);
 };
 
 

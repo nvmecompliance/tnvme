@@ -96,7 +96,6 @@ CtrlrResetDefaults_r10b::VerifyCtrlrResetDefaults()
     asq->Init(5);
 
     gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
-
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
         throw exception();
 

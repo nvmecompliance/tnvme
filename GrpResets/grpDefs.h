@@ -14,20 +14,16 @@
  *  limitations under the License.
  */
 
-#ifndef _TNVMEHELPERS_H_
-#define _TNVMEHELPERS_H_
+#ifndef _GRPDEFS_H_
+#define _GRPDEFS_H_
 
-#include "group.h"
+#define ACQ_GROUP_ID                "ACQ"
+#define ASQ_GROUP_ID                "ASQ"
+#define IOCQ_CONTIG_GROUP_ID        "IOCQContig"
+#define IOSQ_CONTIG_GROUP_ID        "IOSQContig"
+#define IOCQ_DISCONTIG_GROUP_ID     "IOCQDiscontig"
+#define IOSQ_DISCONTIG_GROUP_ID     "IOSQDiscontig"
 
-
-bool VerifySpecCompatibility(SpecRev specRev);
-bool ParseTargetCmdLine(TestTarget &target, const char *optarg);
-bool ParseSkipTestCmdLine(vector<TestRef> &skipTest, const char *optarg);
-bool ParseRmmapCmdLine(RmmapIo &rmmap, const char *optarg);
-bool ParseWmmapCmdLine(WmmapIo &wmmap, const char *optarg);
-bool ParseQueuesCmdLine(NumQueues &numQueues, const char *optarg);
-bool ParseErrorCmdLine(ErrorRegs &errRegs, const char *optarg);
-bool SetFeaturesNumberOfQueues(NumQueues &numQueues, int fd);
-
+#define DEFAULT_CMD_WAIT_ms         2000
 
 #endif

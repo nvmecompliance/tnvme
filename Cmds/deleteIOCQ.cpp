@@ -46,6 +46,7 @@ DeleteIOCQ::Init(const SharedIOCQPtr iocq)
         // Handle Q ID
         dword10 &= ~0x0000ffff;
         dword10 |= (uint32_t)iocq->GetQId();
+        LOG_NRM("Init delete IOCQ cmd for CQ=%d", (uint32_t)iocq->GetQId());
 
         SetDword(dword10, 10);
     }   // Handle DWORD 10

@@ -14,8 +14,8 @@
  *  limitations under the License.
  */
 
-#ifndef _DELETEIOQCONTIG_r10b_H_
-#define _DELETEIOQCONTIG_r10b_H_
+#ifndef _CREATEIOQDISCONTIGISR_r10b_H_
+#define _CREATEIOQDISCONTIGISR_r10b_H_
 
 #include "test.h"
 #include "../Queues/asq.h"
@@ -29,20 +29,21 @@
  * 1) See notes in the header file of the Test base class
  * \endverbatim
  */
-class DeleteIOQContig_r10b : public Test
+class CreateIOQDiscontigIsr_r10b : public Test
 {
 public:
-    DeleteIOQContig_r10b(int fd, string grpName, string testName,
+    CreateIOQDiscontigIsr_r10b(int fd, string grpName, string testName,
         ErrorRegs errRegs);
-    virtual ~DeleteIOQContig_r10b();
+    virtual ~CreateIOQDiscontigIsr_r10b();
 
     /**
      * IMPORTANT: Read Test::Clone() header comment.
      */
-    virtual DeleteIOQContig_r10b *Clone() const
-        { return new DeleteIOQContig_r10b(*this); }
-    DeleteIOQContig_r10b &operator=(const DeleteIOQContig_r10b &other);
-    DeleteIOQContig_r10b(const DeleteIOQContig_r10b &other);
+    virtual CreateIOQDiscontigIsr_r10b *Clone() const
+        { return new CreateIOQDiscontigIsr_r10b(*this); }
+    CreateIOQDiscontigIsr_r10b &operator=(
+        const CreateIOQDiscontigIsr_r10b &other);
+    CreateIOQDiscontigIsr_r10b(const CreateIOQDiscontigIsr_r10b &other);
 
 
 protected:

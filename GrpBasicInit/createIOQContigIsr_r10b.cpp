@@ -14,33 +14,37 @@
  *  limitations under the License.
  */
 
-#include "deleteIOQDiscontig_r10b.h"
+#include "createIOQContigIsr_r10b.h"
 #include "globals.h"
 #include "createACQASQ_r10b.h"
-#include "createIOQDiscontigPoll_r10b.h"
 #include "grpDefs.h"
-#include "../Utils/queues.h"
+#include "../Queues/iocq.h"
+#include "../Queues/iosq.h"
 #include "../Utils/kernelAPI.h"
+#include "../Utils/queues.h"
 
 
-DeleteIOQDiscontig_r10b::DeleteIOQDiscontig_r10b(int fd, string grpName,
+#define IOQ_ID                      1
+
+static uint16_t NumEntriesIOQ =     5;
+
+
+CreateIOQContigIsr_r10b::CreateIOQContigIsr_r10b(int fd, string grpName,
     string testName, ErrorRegs errRegs) :
     Test(fd, grpName, testName, SPECREV_10b, errRegs)
 {
     // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 7");
-    mTestDesc.SetShort(     "Delete discontiguous IOCQ and IOSQ's");
+    mTestDesc.SetShort(     "Create contiguous IOCQ(isr) and IOSQ's");
     // No string size limit for the long description
     mTestDesc.SetLong(
-        "Issue the admin commands Delete I/O SQ and Delete I/Q CQ"
-        "to the ASQ and reap the resulting CE's from the ACQ to certify "
-        "those the discontiguous IOQ's have been deleted. Dumping driver "
-        "metrics before and after the deletion will prove the dnvme/hdw has "
-        "removed those Q's");
+        "Issue the admin commands Create contiguous I/O SQ and Create I/Q "
+        "CQ(isr) to the ASQ and reap the resulting CE's from the ACQ to "
+        "certify those Q's have been created.");
 }
 
 
-DeleteIOQDiscontig_r10b::~DeleteIOQDiscontig_r10b()
+CreateIOQContigIsr_r10b::~CreateIOQContigIsr_r10b()
 {
     ///////////////////////////////////////////////////////////////////////////
     // Allocations taken from the heap and not under the control of the
@@ -49,9 +53,8 @@ DeleteIOQDiscontig_r10b::~DeleteIOQDiscontig_r10b()
 }
 
 
-DeleteIOQDiscontig_r10b::
-DeleteIOQDiscontig_r10b(const DeleteIOQDiscontig_r10b &other) :
-    Test(other)
+CreateIOQContigIsr_r10b::
+CreateIOQContigIsr_r10b(const CreateIOQContigIsr_r10b &other) : Test(other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -60,8 +63,8 @@ DeleteIOQDiscontig_r10b(const DeleteIOQDiscontig_r10b &other) :
 }
 
 
-DeleteIOQDiscontig_r10b &
-DeleteIOQDiscontig_r10b::operator=(const DeleteIOQDiscontig_r10b &other)
+CreateIOQContigIsr_r10b &
+CreateIOQContigIsr_r10b::operator=(const CreateIOQContigIsr_r10b &other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -73,27 +76,16 @@ DeleteIOQDiscontig_r10b::operator=(const DeleteIOQDiscontig_r10b &other)
 
 
 bool
-DeleteIOQDiscontig_r10b::RunCoreTest()
+CreateIOQContigIsr_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
      * 1) The ASQ & ACQ's have been created by the RsrcMngr for group lifetime
      * 2) All interrupts are disabled.
-     * 3) CreateIOQDiscontigPoll_r10b test case has setup the Q's to delete
-     * 4) CC.IOCQES and CC.IOSQES are already setup with correct values.
+     * 3) Empty ASQ & ACQ's
      * \endverbatim
      */
-    uint64_t regVal;
-
-
-    // DUT must support discontig memory backing a IOQ to run this test
-    if (gRegisters->Read(CTLSPC_CAP, regVal) == false) {
-        LOG_ERR("Unable to determine Q memory requirements");
-        throw exception();
-    } else if (regVal & CAP_CQR) {
-        LOG_NRM("Unable to utilize discontig Q's, DUT requires contig");
-        return true;
-    }
+    uint64_t work;
 
     KernelAPI::DumpKernelMetrics(mFd,
         FileSystem::PrepLogFile(mGrpName, mTestName, "kmetrics", "before"));
@@ -102,25 +94,49 @@ DeleteIOQDiscontig_r10b::RunCoreTest()
     SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
     SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
 
-    // According to spec, if one deletes the CQ before the SQ it's a "shall not"
-    // statement which means it will have undefined behavior and thus there is
-    // nothing to gain by attempting such action.
-    LOG_NRM("Lookup IOSQ which was created in a prior test within group");
-    SharedIOSQPtr iosq =
-        CAST_TO_IOSQ(gRsrcMngr->GetObj(IOSQ_DISCONTIG_GROUP_ID))
-    Queues::DeleteIOSQInHdw(mFd, mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
-        iosq, asq, acq);
-    // Not explicitly necessary, but is more clean to free what is not needed
-    gRsrcMngr->FreeObj(IOSQ_DISCONTIG_GROUP_ID);
+    // Verify assumptions are active/enabled/present/setup
+    if (acq->ReapInquiry() != 0) {
+        LOG_ERR("The ACQ should not have any CE's waiting before testing");
+        throw exception();
+    } else if (gRegisters->Read(CTLSPC_CAP, work) == false) {
+        LOG_ERR("Unable to determine MQES");
+        throw exception();
+    }
+
+    // Verify the min requirements for this test are supported by DUT
+    work &= CAP_MQES;
+    if (work < (uint64_t)NumEntriesIOQ) {
+        LOG_NRM("Changing number of Q element from %d to %d",
+            NumEntriesIOQ, (uint16_t)work);
+        NumEntriesIOQ = work;
+    } else if (gInformative->GetFeaturesNumOfIOCQs() < IOQ_ID) {
+        LOG_ERR("DUT doesn't support %d IOCQ's", IOQ_ID);
+        throw exception();
+    } else if (gInformative->GetFeaturesNumOfIOSQs() < IOQ_ID) {
+        LOG_ERR("DUT doesn't support %d IOSQ's", IOQ_ID);
+        throw exception();
+    }
 
 
-    LOG_NRM("Lookup IOCQ which was created in a prior test within group");
-    SharedIOCQPtr iocq =
-        CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_DISCONTIG_GROUP_ID))
-    Queues::DeleteIOCQInHdw(mFd, mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
-        iocq, asq, acq);
-    // Not explicitly necessary, but is more clean to free what is not needed
-    gRsrcMngr->FreeObj(IOCQ_DISCONTIG_GROUP_ID);
+    if (gCtrlrConfig->SetState(ST_DISABLE) == false)
+        throw exception();
+    if (gCtrlrConfig->SetIrqScheme(INT_MSIX, 3) == false)
+        throw exception();
+
+    gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
+    if (gCtrlrConfig->SetState(ST_ENABLE) == false)
+        throw exception();
+
+
+    gCtrlrConfig->SetIOCQES(IOCQ::COMMON_ELEMENT_SIZE_PWR_OF_2);
+    Queues::CreateIOCQContig(mFd, mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+        asq, acq, IOQ_ID, NumEntriesIOQ, true, IOCQ_CONTIG_GROUP_ID, true, 1);
+
+
+    gCtrlrConfig->SetIOSQES(IOSQ::COMMON_ELEMENT_SIZE_PWR_OF_2);
+    Queues::CreateIOSQContig(mFd, mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+        asq, acq, IOQ_ID, NumEntriesIOQ, true, IOSQ_CONTIG_GROUP_ID, IOQ_ID, 0);
+
 
     KernelAPI::DumpKernelMetrics(mFd,
         FileSystem::PrepLogFile(mGrpName, mTestName, "kmetrics", "after"));

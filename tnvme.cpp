@@ -39,11 +39,13 @@
 #include "GrpResets/grpResets.h"
 
 
-#define NO_DEVICES     "no devices found"
+#define NO_DEVICES              "no devices found"
+#define INFORMATIVE_GRPNUM      0
 
 
 void Usage(void);
 void DestroySingletons();
+bool ExecuteTests(struct CmdLine &cl, vector<Group *> &groups);
 void BuildSingletons(int &fd, struct CmdLine &cl);
 void DestroyTestInfrastructure(vector<Group *> &groups, int &fd);
 bool BuildTestInfrastructure(vector<Group *> &groups, int &fd,
@@ -143,9 +145,9 @@ main(int argc, char *argv[])
     CmdLine.device = NO_DEVICES;
     CmdLine.rmmap.req = false;
     CmdLine.wmmap.req = false;
-    CmdLine.queues.req = false;
-    CmdLine.queues.ncqr = 0;
-    CmdLine.queues.nsqr = 0;
+    CmdLine.numQueues.req = false;
+    CmdLine.numQueues.ncqr = 0;
+    CmdLine.numQueues.nsqr = 0;
     CmdLine.errRegs.sts = (STS_SSE | STS_STA | STS_RMA | STS_RTA);
     CmdLine.errRegs.pxds = (PXDS_TP | PXDS_FED);
     CmdLine.errRegs.aeruces = 0;
@@ -273,7 +275,7 @@ main(int argc, char *argv[])
             exit(0);
 
         case 'q':
-            if (ParseQueuesCmdLine(CmdLine.queues, optarg) == false) {
+            if (ParseQueuesCmdLine(CmdLine.numQueues, optarg) == false) {
                 printf("Unable to parse --queues cmd line\n");
                 exit(1);
             }
@@ -322,8 +324,8 @@ main(int argc, char *argv[])
 
 
     fflush(stdout);
-    if (CmdLine.queues.req) {
-        if ((exitCode = !SetFeaturesNumberOfQueues(CmdLine.queues, fd)))
+    if (CmdLine.numQueues.req) {
+        if ((exitCode = !SetFeaturesNumberOfQueues(CmdLine.numQueues, fd)))
             printf("FAILURE: Setting number of queues\n");
         else
             printf("SUCCESS: Setting number of queues\n");
@@ -379,7 +381,7 @@ main(int argc, char *argv[])
             CmdLine.wmmap.offset, CmdLine.wmmap.acc,
             (uint8_t *)(&CmdLine.wmmap.value));
     } else if (CmdLine.reset) {
-        if ((exitCode = !KernelAPI::SoftReset()))
+        if ((exitCode = !gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY)))
             printf("FAILURE: reset\n");
         else
             printf("SUCCESS: reset\n");
@@ -534,3 +536,216 @@ DestroyTestInfrastructure(vector<Group *> &groups, int &fd)
             LOG_ERR("%s", strerror(errno));
     }
 }
+
+
+/**
+ * A function to execute the desired test case(s). Param ignore
+ * indicates that when an error is reported from a test case, it is ignored to
+ * the point that the next test case will be allowed to run, if and only if,
+ * there are more tests which could have run if the test passed. The error
+ * itself won't be lost. because the end return value from this function will
+ * indicate an error was detected even though it was ignored.
+ * @param cl Pass the cmd line parameters
+ * @param groups Pass all groups being considered for execution
+ * @return true upon success, false if failures/errors detected;
+ */
+bool
+ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
+{
+    size_t iLoop;
+    int numPassed = 0;
+    int numFailed = 0;
+    int numSkipped = 0;
+    bool allTestsPass = true;    // assuming success until we find otherwise
+    bool thisTestPass;
+    TestIteratorType testIter;
+
+
+    if ((cl.test.t.group != UINT_MAX) && (cl.test.t.group >= groups.size())) {
+        LOG_ERR("Specified test group does not exist");
+        return false;
+    } else if (VerifySpecCompatibility(cl.rev) == false) {
+        LOG_ERR("Targeted compliance revision incompatible with hdw");
+        return false;
+    }
+
+    for (iLoop = 0; iLoop < cl.loop; iLoop++) {
+        LOG_NRM("Start loop execution #%ld", iLoop);
+
+        for (size_t iGrp = 0; iGrp < groups.size(); iGrp++) {
+            bool allHaveRun = false;
+
+            // Always run the Informative group 1st, i.e. 0 always runs 1st
+            if (iGrp == INFORMATIVE_GRPNUM) {
+                LOG_NRM("Executing a new group, start from known point");
+                if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
+                    return false;
+
+                // Run all tests within this group
+                testIter = groups[iGrp]->GetTestIterator();
+                while (allHaveRun == false) {
+                    thisTestPass = true;
+
+                    switch (groups[iGrp]->RunTest(testIter, cl.skiptest)) {
+                    case Group::TR_SUCCESS:
+                        numPassed++;
+                        break;
+                    case Group::TR_FAIL:
+                        allTestsPass = false;
+                        thisTestPass = false;
+                        numFailed++;
+                        break;
+                    case Group::TR_SKIPPING:
+                        numSkipped++;
+                        break;
+                    case Group::TR_NOTFOUND:
+                        allHaveRun = true;
+                        break;
+                    }
+                    if ((cl.ignore == false) && (allTestsPass == false)) {
+                        goto FAIL_OUT;
+                    } else if (cl.ignore && (thisTestPass == false)) {
+                        LOG_NRM("Detected error, but forced to ignore");
+                        break;  // don't execute any more within this group
+                    }
+                }
+                continue;   // continue with next test in next group
+            }
+
+
+            // Now handle anything spec'd in the --test <cmd line option>
+            if (cl.test.t.group == UINT_MAX) {
+                // Do not run Informative group, that group always runs above
+                if (iGrp == INFORMATIVE_GRPNUM)
+                    break;  // continue with next test in next group
+
+                LOG_NRM("Executing a new group, start from known point");
+                if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
+                    return false;
+
+                // Run all tests within all groups
+                testIter = groups[iGrp]->GetTestIterator();
+                while (allHaveRun == false) {
+                    thisTestPass = true;
+
+                    switch (groups[iGrp]->RunTest(testIter, cl.skiptest)) {
+                    case Group::TR_SUCCESS:
+                        numPassed++;
+                        break;
+                    case Group::TR_FAIL:
+                        allTestsPass = false;
+                        thisTestPass = false;
+                        numFailed++;
+                        break;
+                    case Group::TR_SKIPPING:
+                        numSkipped++;
+                        break;
+                    case Group::TR_NOTFOUND:
+                        allHaveRun = true;
+                        break;
+                    }
+                    if ((cl.ignore == false) && (allTestsPass == false)) {
+                        goto FAIL_OUT;
+                    } else if (cl.ignore && (thisTestPass == false)) {
+                        LOG_NRM("Detected error, but forced to ignore");
+                        break;  // continue with next test in next group
+                    }
+                }
+
+            } else if ((cl.test.t.major == UINT_MAX) ||
+                       (cl.test.t.minor == UINT_MAX)) {
+
+                // Run all tests within spec'd group, except Informative grp
+                if ((iGrp == cl.test.t.group) && (iGrp != INFORMATIVE_GRPNUM)) {
+                    LOG_NRM("Executing a new group, start from known point");
+                    if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
+                        return false;
+
+                    // Run all tests within this group
+                    testIter = groups[iGrp]->GetTestIterator();
+                    while (allHaveRun == false) {
+                        thisTestPass = true;
+
+                        switch (groups[iGrp]->RunTest(testIter, cl.skiptest)) {
+                        case Group::TR_SUCCESS:
+                            numPassed++;
+                            break;
+                        case Group::TR_FAIL:
+                            allTestsPass = false;
+                            thisTestPass = false;
+                            numFailed++;
+                            break;
+                        case Group::TR_SKIPPING:
+                            numSkipped++;
+                            break;
+                        case Group::TR_NOTFOUND:
+                            allHaveRun = true;
+                            break;
+                        }
+                        if ((cl.ignore == false) && (allTestsPass == false)) {
+                            goto FAIL_OUT;
+                        } else if (cl.ignore && (thisTestPass == false)) {
+                            LOG_NRM("Detected error, but forced to ignore");
+                            break;  // continue with next test in next group
+                        }
+                    }
+                    break;  // check if more loops must occur
+                }
+
+            } else {
+                // Run spec'd test within spec'd group, except Informative grp
+                if ((iGrp == cl.test.t.group) && (iGrp != INFORMATIVE_GRPNUM)) {
+                    LOG_NRM("Executing a new group, start from known point");
+                    if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
+                        return false;
+
+                    switch (groups[iGrp]->RunTest(cl.test.t, cl.skiptest)) {
+                    case Group::TR_SUCCESS:
+                        numPassed++;
+                        break;
+                    case Group::TR_FAIL:
+                        allTestsPass = false;
+                        numFailed++;
+                        break;
+                    case Group::TR_SKIPPING:
+                        numSkipped++;
+                        break;
+                    case Group::TR_NOTFOUND:
+                        LOG_DBG("Internal programming error, unknown test");
+                        break;
+                    }
+                    if ((cl.ignore == false) && (allTestsPass == false))
+                        goto FAIL_OUT;
+
+                    break;  // check if more loops must occur
+                }
+            }
+        }
+
+        LOG_NRM("Iteration SUMMARY passed : %d", numPassed);
+        if (numFailed) {
+            LOG_NRM("                  failed : %d  <----------", numFailed);
+        } else {
+            LOG_NRM("                  failed : 0");
+        }
+        LOG_NRM("                  skipped: %d", numSkipped);
+        LOG_NRM("                  total  : %d",
+            numPassed+numFailed+numSkipped);
+        LOG_NRM("Stop loop execution #%ld", iLoop);
+    }
+
+    return allTestsPass;
+
+FAIL_OUT:
+    LOG_NRM("Tests  passed: %d", numPassed);
+    if (numFailed) {
+        LOG_NRM("       failed: %d    <--------------", numFailed);
+    } else {
+        LOG_NRM("       failed: 0");
+    }
+    LOG_NRM("      skipped: %d", numSkipped);
+    LOG_NRM("        total: %d", numPassed+numFailed+numSkipped);
+    LOG_NRM("Stop loop execution #%ld", iLoop);
+    return allTestsPass;
+}
+

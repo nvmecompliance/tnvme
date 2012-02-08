@@ -81,10 +81,6 @@ CreateACQASQ_r10b::RunCoreTest()
     KernelAPI::DumpKernelMetrics(mFd,
         FileSystem::PrepLogFile(mGrpName, mTestName, "kmetrics", "before"));
 
-    // After disabling the defaults for AMS & CSS are fine, no need to modify
-    if (gCtrlrConfig->SetMPS() == false)
-        throw exception();
-
     SharedACQPtr acq = CAST_TO_ACQ(
         gRsrcMngr->AllocObj(Trackable::OBJ_ACQ, ACQ_GROUP_ID))
     acq->Init(5);
@@ -94,7 +90,6 @@ CreateACQASQ_r10b::RunCoreTest()
     asq->Init(5);
 
     gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
-
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
         throw exception();
 

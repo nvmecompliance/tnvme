@@ -16,7 +16,14 @@
 
 #include "ctrlrResetIOQDeleted_r10b.h"
 #include "globals.h"
+#include "grpDefs.h"
+#include "../Queues/iocq.h"
+#include "../Queues/iosq.h"
 #include "../Utils/kernelAPI.h"
+#include "../Utils/queues.h"
+
+#define IOCQ_ID                     1
+#define IOSQ_ID                     2
 
 
 CtrlrResetIOQDeleted_r10b::CtrlrResetIOQDeleted_r10b(int fd, string grpName,
@@ -77,8 +84,68 @@ CtrlrResetIOQDeleted_r10b::RunCoreTest()
      * 3) All interrupts are disabled.
      *  \endverbatim
      */
+    uint64_t work;
+    uint16_t numEntriesIOQ = 10;
 
-     // Place local variables here
+    // Verify the min requirements for this test are supported by DUT
+    if (gRegisters->Read(CTLSPC_CAP, work) == false) {
+        LOG_ERR("Unable to determine MQES");
+        throw exception();
+    }
+
+    work &= CAP_MQES;
+    if (work < (uint64_t)numEntriesIOQ) {
+        LOG_NRM("Changing number of Q element from %d to %d",
+            numEntriesIOQ, (uint16_t)work);
+        numEntriesIOQ = work;
+    } else if (gInformative->GetFeaturesNumOfIOCQs() < IOCQ_ID) {
+        LOG_ERR("DUT doesn't support %d IOCQ's", IOCQ_ID);
+        throw exception();
+    } else if (gInformative->GetFeaturesNumOfIOSQs() < IOSQ_ID) {
+        LOG_ERR("DUT doesn't support %d IOSQ's", IOSQ_ID);
+        throw exception();
+    }
+
+    // Create Admin Q Objects for Group lifetime
+    SharedACQPtr acq = CAST_TO_ACQ(
+        gRsrcMngr->AllocObj(Trackable::OBJ_ACQ, ACQ_GROUP_ID))
+    acq->Init(15);
+    SharedASQPtr asq = CAST_TO_ASQ(
+        gRsrcMngr->AllocObj(Trackable::OBJ_ASQ, ASQ_GROUP_ID))
+    asq->Init(15);
+
+    VerifyCtrlrResetDeletesIOQs(acq, asq, numEntriesIOQ);
 
     return true;
+}
+
+void
+CtrlrResetIOQDeleted_r10b::VerifyCtrlrResetDeletesIOQs(SharedACQPtr acq,
+    SharedASQPtr asq, uint16_t numEntriesIOQ)
+{
+    // Set ctrl'r to enable state, create IOQ's and then disable the ctrl'r.
+    // Re-enable the ctrl'r and try to create the same IOQ's, verify that
+    // these IOQ's are created successfully.
+    for (uint16_t i = 0; i < 2; i++) {
+        gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
+        if (gCtrlrConfig->SetState(ST_ENABLE) == false)
+            throw exception();
+
+        gCtrlrConfig->SetIOCQES(IOCQ::COMMON_ELEMENT_SIZE_PWR_OF_2);
+        Queues::CreateIOCQContig(mFd, mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+            asq, acq, IOCQ_ID, numEntriesIOQ, false, IOCQ_CONTIG_GROUP_ID,
+            false, 0);
+
+        // Create 2 IO SQ's, start with SQ ID 1 and associate all SQ's to one
+        // CQ with IOCQ_ID
+        gCtrlrConfig->SetIOSQES(IOSQ::COMMON_ELEMENT_SIZE_PWR_OF_2);
+        for (uint16_t j = 1; j <= IOSQ_ID; j++) {
+            Queues::CreateIOSQContig(mFd, mGrpName, mTestName,
+                DEFAULT_CMD_WAIT_ms, asq, acq, j, numEntriesIOQ, false,
+                IOSQ_CONTIG_GROUP_ID, IOCQ_ID, 0);
+        }
+
+        if (gCtrlrConfig->SetState(ST_DISABLE) == false)
+            throw exception();
+    }
 }

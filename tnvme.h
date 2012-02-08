@@ -89,7 +89,7 @@ struct WmmapIo {
     nvme_acc_type   acc;
 };
 
-struct Queues {
+struct NumQueues {
     bool            req;     // requested by cmd line
     uint16_t        ncqr;    // Number of IOCQ's requested
     uint16_t        nsqr;    // Number of IOSQ's requested
@@ -114,7 +114,7 @@ struct CmdLine {
     vector<TestRef> skiptest;
     RmmapIo         rmmap;
     WmmapIo         wmmap;
-    Queues          queues;
+    NumQueues       numQueues;
     ErrorRegs       errRegs;
 };
 

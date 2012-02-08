@@ -70,12 +70,10 @@ DumpRegisters_r10b::RunCoreTest()
      *  \endverbatim
      */
 
-    KernelAPI::DumpPciSpaceRegs( mSpecRev,
-        FileSystem::PrepLogFile(mGrpName, mTestName, "pci", "registers"),
-        false);
+    KernelAPI::DumpPciSpaceRegs(mSpecRev,
+        FileSystem::PrepLogFile(mGrpName, mTestName, "pci", "regs"), false);
     KernelAPI::DumpCtrlrSpaceRegs(mSpecRev,
-        FileSystem::PrepLogFile(mGrpName, mTestName, "ctrl", "registers"),
-        false);
+        FileSystem::PrepLogFile(mGrpName, mTestName, "ctrl", "regs"), false);
     return true;
 }
 

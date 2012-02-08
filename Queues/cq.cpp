@@ -331,3 +331,37 @@ CQ::Reap(uint16_t &ceRemain, SharedMemBufferPtr memBuffer,
 }
 
 
+void
+CQ::Dump(LogFilename filename, string fileHdr)
+{
+    FILE *fp;
+    union CE ce;
+    vector<string> desc;
+
+    Queue::Dump(filename, fileHdr);
+
+    // Reopen the file and append the same data in a different format
+    if ((fp = fopen(filename.c_str(), "a")) == NULL) {
+        LOG_DBG("Failed to open file: %s", filename.c_str());
+        throw exception();
+    }
+
+    fprintf(fp, "\nFurther decoding details of the above raw dump follow:\n");
+    for (uint32_t i = 0; i < GetNumEntries(); i++) {
+        ce = PeekCE(i);
+        fprintf(fp, "CE %d @ 0x%08X:\n", i, (i * GetEntrySize()));
+        fprintf(fp, "  Cmd specific: 0x%08X\n", ce.n.cmdSpec);
+        fprintf(fp, "  Reserved:     0x%08X\n", ce.n.reserved);
+        fprintf(fp, "  SQ head ptr:  0x%04X\n", ce.n.SQHD);
+        fprintf(fp, "  SQ ID:        0x%04X\n", ce.n.SQID);
+        fprintf(fp, "  Cmd ID:       0x%08X\n", ce.n.CID);
+        fprintf(fp, "  P:            0x%1X\n",  ce.n.SF.t.P);
+        ProcessCE::DecodeStatus(ce, desc);
+        for (size_t j = 0; j < desc.size(); j++ )
+            fprintf(fp, "  %s\n", desc[j].c_str());
+    }
+
+    fclose(fp);
+}
+
+

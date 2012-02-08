@@ -23,7 +23,9 @@ SRC =						\
 	grpBasicInit.cpp			\
 	createACQASQ_r10b.cpp			\
 	createIOQContigPoll_r10b.cpp		\
+	createIOQContigIsr_r10b.cpp		\
 	createIOQDiscontigPoll_r10b.cpp		\
+	createIOQDiscontigIsr_r10b.cpp		\
 	deleteIOQContig_r10b.cpp		\
 	deleteIOQDiscontig_r10b.cpp		\
 	writeDataPat_r10b.cpp			\

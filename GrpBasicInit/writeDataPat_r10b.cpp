@@ -16,11 +16,10 @@
 
 #include "writeDataPat_r10b.h"
 #include "globals.h"
-#include "../Utils/kernelAPI.h"
 #include "createIOQContigPoll_r10b.h"
 #include "createIOQDiscontigPoll_r10b.h"
-
-#define DEFAULT_CMD_WAIT_ms         2000
+#include "grpDefs.h"
+#include "../Utils/kernelAPI.h"
 
 
 WriteDataPat_r10b::WriteDataPat_r10b(int fd, string grpName, string testName,
@@ -123,13 +122,13 @@ WriteDataPat_r10b::WriteDataPattern()
 
     // Lookup objs which were created in a prior test within group
     SharedIOSQPtr iosqContig = CAST_TO_IOSQ(
-        gRsrcMngr->GetObj(IOSQ_CONTIG_POLL_GROUP_ID))
+        gRsrcMngr->GetObj(IOSQ_CONTIG_GROUP_ID))
     SharedIOCQPtr iocqContig = CAST_TO_IOCQ(
-        gRsrcMngr->GetObj(IOCQ_CONTIG_POLL_GROUP_ID))
+        gRsrcMngr->GetObj(IOCQ_CONTIG_GROUP_ID))
     SharedIOSQPtr iosqDiscontig = CAST_TO_IOSQ(
-        gRsrcMngr->GetObj(IOSQ_DISCONTIG_POLL_GROUP_ID))
+        gRsrcMngr->GetObj(IOSQ_DISCONTIG_GROUP_ID))
     SharedIOCQPtr iocqDiscontig = CAST_TO_IOCQ(
-        gRsrcMngr->GetObj(IOCQ_DISCONTIG_POLL_GROUP_ID))
+        gRsrcMngr->GetObj(IOCQ_DISCONTIG_GROUP_ID))
 
     LOG_NRM("Send the cmd to hdw via the contiguous IOQ's");
     SendToIOSQ(iosqContig, iocqContig, writeCmd, "contig");

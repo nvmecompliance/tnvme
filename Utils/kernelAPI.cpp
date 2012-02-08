@@ -37,20 +37,6 @@ KernelAPI::~KernelAPI()
 }
 
 
-bool
-KernelAPI::SoftReset()
-{
-    bool retVal;
-
-    // In user space, in kernel space and in hardware, nothing remains.
-    LOG_NRM("Performing soft reset");
-    gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY);
-    if ((retVal = gCtrlrConfig->SetIrqScheme(INT_NONE, 0)) == false)
-        LOG_ERR("Setting IRQ scheme failed");
-    return retVal;
-}
-
-
 uint8_t *
 KernelAPI::mmap(int fd, size_t bufLength, uint16_t bufID, MmapRegion region)
 {
@@ -100,10 +86,11 @@ KernelAPI::DumpCtrlrSpaceRegs(SpecRev specRev, LogFilename filename,
     int fd;
     string work;
     uint64_t value = 0;
+    string outFile;
     const CtlSpcType *pciMetrics = gRegisters->GetCtlMetrics();
 
 
-    // Dumping all register values to well known file
+    LOG_NRM("Dump ctrlr regs to filename: %s", filename.c_str());
     if ((fd = open(filename.c_str(), FILENAME_FLAGS, FILENAME_MODE)) == -1) {
         LOG_ERR("file=%s: %s", filename.c_str(), strerror(errno));
         throw exception();
@@ -161,7 +148,7 @@ KernelAPI::DumpPciSpaceRegs(SpecRev specRev, LogFilename filename,
     const vector<PciCapabilities> *pciCap = gRegisters->GetPciCapabilities();
 
 
-    // Dumping all register values to well known file
+    LOG_NRM("Dump PCI regs to filename: %s", filename.c_str());
     if ((fd = open(filename.c_str(), FILENAME_FLAGS, FILENAME_MODE)) == -1) {
         LOG_ERR("file=%s: %s", filename.c_str(), strerror(errno));
         throw exception();

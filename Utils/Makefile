@@ -19,10 +19,11 @@ LDFLAGS=-lm
 LIBS = -L../ -L/usr/local/lib -lm
 INCLUDES = -I. -I../ -I../../ -I/usr/local/include
 
-SRC = \
-	kernelAPI.cpp	\
+SRC =				\
+	kernelAPI.cpp		\
 	buffers.cpp		\
-	fileSystem.cpp
+	fileSystem.cpp		\
+	queues.cpp
 
 .SUFFIXES: .cpp
 

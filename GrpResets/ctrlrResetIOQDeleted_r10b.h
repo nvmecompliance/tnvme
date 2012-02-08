@@ -18,7 +18,8 @@
 #define _CTRLRRESETIOQDELETED_r10b_H_
 
 #include "test.h"
-
+#include "../Queues/asq.h"
+#include "../Queues/acq.h"
 
 /** \verbatim
  * -----------------------------------------------------------------------------
@@ -52,6 +53,8 @@ private:
     ///////////////////////////////////////////////////////////////////////////
     // Adding a member variable? Then edit the copy constructor and operator=().
     ///////////////////////////////////////////////////////////////////////////
+    void VerifyCtrlrResetDeletesIOQs(SharedACQPtr acq, SharedASQPtr asq,
+        uint16_t numEntriesIOQ);
 };
 
 

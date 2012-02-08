@@ -21,9 +21,6 @@
 #include "../Queues/asq.h"
 #include "../Queues/acq.h"
 
-#define IOCQ_DISCONTIG_POLL_GROUP_ID      "IOCQDiscontigPoll"
-#define IOSQ_DISCONTIG_POLL_GROUP_ID      "IOSQDiscontigPoll"
-
 
 /** \verbatim
  * -----------------------------------------------------------------------------
@@ -57,8 +54,6 @@ private:
     ///////////////////////////////////////////////////////////////////////////
     // Adding a member variable? Then edit the copy constructor and operator=().
     ///////////////////////////////////////////////////////////////////////////
-    void CreateIOCQDiscontigPoll(SharedASQPtr asq, SharedACQPtr acq);
-    void CreateIOSQDiscontigPoll(SharedASQPtr asq, SharedACQPtr acq);
 };
 
 

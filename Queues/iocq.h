@@ -50,8 +50,8 @@ public:
      * @param qId Pass the queue's ID
      * @param numEntries Pass the number of elements within the Q
      * @param irqEnabled Pass true if IRQ's are to be enabled for this Q
-     * @param irqVec If (irqEnabled==true) then what the IRQ's vector. Value
-     *        must be amoung the set from (0 - (n-1)) where n is is spec'd
+     * @param irqVec If (irqEnabled==true) then spec's the IRQ's vector. Value
+     *        must be among the set from (0 - (n-1)) where n is is spec'd
      *        during a call to CtrlrConfig::SetIrqScheme().
      */
     void Init(uint16_t qId, uint16_t numEntries, bool irqEnabled,
@@ -66,8 +66,8 @@ public:
      *      must only ever be accessed as RO. Writing to this buffer will have
      *      unpredictable results.
      * @param irqEnabled Pass true if IRQ's are to be enabled for this Q
-     * @param irqVec If (irqEnabled==true) then what the IRQ's vector. Value
-     *        must be amoung the set from (0 - (n-1)) where n is is spec'd
+     * @param irqVec If (irqEnabled==true) then spec's the IRQ's vector. Value
+     *        must be among the set from (0 - (n-1)) where n is is spec'd
      *        during a call to CtrlrConfig::SetIrqScheme()
      */
     void Init(uint16_t qId, uint16_t numEntries,

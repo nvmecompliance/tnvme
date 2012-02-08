@@ -51,8 +51,9 @@ Trackable::~Trackable()
     case OBJ_SETFEATURES:   obj = "SeteFeatures";       break;
     case OBJ_WRITE:         obj = "Write";              break;
     case OBJ_READ:          obj = "Read";               break;
-
-    default:                obj = "unknown";            break;
+    default:
+        LOG_ERR("Forgot to label this unknown obj");
+        throw exception();
     }
     LOG_DBG("Destroying trackable obj: %s", obj.c_str());
 }

@@ -22,23 +22,23 @@ LDFLAGS = $(foreach stem, $(SUBDIRS),./$(stem)/lib$(stem).a)
 LDFLAGS += -lboost_filesystem
 INCLUDES = -I./ -I../
 
-SUBDIRS:=				\
-	Singletons 			\
+SUBDIRS:=			\
+	Singletons		\
 	GrpInformative		\
 	GrpPciRegisters		\
 	GrpCtrlRegisters	\
 	GrpBasicInit		\
 	GrpResets		\
-	Queues				\
-	Cmds				\
+	Queues			\
+	Cmds			\
 	Utils
 
-SOURCES:=				\
-	globals.cpp			\
-	group.cpp			\
-	test.cpp			\
+SOURCES:=			\
+	globals.cpp		\
+	group.cpp		\
+	test.cpp		\
 	testDescribe.cpp	\
-	tnvme.cpp			\
+	tnvme.cpp		\
 	tnvmeHelpers.cpp	\
 	trackable.cpp
 

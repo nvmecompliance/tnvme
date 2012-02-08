@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-#include "createIOQDiscontigPoll_r10b.h"
+#include "createIOQDiscontigIsr_r10b.h"
 #include "globals.h"
 #include "createACQASQ_r10b.h"
 #include "grpDefs.h"
@@ -29,22 +29,22 @@
 static uint16_t NumEntriesIOQ =     5;
 
 
-CreateIOQDiscontigPoll_r10b::CreateIOQDiscontigPoll_r10b(int fd, string grpName,
+CreateIOQDiscontigIsr_r10b::CreateIOQDiscontigIsr_r10b(int fd, string grpName,
     string testName, ErrorRegs errRegs) :
     Test(fd, grpName, testName, SPECREV_10b, errRegs)
 {
     // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 7");
-    mTestDesc.SetShort(     "Create discontiguous IOCQ(poll) and IOSQ's");
+    mTestDesc.SetShort(     "Create discontiguous IOCQ(isr) and IOSQ's");
     // No string size limit for the long description
     mTestDesc.SetLong(
         "Issue the admin commands Create discontiguous I/O SQ and Create I/Q "
-        "CQ(poll) to the ASQ and reap the resulting CE's from the ACQ to "
+        "CQ(isr) to the ASQ and reap the resulting CE's from the ACQ to "
         "certify those Q's have been created.");
 }
 
 
-CreateIOQDiscontigPoll_r10b::~CreateIOQDiscontigPoll_r10b()
+CreateIOQDiscontigIsr_r10b::~CreateIOQDiscontigIsr_r10b()
 {
     ///////////////////////////////////////////////////////////////////////////
     // Allocations taken from the heap and not under the control of the
@@ -53,8 +53,8 @@ CreateIOQDiscontigPoll_r10b::~CreateIOQDiscontigPoll_r10b()
 }
 
 
-CreateIOQDiscontigPoll_r10b::
-CreateIOQDiscontigPoll_r10b(const CreateIOQDiscontigPoll_r10b &other) :
+CreateIOQDiscontigIsr_r10b::
+CreateIOQDiscontigIsr_r10b(const CreateIOQDiscontigIsr_r10b &other) :
     Test(other)
 {
     ///////////////////////////////////////////////////////////////////////////
@@ -64,8 +64,8 @@ CreateIOQDiscontigPoll_r10b(const CreateIOQDiscontigPoll_r10b &other) :
 }
 
 
-CreateIOQDiscontigPoll_r10b &
-CreateIOQDiscontigPoll_r10b::operator=(const CreateIOQDiscontigPoll_r10b &other)
+CreateIOQDiscontigIsr_r10b &
+CreateIOQDiscontigIsr_r10b::operator=(const CreateIOQDiscontigIsr_r10b &other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -77,12 +77,12 @@ CreateIOQDiscontigPoll_r10b::operator=(const CreateIOQDiscontigPoll_r10b &other)
 
 
 bool
-CreateIOQDiscontigPoll_r10b::RunCoreTest()
+CreateIOQDiscontigIsr_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
      * 1) The ASQ & ACQ's have been created by the RsrcMngr for group lifetime
-     * 2) All interrupts are disabled.
+     * 2) Interrupts are eabled, 3 requested and IRQ2 is free for this test
      * 3) Empty ASQ & ACQ's
      * \endverbatim
      */
@@ -134,7 +134,7 @@ CreateIOQDiscontigPoll_r10b::RunCoreTest()
         sysconf(_SC_PAGESIZE), true, 0);
     Queues::CreateIOCQDiscontig(mFd, mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
         asq, acq, IOQ_ID, NumEntriesIOQ, true, IOCQ_DISCONTIG_GROUP_ID,
-        false, 0, iocqMem);
+        true, 2, iocqMem);
 
 
     gCtrlrConfig->SetIOSQES(IOSQ::COMMON_ELEMENT_SIZE_PWR_OF_2);

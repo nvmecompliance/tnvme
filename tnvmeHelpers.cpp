@@ -26,215 +26,38 @@
 #include "Utils/kernelAPI.h"
 #include "Cmds/setFeatures.h"
 
-#define INFORMATIVE_GRPNUM          0
-
 
 /**
- * A function to execute the desired test case(s). Param ignore
- * indicates that when an error is reported from a test case, it is ignored to
- * the point that the next test case will be allowed to run, if and only if,
- * there are more tests which could have run if the test passed. The error
- * itself won't be lost. because the end return value from this function will
- * indicate an error was detected even though it was ignored.
- * @param cl Pass the cmd line parameters
- * @param groups Pass all groups being considered for execution
- * @return true upon success, false if failures/errors detected;
+ * Verify the spec'd spec revision is what the DUT/hdw is reporting
+ * @note Requires singleton gRegisters to exist to perform job.
+ * @param specRev Pass the revision to compare against what hdw is reporting
+ * @return true upon validation, otherwise false.
  */
 bool
-ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
+VerifySpecCompatibility(SpecRev specRev)
 {
-    size_t iLoop;
-    int numPassed = 0;
-    int numFailed = 0;
-    int numSkipped = 0;
-    bool allTestsPass = true;    // assuming success until we find otherwise
-    bool thisTestPass;
-    TestIteratorType testIter;
+    uint64_t versionReg;
+    uint16_t tgtMajor, tgtMinor, hdwMajor, hdwMinor;
 
 
-    if ((cl.test.t.group != UINT_MAX) && (cl.test.t.group >= groups.size())) {
-        LOG_ERR("Specified test group does not exist");
+    if (gRegisters->Read(CTLSPC_VS, versionReg) == false)
+        return false;
+    hdwMajor = (uint16_t)(versionReg >> 16);
+    hdwMinor = (uint16_t)(versionReg >> 0);
+
+    switch (specRev) {
+    case SPECREV_10b:   tgtMajor = 1;  tgtMinor = 0;  break;
+    default:
+        LOG_ERR("Requesting comparison against unknown SpecRev=%d", specRev);
         return false;
     }
 
-    for (iLoop = 0; iLoop < cl.loop; iLoop++) {
-        LOG_NRM("Start loop execution #%ld", iLoop);
-
-        for (size_t iGrp = 0; iGrp < groups.size(); iGrp++) {
-            bool allHaveRun = false;
-
-            // Always run the Informative group 1st, i.e. 0 always runs 1st
-            if (iGrp == INFORMATIVE_GRPNUM) {
-                LOG_NRM("Executing a new group, start from known point");
-                if (KernelAPI::SoftReset() == false)
-                    return false;
-
-                // Run all tests within this group
-                testIter = groups[iGrp]->GetTestIterator();
-                while (allHaveRun == false) {
-                    thisTestPass = true;
-
-                    switch (groups[iGrp]->RunTest(testIter, cl.skiptest)) {
-                    case Group::TR_SUCCESS:
-                        numPassed++;
-                        break;
-                    case Group::TR_FAIL:
-                        allTestsPass = false;
-                        thisTestPass = false;
-                        numFailed++;
-                        break;
-                    case Group::TR_SKIPPING:
-                        numSkipped++;
-                        break;
-                    case Group::TR_NOTFOUND:
-                        allHaveRun = true;
-                        break;
-                    }
-                    if ((cl.ignore == false) && (allTestsPass == false)) {
-                        goto FAIL_OUT;
-                    } else if (cl.ignore && (thisTestPass == false)) {
-                        LOG_NRM("Detected error, but forced to ignore");
-                        break;  // don't execute any more within this group
-                    }
-                }
-                continue;   // continue with next test in next group
-            }
-
-
-            // Now handle anything spec'd in the --test <cmd line option>
-            if (cl.test.t.group == UINT_MAX) {
-                // Do not run Informative group, that group always runs above
-                if (iGrp == INFORMATIVE_GRPNUM)
-                    break;  // continue with next test in next group
-
-                LOG_NRM("Executing a new group, start from known point");
-                if (KernelAPI::SoftReset() == false)
-                    return false;
-
-                // Run all tests within all groups
-                testIter = groups[iGrp]->GetTestIterator();
-                while (allHaveRun == false) {
-                    thisTestPass = true;
-
-                    switch (groups[iGrp]->RunTest(testIter, cl.skiptest)) {
-                    case Group::TR_SUCCESS:
-                        numPassed++;
-                        break;
-                    case Group::TR_FAIL:
-                        allTestsPass = false;
-                        thisTestPass = false;
-                        numFailed++;
-                        break;
-                    case Group::TR_SKIPPING:
-                        numSkipped++;
-                        break;
-                    case Group::TR_NOTFOUND:
-                        allHaveRun = true;
-                        break;
-                    }
-                    if ((cl.ignore == false) && (allTestsPass == false)) {
-                        goto FAIL_OUT;
-                    } else if (cl.ignore && (thisTestPass == false)) {
-                        LOG_NRM("Detected error, but forced to ignore");
-                        break;  // continue with next test in next group
-                    }
-                }
-
-            } else if ((cl.test.t.major == UINT_MAX) ||
-                       (cl.test.t.minor == UINT_MAX)) {
-
-                // Run all tests within spec'd group, except Informative grp
-                if ((iGrp == cl.test.t.group) && (iGrp != INFORMATIVE_GRPNUM)) {
-                    LOG_NRM("Executing a new group, start from known point");
-                    if (KernelAPI::SoftReset() == false)
-                        return false;
-
-                    // Run all tests within this group
-                    testIter = groups[iGrp]->GetTestIterator();
-                    while (allHaveRun == false) {
-                        thisTestPass = true;
-
-                        switch (groups[iGrp]->RunTest(testIter, cl.skiptest)) {
-                        case Group::TR_SUCCESS:
-                            numPassed++;
-                            break;
-                        case Group::TR_FAIL:
-                            allTestsPass = false;
-                            thisTestPass = false;
-                            numFailed++;
-                            break;
-                        case Group::TR_SKIPPING:
-                            numSkipped++;
-                            break;
-                        case Group::TR_NOTFOUND:
-                            allHaveRun = true;
-                            break;
-                        }
-                        if ((cl.ignore == false) && (allTestsPass == false)) {
-                            goto FAIL_OUT;
-                        } else if (cl.ignore && (thisTestPass == false)) {
-                            LOG_NRM("Detected error, but forced to ignore");
-                            break;  // continue with next test in next group
-                        }
-                    }
-                    break;  // check if more loops must occur
-                }
-
-            } else {
-                // Run spec'd test within spec'd group, except Informative grp
-                if ((iGrp == cl.test.t.group) && (iGrp != INFORMATIVE_GRPNUM)) {
-                    LOG_NRM("Executing a new group, start from known point");
-                    if (KernelAPI::SoftReset() == false)
-                        return false;
-
-                    switch (groups[iGrp]->RunTest(cl.test.t, cl.skiptest)) {
-                    case Group::TR_SUCCESS:
-                        numPassed++;
-                        break;
-                    case Group::TR_FAIL:
-                        allTestsPass = false;
-                        numFailed++;
-                        break;
-                    case Group::TR_SKIPPING:
-                        numSkipped++;
-                        break;
-                    case Group::TR_NOTFOUND:
-                        LOG_DBG("Internal programming error, unknown test");
-                        break;
-                    }
-                    if ((cl.ignore == false) && (allTestsPass == false))
-                        goto FAIL_OUT;
-
-                    break;  // check if more loops must occur
-                }
-            }
-        }
-
-        LOG_NRM("Iteration SUMMARY passed : %d", numPassed);
-        if (numFailed) {
-            LOG_NRM("                  failed : %d  <----------", numFailed);
-        } else {
-            LOG_NRM("                  failed : 0");
-        }
-        LOG_NRM("                  skipped: %d", numSkipped);
-        LOG_NRM("                  total  : %d",
-            numPassed+numFailed+numSkipped);
-        LOG_NRM("Stop loop execution #%ld", iLoop);
+    if ((tgtMajor != hdwMajor) || (tgtMinor != hdwMinor)) {
+        LOG_ERR("(Targeted vs hdw) revision incompatible (%d.%d != %d.%d)",
+            tgtMajor, tgtMinor, hdwMajor, hdwMinor);
+        return false;
     }
-
-    return allTestsPass;
-
-FAIL_OUT:
-    LOG_NRM("Tests  passed: %d", numPassed);
-    if (numFailed) {
-        LOG_NRM("       failed: %d    <--------------", numFailed);
-    } else {
-        LOG_NRM("       failed: 0");
-    }
-    LOG_NRM("      skipped: %d", numSkipped);
-    LOG_NRM("        total: %d", numPassed+numFailed+numSkipped);
-    LOG_NRM("Stop loop execution #%ld", iLoop);
-    return allTestsPass;
+    return true;
 }
 
 
@@ -624,57 +447,6 @@ ParseWmmapCmdLine(WmmapIo &wmmap, const char *optarg)
 
 /**
  * A function to specifically handle parsing cmd lines of the form
- * "<ncqr:nsqr>".
- * @param queues Pass a structure to populate with parsing results
- * @param optarg Pass the 'optarg' argument from the getopt_long() API.
- * @return true upon successful parsing, otherwise false.
- */
-bool
-ParseQueuesCmdLine(Queues &queues, const char *optarg)
-{
-    char *endptr;
-    string swork;
-    size_t tmp;
-    string sacc;
-
-    queues.req = true;
-    queues.ncqr = 0;
-    queues.nsqr = 0;
-
-    // Parsing <ncqr:nsqr>
-    swork = optarg;
-    tmp = strtoul(swork.substr(0, swork.size()).c_str(), &endptr, 16);
-    if (*endptr != ':') {
-        LOG_ERR("Unrecognized format <ncqr:nsqr>=%s", optarg);
-        return false;
-    } else if (tmp > ((uint16_t)(-1))) {
-        LOG_ERR("<ncqr> > allowed max value of 0x%04X", ((uint16_t)(-1)));
-        return false;
-    }
-    queues.ncqr = (uint16_t)tmp;
-
-    // Parsing <nsqr>
-    swork = swork.substr(swork.find_first_of(':') + 1, swork.length());
-    if (swork.length() == 0) {
-        LOG_ERR("Missing <nsqr> format string");
-        return false;
-    }
-    tmp = strtoul(swork.substr(0, swork.size()).c_str(), &endptr, 16);
-    if (*endptr != '\0') {
-        LOG_ERR("Unrecognized format <nsqr>=%s", optarg);
-        return false;
-    } else if (tmp > ((uint16_t)(-1))) {
-        LOG_ERR("<nsqr> > allowed max value of 0x%04X", ((uint16_t)(-1)));
-        return false;
-    }
-    queues.nsqr = (uint16_t)tmp;
-
-    return true;
-}
-
-
-/**
- * A function to specifically handle parsing cmd lines of the form
  * "<STS:PXDS:AERUCES:CSTS>".
  * @param errRegs Pass a structure to populate with parsing results
  * @param optarg Pass the 'optarg' argument from the getopt_long() API.
@@ -745,7 +517,68 @@ ParseErrorCmdLine(ErrorRegs &errRegs, const char *optarg)
 }
 
 
-bool SetFeaturesNumberOfQueues(Queues &queues, int fd)
+/**
+ * A function to specifically handle parsing cmd lines of the form
+ * "<ncqr:nsqr>".
+ * @param numQueues Pass a structure to populate with parsing results
+ * @param optarg Pass the 'optarg' argument from the getopt_long() API.
+ * @return true upon successful parsing, otherwise false.
+ */
+bool
+ParseQueuesCmdLine(NumQueues &numQueues, const char *optarg)
+{
+    char *endptr;
+    string swork;
+    size_t tmp;
+    string sacc;
+
+    numQueues.req = true;
+    numQueues.ncqr = 0;
+    numQueues.nsqr = 0;
+
+    // Parsing <ncqr:nsqr>
+    swork = optarg;
+    tmp = strtoul(swork.substr(0, swork.size()).c_str(), &endptr, 16);
+    if (*endptr != ':') {
+        LOG_ERR("Unrecognized format <ncqr:nsqr>=%s", optarg);
+        return false;
+    } else if (tmp > ((uint16_t)(-1))) {
+        LOG_ERR("<ncqr> > allowed max value of 0x%04X", ((uint16_t)(-1)));
+        return false;
+    }
+    numQueues.ncqr = (uint16_t)tmp;
+
+    // Parsing <nsqr>
+    swork = swork.substr(swork.find_first_of(':') + 1, swork.length());
+    if (swork.length() == 0) {
+        LOG_ERR("Missing <nsqr> format string");
+        return false;
+    }
+    tmp = strtoul(swork.substr(0, swork.size()).c_str(), &endptr, 16);
+    if (*endptr != '\0') {
+        LOG_ERR("Unrecognized format <nsqr>=%s", optarg);
+        return false;
+    } else if (tmp > ((uint16_t)(-1))) {
+        LOG_ERR("<nsqr> > allowed max value of 0x%04X", ((uint16_t)(-1)));
+        return false;
+    }
+    numQueues.nsqr = (uint16_t)tmp;
+
+    return true;
+}
+
+
+/**
+ * A function to send Set Features admin cmd to a device sending the identifier
+ * 0x07 to set number of queues. This value, according to the spec, shall NOT
+ * change between resets, i.e. only set this value after a power up. Failure to
+ * conform results in undefined behavior.
+ * "<STS:PXDS:AERUCES:CSTS>".
+ * @param numQueues Pass a structure to source the desired values to send to hdw
+ * @param fd Pass file descriptor representing device to commune with
+ * @return true upon successful parsing, otherwise false.
+ */
+bool SetFeaturesNumberOfQueues(NumQueues &numQueues, int fd)
 {
     uint16_t numCE;
     uint16_t ceRemain;
@@ -753,7 +586,7 @@ bool SetFeaturesNumberOfQueues(Queues &queues, int fd)
 
     try {   // The objects to perform this work throw exceptions
         LOG_NRM("Setting number of Q's; ncqr=0x%04X, nsqr=0x%04X",
-            queues.ncqr, queues.nsqr);
+            numQueues.ncqr, numQueues.nsqr);
         if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
             throw exception();
 
@@ -762,6 +595,7 @@ bool SetFeaturesNumberOfQueues(Queues &queues, int fd)
         acq->Init(2);
         SharedASQPtr asq = SharedASQPtr(new ASQ(fd));
         asq->Init(2);
+        gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
         if (gCtrlrConfig->SetState(ST_ENABLE) == false)
             throw exception();
 
@@ -769,7 +603,7 @@ bool SetFeaturesNumberOfQueues(Queues &queues, int fd)
         SharedSetFeaturesPtr sfNumOfQ =
             SharedSetFeaturesPtr(new SetFeatures(fd));
         sfNumOfQ->SetFID(BaseFeatures::FID_NUM_QUEUES);
-        sfNumOfQ->SetNumberOfQueues(queues.ncqr, queues.nsqr);
+        sfNumOfQ->SetNumberOfQueues(numQueues.ncqr, numQueues.nsqr);
 
         LOG_NRM("Send the cmd to the ASQ, wait for it to complete");
         asq->Send(sfNumOfQ);

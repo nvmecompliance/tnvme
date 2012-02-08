@@ -14,6 +14,7 @@
  *  limitations under the License.
  */
 
+#include <stdio.h>
 #include "ce.h"
 #include "globals.h"
 
@@ -48,59 +49,109 @@ ProcessCE::ValidateStatus(union CE &ce)
 bool
 ProcessCE::LogStatus(union CE &ce)
 {
-    LOG_NRM("Decode: CE.status=0x%04X", ce.n.SF.t.status);
-    if (ce.n.SF.b.DNR)
-        LOG_NRM("  DNR = 0x%01X (do not retry)", ce.n.SF.b.DNR);
-    if (ce.n.SF.b.M)
-        LOG_NRM("  M   = 0x%01X (more status available)", ce.n.SF.b.M);
+    bool detectedErr;
+    vector<string> desc;
+
+    detectedErr = DecodeStatus(ce, desc);
+    for (size_t i = 0; i < desc.size(); i++ ) {
+        if (detectedErr && (i >= (desc.size() - 1))) {
+            LOG_ERR("%s", desc[i].c_str());
+        } else {
+            LOG_NRM("%s", desc[i].c_str());
+        }
+    }
+    return detectedErr;
+}
+
+
+bool
+ProcessCE::DecodeStatus(union CE &ce, vector<string> &desc)
+{
+    char work[256];
+
+    desc.clear();
+    snprintf(work, sizeof(work), "Decode: CE.status=0x%04X", ce.n.SF.t.status);
+    desc.push_back(work);
+
+
+    if (ce.n.SF.b.DNR) {
+        snprintf(work, sizeof(work),
+            "  DNR = 0x%01X (do not retry)", ce.n.SF.b.DNR);
+        desc.push_back(work);
+    }
+    if (ce.n.SF.b.M) {
+        snprintf(work, sizeof(work),
+            "  M   = 0x%01X (more status available)", ce.n.SF.b.M);
+        desc.push_back(work);
+    }
+
 
     switch (ce.n.SF.b.SCT) {
     case SCT_GENERIC:
-        LOG_NRM("  SCT = 0x%01X (generic cmd status)", ce.n.SF.b.SCT);
+        snprintf(work, sizeof(work),
+            "  SCT = 0x%01X  (generic cmd status)", ce.n.SF.b.SCT);
         break;
     case SCT_CMD:
-        LOG_NRM("  SCT = 0x%01X (cmd specific errors)", ce.n.SF.b.SCT);
+        snprintf(work, sizeof(work),
+            "  SCT = 0x%01X  (cmd specific errors)", ce.n.SF.b.SCT);
         break;
     case SCT_MEDIA:
-        LOG_NRM("  SCT = 0x%01X (media errors)", ce.n.SF.b.SCT);
+        snprintf(work, sizeof(work),
+            "  SCT = 0x%01X  (media errors)", ce.n.SF.b.SCT);
         break;
     case SCT_VENDOR:
-        LOG_NRM("  SCT = 0x%01X (vendor specific)", ce.n.SF.b.SCT);
+        snprintf(work, sizeof(work),
+            "  SCT = 0x%01X  (vendor specific)", ce.n.SF.b.SCT);
         break;
     default:
-        LOG_ERR("  SCT = 0x%01X (??? unknown/undefined/illegal)", ce.n.SF.b.SCT);
+        snprintf(work, sizeof(work),
+            "  SCT = 0x%01X  (??? unknown/undefined/illegal)", ce.n.SF.b.SCT);
+        desc.push_back(work);
         return false;
     }
+    desc.push_back(work);
+
 
     // If this is vendor specific, then we can't possibly know the description
     if (ce.n.SF.b.SCT == SCT_VENDOR) {
-        LOG_NRM("  SC  = 0x%02X (Vendor specific)", ce.n.SF.b.SC);
+        snprintf(work, sizeof(work),
+            "  SC  = 0x%02X (Vendor specific)", ce.n.SF.b.SC);
+        desc.push_back(work);
     } else {    // We should be able to lookup the spec defined error
         unsigned int i = 0;
         for ( ; i < (sizeof(mCEStatMetrics) / sizeof(mCEStatMetrics[0])); i++) {
 
             if (mCEStatMetrics[i].sct == ce.n.SF.b.SCT) {
                 if (mCEStatMetrics[i].sc == ce.n.SF.b.SC) {
-                    LOG_NRM("  SC  = 0x%02X (%s)", ce.n.SF.b.SC,
-                        mCEStatMetrics[ce.n.SF.b.SC].desc);
+                    snprintf(work, sizeof(work), "  SC  = 0x%02X (%s)",
+                        ce.n.SF.b.SC, mCEStatMetrics[ce.n.SF.b.SC].desc);
+                    desc.push_back(work);
                     break;
                 }
             }
         }
 
         if (i >= (sizeof(mCEStatMetrics) / sizeof(mCEStatMetrics[0]))) {
-            LOG_ERR("Detected unknown combo: SCT:SC = 0x%01X,0x%02X",
+            snprintf(work, sizeof(work),
+                "Detected unknown combo: SCT:SC = 0x%01X,0x%02X",
                 ce.n.SF.b.SCT, ce.n.SF.b.SC);
+            desc.push_back(work);
             return false;
         }
     }
 
+
     if (ce.n.SF.t.status != 0) {
-        LOG_ERR("Detected unsuccessful CE...");
-        LOG_NRM("  DWORD0: 0x%08X", ce.t.dw0);
-        LOG_NRM("  DWORD1: 0x%08X", ce.t.dw1);
-        LOG_NRM("  DWORD2: 0x%08X", ce.t.dw2);
-        LOG_NRM("  DWORD3: 0x%08X", ce.t.dw3);
+        snprintf(work, sizeof(work), "Detected unsuccessful CE...");
+        desc.push_back(work);
+        snprintf(work, sizeof(work), "  DWORD0: 0x%08X", ce.t.dw0);
+        desc.push_back(work);
+        snprintf(work, sizeof(work), "  DWORD1: 0x%08X", ce.t.dw1);
+        desc.push_back(work);
+        snprintf(work, sizeof(work), "  DWORD2: 0x%08X", ce.t.dw2);
+        desc.push_back(work);
+        snprintf(work, sizeof(work), "  DWORD3: 0x%08X", ce.t.dw3);
+        desc.push_back(work);
         return false;
     }
 

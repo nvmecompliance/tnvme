@@ -17,6 +17,7 @@
 #include "tnvme.h"
 #include "test.h"
 #include "globals.h"
+#include "Utils/kernelAPI.h"
 
 
 Test::Test(int fd, string grpName, string testName, SpecRev specRev,
@@ -81,9 +82,21 @@ Test::Run()
             }
         }
     } catch (...) {
-        ;   // Don't let exceptions propagate, converting to boolean error
+        ;   // Don't let exceptions propagate, fall thru to return boolean error
     }
 
+    try {
+        KernelAPI::DumpKernelMetrics(mFd, FileSystem::PrepLogFile(mGrpName,
+            mTestName, "kmetrics", "postFailure"));
+        KernelAPI::DumpPciSpaceRegs(mSpecRev,
+            FileSystem::PrepLogFile(mGrpName, mTestName, "pci",
+            "regs.postFailure"), false);
+        KernelAPI::DumpCtrlrSpaceRegs(mSpecRev,
+            FileSystem::PrepLogFile(mGrpName, mTestName, "ctrl",
+            "regs.postFailure"), false);
+    } catch (...) {
+        ;   // Subsequent errs possible if dnvme is corrupted from test failure
+    }
     LOG_NRM("FAILED test case run");
     return false;
 }

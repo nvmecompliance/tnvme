@@ -18,10 +18,9 @@
 #include "dumpIdentifyData_r10b.h"
 #include "globals.h"
 #include "createACQASQ_r10b.h"
+#include "grpDefs.h"
 #include "../Cmds/identify.h"
 #include "../Utils/kernelAPI.h"
-
-#define DEFAULT_CMD_WAIT_ms         2000
 
 
 DumpIdentifyData_r10b::DumpIdentifyData_r10b(int fd, string grpName,
@@ -156,7 +155,7 @@ DumpIdentifyData_r10b::SendIdentifyCtrlrStruct(SharedASQPtr asq,
                 numReaped);
             throw exception();
         }
-        LOG_NRM("The reaped get features CE is...");
+        LOG_NRM("The reaped CE is...");
         acq->LogCE(acqMetrics.head_ptr);
 
         union CE ce = acq->PeekCE(acqMetrics.head_ptr);
@@ -250,7 +249,7 @@ DumpIdentifyData_r10b::SendIdentifyNamespaceStruct(SharedASQPtr asq,
                     numReaped);
                 throw exception();
             }
-            LOG_NRM("The reaped get features CE is...");
+            LOG_NRM("The reaped CE is...");
             acq->LogCE(acqMetrics.head_ptr);
 
             union CE ce = acq->PeekCE(acqMetrics.head_ptr);

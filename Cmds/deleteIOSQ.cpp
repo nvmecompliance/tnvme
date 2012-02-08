@@ -46,6 +46,7 @@ DeleteIOSQ::Init(const SharedIOSQPtr iosq)
         // Handle Q ID
         dword10 &= ~0x0000ffff;
         dword10 |= (uint32_t)iosq->GetQId();
+        LOG_NRM("Init delete IOSQ cmd for SQ=%d", (uint32_t)iosq->GetQId());
 
         SetDword(dword10, 10);
     }   // Handle DWORD 10
