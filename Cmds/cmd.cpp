@@ -45,6 +45,22 @@ Cmd::Cmd(int fd, Trackable::ObjType objBeingCreated) :
 
     mCmdSet = CMD_ADMIN;
     mDataDir = DATADIR_NONE;
+
+    switch (objBeingCreated) {
+    case OBJ_IDENTIFY:      mCmdName = "Identify";      break;
+    case OBJ_CREATEIOCQ:    mCmdName = "CreateIOCQ";    break;
+    case OBJ_CREATEIOSQ:    mCmdName = "CreateIOSQ";    break;
+    case OBJ_DELETEIOCQ:    mCmdName = "DeleteIOCQ";    break;
+    case OBJ_DELETEIOSQ:    mCmdName = "DeleteIOSQ";    break;
+    case OBJ_GETFEATURES:   mCmdName = "GetFeatures";   break;
+    case OBJ_SETFEATURES:   mCmdName = "SetFeatures";   break;
+    case OBJ_WRITE:         mCmdName = "Write";         break;
+    case OBJ_READ:          mCmdName = "Read";          break;
+    default:
+        LOG_DBG("Illegal cmd instantiation, add name here");
+        throw exception();
+        break;
+    }
 }
 
 

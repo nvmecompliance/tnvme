@@ -24,6 +24,7 @@
 #define CNS_BITMASK         0x01
 
 SharedIdentifyPtr Identify::NullIdentifyPtr;
+const uint8_t Identify::Opcode = 0x06;
 const uint16_t Identify::IDEAL_DATA_SIZE =  4096;
 
 
@@ -52,7 +53,7 @@ Identify::Identify() : AdminCmd(0, Trackable::OBJTYPE_FENCE)
 
 Identify::Identify(int fd) : AdminCmd(fd, Trackable::OBJ_IDENTIFY)
 {
-    Init(0x06, DATADIR_FROM_DEVICE);
+    Init(Opcode, DATADIR_FROM_DEVICE);
     SetCNS(true);
 }
 

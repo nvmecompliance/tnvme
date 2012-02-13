@@ -77,6 +77,7 @@ DumpGetFeatures_r10b::RunCoreTest()
      * 2) All interrupts are disabled.
      *  \endverbatim
      */
+    uint32_t isrCount;
 
     KernelAPI::DumpKernelMetrics(mFd,
         FileSystem::PrepLogFile(mGrpName, mTestName, "kmetrics", "before"));
@@ -86,7 +87,7 @@ DumpGetFeatures_r10b::RunCoreTest()
     SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
 
     // Assuming the cmd we issue will result in only a single CE
-    if (acq->ReapInquiry() != 0) {
+    if (acq->ReapInquiry(isrCount) != 0) {
         LOG_ERR("The ACQ should not have any CE's waiting before testing");
         throw exception();
     }
@@ -104,6 +105,7 @@ DumpGetFeatures_r10b::SendGetFeaturesNumOfQueues(SharedASQPtr asq,
     SharedACQPtr acq)
 {
     uint16_t numCE;
+    uint32_t isrCount;
 
 
     LOG_NRM("Create get features");
@@ -124,7 +126,9 @@ DumpGetFeatures_r10b::SendGetFeaturesNumOfQueues(SharedASQPtr asq,
 
 
     LOG_NRM("Wait for the CE to arrive in ACQ");
-    if (acq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE) == false) {
+    if (acq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE, isrCount)
+        == false) {
+
         LOG_ERR("Unable to see completion of get features cmd");
         acq->Dump(
             FileSystem::PrepLogFile(mGrpName, mTestName, "acq",
@@ -143,13 +147,16 @@ DumpGetFeatures_r10b::SendGetFeaturesNumOfQueues(SharedASQPtr asq,
         uint16_t ceRemain;
         uint16_t numReaped;
 
+
         LOG_NRM("The CQ's metrics before reaping holds head_ptr needed");
         struct nvme_gen_cq acqMetrics = acq->GetQMetrics();
         KernelAPI::LogCQMetrics(acqMetrics);
 
         LOG_NRM("Reaping CE from ACQ, requires memory to hold reaped CE");
         SharedMemBufferPtr ceMemCap = SharedMemBufferPtr(new MemBuffer());
-        if ((numReaped = acq->Reap(ceRemain, ceMemCap, numCE, true)) != 1) {
+        if ((numReaped = acq->Reap(ceRemain, ceMemCap, isrCount, numCE, true))
+            != 1) {
+
             LOG_ERR("Verified there was 1 CE, but reaping produced %d",
                 numReaped);
             throw exception();

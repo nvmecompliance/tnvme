@@ -18,7 +18,6 @@
 #define _QUEUES_H_
 
 #include "tnvme.h"
-#include "dnvme.h"
 #include "../Queues/asq.h"
 #include "../Queues/acq.h"
 #include "../Cmds/createIOCQ.h"
@@ -40,6 +39,7 @@ public:
     Queues();
     virtual ~Queues();
 
+
     /**
      * Creates, in hdw, an IOCQ and returns the resource.
      * @note Method uses pre-existing values of CC.IOCQES
@@ -59,18 +59,21 @@ public:
      * @param irqVec If (irqEnabled==true) then spec's the IRQ's vector. Value
      *        must be among the set from (0 - (n-1)) where n is is spec'd
      *        during a call to CtrlrConfig::SetIrqScheme().
+     * @param qualify Pass a qualifying string to append to each dump file
+     * @param verbose Pass true to dump resources to dump files, otherwise false
      * @return The newly create object or throws upon errors
      */
-    static SharedCreateIOCQPtr CreateIOCQContig(int fd, string grpName,
+    static SharedCreateIOCQPtr CreateIOCQContigToHdw(int fd, string grpName,
         string testName, uint16_t ms, SharedASQPtr asq, SharedACQPtr acq,
         uint16_t qId, uint16_t numEntries, bool grpLifetime, string grpID,
-        bool irqEnabled, uint16_t irqVec);
+        bool irqEnabled, uint16_t irqVec, string qualify = "",
+        bool verbose = true);
     /// param qBackedMem is not modified, nor err chk'd; it must setup by caller
-    static SharedCreateIOCQPtr CreateIOCQDiscontig(int fd, string grpName,
+    static SharedCreateIOCQPtr CreateIOCQDiscontigToHdw(int fd, string grpName,
         string testName, uint16_t ms, SharedASQPtr asq, SharedACQPtr acq,
         uint16_t qId, uint16_t numEntries, bool grpLifetime, string grpID,
-        bool irqEnabled, uint16_t irqVec,
-        SharedMemBufferPtr qBackedMem);
+        bool irqEnabled, uint16_t irqVec, SharedMemBufferPtr qBackedMem,
+        string qualify = "", bool verbose = true);
 
     /**
      * Creates, in hdw, an IOCQ and returns the resource.
@@ -89,18 +92,21 @@ public:
      *        Value is ignore if (grpLifetime == false).
      * @param cqId Pass the assoc CQ ID to which this SQ will be associated
      * @param priority Pass this Q's priority value, must be a 2 bit value
+     * @param qualify Pass a qualifying string to append to each dump file
+     * @param verbose Pass true to dump resources to dump files, otherwise false
      * @return The newly create object or throws upon errors
      */
-    static SharedCreateIOSQPtr CreateIOSQContig(int fd, string grpName,
+    static SharedCreateIOSQPtr CreateIOSQContigToHdw(int fd, string grpName,
         string testName, uint16_t ms, SharedASQPtr asq, SharedACQPtr acq,
         uint16_t qId, uint16_t numEntries, bool grpLifetime, string grpID,
-        uint16_t cqId, uint8_t priority);
+        uint16_t cqId, uint8_t priority, string qualify = "",
+        bool verbose = true);
     /// param qBackedMem is not modified, nor err chk'd; it must setup by caller
-    static SharedCreateIOSQPtr CreateIOSQDiscontig(int fd, string grpName,
+    static SharedCreateIOSQPtr CreateIOSQDiscontigToHdw(int fd, string grpName,
         string testName, uint16_t ms, SharedASQPtr asq, SharedACQPtr acq,
         uint16_t qId, uint16_t numEntries, bool grpLifetime, string grpID,
-        uint16_t cqId, uint8_t priority,
-        SharedMemBufferPtr qBackedMem);
+        uint16_t cqId, uint8_t priority, SharedMemBufferPtr qBackedMem,
+        string qualify = "", bool verbose = true);
 
     /**
      * Deletes, in hdw, an pre-existing IOCQ.
@@ -112,21 +118,18 @@ public:
      * @param iocq Pass the object which represents the IOCQ to deleted
      * @param asq Pass pre-existing ASQ to issue a cmd into
      * @param acq Pass pre-existing ACQ to reap CE to verify successful creation
+     * @param qualify Pass a qualifying string to append to each dump file
+     * @param verbose Pass true to dump resources to dump files, otherwise false
      */
-    static void DeleteIOCQInHdw(int fd, string grpName, string testName,
-        uint16_t ms, SharedIOCQPtr iocq, SharedASQPtr asq, SharedACQPtr acq);
-    static void DeleteIOSQInHdw(int fd, string grpName, string testName,
-        uint16_t ms, SharedIOSQPtr iosq, SharedASQPtr asq, SharedACQPtr acq);
+    static void DeleteIOCQToHdw(int fd, string grpName, string testName,
+        uint16_t ms, SharedIOCQPtr iocq, SharedASQPtr asq, SharedACQPtr acq,
+        string qualify = "", bool verbose = true);
+    static void DeleteIOSQToHdw(int fd, string grpName, string testName,
+        uint16_t ms, SharedIOSQPtr iosq, SharedASQPtr asq, SharedACQPtr acq,
+        string qualify = "", bool verbose = true);
 
 
 private:
-    static SharedCreateIOCQPtr InvokeIOCQInHdw(int fd, string grpName,
-        string testName, uint16_t ms, SharedASQPtr asq, SharedACQPtr acq,
-        SharedIOCQPtr iocq, string qualify);
-    static SharedCreateIOSQPtr InvokeIOSQInHdw(int fd, string grpName,
-        string testName, uint16_t ms, SharedASQPtr asq, SharedACQPtr acq,
-        SharedIOSQPtr iosq, string qualify);
-    static void ReapCE(SharedACQPtr acq, uint16_t numCE);
 };
 
 

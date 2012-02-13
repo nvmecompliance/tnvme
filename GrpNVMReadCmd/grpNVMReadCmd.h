@@ -14,11 +14,22 @@
  *  limitations under the License.
  */
 
-#ifndef _GRPDEFS_H_
-#define _GRPDEFS_H_
+#ifndef _GRPNVMREADCMD_H_
+#define _GRPNVMREADCMD_H_
 
-#define ACQ_GROUP_ID                "ACQ"
-#define ASQ_GROUP_ID                "ASQ"
-#define DEFAULT_CMD_WAIT_ms         2000
+#include "../group.h"
+
+
+/**
+* This class implements NVM cmd set read test cases that don't require data
+* to be written to media 1st to detect a successful outcome.
+*/
+class GrpNVMReadCmd : public Group
+{
+public:
+    GrpNVMReadCmd(size_t grpNum, SpecRev specRev, ErrorRegs errRegs, int fd);
+    virtual ~GrpNVMReadCmd();
+};
+
 
 #endif

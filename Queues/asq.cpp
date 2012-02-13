@@ -16,6 +16,7 @@
 
 #include "asq.h"
 #include "globals.h"
+#include "../Cmds/createIOCQ.h"
 
 SharedASQPtr ASQ::NullASQPtr;
 const uint16_t ASQ::IDEAL_ELEMENT_SIZE = 64;
@@ -41,4 +42,22 @@ void
 ASQ::Init(uint16_t numEntries)
 {
     SQ::Init(0, IDEAL_ELEMENT_SIZE, numEntries, 0);
+}
+
+
+void
+ASQ::Send(SharedCmdPtr cmd)
+{
+    // Detect if doing something that looks suspicious/incorrect/illegal
+    if ((cmd->GetCmdSet() == CMD_ADMIN) &&
+        (cmd->GetOpcode() == CreateIOCQ::Opcode) &&
+        cmd->GetBit(11, 1) &&                     // if IOCQ is using IRQ's, but
+        (gCtrlrConfig->IrqsEnabled() == false)) { // dnvme is NOT using IRQ's
+
+        LOG_ERR("Invoking IOCQ with IRQ's, but dnvme disabled IRQ's");
+        LOG_ERR("Rethink test case, see gCtrlrConfig->SetIrqScheme()");
+        throw exception();
+    }
+
+    SQ::Send(cmd);
 }

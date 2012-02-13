@@ -40,6 +40,7 @@ public:
 
     /// Used to compare for NULL pointers being returned by allocations
     static SharedSetFeaturesPtr NullSetFeaturesPtr;
+    static const uint8_t Opcode;
 
     /**
      * Set the number of IO queues desired.

@@ -50,7 +50,7 @@ IOCQ::Init(uint16_t qId, uint16_t numEntries, bool irqEnabled,
         LOG_ERR("Unable to determine MQES");
         throw exception();
     }
-    // Warn if doing something that looks suspicious
+    // Detect if doing something that looks suspicious/incorrect/illegals
     work &= CAP_MQES;
     if (work < (uint64_t)numEntries) {
         LOG_WARN("Creating Q with %d entries, but DUT only allows %d",
@@ -76,7 +76,7 @@ IOCQ::Init(uint16_t qId, uint16_t numEntries,
         LOG_ERR("Unable to determine MQES");
         throw exception();
     }
-    // Warn if doing something that looks suspicious
+    // Detect if doing something that looks suspicious/incorrect/illegal
     work &= CAP_MQES;
     if (work < (uint64_t)numEntries) {
         LOG_WARN("Creating Q with %d entries, but DUT only allows %d",

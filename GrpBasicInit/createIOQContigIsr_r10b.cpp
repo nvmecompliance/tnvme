@@ -86,6 +86,7 @@ CreateIOQContigIsr_r10b::RunCoreTest()
      * \endverbatim
      */
     uint64_t work;
+    uint32_t isrCount;
 
     KernelAPI::DumpKernelMetrics(mFd,
         FileSystem::PrepLogFile(mGrpName, mTestName, "kmetrics", "before"));
@@ -95,7 +96,7 @@ CreateIOQContigIsr_r10b::RunCoreTest()
     SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
 
     // Verify assumptions are active/enabled/present/setup
-    if (acq->ReapInquiry() != 0) {
+    if (acq->ReapInquiry(isrCount) != 0) {
         LOG_ERR("The ACQ should not have any CE's waiting before testing");
         throw exception();
     } else if (gRegisters->Read(CTLSPC_CAP, work) == false) {
@@ -129,12 +130,12 @@ CreateIOQContigIsr_r10b::RunCoreTest()
 
 
     gCtrlrConfig->SetIOCQES(IOCQ::COMMON_ELEMENT_SIZE_PWR_OF_2);
-    Queues::CreateIOCQContig(mFd, mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+    Queues::CreateIOCQContigToHdw(mFd, mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
         asq, acq, IOQ_ID, NumEntriesIOQ, true, IOCQ_CONTIG_GROUP_ID, true, 1);
 
 
     gCtrlrConfig->SetIOSQES(IOSQ::COMMON_ELEMENT_SIZE_PWR_OF_2);
-    Queues::CreateIOSQContig(mFd, mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+    Queues::CreateIOSQContigToHdw(mFd, mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
         asq, acq, IOQ_ID, NumEntriesIOQ, true, IOSQ_CONTIG_GROUP_ID, IOQ_ID, 0);
 
 

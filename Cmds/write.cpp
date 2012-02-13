@@ -18,6 +18,7 @@
 
 
 SharedWritePtr Write::NullWritePtr;
+const uint8_t Write::Opcode = 0x01;
 
 
 Write::Write() : NVMCmd(0, Trackable::OBJTYPE_FENCE)
@@ -28,7 +29,7 @@ Write::Write() : NVMCmd(0, Trackable::OBJTYPE_FENCE)
 
 Write::Write(int fd) : NVMCmd(fd, Trackable::OBJ_WRITE)
 {
-    Init(0x01, DATADIR_TO_DEVICE);
+    Init(Opcode, DATADIR_TO_DEVICE);
 }
 
 

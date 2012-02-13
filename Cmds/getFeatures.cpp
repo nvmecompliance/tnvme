@@ -17,6 +17,9 @@
 #include "getFeatures.h"
 #include "../Utils/buffers.h"
 
+SharedGetFeaturesPtr GetFeatures::NullGetFeaturesPtr;
+const uint8_t GetFeatures::Opcode = 0x0a;
+
 
 GetFeatures::GetFeatures() : BaseFeatures(0, Trackable::OBJTYPE_FENCE)
 {
@@ -26,7 +29,7 @@ GetFeatures::GetFeatures() : BaseFeatures(0, Trackable::OBJTYPE_FENCE)
 
 GetFeatures::GetFeatures(int fd) : BaseFeatures(fd, Trackable::OBJ_GETFEATURES)
 {
-    Init(0x0a, DATADIR_FROM_DEVICE);
+    Init(Opcode, DATADIR_FROM_DEVICE);
 }
 
 

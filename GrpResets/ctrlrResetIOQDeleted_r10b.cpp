@@ -123,26 +123,30 @@ void
 CtrlrResetIOQDeleted_r10b::VerifyCtrlrResetDeletesIOQs(SharedACQPtr acq,
     SharedASQPtr asq, uint16_t numEntriesIOQ)
 {
+    char work[20];
+
     // Set ctrl'r to enable state, create IOQ's and then disable the ctrl'r.
     // Re-enable the ctrl'r and try to create the same IOQ's, verify that
     // these IOQ's are created successfully.
     for (uint16_t i = 0; i < 2; i++) {
+        snprintf(work, sizeof(work), "iter%d", i);
+
         gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
         if (gCtrlrConfig->SetState(ST_ENABLE) == false)
             throw exception();
 
         gCtrlrConfig->SetIOCQES(IOCQ::COMMON_ELEMENT_SIZE_PWR_OF_2);
-        Queues::CreateIOCQContig(mFd, mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
-            asq, acq, IOCQ_ID, numEntriesIOQ, false, IOCQ_CONTIG_GROUP_ID,
-            false, 0);
+        Queues::CreateIOCQContigToHdw(mFd, mGrpName, mTestName,
+            DEFAULT_CMD_WAIT_ms, asq, acq, IOCQ_ID, numEntriesIOQ, false,
+            IOCQ_CONTIG_GROUP_ID, false, 0, work);
 
         // Create 2 IO SQ's, start with SQ ID 1 and associate all SQ's to one
         // CQ with IOCQ_ID
         gCtrlrConfig->SetIOSQES(IOSQ::COMMON_ELEMENT_SIZE_PWR_OF_2);
         for (uint16_t j = 1; j <= IOSQ_ID; j++) {
-            Queues::CreateIOSQContig(mFd, mGrpName, mTestName,
+            Queues::CreateIOSQContigToHdw(mFd, mGrpName, mTestName,
                 DEFAULT_CMD_WAIT_ms, asq, acq, j, numEntriesIOQ, false,
-                IOSQ_CONTIG_GROUP_ID, IOCQ_ID, 0);
+                IOSQ_CONTIG_GROUP_ID, IOCQ_ID, 0, work);
         }
 
         if (gCtrlrConfig->SetState(ST_DISABLE) == false)

@@ -103,3 +103,77 @@ Informative::GetFeaturesNumOfIOSQs()
     LOG_NRM("Max # of IOSQs alloc'd by DUT = %d", (mGetFeaturesNumOfQ & 0xff));
     return (uint16_t)(mGetFeaturesNumOfQ & 0xff);
 }
+
+
+vector<uint32_t>
+Informative::GetBareNamespaces()
+{
+    LBAFormat lbaFmt;
+    vector<uint32_t> ns;
+    ConstSharedIdentifyPtr nsPtr;
+
+    // Determine the Number of Namespaces (NN)
+    ConstSharedIdentifyPtr idCmdCap = GetIdentifyCmdCapabilities();
+    uint32_t nn = (uint32_t)idCmdCap->GetValue(IDCTRLRCAP_NN);
+
+    // Bare namespaces supporting no meta data, and E2E is disabled;
+    // Implies: Identify.LBAF[Identify.FLBAS].MS=0
+    for (uint64_t i = 1; i <= nn; i++) {
+        nsPtr =  GetIdentifyCmdNamespace(i);
+        lbaFmt = nsPtr->GetLBAFormat();
+        if (lbaFmt.MS == 0)
+            ns.push_back(i);
+    }
+    return ns;
+}
+
+
+vector<uint32_t>
+Informative::GetMetaNamespaces()
+{
+    uint8_t dps;
+    LBAFormat lbaFmt;
+    vector<uint32_t> ns;
+    ConstSharedIdentifyPtr nsPtr;
+
+    // Determine the Number of Namespaces (NN)
+    ConstSharedIdentifyPtr idCmdCap = GetIdentifyCmdCapabilities();
+    uint32_t nn = (uint32_t)idCmdCap->GetValue(IDCTRLRCAP_NN);
+
+    // Meta namespaces supporting meta data, and E2E is disabled;
+    // Implies: Identify.LBAF[Identify.FLBAS].MS=!0, Identify.DPS_b2:0=0
+    for (uint64_t i = 1; i <= nn; i++) {
+        nsPtr =  GetIdentifyCmdNamespace(i);
+        lbaFmt = nsPtr->GetLBAFormat();
+        dps = (uint8_t)nsPtr->GetValue(IDNAMESPC_DPS);
+        if ((lbaFmt.MS != 0) && ((dps & 0x07) == 0))
+            ns.push_back(i);
+    }
+    return ns;
+}
+
+
+vector<uint32_t>
+Informative::GetE2ENamespaces()
+{
+    uint8_t dps;
+    LBAFormat lbaFmt;
+    vector<uint32_t> ns;
+    ConstSharedIdentifyPtr nsPtr;
+
+    // Determine the Number of Namespaces (NN)
+    ConstSharedIdentifyPtr idCmdCap = GetIdentifyCmdCapabilities();
+    uint32_t nn = (uint32_t)idCmdCap->GetValue(IDCTRLRCAP_NN);
+
+    // Meta namespaces supporting meta data, and E2E is disabled;
+    // Implies: Identify.LBAF[Identify.FLBAS].MS=!0, Identify.DPS_b2:0=0
+    for (uint64_t i = 1; i <= nn; i++) {
+        nsPtr =  GetIdentifyCmdNamespace(i);
+        lbaFmt = nsPtr->GetLBAFormat();
+        dps = (uint8_t)nsPtr->GetValue(IDNAMESPC_DPS);
+        if ((lbaFmt.MS != 0) && ((dps & 0x07) != 0))
+            ns.push_back(i);
+    }
+    return ns;
+}
+

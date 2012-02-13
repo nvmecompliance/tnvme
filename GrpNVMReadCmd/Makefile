@@ -19,17 +19,14 @@ LDFLAGS=-lm
 LIBS = -L../ -L/usr/local/lib -lm
 INCLUDES = -I. -I../ -I../../ -I/usr/local/include
 
-SRC =				\
-	kernelAPI.cpp		\
-	buffers.cpp		\
-	fileSystem.cpp		\
-	queues.cpp		\
-	io.cpp
+SRC =						\
+	grpNVMReadCmd.cpp			\
+	lbaOutOfRangeBare_r10b.cpp
 
 .SUFFIXES: .cpp
 
 OBJ = $(SRC:.cpp=.o)
-OUT = libUtils.a
+OUT = libGrpNVMReadCmd.a
 
 all: $(OUT)
 

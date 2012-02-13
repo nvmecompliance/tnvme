@@ -37,12 +37,12 @@
  */
 #define INSTANTIATE_OBJ(capital, proper)                            \
     case Trackable::OBJ_ ## capital:                                \
-        LOG_NRM("Cmd %s is born with group lifetime", #proper);     \
+        LOG_NRM("Obj %s is born with group lifetime", #proper);     \
         return SharedTrackablePtr(new proper());                    \
         break;
 #define INSTANTIATE_OBJ_w_fd(capital, proper)                       \
     case Trackable::OBJ_ ## capital:                                \
-        LOG_NRM("Cmd %s is born with group lifetime", #proper);     \
+        LOG_NRM("Obj %s is born with group lifetime", #proper);     \
         return SharedTrackablePtr(new proper(mFd));                 \
         break;
 

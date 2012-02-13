@@ -14,8 +14,8 @@
  *  limitations under the License.
  */
 
-#ifndef _CREATEACQASQ_r10b_H_
-#define _CREATEACQASQ_r10b_H_
+#ifndef _LBAOUTOFRANGEBARE_r10b_H_
+#define _LBAOUTOFRANGEBARE_r10b_H_
 
 #include "test.h"
 
@@ -27,20 +27,20 @@
  * 1) See notes in the header file of the Test base class
  * \endverbatim
  */
-class CreateACQASQ_r10b : public Test
+class LBAOutOfRangeBare_r10b : public Test
 {
 public:
-    CreateACQASQ_r10b(int fd, string grpName, string testName,
+    LBAOutOfRangeBare_r10b(int fd, string grpName, string testName,
         ErrorRegs errRegs);
-    virtual ~CreateACQASQ_r10b();
+    virtual ~LBAOutOfRangeBare_r10b();
 
     /**
      * IMPORTANT: Read Test::Clone() header comment.
      */
-    virtual CreateACQASQ_r10b *Clone() const
-        { return new CreateACQASQ_r10b(*this); }
-    CreateACQASQ_r10b &operator=(const CreateACQASQ_r10b &other);
-    CreateACQASQ_r10b(const CreateACQASQ_r10b &other);
+    virtual LBAOutOfRangeBare_r10b *Clone() const
+        { return new LBAOutOfRangeBare_r10b(*this); }
+    LBAOutOfRangeBare_r10b &operator=(const LBAOutOfRangeBare_r10b &other);
+    LBAOutOfRangeBare_r10b(const LBAOutOfRangeBare_r10b &other);
 
 
 protected:

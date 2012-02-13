@@ -18,6 +18,7 @@
 
 
 SharedReadPtr Read::NullReadPtr;
+const uint8_t Read::Opcode = 0x02;
 
 
 Read::Read() : NVMCmd(0, Trackable::OBJTYPE_FENCE)
@@ -28,7 +29,7 @@ Read::Read() : NVMCmd(0, Trackable::OBJTYPE_FENCE)
 
 Read::Read(int fd) : NVMCmd(fd, Trackable::OBJ_READ)
 {
-    Init(0x02, DATADIR_FROM_DEVICE);
+    Init(Opcode, DATADIR_FROM_DEVICE);
 }
 
 

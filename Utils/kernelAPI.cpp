@@ -256,10 +256,9 @@ KernelAPI::LogCQMetrics(struct nvme_gen_cq &cqMetrics)
     LOG_NRM("CQMetrics.tail_ptr       = 0x%04X", cqMetrics.tail_ptr);
     LOG_NRM("CQMetrics.head_ptr       = 0x%04X", cqMetrics.head_ptr);
     LOG_NRM("CQMetrics.elements       = 0x%04X", cqMetrics.elements);
-    LOG_NRM("CQMetrics.irq_enabled    = 0x%02X", cqMetrics.irq_enabled);
-    LOG_NRM("CQMetrics.irq_no         = 0x%04X", cqMetrics.irq_no);
-    LOG_NRM("CQMetrics.int_vec        = 0x%04X", cqMetrics.int_vec);
-    LOG_NRM("CQMetrics.pbit_new_entry = 0x%02X", cqMetrics.pbit_new_entry);
+    LOG_NRM("CQMetrics.irq_enabled    = %s", cqMetrics.irq_enabled ? "T" : "F");
+    LOG_NRM("CQMetrics.irq_no         = %d", cqMetrics.irq_no);
+    LOG_NRM("CQMetrics.pbit_new_entry = %d", cqMetrics.pbit_new_entry);
 }
 
 
