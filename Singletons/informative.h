@@ -130,8 +130,7 @@ private:
      *          capabilities data structure .
      */
     SharedIdentifyPtr mIdentifyCmdCap;
-    void SetIdentifyCmdCapabilities(SharedIdentifyPtr idCmdCap)
-        { mIdentifyCmdCap = idCmdCap; }
+    void SetIdentifyCmdCapabilities(SharedIdentifyPtr idCmdCap);
 
     /**
      * GrpInformative must set this data. This method must be called in order
@@ -140,8 +139,7 @@ private:
      *          namespace data structure for a given namespace ID.
      */
     vector<SharedIdentifyPtr> mIdentifyCmdNamspc;
-    void SetIdentifyCmdNamespace(SharedIdentifyPtr idCmdNamspc)
-        { mIdentifyCmdNamspc.push_back(idCmdNamspc); }
+    void SetIdentifyCmdNamespace(SharedIdentifyPtr idCmdNamspc);
 
     /**
      * GrpInformative must set this data.
@@ -149,8 +147,7 @@ private:
      *      features which requested the "number of queues" feature ID.
      */
     uint32_t mGetFeaturesNumOfQ;
-    void SetGetFeaturesNumberOfQueues(uint32_t ceDword0)
-        { mGetFeaturesNumOfQ =  ceDword0; }
+    void SetGetFeaturesNumberOfQueues(uint32_t ceDword0);
 };
 
 

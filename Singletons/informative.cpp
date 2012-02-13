@@ -59,7 +59,41 @@ Informative::Informative(int fd, SpecRev specRev)
 Informative::~Informative()
 {
     mInstanceFlag = false;
+
+    mIdentifyCmdCap = Identify::NullIdentifyPtr;
+    mIdentifyCmdNamspc.clear();
+    mGetFeaturesNumOfQ = 0;
 }
+
+
+void
+Informative::SetIdentifyCmdCapabilities(SharedIdentifyPtr idCmdCap)
+{
+    // out with the old and in with the new
+    mIdentifyCmdCap = Identify::NullIdentifyPtr;
+    mIdentifyCmdCap = idCmdCap;
+}
+
+
+    vector<SharedIdentifyPtr> mIdentifyCmdNamspc;
+void
+Informative::SetIdentifyCmdNamespace(SharedIdentifyPtr idCmdNamspc)
+{
+    // out with the old and in with the new
+    mIdentifyCmdNamspc.clear();
+    mIdentifyCmdNamspc.push_back(idCmdNamspc);
+}
+
+
+    uint32_t mGetFeaturesNumOfQ;
+void
+Informative::SetGetFeaturesNumberOfQueues(uint32_t ceDword0)
+{
+    // out with the old and in with the new
+    mGetFeaturesNumOfQ = 0;
+    mGetFeaturesNumOfQ =  ceDword0;
+}
+
 
 
 ConstSharedIdentifyPtr
