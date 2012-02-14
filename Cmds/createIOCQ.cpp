@@ -18,6 +18,9 @@
 #include "globals.h"
 #include "../Utils/buffers.h"
 
+SharedCreateIOCQPtr CreateIOCQ::NullCreateIOCQPtr;
+const uint8_t CreateIOCQ::Opcode = 0x05;
+
 
 CreateIOCQ::CreateIOCQ() :
     AdminCmd(0, Trackable::OBJTYPE_FENCE)
@@ -29,7 +32,7 @@ CreateIOCQ::CreateIOCQ() :
 CreateIOCQ::CreateIOCQ(int fd) :
     AdminCmd(fd, Trackable::OBJ_CREATEIOCQ)
 {
-    AdminCmd::Init(0x05, DATADIR_TO_DEVICE);
+    AdminCmd::Init(Opcode, DATADIR_TO_DEVICE);
 }
 
 
@@ -73,7 +76,7 @@ CreateIOCQ::Init(const SharedIOCQPtr iocq)
 
         // Handle IRQ support
         if (iocq->GetIrqEnabled()) {
-            dword11 |= 0x00000002;
+            dword11 |=  0x00000002;
             dword11 &= ~0xffff0000;    // clear it, then set it
 
             enum nvme_irq_type irq;

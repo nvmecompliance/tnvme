@@ -40,6 +40,7 @@ public:
 
     /// Used to compare for NULL pointers being returned by allocations
     static SharedReadPtr NullReadPtr;
+    static const uint8_t Opcode;
 
     /**
      * Set the Starting Logical Block Address (SLBA).

@@ -86,6 +86,7 @@ CreateIOQDiscontigPoll_r10b::RunCoreTest()
      * 3) Empty ASQ & ACQ's
      * \endverbatim
      */
+    uint32_t isrCount;
     uint64_t regVal;
     uint64_t work;
 
@@ -98,7 +99,7 @@ CreateIOQDiscontigPoll_r10b::RunCoreTest()
     SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
 
     // Verify assumptions are active/enabled/present/setup
-    if (acq->ReapInquiry() != 0) {
+    if (acq->ReapInquiry(isrCount) != 0) {
         LOG_ERR("The ACQ should not have any CE's waiting before testing");
         throw exception();
     } else if (gRegisters->Read(CTLSPC_CAP, regVal) == false) {
@@ -132,9 +133,9 @@ CreateIOQDiscontigPoll_r10b::RunCoreTest()
     SharedMemBufferPtr iocqMem = SharedMemBufferPtr(new MemBuffer());
     iocqMem->InitAlignment((NumEntriesIOQ * IOCQ::COMMON_ELEMENT_SIZE),
         sysconf(_SC_PAGESIZE), true, 0);
-    Queues::CreateIOCQDiscontig(mFd, mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
-        asq, acq, IOQ_ID, NumEntriesIOQ, true, IOCQ_DISCONTIG_GROUP_ID,
-        false, 0, iocqMem);
+    Queues::CreateIOCQDiscontigToHdw(mFd, mGrpName, mTestName,
+        DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, NumEntriesIOQ, true,
+        IOCQ_DISCONTIG_GROUP_ID, false, 0, iocqMem);
 
 
     gCtrlrConfig->SetIOSQES(IOSQ::COMMON_ELEMENT_SIZE_PWR_OF_2);
@@ -142,9 +143,9 @@ CreateIOQDiscontigPoll_r10b::RunCoreTest()
     SharedMemBufferPtr iosqMem = SharedMemBufferPtr(new MemBuffer());
     iosqMem->InitAlignment((NumEntriesIOQ * IOSQ::COMMON_ELEMENT_SIZE),
         sysconf(_SC_PAGESIZE), true, 0);
-    Queues::CreateIOSQDiscontig(mFd, mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
-        asq, acq, IOQ_ID, NumEntriesIOQ, true, IOSQ_DISCONTIG_GROUP_ID,
-        IOQ_ID, 0, iosqMem);
+    Queues::CreateIOSQDiscontigToHdw(mFd, mGrpName, mTestName,
+        DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, NumEntriesIOQ, true,
+        IOSQ_DISCONTIG_GROUP_ID, IOQ_ID, 0, iosqMem);
 
 
     KernelAPI::DumpKernelMetrics(mFd,

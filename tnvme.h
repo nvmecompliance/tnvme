@@ -31,6 +31,9 @@ using namespace std;
 #define LOG_ERR(fmt, ...)    \
     fprintf(stderr, "%s-err:%s:%d: " fmt "\n", LEVEL, __FILE__, __LINE__,   \
         ## __VA_ARGS__);
+#define LOG_ERR_STR(str)    \
+    fprintf(stderr, "%s-err:%s:%d: " "%s" "\n", LEVEL, __FILE__, __LINE__,  \
+        str.c_str());
 #define LOG_WARN(fmt, ...)    \
     fprintf(stderr, "%s-warn:%s:%d: " fmt "\n", LEVEL, __FILE__, __LINE__,  \
         ## __VA_ARGS__);

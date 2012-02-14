@@ -77,6 +77,7 @@ DumpIdentifyData_r10b::RunCoreTest()
      * 2) All interrupts are disabled.
      *  \endverbatim
      */
+    uint32_t isrCount;
 
     KernelAPI::DumpKernelMetrics(mFd,
         FileSystem::PrepLogFile(mGrpName, mTestName, "kmetrics", "before"));
@@ -86,7 +87,7 @@ DumpIdentifyData_r10b::RunCoreTest()
     SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
 
     // Assuming the cmd we issue will result in only a single CE
-    if (acq->ReapInquiry() != 0) {
+    if (acq->ReapInquiry(isrCount) != 0) {
         LOG_ERR("The ACQ should not have any CE's waiting before testing");
         throw exception();
     }
@@ -105,6 +106,7 @@ DumpIdentifyData_r10b::SendIdentifyCtrlrStruct(SharedASQPtr asq,
     SharedACQPtr acq)
 {
     uint16_t numCE;
+    uint32_t isrCount;
 
 
     LOG_NRM("Create 1st identify cmd and assoc some buffer memory");
@@ -127,7 +129,9 @@ DumpIdentifyData_r10b::SendIdentifyCtrlrStruct(SharedASQPtr asq,
 
 
     LOG_NRM("Wait for the CE to arrive in ACQ");
-    if (acq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE) == false) {
+    if (acq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE, isrCount)
+        == false) {
+
         LOG_ERR("Unable to see completion of identify cmd");
         acq->Dump(
             FileSystem::PrepLogFile(mGrpName, mTestName, "acq", "idCmdCap"),
@@ -150,7 +154,9 @@ DumpIdentifyData_r10b::SendIdentifyCtrlrStruct(SharedASQPtr asq,
 
         LOG_NRM("Reaping CE from ACQ, requires memory to hold reaped CE");
         SharedMemBufferPtr ceMemCap = SharedMemBufferPtr(new MemBuffer());
-        if ((numReaped = acq->Reap(ceRemain, ceMemCap, numCE, true)) != 1) {
+        if ((numReaped = acq->Reap(ceRemain, ceMemCap, isrCount, numCE, true))
+            != 1) {
+
             LOG_ERR("Verified there was 1 CE, but reaping produced %d",
                 numReaped);
             throw exception();
@@ -177,6 +183,7 @@ DumpIdentifyData_r10b::SendIdentifyNamespaceStruct(SharedASQPtr asq,
     uint16_t numCE;
     uint64_t numNamSpc;
     char qualifier[20];
+    uint32_t isrCount;
 
 
     ConstSharedIdentifyPtr idCmdCap =
@@ -214,7 +221,7 @@ DumpIdentifyData_r10b::SendIdentifyNamespaceStruct(SharedASQPtr asq,
 
 
         LOG_NRM("Wait for the CE to arrive in ACQ");
-        if (acq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE)
+        if (acq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE, isrCount)
             == false) {
 
             LOG_ERR("Unable to see completion of identify cmd");
@@ -243,7 +250,7 @@ DumpIdentifyData_r10b::SendIdentifyNamespaceStruct(SharedASQPtr asq,
             SharedMemBufferPtr ceMemNamSpc =
                 SharedMemBufferPtr(new MemBuffer());
             if ((numReaped =
-                acq->Reap(ceRemain, ceMemNamSpc, numCE, true)) != 1) {
+                acq->Reap(ceRemain, ceMemNamSpc, isrCount, numCE, true)) != 1) {
 
                 LOG_ERR("Verified there was 1 CE, but reaping produced %d",
                     numReaped);

@@ -49,18 +49,18 @@ ProcessCE::ValidateStatus(union CE &ce)
 bool
 ProcessCE::LogStatus(union CE &ce)
 {
-    bool detectedErr;
+    bool decodeOK;
     vector<string> desc;
 
-    detectedErr = DecodeStatus(ce, desc);
+    decodeOK = DecodeStatus(ce, desc);
     for (size_t i = 0; i < desc.size(); i++ ) {
-        if (detectedErr && (i >= (desc.size() - 1))) {
+        if ((decodeOK == false) && (i >= (desc.size() - 1))) {
             LOG_ERR("%s", desc[i].c_str());
         } else {
             LOG_NRM("%s", desc[i].c_str());
         }
     }
-    return detectedErr;
+    return decodeOK;
 }
 
 

@@ -85,7 +85,7 @@ CtrlrConfig::GetIrqScheme(enum nvme_irq_type &irq, uint16_t &numIrqs)
         LOG_ERR("%s", irqDesc.c_str());
         return false;
     }
-    LOG_NRM("%d enabled IRQ's of %s", numIrqs, irqDesc.c_str());
+    LOG_NRM("Getting IRQ state: %d IRQ's of %s", numIrqs, irqDesc.c_str());
     return true;
 }
 
@@ -103,7 +103,7 @@ CtrlrConfig::SetIrqScheme(enum nvme_irq_type newIrq, uint16_t numIrqs)
         LOG_ERR("Unable to decode IRQ scheme");
         return false;
     }
-    LOG_NRM("Setting %d IRQ's of %s", numIrqs, irqDesc.c_str());
+    LOG_NRM("Setting IRQ state: %d IRQ's of %s", numIrqs, irqDesc.c_str());
 
     struct interrupts state;
     state.irq_type = newIrq;
@@ -113,6 +113,27 @@ CtrlrConfig::SetIrqScheme(enum nvme_irq_type newIrq, uint16_t numIrqs)
         return false;
     }
     return true;
+}
+
+
+bool
+CtrlrConfig::IrqsEnabled()
+{
+    enum nvme_irq_type irq;
+    uint16_t numIrqs;
+
+    if (GetIrqScheme(irq, numIrqs) == false)
+        return false;   // no, it is disabled
+
+    switch (irq) {
+    case INT_MSI_SINGLE:
+    case INT_MSI_MULTI:
+    case INT_MSIX:
+         return true;   // yes, it is enabled
+    case INT_NONE:
+    default:
+         return false;  // no, it is disabled
+    }
 }
 
 
@@ -315,7 +336,7 @@ CtrlrConfig::SetMPS()
 {
     switch (sysconf(_SC_PAGESIZE)) {
     case 4096:
-        LOG_NRM("Writing CC.MPS for a 4096B page size");
+        LOG_NRM("Writing CC.MPS for a 4096 byte page size");
         return SetRegValue(0, 0x0f, CC_MPS, 7);
     default:
         LOG_DBG("Kernel reporting unsupported page size: 0x%08lX",

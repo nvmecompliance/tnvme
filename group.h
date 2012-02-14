@@ -29,6 +29,7 @@
         deque<Test *> tmp;                                          \
         tmp.push_back(new test(fd, #grpName, #test, errRegs));      \
         mTests.push_back(tmp);                                      \
+        tmp.clear();                                                \
     }
 
 /// Use to append a new x.y test number at the test level

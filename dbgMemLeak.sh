@@ -30,6 +30,6 @@ fi
 
 rm -rf ./Logs
 mkdir -m 0777 ./Logs
-echo ./tnvme -k skipqemu.cfg $TNVME_CMD_LINE 2>&1 | tee ./Logs/tnvme.out
-valgrind --tool=memcheck ./tnvme -k skipqemu.cfg $TNVME_CMD_LINE 2>&1 | tee ./Logs/tnvme.out
-#valgrind --tool=memcheck --leak-check=full --track-origins=yes -v --show-reachable=yes ./tnvme -k skipqemu.cfg $TNVME_CMD_LINE 2>&1 | tee ./Logs/tnvme.out
+echo ./tnvme -k skiptest.cfg $TNVME_CMD_LINE 2>&1 | tee ./Logs/tnvme.out
+#valgrind --tool=memcheck ./tnvme -k skiptest.cfg $TNVME_CMD_LINE 2>&1 | tee ./Logs/tnvme.out
+valgrind --tool=memcheck --leak-check=full --track-origins=yes -v --show-reachable=yes ./tnvme -k skiptest.cfg $TNVME_CMD_LINE 2>&1 | tee ./Logs/tnvme.out

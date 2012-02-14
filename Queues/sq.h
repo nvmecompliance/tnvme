@@ -21,6 +21,11 @@
 #include "se.h"
 #include "../Cmds/cmd.h"
 
+class SQ;    // forward definition
+typedef boost::shared_ptr<SQ>               SharedSQPtr;
+#define CAST_TO_SQ(shared_trackable_ptr)    \
+        boost::shared_polymorphic_downcast<SQ>(shared_trackable_ptr);
+
 
 /**
 * This class extends the base class. It is also not meant to be instantiated.
@@ -39,6 +44,9 @@ public:
      */
     SQ(int fd, Trackable::ObjType objBeingCreated);
     virtual ~SQ();
+
+    /// Used to compare for NULL pointers being returned by allocations
+    static SharedSQPtr NullSQPtr;
 
     virtual bool GetIsCQ() { return false; }
 
@@ -68,7 +76,7 @@ public:
      * Issue the specified cmd to this queue, but does not ring any doorbell.
      * @param cmd Pass the cmd to send to this queue.
      */
-    void Send(SharedCmdPtr cmd);
+    virtual void Send(SharedCmdPtr cmd);
 
     /**
      * Ring the doorbell assoc with this SQ. This will commit to hardware all

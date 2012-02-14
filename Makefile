@@ -29,6 +29,8 @@ SUBDIRS:=			\
 	GrpCtrlRegisters	\
 	GrpBasicInit		\
 	GrpResets		\
+	GrpQueues		\
+	GrpNVMReadCmd		\
 	Queues			\
 	Cmds			\
 	Utils
@@ -56,7 +58,7 @@ RPMSPECFILE=$(RPMBASE).spec
 SRCDIR?=./src
 
 all: GOAL=all
-all: $(APP_NAME) doc
+all: $(APP_NAME)
 
 rpm: rpmzipsrc rpmbuild
 
@@ -78,7 +80,7 @@ clobber: $(SUBDIRS) clean
 	rm -f $(APP_NAME)
 
 doc: GOAL=doc
-doc: $(SUBDIRS)
+doc: all
 	doxygen doxygen.conf > doxygen.log
 
 $(SUBDIRS):

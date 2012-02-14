@@ -583,6 +583,8 @@ bool SetFeaturesNumberOfQueues(NumQueues &numQueues, int fd)
     uint16_t numCE;
     uint16_t ceRemain;
     uint16_t numReaped;
+    uint32_t isrCount;
+
 
     try {   // The objects to perform this work throw exceptions
         LOG_NRM("Setting number of Q's; ncqr=0x%04X, nsqr=0x%04X",
@@ -608,7 +610,7 @@ bool SetFeaturesNumberOfQueues(NumQueues &numQueues, int fd)
         LOG_NRM("Send the cmd to the ASQ, wait for it to complete");
         asq->Send(sfNumOfQ);
         asq->Ring();
-        if (acq->ReapInquiryWaitSpecify(2000, 1, numCE) == false) {
+        if (acq->ReapInquiryWaitSpecify(2000, 1, numCE, isrCount) == false) {
             LOG_ERR("Unable to see completion of Set Features cmd");
             throw exception();
         } else if (numCE != 1) {
@@ -622,7 +624,9 @@ bool SetFeaturesNumberOfQueues(NumQueues &numQueues, int fd)
 
         LOG_NRM("Reaping CE from ACQ, requires memory to hold reaped CE");
         SharedMemBufferPtr ceMemIOCQ = SharedMemBufferPtr(new MemBuffer());
-        if ((numReaped = acq->Reap(ceRemain, ceMemIOCQ, numCE, true)) != 1) {
+        if ((numReaped = acq->Reap(ceRemain, ceMemIOCQ, isrCount, numCE, true))
+            != 1) {
+
             LOG_ERR("Verified there was 1 CE, but reaping produced %d",
                 numReaped);
             throw exception();

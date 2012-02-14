@@ -80,6 +80,23 @@ public:
     /// @return Derives the value from DW0 of the CE & converts to a 1-base val
     uint16_t GetFeaturesNumOfIOSQs();
 
+    /**
+     * Retrieve an array indicating all the namespace ID(s) for the appropriate
+     * namespace type desired.
+     * @note Bare: Namespaces supporting no meta data, and E2E is
+     *       disabled; Implies: Identify.LBAF[Identify.FLBAS].MS=0
+     * @note Meta: Namespaces supporting meta data, and E2E is disabled;
+     *       Implies: Identify.LBAF[Identify.FLBAS].MS=!0, Identify.DPS_b2:0=0
+     * @note E2E: Namepspaces supporting meta data, and E2E is enabled;
+     *       Implies: Identify.LBAF[Identify.FLBAS].MS=!0, Identify.DPS_b2:0=!0
+     * @return vector containing all desired namespaces; it could be an empty
+     *       vector indicating no namespaces are present in the DUT, otherwise
+     *       throws if anything prevents detecting the requested data.
+     */
+    vector<uint32_t> GetBareNamespaces();
+    vector<uint32_t> GetMetaNamespaces();
+    vector<uint32_t> GetE2ENamespaces();
+
 
 private:
     // Implement singleton design pattern
@@ -113,8 +130,7 @@ private:
      *          capabilities data structure .
      */
     SharedIdentifyPtr mIdentifyCmdCap;
-    void SetIdentifyCmdCapabilities(SharedIdentifyPtr idCmdCap)
-        { mIdentifyCmdCap = idCmdCap; }
+    void SetIdentifyCmdCapabilities(SharedIdentifyPtr idCmdCap);
 
     /**
      * GrpInformative must set this data. This method must be called in order
@@ -123,8 +139,7 @@ private:
      *          namespace data structure for a given namespace ID.
      */
     vector<SharedIdentifyPtr> mIdentifyCmdNamspc;
-    void SetIdentifyCmdNamespace(SharedIdentifyPtr idCmdNamspc)
-        { mIdentifyCmdNamspc.push_back(idCmdNamspc); }
+    void SetIdentifyCmdNamespace(SharedIdentifyPtr idCmdNamspc);
 
     /**
      * GrpInformative must set this data.
@@ -132,8 +147,7 @@ private:
      *      features which requested the "number of queues" feature ID.
      */
     uint32_t mGetFeaturesNumOfQ;
-    void SetGetFeaturesNumberOfQueues(uint32_t ceDword0)
-        { mGetFeaturesNumOfQ =  ceDword0; }
+    void SetGetFeaturesNumberOfQueues(uint32_t ceDword0);
 };
 
 

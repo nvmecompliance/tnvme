@@ -42,6 +42,7 @@ public:
 
     /// Used to compare for NULL pointers being returned by allocations
     static SharedDeleteIOSQPtr NullDeleteIOSQPtr;
+    static const uint8_t Opcode;
 
     /**
      * Initialize this object and prepares it to send to the hdw.

@@ -64,6 +64,7 @@ public:
     nvme_cmds GetCmdSet() const { return mCmdSet; }
     DataDir   GetDataDir() const { return mDataDir; }
     uint8_t   GetOpcode() const { return GetByte(0, 0); }
+    string    GetName() const { return mCmdName; }
 
     static const uint8_t BITMASK_FUSE_B;
     static const uint32_t BITMASK_FUSE_DW;
@@ -153,6 +154,7 @@ private:
     nvme_cmds mCmdSet;
     SharedMemBufferPtr mCmdBuf;
     DataDir mDataDir;
+    string mCmdName;
 };
 
 

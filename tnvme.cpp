@@ -37,6 +37,8 @@
 #include "GrpCtrlRegisters/grpCtrlRegisters.h"
 #include "GrpBasicInit/grpBasicInit.h"
 #include "GrpResets/grpResets.h"
+#include "GrpQueues/grpQueues.h"
+#include "GrpNVMReadCmd/grpNVMReadCmd.h"
 
 
 #define NO_DEVICES              "no devices found"
@@ -108,7 +110,7 @@ main(int argc, char *argv[])
     string work;
     vector<Group *> groups;
     vector<string> devices;
-    struct CmdLine CmdLine;
+    struct CmdLine cmdLine;
     struct dirent *dirEntry;
     bool deviceFound = false;
     bool accessingHdw = true;
@@ -135,23 +137,23 @@ main(int argc, char *argv[])
     };
 
     // defaults if not spec'd on cmd line
-    CmdLine.rev = SPECREV_10b;
-    CmdLine.detail.req = false;
-    CmdLine.test.req = false;
-    CmdLine.reset = false;
-    CmdLine.summary = false;
-    CmdLine.ignore = false;
-    CmdLine.loop = 1;
-    CmdLine.device = NO_DEVICES;
-    CmdLine.rmmap.req = false;
-    CmdLine.wmmap.req = false;
-    CmdLine.numQueues.req = false;
-    CmdLine.numQueues.ncqr = 0;
-    CmdLine.numQueues.nsqr = 0;
-    CmdLine.errRegs.sts = (STS_SSE | STS_STA | STS_RMA | STS_RTA);
-    CmdLine.errRegs.pxds = (PXDS_TP | PXDS_FED);
-    CmdLine.errRegs.aeruces = 0;
-    CmdLine.errRegs.csts = CSTS_CFS;
+    cmdLine.rev = SPECREV_10b;
+    cmdLine.detail.req = false;
+    cmdLine.test.req = false;
+    cmdLine.reset = false;
+    cmdLine.summary = false;
+    cmdLine.ignore = false;
+    cmdLine.loop = 1;
+    cmdLine.device = NO_DEVICES;
+    cmdLine.rmmap.req = false;
+    cmdLine.wmmap.req = false;
+    cmdLine.numQueues.req = false;
+    cmdLine.numQueues.ncqr = 0;
+    cmdLine.numQueues.nsqr = 0;
+    cmdLine.errRegs.sts = (STS_SSE | STS_STA | STS_RMA | STS_RTA);
+    cmdLine.errRegs.pxds = (PXDS_TP | PXDS_FED);
+    cmdLine.errRegs.aeruces = 0;
+    cmdLine.errRegs.csts = CSTS_CFS;
 
     if (argc == 1) {
         printf("%s is a compliance test suite for NVM Express hardware.\n",
@@ -172,7 +174,7 @@ main(int argc, char *argv[])
             devices.push_back("/dev/" + work);
     }
     if (devices.size())
-        CmdLine.device = devices[0];    // Default to 1st element listed
+        cmdLine.device = devices[0];    // Default to 1st element listed
 
 
     // Report what we are about to process
@@ -188,12 +190,12 @@ main(int argc, char *argv[])
 
         case 'v':
             if (strcmp("1.0a", optarg) == 0) {
-                CmdLine.rev = SPECREV_10b;
+                cmdLine.rev = SPECREV_10b;
             }
             break;
 
         case 'a':
-            if (ParseTargetCmdLine(CmdLine.detail, optarg) == false) {
+            if (ParseTargetCmdLine(cmdLine.detail, optarg) == false) {
                 printf("Unable to parse --detail cmd line\n");
                 exit(1);
             }
@@ -201,35 +203,35 @@ main(int argc, char *argv[])
             break;
 
         case 't':
-            if (ParseTargetCmdLine(CmdLine.test, optarg) == false) {
+            if (ParseTargetCmdLine(cmdLine.test, optarg) == false) {
                 printf("Unable to parse --test cmd line\n");
                 exit(1);
             }
             break;
 
         case 'k':
-            if (ParseSkipTestCmdLine(CmdLine.skiptest, optarg) == false) {
+            if (ParseSkipTestCmdLine(cmdLine.skiptest, optarg) == false) {
                 printf("Unable to parse --skiptest cmd line\n");
                 exit(1);
             }
             break;
 
         case 'r':
-            if (ParseRmmapCmdLine(CmdLine.rmmap, optarg) == false) {
+            if (ParseRmmapCmdLine(cmdLine.rmmap, optarg) == false) {
                 printf("Unable to parse --rmmap cmd line\n");
                 exit(1);
             }
             break;
 
         case 'w':
-            if (ParseWmmapCmdLine(CmdLine.wmmap, optarg) == false) {
+            if (ParseWmmapCmdLine(cmdLine.wmmap, optarg) == false) {
                 printf("Unable to parse --wmmap cmd line\n");
                 exit(1);
             }
             break;
 
         case 'e':
-            if (ParseErrorCmdLine(CmdLine.errRegs, optarg) == false) {
+            if (ParseErrorCmdLine(cmdLine.errRegs, optarg) == false) {
                 printf("Unable to parse --error cmd line\n");
                 exit(1);
             }
@@ -239,7 +241,7 @@ main(int argc, char *argv[])
             work = optarg;
             for (size_t i = 0; i < devices.size(); i++) {
                 if (work.compare(devices[i]) == 0) {
-                    CmdLine.device = work;
+                    cmdLine.device = work;
                     deviceFound = true;
                     break;
                 }
@@ -260,7 +262,7 @@ main(int argc, char *argv[])
                 printf("Negative/zero values for --loop are unproductive\n");
                 exit(1);
             }
-            CmdLine.loop = tmp;
+            cmdLine.loop = tmp;
             break;
 
         case 'l':
@@ -275,22 +277,22 @@ main(int argc, char *argv[])
             exit(0);
 
         case 'q':
-            if (ParseQueuesCmdLine(CmdLine.numQueues, optarg) == false) {
+            if (ParseQueuesCmdLine(cmdLine.numQueues, optarg) == false) {
                 printf("Unable to parse --queues cmd line\n");
                 exit(1);
             }
             break;
 
         case 's':
-            CmdLine.summary = true;
+            cmdLine.summary = true;
             accessingHdw = false;
             break;
 
         default:
         case 'h':   Usage();                            exit(0);
         case '?':   Usage();                            exit(1);
-        case 'z':   CmdLine.reset = true;               break;
-        case 'i':   CmdLine.ignore = true;              break;
+        case 'z':   cmdLine.reset = true;               break;
+        case 'i':   cmdLine.ignore = true;              break;
         }
     }
 
@@ -305,12 +307,12 @@ main(int argc, char *argv[])
     }
 
     // Execute cmd line options which require the test infrastructure
-    if (BuildTestInfrastructure(groups, fd, CmdLine) == false)
+    if (BuildTestInfrastructure(groups, fd, cmdLine) == false)
         exit(1);
 
     // Accessing hardware requires specific checks and inquiries before running
     if (accessingHdw) {
-        BuildSingletons(fd, CmdLine);
+        BuildSingletons(fd, cmdLine);
 
         LOG_NRM("Checking for unintended device under low powered states");
         if (gRegisters->Read(PCISPC_PMCS, regVal) == false) {
@@ -324,20 +326,20 @@ main(int argc, char *argv[])
 
 
     fflush(stdout);
-    if (CmdLine.numQueues.req) {
-        if ((exitCode = !SetFeaturesNumberOfQueues(CmdLine.numQueues, fd)))
+    if (cmdLine.numQueues.req) {
+        if ((exitCode = !SetFeaturesNumberOfQueues(cmdLine.numQueues, fd)))
             printf("FAILURE: Setting number of queues\n");
         else
             printf("SUCCESS: Setting number of queues\n");
-    } else if (CmdLine.summary) {
+    } else if (cmdLine.summary) {
         for (size_t i = 0; i < groups.size(); i++) {
             FORMAT_GROUP_DESCRIPTION(work, groups[i])
             printf("%s\n", work.c_str());
             printf("%s", groups[i]->GetGroupSummary(false).c_str());
         }
 
-    } else if (CmdLine.detail.req) {
-        if (CmdLine.detail.t.group == UINT_MAX) {
+    } else if (cmdLine.detail.req) {
+        if (cmdLine.detail.t.group == UINT_MAX) {
             for (size_t i = 0; i < groups.size(); i++) {
                 FORMAT_GROUP_DESCRIPTION(work, groups[i])
                 printf("%s\n", work.c_str());
@@ -345,57 +347,61 @@ main(int argc, char *argv[])
             }
 
         } else {    // user spec'd a group they are interested in
-            if (CmdLine.detail.t.group >= groups.size()) {
+            if (cmdLine.detail.t.group >= groups.size()) {
                 printf("Specified test group does not exist\n");
 
             } else {
                 for (size_t i = 0; i < groups.size(); i++) {
-                    if (i == CmdLine.detail.t.group) {
+                    if (i == cmdLine.detail.t.group) {
                         FORMAT_GROUP_DESCRIPTION(work, groups[i])
                         printf("%s\n", work.c_str());
 
-                        if ((CmdLine.detail.t.major == UINT_MAX) ||
-                            (CmdLine.detail.t.minor == UINT_MAX)) {
+                        if ((cmdLine.detail.t.major == UINT_MAX) ||
+                            (cmdLine.detail.t.minor == UINT_MAX)) {
                             // Want info on all tests within group
                             printf("%s",
                                 groups[i]->GetGroupSummary(true).c_str());
                         } else {
                             // Want info on spec'd test within group
                             printf("%s", groups[i]->GetTestDescription(true,
-                                CmdLine.detail.t).c_str());
+                                cmdLine.detail.t).c_str());
                             break;
                         }
                     }
                 }
             }
         }
-    } else if (CmdLine.rmmap.req) {
-        uint8_t *value = new uint8_t[CmdLine.rmmap.size];
-        gRegisters->Read(CmdLine.rmmap.space, CmdLine.rmmap.size,
-            CmdLine.rmmap.offset, CmdLine.rmmap.acc, value);
-        string result = gRegisters->FormatRegister(CmdLine.rmmap.space,
-            CmdLine.rmmap.size, CmdLine.rmmap.offset, value);
+    } else if (cmdLine.rmmap.req) {
+        uint8_t *value = new uint8_t[cmdLine.rmmap.size];
+        gRegisters->Read(cmdLine.rmmap.space, cmdLine.rmmap.size,
+            cmdLine.rmmap.offset, cmdLine.rmmap.acc, value);
+        string result = gRegisters->FormatRegister(cmdLine.rmmap.space,
+            cmdLine.rmmap.size, cmdLine.rmmap.offset, value);
         printf("%s\n", result.c_str());
-    } else if (CmdLine.wmmap.req) {
-        gRegisters->Write(CmdLine.wmmap.space, CmdLine.wmmap.size,
-            CmdLine.wmmap.offset, CmdLine.wmmap.acc,
-            (uint8_t *)(&CmdLine.wmmap.value));
-    } else if (CmdLine.reset) {
+    } else if (cmdLine.wmmap.req) {
+        gRegisters->Write(cmdLine.wmmap.space, cmdLine.wmmap.size,
+            cmdLine.wmmap.offset, cmdLine.wmmap.acc,
+            (uint8_t *)(&cmdLine.wmmap.value));
+    } else if (cmdLine.reset) {
         if ((exitCode = !gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY)))
             printf("FAILURE: reset\n");
         else
             printf("SUCCESS: reset\n");
         // At this point we cannot enable the ctrlr because that requires
         // ACQ/ASQ's to be created, ctrlr simply won't become ready w/o these.
-    } else if (CmdLine.test.req) {
-        if ((exitCode = !ExecuteTests(CmdLine, groups)))
+    } else if (cmdLine.test.req) {
+        if ((exitCode = !ExecuteTests(cmdLine, groups)))
             printf("FAILURE: testing\n");
         else
             printf("SUCCESS: testing\n");
     }
 
+    // cleanup duties
     DestroyTestInfrastructure(groups, fd);
     DestroySingletons();
+
+    cmdLine.skiptest.clear();
+    devices.clear();
     exit(exitCode);
 }
 
@@ -510,6 +516,8 @@ BuildTestInfrastructure(vector<Group *> &groups, int &fd, struct CmdLine &cl)
     groups.push_back(new GrpCtrlRegisters(groups.size(), cl.rev, cl.errRegs, fd));  // 2
     groups.push_back(new GrpBasicInit(groups.size(), cl.rev, cl.errRegs, fd));      // 3
     groups.push_back(new GrpResets(groups.size(), cl.rev, cl.errRegs, fd));         // 4
+    groups.push_back(new GrpQueues(groups.size(), cl.rev, cl.errRegs, fd));         // 5
+    groups.push_back(new GrpNVMReadCmd(groups.size(), cl.rev, cl.errRegs, fd));     // 6
 
     return true;
 }

@@ -23,7 +23,8 @@ SRC =				\
 	kernelAPI.cpp		\
 	buffers.cpp		\
 	fileSystem.cpp		\
-	queues.cpp
+	queues.cpp		\
+	io.cpp
 
 .SUFFIXES: .cpp
 

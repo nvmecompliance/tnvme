@@ -17,6 +17,9 @@
 #include "setFeatures.h"
 #include "../Utils/buffers.h"
 
+SharedSetFeaturesPtr SetFeatures::NullSetFeaturesPtr;
+const uint8_t SetFeatures::Opcode = 0x09;
+
 
 SetFeatures::SetFeatures() : BaseFeatures(0, Trackable::OBJTYPE_FENCE)
 {
@@ -26,7 +29,7 @@ SetFeatures::SetFeatures() : BaseFeatures(0, Trackable::OBJTYPE_FENCE)
 
 SetFeatures::SetFeatures(int fd) : BaseFeatures(fd, Trackable::OBJ_SETFEATURES)
 {
-    Init(0x09, DATADIR_TO_DEVICE);
+    Init(Opcode, DATADIR_TO_DEVICE);
 }
 
 

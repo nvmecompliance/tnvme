@@ -161,6 +161,7 @@ VerifyDataPat_r10b::SendToIOSQ(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
     uint16_t numCE;
     uint16_t ceRemain;
     uint16_t numReaped;
+    uint32_t isrCount;
 
 
     LOG_NRM("Send the cmd to hdw via %s IOSQ", qualifier.c_str());
@@ -171,7 +172,9 @@ VerifyDataPat_r10b::SendToIOSQ(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
 
 
     LOG_NRM("Wait for the CE to arrive in IOCQ");
-    if (iocq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE) == false) {
+    if (iocq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE, isrCount)
+        == false) {
+
         LOG_ERR("Unable to see completion of cmd");
         iocq->Dump(
             FileSystem::PrepLogFile(mGrpName, mTestName, "iocq", qualifier),
@@ -191,7 +194,9 @@ VerifyDataPat_r10b::SendToIOSQ(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
 
     LOG_NRM("Reaping CE from IOCQ, requires memory to hold reaped CE");
     SharedMemBufferPtr ceMemIOCQ = SharedMemBufferPtr(new MemBuffer());
-    if ((numReaped = iocq->Reap(ceRemain, ceMemIOCQ, numCE, true)) != 1) {
+    if ((numReaped = iocq->Reap(ceRemain, ceMemIOCQ, isrCount, numCE, true))
+        != 1) {
+
         LOG_ERR("Verified there was 1 CE, but reaping produced %d", numReaped);
         throw exception();
     }

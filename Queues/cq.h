@@ -20,6 +20,11 @@
 #include "queue.h"
 #include "ce.h"
 
+class CQ;    // forward definition
+typedef boost::shared_ptr<CQ>               SharedCQPtr;
+#define CAST_TO_CQ(shared_trackable_ptr)    \
+        boost::shared_polymorphic_downcast<CQ>(shared_trackable_ptr);
+
 
 /**
 * This class extends the base class. It is also not meant to be instantiated.
@@ -39,10 +44,20 @@ public:
     CQ(int fd, Trackable::ObjType objBeingCreated);
     virtual ~CQ();
 
+    /// Used to compare for NULL pointers being returned by allocations
+    static SharedCQPtr NullCQPtr;
+
     virtual bool GetIsCQ() { return true; }
 
     struct nvme_gen_cq GetQMetrics();
 
+    /**
+     * Even though a particular CQ may have IRQ's enabled, this does not mean
+     * IRQ's will be used when reaping CE's. Reference
+     * gCtrlrConfig.IrqsEnabled() to decipher if the OS/kernel/dnvme will poll
+     * or use IRQ's for this CQ.
+     * @return true when an IRQ for this CQ is enabled, otherwise false
+     */
     bool GetIrqEnabled() { return mIrqEnabled; }
     uint16_t GetIrqVector() { return mIrqVec; }
 
@@ -86,9 +101,12 @@ public:
     /**
      * Inquire as to the number of CE's which are present in this CQ. Returns
      * immediately, does not block.
+     * @param isrCount Returns the number of ISR's which fired and were counted
+     *        that are assoc with this CQ. If this CQ does not use IRQ's, then
+     *        this value will remain 0.
      * @return The number of unreap'd CE's awaiting
      */
-    uint16_t ReapInquiry();
+    uint16_t ReapInquiry(uint32_t &isrCount);
 
     /**
      * Inquire as to the number of CE's which are present in this CQ. If the
@@ -96,9 +114,12 @@ public:
      * a CE arrives or a timeout period expires.
      * @param ms Pass the max number of milliseconds to wait until CE's arrive.
      * @param numCE Returns the number of unreap'd CE's awaiting
+     * @param isrCount Returns the number of ISR's which fired and were counted
+     *        that are assoc with this CQ. If this CQ does not use IRQ's, then
+     *        this value will remain 0.
      * @return true when CE's are awaiting to be reaped, otherwise a timeout
      */
-    bool ReapInquiryWaitAny(uint16_t ms, uint16_t &numCE);
+    bool ReapInquiryWaitAny(uint16_t ms, uint16_t &numCE, uint32_t &isrCount);
 
     /**
      * Wait until at least the specified number of CE's become available or
@@ -106,9 +127,13 @@ public:
      * @param ms Pass the max number of ms to wait until numTil CE's arrive.
      * @param numTil Pass the number of CE's that need to become available
      * @param numCE Returns the number of unreap'd CE's awaiting
+     * @param isrCount Returns the number of ISR's which fired and were counted
+     *        that are assoc with this CQ. If this CQ does not use IRQ's, then
+     *        this value will remain 0.
      * @return true when CE's are awaiting to be reaped, otherwise a timeout
      */
-    bool ReapInquiryWaitSpecify(uint16_t ms, uint16_t numTil, uint16_t &numCE);
+    bool ReapInquiryWaitSpecify(uint16_t ms, uint16_t numTil, uint16_t &numCE,
+        uint32_t &isrCount);
 
     /**
      * Reap a specified number of Completion Elements (CE) from this CQ. The
@@ -118,6 +143,9 @@ public:
      * @param memBuffer Pass a buffer to contain the CE's requested. The
      *      contents of the buffer will be lost and the buffer will be resized
      *      to fulfill ceDesire.
+     * @param isrCount Returns the number of ISR's which fired and were counted
+     *        that are assoc with this CQ. If this CQ does not use IRQ's, then
+     *        this value will remain 0.
      * @param ceDesire Pass the number of CE's desired to be reaped, 0 indicates
      *      reap all which can be reaped.
      * @param zeroMem Pass true to zero out memBuffer before reaping, otherwise
@@ -125,7 +153,7 @@ public:
      * @return Returns the actual number of CE's reaped
      */
     uint16_t Reap(uint16_t &ceRemain, SharedMemBufferPtr memBuffer,
-        uint16_t ceDesire = 0, bool zeroMem = false);
+        uint32_t &isrCount, uint16_t ceDesire = 0, bool zeroMem = false);
 
 
 protected:

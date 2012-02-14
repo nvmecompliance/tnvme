@@ -41,7 +41,7 @@ public:
 
     /// Used to compare for NULL pointers being returned by allocations
     static SharedIdentifyPtr NullIdentifyPtr;
-
+    static const uint8_t Opcode;
     /// The perfectly sized data buffer should be of this size
     static const uint16_t IDEAL_DATA_SIZE;
 

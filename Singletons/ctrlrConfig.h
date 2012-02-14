@@ -71,6 +71,14 @@ public:
     bool SetIrqScheme(enum nvme_irq_type newIrq, uint16_t numIrqs);
 
     /**
+     * Determines whether IRQ's are:
+     * disabled (nvme_irq_type == {INT_NONE | INT_FENCE}), or
+     * enabled (nvme_irq_type == {INT_MSI_SINGLE | INT_MSI_MULTI | INT_MSIX}).
+     * @return true if enabled, otherwise false
+     */
+    bool IrqsEnabled();
+
+    /**
      * Is the controller enabled?
      * @return true if enabled, otherwise false
      */
