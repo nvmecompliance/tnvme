@@ -37,6 +37,7 @@
 #include "GrpCtrlRegisters/grpCtrlRegisters.h"
 #include "GrpBasicInit/grpBasicInit.h"
 #include "GrpResets/grpResets.h"
+#include "GrpQueues/grpQueues.h"
 #include "GrpNVMReadCmd/grpNVMReadCmd.h"
 
 
@@ -515,7 +516,8 @@ BuildTestInfrastructure(vector<Group *> &groups, int &fd, struct CmdLine &cl)
     groups.push_back(new GrpCtrlRegisters(groups.size(), cl.rev, cl.errRegs, fd));  // 2
     groups.push_back(new GrpBasicInit(groups.size(), cl.rev, cl.errRegs, fd));      // 3
     groups.push_back(new GrpResets(groups.size(), cl.rev, cl.errRegs, fd));         // 4
-    groups.push_back(new GrpNVMReadCmd(groups.size(), cl.rev, cl.errRegs, fd));     // 5
+    groups.push_back(new GrpQueues(groups.size(), cl.rev, cl.errRegs, fd));         // 5
+    groups.push_back(new GrpNVMReadCmd(groups.size(), cl.rev, cl.errRegs, fd));     // 6
 
     return true;
 }

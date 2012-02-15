@@ -29,6 +29,7 @@ SUBDIRS:=			\
 	GrpCtrlRegisters	\
 	GrpBasicInit		\
 	GrpResets		\
+	GrpQueues		\
 	GrpNVMReadCmd		\
 	Queues			\
 	Cmds			\
