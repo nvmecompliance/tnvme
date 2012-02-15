@@ -49,55 +49,28 @@ Informative::Informative(int fd, SpecRev specRev)
     }
 
     mSpecRev = specRev;
-
-    mIdentifyCmdCap = Identify::NullIdentifyPtr;
-    mIdentifyCmdNamspc.clear();
-    mGetFeaturesNumOfQ = 0;
+    Clear();
 }
 
 
 Informative::~Informative()
 {
     mInstanceFlag = false;
+    Clear();
+}
 
+
+void
+Informative::Clear()
+{
     mIdentifyCmdCap = Identify::NullIdentifyPtr;
     mIdentifyCmdNamspc.clear();
     mGetFeaturesNumOfQ = 0;
 }
-
-
-void
-Informative::SetIdentifyCmdCapabilities(SharedIdentifyPtr idCmdCap)
-{
-    // out with the old and in with the new
-    mIdentifyCmdCap = Identify::NullIdentifyPtr;
-    mIdentifyCmdCap = idCmdCap;
-}
-
-
-    vector<SharedIdentifyPtr> mIdentifyCmdNamspc;
-void
-Informative::SetIdentifyCmdNamespace(SharedIdentifyPtr idCmdNamspc)
-{
-    // out with the old and in with the new
-    mIdentifyCmdNamspc.clear();
-    mIdentifyCmdNamspc.push_back(idCmdNamspc);
-}
-
-
-    uint32_t mGetFeaturesNumOfQ;
-void
-Informative::SetGetFeaturesNumberOfQueues(uint32_t ceDword0)
-{
-    // out with the old and in with the new
-    mGetFeaturesNumOfQ = 0;
-    mGetFeaturesNumOfQ =  ceDword0;
-}
-
 
 
 ConstSharedIdentifyPtr
-Informative::GetIdentifyCmdNamespace(uint64_t namspcId)
+Informative::GetIdentifyCmdNamespace(uint64_t namspcId) const
 {
     if (namspcId > mIdentifyCmdNamspc.size()) {
         LOG_DBG("Requested Identify namespace struct %llu, out of %lu",
@@ -113,7 +86,7 @@ Informative::GetIdentifyCmdNamespace(uint64_t namspcId)
 
 
 uint32_t
-Informative::GetFeaturesNumOfQueues()
+Informative::GetFeaturesNumOfQueues() const
 {
     // Call these 2 methods for logging purposes only
     GetFeaturesNumOfIOCQs();
@@ -124,7 +97,7 @@ Informative::GetFeaturesNumOfQueues()
 
 
 uint16_t
-Informative::GetFeaturesNumOfIOCQs()
+Informative::GetFeaturesNumOfIOCQs() const
 {
     LOG_NRM("Max # of IOCQs alloc'd by DUT = %d", (mGetFeaturesNumOfQ >> 16));
     return (uint16_t)(mGetFeaturesNumOfQ >> 16);
@@ -132,7 +105,7 @@ Informative::GetFeaturesNumOfIOCQs()
 
 
 uint16_t
-Informative::GetFeaturesNumOfIOSQs()
+Informative::GetFeaturesNumOfIOSQs() const
 {
     LOG_NRM("Max # of IOSQs alloc'd by DUT = %d", (mGetFeaturesNumOfQ & 0xff));
     return (uint16_t)(mGetFeaturesNumOfQ & 0xff);
@@ -140,7 +113,7 @@ Informative::GetFeaturesNumOfIOSQs()
 
 
 vector<uint32_t>
-Informative::GetBareNamespaces()
+Informative::GetBareNamespaces() const
 {
     LBAFormat lbaFmt;
     vector<uint32_t> ns;
@@ -152,18 +125,21 @@ Informative::GetBareNamespaces()
 
     // Bare namespaces supporting no meta data, and E2E is disabled;
     // Implies: Identify.LBAF[Identify.FLBAS].MS=0
+    LOG_NRM("Seeking all bare namspc's");
     for (uint64_t i = 1; i <= nn; i++) {
         nsPtr =  GetIdentifyCmdNamespace(i);
         lbaFmt = nsPtr->GetLBAFormat();
-        if (lbaFmt.MS == 0)
+        if (lbaFmt.MS == 0) {
+            LOG_NRM("Identified bare namspc #%lld", (unsigned long long)i);
             ns.push_back(i);
+        }
     }
     return ns;
 }
 
 
 vector<uint32_t>
-Informative::GetMetaNamespaces()
+Informative::GetMetaNamespaces() const
 {
     uint8_t dps;
     LBAFormat lbaFmt;
@@ -176,19 +152,22 @@ Informative::GetMetaNamespaces()
 
     // Meta namespaces supporting meta data, and E2E is disabled;
     // Implies: Identify.LBAF[Identify.FLBAS].MS=!0, Identify.DPS_b2:0=0
+    LOG_NRM("Seeking all meta namspc's");
     for (uint64_t i = 1; i <= nn; i++) {
         nsPtr =  GetIdentifyCmdNamespace(i);
         lbaFmt = nsPtr->GetLBAFormat();
         dps = (uint8_t)nsPtr->GetValue(IDNAMESPC_DPS);
-        if ((lbaFmt.MS != 0) && ((dps & 0x07) == 0))
+        if ((lbaFmt.MS != 0) && ((dps & 0x07) == 0)) {
+            LOG_NRM("Identified meta namspc #%lld", (unsigned long long)i);
             ns.push_back(i);
+        }
     }
     return ns;
 }
 
 
 vector<uint32_t>
-Informative::GetE2ENamespaces()
+Informative::GetE2ENamespaces() const
 {
     uint8_t dps;
     LBAFormat lbaFmt;
@@ -201,12 +180,15 @@ Informative::GetE2ENamespaces()
 
     // Meta namespaces supporting meta data, and E2E is disabled;
     // Implies: Identify.LBAF[Identify.FLBAS].MS=!0, Identify.DPS_b2:0=0
+    LOG_NRM("Seeking all E2E namspc's");
     for (uint64_t i = 1; i <= nn; i++) {
         nsPtr =  GetIdentifyCmdNamespace(i);
         lbaFmt = nsPtr->GetLBAFormat();
         dps = (uint8_t)nsPtr->GetValue(IDNAMESPC_DPS);
-        if ((lbaFmt.MS != 0) && ((dps & 0x07) != 0))
+        if ((lbaFmt.MS != 0) && ((dps & 0x07) != 0)) {
+            LOG_NRM("Identified E2E namspc #%lld", (unsigned long long)i);
             ns.push_back(i);
+        }
     }
     return ns;
 }

@@ -39,6 +39,10 @@ public:
 
     /**
      * Send an existing, user defined cmd to hdw using the specific SQ/CQ pairs.
+     * This method requires 0 elements to reside in the CQ and also assume no
+     * other cmd will complete into that CQ while this operation is occurring.
+     * In the end the number of IRQ's and number of CE's will be verified to
+     * guarantee that only 1 CE arrived as a result of sending this 1 cmd.
      * @note Throws upon errors
      * @note Method uses pre-existing values of CC.IOCQES
      * @param grpName Pass the name of the group to which this test belongs

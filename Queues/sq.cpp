@@ -273,19 +273,13 @@ SQ::Send(SharedCmdPtr cmd)
     struct nvme_64b_send io;
 
 
-    switch (io.cmd_set) {
-    case CMD_ADMIN: cmdSet = "admin";           break;
-    case CMD_NVM:   cmdSet = "NVM";             break;
-    default:        cmdSet = "illegal/unknown"; break;
-    };
-
     // Detect if doing something that looks suspicious/incorrect/illegal
     if (gCtrlrConfig->IsStateEnabled() == false)
         LOG_WARN("Sending cmds to a disabled DUT is suspicious");
 
-
     io.q_id = GetQId();
-    io.bit_mask = (send_64b_bitmask)(cmd->GetPrpBitmask() | cmd->GetMetaBitmask());
+    io.bit_mask = (send_64b_bitmask)(cmd->GetPrpBitmask() |
+        cmd->GetMetaBitmask());
     io.meta_buf_id = cmd->GetMetaBufferID();
     io.data_buf_size = cmd->GetPrpBufferSize();
     io.data_buf_ptr = cmd->GetROPrpBuffer();
@@ -293,10 +287,15 @@ SQ::Send(SharedCmdPtr cmd)
     io.cmd_set = cmd->GetCmdSet();
     io.data_dir = cmd->GetDataDir();
 
-
+    switch (io.cmd_set) {
+    case CMD_ADMIN: cmdSet = "admin";           break;
+    case CMD_NVM:   cmdSet = "NVM";             break;
+    default:        cmdSet = "illegal/unknown"; break;
+    };
     LOG_NRM(
         "Send %s cmd set, opcode 0x%02X, payload size 0x%04X, to SQ id 0x%02X",
         cmdSet.c_str(), cmd->GetOpcode(), io.data_buf_size, io.q_id);
+
     if ((rc = ioctl(mFd, NVME_IOCTL_SEND_64B_CMD, &io)) < 0) {
         LOG_ERR("Error sending cmd, rc =%d", rc);
         throw exception();

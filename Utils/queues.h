@@ -42,6 +42,10 @@ public:
 
     /**
      * Creates, in hdw, an IOCQ and returns the resource.
+     * This method requires 0 elements to reside in the CQ and also assume no
+     * other cmd will complete into that CQ while this operation is occurring.
+     * In the end the number of IRQ's and number of CE's will be verified to
+     * guarantee that only 1 CE arrived as a result of sending this 1 cmd.
      * @note Method uses pre-existing values of CC.IOCQES
      * @param fd Pass the device FD, not the filename, to communicate
      * @param grpName Pass the name of the group to which this test belongs
@@ -77,6 +81,10 @@ public:
 
     /**
      * Creates, in hdw, an IOCQ and returns the resource.
+     * This method requires 0 elements to reside in the CQ and also assume no
+     * other cmd will complete into that CQ while this operation is occurring.
+     * In the end the number of IRQ's and number of CE's will be verified to
+     * guarantee that only 1 CE arrived as a result of sending this 1 cmd.
      * @note Method uses pre-existing values of CC.IOSQES
      * @param fd Pass the device FD, not the filename, to communicate
      * @param grpName Pass the name of the group to which this test belongs
@@ -110,6 +118,10 @@ public:
 
     /**
      * Deletes, in hdw, an pre-existing IOCQ.
+     * This method requires 0 elements to reside in the CQ and also assume no
+     * other cmd will complete into that CQ while this operation is occurring.
+     * In the end the number of IRQ's and number of CE's will be verified to
+     * guarantee that only 1 CE arrived as a result of sending this 1 cmd.
      * @note Throws upon errors
      * @param fd Pass the device FD, not the filename, to communicate
      * @param grpName Pass the name of the group to which this test belongs

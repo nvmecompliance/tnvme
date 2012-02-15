@@ -14,38 +14,34 @@
  *  limitations under the License.
  */
 
-#include "lbaOutOfRangeBare_r10b.h"
+#include "createResources_r10b.h"
 #include "globals.h"
 #include "grpDefs.h"
 #include "../Queues/acq.h"
 #include "../Queues/asq.h"
+#include "../Queues/iocq.h"
+#include "../Queues/iosq.h"
 #include "../Utils/kernelAPI.h"
 #include "../Utils/queues.h"
-#include "../Cmds/read.h"
 
-#define RD_NUM_BLKS                 2
+static uint16_t NumEntriesIOQ =     2;
 
 
-LBAOutOfRangeBare_r10b::LBAOutOfRangeBare_r10b(int fd, string grpName, string testName,
+CreateResources_r10b::CreateResources_r10b(int fd, string grpName, string testName,
     ErrorRegs errRegs) :
     Test(fd, grpName, testName, SPECREV_10b, errRegs)
 {
     // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-    mTestDesc.SetCompliance("revision 1.0b, section 4,6");
-    mTestDesc.SetShort(     "Issue read and cause SC=LBA Out of Range on bare namspcs");
+    mTestDesc.SetCompliance("revision 1.0b, section 5");
+    mTestDesc.SetShort(     "Create resources needed by subsequent tests");
     // No string size limit for the long description
     mTestDesc.SetLong(
-        "For all bare namspcs from Identify.NN, determine Identify.NSZE; For "
-        "each namspc cause many scenarios by issuing a single read cmd "
-        "requesting 2 data blocks. 1) Issue cmd where 1st block starts at LBA "
-        "(Identify.NSZE - 1), expect failure 2) Issue cmd where 1st block "
-        "starts at LBA Identify.NSZE, expect failure. 3) Issue cmd where 1st "
-        "block starts at 2nd to last max LBA value, expect failure. 4) Issue "
-        "cmd where 1st block starts at last max LBA value, expect failure.");
+        "Create resources with group lifetime which are needed by subsequent "
+        "tests");
 }
 
 
-LBAOutOfRangeBare_r10b::~LBAOutOfRangeBare_r10b()
+CreateResources_r10b::~CreateResources_r10b()
 {
     ///////////////////////////////////////////////////////////////////////////
     // Allocations taken from the heap and not under the control of the
@@ -54,8 +50,8 @@ LBAOutOfRangeBare_r10b::~LBAOutOfRangeBare_r10b()
 }
 
 
-LBAOutOfRangeBare_r10b::
-LBAOutOfRangeBare_r10b(const LBAOutOfRangeBare_r10b &other) : Test(other)
+CreateResources_r10b::
+CreateResources_r10b(const CreateResources_r10b &other) : Test(other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -64,8 +60,8 @@ LBAOutOfRangeBare_r10b(const LBAOutOfRangeBare_r10b &other) : Test(other)
 }
 
 
-LBAOutOfRangeBare_r10b &
-LBAOutOfRangeBare_r10b::operator=(const LBAOutOfRangeBare_r10b &other)
+CreateResources_r10b &
+CreateResources_r10b::operator=(const CreateResources_r10b &other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -77,13 +73,44 @@ LBAOutOfRangeBare_r10b::operator=(const LBAOutOfRangeBare_r10b &other)
 
 
 bool
-LBAOutOfRangeBare_r10b::RunCoreTest()
+CreateResources_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
-     * 1) Test CreateResources_r10b has been called previously
+     * 1) This is the 1st within GrpNVMReadCmd.
+     * 2) The NVME device is disabled
+     * 3) All interrupts are disabled.
      * \endverbatim
      */
+     if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
+        throw exception();
+
+    SharedACQPtr acq = CAST_TO_ACQ(
+        gRsrcMngr->AllocObj(Trackable::OBJ_ACQ, ACQ_GROUP_ID))
+    acq->Init(5);
+
+    SharedASQPtr asq = CAST_TO_ASQ(
+        gRsrcMngr->AllocObj(Trackable::OBJ_ASQ, ASQ_GROUP_ID))
+    asq->Init(5);
+
+    if (gCtrlrConfig->SetIrqScheme(INT_MSIX, 3) == false)
+        throw exception();
+
+    gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
+    if (gCtrlrConfig->SetState(ST_ENABLE) == false)
+        throw exception();
+
+    gCtrlrConfig->SetIOCQES(IOCQ::COMMON_ELEMENT_SIZE_PWR_OF_2);
+    Queues::CreateIOCQContigToHdw(mFd, mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+        asq, acq, IOQ_ID, NumEntriesIOQ, true, IOCQ_CONTIG_GROUP_ID, true, 1);
+
+
+    gCtrlrConfig->SetIOSQES(IOSQ::COMMON_ELEMENT_SIZE_PWR_OF_2);
+    Queues::CreateIOSQContigToHdw(mFd, mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+        asq, acq, IOQ_ID, NumEntriesIOQ, true, IOSQ_CONTIG_GROUP_ID, IOQ_ID, 0);
+
+    if (gCtrlrConfig->SetState(ST_ENABLE) == false)
+        throw exception();
 
     return true;
 }

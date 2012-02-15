@@ -118,7 +118,7 @@ Identify::GetValue(int field, IdentifyDataType *idData) const
     uint8_t byte;
     uint64_t value = 0;
 
-    if (idData[field].length >= sizeof(uint64_t)) {
+    if (idData[field].length > sizeof(uint64_t)) {
         LOG_DBG("sizeof(%s) > %ld bytes", idData[field].desc, sizeof(uint64_t));
         throw exception();
     } else if ((idData[field].length + idData[field].offset) >=

@@ -44,8 +44,10 @@ Test::~Test()
 
 
 Test::Test(const Test &other) :
-    mFd(other.mFd), mSpecRev(other.mSpecRev), mTestDesc(other.mTestDesc),
-    mGrpName(other.mGrpName), mTestName(other.mTestName)
+    mFd(other.mFd), mSpecRev(other.mSpecRev), mGrpName(other.mGrpName),
+    mTestName(other.mTestName), mErrRegs(other.mErrRegs),
+    mTestDesc(other.mTestDesc)
+
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -63,9 +65,11 @@ Test::operator=(const Test &other)
     ///////////////////////////////////////////////////////////////////////////
     mFd = other.mFd;
     mSpecRev = other.mSpecRev;
-    mTestDesc = other.mTestDesc;
     mGrpName = other.mGrpName;
     mTestName = other.mTestName;
+    mErrRegs = other.mErrRegs;
+    mTestDesc = other.mTestDesc;
+
     return *this;
 }
 

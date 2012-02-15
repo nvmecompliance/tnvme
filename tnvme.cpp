@@ -41,7 +41,7 @@
 
 
 #define NO_DEVICES              "no devices found"
-#define INFORMATIVE_GRPNUM      0
+#define INFORM_GRPNUM      0
 
 
 void Usage(void);
@@ -563,6 +563,7 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
     int numFailed = 0;
     int numSkipped = 0;
     bool allTestsPass = true;    // assuming success until we find otherwise
+    bool allHaveRun = false;
     bool thisTestPass;
     TestIteratorType testIter;
 
@@ -575,56 +576,51 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
         return false;
     }
 
+
+    // Always run the Informative group to populate gInformative singleton.
+    // This group is mandated to be non-intrusive in that is will only read
+    // from the DUT to gather non-volatile data to learn of its operating params
+    LOG_NRM("Executing GrpInformative, start from known point");
+    if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
+        return false;
+
+    // Run all tests within GrpInformative
+    testIter = groups[INFORM_GRPNUM]->GetTestIterator();
+    while (allHaveRun == false) {
+        thisTestPass = true;
+
+        switch (groups[INFORM_GRPNUM]->RunTest(testIter, cl.skiptest)) {
+        case Group::TR_SUCCESS:
+            numPassed++;
+            break;
+        case Group::TR_FAIL:
+            allTestsPass = false;
+            thisTestPass = false;
+            numFailed++;
+            break;
+        case Group::TR_SKIPPING:
+            // Causes gInformative singleton to be uninitialized
+            LOG_ERR("Not allowed to skip GrpInformative");
+            thisTestPass = false;
+            break;
+        case Group::TR_NOTFOUND:
+            allHaveRun = true;
+            break;
+        }
+        if (thisTestPass == false)
+            goto FAIL_OUT;
+    }
+
+
+    // GrpInformative is special and is handle above, therefore one must
+    // loop through every other group except GrpInformative
     for (iLoop = 0; iLoop < cl.loop; iLoop++) {
         LOG_NRM("Start loop execution #%ld", iLoop);
-
-        for (size_t iGrp = 0; iGrp < groups.size(); iGrp++) {
-            bool allHaveRun = false;
-
-            // Always run the Informative group 1st, i.e. 0 always runs 1st
-            if (iGrp == INFORMATIVE_GRPNUM) {
-                LOG_NRM("Executing a new group, start from known point");
-                if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
-                    return false;
-
-                // Run all tests within this group
-                testIter = groups[iGrp]->GetTestIterator();
-                while (allHaveRun == false) {
-                    thisTestPass = true;
-
-                    switch (groups[iGrp]->RunTest(testIter, cl.skiptest)) {
-                    case Group::TR_SUCCESS:
-                        numPassed++;
-                        break;
-                    case Group::TR_FAIL:
-                        allTestsPass = false;
-                        thisTestPass = false;
-                        numFailed++;
-                        break;
-                    case Group::TR_SKIPPING:
-                        numSkipped++;
-                        break;
-                    case Group::TR_NOTFOUND:
-                        allHaveRun = true;
-                        break;
-                    }
-                    if ((cl.ignore == false) && (allTestsPass == false)) {
-                        goto FAIL_OUT;
-                    } else if (cl.ignore && (thisTestPass == false)) {
-                        LOG_NRM("Detected error, but forced to ignore");
-                        break;  // don't execute any more within this group
-                    }
-                }
-                continue;   // continue with next test in next group
-            }
-
+        for (size_t iGrp = (INFORM_GRPNUM + 1); iGrp < groups.size(); iGrp++) {
+            allHaveRun = false;
 
             // Now handle anything spec'd in the --test <cmd line option>
             if (cl.test.t.group == UINT_MAX) {
-                // Do not run Informative group, that group always runs above
-                if (iGrp == INFORMATIVE_GRPNUM)
-                    break;  // continue with next test in next group
-
                 LOG_NRM("Executing a new group, start from known point");
                 if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
                     return false;
@@ -662,7 +658,7 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
                        (cl.test.t.minor == UINT_MAX)) {
 
                 // Run all tests within spec'd group, except Informative grp
-                if ((iGrp == cl.test.t.group) && (iGrp != INFORMATIVE_GRPNUM)) {
+                if (iGrp == cl.test.t.group) {
                     LOG_NRM("Executing a new group, start from known point");
                     if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
                         return false;
@@ -700,7 +696,7 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
 
             } else {
                 // Run spec'd test within spec'd group, except Informative grp
-                if ((iGrp == cl.test.t.group) && (iGrp != INFORMATIVE_GRPNUM)) {
+                if (iGrp == cl.test.t.group) {
                     LOG_NRM("Executing a new group, start from known point");
                     if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
                         return false;

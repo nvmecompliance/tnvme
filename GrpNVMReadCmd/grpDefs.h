@@ -23,6 +23,7 @@
 #define IOSQ_CONTIG_GROUP_ID        "IOSQContig"
 #define IOCQ_DISCONTIG_GROUP_ID     "IOCQDiscontig"
 #define IOSQ_DISCONTIG_GROUP_ID     "IOSQDiscontig"
+#define IOQ_ID                      1
 
 #define DEFAULT_CMD_WAIT_ms         2000
 

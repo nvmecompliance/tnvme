@@ -15,6 +15,7 @@
  */
 
 #include "grpNVMReadCmd.h"
+#include "createResources_r10b.h"
 #include "lbaOutOfRangeBare_r10b.h"
 
 
@@ -31,6 +32,7 @@ GrpNVMReadCmd::GrpNVMReadCmd(size_t grpNum, SpecRev specRev, ErrorRegs errRegs,
     //            Tests x.0, x.1, x.<next_test_num=2>  Minor num; test level
     switch (mSpecRev) {
     case SPECREV_10b:
+        APPEND_TEST_AT_GROUP_LEVEL(CreateResources_r10b, fd, GrpNVMReadCmd, errRegs)
         APPEND_TEST_AT_GROUP_LEVEL(LBAOutOfRangeBare_r10b, fd, GrpNVMReadCmd, errRegs)
         break;
 
