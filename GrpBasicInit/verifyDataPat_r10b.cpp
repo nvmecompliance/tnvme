@@ -16,11 +16,12 @@
 
 #include "verifyDataPat_r10b.h"
 #include "globals.h"
+#include "grpDefs.h"
 #include "createIOQContigPoll_r10b.h"
 #include "createIOQDiscontigPoll_r10b.h"
 #include "writeDataPat_r10b.h"
-#include "grpDefs.h"
 #include "../Utils/kernelAPI.h"
+#include "../Utils/io.h"
 
 
 VerifyDataPat_r10b::VerifyDataPat_r10b(int fd, string grpName, string testName,
@@ -158,54 +159,8 @@ VerifyDataPat_r10b::SendToIOSQ(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
     SharedReadPtr readCmd, string qualifier, SharedMemBufferPtr writtenPayload,
     SharedMemBufferPtr readPayload)
 {
-    uint16_t numCE;
-    uint16_t ceRemain;
-    uint16_t numReaped;
-    uint32_t isrCount;
-
-
-    LOG_NRM("Send the cmd to hdw via %s IOSQ", qualifier.c_str());
-    iosq->Send(readCmd);
-    iosq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "iosq", qualifier),
-        "Just B4 ringing SQ doorbell, dump entire IOSQ contents");
-    iosq->Ring();
-
-
-    LOG_NRM("Wait for the CE to arrive in IOCQ");
-    if (iocq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE, isrCount)
-        == false) {
-
-        LOG_ERR("Unable to see completion of cmd");
-        iocq->Dump(
-            FileSystem::PrepLogFile(mGrpName, mTestName, "iocq", qualifier),
-            "Unable to see any CE's in IOCQ, dump entire CQ contents");
-        throw exception();
-    } else if (numCE != 1) {
-        LOG_ERR("The IOCQ should only have 1 CE as a result of a cmd");
-        throw exception();
-    }
-    iocq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "iocq", qualifier),
-        "Just B4 reaping IOCQ, dump entire CQ contents");
-
-
-    LOG_NRM("The CQ's metrics B4 reaping holds head_ptr needed");
-    struct nvme_gen_cq iocqMetrics = iocq->GetQMetrics();
-    KernelAPI::LogCQMetrics(iocqMetrics);
-
-    LOG_NRM("Reaping CE from IOCQ, requires memory to hold reaped CE");
-    SharedMemBufferPtr ceMemIOCQ = SharedMemBufferPtr(new MemBuffer());
-    if ((numReaped = iocq->Reap(ceRemain, ceMemIOCQ, isrCount, numCE, true))
-        != 1) {
-
-        LOG_ERR("Verified there was 1 CE, but reaping produced %d", numReaped);
-        throw exception();
-    }
-    LOG_NRM("The reaped CE is...");
-    iocq->LogCE(iocqMetrics.head_ptr);
-
-    union CE ce = iocq->PeekCE(iocqMetrics.head_ptr);
-    ProcessCE::ValidateStatus(ce);  // throws upon error
-
+    IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
+        readCmd, qualifier, true);
 
     LOG_NRM("Compare read vs written data to verify");
     if (readPayload->Compare(writtenPayload) == false) {

@@ -16,8 +16,8 @@
 
 #include "dumpGetFeatures_r10b.h"
 #include "globals.h"
-#include "createACQASQ_r10b.h"
 #include "grpDefs.h"
+#include "createACQASQ_r10b.h"
 #include "../Cmds/getFeatures.h"
 #include "../Utils/kernelAPI.h"
 

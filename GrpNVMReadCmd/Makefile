@@ -21,6 +21,7 @@ INCLUDES = -I. -I../ -I../../ -I/usr/local/include
 
 SRC =						\
 	grpNVMReadCmd.cpp			\
+	createResources_r10b.cpp		\
 	lbaOutOfRangeBare_r10b.cpp
 
 .SUFFIXES: .cpp

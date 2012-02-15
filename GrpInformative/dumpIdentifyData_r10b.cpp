@@ -15,12 +15,14 @@
  */
 
 #include <unistd.h>
-#include "dumpIdentifyData_r10b.h"
-#include "globals.h"
-#include "createACQASQ_r10b.h"
 #include "grpDefs.h"
+#include "globals.h"
+#include "dumpIdentifyData_r10b.h"
+#include "createACQASQ_r10b.h"
 #include "../Cmds/identify.h"
 #include "../Utils/kernelAPI.h"
+#include "../Utils/queues.h"
+#include "../Utils/io.h"
 
 
 DumpIdentifyData_r10b::DumpIdentifyData_r10b(int fd, string grpName,
@@ -105,10 +107,6 @@ void
 DumpIdentifyData_r10b::SendIdentifyCtrlrStruct(SharedASQPtr asq,
     SharedACQPtr acq)
 {
-    uint16_t numCE;
-    uint32_t isrCount;
-
-
     LOG_NRM("Create 1st identify cmd and assoc some buffer memory");
     SharedIdentifyPtr idCmdCap = SharedIdentifyPtr(new Identify(mFd));
     LOG_NRM("Force identify to request ctrlr capabilities struct");
@@ -120,59 +118,14 @@ DumpIdentifyData_r10b::SendIdentifyCtrlrStruct(SharedASQPtr asq,
         (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE);
     idCmdCap->SetPrpBuffer(idPrpCap, idMemCap);
 
+    IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
+        idCmdCap, "IdCtrlStruct", true);
 
-    LOG_NRM("Send the 1st identify cmd to hdw");
-    asq->Send(idCmdCap);
-    asq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "asq", "idCmdCap"),
-        "Just B4 ringing SQ0 doorbell, dump entire SQ contents");
-    asq->Ring();
+    idCmdCap->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "IdCtrlStruct"),
+        "The complete admin cmd identify ctrl data structure decoded:");
 
-
-    LOG_NRM("Wait for the CE to arrive in ACQ");
-    if (acq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE, isrCount)
-        == false) {
-
-        LOG_ERR("Unable to see completion of identify cmd");
-        acq->Dump(
-            FileSystem::PrepLogFile(mGrpName, mTestName, "acq", "idCmdCap"),
-            "Unable to see any CE's in CQ0, dump entire CQ contents");
-        throw exception();
-    } else if (numCE != 1) {
-        LOG_ERR("The ACQ should only have 1 CE as a result of a cmd");
-        throw exception();
-    }
-    acq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "acq", "idCmdCap"),
-        "Just B4 reaping CQ0, dump entire CQ contents");
-
-    {
-        uint16_t ceRemain;
-        uint16_t numReaped;
-
-        LOG_NRM("The CQ's metrics before reaping holds head_ptr needed");
-        struct nvme_gen_cq acqMetrics = acq->GetQMetrics();
-        KernelAPI::LogCQMetrics(acqMetrics);
-
-        LOG_NRM("Reaping CE from ACQ, requires memory to hold reaped CE");
-        SharedMemBufferPtr ceMemCap = SharedMemBufferPtr(new MemBuffer());
-        if ((numReaped = acq->Reap(ceRemain, ceMemCap, isrCount, numCE, true))
-            != 1) {
-
-            LOG_ERR("Verified there was 1 CE, but reaping produced %d",
-                numReaped);
-            throw exception();
-        }
-        LOG_NRM("The reaped CE is...");
-        acq->LogCE(acqMetrics.head_ptr);
-
-        union CE ce = acq->PeekCE(acqMetrics.head_ptr);
-        ProcessCE::ValidateStatus(ce);  // throws upon error
-
-        idCmdCap->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "idCmdCap"),
-            "The complete admin cmd identify ctgrlr data structure decoded:");
-
-        // Update the Informative singleton for all tests to see and use
-        gInformative->SetIdentifyCmdCapabilities(idCmdCap);
-    }
+    // Update the Informative singleton for all tests to see and use
+    gInformative->SetIdentifyCmdCapabilities(idCmdCap);
 }
 
 
@@ -180,10 +133,8 @@ void
 DumpIdentifyData_r10b::SendIdentifyNamespaceStruct(SharedASQPtr asq,
     SharedACQPtr acq)
 {
-    uint16_t numCE;
     uint64_t numNamSpc;
     char qualifier[20];
-    uint32_t isrCount;
 
 
     ConstSharedIdentifyPtr idCmdCap =
@@ -193,12 +144,14 @@ DumpIdentifyData_r10b::SendIdentifyNamespaceStruct(SharedASQPtr asq,
         throw exception();
     }
 
+    LOG_NRM("Gather %lld identify namspc structs from DUT",
+        (unsigned long long)numNamSpc);
     for (uint64_t namSpc = 1; namSpc <= numNamSpc; namSpc++) {
         snprintf(qualifier, sizeof(qualifier), "idCmdNamSpc-%llu",
             (long long unsigned int)namSpc);
 
         LOG_NRM("Create identify cmd #%llu & assoc some buffer memory",
-            (long long unsigned int)(namSpc+1));
+            (long long unsigned int)namSpc);
         SharedIdentifyPtr idCmdNamSpc = SharedIdentifyPtr(new Identify(mFd));
         LOG_NRM("Force identify to request namespace struct #%llu",
             (long long unsigned int)namSpc);
@@ -212,61 +165,13 @@ DumpIdentifyData_r10b::SendIdentifyNamespaceStruct(SharedASQPtr asq,
         idCmdNamSpc->SetPrpBuffer(idPrpNamSpc, idMemNamSpc);
 
 
-        LOG_NRM("Send the identify cmd to hdw");
-        asq->Send(idCmdNamSpc);
-        asq->Dump(
-            FileSystem::PrepLogFile(mGrpName, mTestName, "asq", qualifier),
-            "Just B4 ringing SQ0 doorbell, dump entire SQ contents");
-        asq->Ring();
+        IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
+            idCmdNamSpc, qualifier, true);
 
+        idCmdNamSpc->Dump(
+            FileSystem::PrepLogFile(mGrpName, mTestName, qualifier),
+            "The complete admin cmd identify namespace structure decoded:");
 
-        LOG_NRM("Wait for the CE to arrive in ACQ");
-        if (acq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE, isrCount)
-            == false) {
-
-            LOG_ERR("Unable to see completion of identify cmd");
-            acq->Dump(
-                FileSystem::PrepLogFile(mGrpName, mTestName, "acq", qualifier),
-                "Unable to see any CE's in CQ0, dump entire CQ contents");
-            throw exception();
-        } else if (numCE != 1) {
-            LOG_ERR("The ACQ should only have 1 CE as a result of a cmd");
-            throw exception();
-        }
-        acq->Dump(
-            FileSystem::PrepLogFile(mGrpName, mTestName, "acq", qualifier),
-            "Just B4 reaping CQ0, dump entire CQ contents");
-
-
-        {
-            uint16_t ceRemain;
-            uint16_t numReaped;
-
-            LOG_NRM("The CQ's metrics before reaping holds head_ptr needed");
-            struct nvme_gen_cq acqMetrics = acq->GetQMetrics();
-            KernelAPI::LogCQMetrics(acqMetrics);
-
-            LOG_NRM("Reaping CE from ACQ, requires memory to hold reaped CE");
-            SharedMemBufferPtr ceMemNamSpc =
-                SharedMemBufferPtr(new MemBuffer());
-            if ((numReaped =
-                acq->Reap(ceRemain, ceMemNamSpc, isrCount, numCE, true)) != 1) {
-
-                LOG_ERR("Verified there was 1 CE, but reaping produced %d",
-                    numReaped);
-                throw exception();
-            }
-            LOG_NRM("The reaped CE is...");
-            acq->LogCE(acqMetrics.head_ptr);
-
-            union CE ce = acq->PeekCE(acqMetrics.head_ptr);
-            ProcessCE::ValidateStatus(ce);  // throws upon error
-
-            idCmdNamSpc->Dump(
-                FileSystem::PrepLogFile(mGrpName, mTestName, qualifier),
-                "The complete admin cmd identify namespace structure decoded:");
-
-            gInformative->SetIdentifyCmdNamespace(idCmdNamSpc);
-        }
+        gInformative->SetIdentifyCmdNamespace(idCmdNamSpc);
     }
 }
