@@ -19,7 +19,7 @@
 
 #include <stdint.h>
 #include <sys/ioctl.h>
-#include "temp/dnvme/dnvme_ioctls.h"
-#include "temp/dnvme/dnvme_interface.h"
+#include "dnvme/dnvme_ioctls.h"
+#include "dnvme/dnvme_interface.h"
 
 #endif
