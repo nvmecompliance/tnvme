@@ -12,8 +12,6 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 #
-CC=g++
-CFLAGS=-g -O0 -W -Wall -Werror -DDEBUG
 LDFLAGS=-lm
 LIBS = -L../ -L/usr/local/lib -lm
 INCLUDES = -I. -I../ -I../../ -I/usr/local/include
@@ -30,7 +28,7 @@ OUT = libGrpPciRegisters.a
 all: $(OUT)
 
 .cpp.o:
-	$(CC) $(INCLUDES) $(CFLAGS) -c $< -o $@ $(LDFLAGS)
+	$(CC) $(INCLUDES) $(CFLAGS) $(DFLAGS) -c $< -o $@ $(LDFLAGS)
 
 $(OUT): $(OBJ)
 	ar rcs $(OUT) $(OBJ)

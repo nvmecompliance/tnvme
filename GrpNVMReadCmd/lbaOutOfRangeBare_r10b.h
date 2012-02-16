@@ -18,6 +18,8 @@
 #define _LBAOUTOFRANGEBARE_r10b_H_
 
 #include "test.h"
+#include "../Queues/acq.h"
+#include "../Queues/asq.h"
 
 
 /** \verbatim
@@ -51,6 +53,9 @@ private:
     ///////////////////////////////////////////////////////////////////////////
     // Adding a member variable? Then edit the copy constructor and operator=().
     ///////////////////////////////////////////////////////////////////////////
+//    void SendCmdToHdw(string grpName, string testName, uint16_t ms,
+//        SharedSQPtr sq, SharedCQPtr cq, SharedCmdPtr cmd, string qualify,
+//        bool verbose);
 };
 
 

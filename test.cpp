@@ -24,8 +24,9 @@ Test::Test(int fd, string grpName, string testName, SpecRev specRev,
     ErrorRegs errRegs)
 {
     mFd = fd;
-    if (mFd < 0)
+    if (mFd < 0) {
         LOG_DBG("Object created with a bad fd=%d", fd);
+    }
 
     mSpecRev = specRev;
     mGrpName = grpName;
