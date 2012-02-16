@@ -568,6 +568,7 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
     bool allHaveRun = false;
     bool thisTestPass;
     TestIteratorType testIter;
+    vector<TestRef> skipNothing;
 
 
     if ((cl.test.t.group != UINT_MAX) && (cl.test.t.group >= groups.size())) {
@@ -591,7 +592,8 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
     while (allHaveRun == false) {
         thisTestPass = true;
 
-        switch (groups[INFORM_GRPNUM]->RunTest(testIter, cl.skiptest)) {
+        // Do not allow skipping GrpInformative; supply empty skip instructions
+        switch (groups[INFORM_GRPNUM]->RunTest(testIter, skipNothing)) {
         case Group::TR_SUCCESS:
             numPassed++;
             break;
