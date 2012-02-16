@@ -19,9 +19,6 @@
 
 #include "../group.h"
 
-#define FILENAME_FLAGS         (O_RDWR | O_TRUNC | O_CREAT)
-#define FILENAME_MODE          (S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH)
-
 
 /**
 * This class implements a logical grouping of test cases for all NVME

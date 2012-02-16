@@ -70,14 +70,22 @@ CtrlrConfig::~CtrlrConfig()
 bool
 CtrlrConfig::GetIrqScheme(enum nvme_irq_type &irq, uint16_t &numIrqs)
 {
-    //------------------------------------------------------------------------
-    // todo Add logic to gather the current IRQ being supported for this device,
-    //      rather than just assigning some constant we must ask the device.
-    //      Use IOCTL_GET_DEVICE_METRICS to gather this data
-    //------------------------------------------------------------------------
-    LOG_DBG("todo not implemented yet");
-    irq = INT_NONE;
-    numIrqs = 0;
+    public_metrics_dev state;
+
+    if (ioctl(mFd, NVME_IOCTL_GET_DEVICE_METRICS, &state) < 0) {
+        LOG_ERR("Unable to get IRQ scheme");
+        return false;
+    }
+
+    irq = state.irq_active.irq_type;
+    numIrqs = state.irq_active.num_irqs;
+
+    string irqDesc;
+    if (DecodeIrqScheme(irq, irqDesc) == false) {
+        LOG_ERR("%s", irqDesc.c_str());
+        return false;
+    }
+    LOG_NRM("Getting IRQ state: %d IRQ's of %s", numIrqs, irqDesc.c_str());
     return true;
 }
 
@@ -85,21 +93,60 @@ CtrlrConfig::GetIrqScheme(enum nvme_irq_type &irq, uint16_t &numIrqs)
 bool
 CtrlrConfig::SetIrqScheme(enum nvme_irq_type newIrq, uint16_t numIrqs)
 {
-    struct interrupts irq;
-
     if (IsStateEnabled()) {
         LOG_DBG("The NVMe must be disabled in order to change the IRQ scheme");
         return false;
     }
 
-    //------------------------------------------------------------------------
-    // todo Add logic to set the current IRQ scheme for this device,
-    //      currently IRQ's are not supported by dnvme.
-    //------------------------------------------------------------------------
-    LOG_DBG("todo SetIrqScheme() not implemented yet");
-    irq.irq_type = newIrq;
-    irq.num_irqs = numIrqs;
+    string irqDesc;
+    if (DecodeIrqScheme(newIrq, irqDesc) == false) {
+        LOG_ERR("Unable to decode IRQ scheme");
+        return false;
+    }
+    LOG_NRM("Setting IRQ state: %d IRQ's of %s", numIrqs, irqDesc.c_str());
+
+    struct interrupts state;
+    state.irq_type = newIrq;
+    state.num_irqs = numIrqs;
+    if (ioctl(mFd, NVME_IOCTL_SET_IRQ, &state) < 0) {
+        LOG_ERR("%s", irqDesc.c_str());
+        return false;
+    }
     return true;
+}
+
+
+bool
+CtrlrConfig::IrqsEnabled()
+{
+    enum nvme_irq_type irq;
+    uint16_t numIrqs;
+
+    if (GetIrqScheme(irq, numIrqs) == false)
+        return false;   // no, it is disabled
+
+    switch (irq) {
+    case INT_MSI_SINGLE:
+    case INT_MSI_MULTI:
+    case INT_MSIX:
+         return true;   // yes, it is enabled
+    case INT_NONE:
+    default:
+         return false;  // no, it is disabled
+    }
+}
+
+
+bool
+CtrlrConfig::DecodeIrqScheme(enum nvme_irq_type newIrq, string &desc)
+{
+    switch (newIrq) {
+    case INT_MSI_SINGLE:    desc = "MSI-single IRQ scheme";     return true;
+    case INT_MSI_MULTI:     desc = "MSI-multi IRQ scheme";      return true;
+    case INT_MSIX:          desc = "MSI-X IRQ scheme";          return true;
+    case INT_NONE:          desc = "no IRQ scheme";             return true;
+    default:                desc = "unknown IRQ scheme";        return false;
+    }
 }
 
 
@@ -119,9 +166,18 @@ CtrlrConfig::SetState(enum nvme_state state)
     string toState;
 
     switch (state) {
-    case ST_ENABLE:             toState = "Enabling";               break;
-    case ST_DISABLE:            toState = "Disabling";              break;
-    case ST_DISABLE_COMPLETELY: toState = "Disabling completely";   break;
+    case ST_ENABLE:
+        // Always conform to page size of the active architecture
+        if (SetMPS() == false)
+            return false;
+        toState = "Enabling";
+        break;
+    case ST_DISABLE:
+        toState = "Disabling";
+        break;
+    case ST_DISABLE_COMPLETELY:
+        toState = "Disabling completely";
+        break;
     default:
         LOG_DBG("Illegal state detected = %d", state);
         throw exception();
@@ -189,6 +245,16 @@ CtrlrConfig::SetRegValue(uint8_t value, uint8_t valueMask, uint64_t regMask,
 }
 
 
+bool
+CtrlrConfig::GetIOCQES(uint8_t &value)
+{
+    bool retVal;
+    retVal = GetRegValue(value, CC_IOCQES, 20);
+    LOG_NRM("Reading CC.IOCQES = 0x%02X; effectively (2^%d) = %d", value, value,
+        (int)pow(2, value));
+    return retVal;
+}
+
 
 bool
 CtrlrConfig::SetIOCQES(uint8_t value)
@@ -196,6 +262,17 @@ CtrlrConfig::SetIOCQES(uint8_t value)
     LOG_NRM("Writing CC.IOCQES = 0x%02X; effectively (2^%d) = %d", value, value,
         (int)pow(2, value));
     return SetRegValue(value, 0x0f, CC_IOCQES, 20);
+}
+
+
+bool
+CtrlrConfig::GetIOSQES(uint8_t &value)
+{
+    bool retVal;
+    retVal = GetRegValue(value, CC_IOSQES, 16);
+    LOG_NRM("Reading CC.IOCQES = 0x%02X; effectively (2^%d) = %d", value, value,
+        (int)pow(2, value));
+    return retVal;
 }
 
 
@@ -209,10 +286,30 @@ CtrlrConfig::SetIOSQES(uint8_t value)
 
 
 bool
+CtrlrConfig::GetSHN(uint8_t &value)
+{
+    bool retVal;
+    retVal = GetRegValue(value, CC_SHN, 14);
+    LOG_NRM("Reading CC.SHN = 0x%02X", value);
+    return retVal;
+}
+
+
+bool
 CtrlrConfig::SetSHN(uint8_t value)
 {
     LOG_NRM("Writing CC.SHN = 0x%02X", value);
     return SetRegValue(value, 0x03, CC_SHN, 14);
+}
+
+
+bool
+CtrlrConfig::GetAMS(uint8_t &value)
+{
+    bool retVal;
+    retVal = GetRegValue(value, CC_AMS, 11);
+    LOG_NRM("Reading CC.AMS = 0x%02X", value);
+    return retVal;
 }
 
 
@@ -225,17 +322,21 @@ CtrlrConfig::SetAMS(uint8_t value)
 
 
 bool
-CtrlrConfig::SetMPS(uint8_t value)
+CtrlrConfig::GetMPS(uint8_t &value)
 {
-    LOG_NRM("Writing CC.MPS = 0x%02X", value);
-    return SetRegValue(value, 0x0f, CC_MPS, 7);
+    bool retVal;
+    retVal = GetRegValue(value, CC_MPS, 7);
+    LOG_NRM("Reading CC.MPS = 0x%02X", value);
+    return retVal;
 }
+
+
 bool
 CtrlrConfig::SetMPS()
 {
     switch (sysconf(_SC_PAGESIZE)) {
     case 4096:
-        LOG_NRM("Writing CC.MPS for a 4096B page size");
+        LOG_NRM("Writing CC.MPS for a 4096 byte page size");
         return SetRegValue(0, 0x0f, CC_MPS, 7);
     default:
         LOG_DBG("Kernel reporting unsupported page size: 0x%08lX",
@@ -246,9 +347,20 @@ CtrlrConfig::SetMPS()
 
 
 bool
+CtrlrConfig::GetCSS(uint8_t &value)
+{
+    bool retVal;
+    retVal = GetRegValue(value, CC_CSS, 4);
+    LOG_NRM("Reading CC.CSS = 0x%02X", value);
+    return retVal;
+}
+
+
+bool
 CtrlrConfig::SetCSS(uint8_t value)
 {
     LOG_NRM("Writing CC.CSS = 0x%02X", value);
     return SetRegValue(value, 0x07, CC_CSS, 4);
 }
+
 

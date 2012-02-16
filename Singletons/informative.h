@@ -56,7 +56,7 @@ public:
      * Retrieve a previously fetched identify command's capabilities struct.
      * @return Identify::NullIdentifyPtr if the data wasn't retrieved correctly
      */
-    ConstSharedIdentifyPtr GetIdentifyCmdCapabilities()
+    ConstSharedIdentifyPtr GetIdentifyCmdCapabilities() const
         { return mIdentifyCmdCap; }
 
     /**
@@ -66,7 +66,7 @@ public:
      *      or also if the requested namspcId is larger than the total number
      *      of namespace structures available.
      */
-    ConstSharedIdentifyPtr GetIdentifyCmdNamespace(uint64_t namspcId);
+    ConstSharedIdentifyPtr GetIdentifyCmdNamespace(uint64_t namspcId) const;
 
     /**
      * Retrieve a previously fetched get features's number of queues feature ID.
@@ -74,11 +74,28 @@ public:
      * states this is a 0-based value, thus 1 IOQ will always be supported
      * @return The last known DW0 of the CE returned by the DUT.
      */
-    uint32_t GetFeaturesNumOfQueues();
+    uint32_t GetFeaturesNumOfQueues() const;
     /// @return Derives the value from DW0 of the CE & converts to a 1-base val
-    uint16_t GetFeaturesNumOfIOCQs();
+    uint16_t GetFeaturesNumOfIOCQs() const;
     /// @return Derives the value from DW0 of the CE & converts to a 1-base val
-    uint16_t GetFeaturesNumOfIOSQs();
+    uint16_t GetFeaturesNumOfIOSQs() const;
+
+    /**
+     * Retrieve an array indicating all the namespace ID(s) for the appropriate
+     * namespace type desired.
+     * @note Bare: Namespaces supporting no meta data, and E2E is
+     *       disabled; Implies: Identify.LBAF[Identify.FLBAS].MS=0
+     * @note Meta: Namespaces supporting meta data, and E2E is disabled;
+     *       Implies: Identify.LBAF[Identify.FLBAS].MS=!0, Identify.DPS_b2:0=0
+     * @note E2E: Namepspaces supporting meta data, and E2E is enabled;
+     *       Implies: Identify.LBAF[Identify.FLBAS].MS=!0, Identify.DPS_b2:0=!0
+     * @return vector containing all desired namespaces; it could be an empty
+     *       vector indicating no namespaces are present in the DUT, otherwise
+     *       throws if anything prevents detecting the requested data.
+     */
+    vector<uint32_t> GetBareNamespaces() const;
+    vector<uint32_t> GetMetaNamespaces() const;
+    vector<uint32_t> GetE2ENamespaces() const;
 
 
 private:
@@ -96,8 +113,8 @@ private:
     /**
      * These are the only tests within group GrpInformative which can initialize
      * this singleton; if GrpInformative does not get executed this singleton
-     * won't get init'd correctly. For GrpInformative not to execute means it
-     * might have been skipped, see cmd line option --skiptest.
+     * won't get init'd correctly. Thus GrpInformative must run always, and
+     * it should only run once at power-up.
      *
      * The "setting" of data is privatized because this data must be guaranteed
      * coherent, not modifiable for all tests for all groups to retrieve and
@@ -134,6 +151,9 @@ private:
     uint32_t mGetFeaturesNumOfQ;
     void SetGetFeaturesNumberOfQueues(uint32_t ceDword0)
         { mGetFeaturesNumOfQ =  ceDword0; }
+
+    /// Force this object to remove/delete all that has been previously set.
+    void Clear();
 };
 
 

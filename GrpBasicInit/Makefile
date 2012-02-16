@@ -12,9 +12,6 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 #
-
-CC=g++
-CFLAGS=-g -O0 -W -Wall -Werror -DDEBUG
 LDFLAGS=-lm
 LIBS = -L../ -L/usr/local/lib -lm
 INCLUDES = -I. -I../ -I../../ -I/usr/local/include
@@ -23,7 +20,9 @@ SRC =						\
 	grpBasicInit.cpp			\
 	createACQASQ_r10b.cpp			\
 	createIOQContigPoll_r10b.cpp		\
+	createIOQContigIsr_r10b.cpp		\
 	createIOQDiscontigPoll_r10b.cpp		\
+	createIOQDiscontigIsr_r10b.cpp		\
 	deleteIOQContig_r10b.cpp		\
 	deleteIOQDiscontig_r10b.cpp		\
 	writeDataPat_r10b.cpp			\
@@ -37,7 +36,7 @@ OUT = libGrpBasicInit.a
 all: $(OUT)
 
 .cpp.o:
-	$(CC) $(INCLUDES) $(CFLAGS) -c $< -o $@ $(LDFLAGS)
+	$(CC) $(INCLUDES) $(CFLAGS) $(DFLAGS) -c $< -o $@ $(LDFLAGS)
 
 $(OUT): $(OBJ)
 	ar rcs $(OUT) $(OBJ)

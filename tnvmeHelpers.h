@@ -20,14 +20,14 @@
 #include "group.h"
 
 
+bool VerifySpecCompatibility(SpecRev specRev);
 bool ParseTargetCmdLine(TestTarget &target, const char *optarg);
 bool ParseSkipTestCmdLine(vector<TestRef> &skipTest, const char *optarg);
 bool ParseRmmapCmdLine(RmmapIo &rmmap, const char *optarg);
 bool ParseWmmapCmdLine(WmmapIo &wmmap, const char *optarg);
-bool ExecuteTests(struct CmdLine &cl, vector<Group *> &groups);
-bool ParseQueuesCmdLine(Queues &queues, const char *optarg);
+bool ParseQueuesCmdLine(NumQueues &numQueues, const char *optarg);
 bool ParseErrorCmdLine(ErrorRegs &errRegs, const char *optarg);
-bool SetFeaturesNumberOfQueues(Queues &queues, int fd);
+bool SetFeaturesNumberOfQueues(NumQueues &numQueues, int fd);
 
 
 #endif

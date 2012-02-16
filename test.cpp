@@ -17,14 +17,16 @@
 #include "tnvme.h"
 #include "test.h"
 #include "globals.h"
+#include "Utils/kernelAPI.h"
 
 
 Test::Test(int fd, string grpName, string testName, SpecRev specRev,
     ErrorRegs errRegs)
 {
     mFd = fd;
-    if (mFd < 0)
+    if (mFd < 0) {
         LOG_DBG("Object created with a bad fd=%d", fd);
+    }
 
     mSpecRev = specRev;
     mGrpName = grpName;
@@ -43,8 +45,10 @@ Test::~Test()
 
 
 Test::Test(const Test &other) :
-    mFd(other.mFd), mSpecRev(other.mSpecRev), mTestDesc(other.mTestDesc),
-    mGrpName(other.mGrpName), mTestName(other.mTestName)
+    mFd(other.mFd), mSpecRev(other.mSpecRev), mGrpName(other.mGrpName),
+    mTestName(other.mTestName), mErrRegs(other.mErrRegs),
+    mTestDesc(other.mTestDesc)
+
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -62,9 +66,11 @@ Test::operator=(const Test &other)
     ///////////////////////////////////////////////////////////////////////////
     mFd = other.mFd;
     mSpecRev = other.mSpecRev;
-    mTestDesc = other.mTestDesc;
     mGrpName = other.mGrpName;
     mTestName = other.mTestName;
+    mErrRegs = other.mErrRegs;
+    mTestDesc = other.mTestDesc;
+
     return *this;
 }
 
@@ -81,9 +87,21 @@ Test::Run()
             }
         }
     } catch (...) {
-        ;   // Don't let exceptions propagate, converting to boolean error
+        ;   // Don't let exceptions propagate, fall thru to return boolean error
     }
 
+    try {
+        KernelAPI::DumpKernelMetrics(mFd, FileSystem::PrepLogFile(mGrpName,
+            mTestName, "kmetrics", "postFailure"));
+        KernelAPI::DumpPciSpaceRegs(mSpecRev,
+            FileSystem::PrepLogFile(mGrpName, mTestName, "pci",
+            "regs.postFailure"), false);
+        KernelAPI::DumpCtrlrSpaceRegs(mSpecRev,
+            FileSystem::PrepLogFile(mGrpName, mTestName, "ctrl",
+            "regs.postFailure"), false);
+    } catch (...) {
+        ;   // Subsequent errs possible if dnvme is corrupted from test failure
+    }
     LOG_NRM("FAILED test case run");
     return false;
 }

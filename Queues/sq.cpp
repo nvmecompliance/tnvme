@@ -18,9 +18,10 @@
 #include "globals.h"
 #include "../Utils/kernelAPI.h"
 
+SharedSQPtr SQ::NullSQPtr;
 
-SQ::SQ() :
-    Queue(0, Trackable::OBJTYPE_FENCE)
+
+SQ::SQ() : Queue(0, Trackable::OBJTYPE_FENCE)
 {
     // This constructor will throw
 }
@@ -67,7 +68,7 @@ SQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
         throw exception();
     }
 
-    // Warn if doing something that looks suspicious
+    // Detect if doing something that looks suspicious/incorrect/illegal
     work &= CAP_MQES;
     if (work < (uint64_t)numEntries) {
         LOG_WARN("Creating Q with %d entries, but DUT only allows %d",
@@ -114,6 +115,9 @@ SQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
         LOG_DBG("Unable to mmap contig memory to user space");
         throw exception();
     }
+
+    LOG_NRM("Created SQ: (id, cqid, entrySize, numEntries) = (%d, %d, %d, %d)",
+        GetQId(), GetCqId(), GetEntrySize(), GetNumEntries());
 }
 
 
@@ -135,7 +139,7 @@ SQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
         throw exception();
     }
 
-    // Warn if doing something that looks suspicious
+    // Detect if doing something that looks suspicious/incorrect/illegal
     work &= CAP_MQES;
     if (work < (uint64_t)numEntries) {
         LOG_WARN("Creating Q with %d entries, but DUT only allows %d",
@@ -179,6 +183,9 @@ SQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
     q.elements = GetNumEntries();
     q.contig = false;
     CreateIOSQ(q);
+
+    LOG_NRM("Created SQ: (id, cqid, entrySize, numEntries) = (%d, %d, %d, %d)",
+        GetQId(), GetCqId(), GetEntrySize(), GetNumEntries());
 }
 
 
@@ -186,10 +193,6 @@ void
 SQ::CreateIOSQ(struct nvme_prep_sq &q)
 {
     int ret;
-
-    LOG_NRM("Init %s SQ: (id, cqid, entrySize, numEntries) = (%d, %d, %d, %d)",
-        q.contig ? "contig" : "discontig", GetQId(), GetCqId(), GetEntrySize(),
-        GetNumEntries());
 
     if ((ret = ioctl(mFd, NVME_IOCTL_PREPARE_SQ_CREATION, &q)) < 0) {
         LOG_DBG("Q Creation failed by dnvme with error: 0x%02X", ret);
@@ -266,10 +269,17 @@ void
 SQ::Send(SharedCmdPtr cmd)
 {
     int rc;
+    string cmdSet;
     struct nvme_64b_send io;
 
+
+    // Detect if doing something that looks suspicious/incorrect/illegal
+    if (gCtrlrConfig->IsStateEnabled() == false)
+        LOG_WARN("Sending cmds to a disabled DUT is suspicious");
+
     io.q_id = GetQId();
-    io.bit_mask = (send_64b_bitmask)(cmd->GetPrpBitmask() | cmd->GetMetaBitmask());
+    io.bit_mask = (send_64b_bitmask)(cmd->GetPrpBitmask() |
+        cmd->GetMetaBitmask());
     io.meta_buf_id = cmd->GetMetaBufferID();
     io.data_buf_size = cmd->GetPrpBufferSize();
     io.data_buf_ptr = cmd->GetROPrpBuffer();
@@ -277,9 +287,15 @@ SQ::Send(SharedCmdPtr cmd)
     io.cmd_set = cmd->GetCmdSet();
     io.data_dir = cmd->GetDataDir();
 
+    switch (io.cmd_set) {
+    case CMD_ADMIN: cmdSet = "admin";           break;
+    case CMD_NVM:   cmdSet = "NVM";             break;
+    default:        cmdSet = "illegal/unknown"; break;
+    };
     LOG_NRM(
-        "Send cmd set %d, opcode 0x%02X, payload size %04X, to SQ id 0x%02X",
-        io.cmd_set, cmd->GetOpcode(), io.data_buf_size, io.q_id);
+        "Send %s cmd set, opcode 0x%02X, payload size 0x%04X, to SQ id 0x%02X",
+        cmdSet.c_str(), cmd->GetOpcode(), io.data_buf_size, io.q_id);
+
     if ((rc = ioctl(mFd, NVME_IOCTL_SEND_64B_CMD, &io)) < 0) {
         LOG_ERR("Error sending cmd, rc =%d", rc);
         throw exception();

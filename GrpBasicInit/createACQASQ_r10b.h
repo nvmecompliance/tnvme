@@ -19,9 +19,6 @@
 
 #include "test.h"
 
-#define ACQ_GROUP_ID      "ACQ"
-#define ASQ_GROUP_ID      "ASQ"
-
 
 /** \verbatim
  * -----------------------------------------------------------------------------

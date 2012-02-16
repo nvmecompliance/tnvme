@@ -53,10 +53,11 @@ public:
      * @param value Returns the value read, if and only if successful. The
      *          lowest order nibbles are populated 1st if the register is
      *          smaller than sizeof(value)
+     * @param verbose Pass true to log action, false to be silent
      * @return true upon success, otherwise false
      */
-    bool Read(PciSpc reg, uint64_t &value);
-    bool Read(CtlSpc reg, uint64_t &value);
+    bool Read(PciSpc reg, uint64_t &value, bool verbose = true);
+    bool Read(CtlSpc reg, uint64_t &value, bool verbose = true);
 
     /**
      * Generic read function, you supply ALL the necessary data to read at
@@ -66,10 +67,11 @@ public:
      * @param roffset Pass the offset from start of spec'd address space to
      *        start reading.
      * @param value Returns the value read, if and only if successful.
+     * @param verbose Pass true to log action, false to be silent
      * @return true upon success, otherwise false
      */
     bool Read(nvme_io_space regSpc, uint16_t rsize, uint16_t roffset,
-        uint8_t *value);
+        uint8_t *value, bool verbose = true);
 
     /**
      * Generic read function, you supply ALL the necessary data to read at
@@ -80,19 +82,21 @@ public:
      *        start reading.
      * @param racc Pass the register access width to read.
      * @param value Returns the value read, if and only if successful.
+     * @param verbose Pass true to log action, false to be silent
      * @return true upon success, otherwise false
      */
     bool Read(nvme_io_space regSpc, uint16_t rsize, uint16_t roffset,
-        nvme_acc_type racc, uint8_t *value);
+        nvme_acc_type racc, uint8_t *value, bool verbose = true);
 
     /**
      * Write a register value to the appropriate address space.
      * @param reg Pass which register to write.
      * @param value Pass the value to write.
+     * @param verbose Pass true to log action, false to be silent
      * @return true upon success, otherwise false
      */
-    bool Write(PciSpc reg, uint64_t value);
-    bool Write(CtlSpc reg, uint64_t value);
+    bool Write(PciSpc reg, uint64_t value, bool verbose = true);
+    bool Write(CtlSpc reg, uint64_t value, bool verbose = true);
 
     /**
      * Generic write function, you supply ALL the necessary data to write at
@@ -102,10 +106,11 @@ public:
      * @param roffset Pass the offset from start of spec'd address space to
      *        start writing.
      * @param value Pass the array of value(s) to write, must be of rsize size
+     * @param verbose Pass true to log action, false to be silent
      * @return true upon success, otherwise false
      */
     bool Write(nvme_io_space regSpc, uint16_t rsize, uint16_t roffset,
-        uint8_t *value);
+        uint8_t *value, bool verbose = true);
 
     /**
      * Generic write function, you supply ALL the necessary data to write at
@@ -116,10 +121,11 @@ public:
      *        start writing.
      * @param racc Pass which register access width to write
      * @param value Pass the array of value(s) to write, must be of rsize size
+     * @param verbose Pass true to log action, false to be silent
      * @return true upon success, otherwise false
      */
     bool Write(nvme_io_space regSpc, uint16_t rsize, uint16_t roffset,
-        nvme_acc_type racc, uint8_t *value);
+        nvme_acc_type racc, uint8_t *value, bool verbose = true);
 
     /**
      * Returns the list of capabilities discovered by parsing PCI address
@@ -179,9 +185,9 @@ private:
     void DiscoverPciCapabilities();
 
     bool Read(nvme_io_space regSpc, uint16_t rsize, uint16_t roffset,
-        uint64_t &value, const char *rdesc);
+        uint64_t &value, const char *rdesc, bool verbose);
     bool Write(nvme_io_space regSpc, uint16_t rsize, uint16_t roffset,
-        uint64_t &value, const char *rdesc);
+        uint64_t &value, const char *rdesc, bool verbose);
 };
 
 

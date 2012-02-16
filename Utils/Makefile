@@ -12,17 +12,16 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 #
-
-CC=g++
-CFLAGS=-g -O0 -W -Wall -Werror -DDEBUG
 LDFLAGS=-lm
 LIBS = -L../ -L/usr/local/lib -lm
 INCLUDES = -I. -I../ -I../../ -I/usr/local/include
 
-SRC = \
-	kernelAPI.cpp	\
+SRC =				\
+	kernelAPI.cpp		\
 	buffers.cpp		\
-	fileSystem.cpp
+	fileSystem.cpp		\
+	queues.cpp		\
+	io.cpp
 
 .SUFFIXES: .cpp
 
@@ -32,7 +31,7 @@ OUT = libUtils.a
 all: $(OUT)
 
 .cpp.o:
-	$(CC) $(INCLUDES) $(CFLAGS) -c $< -o $@ $(LDFLAGS)
+	$(CC) $(INCLUDES) $(CFLAGS) $(DFLAGS) -c $< -o $@ $(LDFLAGS)
 
 $(OUT): $(OBJ)
 	ar rcs $(OUT) $(OBJ)

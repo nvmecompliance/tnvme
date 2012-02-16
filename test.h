@@ -126,14 +126,14 @@ protected:
     int mFd;
     /// NVME spec rev being targeted
     SpecRev mSpecRev;
-    /// Children must populate this during construction
-    TestDescribe mTestDesc;
     /// The name of the parent container object, i.e. the group name
     string mGrpName;
     /// The name of the child
     string mTestName;
     /// Which bits in contained registers indicate error conditions to be flag'd
     ErrorRegs mErrRegs;
+    /// Children must populate this during construction
+    TestDescribe mTestDesc;
 
     /**
      * Forcing children to implement the core logic of each test case.

@@ -16,15 +16,11 @@
 
 #include "deleteIOQContig_r10b.h"
 #include "globals.h"
-#include "../Queues/iocq.h"
-#include "../Queues/iosq.h"
-#include "../Utils/kernelAPI.h"
-#include "../Cmds/deleteIOCQ.h"
-#include "../Cmds/deleteIOSQ.h"
 #include "createACQASQ_r10b.h"
 #include "createIOQContigPoll_r10b.h"
-
-#define DEFAULT_CMD_WAIT_ms         2000
+#include "grpDefs.h"
+#include "../Utils/queues.h"
+#include "../Utils/kernelAPI.h"
 
 
 DeleteIOQContig_r10b::DeleteIOQContig_r10b(int fd, string grpName,
@@ -94,122 +90,28 @@ DeleteIOQContig_r10b::RunCoreTest()
     SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
     SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
 
-    DeleteIOCQContig(asq, acq);
-    DeleteIOSQContig(asq, acq);
+
+    // According to spec, if one deletes the CQ before the SQ it's a "shall not"
+    // statement which means it will have undefined behavior and thus there is
+    // nothing to gain by attempting such action.
+    LOG_NRM("Lookup IOSQ which was created in a prior test within group");
+    SharedIOSQPtr iosq = CAST_TO_IOSQ(gRsrcMngr->GetObj(IOSQ_CONTIG_GROUP_ID))
+    Queues::DeleteIOSQToHdw(mFd, mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+        iosq, asq, acq);
+    // Not explicitly necessary, but is more clean to free what is not needed
+    gRsrcMngr->FreeObj(IOSQ_CONTIG_GROUP_ID);
+
+
+    LOG_NRM("Lookup IOCQ which was created in a prior test within group");
+    SharedIOCQPtr iocq = CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_CONTIG_GROUP_ID))
+    Queues::DeleteIOCQToHdw(mFd, mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+        iocq, asq, acq);
+    // Not explicitly necessary, but is more clean to free what is not needed
+    gRsrcMngr->FreeObj(IOCQ_CONTIG_GROUP_ID);
+
 
     KernelAPI::DumpKernelMetrics(mFd,
         FileSystem::PrepLogFile(mGrpName, mTestName, "kmetrics", "after"));
     return true;
 }
 
-
-void
-DeleteIOQContig_r10b::DeleteIOCQContig(SharedASQPtr asq,
-    SharedACQPtr acq)
-{
-    uint16_t numCE;
-
-    LOG_NRM("Lookup IOCQ which was created in a prior test within group");
-    SharedIOCQPtr iocq =
-        CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_CONTIG_POLL_GROUP_ID))
-
-    LOG_NRM("Create a Delete IOCQ cmd to perform the IOCQ deletion");
-    SharedDeleteIOCQPtr deleteIOCQCmd =
-        SharedDeleteIOCQPtr(new DeleteIOCQ(mFd));
-    deleteIOCQCmd->Init(iocq);
-
-
-    LOG_NRM("Send the Delete IOCQ cmd to hdw");
-    asq->Send(deleteIOCQCmd);
-    asq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "asq",
-        "deleteIOCQCmd"),
-        "Just B4 ringing SQ0 doorbell, dump entire SQ contents");
-    asq->Ring();
-
-
-    LOG_NRM("Wait for the CE to arrive in ACQ");
-    if (acq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE) == false) {
-        LOG_ERR("Unable to see completion of Delete IOCQ cmd");
-        acq->Dump(
-            FileSystem::PrepLogFile(mGrpName, mTestName, "acq","deleteIOCQCmd"),
-            "Unable to see any CE's in CQ0, dump entire CQ contents");
-        throw exception();
-    }
-    acq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "acq",
-        "deleteIOCQCmd"), "Just B4 reaping CQ0, dump entire CQ contents");
-
-
-    {
-        uint16_t ceRemain;
-        uint16_t numReaped;
-
-        LOG_NRM("Reaping CE from ACQ, requires memory to hold reaped CE");
-        SharedMemBufferPtr ceMemIOCQ = SharedMemBufferPtr(new MemBuffer());
-        if ((numReaped = acq->Reap(ceRemain, ceMemIOCQ, numCE, true)) != 1) {
-            LOG_ERR("Verified there was 1 CE, but reaping produced %d",
-                numReaped);
-            throw exception();
-        }
-        LOG_NRM("The reaped identify CE is...");
-        ceMemIOCQ->Log();
-    }
-
-    // Not explicitly necessary, but is more clean to free what is not needed
-    gRsrcMngr->FreeObj(IOCQ_CONTIG_POLL_GROUP_ID);
-}
-
-
-void
-DeleteIOQContig_r10b::DeleteIOSQContig(SharedASQPtr asq,
-    SharedACQPtr acq)
-{
-    uint16_t numCE;
-
-    LOG_NRM("Lookup IOSQ which was created in a prior test within group");
-    SharedIOSQPtr iosq =
-        CAST_TO_IOSQ(gRsrcMngr->GetObj(IOSQ_CONTIG_POLL_GROUP_ID))
-
-    LOG_NRM("Create a Delete IOSQ cmd to perform the IOSQ deletion");
-    SharedDeleteIOSQPtr deleteIOSQCmd =
-        SharedDeleteIOSQPtr(new DeleteIOSQ(mFd));
-    deleteIOSQCmd->Init(iosq);
-
-
-    LOG_NRM("Send the Delete IOSQ cmd to hdw");
-    asq->Send(deleteIOSQCmd);
-    asq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "asq",
-        "deleteIOSQCmd"),
-        "Just B4 ringing SQ0 doorbell, dump entire SQ contents");
-    asq->Ring();
-
-
-    LOG_NRM("Wait for the CE to arrive in ACQ");
-    if (acq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE) == false) {
-        LOG_ERR("Unable to see completion of Delete IOSQ cmd");
-        acq->Dump(
-            FileSystem::PrepLogFile(mGrpName, mTestName, "acq","deleteIOSQCmd"),
-            "Unable to see any CE's in CQ0, dump entire CQ contents");
-        throw exception();
-    }
-    acq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "acq",
-        "deleteIOSQCmd"), "Just B4 reaping CQ0, dump entire CQ contents");
-
-
-    {
-        uint16_t ceRemain;
-        uint16_t numReaped;
-
-        LOG_NRM("Reaping CE from ACQ, requires memory to hold reaped CE");
-        SharedMemBufferPtr ceMemIOSQ = SharedMemBufferPtr(new MemBuffer());
-        if ((numReaped = acq->Reap(ceRemain, ceMemIOSQ, numCE, true)) != 1) {
-            LOG_ERR("Verified there was 1 CE, but reaping produced %d",
-                numReaped);
-            throw exception();
-        }
-        LOG_NRM("The reaped identify CE is...");
-        ceMemIOSQ->Log();
-    }
-
-    // Not explicitly necessary, but is more clean to free what is not needed
-    gRsrcMngr->FreeObj(IOSQ_CONTIG_POLL_GROUP_ID);
-}

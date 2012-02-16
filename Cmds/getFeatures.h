@@ -40,6 +40,7 @@ public:
 
     /// Used to compare for NULL pointers being returned by allocations
     static SharedGetFeaturesPtr NullGetFeaturesPtr;
+    static const uint8_t Opcode;
 
     /**
      * Append the entire contents of this cmds' contents, any PRP payload,

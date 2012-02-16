@@ -53,7 +53,7 @@ public:
      * Learns of the active IRQ scheme enabled in the device. It doesn't
      * indicate that IRQ's are being used, to use IRQ's CQ's must be created
      * to use IRQ's. The ACQ doesn't have a choice and always uses IRQ's if
-     * there is a CQ created in the controller.
+     * there is a ACQ allocated..
      * @param irq Returns wich IRQ scheme is active
      * @param numIrqs Returns the number of IRQ's which are active
      * @return true upon success, otherwise ignore parameter irq.
@@ -71,6 +71,14 @@ public:
     bool SetIrqScheme(enum nvme_irq_type newIrq, uint16_t numIrqs);
 
     /**
+     * Determines whether IRQ's are:
+     * disabled (nvme_irq_type == {INT_NONE | INT_FENCE}), or
+     * enabled (nvme_irq_type == {INT_MSI_SINGLE | INT_MSI_MULTI | INT_MSIX}).
+     * @return true if enabled, otherwise false
+     */
+    bool IrqsEnabled();
+
+    /**
      * Is the controller enabled?
      * @return true if enabled, otherwise false
      */
@@ -84,12 +92,14 @@ public:
      *          needed by the ACQ/ASQ, because those entities remain intact.
      *          The ACQ/ASQ are also reset to the empty state. A re-enabling at
      *          this point would allow the immediate submission of admin cmds
-     *          into ACQ.
+     *          into ACQ. The action causes dnvme to automatically
+     *          invoke SetIrqScheme(INT_NONE).
      *      ST_DISABLE_COMPLETELY to disable and nothing is left intact. This
      *          is as close to a power up situation as one could achieve. The
      *          NVME device resets all registers to default values and dnvme
      *          writes admin Q base addresses and Q sizes to 0, nothing is truly
-     *          enabled.
+     *          enabled. The action causes dnvme to automatically invoke
+     *          SetIrqScheme(INT_NONE).
      * @return true if successful, otherwise false
      */
     bool SetState(enum nvme_state state);
@@ -97,31 +107,21 @@ public:
     bool ReadRegCC(uint32_t &regVal);
     bool WriteRegCC(uint32_t regVal);
 
-    bool GetIOCQES(uint8_t &value)
-        { return GetRegValue(value, CC_IOCQES, 20); }
+    bool GetIOCQES(uint8_t &value);
     bool SetIOCQES(uint8_t value);
 
-    bool GetIOSQES(uint8_t &value)
-        { return GetRegValue(value, CC_IOSQES, 16); }
+    bool GetIOSQES(uint8_t &value);
     bool SetIOSQES(uint8_t value);
 
-    bool GetSHN(uint8_t &value)
-        { return GetRegValue(value, CC_SHN, 14); }
+    bool GetSHN(uint8_t &value);
     bool SetSHN(uint8_t value);
 
-    bool GetAMS(uint8_t &value)
-        { return GetRegValue(value, CC_AMS, 11); }
+    bool GetAMS(uint8_t &value);
     bool SetAMS(uint8_t value);
 
-    bool GetMPS(uint8_t &value)
-        { return GetRegValue(value, CC_MPS, 7); }
-    /// Set page size to custom value
-    bool SetMPS(uint8_t value);
-    /// Set page size according to what sysconf(_SC_PAGESIZE) returns
-    bool SetMPS();
+    bool GetMPS(uint8_t &value);
 
-    bool GetCSS(uint8_t &value)
-        { return GetRegValue(value, CC_CSS, 4); }
+    bool GetCSS(uint8_t &value);
     bool SetCSS(uint8_t value);
     static const uint8_t CSS_NVM_CMDSET;
 
@@ -144,6 +144,12 @@ private:
     bool GetRegValue(uint8_t &value, uint32_t regMask, uint8_t bitShift);
     bool SetRegValue(uint8_t value, uint8_t valueMask, uint64_t regMask,
         uint8_t bitShift);
+
+    /// Converts an enum to a human readable string
+    bool DecodeIrqScheme(enum nvme_irq_type newIrq, string &desc);
+
+    /// Set page size according to what sysconf(_SC_PAGESIZE) returns
+    bool SetMPS();
 };
 
 

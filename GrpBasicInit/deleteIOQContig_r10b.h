@@ -53,8 +53,6 @@ private:
     ///////////////////////////////////////////////////////////////////////////
     // Adding a member variable? Then edit the copy constructor and operator=().
     ///////////////////////////////////////////////////////////////////////////
-    void DeleteIOCQContig(SharedASQPtr asq, SharedACQPtr acq);
-    void DeleteIOSQContig(SharedASQPtr asq, SharedACQPtr acq);
 };
 
 

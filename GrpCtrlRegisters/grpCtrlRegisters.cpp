@@ -16,6 +16,7 @@
 
 #include "grpCtrlRegisters.h"
 #include "allCtrlRegs_r10b.h"
+#include "ctrlrResetDefaults_r10b.h"
 
 
 GrpCtrlRegisters::GrpCtrlRegisters(size_t grpNum, SpecRev specRev,
@@ -32,6 +33,7 @@ GrpCtrlRegisters::GrpCtrlRegisters(size_t grpNum, SpecRev specRev,
     switch (mSpecRev) {
     case SPECREV_10b:
         APPEND_TEST_AT_GROUP_LEVEL(AllCtrlRegs_r10b, fd, GrpCtrlRegisters, errRegs)
+        APPEND_TEST_AT_GROUP_LEVEL(CtrlrResetDefaults_r10b, fd, GrpCtrlRegisters, errRegs)
         break;
 
     default:

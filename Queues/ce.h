@@ -18,7 +18,11 @@
 #define _CE_H_
 
 #include <stdint.h>
+#include <vector>
+#include <string>
 #include "ceDefs.h"
+
+using namespace std;
 
 
 struct StatbyBits {
@@ -96,6 +100,15 @@ public:
      * @return true if (status == success), otherwise false.
      */
     static bool LogStatus(union CE &ce);
+
+    /**
+     * Decode the status of the CE into human readable strings.
+     * @note This method may throw
+     * @param ce Pass the CE to perform the interrogation against
+     * @param desc Returns an array of decoded strings
+     * @return true if (status == success), otherwise false.
+     */
+    static bool DecodeStatus(union CE &ce, vector<string> &desc);
 
 private:
     /// Contains details about every CE status field

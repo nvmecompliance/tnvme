@@ -78,32 +78,32 @@ Registers::~Registers()
 
 
 bool
-Registers::Read(PciSpc reg, uint64_t &value)
+Registers::Read(PciSpc reg, uint64_t &value, bool verbose)
 {
     if (mPciSpcMetrics[reg].specRev != mSpecRev) {
         LOG_ERR("Attempting reg (%d) access to incompatible spec release", reg);
         return false;
     }
     return Read(NVMEIO_PCI_HDR, mPciSpcMetrics[reg].size,
-        mPciSpcMetrics[reg].offset, value, mPciSpcMetrics[reg].desc);
+        mPciSpcMetrics[reg].offset, value, mPciSpcMetrics[reg].desc, verbose);
 }
 
 
 bool
-Registers::Read(CtlSpc reg, uint64_t &value)
+Registers::Read(CtlSpc reg, uint64_t &value, bool verbose)
 {
     if (mPciSpcMetrics[reg].specRev != mSpecRev) {
         LOG_ERR("Attempting reg (%d) access to incompatible spec release", reg);
         return false;
     }
     return Read(NVMEIO_BAR01, mCtlSpcMetrics[reg].size,
-        mCtlSpcMetrics[reg].offset, value, mCtlSpcMetrics[reg].desc);
+        mCtlSpcMetrics[reg].offset, value, mCtlSpcMetrics[reg].desc, verbose);
 }
 
 
 bool
 Registers::Read(nvme_io_space regSpc, uint16_t rsize, uint16_t roffset,
-    uint64_t &value, const char *rdesc)
+    uint64_t &value, const char *rdesc, bool verbose)
 {
     int rc;
     enum nvme_acc_type dftAcc = (regSpc == NVMEIO_BAR01) ? DWORD_LEN : BYTE_LEN;
@@ -127,14 +127,15 @@ Registers::Read(nvme_io_space regSpc, uint16_t rsize, uint16_t roffset,
     }
 
     value = REGMASK(value, rsize);
-    LOG_NRM("Reading %s", FormatRegister(rsize, rdesc, value).c_str());
+    if (verbose)
+        LOG_NRM("Reading %s", FormatRegister(rsize, rdesc, value).c_str());
     return true;
 }
 
 
 bool
 Registers::Read(nvme_io_space regSpc, uint16_t rsize, uint16_t roffset,
-    uint8_t *value)
+    uint8_t *value, bool verbose)
 {
     int rc;
     enum nvme_acc_type dftAcc = (regSpc == NVMEIO_BAR01) ? DWORD_LEN : BYTE_LEN;
@@ -156,15 +157,17 @@ Registers::Read(nvme_io_space regSpc, uint16_t rsize, uint16_t roffset,
         return false;
     }
 
-    LOG_NRM("Reading %s",
-        FormatRegister(regSpc, rsize, roffset, value).c_str());
+    if (verbose) {
+        LOG_NRM("Reading %s",
+            FormatRegister(regSpc, rsize, roffset, value).c_str());
+    }
     return true;
 }
 
 
 bool
 Registers::Read(nvme_io_space regSpc, uint16_t rsize, uint16_t roffset,
-    nvme_acc_type racc, uint8_t *value)
+    nvme_acc_type racc, uint8_t *value, bool verbose)
 {
     int rc;
     struct rw_generic io = { regSpc, roffset, rsize, racc, value };
@@ -177,39 +180,41 @@ Registers::Read(nvme_io_space regSpc, uint16_t rsize, uint16_t roffset,
         return false;
     }
 
-    LOG_NRM("Reading %s",
-        FormatRegister(regSpc, rsize, roffset, value).c_str());
+    if (verbose) {
+        LOG_NRM("Reading %s",
+            FormatRegister(regSpc, rsize, roffset, value).c_str());
+    }
     return true;
 }
 
 
 bool
-Registers::Write(PciSpc reg, uint64_t value)
+Registers::Write(PciSpc reg, uint64_t value, bool verbose)
 {
     if (mPciSpcMetrics[reg].specRev != mSpecRev) {
         LOG_ERR("Attempting reg (%d) access to incompatible spec release", reg);
         return false;
     }
     return Write(NVMEIO_PCI_HDR, mPciSpcMetrics[reg].size,
-        mPciSpcMetrics[reg].offset, value, mPciSpcMetrics[reg].desc);
+        mPciSpcMetrics[reg].offset, value, mPciSpcMetrics[reg].desc, verbose);
 }
 
 
 bool
-Registers::Write(CtlSpc reg, uint64_t value)
+Registers::Write(CtlSpc reg, uint64_t value, bool verbose)
 {
     if (mPciSpcMetrics[reg].specRev != mSpecRev) {
         LOG_ERR("Attempting reg (%d) access to incompatible spec release", reg);
         return false;
     }
     return Write(NVMEIO_BAR01, mCtlSpcMetrics[reg].size,
-        mCtlSpcMetrics[reg].offset, value, mCtlSpcMetrics[reg].desc);
+        mCtlSpcMetrics[reg].offset, value, mCtlSpcMetrics[reg].desc, verbose);
 }
 
 
 bool
 Registers::Write(nvme_io_space regSpc, uint16_t rsize, uint16_t roffset,
-    uint64_t &value, const char *rdesc)
+    uint64_t &value, const char *rdesc, bool verbose)
 {
     int rc;
     enum nvme_acc_type dftAcc = (regSpc == NVMEIO_BAR01) ? DWORD_LEN : BYTE_LEN;
@@ -240,14 +245,15 @@ Registers::Write(nvme_io_space regSpc, uint16_t rsize, uint16_t roffset,
     }
 
     value = REGMASK(value, rsize);
-    LOG_NRM("Writing %s", FormatRegister(rsize, rdesc, value).c_str());
+    if (verbose)
+        LOG_NRM("Writing %s", FormatRegister(rsize, rdesc, value).c_str());
     return true;
 }
 
 
 bool
 Registers::Write(nvme_io_space regSpc, uint16_t rsize, uint16_t roffset,
-    uint8_t *value)
+    uint8_t *value, bool verbose)
 {
     int rc;
     enum nvme_acc_type dftAcc = (regSpc == NVMEIO_BAR01) ? DWORD_LEN : BYTE_LEN;
@@ -269,15 +275,17 @@ Registers::Write(nvme_io_space regSpc, uint16_t rsize, uint16_t roffset,
         return false;
     }
 
-    LOG_NRM("Writing %s",
-        FormatRegister(regSpc, rsize, roffset, value).c_str());
+    if (verbose) {
+        LOG_NRM("Writing %s",
+            FormatRegister(regSpc, rsize, roffset, value).c_str());
+    }
     return true;
 }
 
 
 bool
 Registers::Write(nvme_io_space regSpc, uint16_t rsize, uint16_t roffset,
-    nvme_acc_type racc, uint8_t *value)
+    nvme_acc_type racc, uint8_t *value, bool verbose)
 {
     int rc;
     struct rw_generic io = { regSpc, roffset, rsize, racc, value };
@@ -290,8 +298,10 @@ Registers::Write(nvme_io_space regSpc, uint16_t rsize, uint16_t roffset,
         return false;
     }
 
-    LOG_NRM("Writing %s",
-        FormatRegister(regSpc, rsize, roffset, value).c_str());
+    if (verbose) {
+        LOG_NRM("Writing %s",
+            FormatRegister(regSpc, rsize, roffset, value).c_str());
+    }
     return true;
 }
 
@@ -367,7 +377,7 @@ Registers::FormatRegister(nvme_io_space regSpc, uint16_t rsize,
     return result;
 }
 
-#include <stdlib.h>
+
 void
 Registers::DiscoverPciCapabilities()
 {
@@ -477,7 +487,9 @@ Registers::DiscoverPciCapabilities()
         (uint16_t)REGMASK(nextCap, 4));
     capId = (uint16_t)REGMASK(nextCap, 2);
     capOffset = (uint16_t)REGMASK((nextCap >> 20), 2);
-    if (capId == 0x0001) {
+    if (nextCap == 0) {
+        LOG_NRM("No extended PCI capabilities supported");
+    } else if (capId == 0x0001) {
         LOG_NRM("Decoding AERCAP capabilities");
         mPciCap.push_back(PCICAP_AERCAP);
         mPciSpcMetrics[PCISPC_AERID].offset = capOffset;

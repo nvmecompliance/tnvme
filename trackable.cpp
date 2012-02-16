@@ -44,7 +44,16 @@ Trackable::~Trackable()
     case OBJ_IOSQ:          obj = "IOSQ";               break;
     case OBJ_IDENTIFY:      obj = "Identify";           break;
     case OBJ_CREATEIOCQ:    obj = "CreateIOCQ";         break;
-    default:                obj = "unknown";            break;
+    case OBJ_CREATEIOSQ:    obj = "CreateIOSQ";         break;
+    case OBJ_DELETEIOCQ:    obj = "DeleteIOCQ";         break;
+    case OBJ_DELETEIOSQ:    obj = "DeleteIOSQ";         break;
+    case OBJ_GETFEATURES:   obj = "GetFeatures";        break;
+    case OBJ_SETFEATURES:   obj = "SeteFeatures";       break;
+    case OBJ_WRITE:         obj = "Write";              break;
+    case OBJ_READ:          obj = "Read";               break;
+    default:
+        LOG_ERR("Forgot to label this unknown obj");
+        throw exception();
     }
     LOG_DBG("Destroying trackable obj: %s", obj.c_str());
 }

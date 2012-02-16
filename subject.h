@@ -53,7 +53,7 @@ public:
             mCurState = newSt;
             LOG_DBG("Subject notifying observers of event");
             for (size_t i = 0; i < mObservers.size(); i++)
-                (mObservers[0])->Update(static_cast<TSubject *>(this), newSt);
+                (mObservers[i])->Update(static_cast<TSubject *>(this), newSt);
         }
     }
 

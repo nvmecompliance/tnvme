@@ -1,0 +1,32 @@
+nvmecompliance_release=1.1.0 Added interrupt support; MSI, MSI-X, no pin based
+    1) Interrupts supported in tnvme are abstracted from the scheme set within
+       dnvme; test leverage the same user space API no matter the setting used
+       in dnvme.
+    2) Numerous bug fixes; refer to git repo log statements for details.
+    3) Major framework enhancements to aid in test development. Ideas were
+       generated as a result of feedback via nvmecompliance@intel.com and
+       as a result of adding tests cases finding new ways to improve the
+       experience.
+    4) Updated tnvme/Doc/testPlan.ods with details targetting the architecture
+       expected by this framework. The test plan is roughly 40/45% coverage of 
+       the 1.0b NVMe specification. Outside sources are encouraged to work on
+       the test plan marked as "TBD" since those test still need to be 
+       described and coded.
+    5) Known deficiencies:
+        a) Reap inquiry takes much longer than it should, and thus test cases
+           take longer to complete. This is due to the polling scheme whereby
+           tnvme must keep generating IOCTL calls into dnvme until such time
+           a CE arrives in the CQ. This should be fixed with a select scheme.
+        b) Output files are becoming very large, especially if one --loop the
+           test multiple times. Deriving a future scheme to keep only the
+           last group of test logging, or maybe the last 1MB of data. Solutions
+           are still being discussed.
+        c) There is no method of extracting the log page when a CE arrives and
+           its More (M) bit is set indicating more data is available. This
+           should be handled by default by the framework when more info is
+           available by dumpting the data to an output file.
+
+vmecompliance_release=1.0.1 Enhancements and bugfixes; added read/write cmds
+    1) Planning on supporting interrupts in the future.
+    2) Planning on adding tests in the future.
+nvmecompliance_release=1.0.0 First official release of the NVME compliance suite

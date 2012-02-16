@@ -17,6 +17,9 @@
 #include "deleteIOCQ.h"
 #include "../Utils/buffers.h"
 
+SharedDeleteIOCQPtr DeleteIOCQ::NullDeleteIOCQPtr;
+const uint8_t DeleteIOCQ::Opcode = 0x04;
+
 
 DeleteIOCQ::DeleteIOCQ() :
     AdminCmd(0, Trackable::OBJTYPE_FENCE)
@@ -28,7 +31,7 @@ DeleteIOCQ::DeleteIOCQ() :
 DeleteIOCQ::DeleteIOCQ(int fd) :
     AdminCmd(fd, Trackable::OBJ_DELETEIOCQ)
 {
-    AdminCmd::Init(0x04, DATADIR_NONE);
+    AdminCmd::Init(Opcode, DATADIR_NONE);
 }
 
 
@@ -46,6 +49,7 @@ DeleteIOCQ::Init(const SharedIOCQPtr iocq)
         // Handle Q ID
         dword10 &= ~0x0000ffff;
         dword10 |= (uint32_t)iocq->GetQId();
+        LOG_NRM("Init delete IOCQ cmd for CQ=%d", (uint32_t)iocq->GetQId());
 
         SetDword(dword10, 10);
     }   // Handle DWORD 10

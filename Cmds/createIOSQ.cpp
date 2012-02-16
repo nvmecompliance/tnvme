@@ -17,6 +17,9 @@
 #include "createIOSQ.h"
 #include "../Utils/buffers.h"
 
+SharedCreateIOSQPtr CreateIOSQ::NullCreateIOSQPtr;
+const uint8_t CreateIOSQ::Opcode = 0x01;
+
 
 CreateIOSQ::CreateIOSQ() :
     AdminCmd(0, Trackable::OBJTYPE_FENCE)
@@ -28,7 +31,7 @@ CreateIOSQ::CreateIOSQ() :
 CreateIOSQ::CreateIOSQ(int fd) :
     AdminCmd(fd, Trackable::OBJ_CREATEIOSQ)
 {
-    AdminCmd::Init(0x01, DATADIR_TO_DEVICE);
+    AdminCmd::Init(Opcode, DATADIR_TO_DEVICE);
 }
 
 

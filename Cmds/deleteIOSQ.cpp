@@ -17,6 +17,9 @@
 #include "deleteIOSQ.h"
 #include "../Utils/buffers.h"
 
+SharedDeleteIOSQPtr DeleteIOSQ::NullDeleteIOSQPtr;
+const uint8_t DeleteIOSQ::Opcode = 0x00;
+
 
 DeleteIOSQ::DeleteIOSQ() :
     AdminCmd(0, Trackable::OBJTYPE_FENCE)
@@ -28,7 +31,7 @@ DeleteIOSQ::DeleteIOSQ() :
 DeleteIOSQ::DeleteIOSQ(int fd) :
     AdminCmd(fd, Trackable::OBJ_DELETEIOSQ)
 {
-    AdminCmd::Init(0x00, DATADIR_NONE);
+    AdminCmd::Init(Opcode, DATADIR_NONE);
 }
 
 
@@ -46,6 +49,7 @@ DeleteIOSQ::Init(const SharedIOSQPtr iosq)
         // Handle Q ID
         dword10 &= ~0x0000ffff;
         dword10 |= (uint32_t)iosq->GetQId();
+        LOG_NRM("Init delete IOSQ cmd for SQ=%d", (uint32_t)iosq->GetQId());
 
         SetDword(dword10, 10);
     }   // Handle DWORD 10

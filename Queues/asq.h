@@ -50,6 +50,12 @@ public:
      */
     void Init(uint16_t numEntries);
 
+    /**
+     * Issue the specified cmd to this queue, but does not ring any doorbell.
+     * @param cmd Pass the cmd to send to this queue.
+     */
+    virtual void Send(SharedCmdPtr cmd);
+
 
 private:
     ASQ();

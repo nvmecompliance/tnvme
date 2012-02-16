@@ -37,12 +37,12 @@
  */
 #define INSTANTIATE_OBJ(capital, proper)                            \
     case Trackable::OBJ_ ## capital:                                \
-        LOG_NRM("Cmd %s is born with group lifetime", #proper);     \
+        LOG_NRM("Obj %s is born with group lifetime", #proper);     \
         return SharedTrackablePtr(new proper());                    \
         break;
 #define INSTANTIATE_OBJ_w_fd(capital, proper)                       \
     case Trackable::OBJ_ ## capital:                                \
-        LOG_NRM("Cmd %s is born with group lifetime", #proper);     \
+        LOG_NRM("Obj %s is born with group lifetime", #proper);     \
         return SharedTrackablePtr(new proper(mFd));                 \
         break;
 
@@ -170,11 +170,12 @@ ObjRsrc::FreeAllObjNotASQACQ()
     size_t numB4 = mObjGrpLife.size();
 
     item = mObjGrpLife.begin();
-    while (item == mObjGrpLife.end()) {
+    while (item != mObjGrpLife.end()) {
         SharedTrackablePtr tPtr = (*item).second;
         Trackable::ObjType obj = tPtr->GetObjType();
-        if ((obj != Trackable::OBJ_ACQ) && (obj != Trackable::OBJ_ACQ))
+        if ((obj != Trackable::OBJ_ACQ) && (obj != Trackable::OBJ_ASQ))
             mObjGrpLife.erase(item);
+        item++;
     }
     LOG_NRM("Group level resources are being freed: %ld",
         (numB4 - mObjGrpLife.size()));

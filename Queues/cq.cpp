@@ -19,7 +19,9 @@
 #include "../Utils/kernelAPI.h"
 #include "../Utils/buffers.h"
 
-#define NUM_TIME_SEGMENTS      10
+#define NUM_TIME_SEGMENTS      300
+
+SharedCQPtr CQ::NullCQPtr;
 
 
 CQ::CQ() :
@@ -102,6 +104,10 @@ CQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
         LOG_DBG("Unable to mmap contig memory to user space");
         throw exception();
     }
+
+    LOG_NRM(
+        "Created CQ: (id, entrySize, numEntry, IRQEnable) = (%d, %d, %d, %s)",
+        GetQId(), GetEntrySize(), GetNumEntries(), GetIrqEnabled() ? "T" : "F");
 }
 
 
@@ -153,6 +159,10 @@ CQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
     q.elements = GetNumEntries();
     q.contig = false;
     CreateIOCQ(q);
+
+    LOG_NRM(
+        "Created CQ: (id, entrySize, numEntry, IRQEnable) = (%d, %d, %d, %s)",
+        GetQId(), GetEntrySize(), GetNumEntries(), GetIrqEnabled() ? "T" : "F");
 }
 
 
@@ -234,7 +244,7 @@ CQ::DumpCE(uint16_t indexPtr, LogFilename filename, string fileHdr)
 
 
 uint16_t
-CQ::ReapInquiry()
+CQ::ReapInquiry(uint32_t &isrCount)
 {
     int rc;
     struct nvme_reap_inquiry inq;
@@ -245,13 +255,15 @@ CQ::ReapInquiry()
         throw exception();
     }
 
-    LOG_NRM("%d CE's awaiting attention in SQ %d", inq.num_remaining, inq.q_id);
+    isrCount = inq.isr_count;
+    LOG_NRM("%d CE's awaiting attention in CQ %d, ISR count: %d",
+        inq.num_remaining, inq.q_id, isrCount);
     return inq.num_remaining;
 }
 
 
 bool
-CQ::ReapInquiryWaitAny(uint16_t ms, uint16_t &numCE)
+CQ::ReapInquiryWaitAny(uint16_t ms, uint16_t &numCE, uint32_t &isrCount)
 {
     // Chunk the wait period up into equal segments, until such time there
     // can be time to develop a select() solution in dnvme
@@ -260,7 +272,7 @@ CQ::ReapInquiryWaitAny(uint16_t ms, uint16_t &numCE)
         (double)segments/1000000.0);
 
     for (int i = 0; i < NUM_TIME_SEGMENTS; i++) {
-        if ((numCE = ReapInquiry()) != 0) {
+        if ((numCE = ReapInquiry(isrCount)) != 0) {
             return true;
         }
         usleep(segments);
@@ -270,7 +282,8 @@ CQ::ReapInquiryWaitAny(uint16_t ms, uint16_t &numCE)
 
 
 bool
-CQ::ReapInquiryWaitSpecify(uint16_t ms, uint16_t numTil, uint16_t &numCE)
+CQ::ReapInquiryWaitSpecify(uint16_t ms, uint16_t numTil, uint16_t &numCE,
+    uint32_t &isrCount)
 {
     // Chunk the wait period up into equal segments, until such time there
     // can be time to develop a select() solution in dnvme
@@ -279,7 +292,7 @@ CQ::ReapInquiryWaitSpecify(uint16_t ms, uint16_t numTil, uint16_t &numCE)
         (double)segments/1000000.0);
 
     for (int i = 0; i < NUM_TIME_SEGMENTS; i++) {
-        if ((numCE = ReapInquiry()) != 0) {
+        if ((numCE = ReapInquiry(isrCount)) != 0) {
             if (numCE >= numTil)
                 return true;
         }
@@ -290,7 +303,7 @@ CQ::ReapInquiryWaitSpecify(uint16_t ms, uint16_t numTil, uint16_t &numCE)
 
 
 uint16_t
-CQ::Reap(uint16_t &ceRemain, SharedMemBufferPtr memBuffer,
+CQ::Reap(uint16_t &ceRemain, SharedMemBufferPtr memBuffer, uint32_t &isrCount,
     uint16_t ceDesire, bool zeroMem)
 {
     int rc;
@@ -310,7 +323,6 @@ CQ::Reap(uint16_t &ceRemain, SharedMemBufferPtr memBuffer,
         LOG_NRM("Requested num of CE's exceeds max can fit, resizing");
         ceDesire = (GetNumEntries() - 1);
     }
-    LOG_NRM("Reaping %d CE's from CQ %d", ceDesire, GetQId());
 
     // Allocate enough space to contain the CE's
     memBuffer->Init(GetEntrySize()*ceDesire);
@@ -326,8 +338,45 @@ CQ::Reap(uint16_t &ceRemain, SharedMemBufferPtr memBuffer,
         throw exception();
     }
 
+    isrCount = reap.isr_count;
     ceRemain = reap.num_remaining;
+    LOG_NRM("Reaped %d CE's, %d remain, from CQ %d, ISR count: %d",
+        reap.num_reaped, reap.num_remaining, GetQId(), isrCount);
     return reap.num_reaped;
+}
+
+
+void
+CQ::Dump(LogFilename filename, string fileHdr)
+{
+    FILE *fp;
+    union CE ce;
+    vector<string> desc;
+
+    Queue::Dump(filename, fileHdr);
+
+    // Reopen the file and append the same data in a different format
+    if ((fp = fopen(filename.c_str(), "a")) == NULL) {
+        LOG_DBG("Failed to open file: %s", filename.c_str());
+        throw exception();
+    }
+
+    fprintf(fp, "\nFurther decoding details of the above raw dump follow:\n");
+    for (uint32_t i = 0; i < GetNumEntries(); i++) {
+        ce = PeekCE(i);
+        fprintf(fp, "CE %d @ 0x%08X:\n", i, (i * GetEntrySize()));
+        fprintf(fp, "  Cmd specific: 0x%08X\n", ce.n.cmdSpec);
+        fprintf(fp, "  Reserved:     0x%08X\n", ce.n.reserved);
+        fprintf(fp, "  SQ head ptr:  0x%04X\n", ce.n.SQHD);
+        fprintf(fp, "  SQ ID:        0x%04X\n", ce.n.SQID);
+        fprintf(fp, "  Cmd ID:       0x%08X\n", ce.n.CID);
+        fprintf(fp, "  P:            0x%1X\n",  ce.n.SF.t.P);
+        ProcessCE::DecodeStatus(ce, desc);
+        for (size_t j = 0; j < desc.size(); j++ )
+            fprintf(fp, "  %s\n", desc[j].c_str());
+    }
+
+    fclose(fp);
 }
 
 

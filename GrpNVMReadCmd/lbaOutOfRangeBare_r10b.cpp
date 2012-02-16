@@ -1,0 +1,189 @@
+/*
+ * Copyright (c) 2011, Intel Corporation.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
+#include "lbaOutOfRangeBare_r10b.h"
+#include "globals.h"
+#include "grpDefs.h"
+#include "../Queues/acq.h"
+#include "../Queues/asq.h"
+#include "../Utils/kernelAPI.h"
+#include "../Utils/queues.h"
+#include "../Cmds/read.h"
+
+#define RD_NUM_BLKS                 2
+
+
+LBAOutOfRangeBare_r10b::LBAOutOfRangeBare_r10b(int fd, string mGrpName, string mTestName,
+    ErrorRegs errRegs) :
+    Test(fd, mGrpName, mTestName, SPECREV_10b, errRegs)
+{
+    // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    mTestDesc.SetCompliance("revision 1.0b, section 4,6");
+    mTestDesc.SetShort(     "Issue read and cause SC=LBA Out of Range on bare namspcs");
+    // No string size limit for the long description
+    mTestDesc.SetLong(
+        "For all bare namspcs from Identify.NN, determine Identify.NSZE; For "
+        "each namspc cause many scenarios by issuing a single read cmd "
+        "requesting 2 data blocks. 1) Issue cmd where 1st block starts at LBA "
+        "(Identify.NSZE - 1), expect failure 2) Issue cmd where 1st block "
+        "starts at LBA Identify.NSZE, expect failure. 3) Issue cmd where 1st "
+        "block starts at 2nd to last max LBA value, expect failure. 4) Issue "
+        "cmd where 1st block starts at last max LBA value, expect failure.");
+}
+
+
+LBAOutOfRangeBare_r10b::~LBAOutOfRangeBare_r10b()
+{
+    ///////////////////////////////////////////////////////////////////////////
+    // Allocations taken from the heap and not under the control of the
+    // RsrcMngr need to be freed/deleted here.
+    ///////////////////////////////////////////////////////////////////////////
+}
+
+
+LBAOutOfRangeBare_r10b::
+LBAOutOfRangeBare_r10b(const LBAOutOfRangeBare_r10b &other) : Test(other)
+{
+    ///////////////////////////////////////////////////////////////////////////
+    // All pointers in this object must be NULL, never allow shallow or deep
+    // copies, see Test::Clone() header comment.
+    ///////////////////////////////////////////////////////////////////////////
+}
+
+
+LBAOutOfRangeBare_r10b &
+LBAOutOfRangeBare_r10b::operator=(const LBAOutOfRangeBare_r10b &other)
+{
+    ///////////////////////////////////////////////////////////////////////////
+    // All pointers in this object must be NULL, never allow shallow or deep
+    // copies, see Test::Clone() header comment.
+    ///////////////////////////////////////////////////////////////////////////
+    Test::operator=(other);
+    return *this;
+}
+
+
+bool
+LBAOutOfRangeBare_r10b::RunCoreTest()
+{
+    /** \verbatim
+     * Assumptions:
+     * 1) Test CreateResources_r10b has been called previously
+     * \endverbatim
+     */
+#if 0
+    uint64_t nsze;
+    ConstSharedIdentifyPtr namSpcPtr;
+
+    // Lookup objs which were created in a prior test within group
+    SharedIOSQPtr iosqContig = CAST_TO_IOSQ(
+        gRsrcMngr->GetObj(IOSQ_CONTIG_GROUP_ID))
+    SharedIOCQPtr iocqContig = CAST_TO_IOCQ(
+        gRsrcMngr->GetObj(IOCQ_CONTIG_GROUP_ID))
+
+    vector<uint32_t> bare = gInformative->GetBareNamespaces();
+    for (size_t i = 1; i <= bare.size(); i++) {
+        namSpcPtr = gInformative->GetIdentifyCmdNamespace(i);
+        if (namSpcPtr == Identify::NullIdentifyPtr) {
+            LOG_ERR("Identify namspc struct #%d doesn't exist", bare[i]);
+            throw exception();
+        }
+        nsze = namSpcPtr->GetValue(IDNAMESPC_NSZE);
+
+        LOG_NRM("Create memory to contain read payload");
+        SharedMemBufferPtr readMem = SharedMemBufferPtr(new MemBuffer());
+        uint64_t lbaDataSize = namSpcPtr->GetLBADataSize();
+        readMem->Init(RD_NUM_BLKS * lbaDataSize);
+
+        LOG_NRM("Create a read cmd to read data from namspc %d", bare[i]);
+        SharedReadPtr readCmd = SharedReadPtr(new Read(mFd));
+        send_64b_bitmask prpBitmask = (send_64b_bitmask)
+            (MASK_PRP1_PAGE | MASK_PRP2_PAGE | MASK_PRP2_LIST);
+        readCmd->SetPrpBuffer(prpBitmask, readMem);
+        readCmd->SetNSID(bare[i]);
+        readCmd->SetNLB(RD_NUM_BLKS - 1);    // convert to 0-based value
+
+
+        LOG_NRM("Issue cmd where 1st block starts at LBA (Identify.NSZE - 1)");
+        readCmd->SetSLBA(nsze - 1);
+        IOSendToIOSQ(iosqContig, iocqContig, readCmd, "nsze-1", dataPat, readMem);
+    }
+#endif
+    return true;
+}
+
+#if 0
+void
+LBAOutOfRangeBare_r10b::SendCmdToHdw(string mGrpName, string mTestName,
+    uint16_t ms, SharedSQPtr sq, SharedCQPtr cq, SharedCmdPtr cmd,
+    string qualify, bool verbose)
+{
+    uint16_t numCE;
+    uint32_t isrCount;
+    uint32_t isrCountB4;
+    string work;
+
+
+    if ((numCE = cq->ReapInquiry(isrCountB4)) != 0) {
+        LOG_ERR("Require 0 CE's within CQ %d, not upheld, found %d",
+            cq->GetQId(), numCE);
+        throw exception();
+    }
+
+    LOG_NRM("Send the cmd to hdw via SQ %d", sq->GetQId());
+    sq->Send(cmd);
+    if (verbose) {
+        work = str(format("Just B4 ringing SQ %d doorbell, dump entire SQ") %
+            sq->GetQId());
+        sq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName,
+            "sq." + cmd->GetName(), qualify), work);
+    }
+    sq->Ring();
+
+
+    LOG_NRM("Wait for the CE to arrive in CQ %d", cq->GetQId());
+    if (cq->ReapInquiryWaitSpecify(ms, 1, numCE, isrCount) == false) {
+        LOG_ERR("Unable to see CE for issued cmd");
+        work = str(format("Unable to see any CE's in CQ %d, dump entire CQ") %
+            cq->GetQId());
+        cq->Dump(
+            FileSystem::PrepLogFile(mGrpName, mTestName, "cq." + cmd->GetName(),
+            qualify), work);
+        throw exception();
+    } else if (numCE != 1) {
+        LOG_ERR("1 cmd caused %d CE's to arrive in CQ %d", numCE, cq->GetQId());
+        throw exception();
+    }
+    if (verbose) {
+        work = str(format("Just B4 reaping CQ %d, dump entire CQ") %
+            cq->GetQId());
+        cq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName,
+            "cq." + cmd->GetName(), qualify), work);
+    }
+
+    // throws if an error occurs
+    ReapCE(cq, numCE, isrCount, mGrpName, mTestName, qualify);
+
+    // Single cmd submitted on empty ASQ should always yield 1 IRQ on ACQ
+    if (gCtrlrConfig->IrqsEnabled() && cq->GetIrqEnabled() &&
+        (isrCount != (isrCountB4 + 1))) {
+
+        LOG_ERR("CQ using IRQ's, but IRQ count not expected (%d != %d)",
+            isrCount, (isrCountB4 + 1));
+        throw exception();
+    }
+}
+#endif

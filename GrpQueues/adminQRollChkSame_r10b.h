@@ -14,11 +14,12 @@
  *  limitations under the License.
  */
 
-#ifndef _DUMPCTRLRADDRSPACE_r10b_H_
-#define _DUMPPCIADDRSPACE_r10b_H_
+#ifndef _ADMINQROLLCHKSAME_r10b_H_
+#define _ADMINQROLLCHKSAME_r10b_H_
 
 #include "test.h"
-
+#include "../Queues/asq.h"
+#include "../Queues/acq.h"
 
 /** \verbatim
  * -----------------------------------------------------------------------------
@@ -27,20 +28,20 @@
  * 1) See notes in the header file of the Test base class
  * \endverbatim
  */
-class DumpCtrlrAddrSpace_r10b : public Test
+class AdminQRollChkSame_r10b : public Test
 {
 public:
-    DumpCtrlrAddrSpace_r10b(int fd, string grpName, string testName,
+    AdminQRollChkSame_r10b(int fd, string grpName, string testName,
         ErrorRegs errRegs);
-    virtual ~DumpCtrlrAddrSpace_r10b();
+    virtual ~AdminQRollChkSame_r10b();
 
     /**
      * IMPORTANT: Read Test::Clone() header comment.
      */
-    virtual DumpCtrlrAddrSpace_r10b *Clone() const
-        { return new DumpCtrlrAddrSpace_r10b(*this); }
-    DumpCtrlrAddrSpace_r10b &operator=(const DumpCtrlrAddrSpace_r10b &other);
-    DumpCtrlrAddrSpace_r10b(const DumpCtrlrAddrSpace_r10b &other);
+    virtual AdminQRollChkSame_r10b *Clone() const
+        { return new AdminQRollChkSame_r10b(*this); }
+    AdminQRollChkSame_r10b &operator=(const AdminQRollChkSame_r10b &other);
+    AdminQRollChkSame_r10b(const AdminQRollChkSame_r10b &other);
 
 
 protected:
@@ -51,6 +52,9 @@ private:
     ///////////////////////////////////////////////////////////////////////////
     // Adding a member variable? Then edit the copy constructor and operator=().
     ///////////////////////////////////////////////////////////////////////////
+    void VerifyCESQValues(SharedACQPtr acq, uint16_t expectedVal);
+    void VerifyQPointers(SharedACQPtr acq, SharedASQPtr asq);
+
 };
 
 

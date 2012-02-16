@@ -16,12 +16,12 @@
 
 #include "verifyDataPat_r10b.h"
 #include "globals.h"
-#include "../Utils/kernelAPI.h"
+#include "grpDefs.h"
 #include "createIOQContigPoll_r10b.h"
 #include "createIOQDiscontigPoll_r10b.h"
 #include "writeDataPat_r10b.h"
-
-#define DEFAULT_CMD_WAIT_ms         2000
+#include "../Utils/kernelAPI.h"
+#include "../Utils/io.h"
 
 
 VerifyDataPat_r10b::VerifyDataPat_r10b(int fd, string grpName, string testName,
@@ -80,7 +80,6 @@ VerifyDataPat_r10b::RunCoreTest()
      * 3) The NVM cmd set is the active cmd set.
      * \endverbatim
      */
-
     KernelAPI::DumpKernelMetrics(mFd,
         FileSystem::PrepLogFile(mGrpName, mTestName, "kmetrics", "before"));
 
@@ -95,6 +94,9 @@ VerifyDataPat_r10b::RunCoreTest()
 void
 VerifyDataPat_r10b::VerifyDataPattern()
 {
+    uint64_t regVal;
+
+
     LOG_NRM("Calc buffer size to read %d log blks from media",
         WRITE_DATA_PAT_NUM_BLKS);
     ConstSharedIdentifyPtr namSpcPtr = gInformative->GetIdentifyCmdNamespace(1);
@@ -126,16 +128,26 @@ VerifyDataPat_r10b::VerifyDataPattern()
 
     // Lookup objs which were created in a prior test within group
     SharedIOSQPtr iosqContig = CAST_TO_IOSQ(
-        gRsrcMngr->GetObj(IOSQ_CONTIG_POLL_GROUP_ID))
+        gRsrcMngr->GetObj(IOSQ_CONTIG_GROUP_ID))
     SharedIOCQPtr iocqContig = CAST_TO_IOCQ(
-        gRsrcMngr->GetObj(IOCQ_CONTIG_POLL_GROUP_ID))
+        gRsrcMngr->GetObj(IOCQ_CONTIG_GROUP_ID))
     SharedIOSQPtr iosqDiscontig = CAST_TO_IOSQ(
-        gRsrcMngr->GetObj(IOSQ_DISCONTIG_POLL_GROUP_ID))
+        gRsrcMngr->GetObj(IOSQ_DISCONTIG_GROUP_ID))
     SharedIOCQPtr iocqDiscontig = CAST_TO_IOCQ(
-        gRsrcMngr->GetObj(IOCQ_DISCONTIG_POLL_GROUP_ID))
+        gRsrcMngr->GetObj(IOCQ_DISCONTIG_GROUP_ID))
 
     LOG_NRM("Send the cmd to hdw via the contiguous IOQ's");
     SendToIOSQ(iosqContig, iocqContig, readCmd, "contig", dataPat, readMem);
+
+    // To run the discontig part of this test, the hdw must support that feature
+    if (gRegisters->Read(CTLSPC_CAP, regVal) == false) {
+        LOG_ERR("Unable to determine Q memory requirements");
+        throw exception();
+    } else if (regVal & CAP_CQR) {
+        LOG_NRM("Unable to utilize discontig Q's, DUT requires contig");
+        return;
+    }
+
     LOG_NRM("Send the cmd to hdw via the discontiguous IOQ's");
     SendToIOSQ(iosqDiscontig, iocqDiscontig, readCmd, "discontig", dataPat,
         readMem);
@@ -147,49 +159,8 @@ VerifyDataPat_r10b::SendToIOSQ(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
     SharedReadPtr readCmd, string qualifier, SharedMemBufferPtr writtenPayload,
     SharedMemBufferPtr readPayload)
 {
-    uint16_t numCE;
-    uint16_t ceRemain;
-    uint16_t numReaped;
-
-
-    LOG_NRM("Send the cmd to hdw via %s IOSQ", qualifier.c_str());
-    iosq->Send(readCmd);
-    iosq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "iosq", qualifier),
-        "Just B4 ringing SQ doorbell, dump entire IOSQ contents");
-    iosq->Ring();
-
-
-    LOG_NRM("Wait for the CE to arrive in IOCQ");
-    if (iocq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE) == false) {
-        LOG_ERR("Unable to see completion of cmd");
-        iocq->Dump(
-            FileSystem::PrepLogFile(mGrpName, mTestName, "iocq", qualifier),
-            "Unable to see any CE's in IOCQ, dump entire CQ contents");
-        throw exception();
-    } else if (numCE != 1) {
-        LOG_ERR("The IOCQ should only have 1 CE as a result of a cmd");
-        throw exception();
-    }
-    iocq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "iocq", qualifier),
-        "Just B4 reaping IOCQ, dump entire CQ contents");
-
-
-    LOG_NRM("The CQ's metrics B4 reaping holds head_ptr needed");
-    struct nvme_gen_cq iocqMetrics = iocq->GetQMetrics();
-    KernelAPI::LogCQMetrics(iocqMetrics);
-
-    LOG_NRM("Reaping CE from IOCQ, requires memory to hold reaped CE");
-    SharedMemBufferPtr ceMemIOCQ = SharedMemBufferPtr(new MemBuffer());
-    if ((numReaped = iocq->Reap(ceRemain, ceMemIOCQ, numCE, true)) != 1) {
-        LOG_ERR("Verified there was 1 CE, but reaping produced %d", numReaped);
-        throw exception();
-    }
-    LOG_NRM("The reaped CE is...");
-    iocq->LogCE(iocqMetrics.head_ptr);
-
-    union CE ce = iocq->PeekCE(iocqMetrics.head_ptr);
-    ProcessCE::ValidateStatus(ce);  // throws upon error
-
+    IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
+        readCmd, qualifier, true);
 
     LOG_NRM("Compare read vs written data to verify");
     if (readPayload->Compare(writtenPayload) == false) {

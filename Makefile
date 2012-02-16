@@ -15,29 +15,33 @@
 
 # Compiling tnvme requires the boost libraries to be installed
 # Ubuntu: sudo apt-get install libboost1.42-all-dev
-CC = g++
-CFLAGS = -g -O0 -W -Wall -Werror -DDEBUG
 APP_NAME = tnvme
+export CC = g++				# Mods here affect all sub-makes
+#export DFLAGS = -g -DDEBUG		# comment here affects all sub-makes
+export CFLAGS = -O0 -W -Wall -Werror	# mods here affect all sub-makes
 LDFLAGS = $(foreach stem, $(SUBDIRS),./$(stem)/lib$(stem).a)
 LDFLAGS += -lboost_filesystem
 INCLUDES = -I./ -I../
 
-SUBDIRS:=				\
-	Singletons 			\
+SUBDIRS:=			\
+	Singletons		\
 	GrpInformative		\
 	GrpPciRegisters		\
 	GrpCtrlRegisters	\
 	GrpBasicInit		\
-	Queues				\
-	Cmds				\
+	GrpResets		\
+	GrpQueues		\
+	GrpNVMReadCmd		\
+	Queues			\
+	Cmds			\
 	Utils
 
-SOURCES:=				\
-	globals.cpp			\
-	group.cpp			\
-	test.cpp			\
+SOURCES:=			\
+	globals.cpp		\
+	group.cpp		\
+	test.cpp		\
 	testDescribe.cpp	\
-	tnvme.cpp			\
+	tnvme.cpp		\
 	tnvmeHelpers.cpp	\
 	trackable.cpp
 
@@ -55,7 +59,7 @@ RPMSPECFILE=$(RPMBASE).spec
 SRCDIR?=./src
 
 all: GOAL=all
-all: $(APP_NAME) doc
+all: $(APP_NAME)
 
 rpm: rpmzipsrc rpmbuild
 
@@ -77,7 +81,7 @@ clobber: $(SUBDIRS) clean
 	rm -f $(APP_NAME)
 
 doc: GOAL=doc
-doc: $(SUBDIRS)
+doc: all
 	doxygen doxygen.conf > doxygen.log
 
 $(SUBDIRS):

@@ -16,11 +16,10 @@
 
 #include "writeDataPat_r10b.h"
 #include "globals.h"
-#include "../Utils/kernelAPI.h"
 #include "createIOQContigPoll_r10b.h"
 #include "createIOQDiscontigPoll_r10b.h"
-
-#define DEFAULT_CMD_WAIT_ms         2000
+#include "grpDefs.h"
+#include "../Utils/kernelAPI.h"
 
 
 WriteDataPat_r10b::WriteDataPat_r10b(int fd, string grpName, string testName,
@@ -78,7 +77,6 @@ WriteDataPat_r10b::RunCoreTest()
      * 3) The NVM cmd set is the active cmd set.
      * \endverbatim
      */
-
     KernelAPI::DumpKernelMetrics(mFd,
         FileSystem::PrepLogFile(mGrpName, mTestName, "kmetrics", "before"));
 
@@ -93,6 +91,9 @@ WriteDataPat_r10b::RunCoreTest()
 void
 WriteDataPat_r10b::WriteDataPattern()
 {
+    uint64_t regVal;
+
+
     LOG_NRM("Calc buffer size to write %d logical blks to media",
         WRITE_DATA_PAT_NUM_BLKS);
     ConstSharedIdentifyPtr namSpcPtr = gInformative->GetIdentifyCmdNamespace(1);
@@ -121,16 +122,26 @@ WriteDataPat_r10b::WriteDataPattern()
 
     // Lookup objs which were created in a prior test within group
     SharedIOSQPtr iosqContig = CAST_TO_IOSQ(
-        gRsrcMngr->GetObj(IOSQ_CONTIG_POLL_GROUP_ID))
+        gRsrcMngr->GetObj(IOSQ_CONTIG_GROUP_ID))
     SharedIOCQPtr iocqContig = CAST_TO_IOCQ(
-        gRsrcMngr->GetObj(IOCQ_CONTIG_POLL_GROUP_ID))
+        gRsrcMngr->GetObj(IOCQ_CONTIG_GROUP_ID))
     SharedIOSQPtr iosqDiscontig = CAST_TO_IOSQ(
-        gRsrcMngr->GetObj(IOSQ_DISCONTIG_POLL_GROUP_ID))
+        gRsrcMngr->GetObj(IOSQ_DISCONTIG_GROUP_ID))
     SharedIOCQPtr iocqDiscontig = CAST_TO_IOCQ(
-        gRsrcMngr->GetObj(IOCQ_DISCONTIG_POLL_GROUP_ID))
+        gRsrcMngr->GetObj(IOCQ_DISCONTIG_GROUP_ID))
 
     LOG_NRM("Send the cmd to hdw via the contiguous IOQ's");
     SendToIOSQ(iosqContig, iocqContig, writeCmd, "contig");
+
+    // To run the discontig part of this test, the hdw must support that feature
+    if (gRegisters->Read(CTLSPC_CAP, regVal) == false) {
+        LOG_ERR("Unable to determine Q memory requirements");
+        throw exception();
+    } else if (regVal & CAP_CQR) {
+        LOG_NRM("Unable to utilize discontig Q's, DUT requires contig");
+        return;
+    }
+
     LOG_NRM("Send the cmd to hdw via the discontiguous IOQ's");
     SendToIOSQ(iosqDiscontig, iocqDiscontig, writeCmd, "discontig");
 }
@@ -143,6 +154,7 @@ WriteDataPat_r10b::SendToIOSQ(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
     uint16_t numCE;
     uint16_t ceRemain;
     uint16_t numReaped;
+    uint32_t isrCount;
 
 
     LOG_NRM("Send the cmd to hdw via %s IOSQ", qualifier.c_str());
@@ -153,7 +165,9 @@ WriteDataPat_r10b::SendToIOSQ(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
 
 
     LOG_NRM("Wait for the CE to arrive in IOCQ");
-    if (iocq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE) == false) {
+    if (iocq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE, isrCount)
+        == false) {
+
         LOG_ERR("Unable to see completion of cmd");
         iocq->Dump(
             FileSystem::PrepLogFile(mGrpName, mTestName, "iocq", qualifier),
@@ -173,7 +187,9 @@ WriteDataPat_r10b::SendToIOSQ(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
 
     LOG_NRM("Reaping CE from IOCQ, requires memory to hold reaped CE");
     SharedMemBufferPtr ceMemIOCQ = SharedMemBufferPtr(new MemBuffer());
-    if ((numReaped = iocq->Reap(ceRemain, ceMemIOCQ, numCE, true)) != 1) {
+    if ((numReaped = iocq->Reap(ceRemain, ceMemIOCQ, isrCount, numCE, true))
+        != 1) {
+
         LOG_ERR("Verified there was 1 CE, but reaping produced %d", numReaped);
         throw exception();
     }
