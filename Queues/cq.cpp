@@ -19,7 +19,7 @@
 #include "../Utils/kernelAPI.h"
 #include "../Utils/buffers.h"
 
-#define NUM_TIME_SEGMENTS      10
+#define NUM_TIME_SEGMENTS      300
 
 SharedCQPtr CQ::NullCQPtr;
 
