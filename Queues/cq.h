@@ -104,9 +104,10 @@ public:
      * @param isrCount Returns the number of ISR's which fired and were counted
      *        that are assoc with this CQ. If this CQ does not use IRQ's, then
      *        this value will remain 0.
+     * @reportOn0 Pass true to report when 0 CE's are awaiting in the CQ
      * @return The number of unreap'd CE's awaiting
      */
-    uint16_t ReapInquiry(uint32_t &isrCount);
+    uint16_t ReapInquiry(uint32_t &isrCount, bool reportOn0 = false);
 
     /**
      * Inquire as to the number of CE's which are present in this CQ. If the

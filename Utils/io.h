@@ -58,10 +58,21 @@ public:
         SharedSQPtr sq, SharedCQPtr cq, SharedCmdPtr cmd, string qualify,
         bool verbose);
 
+    /**
+     * Reap a specified number of CE's from the specified CQ.
+     * @param cq Pass the CQ to reap from
+     * @param numCE Pass the number of CE's to reap from the CQ
+     * @param isrCount Return the ISR count as a result of reaping
+     * @param grpName Pass the name of the group to which this test belongs
+     * @param testName Pass the name of the child testclass
+     * @param qualify Pass a qualifying string to append to each dump file
+     * @param status Pass the expected status to verify with
+     */
+    static void ReapCE(SharedCQPtr cq, uint16_t numCE,  uint32_t &isrCount,
+        string grpName, string testName, string qualify,
+        CEStat status = CESTAT_SUCCESS);
 
 private:
-    static void ReapCE(SharedCQPtr cq, uint16_t numCE,  uint32_t &isrCount,
-        string grpName, string testName, string qualify);
 };
 
 

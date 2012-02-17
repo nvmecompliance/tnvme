@@ -19,8 +19,6 @@
 #include "globals.h"
 #include "io.h"
 
-using boost::format;
-
 
 IO::IO()
 {
@@ -43,7 +41,7 @@ IO::SendCmdToHdw(string grpName, string testName, uint16_t ms,
     string work;
 
 
-    if ((numCE = cq->ReapInquiry(isrCountB4)) != 0) {
+    if ((numCE = cq->ReapInquiry(isrCountB4, true)) != 0) {
         LOG_ERR("Require 0 CE's within CQ %d, not upheld, found %d",
             cq->GetQId(), numCE);
         throw exception();
@@ -52,8 +50,8 @@ IO::SendCmdToHdw(string grpName, string testName, uint16_t ms,
     LOG_NRM("Send the cmd to hdw via SQ %d", sq->GetQId());
     sq->Send(cmd);
     if (verbose) {
-        work = str(format("Just B4 ringing SQ %d doorbell, dump entire SQ") %
-            sq->GetQId());
+        work = str(boost::format(
+            "Just B4 ringing SQ %d doorbell, dump entire SQ") % sq->GetQId());
         sq->Dump(FileSystem::PrepLogFile(grpName, testName,
             "sq." + cmd->GetName(), qualify), work);
     }
@@ -63,8 +61,8 @@ IO::SendCmdToHdw(string grpName, string testName, uint16_t ms,
     LOG_NRM("Wait for the CE to arrive in CQ %d", cq->GetQId());
     if (cq->ReapInquiryWaitSpecify(ms, 1, numCE, isrCount) == false) {
         LOG_ERR("Unable to see CE for issued cmd");
-        work = str(format("Unable to see any CE's in CQ %d, dump entire CQ") %
-            cq->GetQId());
+        work = str(boost::format(
+            "Unable to see any CE's in CQ %d, dump entire CQ") % cq->GetQId());
         cq->Dump(
             FileSystem::PrepLogFile(grpName, testName, "cq." + cmd->GetName(),
             qualify), work);
@@ -74,7 +72,7 @@ IO::SendCmdToHdw(string grpName, string testName, uint16_t ms,
         throw exception();
     }
     if (verbose) {
-        work = str(format("Just B4 reaping CQ %d, dump entire CQ") %
+        work = str(boost::format("Just B4 reaping CQ %d, dump entire CQ") %
             cq->GetQId());
         cq->Dump(FileSystem::PrepLogFile(grpName, testName,
             "cq." + cmd->GetName(), qualify), work);
@@ -96,7 +94,7 @@ IO::SendCmdToHdw(string grpName, string testName, uint16_t ms,
 
 void
 IO::ReapCE(SharedCQPtr cq, uint16_t numCE, uint32_t &isrCount,
-    string grpName, string testName, string qualify)
+    string grpName, string testName, string qualify, CEStat status)
 {
     uint16_t ceRemain;
     uint16_t numReaped;
@@ -110,8 +108,8 @@ IO::ReapCE(SharedCQPtr cq, uint16_t numCE, uint32_t &isrCount,
     LOG_NRM("Reaping CE from CQ %d, requires memory to hold CE", cq->GetQId());
     SharedMemBufferPtr ceMem = SharedMemBufferPtr(new MemBuffer());
     if ((numReaped = cq->Reap(ceRemain, ceMem, isrCount, numCE, true)) != 1) {
-        work = str(format("Verified 1 CE, but reaping returned %d") %
-            numReaped);
+        work = str(boost::format("Verified CE's exist, desired %d, reaped %d")
+            % numCE % numReaped);
         LOG_ERR_STR(work);
         cq->Dump(
             FileSystem::PrepLogFile(grpName, testName, "cq.error", qualify),
@@ -119,6 +117,6 @@ IO::ReapCE(SharedCQPtr cq, uint16_t numCE, uint32_t &isrCount,
         throw exception();
     }
     union CE ce = cq->PeekCE(cqMetrics.head_ptr);
-    ProcessCE::ValidateStatus(ce);  // throws upon error
+    ProcessCE::Validate(ce, status);  // throws upon error
 }
 

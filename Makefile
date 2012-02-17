@@ -17,7 +17,7 @@
 # Ubuntu: sudo apt-get install libboost1.42-all-dev
 APP_NAME = tnvme
 export CC = g++				# Mods here affect all sub-makes
-#export DFLAGS = -g -DDEBUG		# comment here affects all sub-makes
+export DFLAGS = -g -DDEBUG		# comment here affects all sub-makes
 export CFLAGS = -O0 -W -Wall -Werror	# mods here affect all sub-makes
 LDFLAGS = $(foreach stem, $(SUBDIRS),./$(stem)/lib$(stem).a)
 LDFLAGS += -lboost_filesystem
@@ -88,7 +88,7 @@ $(SUBDIRS):
 	$(MAKE) -C $@ $(GOAL)
 
 $(APP_NAME): $(SUBDIRS) $(SOURCES)
-	$(CC) $(CFLAGS) $(INCLUDES) $(SOURCES) -o $(APP_NAME) $(LDFLAGS)
+	$(CC) $(INCLUDES) $(CFLAGS) $(DFLAGS) $(SOURCES) -o $(APP_NAME) $(LDFLAGS)
 
 # Specify a custom source compile dir: "make src SRCDIR=../compile/dir"
 # If the specified dir could cause recursive copies, then specify w/o './'

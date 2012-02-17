@@ -39,32 +39,54 @@ ProcessCE::~ProcessCE()
 
 
 void
-ProcessCE::ValidateStatus(union CE &ce)
+ProcessCE::Validate(union CE &ce, CEStat status)
 {
-    if (LogStatus(ce) == false)
+    LogStatus(ce);
+
+    if ((ce.n.SF.b.SCT != mCEStatMetrics[status].sct) ||
+        (ce.n.SF.b.SC  != mCEStatMetrics[status].sc)) {
+
+        LOG_ERR("Expected (SCT:SC) 0x%02X:0x%02X, but detected 0x%02X:0x%02X",
+            mCEStatMetrics[status].sct, mCEStatMetrics[status].sc,
+            ce.n.SF.b.SCT, ce.n.SF.b.SC);
         throw exception();
+    }
 }
 
 
-bool
+void
+ProcessCE::ValidateDetailed(union CE &ce, StatbyBits &status)
+{
+    LogStatus(ce);
+
+    if ((status.DNR != ce.n.SF.b.DNR) ||
+        (status.M   != ce.n.SF.b.M) ||
+        (status.P   != ce.n.SF.b.P) ||
+        (status.SC  != ce.n.SF.b.SC) ||
+        (status.SCT != ce.n.SF.b.SCT)) {
+
+        LOG_ERR("Expected (DNR:M:P:SCT:SC) 0x%02X:0x%01X:0x%01X:0x%02X:0x%02X, "
+            "but detected x%02X:0x%01X:0x%01X:0x%02X:0x%02X",
+            status.DNR, status.M, status.P, status.SC, status.SCT,
+            ce.n.SF.b.DNR, ce.n.SF.b.M, ce.n.SF.b.P, ce.n.SF.b.SCT,
+            ce.n.SF.b.SC);
+        throw exception();
+    }
+}
+
+
+void
 ProcessCE::LogStatus(union CE &ce)
 {
-    bool decodeOK;
     vector<string> desc;
 
-    decodeOK = DecodeStatus(ce, desc);
-    for (size_t i = 0; i < desc.size(); i++ ) {
-        if ((decodeOK == false) && (i >= (desc.size() - 1))) {
-            LOG_ERR("%s", desc[i].c_str());
-        } else {
-            LOG_NRM("%s", desc[i].c_str());
-        }
-    }
-    return decodeOK;
+    DecodeStatus(ce, desc);
+    for (size_t i = 0; i < desc.size(); i++ )
+        LOG_NRM("%s", desc[i].c_str());
 }
 
 
-bool
+void
 ProcessCE::DecodeStatus(union CE &ce, vector<string> &desc)
 {
     char work[256];
@@ -107,7 +129,6 @@ ProcessCE::DecodeStatus(union CE &ce, vector<string> &desc)
         snprintf(work, sizeof(work),
             "  SCT = 0x%01X  (??? unknown/undefined/illegal)", ce.n.SF.b.SCT);
         desc.push_back(work);
-        return false;
     }
     desc.push_back(work);
 
@@ -136,7 +157,6 @@ ProcessCE::DecodeStatus(union CE &ce, vector<string> &desc)
                 "Detected unknown combo: SCT:SC = 0x%01X,0x%02X",
                 ce.n.SF.b.SCT, ce.n.SF.b.SC);
             desc.push_back(work);
-            return false;
         }
     }
 
@@ -152,8 +172,5 @@ ProcessCE::DecodeStatus(union CE &ce, vector<string> &desc)
         desc.push_back(work);
         snprintf(work, sizeof(work), "  DWORD3: 0x%08X", ce.t.dw3);
         desc.push_back(work);
-        return false;
     }
-
-    return true;
 }

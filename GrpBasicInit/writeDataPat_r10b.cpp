@@ -197,5 +197,5 @@ WriteDataPat_r10b::SendToIOSQ(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
     iocq->LogCE(iocqMetrics.head_ptr);
 
     union CE ce = iocq->PeekCE(iocqMetrics.head_ptr);
-    ProcessCE::ValidateStatus(ce);  // throws upon error
+    ProcessCE::Validate(ce);  // throws upon error
 }

@@ -19,7 +19,7 @@
 #include "../Utils/kernelAPI.h"
 #include "../Utils/buffers.h"
 
-#define NUM_TIME_SEGMENTS      300
+#define NUM_TIME_SEGMENTS      500
 
 SharedCQPtr CQ::NullCQPtr;
 
@@ -244,7 +244,7 @@ CQ::DumpCE(uint16_t indexPtr, LogFilename filename, string fileHdr)
 
 
 uint16_t
-CQ::ReapInquiry(uint32_t &isrCount)
+CQ::ReapInquiry(uint32_t &isrCount, bool reportOn0)
 {
     int rc;
     struct nvme_reap_inquiry inq;
@@ -256,8 +256,10 @@ CQ::ReapInquiry(uint32_t &isrCount)
     }
 
     isrCount = inq.isr_count;
-    LOG_NRM("%d CE's awaiting attention in CQ %d, ISR count: %d",
-        inq.num_remaining, inq.q_id, isrCount);
+    if (inq.num_remaining || reportOn0) {
+        LOG_NRM("%d CE's awaiting attention in CQ %d, ISR count: %d",
+            inq.num_remaining, inq.q_id, isrCount);
+    }
     return inq.num_remaining;
 }
 

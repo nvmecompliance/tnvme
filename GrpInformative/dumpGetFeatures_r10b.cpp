@@ -87,7 +87,7 @@ DumpGetFeatures_r10b::RunCoreTest()
     SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
 
     // Assuming the cmd we issue will result in only a single CE
-    if (acq->ReapInquiry(isrCount) != 0) {
+    if (acq->ReapInquiry(isrCount, true) != 0) {
         LOG_ERR("The ACQ should not have any CE's waiting before testing");
         throw exception();
     }
@@ -168,7 +168,7 @@ DumpGetFeatures_r10b::SendGetFeaturesNumOfQueues(SharedASQPtr asq,
             "The CE of the Get Features cmd; Number of Q's feature ID:");
 
         union CE ce = acq->PeekCE(acqMetrics.head_ptr);
-        ProcessCE::ValidateStatus(ce);  // throws upon error
+        ProcessCE::Validate(ce);  // throws upon error
 
         // Update the Informative singleton for all tests to see and use
         gInformative->SetGetFeaturesNumberOfQueues(ce.t.dw0);

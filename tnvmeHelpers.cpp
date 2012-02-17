@@ -635,7 +635,7 @@ bool SetFeaturesNumberOfQueues(NumQueues &numQueues, int fd)
         acq->LogCE(acqMetrics.head_ptr);
 
         union CE ce = acq->PeekCE(acqMetrics.head_ptr);
-        ProcessCE::ValidateStatus(ce);  // throws upon error
+        ProcessCE::Validate(ce);  // throws upon error
         printf("The operation succeeded to set number of queues\n");
     } catch (...) {
         printf("Operation failed to set number of queues\n");
