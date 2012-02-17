@@ -17,6 +17,7 @@
 #include "grpQueues.h"
 #include "initialStateAdmin_r10b.h"
 #include "adminQRollChkSame_r10b.h"
+#include "adminQRollChkDiff_r10b.h"
 
 
 GrpQueues::GrpQueues(size_t grpNum, SpecRev specRev, ErrorRegs errRegs,
@@ -34,6 +35,7 @@ GrpQueues::GrpQueues(size_t grpNum, SpecRev specRev, ErrorRegs errRegs,
     case SPECREV_10b:
         APPEND_TEST_AT_GROUP_LEVEL(InitialStateAdmin_r10b, fd, GrpQueues, errRegs)
         APPEND_TEST_AT_GROUP_LEVEL(AdminQRollChkSame_r10b, fd, GrpQueues, errRegs)
+        APPEND_TEST_AT_GROUP_LEVEL(AdminQRollChkDiff_r10b, fd, GrpQueues, errRegs)
         break;
 
     default:
