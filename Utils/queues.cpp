@@ -34,7 +34,7 @@ Queues::~Queues()
 }
 
 
-SharedCreateIOCQPtr
+SharedIOCQPtr
 Queues::CreateIOCQContigToHdw(int fd, string grpName, string testName,
     uint16_t ms, SharedASQPtr asq, SharedACQPtr acq, uint16_t qId,
     uint16_t numEntries, bool grpLifetime, string grpID, bool irqEnabled,
@@ -67,11 +67,11 @@ Queues::CreateIOCQContigToHdw(int fd, string grpName, string testName,
 
     IO::SendCmdToHdw(grpName, testName, ms, asq, acq, createIOCQCmd, workStr,
         verbose);
-    return createIOCQCmd;
+    return iocq;
 }
 
 
-SharedCreateIOSQPtr
+SharedIOSQPtr
 Queues::CreateIOSQContigToHdw(int fd, string grpName, string testName,
     uint16_t ms, SharedASQPtr asq, SharedACQPtr acq, uint16_t qId,
     uint16_t numEntries, bool grpLifetime, string grpID, uint16_t cqId,
@@ -104,11 +104,11 @@ Queues::CreateIOSQContigToHdw(int fd, string grpName, string testName,
 
     IO::SendCmdToHdw(grpName, testName, ms, asq, acq, createIOSQCmd, workStr,
         verbose);
-    return createIOSQCmd;
+    return iosq;
 }
 
 
-SharedCreateIOCQPtr
+SharedIOCQPtr
 Queues::CreateIOCQDiscontigToHdw(int fd, string grpName, string testName,
     uint16_t ms, SharedASQPtr asq, SharedACQPtr acq, uint16_t qId,
     uint16_t numEntries, bool grpLifetime, string grpID, bool irqEnabled,
@@ -153,11 +153,11 @@ Queues::CreateIOCQDiscontigToHdw(int fd, string grpName, string testName,
 
     IO::SendCmdToHdw(grpName, testName, ms, asq, acq, createIOCQCmd, workStr,
         verbose);
-    return createIOCQCmd;
+    return iocq;
 }
 
 
-SharedCreateIOSQPtr
+SharedIOSQPtr
 Queues::CreateIOSQDiscontigToHdw(int fd, string grpName, string testName,
     uint16_t ms, SharedASQPtr asq, SharedACQPtr acq, uint16_t qId,
     uint16_t numEntries, bool grpLifetime, string grpID, uint16_t cqId,
@@ -201,7 +201,7 @@ Queues::CreateIOSQDiscontigToHdw(int fd, string grpName, string testName,
 
     IO::SendCmdToHdw(grpName, testName, ms, asq, acq, createIOSQCmd, workStr,
         verbose);
-    return createIOSQCmd;
+    return iosq;
 }
 
 

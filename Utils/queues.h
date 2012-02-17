@@ -67,13 +67,13 @@ public:
      * @param verbose Pass true to dump resources to dump files, otherwise false
      * @return The newly create object or throws upon errors
      */
-    static SharedCreateIOCQPtr CreateIOCQContigToHdw(int fd, string grpName,
+    static SharedIOCQPtr CreateIOCQContigToHdw(int fd, string grpName,
         string testName, uint16_t ms, SharedASQPtr asq, SharedACQPtr acq,
         uint16_t qId, uint16_t numEntries, bool grpLifetime, string grpID,
         bool irqEnabled, uint16_t irqVec, string qualify = "",
         bool verbose = true);
     /// param qBackedMem is not modified, nor err chk'd; it must setup by caller
-    static SharedCreateIOCQPtr CreateIOCQDiscontigToHdw(int fd, string grpName,
+    static SharedIOCQPtr CreateIOCQDiscontigToHdw(int fd, string grpName,
         string testName, uint16_t ms, SharedASQPtr asq, SharedACQPtr acq,
         uint16_t qId, uint16_t numEntries, bool grpLifetime, string grpID,
         bool irqEnabled, uint16_t irqVec, SharedMemBufferPtr qBackedMem,
@@ -104,13 +104,13 @@ public:
      * @param verbose Pass true to dump resources to dump files, otherwise false
      * @return The newly create object or throws upon errors
      */
-    static SharedCreateIOSQPtr CreateIOSQContigToHdw(int fd, string grpName,
+    static SharedIOSQPtr CreateIOSQContigToHdw(int fd, string grpName,
         string testName, uint16_t ms, SharedASQPtr asq, SharedACQPtr acq,
         uint16_t qId, uint16_t numEntries, bool grpLifetime, string grpID,
         uint16_t cqId, uint8_t priority, string qualify = "",
         bool verbose = true);
     /// param qBackedMem is not modified, nor err chk'd; it must setup by caller
-    static SharedCreateIOSQPtr CreateIOSQDiscontigToHdw(int fd, string grpName,
+    static SharedIOSQPtr CreateIOSQDiscontigToHdw(int fd, string grpName,
         string testName, uint16_t ms, SharedASQPtr asq, SharedACQPtr acq,
         uint16_t qId, uint16_t numEntries, bool grpLifetime, string grpID,
         uint16_t cqId, uint8_t priority, SharedMemBufferPtr qBackedMem,
