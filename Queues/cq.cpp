@@ -14,14 +14,14 @@
  *  limitations under the License.
  */
 
+#include <sys/time.h>
 #include "cq.h"
 #include "globals.h"
 #include "../Utils/kernelAPI.h"
 #include "../Utils/buffers.h"
 
-#define NUM_TIME_SEGMENTS      500
-
 SharedCQPtr CQ::NullCQPtr;
+static struct timezone TZ_NULL = {0, 0};
 
 
 CQ::CQ() :
@@ -267,18 +267,20 @@ CQ::ReapInquiry(uint32_t &isrCount, bool reportOn0)
 bool
 CQ::ReapInquiryWaitAny(uint16_t ms, uint16_t &numCE, uint32_t &isrCount)
 {
-    // Chunk the wait period up into equal segments, until such time there
-    // can be time to develop a select() solution in dnvme
-    useconds_t segments = ((ms * 1000) / NUM_TIME_SEGMENTS);
-    LOG_DBG("Waiting %d iters of %f s each", NUM_TIME_SEGMENTS,
-        (double)segments/1000000.0);
+    struct timeval initial;
 
-    for (int i = 0; i < NUM_TIME_SEGMENTS; i++) {
+    if (gettimeofday(&initial, &TZ_NULL) != 0) {
+        LOG_DBG("Cannot retrieve system time");
+        throw exception();
+    }
+
+    while (CalcTimeout(ms, initial) == false) {
         if ((numCE = ReapInquiry(isrCount)) != 0) {
             return true;
         }
-        usleep(segments);
     }
+
+    LOG_ERR("Timed out waiting %d ms for CE's in CQ %d", ms, GetQId());
     return false;
 }
 
@@ -287,18 +289,49 @@ bool
 CQ::ReapInquiryWaitSpecify(uint16_t ms, uint16_t numTil, uint16_t &numCE,
     uint32_t &isrCount)
 {
-    // Chunk the wait period up into equal segments, until such time there
-    // can be time to develop a select() solution in dnvme
-    useconds_t segments = ((ms * 1000) / NUM_TIME_SEGMENTS);
-    LOG_DBG("Waiting %d iters of %f s each", NUM_TIME_SEGMENTS,
-        (double)segments/1000000.0);
+    struct timeval initial;
 
-    for (int i = 0; i < NUM_TIME_SEGMENTS; i++) {
+    if (gettimeofday(&initial, &TZ_NULL) != 0) {
+        LOG_DBG("Cannot retrieve system time");
+        throw exception();
+    }
+
+    while (CalcTimeout(ms, initial) == false) {
         if ((numCE = ReapInquiry(isrCount)) != 0) {
             if (numCE >= numTil)
                 return true;
         }
-        usleep(segments);
+    }
+
+    LOG_ERR("Timed out waiting %d ms for CE's in CQ %d", ms, GetQId());
+    return false;
+}
+
+
+bool
+CQ::CalcTimeout(uint16_t ms, struct timeval initial)
+{
+    struct timeval current;
+    time_t sTO = (ms / 1000);                           // sec Time Out (sTO)
+    suseconds_t usTO = ((ms - (sTO * 1000)) * 1000);    // usec Time Out (usTO)
+
+
+    if (gettimeofday(&current, &TZ_NULL) != 0) {
+        LOG_DBG("Cannot retrieve system time");
+        throw exception();
+    }
+
+    if ((current.tv_usec - initial.tv_usec) < 0) {
+        if (((current.tv_sec - initial.tv_sec) >= sTO) &&
+            (current.tv_usec >= usTO)) {
+           return true;
+        }
+
+    } else {
+        if (((current.tv_sec - initial.tv_sec) >= sTO) &&
+            ((current.tv_usec - initial.tv_usec) >= usTO)) {
+           return true;
+        }
     }
     return false;
 }

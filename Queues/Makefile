@@ -13,8 +13,6 @@
 #   limitations under the License.
 #
 
-CC=g++
-CFLAGS=-g -O0 -W -Wall -Werror -DDEBUG
 LDFLAGS=-lm
 LIBS = -L../ -L/usr/local/lib -lm
 INCLUDES = -I. -I../ -I../../ -I/usr/local/include

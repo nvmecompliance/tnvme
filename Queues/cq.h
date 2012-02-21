@@ -196,6 +196,14 @@ private:
      * @param q Pass the IOCQ's definition
      */
     void CreateIOCQ(struct nvme_prep_cq &q);
+
+    /**
+     * Calculate if a timeout (TO) period has expired
+     * @param ms Pass the number of ms indicating the TO period
+     * @param initial Pass the time when the period starting
+     * @return true if the TO has expired, false otherwise
+     */
+    bool CalcTimeout(uint16_t ms, struct timeval initial);
 };
 
 
