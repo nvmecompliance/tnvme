@@ -163,8 +163,25 @@ IOQRollChkSame_r10b::IOQRollChkSame(SharedASQPtr asq, SharedACQPtr acq,
     for (uint16_t numEntries = 0; numEntries < (iosqContig->GetNumEntries()
         + 2); numEntries++) {
         SendToIOSQ(iosqContig, iocqContig, writeCmd, "contig");
+        VerifyCESQValues(iocqContig, (numEntries + 1) %
+            iocqContig->GetNumEntries());
     }
     VerifyQPointers(iosqContig, iocqContig);
+}
+
+
+void
+IOQRollChkSame_r10b::DisableAndEnableCtrl()
+{
+    if (gCtrlrConfig->SetState(ST_DISABLE) == false)
+        throw exception();
+
+    if (gCtrlrConfig->SetIrqScheme(INT_MSIX, 3) == false)
+        throw exception();
+
+    gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
+    if (gCtrlrConfig->SetState(ST_ENABLE) == false)
+        throw exception();
 }
 
 
@@ -217,9 +234,6 @@ IOQRollChkSame_r10b::SendToIOSQ(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
         throw exception();
     }
 
-    LOG_NRM("The CQ's metrics B4 reaping holds head_ptr needed");
-    struct nvme_gen_cq iocqMetrics = iocq->GetQMetrics();
-
     LOG_NRM("Reaping CE from IOCQ, requires memory to hold reaped CE");
     SharedMemBufferPtr ceMemIOCQ = SharedMemBufferPtr(new MemBuffer());
     if ((numReaped = iocq->Reap(ceRemain, ceMemIOCQ, isrCount, numCE, true))
@@ -227,35 +241,42 @@ IOQRollChkSame_r10b::SendToIOSQ(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
         LOG_ERR("Verified there was 1 CE, but reaping produced %d", numReaped);
         throw exception();
     }
-    LOG_NRM("The reaped CE is...");
-    iocq->LogCE(iocqMetrics.head_ptr);
+}
 
-    union CE ce = iocq->PeekCE(iocqMetrics.head_ptr);
-    ProcessCE::Validate(ce); // throws upon error
+
+void
+IOQRollChkSame_r10b::VerifyCESQValues(SharedIOCQPtr iocq,
+    uint16_t expectedVal)
+{
+    union CE ce;
+    struct nvme_gen_cq iocqMetrics = iocq->GetQMetrics();
+
+    // The CQ's metrics after reaping holds head_ptr plus 1 needed. Also Take
+    // Q roll over into account
+    if (iocqMetrics.head_ptr == 0) {
+        ce = iocq->PeekCE(iocq->GetNumEntries() - 1);
+    } else {
+        ce = iocq->PeekCE(iocqMetrics.head_ptr - 1);
+    }
 
     if (ce.n.SQID != IOQ_ID) {
-        LOG_ERR("Expected CE.SQID = 0x%04X but actual CE.SQID  = 0x%04X",
-            IOQ_ID, ce.n.SQID);
-        iocq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "iocq.sqd",
-            qualifier), "SQ ID value of a CE in IOCQ is invalid");
+        LOG_ERR("Expected CE.SQID = 0x%04X in IOCQ CE but actual "
+            "CE.SQID  = 0x%04X", IOQ_ID, ce.n.SQID);
+        iocq->Dump(
+            FileSystem::PrepLogFile(mGrpName, mTestName, "iocq", "CE.SQID"),
+            "CE SQ ID Inconsistent");
+        throw exception();
+    }
+
+    if (ce.n.SQHD != expectedVal) {
+        LOG_ERR("Expected CE.SQHD = 0x%04X in IOCQ CE but actual "
+            "CE.SQHD  = 0x%04X", expectedVal, ce.n.SQHD);
+        iocq->Dump(
+            FileSystem::PrepLogFile(mGrpName, mTestName, "iocq", "CE.SQHD"),
+            "CE SQ Head Pointer Inconsistent");
         throw exception();
     }
 }
-
-void
-IOQRollChkSame_r10b::DisableAndEnableCtrl()
-{
-    if (gCtrlrConfig->SetState(ST_DISABLE) == false)
-        throw exception();
-
-    if (gCtrlrConfig->SetIrqScheme(INT_MSIX, 3) == false)
-        throw exception();
-
-    gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
-    if (gCtrlrConfig->SetState(ST_ENABLE) == false)
-        throw exception();
-}
-
 
 void
 IOQRollChkSame_r10b::VerifyQPointers(SharedIOSQPtr iosq, SharedIOCQPtr iocq)

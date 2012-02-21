@@ -56,13 +56,14 @@ private:
     ///////////////////////////////////////////////////////////////////////////
     // Adding a member variable? Then edit the copy constructor and operator=().
     ///////////////////////////////////////////////////////////////////////////
-    void SearchSupportingNamespc(vector<uint32_t>& nameSpc,
-        ConstSharedIdentifyPtr& namSpcPtr);
     void IOQRollChkSame(SharedASQPtr asq, SharedACQPtr acq,
         uint16_t numEntriesIOQ);
+    void DisableAndEnableCtrl();
+    void SearchSupportingNamespc(vector<uint32_t>& nameSpc,
+        ConstSharedIdentifyPtr& namSpcPtr);
     void SendToIOSQ(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
         SharedWritePtr writeCmd, string qualifier);
-    void DisableAndEnableCtrl();
+    void VerifyCESQValues(SharedIOCQPtr iocq, uint16_t expectedVal);
     void VerifyQPointers(SharedIOSQPtr iosq, SharedIOCQPtr iocq);
 };
 
