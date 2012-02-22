@@ -72,6 +72,8 @@ Usage(void) {
     printf("  -z(--reset)                         Ctrl'r level reset via CC.EN\n");
     printf("  -p(--loop) <count>                  Loop test execution <count> times; dflt=1\n");
     printf("  -k(--skiptest) <filename>           A file contains a list of tests to skip\n");
+    printf("  -g(--log) <dirname>                 Pass the base log dir path which is req'd\n");
+    printf("                                      to exist before app execution; dflt=\"./\"\n");
     printf("  -q(--queues) <ncqr:nsqr>            Write <ncqr> and <nsqr> as values by the\n");
     printf("                                      Set Features, ID=7. Must be only option.\n");
     printf("                                      Option missing indicates tnvme to read\n");
@@ -115,7 +117,7 @@ main(int argc, char *argv[])
     bool deviceFound = false;
     bool accessingHdw = true;
     uint64_t regVal = 0;
-    const char *short_opt = "hslzia::t::v:p:d:k:r:w:q:e:";
+    const char *short_opt = "hslzia::t::v:p:d:k:r:w:q:e:g:";
     static struct option long_opt[] = {
         // {name,           has_arg,            flag,   val}
         {   "help",         no_argument,        NULL,   'h'},
@@ -133,6 +135,7 @@ main(int argc, char *argv[])
         {   "list",         no_argument,        NULL,   'l'},
         {   "queues",       required_argument,  NULL,   'q'},
         {   "error",        required_argument,  NULL,   'e'},
+        {   "log",          required_argument,  NULL,   'g'},
         {   NULL,           no_argument,        NULL,    0}
     };
 
@@ -154,6 +157,7 @@ main(int argc, char *argv[])
     cmdLine.errRegs.pxds = (PXDS_TP | PXDS_FED);
     cmdLine.errRegs.aeruces = 0;
     cmdLine.errRegs.csts = CSTS_CFS;
+    cmdLine.log = "./";
 
     if (argc == 1) {
         printf("%s is a compliance test suite for NVM Express hardware.\n",
@@ -288,6 +292,10 @@ main(int argc, char *argv[])
             accessingHdw = false;
             break;
 
+        case 'g':
+            cmdLine.log = optarg;
+            break;
+
         default:
         case 'h':   Usage();                            exit(0);
         case '?':   Usage();                            exit(1);
@@ -321,7 +329,8 @@ main(int argc, char *argv[])
             LOG_WARN("PCI power state not fully operational");
         }
 
-        FileSystem::AssureDirectoryExists(BASE_LOG_DIR);
+        if (FileSystem::SetRootLogDir(cmdLine.log) == false)
+            exit(1);
     }
 
 
@@ -580,39 +589,46 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
     }
 
 
-    // Always run the Informative group to populate gInformative singleton.
-    // This group is mandated to be non-intrusive in that is will only read
-    // from the DUT to gather non-volatile data to learn of its operating params
-    LOG_NRM("Executing GrpInformative, start from known point");
-    if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
-        return false;
+    {
+        // Clean out any garbage in the logging directory
+        FileSystem::SetBaseLogDir(true);
+        if (FileSystem::PrepLogDir() == false)
+            LOG_WARN("Unable to cleanup logging between group runs");
 
-    // Run all tests within GrpInformative
-    testIter = groups[INFORM_GRPNUM]->GetTestIterator();
-    while (allHaveRun == false) {
-        thisTestPass = true;
+        // Always run the Informative group to populate gInformative singleton.
+        // This group is mandated to be non-intrusive in that is will only read
+        // from the DUT to gather non-volatile data to learn its operating param
+        LOG_NRM("Executing GrpInformative, start from known point");
+        if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
+            return false;
 
-        // Do not allow skipping GrpInformative; supply empty skip instructions
-        switch (groups[INFORM_GRPNUM]->RunTest(testIter, skipNothing)) {
-        case Group::TR_SUCCESS:
-            numPassed++;
-            break;
-        case Group::TR_FAIL:
-            allTestsPass = false;
-            thisTestPass = false;
-            numFailed++;
-            break;
-        case Group::TR_SKIPPING:
-            // Causes gInformative singleton to be uninitialized
-            LOG_ERR("Not allowed to skip GrpInformative");
-            thisTestPass = false;
-            break;
-        case Group::TR_NOTFOUND:
-            allHaveRun = true;
-            break;
+        // Run all tests within GrpInformative
+        testIter = groups[INFORM_GRPNUM]->GetTestIterator();
+        while (allHaveRun == false) {
+            thisTestPass = true;
+
+            // Don't allow skipping GrpInformative; send empty skip instructions
+            switch (groups[INFORM_GRPNUM]->RunTest(testIter, skipNothing)) {
+            case Group::TR_SUCCESS:
+                numPassed++;
+                break;
+            case Group::TR_FAIL:
+                allTestsPass = false;
+                thisTestPass = false;
+                numFailed++;
+                break;
+            case Group::TR_SKIPPING:
+                // Causes gInformative singleton to be uninitialized
+                LOG_ERR("Not allowed to skip GrpInformative");
+                thisTestPass = false;
+                break;
+            case Group::TR_NOTFOUND:
+                allHaveRun = true;
+                break;
+            }
+            if (thisTestPass == false)
+                goto FAIL_OUT;
         }
-        if (thisTestPass == false)
-            goto FAIL_OUT;
     }
 
 
@@ -620,8 +636,14 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
     // loop through every other group except GrpInformative
     for (iLoop = 0; iLoop < cl.loop; iLoop++) {
         LOG_NRM("Start loop execution #%ld", iLoop);
+
         for (size_t iGrp = (INFORM_GRPNUM + 1); iGrp < groups.size(); iGrp++) {
             allHaveRun = false;
+
+            // Clean out any garbage in the logging directory
+            FileSystem::SetBaseLogDir(false);
+            if (FileSystem::PrepLogDir() == false)
+                LOG_WARN("Unable to cleanup logging between group runs");
 
             // Now handle anything spec'd in the --test <cmd line option>
             if (cl.test.t.group == UINT_MAX) {

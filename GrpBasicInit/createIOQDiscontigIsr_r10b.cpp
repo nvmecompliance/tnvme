@@ -90,10 +90,6 @@ CreateIOQDiscontigIsr_r10b::RunCoreTest()
     uint64_t regVal;
     uint64_t work;
 
-
-    KernelAPI::DumpKernelMetrics(mFd,
-        FileSystem::PrepLogFile(mGrpName, mTestName, "kmetrics", "before"));
-
     // Lookup objs which were created in a prior test within group
     SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
     SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
@@ -147,8 +143,5 @@ CreateIOQDiscontigIsr_r10b::RunCoreTest()
         DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, NumEntriesIOQ, true,
         IOSQ_DISCONTIG_GROUP_ID, IOQ_ID, 0, iosqMem);
 
-
-    KernelAPI::DumpKernelMetrics(mFd,
-        FileSystem::PrepLogFile(mGrpName, mTestName, "kmetrics", "after"));
     return true;
 }

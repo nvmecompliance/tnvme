@@ -95,9 +95,6 @@ DeleteIOQDiscontig_r10b::RunCoreTest()
         return true;
     }
 
-    KernelAPI::DumpKernelMetrics(mFd,
-        FileSystem::PrepLogFile(mGrpName, mTestName, "kmetrics", "before"));
-
     // Lookup objs which were created in a prior test within group
     SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
     SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
@@ -122,7 +119,5 @@ DeleteIOQDiscontig_r10b::RunCoreTest()
     // Not explicitly necessary, but is more clean to free what is not needed
     gRsrcMngr->FreeObj(IOCQ_DISCONTIG_GROUP_ID);
 
-    KernelAPI::DumpKernelMetrics(mFd,
-        FileSystem::PrepLogFile(mGrpName, mTestName, "kmetrics", "after"));
     return true;
 }

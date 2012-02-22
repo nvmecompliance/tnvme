@@ -20,7 +20,6 @@
 #include <limits.h>
 #include "tnvme.h"
 
-#define BASE_LOG_DIR                "./Logs/"
 
 /**
  * Enforce type checking to ensure logs end up the proper location. Use
@@ -45,16 +44,37 @@ public:
     virtual ~FileSystem();
 
     /**
-     * Certifies that a directory is located in the current working directory,
-     * otherwise it is created.
+     * Initializes the file system to use the specific root logging directory by
+     * verifying it exists. It must exists and will not be created. Under the
+     * root log directory 2 base logging directories are setup and cleaned. The
+     * default base log directory will be SetBaseLogDir(true).
      * @note This method will not throw
-     * @param dir Pass the name of the directory to certify
+     * @param dir Pass the name of the root log directory to certify
+     * @return true if successful, otherwise false;
      */
-    static void AssureDirectoryExists(string dir);
+    static bool SetRootLogDir(string dir);
 
     /**
-     * Creates a filename from the parameters, and assures the
-     * BASE_LOG_DIR/grpName directory exists to contain the file.
+     * Sets 1 of 2 possible base logging directories. GrpInformative gets its
+     * own logging directory to remember the constant data which is always
+     * extracted before all test(s) execute.
+     * @note This method will not throw
+     * @param useGrpInfo Pass true for mLogDirPending, false for mLogDirPending
+     */
+    static void SetBaseLogDir(bool useGrpInfo) { mUseGrpInfo = useGrpInfo; }
+
+    /**
+     * Cleans all files from the base logging directory. Each new group which
+     * executes should start logging to an empty directory. This approach keeps
+     * only the last group's logs and attempts to prevent the file system from
+     * breaching a maximum limit.
+     * @note This method will not throw
+     * @return true if successful, otherwise false;
+     */
+    static bool PrepLogDir();
+
+    /**
+     * Creates a filename from the parameters within the base logging directory.
      * @note This method may throw
      * @param grpName Pass the name of the group, i.e. Test::mGrpName, required
      * @param className Pass the test cast class name, required
@@ -64,6 +84,13 @@ public:
      */
     static LogFilename PrepLogFile(string grpName, string className,
         string objName, string qualifier = "");
+
+
+private:
+    /// true uses mLogDirGrpInfo; false uses mLogDirPending
+    static bool mUseGrpInfo;
+    static string mLogDirPending;
+    static string mLogDirGrpInfo;
 };
 
 

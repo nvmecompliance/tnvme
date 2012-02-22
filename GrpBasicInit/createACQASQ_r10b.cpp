@@ -79,9 +79,6 @@ CreateACQASQ_r10b::RunCoreTest()
      * \endverbatim
      */
 
-    KernelAPI::DumpKernelMetrics(mFd,
-        FileSystem::PrepLogFile(mGrpName, mTestName, "kmetrics", "before"));
-
     SharedACQPtr acq = CAST_TO_ACQ(
         gRsrcMngr->AllocObj(Trackable::OBJ_ACQ, ACQ_GROUP_ID))
     acq->Init(5);
@@ -94,7 +91,5 @@ CreateACQASQ_r10b::RunCoreTest()
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
         throw exception();
 
-    KernelAPI::DumpKernelMetrics(mFd,
-        FileSystem::PrepLogFile(mGrpName, mTestName, "kmetrics", "after"));
     return true;
 }
