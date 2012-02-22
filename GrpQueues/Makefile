@@ -22,7 +22,8 @@ SRC =					\
 	adminQRollChkSame_r10b.cpp	\
 	adminQRollChkDiff_r10b.cpp	\
 	createResources_r10b.cpp	\
-	ioqRollChkSame_r10b.cpp
+	ioqRollChkSame_r10b.cpp		\
+	ioqRollChkDiff_r10b.cpp
 
 .SUFFIXES: .cpp
 

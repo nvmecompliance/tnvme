@@ -20,6 +20,7 @@
 #include "adminQRollChkDiff_r10b.h"
 #include "createResources_r10b.h"
 #include "ioqRollChkSame_r10b.h"
+#include "ioqRollChkDiff_r10b.h"
 
 namespace GrpQueues {
 
@@ -42,6 +43,7 @@ GrpQueues::GrpQueues(size_t grpNum, SpecRev specRev, ErrorRegs errRegs,
         APPEND_TEST_AT_GROUP_LEVEL(AdminQRollChkDiff_r10b, fd, GrpQueues, errRegs)
         APPEND_TEST_AT_GROUP_LEVEL(CreateResources_r10b, fd, GrpQueues, errRegs)
         APPEND_TEST_AT_GROUP_LEVEL(IOQRollChkSame_r10b, fd, GrpQueues, errRegs)
+        APPEND_TEST_AT_GROUP_LEVEL(IOQRollChkDiff_r10b, fd, GrpQueues, errRegs)
         break;
 
     default:
