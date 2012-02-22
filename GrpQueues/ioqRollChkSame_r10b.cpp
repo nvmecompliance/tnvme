@@ -134,7 +134,7 @@ IOQRollChkSame_r10b::IOQRollChkSame(SharedASQPtr asq, SharedACQPtr acq,
     gCtrlrConfig->SetIOCQES(IOCQ::COMMON_ELEMENT_SIZE_PWR_OF_2);
     SharedIOCQPtr iocqContig = Queues::CreateIOCQContigToHdw(mFd, mGrpName,
         mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, numEntriesIOQ,
-        false, IOCQ_CONTIG_GROUP_ID, true, 1);
+        false, IOCQ_CONTIG_GROUP_ID, false, 1);
 
     gCtrlrConfig->SetIOSQES(IOSQ::COMMON_ELEMENT_SIZE_PWR_OF_2);
     SharedIOSQPtr iosqContig = Queues::CreateIOSQContigToHdw(mFd, mGrpName,
@@ -174,9 +174,6 @@ void
 IOQRollChkSame_r10b::DisableAndEnableCtrl()
 {
     if (gCtrlrConfig->SetState(ST_DISABLE) == false)
-        throw exception();
-
-    if (gCtrlrConfig->SetIrqScheme(INT_MSIX, 3) == false)
         throw exception();
 
     gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);

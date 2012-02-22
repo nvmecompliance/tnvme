@@ -91,9 +91,6 @@ CreateResources_r10b::RunCoreTest()
         gRsrcMngr->AllocObj(Trackable::OBJ_ASQ, ASQ_GROUP_ID))
     asq->Init(5);
 
-    if (gCtrlrConfig->SetIrqScheme(INT_MSIX, 3) == false)
-        throw exception();
-
     gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
         throw exception();
