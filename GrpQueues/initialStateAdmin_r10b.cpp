@@ -20,6 +20,8 @@
 #include "../Utils/kernelAPI.h"
 #include "../Utils/io.h"
 
+namespace GrpQueues {
+
 
 InitialStateAdmin_r10b::InitialStateAdmin_r10b(int fd, string grpName,
     string testName, ErrorRegs errRegs) :
@@ -169,3 +171,5 @@ InitialStateAdmin_r10b::VerifyHeadAndTailDoorBells(SharedACQPtr acq,
         throw exception();
     }
 }
+
+}   // namespace

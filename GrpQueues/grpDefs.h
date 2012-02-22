@@ -17,6 +17,8 @@
 #ifndef _GRPDEFS_H_
 #define _GRPDEFS_H_
 
+namespace GrpQueues {
+
 #define ACQ_GROUP_ID                "ACQ"
 #define ASQ_GROUP_ID                "ASQ"
 #define IOCQ_CONTIG_GROUP_ID        "IOCQContig"
@@ -26,5 +28,7 @@
 #define IOQ_ID                      1
 
 #define DEFAULT_CMD_WAIT_ms         2000
+
+}   // namespace
 
 #endif

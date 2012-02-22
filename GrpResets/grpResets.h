@@ -19,6 +19,8 @@
 
 #include "../group.h"
 
+namespace GrpResets {
+
 
 /**
 * This class implements a logical grouping of test cases for all NVME
@@ -32,5 +34,6 @@ public:
     virtual ~GrpResets();
 };
 
+}   // namespace
 
 #endif

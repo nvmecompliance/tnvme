@@ -19,6 +19,8 @@
 
 #include "test.h"
 
+namespace GrpPciRegisters {
+
 
 /** \verbatim
  * -----------------------------------------------------------------------------
@@ -89,5 +91,6 @@ private:
     void ValidateROBitsAfterWriting();
 };
 
+}   // namespace
 
 #endif

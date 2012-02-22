@@ -17,6 +17,8 @@
 #include "allPciRegs_r10b.h"
 #include "globals.h"
 
+namespace GrpPciRegisters {
+
 
 AllPciRegs_r10b::AllPciRegs_r10b(int fd, string grpName, string testName,
     ErrorRegs errRegs) :
@@ -358,4 +360,5 @@ AllPciRegs_r10b::ValidatePciHdrRegisterROAttribute(PciSpc reg)
     }
 }
 
+}   // namespace
 

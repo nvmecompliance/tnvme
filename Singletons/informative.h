@@ -121,8 +121,8 @@ private:
      * count upon. This data should be data that never changes even after
      * interaction with a DUT's various registers, Set Features attempts.
      */
-    friend class DumpIdentifyData_r10b;
-    friend class DumpGetFeatures_r10b;
+    friend class GrpInformative::DumpIdentifyData_r10b;
+    friend class GrpInformative::DumpGetFeatures_r10b;
 
     /**
      * GrpInformative must set this data.

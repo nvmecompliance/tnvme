@@ -22,6 +22,8 @@
 #include "../Utils/queues.h"
 #include "../Utils/kernelAPI.h"
 
+namespace GrpBasicInit {
+
 
 DeleteIOQDiscontig_r10b::DeleteIOQDiscontig_r10b(int fd, string grpName,
     string testName, ErrorRegs errRegs) :
@@ -121,3 +123,5 @@ DeleteIOQDiscontig_r10b::RunCoreTest()
 
     return true;
 }
+
+}   // namespace

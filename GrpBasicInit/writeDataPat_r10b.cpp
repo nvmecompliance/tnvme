@@ -21,6 +21,8 @@
 #include "grpDefs.h"
 #include "../Utils/kernelAPI.h"
 
+namespace GrpBasicInit {
+
 
 WriteDataPat_r10b::WriteDataPat_r10b(int fd, string grpName, string testName,
     ErrorRegs errRegs) :
@@ -194,3 +196,5 @@ WriteDataPat_r10b::SendToIOSQ(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
     union CE ce = iocq->PeekCE(iocqMetrics.head_ptr);
     ProcessCE::Validate(ce);  // throws upon error
 }
+
+}   // namespace

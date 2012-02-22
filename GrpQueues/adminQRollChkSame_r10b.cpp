@@ -20,7 +20,10 @@
 #include "../Utils/kernelAPI.h"
 #include "../Utils/io.h"
 
+namespace GrpQueues {
+
 #define MAX_ADMIN_Q_SIZE            4096
+
 
 AdminQRollChkSame_r10b::AdminQRollChkSame_r10b(int fd, string grpName,
     string testName, ErrorRegs errRegs) :
@@ -206,3 +209,5 @@ AdminQRollChkSame_r10b::VerifyQPointers(SharedACQPtr acq, SharedASQPtr asq)
         throw exception();
     }
 }
+
+}   // namespace

@@ -40,6 +40,28 @@
 #include "GrpQueues/grpQueues.h"
 #include "GrpNVMReadCmd/grpNVMReadCmd.h"
 
+void
+InstantiateGroups(vector<Group *> &groups, int &fd, struct CmdLine &cl)
+{
+    // IMPORTANT: Once a group is assigned/push_back() to a position in the
+    //            vector, i.e. a group index/number, then it should stay in that
+    //            position so that the group references won't change per
+    //            release. Future groups can be appended 1, 2, 3, 4, etc., but
+    //            existing groups need to keep their original assigned vector
+    //            position so users of this app can rely on these assignments.
+    //
+    // All groups will be pushed here. The groups themselves dictate which
+    // tests get executed based upon the constructed 'specRev' being targeted.
+    groups.push_back(new GrpInformative::GrpInformative(groups.size(), cl.rev, cl.errRegs, fd));        // 0
+    groups.push_back(new GrpPciRegisters::GrpPciRegisters(groups.size(), cl.rev, cl.errRegs, fd));      // 1
+    groups.push_back(new GrpCtrlRegisters::GrpCtrlRegisters(groups.size(), cl.rev, cl.errRegs, fd));    // 2
+    groups.push_back(new GrpBasicInit::GrpBasicInit(groups.size(), cl.rev, cl.errRegs, fd));            // 3
+    groups.push_back(new GrpResets::GrpResets(groups.size(), cl.rev, cl.errRegs, fd));                  // 4
+    groups.push_back(new GrpQueues::GrpQueues(groups.size(), cl.rev, cl.errRegs, fd));                  // 5
+    groups.push_back(new GrpNVMReadCmd::GrpNVMReadCmd(groups.size(), cl.rev, cl.errRegs, fd));          // 6
+}
+// ------------------------------EDIT HERE---------------------------------
+
 
 #define NO_DEVICES              "no devices found"
 #define INFORM_GRPNUM      0
@@ -509,25 +531,7 @@ BuildTestInfrastructure(vector<Group *> &groups, int &fd, struct CmdLine &cl)
         return false;
     }
 
-
-    // ------------------------------EDIT HERE---------------------------------
-    // IMPORTANT: Once a group is assigned/push_back() to a position in the
-    //            vector, i.e. a group index/number, then it should stay in that
-    //            position so that the group references won't change per
-    //            release. Future groups can be appended 1, 2, 3, 4, etc., but
-    //            existing groups need to keep their original assigned vector
-    //            position so users of this app can rely on these assignments.
-    //
-    // All groups will be pushed here. The groups themselves dictate which
-    // tests get executed based upon the constructed 'specRev' being targeted.
-    groups.push_back(new GrpInformative(groups.size(), cl.rev, cl.errRegs, fd));    // 0
-    groups.push_back(new GrpPciRegisters(groups.size(), cl.rev, cl.errRegs, fd));   // 1
-    groups.push_back(new GrpCtrlRegisters(groups.size(), cl.rev, cl.errRegs, fd));  // 2
-    groups.push_back(new GrpBasicInit(groups.size(), cl.rev, cl.errRegs, fd));      // 3
-    groups.push_back(new GrpResets(groups.size(), cl.rev, cl.errRegs, fd));         // 4
-    groups.push_back(new GrpQueues(groups.size(), cl.rev, cl.errRegs, fd));         // 5
-    groups.push_back(new GrpNVMReadCmd(groups.size(), cl.rev, cl.errRegs, fd));     // 6
-
+    InstantiateGroups(groups, fd, cl);
     return true;
 }
 

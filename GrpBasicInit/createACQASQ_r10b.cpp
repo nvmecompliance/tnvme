@@ -22,6 +22,8 @@
 #include "../Utils/kernelAPI.h"
 #include "../Singletons/informative.h"
 
+namespace GrpBasicInit {
+
 
 CreateACQASQ_r10b::CreateACQASQ_r10b(int fd, string grpName, string testName,
     ErrorRegs errRegs) :
@@ -93,3 +95,5 @@ CreateACQASQ_r10b::RunCoreTest()
 
     return true;
 }
+
+}   // namespace

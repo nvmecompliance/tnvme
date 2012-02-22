@@ -21,6 +21,8 @@
 #include "../Queues/asq.h"
 #include "../Queues/acq.h"
 
+namespace GrpInformative {
+
 
 /** \verbatim
  * -----------------------------------------------------------------------------
@@ -56,5 +58,6 @@ private:
     void SendGetFeaturesNumOfQueues(SharedASQPtr asq, SharedACQPtr acq);
 };
 
+}   // namespace
 
 #endif

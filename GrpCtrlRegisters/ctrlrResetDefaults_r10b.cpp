@@ -18,6 +18,8 @@
 #include "globals.h"
 #include "../Utils/kernelAPI.h"
 
+namespace GrpCtrlRegisters {
+
 
 CtrlrResetDefaults_r10b::CtrlrResetDefaults_r10b(int fd, string grpName,
     string testName, ErrorRegs errRegs) :
@@ -209,3 +211,5 @@ CtrlrResetDefaults_r10b::ReportOffendingBitPos(uint64_t val,
     }
     return INT_MAX; // there is no mismatch
 }
+
+}   // namespace

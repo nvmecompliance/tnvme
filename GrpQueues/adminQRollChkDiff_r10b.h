@@ -21,6 +21,9 @@
 #include "../Queues/asq.h"
 #include "../Queues/acq.h"
 
+namespace GrpQueues {
+
+
 /** \verbatim
  * -----------------------------------------------------------------------------
  * ----------------Mandatory rules for children to follow-----------------------
@@ -56,5 +59,6 @@ private:
     void VerifyQPointers(SharedACQPtr acq, SharedASQPtr asq);
 };
 
+}   // namespace
 
 #endif

@@ -21,6 +21,8 @@
 #include "../Queues/acq.h"
 #include "../Queues/asq.h"
 
+namespace GrpNVMReadCmd {
+
 
 /** \verbatim
  * -----------------------------------------------------------------------------
@@ -57,5 +59,6 @@ private:
         string qualify);
 };
 
+}   // namespace
 
 #endif

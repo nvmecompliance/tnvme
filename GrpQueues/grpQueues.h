@@ -19,6 +19,8 @@
 
 #include "../group.h"
 
+namespace GrpQueues {
+
 
 /**
 * This class implements a logical grouping of test cases for queues of the
@@ -32,5 +34,6 @@ public:
     virtual ~GrpQueues();
 };
 
+}   // namespace
 
 #endif

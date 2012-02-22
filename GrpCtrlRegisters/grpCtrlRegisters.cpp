@@ -18,6 +18,8 @@
 #include "allCtrlRegs_r10b.h"
 #include "ctrlrResetDefaults_r10b.h"
 
+namespace GrpCtrlRegisters {
+
 
 GrpCtrlRegisters::GrpCtrlRegisters(size_t grpNum, SpecRev specRev,
     ErrorRegs errRegs, int fd) :
@@ -48,3 +50,5 @@ GrpCtrlRegisters::~GrpCtrlRegisters()
 {
     // mTests deallocated in parent
 }
+
+}   // namespace

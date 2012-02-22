@@ -23,6 +23,8 @@
 #include "../Utils/kernelAPI.h"
 #include "../Utils/io.h"
 
+namespace GrpBasicInit {
+
 
 VerifyDataPat_r10b::VerifyDataPat_r10b(int fd, string grpName, string testName,
     ErrorRegs errRegs) :
@@ -167,3 +169,5 @@ VerifyDataPat_r10b::SendToIOSQ(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
             "Data read from media miscompared from written");
     }
 }
+
+}   // namespace

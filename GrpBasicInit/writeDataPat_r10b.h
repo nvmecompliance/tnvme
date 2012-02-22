@@ -22,6 +22,8 @@
 #include "../Queues/iosq.h"
 #include "../Cmds/write.h"
 
+namespace GrpBasicInit {
+
 using namespace std;
 
 #define WRITE_DATA_PAT_NUM_BLKS     5
@@ -63,5 +65,6 @@ private:
         SharedWritePtr writeCmd, string qualifier);
 };
 
+}   // namespace
 
 #endif

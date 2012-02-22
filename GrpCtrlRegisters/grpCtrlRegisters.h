@@ -19,6 +19,8 @@
 
 #include "../group.h"
 
+namespace GrpCtrlRegisters {
+
 
 /**
 * This class implements a logical grouping of test cases for all NVME
@@ -33,5 +35,6 @@ public:
     virtual ~GrpCtrlRegisters();
 };
 
+}   // namespace
 
 #endif

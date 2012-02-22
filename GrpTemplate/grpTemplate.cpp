@@ -17,6 +17,8 @@
 #include "grpTemplate.h"
 #include "testCase_r10b.h"
 
+namespace GrpTemplate {
+
 
 GrpTemplate::GrpTemplate(size_t grpNum, SpecRev specRev, ErrorRegs errRegs,
     int fd) :
@@ -46,3 +48,5 @@ GrpTemplate::~GrpTemplate()
 {
     // mTests deallocated in parent
 }
+
+}   // namespace

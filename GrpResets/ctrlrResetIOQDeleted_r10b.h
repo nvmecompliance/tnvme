@@ -21,6 +21,9 @@
 #include "../Queues/asq.h"
 #include "../Queues/acq.h"
 
+namespace GrpResets {
+
+
 /** \verbatim
  * -----------------------------------------------------------------------------
  * ----------------Mandatory rules for children to follow-----------------------
@@ -57,5 +60,6 @@ private:
         uint16_t numEntriesIOQ);
 };
 
+}   // namespace
 
 #endif

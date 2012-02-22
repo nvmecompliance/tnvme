@@ -22,6 +22,8 @@
 #include "../Queues/iosq.h"
 #include "../Cmds/read.h"
 
+namespace GrpBasicInit {
+
 using namespace std;
 
 
@@ -62,5 +64,6 @@ private:
         SharedMemBufferPtr writtenPayload, SharedMemBufferPtr readPayload);
 };
 
+}   // namespace
 
 #endif

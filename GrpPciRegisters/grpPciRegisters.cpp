@@ -17,6 +17,8 @@
 #include "grpPciRegisters.h"
 #include "allPciRegs_r10b.h"
 
+namespace GrpPciRegisters {
+
 
 GrpPciRegisters::GrpPciRegisters(size_t grpNum, SpecRev specRev,
     ErrorRegs errRegs, int fd) :
@@ -46,3 +48,5 @@ GrpPciRegisters::~GrpPciRegisters()
 {
     // mTests deallocated in parent
 }
+
+}   // namespace

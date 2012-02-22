@@ -24,6 +24,8 @@
 #include "../Utils/queues.h"
 #include "../Utils/io.h"
 
+namespace GrpInformative {
+
 
 DumpIdentifyData_r10b::DumpIdentifyData_r10b(int fd, string grpName,
     string testName, ErrorRegs errRegs) :
@@ -170,3 +172,5 @@ DumpIdentifyData_r10b::SendIdentifyNamespaceStruct(SharedASQPtr asq,
         gInformative->SetIdentifyCmdNamespace(idCmdNamSpc);
     }
 }
+
+}   // namespace

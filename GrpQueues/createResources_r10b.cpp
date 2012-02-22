@@ -24,6 +24,8 @@
 #include "../Utils/kernelAPI.h"
 #include "../Utils/queues.h"
 
+namespace GrpQueues {
+
 
 CreateResources_r10b::CreateResources_r10b(int fd, string grpName, string testName,
     ErrorRegs errRegs) :
@@ -97,3 +99,5 @@ CreateResources_r10b::RunCoreTest()
 
     return true;
 }
+
+}   // namespace

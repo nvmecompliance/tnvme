@@ -18,6 +18,8 @@
 #include "createResources_r10b.h"
 #include "lbaOutOfRangeBare_r10b.h"
 
+namespace GrpNVMReadCmd {
+
 
 GrpNVMReadCmd::GrpNVMReadCmd(size_t grpNum, SpecRev specRev, ErrorRegs errRegs,
     int fd) :
@@ -48,3 +50,5 @@ GrpNVMReadCmd::~GrpNVMReadCmd()
 {
     // mTests deallocated in parent
 }
+
+}   // namespace

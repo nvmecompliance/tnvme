@@ -17,6 +17,8 @@
 #include "dumpRegisters_r10b.h"
 #include "../Utils/kernelAPI.h"
 
+namespace GrpInformative {
+
 
 DumpRegisters_r10b::DumpRegisters_r10b(int fd, string grpName,
     string testName, ErrorRegs errRegs) :
@@ -77,4 +79,5 @@ DumpRegisters_r10b::RunCoreTest()
     return true;
 }
 
+}   // namespace
 

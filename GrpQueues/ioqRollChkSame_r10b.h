@@ -24,6 +24,8 @@
 #include "../Cmds/write.h"
 #include "../Utils/queues.h"
 
+namespace GrpQueues {
+
 
 /** \verbatim
  * -----------------------------------------------------------------------------
@@ -67,5 +69,6 @@ private:
     void VerifyQPointers(SharedIOSQPtr iosq, SharedIOCQPtr iocq);
 };
 
+}   // namespace
 
 #endif

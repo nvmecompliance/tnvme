@@ -19,6 +19,8 @@
 
 #include "../group.h"
 
+namespace GrpInformative {
+
 
 /**
 * This class implements a logical grouping of test cases for all NVME
@@ -35,5 +37,6 @@ public:
     virtual ~GrpInformative();
 };
 
+}   // namespace
 
 #endif

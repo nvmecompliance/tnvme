@@ -22,6 +22,8 @@
 #include "../Utils/kernelAPI.h"
 #include "../Utils/queues.h"
 
+namespace GrpResets {
+
 #define IOCQ_ID                     1
 #define IOSQ_ID                     2
 
@@ -153,3 +155,5 @@ CtrlrResetIOQDeleted_r10b::VerifyCtrlrResetDeletesIOQs(SharedACQPtr acq,
             throw exception();
     }
 }
+
+}   // namespace

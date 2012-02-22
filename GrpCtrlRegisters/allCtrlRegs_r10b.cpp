@@ -17,6 +17,8 @@
 #include "allCtrlRegs_r10b.h"
 #include "globals.h"
 
+namespace GrpCtrlRegisters {
+
 
 AllCtrlRegs_r10b::AllCtrlRegs_r10b(int fd, string grpName, string testName,
     ErrorRegs errRegs) :
@@ -197,5 +199,7 @@ AllCtrlRegs_r10b::ValidateCtlRegisterROAttribute(CtlSpc reg)
         }
     }
 }
+
+}   // namespace
 
 

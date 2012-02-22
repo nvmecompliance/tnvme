@@ -21,6 +21,8 @@
 #include "../Queues/asq.h"
 #include "../Utils/kernelAPI.h"
 
+namespace GrpInformative {
+
 
 CreateACQASQ_r10b::CreateACQASQ_r10b(int fd, string grpName, string testName,
     ErrorRegs errRegs) :
@@ -92,3 +94,5 @@ CreateACQASQ_r10b::RunCoreTest()
 
     return true;
 }
+
+}   // namespace

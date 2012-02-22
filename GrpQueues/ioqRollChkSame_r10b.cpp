@@ -20,7 +20,10 @@
 #include "../Utils/io.h"
 #include "../Utils/kernelAPI.h"
 
+namespace GrpQueues {
+
 #define WRITE_DATA_PAT_NUM_BLKS     1
+
 
 IOQRollChkSame_r10b::IOQRollChkSame_r10b(int fd, string grpName,
     string testName, ErrorRegs errRegs) :
@@ -316,3 +319,5 @@ IOQRollChkSame_r10b::VerifyQPointers(SharedIOSQPtr iosq, SharedIOCQPtr iocq)
         throw exception();
     }
 }
+
+}   // namespace

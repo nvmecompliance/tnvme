@@ -21,6 +21,8 @@
 #include "createResources_r10b.h"
 #include "ioqRollChkSame_r10b.h"
 
+namespace GrpQueues {
+
 
 GrpQueues::GrpQueues(size_t grpNum, SpecRev specRev, ErrorRegs errRegs,
     int fd) :
@@ -54,3 +56,5 @@ GrpQueues::~GrpQueues()
 {
     // mTests deallocated in parent
 }
+
+}   // namespace

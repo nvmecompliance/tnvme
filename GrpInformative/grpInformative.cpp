@@ -20,6 +20,8 @@
 #include "dumpIdentifyData_r10b.h"
 #include "dumpGetFeatures_r10b.h"
 
+namespace GrpInformative {
+
 
 GrpInformative::GrpInformative(size_t grpNum, SpecRev specRev,
     ErrorRegs errRegs, int fd) :
@@ -52,3 +54,5 @@ GrpInformative::~GrpInformative()
 {
     // mTests deallocated in parent
 }
+
+}   // namespace

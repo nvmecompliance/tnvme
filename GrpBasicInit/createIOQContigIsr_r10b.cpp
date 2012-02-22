@@ -23,6 +23,7 @@
 #include "../Utils/kernelAPI.h"
 #include "../Utils/queues.h"
 
+namespace GrpBasicInit {
 
 #define IOQ_ID                      1
 
@@ -137,3 +138,5 @@ CreateIOQContigIsr_r10b::RunCoreTest()
 
     return true;
 }
+
+}   // namespace

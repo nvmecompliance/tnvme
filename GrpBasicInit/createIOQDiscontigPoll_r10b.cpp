@@ -24,6 +24,8 @@
 #include "../Utils/queues.h"
 #include "../Singletons/informative.h"
 
+namespace GrpBasicInit {
+
 #define IOQ_ID                      2
 
 static uint16_t NumEntriesIOQ =     5;
@@ -145,3 +147,5 @@ CreateIOQDiscontigPoll_r10b::RunCoreTest()
 
     return true;
 }
+
+}   // namespace

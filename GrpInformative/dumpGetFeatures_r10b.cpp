@@ -21,6 +21,8 @@
 #include "../Cmds/getFeatures.h"
 #include "../Utils/kernelAPI.h"
 
+namespace GrpInformative {
+
 
 DumpGetFeatures_r10b::DumpGetFeatures_r10b(int fd, string grpName,
     string testName, ErrorRegs errRegs) :
@@ -169,3 +171,5 @@ DumpGetFeatures_r10b::SendGetFeaturesNumOfQueues(SharedASQPtr asq,
         gInformative->SetGetFeaturesNumberOfQueues(ce.t.dw0);
     }
 }
+
+}   // namespace

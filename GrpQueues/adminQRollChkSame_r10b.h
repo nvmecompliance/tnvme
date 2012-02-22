@@ -21,6 +21,9 @@
 #include "../Queues/asq.h"
 #include "../Queues/acq.h"
 
+namespace GrpQueues {
+
+
 /** \verbatim
  * -----------------------------------------------------------------------------
  * ----------------Mandatory rules for children to follow-----------------------
@@ -57,5 +60,6 @@ private:
 
 };
 
+}   // namespace
 
 #endif

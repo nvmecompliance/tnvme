@@ -25,6 +25,8 @@
 #include "createIOQContigIsr_r10b.h"
 #include "createIOQDiscontigIsr_r10b.h"
 
+namespace GrpBasicInit {
+
 
 GrpBasicInit::GrpBasicInit(size_t grpNum, SpecRev specRev, ErrorRegs errRegs,
     int fd) :
@@ -67,3 +69,5 @@ GrpBasicInit::~GrpBasicInit()
 {
     // mTests deallocated in parent
 }
+
+}   // namespace

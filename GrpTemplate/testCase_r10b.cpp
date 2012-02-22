@@ -19,6 +19,8 @@
 #include "grpDefs.h"
 #include "../Utils/kernelAPI.h"
 
+namespace GrpTemplate {
+
 
 TestCase_r10b::TestCase_r10b(int fd, string grpName, string testName,
     ErrorRegs errRegs) :
@@ -79,3 +81,5 @@ TestCase_r10b::RunCoreTest()
 
     return true;
 }
+
+}   // namespace

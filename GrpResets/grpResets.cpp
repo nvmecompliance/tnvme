@@ -17,6 +17,8 @@
 #include "grpResets.h"
 #include "ctrlrResetIOQDeleted_r10b.h"
 
+namespace GrpResets {
+
 
 GrpResets::GrpResets(size_t grpNum, SpecRev specRev, ErrorRegs errRegs,
     int fd) :
@@ -46,3 +48,5 @@ GrpResets::~GrpResets()
 {
     // mTests deallocated in parent
 }
+
+}   // namespace

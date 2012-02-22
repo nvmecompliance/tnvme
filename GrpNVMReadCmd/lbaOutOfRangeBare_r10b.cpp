@@ -23,6 +23,8 @@
 #include "../Utils/io.h"
 #include "../Cmds/read.h"
 
+namespace GrpNVMReadCmd {
+
 #define RD_NUM_BLKS                 2
 
 
@@ -191,4 +193,6 @@ LBAOutOfRangeBare_r10b::SendCmdToHdw(SharedSQPtr sq, SharedCQPtr cq,
         throw exception();
     }
 }
+
+}   // namespace
 
