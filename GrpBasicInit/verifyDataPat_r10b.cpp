@@ -80,13 +80,8 @@ VerifyDataPat_r10b::RunCoreTest()
      * 3) The NVM cmd set is the active cmd set.
      * \endverbatim
      */
-    KernelAPI::DumpKernelMetrics(mFd,
-        FileSystem::PrepLogFile(mGrpName, mTestName, "kmetrics", "before"));
 
     VerifyDataPattern();
-
-    KernelAPI::DumpKernelMetrics(mFd,
-        FileSystem::PrepLogFile(mGrpName, mTestName, "kmetrics", "after"));
     return true;
 }
 

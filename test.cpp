@@ -80,6 +80,9 @@ Test::Run()
 {
     try {
         ResetStatusRegErrors();
+        KernelAPI::DumpKernelMetrics(mFd, FileSystem::PrepLogFile(mGrpName,
+            mTestName, "kmetrics", "preTestRun"));
+
         if (RunCoreTest()) {
             if (GetStatusRegErrors()) {
                 LOG_NRM("SUCCESSFUL test case run");
@@ -100,7 +103,7 @@ Test::Run()
             FileSystem::PrepLogFile(mGrpName, mTestName, "ctrl",
             "regs.postFailure"), false);
     } catch (...) {
-        ;   // Subsequent errs possible if dnvme is corrupted from test failure
+        LOG_ERR("Failed to pull data from DUT after test failure");
     }
     LOG_NRM("FAILED test case run");
     return false;

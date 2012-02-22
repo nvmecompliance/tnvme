@@ -145,7 +145,7 @@ ProcessCE::DecodeStatus(union CE &ce, vector<string> &desc)
             if (mCEStatMetrics[i].sct == ce.n.SF.b.SCT) {
                 if (mCEStatMetrics[i].sc == ce.n.SF.b.SC) {
                     snprintf(work, sizeof(work), "  SC  = 0x%02X (%s)",
-                        ce.n.SF.b.SC, mCEStatMetrics[ce.n.SF.b.SC].desc);
+                        ce.n.SF.b.SC, mCEStatMetrics[i].desc);
                     desc.push_back(work);
                     break;
                 }
