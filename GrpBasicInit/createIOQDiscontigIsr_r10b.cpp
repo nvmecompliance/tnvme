@@ -84,7 +84,7 @@ CreateIOQDiscontigIsr_r10b::RunCoreTest()
     /** \verbatim
      * Assumptions:
      * 1) The ASQ & ACQ's have been created by the RsrcMngr for group lifetime
-     * 2) Interrupts are eabled, 3 requested and IRQ2 is free for this test
+     * 2) 1 Interrupt(s) are enabled for this test
      * 3) Empty ASQ & ACQ's
      * \endverbatim
      */
@@ -133,7 +133,7 @@ CreateIOQDiscontigIsr_r10b::RunCoreTest()
         sysconf(_SC_PAGESIZE), true, 0);
     Queues::CreateIOCQDiscontigToHdw(mFd, mGrpName, mTestName,
         DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, NumEntriesIOQ, true,
-        IOCQ_DISCONTIG_GROUP_ID, true, 2, iocqMem);
+        IOCQ_DISCONTIG_GROUP_ID, true, 0, iocqMem);
 
 
     gCtrlrConfig->SetIOSQES(IOSQ::COMMON_ELEMENT_SIZE_PWR_OF_2);

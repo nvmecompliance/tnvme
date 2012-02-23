@@ -71,9 +71,9 @@ void Usage(void);
 void DestroySingletons();
 bool ExecuteTests(struct CmdLine &cl, vector<Group *> &groups);
 void BuildSingletons(int &fd, struct CmdLine &cl);
-void DestroyTestInfrastructure(vector<Group *> &groups, int &fd);
-bool BuildTestInfrastructure(vector<Group *> &groups, int &fd,
-    struct CmdLine &cl);
+void DestroyTestFoundation(vector<Group *> &groups, int &fd);
+bool BuildTestFoundation(vector<Group *> &groups, int &fd, struct CmdLine &cl);
+void ReportTestResults(size_t numIters, int numPass, int numFail, int numSkip);
 
 
 void
@@ -337,7 +337,7 @@ main(int argc, char *argv[])
     }
 
     // Execute cmd line options which require the test infrastructure
-    if (BuildTestInfrastructure(groups, fd, cmdLine) == false)
+    if (BuildTestFoundation(groups, fd, cmdLine) == false)
         exit(1);
 
     // Accessing hardware requires specific checks and inquiries before running
@@ -428,7 +428,7 @@ main(int argc, char *argv[])
     }
 
     // cleanup duties
-    DestroyTestInfrastructure(groups, fd);
+    DestroyTestFoundation(groups, fd);
     DestroySingletons();
 
     cmdLine.skiptest.clear();
@@ -478,13 +478,13 @@ void DestroySingletons()
  * @return true upon success, otherwise false
  */
 bool
-BuildTestInfrastructure(vector<Group *> &groups, int &fd, struct CmdLine &cl)
+BuildTestFoundation(vector<Group *> &groups, int &fd, struct CmdLine &cl)
 {
     int ret;
     struct flock fdlock = {F_WRLCK, SEEK_SET, 0, 0, 0};
 
 
-    DestroyTestInfrastructure(groups, fd);
+    DestroyTestFoundation(groups, fd);
 
     // Open and lock access to the device requested for testing. The mutually
     // exclusive write lock is expected to warrant off other instances of this
@@ -537,13 +537,13 @@ BuildTestInfrastructure(vector<Group *> &groups, int &fd, struct CmdLine &cl)
 
 
 /**
- * Tear down that which has been created by BuildTestInfrastructure()
+ * Tear down that which has been created by BuildTestFoundation()
  * @param groups Pass the structure to contain the test objects, if the
  *               structure is not empty the function will abort.
  * @param fd Pass the file descriptor to free from the allocated resource pool
  */
 void
-DestroyTestInfrastructure(vector<Group *> &groups, int &fd)
+DestroyTestFoundation(vector<Group *> &groups, int &fd)
 {
     // Deallocate heap usage
     for (size_t i = 0; i < groups.size(); i++) {
@@ -754,30 +754,28 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
             }
         }
 
-        LOG_NRM("Iteration SUMMARY passed : %d", numPassed);
-        if (numFailed) {
-            LOG_NRM("                  failed : %d  <----------", numFailed);
-        } else {
-            LOG_NRM("                  failed : 0");
-        }
-        LOG_NRM("                  skipped: %d", numSkipped);
-        LOG_NRM("                  total  : %d",
-            numPassed+numFailed+numSkipped);
-        LOG_NRM("Stop loop execution #%ld", iLoop);
+        // Report each iteration results
+        ReportTestResults(iLoop, numPassed, numFailed, numSkipped);
     }
-
     return allTestsPass;
 
 FAIL_OUT:
-    LOG_NRM("Tests  passed: %d", numPassed);
-    if (numFailed) {
-        LOG_NRM("       failed: %d    <--------------", numFailed);
-    } else {
-        LOG_NRM("       failed: 0");
-    }
-    LOG_NRM("      skipped: %d", numSkipped);
-    LOG_NRM("        total: %d", numPassed+numFailed+numSkipped);
-    LOG_NRM("Stop loop execution #%ld", iLoop);
+    ReportTestResults(iLoop, numPassed, numFailed, numSkipped);
     return allTestsPass;
+}
+
+
+void
+ReportTestResults(size_t numIters, int numPass, int numFail, int numSkip)
+{
+    LOG_NRM("Iteration SUMMARY passed : %d", numPass);
+    if (numFail) {
+        LOG_NRM("                  failed : %d  <----------", numFail);
+    } else {
+        LOG_NRM("                  failed : 0");
+    }
+    LOG_NRM("                  skipped: %d", numSkip);
+    LOG_NRM("                  total  : %d", numPass+numFail+numSkip);
+    LOG_NRM("Stop loop execution #%ld", numIters);
 }
 
