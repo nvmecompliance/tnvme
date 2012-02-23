@@ -23,6 +23,7 @@
 #include "../Queues/iosq.h"
 #include "../Utils/kernelAPI.h"
 #include "../Utils/queues.h"
+#include "../Utils/irq.h"
 
 namespace GrpNVMReadCmd {
 
@@ -95,8 +96,8 @@ CreateResources_r10b::RunCoreTest()
         gRsrcMngr->AllocObj(Trackable::OBJ_ASQ, ASQ_GROUP_ID))
     asq->Init(5);
 
-    if (gCtrlrConfig->SetIrqScheme(INT_MSIX, 3) == false)
-        throw exception();
+    // All queues will use identical IRQ vector
+    IRQ::SetAnySchemeSpecifyNum(1);     // throws upon error
 
     gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
@@ -104,7 +105,7 @@ CreateResources_r10b::RunCoreTest()
 
     gCtrlrConfig->SetIOCQES(IOCQ::COMMON_ELEMENT_SIZE_PWR_OF_2);
     Queues::CreateIOCQContigToHdw(mFd, mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
-        asq, acq, IOQ_ID, NumEntriesIOQ, true, IOCQ_CONTIG_GROUP_ID, true, 1);
+        asq, acq, IOQ_ID, NumEntriesIOQ, true, IOCQ_CONTIG_GROUP_ID, true, 0);
 
     gCtrlrConfig->SetIOSQES(IOSQ::COMMON_ELEMENT_SIZE_PWR_OF_2);
     Queues::CreateIOSQContigToHdw(mFd, mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,

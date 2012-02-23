@@ -225,6 +225,26 @@ typedef enum PXDSBits {
 } PXDSBits;
 
 
+/// Bit definitions for PCISPC_MC
+typedef enum MCBits {
+    MC_RES0        = 0xfe00,
+    MC_PVM         = 0x0100,
+    MC_C64         = 0x0080,
+    MC_MME         = 0x0070,
+    MC_MMC         = 0x000e,
+    MC_MSIE        = 0x0001
+} MCBits;
+
+
+/// Bit definitions for PCISPC_MXC
+typedef enum MXCBits {
+    MXC_MXE         = 0x8000,
+    MXC_FM          = 0x4000,
+    MXC_RES0        = 0x3800,
+    MXC_TS          = 0x07ff
+} MXCBits;
+
+
 /// Bit definitions for PCISPC_AERUCES
 typedef enum AERUCESBits {
     AERUCES_RES0   = 0x0000000f,

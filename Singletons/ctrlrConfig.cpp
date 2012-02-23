@@ -68,6 +68,56 @@ CtrlrConfig::~CtrlrConfig()
 
 
 bool
+CtrlrConfig::IsMSICapable(bool &capable, uint16_t &numIrqs)
+{
+    uint64_t value;
+    numIrqs = 0;
+    capable = false;
+    const vector<PciCapabilities> *pciCap = gRegisters->GetPciCapabilities();
+
+    for (size_t i = 0; i < pciCap->size(); i++) {
+        if (pciCap->at(i) == PCICAP_MSICAP) {
+            if (gRegisters->Read(PCISPC_MC, value) == false) {
+                LOG_ERR("Unable to determine IRQ capability");
+                return false;
+            }
+            uint16_t work = (uint16_t)((value & MC_MMC) >> 1);
+            capable = true;
+            numIrqs = work;
+            break;
+        }
+    }
+    LOG_NRM("Detected %d MSI IRQ(s) supported", numIrqs);
+    return true;
+}
+
+
+bool
+CtrlrConfig::IsMSIXCapable(bool &capable, uint16_t &numIrqs)
+{
+    uint64_t value;
+    numIrqs = 0;
+    capable = false;
+    const vector<PciCapabilities> *pciCap = gRegisters->GetPciCapabilities();
+
+    for (size_t i = 0; i < pciCap->size(); i++) {
+        if (pciCap->at(i) == PCICAP_MSIXCAP) {
+            if (gRegisters->Read(PCISPC_MXC, value) == false) {
+                LOG_ERR("Unable to determine IRQ capability");
+                return false;
+            }
+            uint16_t work = (uint16_t)((value & MXC_TS) + 1);
+            capable = true;
+            numIrqs = work;
+            break;
+        }
+    }
+    LOG_NRM("Detected %d MSI-X IRQ(s) supported", numIrqs);
+    return true;
+}
+
+
+bool
 CtrlrConfig::GetIrqScheme(enum nvme_irq_type &irq, uint16_t &numIrqs)
 {
     public_metrics_dev state;
@@ -85,7 +135,7 @@ CtrlrConfig::GetIrqScheme(enum nvme_irq_type &irq, uint16_t &numIrqs)
         LOG_ERR("%s", irqDesc.c_str());
         return false;
     }
-    LOG_NRM("Getting IRQ state: %d IRQ's of %s", numIrqs, irqDesc.c_str());
+    LOG_NRM("Getting IRQ state: %d IRQ(s) of %s", numIrqs, irqDesc.c_str());
     return true;
 }
 
@@ -103,7 +153,7 @@ CtrlrConfig::SetIrqScheme(enum nvme_irq_type newIrq, uint16_t numIrqs)
         LOG_ERR("Unable to decode IRQ scheme");
         return false;
     }
-    LOG_NRM("Setting IRQ state: %d IRQ's of %s", numIrqs, irqDesc.c_str());
+    LOG_NRM("Setting IRQ state: %d IRQ(s) of %s", numIrqs, irqDesc.c_str());
 
     struct interrupts state;
     state.irq_type = newIrq;

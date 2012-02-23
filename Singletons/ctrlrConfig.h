@@ -50,7 +50,7 @@ public:
     ~CtrlrConfig();
 
     /**
-     * Learns of the active IRQ scheme enabled in the device. It doesn't
+     * Gets the active IRQ scheme enabled in the device. It doesn't
      * indicate that IRQ's are being used, to use IRQ's CQ's must be created
      * to use IRQ's. The ACQ doesn't have a choice and always uses IRQ's if
      * there is a ACQ allocated..
@@ -77,6 +77,16 @@ public:
      * @return true if enabled, otherwise false
      */
     bool IrqsEnabled();
+
+    /**
+     * Learns of the spec'd IRQ capability by interrogating the DUT's Registers.
+     * @param capable returns true if IRQ scheme supported, otherwise false
+     * @param numIrqs Returns the number of IRQ's supported under the scheme.
+     *        if (capable == false) then ignore this parameter.
+     * @return true upon successful DUT interrogation, otherwise false
+     */
+    bool IsMSICapable(bool &capable, uint16_t &numIrqs);
+    bool IsMSIXCapable(bool &capable, uint16_t &numIrqs);
 
     /**
      * Is the controller enabled?
