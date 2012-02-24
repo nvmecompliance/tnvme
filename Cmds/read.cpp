@@ -39,15 +39,6 @@ Read::~Read()
 
 
 void
-Read::Dump(LogFilename filename, string fileHdr) const
-{
-    Cmd::Dump(filename, fileHdr);
-    PrpData::Dump(filename, "Payload contents:");
-    MetaData::Dump(filename, "Meta data contents:");
-}
-
-
-void
 Read::SetSLBA(uint64_t lba)
 {
     LOG_NRM("Setting SLBA = 0x%016llX", (long long unsigned int)lba);

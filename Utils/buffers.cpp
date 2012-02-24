@@ -84,15 +84,14 @@ Buffers::Dump(LogFilename filename, const uint8_t *buf, uint32_t bufOffset,
 
     LOG_NRM("Dump a test obj to filename: %s", filename.c_str());
     LOG_NRM("%s", fileHdr.c_str());
-    if ((fp = fopen(filename.c_str(), "a+")) == NULL) {
+    if ((fp = fopen(filename.c_str(), "a")) == NULL) {
         LOG_DBG("Failed to open file: %s", filename.c_str());
         throw exception();
     }
-    fprintf(fp, "This file: %s\n", filename.c_str());
     fprintf(fp, "%s\n", fileHdr.c_str());
 
     if (totalBufSize == 0) {
-        fprintf(fp, "BUFFER IS EMPTY.......\n");
+        fprintf(fp, "0x00000000: BUFFER IS EMPTY\n");
         goto Dump_EXIT_SUCCESS;
     } else if (bufOffset >= totalBufSize) {
         LOG_DBG("Offset into buffer 0x%08X >= to buffer size 0x%08X",

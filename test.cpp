@@ -18,6 +18,8 @@
 #include "test.h"
 #include "globals.h"
 #include "Utils/kernelAPI.h"
+#include "Utils/io.h"
+#include "Cmds/getLogPage.h"
 
 
 Test::Test(int fd, string grpName, string testName, SpecRev specRev,
@@ -93,7 +95,12 @@ Test::Run()
         ;   // Don't let exceptions propagate, fall thru to return boolean error
     }
 
+
+    LOG_NRM("FAILED test run detected above this log entry");
+    LOG_NRM("--START POST FAILURE STATE DUMP--");
     try {
+        // First gather all non-intrusive data, things that won't change the
+        // state of the DUT, effectively taking a snapshot.
         KernelAPI::DumpKernelMetrics(mFd, FileSystem::PrepLogFile(mGrpName,
             mTestName, "kmetrics", "postFailure"));
         KernelAPI::DumpPciSpaceRegs(mSpecRev,
@@ -102,10 +109,54 @@ Test::Run()
         KernelAPI::DumpCtrlrSpaceRegs(mSpecRev,
             FileSystem::PrepLogFile(mGrpName, mTestName, "ctrl",
             "regs.postFailure"), false);
+
+        // Now we can change the state of the DUT. We don't know the state of
+        // the ACQ/ASQ, or even if there are any in existence; place the DUT
+        // into a well known state and then interact gathering instrusive data
+        if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false) {
+            throw exception();
+        }
+
+        SharedACQPtr acq =
+            CAST_TO_ACQ(gRsrcMngr->AllocObj(Trackable::OBJ_ACQ, "ACQ"))
+        acq->Init(2);
+
+        SharedASQPtr asq =
+            CAST_TO_ASQ(gRsrcMngr->AllocObj(Trackable::OBJ_ASQ, "ASQ"))
+        asq->Init(2);
+
+        if (gCtrlrConfig->SetState(ST_ENABLE) == false)
+            throw exception();
+
+        LOG_NRM("Create get log page cmd and assoc some buffer memory");
+        SharedGetLogPagePtr getLogPg = SharedGetLogPagePtr(new GetLogPage(mFd));
+        LOG_NRM("Force identify to request error information");
+        getLogPg->SetLID(GetLogPage::LOGID_ERROR_INFO);
+
+        ConstSharedIdentifyPtr idCmdCtrlr = gInformative->GetIdentifyCmdCtrlr();
+        uint64_t errLogPgEntries = (idCmdCtrlr->GetValue(IDCTRLRCAP_ELPE) + 1);
+        uint32_t bufSize = (errLogPgEntries * GetLogPage::ERRINFO_DATA_SIZE);
+        uint16_t numDWAvail = (bufSize / sizeof(uint32_t));
+        getLogPg->SetNUMD(numDWAvail);
+
+        SharedMemBufferPtr cmdMem = SharedMemBufferPtr(new MemBuffer());
+        cmdMem->InitAlignment(bufSize, sysconf(_SC_PAGESIZE), true, 0);
+        send_64b_bitmask prpReq =
+            (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE);
+        getLogPg->SetPrpBuffer(prpReq, cmdMem);
+
+        IO::SendCmdToHdw(mGrpName, mTestName, 2000, asq, acq, getLogPg, "",
+            false);
+        getLogPg->Dump(FileSystem::PrepLogFile(mGrpName, mTestName,
+            "LogPageErr.postFailure"),
+            "Failed test post dump of error log page:");
     } catch (...) {
-        LOG_ERR("Failed to pull data from DUT after test failure");
+        LOG_NRM("This 2ndary failure could be caused by a prior");
     }
-    LOG_NRM("FAILED test case run");
+
+    LOG_NRM("--END POST FAILURE STATE DUMP--");
+    LOG_NRM("Failed group name: %s", mGrpName.c_str());
+    LOG_NRM("Failed test name:  %s", mTestName.c_str());
     return false;
 }
 

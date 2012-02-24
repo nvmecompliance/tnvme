@@ -96,7 +96,7 @@ VerifyDataPat_r10b::VerifyDataPattern()
 
     LOG_NRM("Calc buffer size to read %d log blks from media",
         WRITE_DATA_PAT_NUM_BLKS);
-    ConstSharedIdentifyPtr namSpcPtr = gInformative->GetIdentifyCmdNamespace(1);
+    ConstSharedIdentifyPtr namSpcPtr = gInformative->GetIdentifyCmdNamspc(1);
     if (namSpcPtr == Identify::NullIdentifyPtr) {
         LOG_ERR("Namespace #1 must exist");
         throw exception();

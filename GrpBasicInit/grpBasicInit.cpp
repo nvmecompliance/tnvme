@@ -22,8 +22,8 @@
 #include "verifyDataPat_r10b.h"
 #include "deleteIOQContig_r10b.h"
 #include "deleteIOQDiscontig_r10b.h"
-#include "createIOQContigIsr_r10b.h"
-#include "createIOQDiscontigIsr_r10b.h"
+#include "createIOQContigIrq_r10b.h"
+#include "createIOQDiscontigIrq_r10b.h"
 
 namespace GrpBasicInit {
 
@@ -49,8 +49,8 @@ GrpBasicInit::GrpBasicInit(size_t grpNum, SpecRev specRev, ErrorRegs errRegs,
         APPEND_TEST_AT_GROUP_LEVEL(DeleteIOQContig_r10b, fd, GrpBasicInit, errRegs)
         APPEND_TEST_AT_GROUP_LEVEL(DeleteIOQDiscontig_r10b, fd, GrpBasicInit, errRegs)
 
-        APPEND_TEST_AT_GROUP_LEVEL(CreateIOQContigIsr_r10b, fd, GrpBasicInit, errRegs)
-        APPEND_TEST_AT_GROUP_LEVEL(CreateIOQDiscontigIsr_r10b, fd, GrpBasicInit, errRegs)
+        APPEND_TEST_AT_GROUP_LEVEL(CreateIOQContigIrq_r10b, fd, GrpBasicInit, errRegs)
+        APPEND_TEST_AT_GROUP_LEVEL(CreateIOQDiscontigIrq_r10b, fd, GrpBasicInit, errRegs)
         APPEND_TEST_AT_GROUP_LEVEL(WriteDataPat_r10b, fd, GrpBasicInit, errRegs)
         APPEND_TEST_AT_GROUP_LEVEL(VerifyDataPat_r10b, fd, GrpBasicInit, errRegs)
         APPEND_TEST_AT_GROUP_LEVEL(DeleteIOQContig_r10b, fd, GrpBasicInit, errRegs)

@@ -20,6 +20,7 @@
 #include "createACQASQ_r10b.h"
 #include "../Cmds/getFeatures.h"
 #include "../Utils/kernelAPI.h"
+#include "../Queues/ce.h"
 
 namespace GrpInformative {
 

@@ -53,20 +53,18 @@ public:
     ~Informative();
 
     /**
-     * Retrieve a previously fetched identify command's capabilities struct.
-     * @return Identify::NullIdentifyPtr if the data wasn't retrieved correctly
+     * Retrieve a previously fetched identify command's controller struct.
+     * @return The requested data
      */
-    ConstSharedIdentifyPtr GetIdentifyCmdCapabilities() const
-        { return mIdentifyCmdCap; }
+    ConstSharedIdentifyPtr GetIdentifyCmdCtrlr() const;
 
     /**
-     * Retrieve a previously fetched identify command's namespace struct.
-     * @param namspcId Pass the ID of the namespace of interest
-     * @return Identify::NullIdentifyPtr if the data wasn't retrieved correctly,
-     *      or also if the requested namspcId is larger than the total number
-     *      of namespace structures available.
+     * Retrieve a previously fetched identify command's namspc struct.
+     * @param namspcId Pass the ID of the namspc of interest
+     * @return Identify::NullIdentifyPtr if the requested namspcId is larger
+     *      than the total number of namspc structures available.
      */
-    ConstSharedIdentifyPtr GetIdentifyCmdNamespace(uint64_t namspcId) const;
+    ConstSharedIdentifyPtr GetIdentifyCmdNamspc(uint64_t namspcId) const;
 
     /**
      * Retrieve a previously fetched get features's number of queues feature ID.
@@ -126,12 +124,12 @@ private:
 
     /**
      * GrpInformative must set this data.
-     * @param idCmdCap Pass the identify cmd after it retrieved the
-     *          capabilities data structure .
+     * @param idCmdCtrlr Pass the identify cmd after it retrieved the
+     *          controller data structure .
      */
-    SharedIdentifyPtr mIdentifyCmdCap;
-    void SetIdentifyCmdCapabilities(SharedIdentifyPtr idCmdCap)
-        { mIdentifyCmdCap = idCmdCap; }
+    SharedIdentifyPtr mIdentifyCmdCtrlr;
+    void SetIdentifyCmdCtrlr(SharedIdentifyPtr idCmdCtrlr)
+        { mIdentifyCmdCtrlr = idCmdCtrlr; }
 
     /**
      * GrpInformative must set this data. This method must be called in order

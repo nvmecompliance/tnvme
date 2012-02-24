@@ -63,17 +63,28 @@ Informative::~Informative()
 void
 Informative::Clear()
 {
-    mIdentifyCmdCap = Identify::NullIdentifyPtr;
+    mIdentifyCmdCtrlr = Identify::NullIdentifyPtr;
     mIdentifyCmdNamspc.clear();
     mGetFeaturesNumOfQ = 0;
 }
 
 
 ConstSharedIdentifyPtr
-Informative::GetIdentifyCmdNamespace(uint64_t namspcId) const
+Informative::GetIdentifyCmdCtrlr() const
+{
+    if (mIdentifyCmdCtrlr == Identify::NullIdentifyPtr) {
+        LOG_DBG("Framework bug: Identify data not allowed to be NULL");
+        throw exception();
+    }
+    return mIdentifyCmdCtrlr;
+}
+
+
+ConstSharedIdentifyPtr
+Informative::GetIdentifyCmdNamspc(uint64_t namspcId) const
 {
     if (namspcId > mIdentifyCmdNamspc.size()) {
-        LOG_DBG("Requested Identify namespace struct %llu, out of %lu",
+        LOG_DBG("Requested Identify namspc struct %llu, out of %lu",
             (long long unsigned int)namspcId, mIdentifyCmdNamspc.size());
         return Identify::NullIdentifyPtr;
     } else if (namspcId == 0) {
@@ -81,6 +92,10 @@ Informative::GetIdentifyCmdNamespace(uint64_t namspcId) const
         return Identify::NullIdentifyPtr;
     }
 
+    if (mIdentifyCmdNamspc[namspcId-1] == Identify::NullIdentifyPtr) {
+        LOG_DBG("Framework bug: Identify data not allowed to be NULL");
+        throw exception();
+    }
     return mIdentifyCmdNamspc[namspcId-1];
 }
 
@@ -120,14 +135,14 @@ Informative::GetBareNamespaces() const
     ConstSharedIdentifyPtr nsPtr;
 
     // Determine the Number of Namespaces (NN)
-    ConstSharedIdentifyPtr idCmdCap = GetIdentifyCmdCapabilities();
-    uint32_t nn = (uint32_t)idCmdCap->GetValue(IDCTRLRCAP_NN);
+    ConstSharedIdentifyPtr idCmdCtrlr = GetIdentifyCmdCtrlr();
+    uint32_t nn = (uint32_t)idCmdCtrlr->GetValue(IDCTRLRCAP_NN);
 
     // Bare namespaces supporting no meta data, and E2E is disabled;
     // Implies: Identify.LBAF[Identify.FLBAS].MS=0
     LOG_NRM("Seeking all bare namspc's");
     for (uint64_t i = 1; i <= nn; i++) {
-        nsPtr =  GetIdentifyCmdNamespace(i);
+        nsPtr =  GetIdentifyCmdNamspc(i);
         lbaFmt = nsPtr->GetLBAFormat();
         if (lbaFmt.MS == 0) {
             LOG_NRM("Identified bare namspc #%lld", (unsigned long long)i);
@@ -147,14 +162,14 @@ Informative::GetMetaNamespaces() const
     ConstSharedIdentifyPtr nsPtr;
 
     // Determine the Number of Namespaces (NN)
-    ConstSharedIdentifyPtr idCmdCap = GetIdentifyCmdCapabilities();
-    uint32_t nn = (uint32_t)idCmdCap->GetValue(IDCTRLRCAP_NN);
+    ConstSharedIdentifyPtr idCmdCtrlr = GetIdentifyCmdCtrlr();
+    uint32_t nn = (uint32_t)idCmdCtrlr->GetValue(IDCTRLRCAP_NN);
 
     // Meta namespaces supporting meta data, and E2E is disabled;
     // Implies: Identify.LBAF[Identify.FLBAS].MS=!0, Identify.DPS_b2:0=0
     LOG_NRM("Seeking all meta namspc's");
     for (uint64_t i = 1; i <= nn; i++) {
-        nsPtr =  GetIdentifyCmdNamespace(i);
+        nsPtr =  GetIdentifyCmdNamspc(i);
         lbaFmt = nsPtr->GetLBAFormat();
         dps = (uint8_t)nsPtr->GetValue(IDNAMESPC_DPS);
         if ((lbaFmt.MS != 0) && ((dps & 0x07) == 0)) {
@@ -175,14 +190,14 @@ Informative::GetE2ENamespaces() const
     ConstSharedIdentifyPtr nsPtr;
 
     // Determine the Number of Namespaces (NN)
-    ConstSharedIdentifyPtr idCmdCap = GetIdentifyCmdCapabilities();
-    uint32_t nn = (uint32_t)idCmdCap->GetValue(IDCTRLRCAP_NN);
+    ConstSharedIdentifyPtr idCmdCtrlr = GetIdentifyCmdCtrlr();
+    uint32_t nn = (uint32_t)idCmdCtrlr->GetValue(IDCTRLRCAP_NN);
 
     // Meta namespaces supporting meta data, and E2E is disabled;
     // Implies: Identify.LBAF[Identify.FLBAS].MS=!0, Identify.DPS_b2:0=0
     LOG_NRM("Seeking all E2E namspc's");
     for (uint64_t i = 1; i <= nn; i++) {
-        nsPtr =  GetIdentifyCmdNamespace(i);
+        nsPtr =  GetIdentifyCmdNamspc(i);
         lbaFmt = nsPtr->GetLBAFormat();
         dps = (uint8_t)nsPtr->GetValue(IDNAMESPC_DPS);
         if ((lbaFmt.MS != 0) && ((dps & 0x07) != 0)) {

@@ -17,10 +17,13 @@
 #ifndef _TRACKABLE_H_
 #define _TRACKABLE_H_
 
+#include <string>
 #include <boost/shared_ptr.hpp>
 
 class Trackable;    // forward definition
 typedef boost::shared_ptr<Trackable>        SharedTrackablePtr;
+
+using namespace std;
 
 
 /**
@@ -49,15 +52,12 @@ public:
         OBJ_DELETEIOSQ,         // Admin cmd set delete IOSQ cmd
         OBJ_GETFEATURES,        // Admin cmd set get features cmd
         OBJ_SETFEATURES,        // Admin cmd set get features cmd
+        OBJ_GETLOGPAGE,         // Admin cmd get log page cmd
         OBJ_WRITE,              // NVM cmd set write cmd
         OBJ_READ,               // NVM cmd set write cmd
 
         OBJTYPE_FENCE           // always must be last element
     } ObjType;
-
-    /// Used to compare for NULL pointers being returned by allocations
-    static SharedTrackablePtr NullTrackablePtr;
-
 
     /**
      * Those whom derive from this must register what type of object they
@@ -68,6 +68,10 @@ public:
     Trackable(ObjType objBeingCreated);
     virtual ~Trackable();
 
+    /// Used to compare for NULL pointers being returned by allocations
+    static SharedTrackablePtr NullTrackablePtr;
+
+    string  GetObjName(ObjType obj);
     ObjType GetObjType() const { return mObjType; }
 
 

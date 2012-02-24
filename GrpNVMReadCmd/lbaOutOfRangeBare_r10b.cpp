@@ -96,7 +96,7 @@ LBAOutOfRangeBare_r10b::RunCoreTest()
 
     vector<uint32_t> bare = gInformative->GetBareNamespaces();
     for (size_t i = 1; i < bare.size(); i++) {
-        namSpcPtr = gInformative->GetIdentifyCmdNamespace(i);
+        namSpcPtr = gInformative->GetIdentifyCmdNamspc(i);
         if (namSpcPtr == Identify::NullIdentifyPtr) {
             LOG_ERR("Identify namspc struct #%d doesn't exist", bare[i]);
             throw exception();

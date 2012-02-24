@@ -190,15 +190,15 @@ IOQRollChkSame_r10b::SearchSupportingNamespc(vector<uint32_t>& nameSpc,
     ConstSharedIdentifyPtr& namSpcPtr)
 {
     nameSpc = gInformative->GetBareNamespaces();
-    namSpcPtr = gInformative->GetIdentifyCmdNamespace(1);
+    namSpcPtr = gInformative->GetIdentifyCmdNamspc(1);
     if (namSpcPtr == Identify::NullIdentifyPtr) {
         LOG_NRM("Identify bare namspc struct #1 doesn't exist");
         nameSpc = gInformative->GetMetaNamespaces();
-        namSpcPtr = gInformative->GetIdentifyCmdNamespace(1);
+        namSpcPtr = gInformative->GetIdentifyCmdNamspc(1);
         if (namSpcPtr == Identify::NullIdentifyPtr) {
             LOG_NRM("Identify meta namspc struct #1 doesn't exist");
             nameSpc = gInformative->GetE2ENamespaces();
-            namSpcPtr = gInformative->GetIdentifyCmdNamespace(1);
+            namSpcPtr = gInformative->GetIdentifyCmdNamspc(1);
             if (namSpcPtr == Identify::NullIdentifyPtr) {
                 LOG_ERR("Identify E2E namspc struct #1 doesn't exist");
                 throw exception();

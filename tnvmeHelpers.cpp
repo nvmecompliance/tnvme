@@ -24,6 +24,7 @@
 #include "tnvmeHelpers.h"
 #include "globals.h"
 #include "Utils/kernelAPI.h"
+#include "Queues/ce.h"
 #include "Cmds/setFeatures.h"
 
 

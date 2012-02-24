@@ -45,22 +45,7 @@ Cmd::Cmd(int fd, Trackable::ObjType objBeingCreated) :
 
     mCmdSet = CMD_ADMIN;
     mDataDir = DATADIR_NONE;
-
-    switch (objBeingCreated) {
-    case OBJ_IDENTIFY:      mCmdName = "Identify";      break;
-    case OBJ_CREATEIOCQ:    mCmdName = "CreateIOCQ";    break;
-    case OBJ_CREATEIOSQ:    mCmdName = "CreateIOSQ";    break;
-    case OBJ_DELETEIOCQ:    mCmdName = "DeleteIOCQ";    break;
-    case OBJ_DELETEIOSQ:    mCmdName = "DeleteIOSQ";    break;
-    case OBJ_GETFEATURES:   mCmdName = "GetFeatures";   break;
-    case OBJ_SETFEATURES:   mCmdName = "SetFeatures";   break;
-    case OBJ_WRITE:         mCmdName = "Write";         break;
-    case OBJ_READ:          mCmdName = "Read";          break;
-    default:
-        LOG_DBG("Illegal cmd instantiation, add name here");
-        throw exception();
-        break;
-    }
+    mCmdName = GetObjName(objBeingCreated);
 }
 
 
@@ -280,6 +265,18 @@ Cmd::GetCID() const
 void
 Cmd::Dump(LogFilename filename, string fileHdr) const
 {
+    FILE *fp;
+
+    if ((fp = fopen(filename.c_str(), "a")) == NULL) {
+        LOG_DBG("Failed to open file: %s", filename.c_str());
+        throw exception();
+    }
+    fprintf(fp, "This file: %s\n", filename.c_str());
+    fprintf(fp, "%s\n\n", fileHdr.c_str());
+    fclose(fp);
+
     Buffers::Dump(filename, (uint8_t *)mCmdBuf->GetBuffer(), 0, ULONG_MAX,
-        mCmdBuf->GetBufSize(), fileHdr);
+        mCmdBuf->GetBufSize(), "Cmd contents:");
+    PrpData::Dump(filename, "Payload contents:");
+    MetaData::Dump(filename, "Meta data contents:");
 }

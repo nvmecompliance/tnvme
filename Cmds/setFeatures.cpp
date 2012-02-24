@@ -39,15 +39,6 @@ SetFeatures::~SetFeatures()
 
 
 void
-SetFeatures::Dump(LogFilename filename, string fileHdr) const
-{
-    Cmd::Dump(filename, fileHdr);
-    PrpData::Dump(filename, "Payload contents:");
-    MetaData::Dump(filename, "Meta data contents:");
-}
-
-
-void
 SetFeatures::SetNumberOfQueues(uint16_t ncqr, uint16_t nsqr)
 {
     LOG_NRM("Setting Set Features(Number of Queues): ncqr=0x%04X, nsqr=0x%04X",

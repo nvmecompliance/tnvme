@@ -20,6 +20,7 @@
 #include "createIOQDiscontigPoll_r10b.h"
 #include "grpDefs.h"
 #include "../Utils/kernelAPI.h"
+#include "../Queues/ce.h"
 
 namespace GrpBasicInit {
 
@@ -93,7 +94,7 @@ WriteDataPat_r10b::WriteDataPattern()
 
     LOG_NRM("Calc buffer size to write %d logical blks to media",
         WRITE_DATA_PAT_NUM_BLKS);
-    ConstSharedIdentifyPtr namSpcPtr = gInformative->GetIdentifyCmdNamespace(1);
+    ConstSharedIdentifyPtr namSpcPtr = gInformative->GetIdentifyCmdNamspc(1);
     if (namSpcPtr == Identify::NullIdentifyPtr) {
         LOG_ERR("Namespace #1 must exist");
         throw exception();

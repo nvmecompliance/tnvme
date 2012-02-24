@@ -105,24 +105,24 @@ DumpIdentifyData_r10b::SendIdentifyCtrlrStruct(SharedASQPtr asq,
     SharedACQPtr acq)
 {
     LOG_NRM("Create 1st identify cmd and assoc some buffer memory");
-    SharedIdentifyPtr idCmdCap = SharedIdentifyPtr(new Identify(mFd));
+    SharedIdentifyPtr idCmdCtrlr = SharedIdentifyPtr(new Identify(mFd));
     LOG_NRM("Force identify to request ctrlr capabilities struct");
-    idCmdCap->SetCNS(true);
+    idCmdCtrlr->SetCNS(true);
     SharedMemBufferPtr idMemCap = SharedMemBufferPtr(new MemBuffer());
     idMemCap->InitAlignment(Identify::IDEAL_DATA_SIZE, sizeof(uint64_t),
         true, 0);
-    send_64b_bitmask idPrpCap =
+    send_64b_bitmask prpReq =
         (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE);
-    idCmdCap->SetPrpBuffer(idPrpCap, idMemCap);
+    idCmdCtrlr->SetPrpBuffer(prpReq, idMemCap);
 
     IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
-        idCmdCap, "IdCtrlStruct", true);
+        idCmdCtrlr, "IdCtrlStruct", true);
 
-    idCmdCap->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "IdCtrlStruct"),
+    idCmdCtrlr->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "IdCtrlStruct"),
         "The complete admin cmd identify ctrl data structure decoded:");
 
     // Update the Informative singleton for all tests to see and use
-    gInformative->SetIdentifyCmdCapabilities(idCmdCap);
+    gInformative->SetIdentifyCmdCtrlr(idCmdCtrlr);
 }
 
 
@@ -134,9 +134,8 @@ DumpIdentifyData_r10b::SendIdentifyNamespaceStruct(SharedASQPtr asq,
     char qualifier[20];
 
 
-    ConstSharedIdentifyPtr idCmdCap =
-        gInformative->GetIdentifyCmdCapabilities();
-    if ((numNamSpc = idCmdCap->GetValue(IDCTRLRCAP_NN)) == 0) {
+    ConstSharedIdentifyPtr idCmdCtrlr = gInformative->GetIdentifyCmdCtrlr();
+    if ((numNamSpc = idCmdCtrlr->GetValue(IDCTRLRCAP_NN)) == 0) {
         LOG_ERR("Required to support >= 1 namespace");
         throw exception();
     }

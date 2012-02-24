@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-#include "createIOQDiscontigIsr_r10b.h"
+#include "createIOQDiscontigIrq_r10b.h"
 #include "globals.h"
 #include "createACQASQ_r10b.h"
 #include "grpDefs.h"
@@ -31,22 +31,22 @@ namespace GrpBasicInit {
 static uint16_t NumEntriesIOQ =     5;
 
 
-CreateIOQDiscontigIsr_r10b::CreateIOQDiscontigIsr_r10b(int fd, string grpName,
+CreateIOQDiscontigIrq_r10b::CreateIOQDiscontigIrq_r10b(int fd, string grpName,
     string testName, ErrorRegs errRegs) :
     Test(fd, grpName, testName, SPECREV_10b, errRegs)
 {
     // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 7");
-    mTestDesc.SetShort(     "Create discontiguous IOCQ(isr) and IOSQ's");
+    mTestDesc.SetShort(     "Create discontiguous IOCQ(irq) and IOSQ's");
     // No string size limit for the long description
     mTestDesc.SetLong(
         "Issue the admin commands Create discontiguous I/O SQ and Create I/Q "
-        "CQ(isr) to the ASQ and reap the resulting CE's from the ACQ to "
+        "CQ(irq) to the ASQ and reap the resulting CE's from the ACQ to "
         "certify those Q's have been created.");
 }
 
 
-CreateIOQDiscontigIsr_r10b::~CreateIOQDiscontigIsr_r10b()
+CreateIOQDiscontigIrq_r10b::~CreateIOQDiscontigIrq_r10b()
 {
     ///////////////////////////////////////////////////////////////////////////
     // Allocations taken from the heap and not under the control of the
@@ -55,8 +55,8 @@ CreateIOQDiscontigIsr_r10b::~CreateIOQDiscontigIsr_r10b()
 }
 
 
-CreateIOQDiscontigIsr_r10b::
-CreateIOQDiscontigIsr_r10b(const CreateIOQDiscontigIsr_r10b &other) :
+CreateIOQDiscontigIrq_r10b::
+CreateIOQDiscontigIrq_r10b(const CreateIOQDiscontigIrq_r10b &other) :
     Test(other)
 {
     ///////////////////////////////////////////////////////////////////////////
@@ -66,8 +66,8 @@ CreateIOQDiscontigIsr_r10b(const CreateIOQDiscontigIsr_r10b &other) :
 }
 
 
-CreateIOQDiscontigIsr_r10b &
-CreateIOQDiscontigIsr_r10b::operator=(const CreateIOQDiscontigIsr_r10b &other)
+CreateIOQDiscontigIrq_r10b &
+CreateIOQDiscontigIrq_r10b::operator=(const CreateIOQDiscontigIrq_r10b &other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -79,7 +79,7 @@ CreateIOQDiscontigIsr_r10b::operator=(const CreateIOQDiscontigIsr_r10b &other)
 
 
 bool
-CreateIOQDiscontigIsr_r10b::RunCoreTest()
+CreateIOQDiscontigIrq_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:

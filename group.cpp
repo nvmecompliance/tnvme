@@ -187,16 +187,6 @@ Group::RunTest(TestRef &tr, vector<TestRef> &skipTest)
         result = TR_SKIPPING;
     else
         result = (*testCase)->Run() ? TR_SUCCESS: TR_FAIL;
-
-    if (result == TR_FAIL) {
-        // Re-report the test which has failed to save a lookup in the log file
-        FORMAT_GROUP_DESCRIPTION(work, this)
-        LOG_NRM("%s", work.c_str());
-        FORMAT_TEST_NUM(work, "", tr.major, tr.minor)
-        work += (*testCase)->GetShortDescription();
-        LOG_NRM("%s", work.c_str());
-    }
-
     LOG_NRM("------------------END TEST------------------");
 
     // Guarantee nothing residual or unintended is left around. Enforce this

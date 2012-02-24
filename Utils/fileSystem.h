@@ -47,7 +47,10 @@ public:
      * Initializes the file system to use the specific root logging directory by
      * verifying it exists. It must exists and will not be created. Under the
      * root log directory 2 base logging directories are setup and cleaned. The
-     * default base log directory will be SetBaseLogDir(true).
+     * default base log directory will be SetBaseLogDir(true). The logging
+     * directory structure is as follows:
+     *     1) <root_log_dir>/<GrpInformative> or
+     *     2) <root_log_dir>/<GrpPending>
      * @note This method will not throw
      * @param dir Pass the name of the root log directory to certify
      * @return true if successful, otherwise false;
@@ -57,7 +60,9 @@ public:
     /**
      * Sets 1 of 2 possible base logging directories. GrpInformative gets its
      * own logging directory to remember the constant data which is always
-     * extracted before all test(s) execute.
+     * extracted before all test(s) execute. Selects one of:
+     *     1) <root_log_dir>/<GrpInformative> or
+     *     2) <root_log_dir>/<GrpPending>
      * @note This method will not throw
      * @param useGrpInfo Pass true for mLogDirPending, false for mLogDirPending
      */

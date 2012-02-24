@@ -14,8 +14,8 @@
  *  limitations under the License.
  */
 
-#ifndef _CREATEIOQDISCONTIGISR_r10b_H_
-#define _CREATEIOQDISCONTIGISR_r10b_H_
+#ifndef _CREATEIOQDISCONTIGIRQ_r10b_H_
+#define _CREATEIOQDISCONTIGIRQ_r10b_H_
 
 #include "test.h"
 #include "../Queues/asq.h"
@@ -31,21 +31,21 @@ namespace GrpBasicInit {
  * 1) See notes in the header file of the Test base class
  * \endverbatim
  */
-class CreateIOQDiscontigIsr_r10b : public Test
+class CreateIOQDiscontigIrq_r10b : public Test
 {
 public:
-    CreateIOQDiscontigIsr_r10b(int fd, string grpName, string testName,
+    CreateIOQDiscontigIrq_r10b(int fd, string grpName, string testName,
         ErrorRegs errRegs);
-    virtual ~CreateIOQDiscontigIsr_r10b();
+    virtual ~CreateIOQDiscontigIrq_r10b();
 
     /**
      * IMPORTANT: Read Test::Clone() header comment.
      */
-    virtual CreateIOQDiscontigIsr_r10b *Clone() const
-        { return new CreateIOQDiscontigIsr_r10b(*this); }
-    CreateIOQDiscontigIsr_r10b &operator=(
-        const CreateIOQDiscontigIsr_r10b &other);
-    CreateIOQDiscontigIsr_r10b(const CreateIOQDiscontigIsr_r10b &other);
+    virtual CreateIOQDiscontigIrq_r10b *Clone() const
+        { return new CreateIOQDiscontigIrq_r10b(*this); }
+    CreateIOQDiscontigIrq_r10b &operator=(
+        const CreateIOQDiscontigIrq_r10b &other);
+    CreateIOQDiscontigIrq_r10b(const CreateIOQDiscontigIrq_r10b &other);
 
 
 protected:

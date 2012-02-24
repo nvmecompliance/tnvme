@@ -34,26 +34,34 @@ Trackable::Trackable(ObjType objBeingCreated)
 
 Trackable::~Trackable()
 {
-    string obj;
+    LOG_DBG("Destroying trackable obj: %s", GetObjName(mObjType).c_str());
+}
 
-    switch (mObjType) {
-    case OBJ_MEMBUFFER:     obj = "MemBuffer";          break;
-    case OBJ_ACQ:           obj = "ACQ";                break;
-    case OBJ_ASQ:           obj = "ASQ";                break;
-    case OBJ_IOCQ:          obj = "IOCQ";               break;
-    case OBJ_IOSQ:          obj = "IOSQ";               break;
-    case OBJ_IDENTIFY:      obj = "Identify";           break;
-    case OBJ_CREATEIOCQ:    obj = "CreateIOCQ";         break;
-    case OBJ_CREATEIOSQ:    obj = "CreateIOSQ";         break;
-    case OBJ_DELETEIOCQ:    obj = "DeleteIOCQ";         break;
-    case OBJ_DELETEIOSQ:    obj = "DeleteIOSQ";         break;
-    case OBJ_GETFEATURES:   obj = "GetFeatures";        break;
-    case OBJ_SETFEATURES:   obj = "SeteFeatures";       break;
-    case OBJ_WRITE:         obj = "Write";              break;
-    case OBJ_READ:          obj = "Read";               break;
+
+string
+Trackable::GetObjName(ObjType obj)
+{
+    string name;
+
+    switch (obj) {
+    case OBJ_MEMBUFFER:     name = "MemBuffer";          break;
+    case OBJ_ACQ:           name = "ACQ";                break;
+    case OBJ_ASQ:           name = "ASQ";                break;
+    case OBJ_IOCQ:          name = "IOCQ";               break;
+    case OBJ_IOSQ:          name = "IOSQ";               break;
+    case OBJ_IDENTIFY:      name = "Identify";           break;
+    case OBJ_CREATEIOCQ:    name = "CreateIOCQ";         break;
+    case OBJ_CREATEIOSQ:    name = "CreateIOSQ";         break;
+    case OBJ_DELETEIOCQ:    name = "DeleteIOCQ";         break;
+    case OBJ_DELETEIOSQ:    name = "DeleteIOSQ";         break;
+    case OBJ_GETFEATURES:   name = "GetFeatures";        break;
+    case OBJ_SETFEATURES:   name = "SetFeatures";        break;
+    case OBJ_GETLOGPAGE:    name = "GetLogPage";         break;
+    case OBJ_WRITE:         name = "Write";              break;
+    case OBJ_READ:          name = "Read";               break;
     default:
         LOG_ERR("Forgot to label this unknown obj");
         throw exception();
     }
-    LOG_DBG("Destroying trackable obj: %s", obj.c_str());
+    return name;
 }

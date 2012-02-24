@@ -17,6 +17,8 @@
 #include <stdio.h>
 #include "ce.h"
 #include "globals.h"
+#include "../Cmds/getLogPage.h"
+#include "../Utils/io.h"
 
 
 // Contains details about every CE status field
@@ -50,6 +52,13 @@ ProcessCE::Validate(union CE &ce, CEStat status)
             mCEStatMetrics[status].sct, mCEStatMetrics[status].sc,
             ce.n.SF.b.SCT, ce.n.SF.b.SC);
         throw exception();
+    } else if ((ce.n.SF.b.SCT != mCEStatMetrics[CESTAT_SUCCESS].sct) ||
+               (ce.n.SF.b.SC  != mCEStatMetrics[CESTAT_SUCCESS].sc)) {
+
+        if (ce.n.SF.b.M) {
+            LOG_ERR("Illegal 'M' bit set while CE indicates success");
+            throw exception();
+        }
     }
 }
 
@@ -71,6 +80,13 @@ ProcessCE::ValidateDetailed(union CE &ce, StatbyBits &status)
             ce.n.SF.b.DNR, ce.n.SF.b.M, ce.n.SF.b.P, ce.n.SF.b.SCT,
             ce.n.SF.b.SC);
         throw exception();
+    } else if ((ce.n.SF.b.SCT != mCEStatMetrics[CESTAT_SUCCESS].sct) ||
+               (ce.n.SF.b.SC  != mCEStatMetrics[CESTAT_SUCCESS].sc)) {
+
+        if (ce.n.SF.b.M) {
+            LOG_ERR("Illegal 'M' bit set while CE indicates success");
+            throw exception();
+        }
     }
 }
 

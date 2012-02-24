@@ -20,7 +20,7 @@
 
 struct IdentifyDataType {
     uint16_t    offset;        // byte offset into the returned data struct
-    uint16_t    length;        // number of bytes this field runs
+    uint16_t    length;        // number of bytes this field consumes
     const char *desc;          // this fields formal description
 };
 

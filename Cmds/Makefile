@@ -31,7 +31,8 @@ SRC =				\
 	getFeatures.cpp		\
 	setFeatures.cpp		\
 	write.cpp		\
-	read.cpp		
+	read.cpp		\
+	getLogPage.cpp
 
 .SUFFIXES: .cpp
 

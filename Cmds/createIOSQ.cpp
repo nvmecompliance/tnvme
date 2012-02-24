@@ -85,11 +85,3 @@ CreateIOSQ::Init(const SharedIOSQPtr iosq)
     }   // Handle DWORD 11
 }
 
-
-void
-CreateIOSQ::Dump(LogFilename filename, string fileHdr) const
-{
-    Cmd::Dump(filename, fileHdr);
-    PrpData::Dump(filename, "Payload contents:");
-    MetaData::Dump(filename, "Meta data contents:");
-}

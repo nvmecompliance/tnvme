@@ -18,7 +18,6 @@
 #define _CQ_H_
 
 #include "queue.h"
-#include "ce.h"
 
 class CQ;    // forward definition
 typedef boost::shared_ptr<CQ>               SharedCQPtr;

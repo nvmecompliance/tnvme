@@ -55,11 +55,3 @@ DeleteIOSQ::Init(const SharedIOSQPtr iosq)
     }   // Handle DWORD 10
 }
 
-
-void
-DeleteIOSQ::Dump(LogFilename filename, string fileHdr) const
-{
-    Cmd::Dump(filename, fileHdr);
-    PrpData::Dump(filename, "Payload contents:");
-    MetaData::Dump(filename, "Meta data contents:");
-}

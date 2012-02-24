@@ -27,6 +27,7 @@
 #include "../Cmds/deleteIOSQ.h"
 #include "../Cmds/getFeatures.h"
 #include "../Cmds/setFeatures.h"
+#include "../Cmds/getLogPage.h"
 #include "../Cmds/write.h"
 #include "../Cmds/read.h"
 
@@ -86,6 +87,7 @@ ObjRsrc::AllocWorker(Trackable::ObjType type)
     INSTANTIATE_OBJ_w_fd(DELETEIOSQ, DeleteIOSQ)
     INSTANTIATE_OBJ_w_fd(GETFEATURES, GetFeatures)
     INSTANTIATE_OBJ_w_fd(SETFEATURES, SetFeatures)
+    INSTANTIATE_OBJ_w_fd(GETLOGPAGE, GetLogPage)
     INSTANTIATE_OBJ_w_fd(WRITE, Write)
     INSTANTIATE_OBJ_w_fd(READ, Read)
 
