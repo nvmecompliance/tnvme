@@ -121,8 +121,7 @@ IOQRollChkSame_r10b::IOQRollChkSame(SharedASQPtr asq, SharedACQPtr acq,
     uint16_t numEntriesIOQ)
 {
     SharedWritePtr writeCmd;
-    ConstSharedIdentifyPtr namSpcPtr;
-    Informative::NamspcType nsType;
+
 
     gCtrlrConfig->SetIOCQES(IOCQ::COMMON_ELEMENT_SIZE_PWR_OF_2);
     SharedIOCQPtr iocqContig = Queues::CreateIOCQContigToHdw(mFd, mGrpName,
@@ -137,8 +136,9 @@ IOQRollChkSame_r10b::IOQRollChkSame(SharedASQPtr asq, SharedACQPtr acq,
     LOG_NRM("(IOCQ Size, IOSQ Size)=(%d,%d)", iocqContig->GetNumEntries(),
         iosqContig->GetNumEntries());
 
-    FindSupportingNamspc(namSpcPtr, nsType);
-    SetWriteCmd(namSpcPtr, writeCmd, nsType);
+    ConstSharedIdentifyPtr namspc = gInformative->Get1stBareMetaE2E();
+    Informative::NamspcType nsType = gInformative->IdentifyNamespace(namspc);
+    SetWriteCmd(namspc, writeCmd, nsType);
 
     LOG_NRM("Send #%d cmds to hdw via the contiguous IOQ's",
         iocqContig->GetNumEntries() + 2);
@@ -149,33 +149,6 @@ IOQRollChkSame_r10b::IOQRollChkSame(SharedASQPtr asq, SharedACQPtr acq,
             iosqContig->GetNumEntries());
     }
     VerifyQPointers(iosqContig, iocqContig);
-}
-
-
-void
-IOQRollChkSame_r10b::FindSupportingNamspc(ConstSharedIdentifyPtr& namSpcPtr,
-        Informative::NamspcType& nsType)
-{
-    vector<uint32_t> nameSpc = gInformative->GetBareNamespaces();
-    if (nameSpc.size()) {
-        namSpcPtr = gInformative->GetIdentifyCmdNamspc(nameSpc[0]);
-        nsType = Informative::NS_BARE;
-    } else {
-        nameSpc = gInformative->GetMetaNamespaces();
-        if (nameSpc.size()) {
-            namSpcPtr = gInformative->GetIdentifyCmdNamspc(nameSpc[0]);
-            nsType = Informative::NS_META;
-        } else {
-            nameSpc = gInformative->GetE2ENamespaces();
-            if (nameSpc.size()) {
-                namSpcPtr = gInformative->GetIdentifyCmdNamspc(nameSpc[0]);
-                nsType = Informative::NS_E2E;
-            } else {
-                LOG_ERR("Either Bare, Meta or E2E namspc doesn't exist");
-                throw exception();
-            }
-        }
-    }
 }
 
 

@@ -86,13 +86,20 @@ public:
     } NamspcType;
 
     /**
+     * Interrogate the supplied identify cmd containing a namespace struct
+     * and return the type of namespace it describes.
+     * @return The namespace type or throws if it couldn't be determined.
+     */
+    NamspcType IdentifyNamespace(ConstSharedIdentifyPtr idCmdNamspc) const;
+
+    /**
      * Retrieve an array indicating all the namespace ID(s) for the appropriate
      * namespace type desired.
      * @note Bare: Namespaces supporting no meta data, and E2E is
      *       disabled; Implies: Identify.LBAF[Identify.FLBAS].MS=0
      * @note Meta: Namespaces supporting meta data, and E2E is disabled;
      *       Implies: Identify.LBAF[Identify.FLBAS].MS=!0, Identify.DPS_b2:0=0
-     * @note E2E: Namepspaces supporting meta data, and E2E is enabled;
+     * @note E2E: Namespaces supporting meta data, and E2E is enabled;
      *       Implies: Identify.LBAF[Identify.FLBAS].MS=!0, Identify.DPS_b2:0=!0
      * @return vector containing all desired namespaces; it could be an empty
      *       vector indicating no namespaces are present in the DUT, otherwise
@@ -101,6 +108,14 @@ public:
     vector<uint32_t> GetBareNamespaces() const;
     vector<uint32_t> GetMetaNamespaces() const;
     vector<uint32_t> GetE2ENamespaces() const;
+
+    /**
+     * Seek for the 1st bare namespace, and if not found, seek for the 1st
+     * meta namespace, and if not found, seek for the first E2E namespace, and
+     * if not found, throw.
+     * @return Namespace if successful, otherwise throws
+     */
+    ConstSharedIdentifyPtr Get1stBareMetaE2E() const;
 
 
 private:

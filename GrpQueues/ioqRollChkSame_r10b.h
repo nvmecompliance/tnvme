@@ -63,8 +63,6 @@ private:
         uint16_t numEntriesIOQ);
     void DisableAndEnableCtrl();
     void SetMetaDataSize();
-    void FindSupportingNamspc(ConstSharedIdentifyPtr& namSpcPtr,
-        Informative::NamspcType& nsType);
     void SetWriteCmd(ConstSharedIdentifyPtr& namSpcPtr,
         SharedWritePtr& writeCmd, Informative::NamspcType nsType);
     void SendToIOSQ(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
