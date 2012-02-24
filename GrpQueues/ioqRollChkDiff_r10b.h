@@ -14,8 +14,8 @@
  *  limitations under the License.
  */
 
-#ifndef _IOQROLLCHKSAME_r10b_H_
-#define _IOQROLLCHKSAME_r10b_H_
+#ifndef _IOQROLLCHKDIFF_r10b_H_
+#define _IOQROLLCHKDIFF_r10b_H_
 
 #include "test.h"
 #include "globals.h"
@@ -35,32 +35,31 @@ namespace GrpQueues {
  * 1) See notes in the header file of the Test base class
  * \endverbatim
  */
-class IOQRollChkSame_r10b : public Test
+class IOQRollChkDiff_r10b : public Test
 {
 public:
-    IOQRollChkSame_r10b(int fd, string grpName, string testName,
+    IOQRollChkDiff_r10b(int fd, string grpName, string testName,
         ErrorRegs errRegs);
-    virtual ~IOQRollChkSame_r10b();
+    virtual ~IOQRollChkDiff_r10b();
 
     /**
      * IMPORTANT: Read Test::Clone() header comment.
      */
-    virtual IOQRollChkSame_r10b *Clone() const
-        { return new IOQRollChkSame_r10b(*this); }
-    IOQRollChkSame_r10b &operator=(const IOQRollChkSame_r10b &other);
-    IOQRollChkSame_r10b(const IOQRollChkSame_r10b &other);
+    virtual IOQRollChkDiff_r10b *Clone() const
+        { return new IOQRollChkDiff_r10b(*this); }
+    IOQRollChkDiff_r10b &operator=(const IOQRollChkDiff_r10b &other);
+    IOQRollChkDiff_r10b(const IOQRollChkDiff_r10b &other);
 
 
 protected:
     virtual bool RunCoreTest();
 
-
 private:
     ///////////////////////////////////////////////////////////////////////////
     // Adding a member variable? Then edit the copy constructor and operator=().
     ///////////////////////////////////////////////////////////////////////////
-    void IOQRollChkSame(SharedASQPtr asq, SharedACQPtr acq,
-        uint16_t numEntriesIOQ);
+    void IOQRollChkDiff(SharedASQPtr asq, SharedACQPtr acq,
+        uint16_t numEntriesIOSQ, uint16_t numEntriesIOCQ);
     void DisableAndEnableCtrl();
     void SetMetaDataSize();
     void FindSupportingNamspc(ConstSharedIdentifyPtr& namSpcPtr,

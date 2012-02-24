@@ -78,6 +78,13 @@ public:
     /// @return Derives the value from DW0 of the CE & converts to a 1-base val
     uint16_t GetFeaturesNumOfIOSQs() const;
 
+    typedef enum {
+        NS_BARE,
+        NS_META,
+        NS_E2E,
+        NS_FENCE    // always must be the last element
+    } NamspcType;
+
     /**
      * Retrieve an array indicating all the namespace ID(s) for the appropriate
      * namespace type desired.

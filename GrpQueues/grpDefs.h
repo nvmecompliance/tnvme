@@ -29,6 +29,8 @@ namespace GrpQueues {
 
 #define DEFAULT_CMD_WAIT_ms         2000
 
+#define MAX(a,b)                    (((a) > (b)) ? (a) : (b))
+
 }   // namespace
 
 #endif
