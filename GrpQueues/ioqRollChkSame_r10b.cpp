@@ -81,7 +81,7 @@ IOQRollChkSame_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
-     * 1) Test CreateResources_r10b has been called previously
+     * 1) Test CreateResources_r10b has run prior.
      *  \endverbatim
      */
     uint64_t maxIOQEntries;

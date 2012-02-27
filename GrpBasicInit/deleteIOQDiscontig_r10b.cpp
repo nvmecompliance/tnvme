@@ -79,10 +79,11 @@ DeleteIOQDiscontig_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
-     * 1) The ASQ & ACQ's have been created by the RsrcMngr for group lifetime
-     * 2) All interrupts are disabled.
-     * 3) CreateIOQDiscontigPoll_r10b test case has setup the Q's to delete
-     * 4) CC.IOCQES and CC.IOSQES are already setup with correct values.
+     * 1) Both test CreateIOQContigPoll_r10b & CreateIOQDiscontigPoll_r10b has
+     *    run prior, or Both test CreateIOQContigIrq_r10b &
+     *    CreateIOQDiscontigIrq_r10b has run prior
+     * 2) An individual test within this group cannot run, the entire group
+     *    must be executed every time. Each subsequent test relies on the prior.
      * \endverbatim
      */
     uint64_t regVal;

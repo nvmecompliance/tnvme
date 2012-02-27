@@ -83,9 +83,9 @@ CreateIOQDiscontigIrq_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
-     * 1) The ASQ & ACQ's have been created by the RsrcMngr for group lifetime
-     * 2) 1 Interrupt(s) are enabled for this test
-     * 3) Empty ASQ & ACQ's
+     * 1) Test CreateIOQContigIrq_r10b has run prior.
+     * 2) An individual test within this group cannot run, the entire group
+     *    must be executed every time. Each subsequent test relies on the prior.
      * \endverbatim
      */
     uint32_t isrCount;

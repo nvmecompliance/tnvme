@@ -81,13 +81,14 @@ CtrlrResetIOQDeleted_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
-     * 1) This is the 1st within GrpResets.
-     * 2) The NVME device is disabled completely.
-     * 3) All interrupts are disabled.
+     * 1) none
      *  \endverbatim
      */
     uint64_t work;
     uint16_t numEntriesIOQ = 10;
+
+    if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
+        throw exception();
 
     // Verify the min requirements for this test are supported by DUT
     if (gRegisters->Read(CTLSPC_CAP, work) == false) {

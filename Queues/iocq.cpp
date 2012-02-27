@@ -61,6 +61,18 @@ IOCQ::Init(uint16_t qId, uint16_t numEntries, bool irqEnabled,
         LOG_ERR("Unable to learn IOCQ entry size");
         throw exception();
     }
+
+    // Nothing to gain by specifying an element size which the DUT doesn't
+    // support, the outcome is undefined, might succeed in crashing the kernel
+    ConstSharedIdentifyPtr idCtrlrCap = gInformative->GetIdentifyCmdCtrlr();
+    uint64_t value = idCtrlrCap->GetValue(IDCTRLRCAP_CQES);
+    uint8_t maxElemSize = (uint8_t)((value >> 4) & 0x0f);
+    uint8_t minElemSize = (uint8_t)((value >> 0) & 0x0f);
+    if ((entrySize < minElemSize) || (entrySize > maxElemSize)) {
+        LOG_ERR("Reg CC.IOCQES yields a bad element size: 0x%04X",
+            (uint16_t)pow(2, entrySize));
+        throw exception();
+    }
     CQ::Init(qId, (uint16_t)pow(2, entrySize), numEntries, irqEnabled, irqVec);
 }
 
@@ -85,6 +97,18 @@ IOCQ::Init(uint16_t qId, uint16_t numEntries,
 
     if (gCtrlrConfig->GetIOCQES(entrySize) == false) {
         LOG_ERR("Unable to learn IOCQ entry size");
+        throw exception();
+    }
+
+    // Nothing to gain by specifying an element size which the DUT doesn't
+    // support, the outcome is undefined, might succeed in crashing the kernel
+    ConstSharedIdentifyPtr idCtrlrCap = gInformative->GetIdentifyCmdCtrlr();
+    uint64_t value = idCtrlrCap->GetValue(IDCTRLRCAP_CQES);
+    uint8_t maxElemSize = (uint8_t)((value >> 4) & 0x0f);
+    uint8_t minElemSize = (uint8_t)((value >> 0) & 0x0f);
+    if ((entrySize < minElemSize) || (entrySize > maxElemSize)) {
+        LOG_ERR("Reg CC.IOCQES yields a bad element size: 0x%04X",
+            (uint16_t)pow(2, entrySize));
         throw exception();
     }
     CQ::Init(qId, (uint16_t)pow(2, entrySize), numEntries, memBuffer,

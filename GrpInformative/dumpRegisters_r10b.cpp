@@ -68,7 +68,7 @@ DumpRegisters_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
-     * 1) none
+     * 1) Test CreateResources_r10b has run prior.
      *  \endverbatim
      */
 

@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-#include "createACQASQ_r10b.h"
+#include "createResources_r10b.h"
 #include "globals.h"
 #include "grpDefs.h"
 #include "../Queues/acq.h"
@@ -24,7 +24,7 @@
 namespace GrpInformative {
 
 
-CreateACQASQ_r10b::CreateACQASQ_r10b(int fd, string grpName, string testName,
+CreateResources_r10b::CreateResources_r10b(int fd, string grpName, string testName,
     ErrorRegs errRegs) :
     Test(fd, grpName, testName, SPECREV_10b, errRegs)
 {
@@ -34,11 +34,11 @@ CreateACQASQ_r10b::CreateACQASQ_r10b(int fd, string grpName, string testName,
     // No string size limit for the long description
     mTestDesc.SetLong(
         "Create ACQ & ASQ kernel objects with group lifespan. Report this data "
-        "to the log directory filename: CreateACQASQ_r10b");
+        "to the log directory filename: CreateResources_r10b");
 }
 
 
-CreateACQASQ_r10b::~CreateACQASQ_r10b()
+CreateResources_r10b::~CreateResources_r10b()
 {
     ///////////////////////////////////////////////////////////////////////////
     // Allocations taken from the heap and not under the control of the
@@ -47,8 +47,8 @@ CreateACQASQ_r10b::~CreateACQASQ_r10b()
 }
 
 
-CreateACQASQ_r10b::
-CreateACQASQ_r10b(const CreateACQASQ_r10b &other) : Test(other)
+CreateResources_r10b::
+CreateResources_r10b(const CreateResources_r10b &other) : Test(other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -57,8 +57,8 @@ CreateACQASQ_r10b(const CreateACQASQ_r10b &other) : Test(other)
 }
 
 
-CreateACQASQ_r10b &
-CreateACQASQ_r10b::operator=(const CreateACQASQ_r10b &other)
+CreateResources_r10b &
+CreateResources_r10b::operator=(const CreateResources_r10b &other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -70,16 +70,13 @@ CreateACQASQ_r10b::operator=(const CreateACQASQ_r10b &other)
 
 
 bool
-CreateACQASQ_r10b::RunCoreTest()
+CreateResources_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
      * 1) This is the 1st within GrpBasicInit.
-     * 2) The NVME device is disabled
-     * 3) All interrupts are disabled.
      * \endverbatim
      */
-
     SharedACQPtr acq = CAST_TO_ACQ(
         gRsrcMngr->AllocObj(Trackable::OBJ_ACQ, ACQ_GROUP_ID))
     acq->Init(5);

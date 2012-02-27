@@ -18,7 +18,6 @@
 #include "grpDefs.h"
 #include "globals.h"
 #include "dumpIdentifyData_r10b.h"
-#include "createACQASQ_r10b.h"
 #include "../Cmds/identify.h"
 #include "../Utils/kernelAPI.h"
 #include "../Utils/queues.h"
@@ -77,8 +76,7 @@ DumpIdentifyData_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
-     * 1) The ASQ & ACQ's have been created by the RsrcMngr for group lifetime
-     * 2) All interrupts are disabled.
+     * 1) Test CreateResources_r10b has run prior.
      *  \endverbatim
      */
     uint32_t isrCount;

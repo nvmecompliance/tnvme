@@ -17,7 +17,6 @@
 #include "dumpGetFeatures_r10b.h"
 #include "globals.h"
 #include "grpDefs.h"
-#include "createACQASQ_r10b.h"
 #include "../Cmds/getFeatures.h"
 #include "../Utils/kernelAPI.h"
 #include "../Queues/ce.h"
@@ -76,8 +75,7 @@ DumpGetFeatures_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
-     * 1) The ASQ & ACQ's have been created by the RsrcMngr for group lifetime
-     * 2) All interrupts are disabled.
+     * 1) Test CreateResources_r10b has run prior.
      *  \endverbatim
      */
     uint32_t isrCount;

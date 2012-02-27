@@ -82,9 +82,10 @@ CreateIOQContigIrq_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
-     * 1) The ASQ & ACQ's have been created by the RsrcMngr for group lifetime
-     * 2) All interrupts are disabled.
-     * 3) Empty ASQ & ACQ's
+     * 1) Test CreateACQASQ_r10b, DeleteIOQContig_r10b, and
+     *    DeleteIOQDiscontig_r10b have run prior.
+     * 2) An individual test within this group cannot run, the entire group
+     *    must be executed every time. Each subsequent test relies on the prior.
      * \endverbatim
      */
     uint64_t work;

@@ -76,11 +76,11 @@ InitialStateAdmin_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
-     * 1) This is the 1st within GrpQueues.
-     * 2) The NVME device is disabled
-     * 3) All interrupts are disabled.
+     * 1) none
      *  \endverbatim
      */
+    if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
+        throw exception();
 
     // Create Admin Q Objects for Group lifetime
     SharedACQPtr acq = CAST_TO_ACQ(

@@ -77,9 +77,9 @@ VerifyDataPat_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
-     * 1) All interrupts are disabled.
-     * 2) Contigous IOQ pairs have been created by the RsrcMngr for group life
-     * 3) The NVM cmd set is the active cmd set.
+     * 1) Test WriteDataPat_r10b has run prior.
+     * 2) An individual test within this group cannot run, the entire group
+     *    must be executed every time. Each subsequent test relies on the prior.
      * \endverbatim
      */
 

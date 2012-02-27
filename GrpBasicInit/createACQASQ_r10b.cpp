@@ -76,11 +76,10 @@ CreateACQASQ_r10b::RunCoreTest()
     /** \verbatim
      * Assumptions:
      * 1) This is the 1st within GrpBasicInit.
-     * 2) The NVME device is disabled
-     * 3) All interrupts are disabled.
+     * 2) An individual test within this group cannot run, the entire group
+     *    must be executed every time. Each subsequent test relies on the prior.
      * \endverbatim
      */
-
     SharedACQPtr acq = CAST_TO_ACQ(
         gRsrcMngr->AllocObj(Trackable::OBJ_ACQ, ACQ_GROUP_ID))
     acq->Init(5);

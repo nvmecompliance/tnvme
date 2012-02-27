@@ -76,8 +76,8 @@ TestCase_r10b::RunCoreTest()
      * 1) none
      *  \endverbatim
      */
-
-     // Place local variables here
+    if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
+        throw exception();
 
     return true;
 }

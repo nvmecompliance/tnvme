@@ -74,6 +74,9 @@ AllCtrlRegs_r10b::RunCoreTest()
      * 1) none
      *  \endverbatim
      */
+    if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
+        throw exception();
+
     ValidateDefaultValues();
     ValidateROBitsAfterWriting();
     return true;

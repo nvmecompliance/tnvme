@@ -89,6 +89,9 @@ AdminQRollChkDiff_r10b::RunCoreTest()
     uint16_t mASQSize = MAX_ADMIN_Q_SIZE;
     uint16_t loopCnt = 0;
 
+    if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
+        throw exception();
+
     while (1) {
         LOG_NRM("(ASQSize, ACQSize, Loop Cnt) = (%d, %d, %d)",
             mASQSize, mACQSize, loopCnt++);

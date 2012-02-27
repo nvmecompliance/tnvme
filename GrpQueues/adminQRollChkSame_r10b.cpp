@@ -84,6 +84,9 @@ AdminQRollChkSame_r10b::RunCoreTest()
     uint16_t adminQSize = 2; // minimum Admin Q size.
     uint16_t loopCnt = 0;
 
+    if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
+        throw exception();
+
     while (1) {
         LOG_NRM("(ASQSize, ACQSize, Loop Cnt) = (%d, %d, %d)",
             adminQSize, adminQSize, loopCnt++);

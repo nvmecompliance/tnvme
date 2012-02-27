@@ -63,6 +63,18 @@ IOSQ::Init(uint16_t qId, uint16_t numEntries, uint16_t cqId,
         LOG_ERR("Unable to learn IOSQ entry size");
         throw exception();
     }
+
+    // Nothing to gain by specifying an element size which the DUT doesn't
+    // support, the outcome is undefined, might succeed in crashing the kernel
+    ConstSharedIdentifyPtr idCtrlrCap = gInformative->GetIdentifyCmdCtrlr();
+    uint64_t value = idCtrlrCap->GetValue(IDCTRLRCAP_SQES);
+    uint8_t maxElemSize = (uint8_t)((value >> 4) & 0x0f);
+    uint8_t minElemSize = (uint8_t)((value >> 0) & 0x0f);
+    if ((entrySize < minElemSize) || (entrySize > maxElemSize)) {
+        LOG_ERR("Reg CC.IOSQES yields a bad element size: 0x%04X",
+            (uint16_t)pow(2, entrySize));
+        throw exception();
+    }
     SQ::Init(qId, (uint16_t)pow(2, entrySize), numEntries, cqId);
 }
 
@@ -84,10 +96,22 @@ IOSQ::Init(uint16_t qId, uint16_t numEntries,
     		LOG_DBG("Illegal priority value, can't fit within 2 bits");
     		throw exception();
     		break;
-    	}
+    }
 
     if (gCtrlrConfig->GetIOSQES(entrySize) == false) {
         LOG_ERR("Unable to learn IOSQ entry size");
+        throw exception();
+    }
+
+    // Nothing to gain by specifying an element size which the DUT doesn't
+    // support, the outcome is undefined, might succeed in crashing the kernel
+    ConstSharedIdentifyPtr idCtrlrCap = gInformative->GetIdentifyCmdCtrlr();
+    uint64_t value = idCtrlrCap->GetValue(IDCTRLRCAP_SQES);
+    uint8_t maxElemSize = (uint8_t)((value >> 4) & 0x0f);
+    uint8_t minElemSize = (uint8_t)((value >> 0) & 0x0f);
+    if ((entrySize < minElemSize) || (entrySize > maxElemSize)) {
+        LOG_ERR("Reg CC.IOSQES yields a bad element size: 0x%04X",
+            (uint16_t)pow(2, entrySize));
         throw exception();
     }
     SQ::Init(qId, (uint16_t)pow(2, entrySize), numEntries, memBuffer, cqId);

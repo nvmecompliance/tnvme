@@ -16,7 +16,7 @@
 
 #include "grpInformative.h"
 #include "dumpRegisters_r10b.h"
-#include "createACQASQ_r10b.h"
+#include "createResources_r10b.h"
 #include "dumpIdentifyData_r10b.h"
 #include "dumpGetFeatures_r10b.h"
 
@@ -36,8 +36,8 @@ GrpInformative::GrpInformative(size_t grpNum, SpecRev specRev,
     //            Tests x.0, x.1, x.<next_test_num=2>  Minor num; test level
     switch (mSpecRev) {
     case SPECREV_10b:
+        APPEND_TEST_AT_GROUP_LEVEL(CreateResources_r10b, fd, GrpInformative, errRegs)
         APPEND_TEST_AT_GROUP_LEVEL(DumpRegisters_r10b, fd, GrpInformative, errRegs)
-        APPEND_TEST_AT_GROUP_LEVEL(CreateACQASQ_r10b, fd, GrpInformative, errRegs)
         APPEND_TEST_AT_GROUP_LEVEL(DumpIdentifyData_r10b, fd, GrpInformative, errRegs)
         APPEND_TEST_AT_GROUP_LEVEL(DumpGetFeatures_r10b, fd, GrpInformative, errRegs)
         break;
