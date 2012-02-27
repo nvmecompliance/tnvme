@@ -30,6 +30,11 @@ SetFeatures::SetFeatures() : BaseFeatures(0, Trackable::OBJTYPE_FENCE)
 SetFeatures::SetFeatures(int fd) : BaseFeatures(fd, Trackable::OBJ_SETFEATURES)
 {
     Init(Opcode, DATADIR_TO_DEVICE);
+
+    // No cmd should ever be created which violates these masking possibilities
+    send_64b_bitmask allowPrpMask = (send_64b_bitmask)
+        (MASK_PRP1_PAGE | MASK_PRP2_PAGE);
+    SetPrpAllowed(allowPrpMask);
 }
 
 

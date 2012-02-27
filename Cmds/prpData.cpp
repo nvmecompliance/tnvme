@@ -19,17 +19,14 @@
 
 using namespace std;
 
-const send_64b_bitmask PrpData::ALLOWED_BITS =
-    (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP1_LIST |
-                       MASK_PRP2_PAGE | MASK_PRP2_LIST);
-
 
 PrpData::PrpData()
 {
     mBufRW = MemBuffer::NullMemBufferPtr;
     mBufRO = NULL;
     mBufSize = 0;
-    mPrpFields = (send_64b_bitmask)0;
+    mPrpFields = (send_64b_bitmask)0;   // What this cmd wants to use
+    mPrpAllowed = (send_64b_bitmask)0;  // What this cmd is allowed to use
 }
 
 
@@ -41,8 +38,9 @@ PrpData::~PrpData()
 void
 PrpData::SetPrpBuffer(send_64b_bitmask prpFields, SharedMemBufferPtr memBuffer)
 {
-    if (prpFields & ~ALLOWED_BITS) {
-        LOG_DBG("Param prpFields only supports bits specific to PRP fields");
+    if (prpFields & ~mPrpAllowed) {
+        LOG_DBG("Attempting to set PRP field to disallowed value: 0x%04X",
+            prpFields);
         throw exception();
     } else if (mBufRO != NULL) {
         LOG_DBG("Buffer already setup as RO, cannot also setup RW buffer");
@@ -65,8 +63,9 @@ void
 PrpData::SetPrpBuffer(send_64b_bitmask prpFields, uint8_t const *memBuffer,
     uint64_t bufSize)
 {
-    if (prpFields & ~ALLOWED_BITS) {
-        LOG_DBG("Param prpFields only supports bits specific to PRP fields");
+    if (prpFields & ~mPrpAllowed) {
+        LOG_DBG("Attempting to set PRP field to disallowed value: 0x%04X",
+            prpFields);
         throw exception();
     } else if (mBufRW != MemBuffer::NullMemBufferPtr) {
         LOG_DBG("Buffer already setup as RW, cannot also setup RO buffer");
@@ -112,4 +111,19 @@ PrpData::Dump(LogFilename filename, string fileHdr) const
 {
     const uint8_t *buf = GetROPrpBuffer();
     Buffers::Dump(filename, buf, 0, ULONG_MAX, GetPrpBufferSize(), fileHdr);
+}
+
+
+void
+PrpData::SetPrpAllowed(send_64b_bitmask allowedBitmask)
+{
+    const send_64b_bitmask PRP_SPECIFIC_BITS = (send_64b_bitmask)
+        (MASK_PRP1_PAGE | MASK_PRP1_LIST | MASK_PRP2_PAGE | MASK_PRP2_LIST);
+
+    if (allowedBitmask & ~PRP_SPECIFIC_BITS) {
+        LOG_DBG("Allowed PRP bitmask violated strict values: 0x%04X",
+            allowedBitmask);
+        throw exception();
+    }
+    mPrpAllowed = allowedBitmask;
 }

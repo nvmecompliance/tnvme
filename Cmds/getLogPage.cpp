@@ -60,6 +60,12 @@ GetLogPage::GetLogPage() : AdminCmd(0, Trackable::OBJTYPE_FENCE)
 GetLogPage::GetLogPage(int fd) : AdminCmd(fd, Trackable::OBJ_GETLOGPAGE)
 {
     Init(Opcode, DATADIR_FROM_DEVICE);
+
+
+    // No cmd should ever be created which violates these masking possibilities
+    send_64b_bitmask allowPrpMask = (send_64b_bitmask)
+        (MASK_PRP1_PAGE | MASK_PRP2_PAGE);
+    SetPrpAllowed(allowPrpMask);
 }
 
 
