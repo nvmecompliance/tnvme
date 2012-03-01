@@ -32,29 +32,29 @@ GrpBasicInit::GrpBasicInit(size_t grpNum, SpecRev specRev, ErrorRegs errRegs,
     int fd) :
     Group(grpNum, specRev, "Basic Initialization")
 {
-    // IMPORTANT: Once a test case is assigned a position in the vector, i.e.
-    //            a test index/number of the form major.minor, then it should
-    //            reside in that position forever so test reference numbers
-    //            don't change per release. Future tests can be appended at
-    //            either the group level or the test level.
-    //            Tests 0.0, 1.0, <next_test_num=2>.0  Major num; group level
-    //            Tests x.0, x.1, x.<next_test_num=2>  Minor num; test level
+    // ------------------------CHANGE NOTICE: (3-2-2012)------------------------
+    // The rule to keep groups and tests at a well known constant reference
+    // number for all of time is to restrictive. A new scheme has replaced
+    // that strategy. For complete details refer to:
+    // "https://github.com/nvmecompliance/tnvme/wiki/Test-Numbering" and
+    // "https://github.com/nvmecompliance/tnvme/wiki/Test-Strategy"
     switch (mSpecRev) {
     case SPECREV_10b:
-        APPEND_TEST_AT_GROUP_LEVEL(CreateACQASQ_r10b, fd, GrpBasicInit, errRegs)
-        APPEND_TEST_AT_GROUP_LEVEL(CreateIOQContigPoll_r10b, fd, GrpBasicInit, errRegs)
-        APPEND_TEST_AT_GROUP_LEVEL(CreateIOQDiscontigPoll_r10b, fd, GrpBasicInit, errRegs)
-        APPEND_TEST_AT_GROUP_LEVEL(WriteDataPat_r10b, fd, GrpBasicInit, errRegs)
-        APPEND_TEST_AT_GROUP_LEVEL(VerifyDataPat_r10b, fd, GrpBasicInit, errRegs)
-        APPEND_TEST_AT_GROUP_LEVEL(DeleteIOQContig_r10b, fd, GrpBasicInit, errRegs)
-        APPEND_TEST_AT_GROUP_LEVEL(DeleteIOQDiscontig_r10b, fd, GrpBasicInit, errRegs)
-
-        APPEND_TEST_AT_GROUP_LEVEL(CreateIOQContigIrq_r10b, fd, GrpBasicInit, errRegs)
-        APPEND_TEST_AT_GROUP_LEVEL(CreateIOQDiscontigIrq_r10b, fd, GrpBasicInit, errRegs)
-        APPEND_TEST_AT_GROUP_LEVEL(WriteDataPat_r10b, fd, GrpBasicInit, errRegs)
-        APPEND_TEST_AT_GROUP_LEVEL(VerifyDataPat_r10b, fd, GrpBasicInit, errRegs)
-        APPEND_TEST_AT_GROUP_LEVEL(DeleteIOQContig_r10b, fd, GrpBasicInit, errRegs)
-        APPEND_TEST_AT_GROUP_LEVEL(DeleteIOQDiscontig_r10b, fd, GrpBasicInit, errRegs)
+        APPEND_TEST_AT_XLEVEL(CreateACQASQ_r10b, fd, GrpBasicInit, errRegs)
+        // Polling 1st
+        APPEND_TEST_AT_ZLEVEL(CreateIOQContigPoll_r10b, fd, GrpBasicInit, errRegs)
+        APPEND_TEST_AT_ZLEVEL(CreateIOQDiscontigPoll_r10b, fd, GrpBasicInit, errRegs)
+        APPEND_TEST_AT_ZLEVEL(WriteDataPat_r10b, fd, GrpBasicInit, errRegs)
+        APPEND_TEST_AT_ZLEVEL(VerifyDataPat_r10b, fd, GrpBasicInit, errRegs)
+        APPEND_TEST_AT_ZLEVEL(DeleteIOQContig_r10b, fd, GrpBasicInit, errRegs)
+        APPEND_TEST_AT_ZLEVEL(DeleteIOQDiscontig_r10b, fd, GrpBasicInit, errRegs)
+        // IRQ 2nd
+        APPEND_TEST_AT_ZLEVEL(CreateIOQContigIrq_r10b, fd, GrpBasicInit, errRegs)
+        APPEND_TEST_AT_ZLEVEL(CreateIOQDiscontigIrq_r10b, fd, GrpBasicInit, errRegs)
+        APPEND_TEST_AT_ZLEVEL(WriteDataPat_r10b, fd, GrpBasicInit, errRegs)
+        APPEND_TEST_AT_ZLEVEL(VerifyDataPat_r10b, fd, GrpBasicInit, errRegs)
+        APPEND_TEST_AT_ZLEVEL(DeleteIOQContig_r10b, fd, GrpBasicInit, errRegs)
+        APPEND_TEST_AT_ZLEVEL(DeleteIOQDiscontig_r10b, fd, GrpBasicInit, errRegs)
         break;
 
     default:

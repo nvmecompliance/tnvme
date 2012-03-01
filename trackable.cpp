@@ -34,7 +34,7 @@ Trackable::Trackable(ObjType objBeingCreated)
 
 Trackable::~Trackable()
 {
-    LOG_DBG("Destroying trackable obj: %s", GetObjName(mObjType).c_str());
+    LOG_DBG_DEEP("Destroying trackable obj: %s", GetObjName(mObjType).c_str());
 }
 
 

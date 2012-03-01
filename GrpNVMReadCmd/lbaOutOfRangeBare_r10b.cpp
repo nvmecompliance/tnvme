@@ -32,7 +32,7 @@ LBAOutOfRangeBare_r10b::LBAOutOfRangeBare_r10b(int fd, string mGrpName, string m
     ErrorRegs errRegs) :
     Test(fd, mGrpName, mTestName, SPECREV_10b, errRegs)
 {
-    // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 4,6");
     mTestDesc.SetShort(     "Issue read and cause SC=LBA Out of Range on bare namspcs");
     // No string size limit for the long description

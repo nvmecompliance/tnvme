@@ -21,32 +21,44 @@
 #include <string>
 #include <vector>
 #include "dnvme.h"
+#include "testRef.h"
 
 using namespace std;
 
 #define APPNAME         "tnvme"
 #define LEVEL           APPNAME
-#define LOG_NRM(fmt, ...)    \
+#define LOG_NRM(fmt, ...)       \
     fprintf(stderr, "%s: " fmt "\n", LEVEL, ## __VA_ARGS__);
-#define LOG_ERR(fmt, ...)    \
+#define LOG_ERR(fmt, ...)       \
     fprintf(stderr, "%s-err:%s:%d: " fmt "\n", LEVEL, __FILE__, __LINE__,   \
         ## __VA_ARGS__);
-#define LOG_ERR_STR(str)    \
+#define LOG_ERR_STR(str)        \
     fprintf(stderr, "%s-err:%s:%d: " "%s" "\n", LEVEL, __FILE__, __LINE__,  \
         str.c_str());
-#define LOG_WARN(fmt, ...)    \
+#define LOG_WARN(fmt, ...)      \
     fprintf(stderr, "%s-warn:%s:%d: " fmt "\n", LEVEL, __FILE__, __LINE__,  \
         ## __VA_ARGS__);
+
 #ifdef DEBUG
-#define LOG_DBG(fmt, ...)    \
+#define LOG_DBG(fmt, ...)       \
     fprintf(stderr, "%s-dbg:%s:%d: " fmt "\n", LEVEL, __FILE__, __LINE__,   \
         ## __VA_ARGS__);
 #else
-#define LOG_DBG(fmt, ...)    ;
+#define LOG_DBG(fmt, ...)       ;
+#endif
+
+#ifdef DEBUG_DEEP
+// Debug statements which were needed at 1 point in time but they end up
+// cluttering up the logging system. Quiet these logs until needed again.
+#define LOG_DBG_DEEP(fmt, ...)  \
+    fprintf(stderr, "%s-dbg-deep:%s:%d: " fmt "\n", LEVEL, __FILE__,        \
+        __LINE__, ## __VA_ARGS__);
+#else
+#define LOG_DBG_DEEP(fmt, ...)  ;
 #endif
 
 
-#define MAX_CHAR_PER_LINE_DESCRIPTION       66
+#define MAX_CHAR_PER_LINE_DESCRIPTION       63
 
 
 typedef enum {
@@ -54,25 +66,23 @@ typedef enum {
     SPECREVTYPE_FENCE        // always must be last element
 } SpecRev;
 
-struct TestRef {
-    size_t  group;
-    size_t  major;
-    size_t  minor;
-    TestRef() {group = 0; major = 0; minor = 0; }
-    TestRef(size_t g, size_t j, size_t n) { group = g; major = j, minor = n; }
-};
 
 /**
- * req      group          major         minor     implies
+ * Combination/permutation not listed below should be considered illegal. The
+ * last permutation listed, request spec'd test within spec'd group, causes
+ * the zero, configuration, and sequence dependencies to become invoked, refer
+ * to: https://github.com/nvmecompliance/tnvme/wiki/Test-Numbering
+ *
+ * req      group       xLevel      yLevel      zLevel    implies
  * -----------------------------------------------------------------------------
- * false     n/a            n/a           n/a      nothing has been requested
- * true   ==UINT_MAX        n/a           n/a      request all groups all tests
- * true   !=UINT_MAX     ==UINT_MAX || ==UINT_MAX  request spec'd group
- * true   !=UINT_MAX     !=UINT_MAX && !=UINT_MAX  request spec'd test in group
+ * false     n/a         n/a         n/a         n/a      nothing has been requested
+ * true   ==UINT_MAX     n/a         n/a         n/a      request all test within all all groups
+ * true   !=UINT_MAX  ==UINT_MAX  ==UINT_MAX  ==UINT_MAX  request all test within spec'd group
+ * true   !=UINT_MAX  !=UINT_MAX  !=UINT_MAX  !=UINT_MAX  request spec'd test within spec'd group
  */
 struct TestTarget {
     bool            req;     // requested by cmd line
-    TestRef t;
+    TestRef         t;
 };
 
 struct RmmapIo {

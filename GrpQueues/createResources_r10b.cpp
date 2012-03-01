@@ -31,7 +31,7 @@ CreateResources_r10b::CreateResources_r10b(int fd, string grpName, string testNa
     ErrorRegs errRegs) :
     Test(fd, grpName, testName, SPECREV_10b, errRegs)
 {
-    // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 5");
     mTestDesc.SetShort(     "Create resources needed by subsequent tests");
     // No string size limit for the long description
@@ -77,9 +77,7 @@ CreateResources_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
-     * 1) This is the 1st within GrpNVMReadCmd.
-     * 2) The NVME device is disabled
-     * 3) All interrupts are disabled.
+     * 1) none
      * \endverbatim
      */
     if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)

@@ -21,7 +21,7 @@
 
 TestDescribe::TestDescribe()
 {
-    // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mShortDesc =            "Missing short test description";
     mCompliance =           "Missing compliance description";
     // No string size limit for the long description

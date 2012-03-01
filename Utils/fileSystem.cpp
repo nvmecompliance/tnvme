@@ -48,14 +48,14 @@ FileSystem::SetRootLogDir(string dir)
     try {
         if (boost::filesystem::exists(dir.c_str())) {
             SetBaseLogDir(false);
-            snprintf(work, sizeof(work), "mkdir -m 777 %s",
+            snprintf(work, sizeof(work), "mkdir -p -m 777 %s",
                 mLogDirPending.c_str());
             system(work);
             if (PrepLogDir() == false)
                 return false;
 
             SetBaseLogDir(true);    // this is the default
-            snprintf(work, sizeof(work), "mkdir -m 777 %s",
+            snprintf(work, sizeof(work), "mkdir -p -m 777 %s",
                 mLogDirGrpInfo.c_str());
             system(work);
             if (PrepLogDir() == false)
@@ -79,13 +79,13 @@ FileSystem::PrepLogDir()
     char work[256];
     string logDir = (mUseGrpInfo) ? mLogDirGrpInfo : mLogDirPending;
 
-    snprintf(work, sizeof(work), "rm -f %s*", logDir.c_str());
+    snprintf(work, sizeof(work), "rm -rf %s*", logDir.c_str());
     system(work);
-    if (boost::filesystem::exists(logDir.c_str())) {
-        LOG_ERR("Unable to create: %s", logDir.c_str());
-        return true;
+    if (boost::filesystem::exists(work)) {
+        LOG_ERR("Unable to remove files within: %s", logDir.c_str());
+        return false;
     }
-    return false;
+    return true;
 }
 
 
