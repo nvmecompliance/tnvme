@@ -19,6 +19,8 @@
 
 #include "../group.h"
 
+namespace GrpTemplate {
+
 
 /**
 * This class implements a template for all groups to come.
@@ -30,5 +32,6 @@ public:
     virtual ~GrpTemplate();
 };
 
+}   // namespace
 
 #endif

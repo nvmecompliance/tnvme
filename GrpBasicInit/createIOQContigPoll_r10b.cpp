@@ -23,6 +23,8 @@
 #include "../Utils/kernelAPI.h"
 #include "../Utils/queues.h"
 
+namespace GrpBasicInit {
+
 #define IOQ_ID                      1
 
 static uint16_t NumEntriesIOQ =     5;
@@ -32,7 +34,7 @@ CreateIOQContigPoll_r10b::CreateIOQContigPoll_r10b(int fd, string grpName,
     string testName, ErrorRegs errRegs) :
     Test(fd, grpName, testName, SPECREV_10b, errRegs)
 {
-    // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 7");
     mTestDesc.SetShort(     "Create contiguous IOCQ(poll) and IOSQ's");
     // No string size limit for the long description
@@ -79,23 +81,20 @@ CreateIOQContigPoll_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
-     * 1) The ASQ & ACQ's have been created by the RsrcMngr for group lifetime
-     * 2) All interrupts are disabled.
-     * 3) Empty ASQ & ACQ's
+     * 1) Test CreateACQASQ_r10b has run prior.
+     * 2) An individual test within this group cannot run, the entire group
+     *    must be executed every time. Each subsequent test relies on the prior.
      * \endverbatim
      */
     uint64_t work;
     uint32_t isrCount;
-
-    KernelAPI::DumpKernelMetrics(mFd,
-        FileSystem::PrepLogFile(mGrpName, mTestName, "kmetrics", "before"));
 
     // Lookup objs which were created in a prior test within group
     SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
     SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
 
     // Verify assumptions are active/enabled/present/setup
-    if (acq->ReapInquiry(isrCount) != 0) {
+    if (acq->ReapInquiry(isrCount, true) != 0) {
         LOG_ERR("The ACQ should not have any CE's waiting before testing");
         throw exception();
     } else if (gRegisters->Read(CTLSPC_CAP, work) == false) {
@@ -127,8 +126,7 @@ CreateIOQContigPoll_r10b::RunCoreTest()
     Queues::CreateIOSQContigToHdw(mFd, mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
         asq, acq, IOQ_ID, NumEntriesIOQ, true, IOSQ_CONTIG_GROUP_ID, IOQ_ID, 0);
 
-
-    KernelAPI::DumpKernelMetrics(mFd,
-        FileSystem::PrepLogFile(mGrpName, mTestName, "kmetrics", "after"));
     return true;
 }
+
+}   // namespace

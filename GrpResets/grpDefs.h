@@ -17,6 +17,8 @@
 #ifndef _GRPDEFS_H_
 #define _GRPDEFS_H_
 
+namespace GrpResets {
+
 #define ACQ_GROUP_ID                "ACQ"
 #define ASQ_GROUP_ID                "ASQ"
 #define IOCQ_CONTIG_GROUP_ID        "IOCQContig"
@@ -25,5 +27,7 @@
 #define IOSQ_DISCONTIG_GROUP_ID     "IOSQDiscontig"
 
 #define DEFAULT_CMD_WAIT_ms         2000
+
+}   // namespace
 
 #endif

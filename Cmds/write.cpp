@@ -30,20 +30,16 @@ Write::Write() : NVMCmd(0, Trackable::OBJTYPE_FENCE)
 Write::Write(int fd) : NVMCmd(fd, Trackable::OBJ_WRITE)
 {
     Init(Opcode, DATADIR_TO_DEVICE);
+
+    // No cmd should ever be created which violates these masking possibilities
+    send_64b_bitmask allowPrpMask = (send_64b_bitmask)
+        (MASK_PRP1_PAGE | MASK_PRP2_PAGE | MASK_PRP2_LIST);
+    SetPrpAllowed(allowPrpMask);
 }
 
 
 Write::~Write()
 {
-}
-
-
-void
-Write::Dump(LogFilename filename, string fileHdr) const
-{
-    Cmd::Dump(filename, fileHdr);
-    PrpData::Dump(filename, "Payload contents:");
-    MetaData::Dump(filename, "Meta data contents:");
 }
 
 

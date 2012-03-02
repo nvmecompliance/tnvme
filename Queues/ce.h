@@ -86,29 +86,37 @@ public:
 
     /**
      * Peeks at the status field of the CE, logs a human readable description
-     * of the status and returns when (status == success), otherwise it
-     * will throw.
-     * @note This method will throw when (status != 0)
+     * of the status and returns when the supplied expected status is what is
+     * contained within the supplied CE, otherwise it will throw.
+     * @note This method may throw
      * @param ce Pass the CE to perform the interrogation against
+     * @param status Pass the expected status to verify with
      */
-    static void ValidateStatus(union CE &ce);
+    static void Validate(union CE &ce, CEStat status = CESTAT_SUCCESS);
+
+    /**
+     * Peeks at the status field of the CE, logs a human readable description
+     * of the status and returns when the supplied expected status is what is
+     * contained within the supplied CE, otherwise it will throw.
+     * @note This method may throw
+     * @param ce Pass the CE to perform the interrogation against
+     * @param status Pass the expected state of the CE to verify with
+     */
+    static void ValidateDetailed(union CE &ce, StatbyBits &status);
 
     /**
      * Indicate the status of the CE in the log file, i.e. stderr.
      * @note This method may throw
-     * @param ce Pass the CE to perform the interrogation against
-     * @return true if (status == success), otherwise false.
      */
-    static bool LogStatus(union CE &ce);
+    static void LogStatus(union CE &ce);
 
     /**
      * Decode the status of the CE into human readable strings.
      * @note This method may throw
      * @param ce Pass the CE to perform the interrogation against
      * @param desc Returns an array of decoded strings
-     * @return true if (status == success), otherwise false.
      */
-    static bool DecodeStatus(union CE &ce, vector<string> &desc);
+    static void DecodeStatus(union CE &ce, vector<string> &desc);
 
 private:
     /// Contains details about every CE status field

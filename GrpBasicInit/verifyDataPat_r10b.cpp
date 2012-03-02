@@ -23,12 +23,14 @@
 #include "../Utils/kernelAPI.h"
 #include "../Utils/io.h"
 
+namespace GrpBasicInit {
+
 
 VerifyDataPat_r10b::VerifyDataPat_r10b(int fd, string grpName, string testName,
     ErrorRegs errRegs) :
     Test(fd, grpName, testName, SPECREV_10b, errRegs)
 {
-    // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 6");
     mTestDesc.SetShort(     "Verify a well known data pattern from media");
     // No string size limit for the long description
@@ -75,18 +77,13 @@ VerifyDataPat_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
-     * 1) All interrupts are disabled.
-     * 2) Contigous IOQ pairs have been created by the RsrcMngr for group life
-     * 3) The NVM cmd set is the active cmd set.
+     * 1) Test WriteDataPat_r10b has run prior.
+     * 2) An individual test within this group cannot run, the entire group
+     *    must be executed every time. Each subsequent test relies on the prior.
      * \endverbatim
      */
-    KernelAPI::DumpKernelMetrics(mFd,
-        FileSystem::PrepLogFile(mGrpName, mTestName, "kmetrics", "before"));
 
     VerifyDataPattern();
-
-    KernelAPI::DumpKernelMetrics(mFd,
-        FileSystem::PrepLogFile(mGrpName, mTestName, "kmetrics", "after"));
     return true;
 }
 
@@ -99,7 +96,7 @@ VerifyDataPat_r10b::VerifyDataPattern()
 
     LOG_NRM("Calc buffer size to read %d log blks from media",
         WRITE_DATA_PAT_NUM_BLKS);
-    ConstSharedIdentifyPtr namSpcPtr = gInformative->GetIdentifyCmdNamespace(1);
+    ConstSharedIdentifyPtr namSpcPtr = gInformative->GetIdentifyCmdNamspc(1);
     if (namSpcPtr == Identify::NullIdentifyPtr) {
         LOG_ERR("Namespace #1 must exist");
         throw exception();
@@ -172,3 +169,5 @@ VerifyDataPat_r10b::SendToIOSQ(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
             "Data read from media miscompared from written");
     }
 }
+
+}   // namespace

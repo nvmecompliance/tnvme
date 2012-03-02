@@ -17,8 +17,12 @@
 #ifndef _GRPDEFS_H_
 #define _GRPDEFS_H_
 
+namespace GrpInformative {
+
 #define ACQ_GROUP_ID                "ACQ"
 #define ASQ_GROUP_ID                "ASQ"
 #define DEFAULT_CMD_WAIT_ms         2000
+
+}   // namespace
 
 #endif

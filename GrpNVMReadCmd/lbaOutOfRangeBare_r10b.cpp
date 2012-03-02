@@ -14,14 +14,16 @@
  *  limitations under the License.
  */
 
+#include "boost/format.hpp"
 #include "lbaOutOfRangeBare_r10b.h"
 #include "globals.h"
 #include "grpDefs.h"
-#include "../Queues/acq.h"
-#include "../Queues/asq.h"
-#include "../Utils/kernelAPI.h"
-#include "../Utils/queues.h"
+#include "../Queues/iocq.h"
+#include "../Queues/iosq.h"
+#include "../Utils/io.h"
 #include "../Cmds/read.h"
+
+namespace GrpNVMReadCmd {
 
 #define RD_NUM_BLKS                 2
 
@@ -30,7 +32,7 @@ LBAOutOfRangeBare_r10b::LBAOutOfRangeBare_r10b(int fd, string mGrpName, string m
     ErrorRegs errRegs) :
     Test(fd, mGrpName, mTestName, SPECREV_10b, errRegs)
 {
-    // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 4,6");
     mTestDesc.SetShort(     "Issue read and cause SC=LBA Out of Range on bare namspcs");
     // No string size limit for the long description
@@ -40,8 +42,7 @@ LBAOutOfRangeBare_r10b::LBAOutOfRangeBare_r10b(int fd, string mGrpName, string m
         "requesting 2 data blocks. 1) Issue cmd where 1st block starts at LBA "
         "(Identify.NSZE - 1), expect failure 2) Issue cmd where 1st block "
         "starts at LBA Identify.NSZE, expect failure. 3) Issue cmd where 1st "
-        "block starts at 2nd to last max LBA value, expect failure. 4) Issue "
-        "cmd where 1st block starts at last max LBA value, expect failure.");
+        "block starts at 2nd to last max LBA value, expect success.");
 }
 
 
@@ -81,10 +82,9 @@ LBAOutOfRangeBare_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
-     * 1) Test CreateResources_r10b has been called previously
+     * 1) Test CreateResources_r10b has run prior.
      * \endverbatim
      */
-#if 0
     uint64_t nsze;
     ConstSharedIdentifyPtr namSpcPtr;
 
@@ -95,8 +95,8 @@ LBAOutOfRangeBare_r10b::RunCoreTest()
         gRsrcMngr->GetObj(IOCQ_CONTIG_GROUP_ID))
 
     vector<uint32_t> bare = gInformative->GetBareNamespaces();
-    for (size_t i = 1; i <= bare.size(); i++) {
-        namSpcPtr = gInformative->GetIdentifyCmdNamespace(i);
+    for (size_t i = 1; i < bare.size(); i++) {
+        namSpcPtr = gInformative->GetIdentifyCmdNamspc(i);
         if (namSpcPtr == Identify::NullIdentifyPtr) {
             LOG_ERR("Identify namspc struct #%d doesn't exist", bare[i]);
             throw exception();
@@ -116,20 +116,27 @@ LBAOutOfRangeBare_r10b::RunCoreTest()
         readCmd->SetNSID(bare[i]);
         readCmd->SetNLB(RD_NUM_BLKS - 1);    // convert to 0-based value
 
+        LOG_NRM("Issue cmd where 1st block starts at LBA (Identify.NSZE-2)");
+        readCmd->SetSLBA(nsze - 2);
+        IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosqContig,
+            iocqContig, readCmd, "nsze-2", true);
 
-        LOG_NRM("Issue cmd where 1st block starts at LBA (Identify.NSZE - 1)");
+        LOG_NRM("Issue cmd where 1st block starts at LBA (Identify.NSZE-1)");
         readCmd->SetSLBA(nsze - 1);
-        IOSendToIOSQ(iosqContig, iocqContig, readCmd, "nsze-1", dataPat, readMem);
+        SendCmdToHdw(iosqContig, iocqContig, readCmd, "nsze-1");
+
+        LOG_NRM("Issue cmd where 1st block starts at LBA (Identify.NSZE)");
+        readCmd->SetSLBA(nsze);
+        SendCmdToHdw(iosqContig, iocqContig, readCmd, "nsze");
     }
-#endif
+
     return true;
 }
 
-#if 0
+
 void
-LBAOutOfRangeBare_r10b::SendCmdToHdw(string mGrpName, string mTestName,
-    uint16_t ms, SharedSQPtr sq, SharedCQPtr cq, SharedCmdPtr cmd,
-    string qualify, bool verbose)
+LBAOutOfRangeBare_r10b::SendCmdToHdw(SharedSQPtr sq, SharedCQPtr cq,
+    SharedCmdPtr cmd, string qualify)
 {
     uint16_t numCE;
     uint32_t isrCount;
@@ -137,7 +144,8 @@ LBAOutOfRangeBare_r10b::SendCmdToHdw(string mGrpName, string mTestName,
     string work;
 
 
-    if ((numCE = cq->ReapInquiry(isrCountB4)) != 0) {
+
+    if ((numCE = cq->ReapInquiry(isrCountB4, true)) != 0) {
         LOG_ERR("Require 0 CE's within CQ %d, not upheld, found %d",
             cq->GetQId(), numCE);
         throw exception();
@@ -145,20 +153,20 @@ LBAOutOfRangeBare_r10b::SendCmdToHdw(string mGrpName, string mTestName,
 
     LOG_NRM("Send the cmd to hdw via SQ %d", sq->GetQId());
     sq->Send(cmd);
-    if (verbose) {
-        work = str(format("Just B4 ringing SQ %d doorbell, dump entire SQ") %
-            sq->GetQId());
-        sq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName,
-            "sq." + cmd->GetName(), qualify), work);
-    }
+    work = str(boost::format(
+        "Just B4 ringing SQ %d doorbell, dump entire SQ") % sq->GetQId());
+    sq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName,
+        "sq." + cmd->GetName(), qualify), work);
     sq->Ring();
 
 
     LOG_NRM("Wait for the CE to arrive in CQ %d", cq->GetQId());
-    if (cq->ReapInquiryWaitSpecify(ms, 1, numCE, isrCount) == false) {
+    if (cq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE, isrCount)
+        == false) {
+
         LOG_ERR("Unable to see CE for issued cmd");
-        work = str(format("Unable to see any CE's in CQ %d, dump entire CQ") %
-            cq->GetQId());
+        work = str(boost::format(
+            "Unable to see any CE's in CQ %d, dump entire CQ") % cq->GetQId());
         cq->Dump(
             FileSystem::PrepLogFile(mGrpName, mTestName, "cq." + cmd->GetName(),
             qualify), work);
@@ -167,15 +175,14 @@ LBAOutOfRangeBare_r10b::SendCmdToHdw(string mGrpName, string mTestName,
         LOG_ERR("1 cmd caused %d CE's to arrive in CQ %d", numCE, cq->GetQId());
         throw exception();
     }
-    if (verbose) {
-        work = str(format("Just B4 reaping CQ %d, dump entire CQ") %
-            cq->GetQId());
-        cq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName,
-            "cq." + cmd->GetName(), qualify), work);
-    }
+    work = str(boost::format("Just B4 reaping CQ %d, dump entire CQ") %
+        cq->GetQId());
+    cq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName,
+        "cq." + cmd->GetName(), qualify), work);
 
     // throws if an error occurs
-    ReapCE(cq, numCE, isrCount, mGrpName, mTestName, qualify);
+    IO::ReapCE(cq, numCE, isrCount, mGrpName, mTestName, qualify,
+        CESTAT_LBA_OUT_RANGE);
 
     // Single cmd submitted on empty ASQ should always yield 1 IRQ on ACQ
     if (gCtrlrConfig->IrqsEnabled() && cq->GetIrqEnabled() &&
@@ -186,4 +193,6 @@ LBAOutOfRangeBare_r10b::SendCmdToHdw(string mGrpName, string mTestName,
         throw exception();
     }
 }
-#endif
+
+}   // namespace
+

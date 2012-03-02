@@ -22,6 +22,8 @@
 #include "../Utils/kernelAPI.h"
 #include "../Utils/queues.h"
 
+namespace GrpResets {
+
 #define IOCQ_ID                     1
 #define IOSQ_ID                     2
 
@@ -30,7 +32,7 @@ CtrlrResetIOQDeleted_r10b::CtrlrResetIOQDeleted_r10b(int fd, string grpName,
     string testName, ErrorRegs errRegs) :
     Test(fd, grpName, testName, SPECREV_10b, errRegs)
 {
-    // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 7");
     mTestDesc.SetShort(     "Ctrlr resets causes IOSQ & IOCQ's to be deleted");
     // No string size limit for the long description
@@ -79,13 +81,14 @@ CtrlrResetIOQDeleted_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
-     * 1) This is the 1st within GrpResets.
-     * 2) The NVME device is disabled completely.
-     * 3) All interrupts are disabled.
+     * 1) none
      *  \endverbatim
      */
     uint64_t work;
     uint16_t numEntriesIOQ = 10;
+
+    if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
+        throw exception();
 
     // Verify the min requirements for this test are supported by DUT
     if (gRegisters->Read(CTLSPC_CAP, work) == false) {
@@ -153,3 +156,5 @@ CtrlrResetIOQDeleted_r10b::VerifyCtrlrResetDeletesIOQs(SharedACQPtr acq,
             throw exception();
     }
 }
+
+}   // namespace

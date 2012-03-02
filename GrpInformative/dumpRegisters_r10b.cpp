@@ -17,12 +17,14 @@
 #include "dumpRegisters_r10b.h"
 #include "../Utils/kernelAPI.h"
 
+namespace GrpInformative {
+
 
 DumpRegisters_r10b::DumpRegisters_r10b(int fd, string grpName,
     string testName, ErrorRegs errRegs) :
     Test(fd, grpName, testName, SPECREV_10b, errRegs)
 {
-    // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 3");
     mTestDesc.SetShort(     "Dump all registers");
     // No string size limit for the long description
@@ -66,7 +68,7 @@ DumpRegisters_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
-     * 1) none
+     * 1) Test CreateResources_r10b has run prior.
      *  \endverbatim
      */
 
@@ -77,4 +79,5 @@ DumpRegisters_r10b::RunCoreTest()
     return true;
 }
 
+}   // namespace
 

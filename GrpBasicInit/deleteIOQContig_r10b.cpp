@@ -22,12 +22,14 @@
 #include "../Utils/queues.h"
 #include "../Utils/kernelAPI.h"
 
+namespace GrpBasicInit {
+
 
 DeleteIOQContig_r10b::DeleteIOQContig_r10b(int fd, string grpName,
     string testName, ErrorRegs errRegs) :
     Test(fd, grpName, testName, SPECREV_10b, errRegs)
 {
-    // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 7");
     mTestDesc.SetShort(     "Delete contiguous IOCQ and IOSQ's");
     // No string size limit for the long description
@@ -76,15 +78,13 @@ DeleteIOQContig_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
-     * 1) The ASQ & ACQ's have been created by the RsrcMngr for group lifetime
-     * 2) All interrupts are disabled.
-     * 3) CreateIOQContigPoll_r10b test case has setup the Q's to delete
-     * 4) CC.IOCQES and CC.IOSQES are already setup with correct values.
+     * 1) Both test CreateIOQContigPoll_r10b & CreateIOQDiscontigPoll_r10b has
+     *    run prior, or Both test CreateIOQContigIrq_r10b &
+     *    CreateIOQDiscontigIrq_r10b has run prior
+     * 2) An individual test within this group cannot run, the entire group
+     *    must be executed every time. Each subsequent test relies on the prior.s.
      * \endverbatim
      */
-
-    KernelAPI::DumpKernelMetrics(mFd,
-        FileSystem::PrepLogFile(mGrpName, mTestName, "kmetrics", "before"));
 
     // Lookup objs which were created in a prior test within group
     SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
@@ -109,9 +109,8 @@ DeleteIOQContig_r10b::RunCoreTest()
     // Not explicitly necessary, but is more clean to free what is not needed
     gRsrcMngr->FreeObj(IOCQ_CONTIG_GROUP_ID);
 
-
-    KernelAPI::DumpKernelMetrics(mFd,
-        FileSystem::PrepLogFile(mGrpName, mTestName, "kmetrics", "after"));
     return true;
 }
+
+}   // namespace
 

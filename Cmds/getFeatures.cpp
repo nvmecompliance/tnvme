@@ -30,6 +30,11 @@ GetFeatures::GetFeatures() : BaseFeatures(0, Trackable::OBJTYPE_FENCE)
 GetFeatures::GetFeatures(int fd) : BaseFeatures(fd, Trackable::OBJ_GETFEATURES)
 {
     Init(Opcode, DATADIR_FROM_DEVICE);
+
+    // No cmd should ever be created which violates these masking possibilities
+    send_64b_bitmask allowPrpMask = (send_64b_bitmask)
+        (MASK_PRP1_PAGE | MASK_PRP2_PAGE);
+    SetPrpAllowed(allowPrpMask);
 }
 
 
@@ -37,12 +42,4 @@ GetFeatures::~GetFeatures()
 {
 }
 
-
-void
-GetFeatures::Dump(LogFilename filename, string fileHdr) const
-{
-    Cmd::Dump(filename, fileHdr);
-    PrpData::Dump(filename, "Payload contents:");
-    MetaData::Dump(filename, "Meta data contents:");
-}
 

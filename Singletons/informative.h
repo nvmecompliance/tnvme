@@ -53,20 +53,18 @@ public:
     ~Informative();
 
     /**
-     * Retrieve a previously fetched identify command's capabilities struct.
-     * @return Identify::NullIdentifyPtr if the data wasn't retrieved correctly
+     * Retrieve a previously fetched identify command's controller struct.
+     * @return The requested data
      */
-    ConstSharedIdentifyPtr GetIdentifyCmdCapabilities() const
-        { return mIdentifyCmdCap; }
+    ConstSharedIdentifyPtr GetIdentifyCmdCtrlr() const;
 
     /**
-     * Retrieve a previously fetched identify command's namespace struct.
-     * @param namspcId Pass the ID of the namespace of interest
-     * @return Identify::NullIdentifyPtr if the data wasn't retrieved correctly,
-     *      or also if the requested namspcId is larger than the total number
-     *      of namespace structures available.
+     * Retrieve a previously fetched identify command's namspc struct.
+     * @param namspcId Pass the ID of the namspc of interest
+     * @return Identify::NullIdentifyPtr if the requested namspcId is larger
+     *      than the total number of namspc structures available.
      */
-    ConstSharedIdentifyPtr GetIdentifyCmdNamespace(uint64_t namspcId) const;
+    ConstSharedIdentifyPtr GetIdentifyCmdNamspc(uint64_t namspcId) const;
 
     /**
      * Retrieve a previously fetched get features's number of queues feature ID.
@@ -80,6 +78,20 @@ public:
     /// @return Derives the value from DW0 of the CE & converts to a 1-base val
     uint16_t GetFeaturesNumOfIOSQs() const;
 
+    typedef enum {
+        NS_BARE,
+        NS_META,
+        NS_E2E,
+        NS_FENCE    // always must be the last element
+    } NamspcType;
+
+    /**
+     * Interrogate the supplied identify cmd containing a namespace struct
+     * and return the type of namespace it describes.
+     * @return The namespace type or throws if it couldn't be determined.
+     */
+    NamspcType IdentifyNamespace(ConstSharedIdentifyPtr idCmdNamspc) const;
+
     /**
      * Retrieve an array indicating all the namespace ID(s) for the appropriate
      * namespace type desired.
@@ -87,7 +99,7 @@ public:
      *       disabled; Implies: Identify.LBAF[Identify.FLBAS].MS=0
      * @note Meta: Namespaces supporting meta data, and E2E is disabled;
      *       Implies: Identify.LBAF[Identify.FLBAS].MS=!0, Identify.DPS_b2:0=0
-     * @note E2E: Namepspaces supporting meta data, and E2E is enabled;
+     * @note E2E: Namespaces supporting meta data, and E2E is enabled;
      *       Implies: Identify.LBAF[Identify.FLBAS].MS=!0, Identify.DPS_b2:0=!0
      * @return vector containing all desired namespaces; it could be an empty
      *       vector indicating no namespaces are present in the DUT, otherwise
@@ -96,6 +108,14 @@ public:
     vector<uint32_t> GetBareNamespaces() const;
     vector<uint32_t> GetMetaNamespaces() const;
     vector<uint32_t> GetE2ENamespaces() const;
+
+    /**
+     * Seek for the 1st bare namespace, and if not found, seek for the 1st
+     * meta namespace, and if not found, seek for the first E2E namespace, and
+     * if not found, throw.
+     * @return Namespace if successful, otherwise throws
+     */
+    ConstSharedIdentifyPtr Get1stBareMetaE2E() const;
 
 
 private:
@@ -121,17 +141,17 @@ private:
      * count upon. This data should be data that never changes even after
      * interaction with a DUT's various registers, Set Features attempts.
      */
-    friend class DumpIdentifyData_r10b;
-    friend class DumpGetFeatures_r10b;
+    friend class GrpInformative::DumpIdentifyData_r10b;
+    friend class GrpInformative::DumpGetFeatures_r10b;
 
     /**
      * GrpInformative must set this data.
-     * @param idCmdCap Pass the identify cmd after it retrieved the
-     *          capabilities data structure .
+     * @param idCmdCtrlr Pass the identify cmd after it retrieved the
+     *          controller data structure .
      */
-    SharedIdentifyPtr mIdentifyCmdCap;
-    void SetIdentifyCmdCapabilities(SharedIdentifyPtr idCmdCap)
-        { mIdentifyCmdCap = idCmdCap; }
+    SharedIdentifyPtr mIdentifyCmdCtrlr;
+    void SetIdentifyCmdCtrlr(SharedIdentifyPtr idCmdCtrlr)
+        { mIdentifyCmdCtrlr = idCmdCtrlr; }
 
     /**
      * GrpInformative must set this data. This method must be called in order

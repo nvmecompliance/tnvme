@@ -17,16 +17,18 @@
 #include "dumpGetFeatures_r10b.h"
 #include "globals.h"
 #include "grpDefs.h"
-#include "createACQASQ_r10b.h"
 #include "../Cmds/getFeatures.h"
 #include "../Utils/kernelAPI.h"
+#include "../Queues/ce.h"
+
+namespace GrpInformative {
 
 
 DumpGetFeatures_r10b::DumpGetFeatures_r10b(int fd, string grpName,
     string testName, ErrorRegs errRegs) :
     Test(fd, grpName, testName, SPECREV_10b, errRegs)
 {
-    // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 7");
     mTestDesc.SetShort(     "Issue the get features cmd");
     // No string size limit for the long description
@@ -73,29 +75,23 @@ DumpGetFeatures_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
-     * 1) The ASQ & ACQ's have been created by the RsrcMngr for group lifetime
-     * 2) All interrupts are disabled.
+     * 1) Test CreateResources_r10b has run prior.
      *  \endverbatim
      */
     uint32_t isrCount;
-
-    KernelAPI::DumpKernelMetrics(mFd,
-        FileSystem::PrepLogFile(mGrpName, mTestName, "kmetrics", "before"));
 
     // Lookup objs which were created in a prior test within group
     SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
     SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
 
     // Assuming the cmd we issue will result in only a single CE
-    if (acq->ReapInquiry(isrCount) != 0) {
+    if (acq->ReapInquiry(isrCount, true) != 0) {
         LOG_ERR("The ACQ should not have any CE's waiting before testing");
         throw exception();
     }
 
     SendGetFeaturesNumOfQueues(asq, acq);
 
-    KernelAPI::DumpKernelMetrics(mFd,
-        FileSystem::PrepLogFile(mGrpName, mTestName, "kmetrics", "after"));
     return true;
 }
 
@@ -168,9 +164,11 @@ DumpGetFeatures_r10b::SendGetFeaturesNumOfQueues(SharedASQPtr asq,
             "The CE of the Get Features cmd; Number of Q's feature ID:");
 
         union CE ce = acq->PeekCE(acqMetrics.head_ptr);
-        ProcessCE::ValidateStatus(ce);  // throws upon error
+        ProcessCE::Validate(ce);  // throws upon error
 
         // Update the Informative singleton for all tests to see and use
         gInformative->SetGetFeaturesNumberOfQueues(ce.t.dw0);
     }
 }
+
+}   // namespace

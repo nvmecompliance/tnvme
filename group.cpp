@@ -40,7 +40,10 @@ Group::~Group()
 {
     while (mTests.size()) {
         while (mTests.back().size()) {
-            delete (Test *)(mTests.back().back());
+            while (mTests.back().back().size()) {
+                delete (Test *)(mTests.back().back().back());
+                mTests.back().back().pop_back();
+            }
             mTests.back().pop_back();
         }
         mTests.pop_back();
@@ -55,9 +58,13 @@ Group::GetGroupSummary(bool verbose)
     TestRef tr;
 
     tr.group = mGrpNum;
-    for (tr.major = 0; tr.major < mTests.size(); tr.major++) {
-        for (tr.minor = 0; tr.minor < mTests[tr.major].size(); tr.minor++) {
-            work += GetTestDescription(verbose, tr);
+    for (tr.xLev = 0; tr.xLev < mTests.size(); tr.xLev++) {
+        for (tr.yLev = 0; tr.yLev < mTests[tr.xLev].size(); tr.yLev++) {
+            for (tr.zLev = 0; tr.zLev < mTests[tr.xLev][tr.yLev].size();
+                tr.zLev++) {
+
+                work += GetTestDescription(verbose, tr);
+            }
         }
     }
 
@@ -70,26 +77,24 @@ Group::GetTestDescription(bool verbose, TestRef &tr)
 {
     string work;
 
-    FORMAT_TEST_NUM(work, PAD_INDENT_LVL1, tr.major, tr.minor)
+    FORMAT_TEST_NUM(work, PAD_INDENT_LVL1, tr.xLev, tr.yLev, tr.zLev)
 
     if (TestExists(tr) == false) {
         work += "unknown test";
         work += NEWLINE;
 
+    } else if (verbose) {
+        work += mTests[tr.xLev][tr.yLev][tr.zLev]->GetShortDescription();
+        work += NEWLINE;
+        work += PAD_INDENT_LVL2;
+        work += "Compliance: ";
+        work += mTests[tr.xLev][tr.yLev][tr.zLev]->GetComplianceDescription();
+        work += NEWLINE;
+        work += mTests[tr.xLev][tr.yLev][tr.zLev]->
+            GetLongDescription(true, sizeof(PAD_INDENT_LVL2) + 2);
     } else {
-        if (verbose) {
-            work += mTests[tr.major][tr.minor]->GetShortDescription();
-            work += NEWLINE;
-            work += PAD_INDENT_LVL2;
-            work += "Compliance: ";
-            work += mTests[tr.major][tr.minor]->GetComplianceDescription();
-            work += NEWLINE;
-            work += mTests[tr.major][tr.minor]->
-                GetLongDescription(true, sizeof(PAD_INDENT_LVL2) + 2);
-        } else {
-            work += mTests[tr.major][tr.minor]->GetShortDescription();
-            work += NEWLINE;
-        }
+        work += mTests[tr.xLev][tr.yLev][tr.zLev]->GetShortDescription();
+        work += NEWLINE;
     }
 
     return work;
@@ -100,12 +105,11 @@ bool
 Group::TestExists(TestRef tr)
 {
     if ((tr.group != mGrpNum) ||
-        (tr.major >= mTests.size()) ||
-        (tr.minor >= mTests[tr.major].size())) {
-        // Uncomment to track down iterator issues, otherwise it ends up being
-        // a nuisance in the logs, cluttering the readability.
-        //LOG_DBG("Test case %ld:%ld.%ld does not exist within group %ld",
-        //    tr.group, tr.major, tr.minor, mGrpNum);
+        (tr.xLev >= mTests.size()) ||
+        (tr.yLev >= mTests[tr.xLev].size()) ||
+        (tr.zLev >= mTests[tr.xLev][tr.yLev].size())) {
+        LOG_DBG_DEEP("Test case %ld:%ld.%ld.%ld does not exist within group",
+            tr.group, tr.xLev, tr.yLev, tr.zLev);
         return false;
     }
     return true;
@@ -116,23 +120,27 @@ bool
 Group::IteraterToTestRef(TestIteratorType testIter, TestRef &tr)
 {
     size_t count = 0;
-    size_t major = 0;
-    size_t minor = 0;
+    size_t x = 0, y = 0, z = 0;
 
     // This loop is attempting to take the testIter, it should be pointing to
     // the next test to consider for execution. However that doesn't mean there
-    // actually is a test object at the testIter index within mTests[][]. Start
-    // from the beginning and traverse the entire matrix to attain a valid test
-    // object for execution.
-    LOG_DBG("Traverse test matrix %ld seeking test @ iterator idx=%ld",
+    // actually is a test object at the testIter index within mTests[][][].
+    // Start from the beginning and traverse the entire matrix to attain a
+    // valid test object for execution.
+    LOG_DBG_DEEP("Parse mTest matrix %ld seeking test @ iter=%ld",
         mGrpNum, testIter);
     while (count < testIter) {
-        if (TestExists(TestRef(mGrpNum, major, minor+1))) {
-            minor++;        // same group level, but the next test level count
+        if (TestExists(TestRef(mGrpNum, x, y, z+1))) {
+            z++;
             count++;
-        } else if (TestExists(TestRef(mGrpNum, major+1, 0))) {
-            major++;
-            minor = 0;      // new group level, restart test level counting
+        } else if (TestExists(TestRef(mGrpNum, x, y+1, 0))) {
+            y++;
+            z = 0;
+            count++;
+        } else if (TestExists(TestRef(mGrpNum, x+1, 0, 0))) {
+            x++;
+            y = 0;
+            z = 0;
             count++;
         } else {            // no next test, never found it
             break;
@@ -143,9 +151,29 @@ Group::IteraterToTestRef(TestIteratorType testIter, TestRef &tr)
         return false;
 
     tr.group = mGrpNum;
-    tr.major = major;
-    tr.minor = minor;
+    tr.xLev = x;
+    tr.yLev = y;
+    tr.zLev = z;
     return true;
+}
+
+
+bool
+Group::TestRefToIterator(TestRef tr, TestIteratorType &testIter)
+{
+    TestRef proposedTr;
+    testIter = GetTestIterator();
+
+    LOG_DBG_DEEP("Parse mTest matrix %ld seeking test @ %ld:%ld.%ld",
+        mGrpNum, tr.xLev, tr.yLev, tr.zLev);
+    while (IteraterToTestRef(testIter, proposedTr)) {
+        if (tr == proposedTr)
+            return true;
+        testIter++;
+    }
+
+    LOG_ERR("Unable to locate targeted test");
+    return false;
 }
 
 
@@ -156,7 +184,6 @@ Group::RunTest(TestIteratorType &testIter, vector<TestRef> &skipTest)
 
     if (IteraterToTestRef(testIter, tr) == false)
         return TR_NOTFOUND;
-
     testIter++;     // next test to consider for execution in the future
     return RunTest(tr, skipTest);
 }
@@ -167,38 +194,37 @@ Group::RunTest(TestRef &tr, vector<TestRef> &skipTest)
 {
     string work;
 
-    // Take out a valid deque<>::iterator to the test under execution
     if (TestExists(tr) == false)
         return TR_NOTFOUND;
-    deque<Test *>::iterator testCase = mTests[tr.major].begin();
-    advance(testCase, tr.minor);
+
+    // Take out a valid deque<>::iterator to the test under execution
+    deque<Test *>::iterator myTest = mTests[tr.xLev][tr.yLev].begin();
+    advance(myTest, tr.zLev);
 
     LOG_NRM("-----------------START TEST-----------------");
     FORMAT_GROUP_DESCRIPTION(work, this)
     LOG_NRM("%s", work.c_str());
-
-    FORMAT_TEST_NUM(work, "", tr.major, tr.minor)
-    work += (*testCase)->GetShortDescription();
+    FORMAT_TEST_NUM(work, "", tr.xLev, tr.yLev, tr.zLev)
+    work += (*myTest)->GetShortDescription();
     LOG_NRM("%s", work.c_str());
-    LOG_NRM("Compliance: %s", (*testCase)->GetComplianceDescription().c_str());
-    LOG_NRM("%s", (*testCase)->GetLongDescription(false, 0).c_str());
+    LOG_NRM("Compliance: %s", (*myTest)->GetComplianceDescription().c_str());
+    LOG_NRM("%s", (*myTest)->GetLongDescription(false, 0).c_str());
 
     TestResult result;
     if (SkippingTest(tr, skipTest))
         result = TR_SKIPPING;
     else
-        result = (*testCase)->Run() ? TR_SUCCESS: TR_FAIL;
-
+        result = (*myTest)->Run() ? TR_SUCCESS: TR_FAIL;
     LOG_NRM("------------------END TEST------------------");
 
     // Guarantee nothing residual or unintended is left around. Enforce this
     // by destroying the existing test obj and replace it with a clone of
     // itself so looping tests over can still be supported.
     LOG_DBG("Enforcing test obj cleanup, cloning & destroying");
-    Test *cleanMeUp = (*testCase);  // Refer to test obj
-    deque<Test *>::iterator insertPos = mTests[tr.major].erase(testCase);
-    mTests[tr.major].insert(insertPos, cleanMeUp->Clone()); // cloning test obj
-    delete cleanMeUp;               // Destructing test obj
+    Test *cleanMeUp = (*myTest);  // Refer to test obj
+    deque<Test *>::iterator insertPos = mTests[tr.xLev][tr.yLev].erase(myTest);
+    mTests[tr.xLev][tr.yLev].insert(insertPos, cleanMeUp->Clone());
+    delete cleanMeUp;
 
     return result;
 }
@@ -208,21 +234,70 @@ bool
 Group::SkippingTest(TestRef &tr, vector<TestRef> &skipTest)
 {
     for (size_t i = 0; i < skipTest.size(); i++) {
-         if ((tr.group == skipTest[i].group) &&
-             (tr.major == skipTest[i].major) &&
-             (tr.minor == skipTest[i].minor)) {
+         if ((tr.group == skipTest[i].group) && (tr.xLev == skipTest[i].xLev) &&
+             (tr.yLev == skipTest[i].yLev) && (tr.zLev == skipTest[i].zLev)) {
 
-            LOG_NRM("Instructed to skip specific test: %ld:%ld.%ld",
-                tr.group, tr.major, tr.minor);
+            LOG_NRM("Instructed to skip specific test: %ld:%ld.%ld.%ld",
+                tr.group, tr.xLev, tr.yLev, tr.zLev);
             return true;
-         } else if ((tr.group == skipTest[i].group) &&
-             (UINT_MAX == skipTest[i].major) &&
-             (UINT_MAX == skipTest[i].minor)) {
 
-            LOG_NRM("Instructed to skip entire group: %ld (test:%ld.%ld)",
-                tr.group, tr.major, tr.minor);
+         } else if ((tr.group == skipTest[i].group) &&
+             ((UINT_MAX == skipTest[i].xLev) ||
+              (UINT_MAX == skipTest[i].yLev) ||
+              (UINT_MAX == skipTest[i].zLev))) {
+
+            LOG_NRM("Instructed to skip entire group: %ld", tr.group);
             return true;
          }
     }
+    return false;
+}
+
+
+bool
+Group::GetTestDependency(TestRef test, TestRef &cfgDepend,
+    TestIteratorType &seqDepend)
+{
+    // Assume failure, ignore cfgDepend & seqDepend
+    cfgDepend = test;
+    seqDepend = -1;
+
+    if (test.group == mGrpNum) {
+        if ((test.yLev == 0) && (test.zLev == 0)) {
+            LOG_NRM("Targeted test has zero dependencies");
+            return true;
+        } else if (test.zLev == 0) {
+            cfgDepend.Init(test.group, test.xLev, 0, 0);
+            if (TestExists(cfgDepend)) {
+                LOG_NRM("Targeted test has a configuration dependency");
+                return true;
+            } else {
+                LOG_DBG("Unable to locate configuration dependency");
+                return false;
+            }
+        } else {
+            TestRef seqTest(test.group, test.xLev, test.yLev, 0);
+            if (TestRefToIterator(seqTest, seqDepend)) {
+                LOG_NRM("Targeted test has a sequence dependency");
+            } else {
+                LOG_DBG("Unable to locate sequence test dependency");
+                return false;
+            }
+
+            // There may or may not be a configuration dependency
+            if (test.yLev != 0) {
+                cfgDepend.Init(test.group, test.xLev, 0, 0);
+                if (TestExists(cfgDepend)) {
+                    LOG_NRM("Targeted test has a configuration dependency");
+                    return true;
+                } else {
+                    LOG_DBG("Unable to locate configuration dependency");
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
+    LOG_DBG("Targeted test does not belong to this group: %ld", mGrpNum);
     return false;
 }

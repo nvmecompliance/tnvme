@@ -21,7 +21,8 @@ SRC =				\
 	buffers.cpp		\
 	fileSystem.cpp		\
 	queues.cpp		\
-	io.cpp
+	io.cpp			\
+	irq.cpp
 
 .SUFFIXES: .cpp
 

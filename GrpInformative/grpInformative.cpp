@@ -16,28 +16,29 @@
 
 #include "grpInformative.h"
 #include "dumpRegisters_r10b.h"
-#include "createACQASQ_r10b.h"
+#include "createResources_r10b.h"
 #include "dumpIdentifyData_r10b.h"
 #include "dumpGetFeatures_r10b.h"
+
+namespace GrpInformative {
 
 
 GrpInformative::GrpInformative(size_t grpNum, SpecRev specRev,
     ErrorRegs errRegs, int fd) :
     Group(grpNum, specRev, "Informative")
 {
-    // IMPORTANT: Once a test case is assigned a position in the vector, i.e.
-    //            a test index/number of the form major.minor, then it should
-    //            reside in that position forever so test reference numbers
-    //            don't change per release. Future tests can be appended at
-    //            either the group level or the test level.
-    //            Tests 0.0, 1.0, <next_test_num=2>.0  Major num; group level
-    //            Tests x.0, x.1, x.<next_test_num=2>  Minor num; test level
+    // ------------------------CHANGE NOTICE: (3-2-2012)------------------------
+    // The rule to keep groups and tests at a well known constant reference
+    // number for all of time is to restrictive. A new scheme has replaced
+    // that strategy. For complete details refer to:
+    // "https://github.com/nvmecompliance/tnvme/wiki/Test-Numbering" and
+    // "https://github.com/nvmecompliance/tnvme/wiki/Test-Strategy
     switch (mSpecRev) {
     case SPECREV_10b:
-        APPEND_TEST_AT_GROUP_LEVEL(DumpRegisters_r10b, fd, GrpInformative, errRegs)
-        APPEND_TEST_AT_GROUP_LEVEL(CreateACQASQ_r10b, fd, GrpInformative, errRegs)
-        APPEND_TEST_AT_GROUP_LEVEL(DumpIdentifyData_r10b, fd, GrpInformative, errRegs)
-        APPEND_TEST_AT_GROUP_LEVEL(DumpGetFeatures_r10b, fd, GrpInformative, errRegs)
+        APPEND_TEST_AT_XLEVEL(DumpRegisters_r10b, fd, GrpInformative, errRegs)
+        APPEND_TEST_AT_XLEVEL(CreateResources_r10b, fd, GrpInformative, errRegs)
+        APPEND_TEST_AT_YLEVEL(DumpIdentifyData_r10b, fd, GrpInformative, errRegs)
+        APPEND_TEST_AT_YLEVEL(DumpGetFeatures_r10b, fd, GrpInformative, errRegs)
         break;
 
     default:
@@ -52,3 +53,5 @@ GrpInformative::~GrpInformative()
 {
     // mTests deallocated in parent
 }
+
+}   // namespace

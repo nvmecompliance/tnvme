@@ -18,18 +18,19 @@
 #include "grpDefs.h"
 #include "globals.h"
 #include "dumpIdentifyData_r10b.h"
-#include "createACQASQ_r10b.h"
 #include "../Cmds/identify.h"
 #include "../Utils/kernelAPI.h"
 #include "../Utils/queues.h"
 #include "../Utils/io.h"
+
+namespace GrpInformative {
 
 
 DumpIdentifyData_r10b::DumpIdentifyData_r10b(int fd, string grpName,
     string testName, ErrorRegs errRegs) :
     Test(fd, grpName, testName, SPECREV_10b, errRegs)
 {
-    // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 7");
     mTestDesc.SetShort(     "Issue the identify cmd");
     // No string size limit for the long description
@@ -75,21 +76,17 @@ DumpIdentifyData_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
-     * 1) The ASQ & ACQ's have been created by the RsrcMngr for group lifetime
-     * 2) All interrupts are disabled.
+     * 1) Test CreateResources_r10b has run prior.
      *  \endverbatim
      */
     uint32_t isrCount;
-
-    KernelAPI::DumpKernelMetrics(mFd,
-        FileSystem::PrepLogFile(mGrpName, mTestName, "kmetrics", "before"));
 
     // Lookup objs which were created in a prior test within group
     SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
     SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
 
     // Assuming the cmd we issue will result in only a single CE
-    if (acq->ReapInquiry(isrCount) != 0) {
+    if (acq->ReapInquiry(isrCount, true) != 0) {
         LOG_ERR("The ACQ should not have any CE's waiting before testing");
         throw exception();
     }
@@ -97,8 +94,6 @@ DumpIdentifyData_r10b::RunCoreTest()
     SendIdentifyCtrlrStruct(asq, acq);
     SendIdentifyNamespaceStruct(asq, acq);
 
-    KernelAPI::DumpKernelMetrics(mFd,
-        FileSystem::PrepLogFile(mGrpName, mTestName, "kmetrics", "after"));
     return true;
 }
 
@@ -108,24 +103,24 @@ DumpIdentifyData_r10b::SendIdentifyCtrlrStruct(SharedASQPtr asq,
     SharedACQPtr acq)
 {
     LOG_NRM("Create 1st identify cmd and assoc some buffer memory");
-    SharedIdentifyPtr idCmdCap = SharedIdentifyPtr(new Identify(mFd));
+    SharedIdentifyPtr idCmdCtrlr = SharedIdentifyPtr(new Identify(mFd));
     LOG_NRM("Force identify to request ctrlr capabilities struct");
-    idCmdCap->SetCNS(true);
+    idCmdCtrlr->SetCNS(true);
     SharedMemBufferPtr idMemCap = SharedMemBufferPtr(new MemBuffer());
     idMemCap->InitAlignment(Identify::IDEAL_DATA_SIZE, sizeof(uint64_t),
         true, 0);
-    send_64b_bitmask idPrpCap =
+    send_64b_bitmask prpReq =
         (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE);
-    idCmdCap->SetPrpBuffer(idPrpCap, idMemCap);
+    idCmdCtrlr->SetPrpBuffer(prpReq, idMemCap);
 
     IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
-        idCmdCap, "IdCtrlStruct", true);
+        idCmdCtrlr, "IdCtrlStruct", true);
 
-    idCmdCap->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "IdCtrlStruct"),
+    idCmdCtrlr->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "IdCtrlStruct"),
         "The complete admin cmd identify ctrl data structure decoded:");
 
     // Update the Informative singleton for all tests to see and use
-    gInformative->SetIdentifyCmdCapabilities(idCmdCap);
+    gInformative->SetIdentifyCmdCtrlr(idCmdCtrlr);
 }
 
 
@@ -137,9 +132,8 @@ DumpIdentifyData_r10b::SendIdentifyNamespaceStruct(SharedASQPtr asq,
     char qualifier[20];
 
 
-    ConstSharedIdentifyPtr idCmdCap =
-        gInformative->GetIdentifyCmdCapabilities();
-    if ((numNamSpc = idCmdCap->GetValue(IDCTRLRCAP_NN)) == 0) {
+    ConstSharedIdentifyPtr idCmdCtrlr = gInformative->GetIdentifyCmdCtrlr();
+    if ((numNamSpc = idCmdCtrlr->GetValue(IDCTRLRCAP_NN)) == 0) {
         LOG_ERR("Required to support >= 1 namespace");
         throw exception();
     }
@@ -175,3 +169,5 @@ DumpIdentifyData_r10b::SendIdentifyNamespaceStruct(SharedASQPtr asq,
         gInformative->SetIdentifyCmdNamespace(idCmdNamSpc);
     }
 }
+
+}   // namespace

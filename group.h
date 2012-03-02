@@ -23,35 +23,47 @@
 #include "test.h"
 
 
-/// Use to append a new x.0 test number at the group level
-#define APPEND_TEST_AT_GROUP_LEVEL(test, fd, grpName, errRegs)      \
-    {                                                               \
-        deque<Test *> tmp;                                          \
-        tmp.push_back(new test(fd, #grpName, #test, errRegs));      \
-        mTests.push_back(tmp);                                      \
-        tmp.clear();                                                \
+/// Use to append a new x.0.0 test number at the XLEVEL
+#define APPEND_TEST_AT_XLEVEL(test, fd, grpName, errRegs)                     \
+    {                                                                         \
+        deque<Test *> zlevel;                                                 \
+        zlevel.push_back(new test(fd, #grpName, #test, errRegs));             \
+        deque<deque<Test *> > ylevel;                                         \
+        ylevel.push_back(zlevel);                                             \
+        mTests.push_back(ylevel);                                             \
+        ylevel.clear();                                                       \
+        zlevel.clear();                                                       \
+    }
+/// Use to append a new x.y.0 test number at the YLEVEL
+#define APPEND_TEST_AT_YLEVEL(test, fd, grpName, errRegs)                     \
+    {                                                                         \
+        deque<Test *> zlevel;                                                 \
+        zlevel.push_back(new test(fd, #grpName, #test, errRegs));             \
+        mTests.back().push_back(zlevel);                                      \
+        zlevel.clear();                                                       \
     }
 
-/// Use to append a new x.y test number at the test level
-#define APPEND_TEST_AT_TEST_LEVEL(test, fd, grpName, errRegs)       \
-    mTests.back().push_back(new test(fd, #grpName, errRegs));
+/// Use to append a new x.y.z test number at the ZLEVEL
+#define APPEND_TEST_AT_ZLEVEL(test, fd, grpName, errRegs)                     \
+    mTests.back().back().push_back(new test(fd, #grpName, #test, errRegs));
+
 
 /// To allow formatting the group information string
-#define FORMAT_GROUP_DESCRIPTION(stdStr, grpObjPtr)                 \
-    {                                                               \
-        char charray[80];                                           \
-        sprintf(charray, "%ld:Group: %s",                           \
-                grpObjPtr->GetGroupNumber(),                        \
-                grpObjPtr->GetGroupDescription().c_str());          \
-        stdStr = charray;                                           \
+#define FORMAT_GROUP_DESCRIPTION(stdStr, grpObjPtr)                           \
+    {                                                                         \
+        char charray[80];                                                     \
+        sprintf(charray, "%ld: Group:%s",                                     \
+                grpObjPtr->GetGroupNumber(),                                  \
+                grpObjPtr->GetGroupDescription().c_str());                    \
+        stdStr = charray;                                                     \
     }
 
 // To allow formatting a test string identically where ever used
-#define FORMAT_TEST_NUM(stdStr, padStr, major, minor)               \
-    {                                                               \
-        char num[40];                                               \
-        sprintf(num, "%s%ld.%ld:Test: ", padStr, major, minor);     \
-        stdStr = num;                                               \
+#define FORMAT_TEST_NUM(stdStr, padStr, x, y, z)                              \
+    {                                                                         \
+        char num[40];                                                         \
+        sprintf(num, "%s%ld.%ld.%ld: Test:", padStr, x, y, z);                \
+        stdStr = num;                                                         \
     }
 
 typedef size_t TestIteratorType;
@@ -59,8 +71,7 @@ typedef size_t TestIteratorType;
 
 /**
 * This class is the base/interface class for all groups. This class purposely
-* enforces children to conform and inherit certain functionality to handle
-* mundane tasks.
+* enforces children to conform and inherit functionality to handle mundane tasks
 *
 * @note This class will not throw exceptions.
 */
@@ -102,11 +113,16 @@ public:
      */
     string GetTestDescription(bool verbose, TestRef &tr);
 
-    /**
-     * Used to allow iterating through all the tests contained within this
-     * group. It is useful when all the major.minor test numbers are unknown.
-     */
+    /// Used to allow iterating through all the tests contained within a group.
     TestIteratorType GetTestIterator() { return 0; }
+
+    /**
+     * Convert a user supplied test reference into a iterator.
+     * @param tr Pass the test reference to convert
+     * @param testIter Returns the converted equivalent if successful
+     * @return true upon success, otherwise false.
+     */
+    bool TestRefToIterator(TestRef tr, TestIteratorType &testIter);
 
     typedef enum {
         TR_SUCCESS,
@@ -116,7 +132,9 @@ public:
     } TestResult;
 
     /**
-     * Run a spec'd test case and report back.
+     * Run a spec'd test case and report back. The iterator is incremented to
+     * the next possible test when returning, thus it will allow to iterate over
+     * all tests contained within this group if this method is called repeatedly
      * @param testIter Pass the test case iterator
      * @param skipTest Pass the complete list of test which should be skipped
      * @return A TestResult
@@ -124,12 +142,42 @@ public:
     TestResult RunTest(TestIteratorType &testIter, vector<TestRef> &skipTest);
 
     /**
-     * Run a spec'd test case and report back.
+     * Run a spec'd test case and report back. This method does NOT allow
+     * iterating over tests wihtin this group.
      * @param tr Pass the test case number to execute
      * @param skipTest Pass the complete list of test which should be skipped
      * @return A TestResult
      */
     TestResult RunTest(TestRef &tr, vector<TestRef> &skipTest);
+
+    typedef enum {
+        TD_ZERO,            // zero dependency (xLevel)
+        TD_CONFIG,          // configuration dependency (yLevel)
+        TD_SEQUENCE,        // sequence dependency (zLevel)
+
+        TD_FENCE            // always must be last element
+    } TestDepends;
+
+    /**
+     * Get the dependency requirements for an individual test. For full details:
+     * https://github.com/nvmecompliance/tnvme/wiki/Test-Numbering.
+     * *
+     *      retVal          seqDepend                    cfgDepend
+     *      --------------------------------------------------------------------
+     *      TD_FENCE       ignore(==-1)         ignore(cfgDepend == test)
+     *      TD_ZERO        ignore(==-1)         ignore(cfgDepend == test)
+     *      TD_CONFIG      ignore(==-1)          valid(cfgDepend != test)
+     *      TD_SEQUENCE     valid(!=-1)          valid(cfgDepend != test)
+     * @param test Pass test reference to decipher its dependency requirements
+     * @param cfgDepend Returns the corresponding configuration dependency;
+     *        (cfgDepend == test) when it should be ignored
+     * @param seqDepend Returns the corresponding sequence dependency;
+     *        (seqDepend == -1) when it should be ignored
+     * @return true upon success, otherwise failed to locate or decode something
+t
+     */
+    bool GetTestDependency(TestRef test, TestRef &cfgDepend,
+        TestIteratorType &seqDepend);
 
 
 protected:
@@ -137,10 +185,9 @@ protected:
     string      mGrpDesc;
     SpecRev     mSpecRev;
 
-    /// array[major][minor];
-    /// major test number: are related at the group level; 1.0, 2.0, 3.0
-    /// minor test number: are related at the test level; x.1, x.2, x.3
-    deque<deque<Test *> > mTests;
+    /// array[xLevel][yLevel][zLevel];
+    /// Refer to: https://github.com/nvmecompliance/tnvme/wiki/Test-Numbering
+    deque<deque<deque<Test *> > > mTests;
 
     /**
      * Validate whether or not the spec'd test case exists.
@@ -150,8 +197,7 @@ protected:
     bool TestExists(TestRef tr);
 
     /**
-     * Convert a user supplied iterator into a test reference of the form
-     * (group:major.minor).
+     * Convert a user supplied iterator into a test reference.
      * @param testIter Pass the iterator to convert
      * @param tr Returns the converted equivalent if successful
      * @return true upon success, otherwise false. A false return will

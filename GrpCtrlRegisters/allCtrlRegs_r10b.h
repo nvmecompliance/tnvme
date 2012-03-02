@@ -19,6 +19,8 @@
 
 #include "test.h"
 
+namespace GrpCtrlRegisters {
+
 
 /** \verbatim
  * -----------------------------------------------------------------------------
@@ -82,5 +84,6 @@ private:
     void ValidateROBitsAfterWriting();
 };
 
+}   // namespace
 
 #endif

@@ -24,6 +24,7 @@
 #include "tnvmeHelpers.h"
 #include "globals.h"
 #include "Utils/kernelAPI.h"
+#include "Queues/ce.h"
 #include "Cmds/setFeatures.h"
 
 
@@ -123,6 +124,7 @@ ParseSkipTestCmdLine(vector<TestRef> &skipTest, const char *optarg)
                     close(fd);
                     return false;
                 }
+
                 TestRef skipThis = tmp.t;
                 skipTest.push_back(skipThis);
                 line = "";
@@ -131,15 +133,19 @@ ParseSkipTestCmdLine(vector<TestRef> &skipTest, const char *optarg)
     }
 
     // Report what tests will be skipped
-    string output = "Execution will skip test case(s): <grp>:<major>.<minor>=";
+    string output = "Execution will skip test case(s): ";
     char work[20];
     for (size_t i = 0; i < skipTest.size(); i++ ) {
-        if ((skipTest[i].major == UINT_MAX) ||
-            (skipTest[i].minor == UINT_MAX)) {
-            snprintf(work, sizeof(work), "%ld:ALL.ALL, ", skipTest[i].group);
+        if ((skipTest[i].xLev == UINT_MAX) ||
+            (skipTest[i].yLev == UINT_MAX) ||
+            (skipTest[i].zLev == UINT_MAX)) {
+
+            snprintf(work, sizeof(work), "%ld:ALL.ALL.ALL, ",
+                skipTest[i].group);
         } else {
-            snprintf(work, sizeof(work), "%ld:%ld.%ld, ",
-                skipTest[i].group, skipTest[i].major, skipTest[i].minor);
+            snprintf(work, sizeof(work), "%ld:%ld.%ld.%ld, ",
+                skipTest[i].group, skipTest[i].xLev, skipTest[i].yLev,
+                skipTest[i].zLev);
         }
         output += work;
     }
@@ -162,21 +168,24 @@ bool
 ParseTargetCmdLine(TestTarget &target, const char *optarg)
 {
     size_t ulwork;
-    char *endptr;
     string swork;
+    char *endptr;
     long tmp;
-
 
     target.req = true;
     target.t.group = UINT_MAX;
-    target.t.major = UINT_MAX;
-    target.t.minor = UINT_MAX;
-    if (optarg == NULL)
+    target.t.xLev = UINT_MAX;
+    target.t.yLev = UINT_MAX;
+    target.t.zLev = UINT_MAX;
+
+    if (optarg == NULL) {
+        // User specified to run all test within all all groups
         return true;
+    }
 
     swork = optarg;
     if ((ulwork = swork.find(":", 0)) == string::npos) {
-        // Specified format <grp>
+        // User specified format <grp> only
         tmp = strtol(swork.c_str(), &endptr, 10);
         if (*endptr != '\0') {
             LOG_ERR("Unrecognized format <grp>=%s", optarg);
@@ -199,7 +208,7 @@ ParseTargetCmdLine(TestTarget &target, const char *optarg)
         }
         target.t.group = tmp;
 
-        // Find major piece of <test>
+        // Find xLev component of <test>
         swork = swork.substr(swork.find_first_of(':') + 1, swork.length());
         if (swork.length() == 0) {
             LOG_ERR("Missing <test> format string");
@@ -208,38 +217,61 @@ ParseTargetCmdLine(TestTarget &target, const char *optarg)
 
         tmp = strtol(swork.substr(0, swork.size()).c_str(), &endptr, 10);
         if (*endptr != '.') {
-            LOG_ERR("Missing '.' character in format string");
+            LOG_ERR("Missing 1st '.' character in format string");
             return false;
         } else if (tmp < 0) {
-            LOG_ERR("<major> values < 0 are not supported");
+            LOG_ERR("<x> values < 0 are not supported");
             return false;
         }
-        target.t.major = tmp;
+        target.t.xLev = tmp;
 
-        // Find minor piece of <test>
+        // Find yLev component of <test>
         swork = swork.substr(swork.find_first_of('.') + 1, swork.length());
         if (swork.length() == 0) {
-            LOG_ERR("Unrecognized format <grp>:<major>.<minor>=%s", optarg);
+            LOG_ERR("Unrecognized format <grp>:<x>.<y>=%s", optarg);
+            return false;
+        }
+
+        tmp = strtol(swork.substr(0, swork.size()).c_str(), &endptr, 10);
+        if (*endptr != '.') {
+            LOG_ERR("Missing 2nd '.' character in format string");
+            return false;
+        } else if (tmp < 0) {
+            LOG_ERR("<y> values < 0 are not supported");
+            return false;
+        }
+        target.t.yLev = tmp;
+
+        // Find zLev component of <test>
+        swork = swork.substr(swork.find_first_of('.') + 1, swork.length());
+        if (swork.length() == 0) {
+            LOG_ERR("Unrecognized format <grp>:<x>.<y>.<z>=%s", optarg);
             return false;
         }
 
         tmp = strtol(swork.substr(0, swork.size()).c_str(), &endptr, 10);
         if (*endptr != '\0') {
-            LOG_ERR("Unrecognized format <grp>:<major>.<minor>=%s", optarg);
+            LOG_ERR("Unrecognized format <grp>:<x>.<y>.<z>=%s", optarg);
             return false;
         } else if (tmp < 0) {
-            LOG_ERR("<minor> values < 0 are not supported");
+            LOG_ERR("<z> values < 0 are not supported");
             return false;
         }
-        target.t.minor = tmp;
+        target.t.zLev = tmp;
     }
-
+;
     if (target.t.group == UINT_MAX) {
         LOG_ERR("Unrecognized format <grp>=%s\n", optarg);
         return false;
-    } else if (((target.t.major == UINT_MAX) && (target.t.minor != UINT_MAX)) ||
-               ((target.t.major != UINT_MAX) && (target.t.minor == UINT_MAX))) {
-        LOG_ERR("Unrecognized format <grp>:<major>.<minor>=%s", optarg);
+    } else if (!(((target.t.xLev == UINT_MAX)  &&
+                  (target.t.yLev == UINT_MAX)  &&
+                  (target.t.zLev == UINT_MAX)) ||
+                 ((target.t.xLev != UINT_MAX)  &&
+                  (target.t.yLev != UINT_MAX)  &&
+                  (target.t.zLev != UINT_MAX)))) {
+        LOG_ERR("Unrecognized format <grp>:<x>.<y>.<z>=%s", optarg);
+        LOG_ERR("Parsed and decoded: <%ld>:<%ld>.<%ld>.<%ld>",
+            target.t.group, target.t.xLev, target.t.yLev, target.t.zLev);
         return false;
     }
 
@@ -635,7 +667,7 @@ bool SetFeaturesNumberOfQueues(NumQueues &numQueues, int fd)
         acq->LogCE(acqMetrics.head_ptr);
 
         union CE ce = acq->PeekCE(acqMetrics.head_ptr);
-        ProcessCE::ValidateStatus(ce);  // throws upon error
+        ProcessCE::Validate(ce);  // throws upon error
         printf("The operation succeeded to set number of queues\n");
     } catch (...) {
         printf("Operation failed to set number of queues\n");

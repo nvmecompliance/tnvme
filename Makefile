@@ -88,7 +88,7 @@ $(SUBDIRS):
 	$(MAKE) -C $@ $(GOAL)
 
 $(APP_NAME): $(SUBDIRS) $(SOURCES)
-	$(CC) $(CFLAGS) $(INCLUDES) $(SOURCES) -o $(APP_NAME) $(LDFLAGS)
+	$(CC) $(INCLUDES) $(CFLAGS) $(DFLAGS) $(SOURCES) -o $(APP_NAME) $(LDFLAGS)
 
 # Specify a custom source compile dir: "make src SRCDIR=../compile/dir"
 # If the specified dir could cause recursive copies, then specify w/o './'

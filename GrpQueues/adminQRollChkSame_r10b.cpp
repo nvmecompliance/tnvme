@@ -20,13 +20,16 @@
 #include "../Utils/kernelAPI.h"
 #include "../Utils/io.h"
 
+namespace GrpQueues {
+
 #define MAX_ADMIN_Q_SIZE            4096
+
 
 AdminQRollChkSame_r10b::AdminQRollChkSame_r10b(int fd, string grpName,
     string testName, ErrorRegs errRegs) :
     Test(fd, grpName, testName, SPECREV_10b, errRegs)
 {
-    // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 4");
     mTestDesc.SetShort(     "Validate admin Q doorbell rollover when Q's same size");
     // No string size limit for the long description
@@ -80,6 +83,9 @@ AdminQRollChkSame_r10b::RunCoreTest()
      */
     uint16_t adminQSize = 2; // minimum Admin Q size.
     uint16_t loopCnt = 0;
+
+    if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
+        throw exception();
 
     while (1) {
         LOG_NRM("(ASQSize, ACQSize, Loop Cnt) = (%d, %d, %d)",
@@ -206,3 +212,5 @@ AdminQRollChkSame_r10b::VerifyQPointers(SharedACQPtr acq, SharedASQPtr asq)
         throw exception();
     }
 }
+
+}   // namespace

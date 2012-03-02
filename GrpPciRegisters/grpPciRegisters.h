@@ -19,6 +19,8 @@
 
 #include "../group.h"
 
+namespace GrpPciRegisters {
+
 /**
 * This class implements a logical grouping of test cases for all NVME
 * specification document releases. It is logically grouping the PCI space
@@ -31,5 +33,6 @@ public:
     virtual ~GrpPciRegisters();
 };
 
+}   // namespace
 
 #endif

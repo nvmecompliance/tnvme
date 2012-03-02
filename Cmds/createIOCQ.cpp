@@ -33,6 +33,11 @@ CreateIOCQ::CreateIOCQ(int fd) :
     AdminCmd(fd, Trackable::OBJ_CREATEIOCQ)
 {
     AdminCmd::Init(Opcode, DATADIR_TO_DEVICE);
+
+    // No cmd should ever be created which violates these masking possibilities
+    send_64b_bitmask allowPrpMask = (send_64b_bitmask)
+        (MASK_PRP1_PAGE | MASK_PRP1_LIST);
+    SetPrpAllowed(allowPrpMask);
 }
 
 
@@ -107,11 +112,3 @@ CreateIOCQ::Init(const SharedIOCQPtr iocq)
     }   // Handle DWORD 11
 }
 
-
-void
-CreateIOCQ::Dump(LogFilename filename, string fileHdr) const
-{
-    Cmd::Dump(filename, fileHdr);
-    PrpData::Dump(filename, "Payload contents:");
-    MetaData::Dump(filename, "Meta data contents:");
-}

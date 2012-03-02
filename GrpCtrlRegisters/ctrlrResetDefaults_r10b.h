@@ -20,6 +20,8 @@
 #include <map>
 #include "test.h"
 
+namespace GrpCtrlRegisters {
+
 
 /** \verbatim
  * -----------------------------------------------------------------------------
@@ -86,5 +88,6 @@ private:
     int ReportOffendingBitPos(uint64_t val, uint64_t expectedVal);
 };
 
+}   // namespace
 
 #endif

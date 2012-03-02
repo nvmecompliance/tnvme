@@ -20,13 +20,16 @@
 #include "createIOQDiscontigPoll_r10b.h"
 #include "grpDefs.h"
 #include "../Utils/kernelAPI.h"
+#include "../Queues/ce.h"
+
+namespace GrpBasicInit {
 
 
 WriteDataPat_r10b::WriteDataPat_r10b(int fd, string grpName, string testName,
     ErrorRegs errRegs) :
     Test(fd, grpName, testName, SPECREV_10b, errRegs)
 {
-    // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 6");
     mTestDesc.SetShort(     "Write a well known data pattern to media");
     // No string size limit for the long description
@@ -72,18 +75,15 @@ WriteDataPat_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
-     * 1) All interrupts are disabled.
-     * 2) Contigous IOQ pairs have been created by the RsrcMngr for group life
-     * 3) The NVM cmd set is the active cmd set.
+     * 1) Both test CreateIOQContigPoll_r10b & CreateIOQDiscontigPoll_r10b has
+     *    run prior, or Both test CreateIOQContigIrq_r10b &
+     *    CreateIOQDiscontigIrq_r10b has run prior
+     * 2) An individual test within this group cannot run, the entire group
+     *    must be executed every time. Each subsequent test relies on the prior.
      * \endverbatim
      */
-    KernelAPI::DumpKernelMetrics(mFd,
-        FileSystem::PrepLogFile(mGrpName, mTestName, "kmetrics", "before"));
 
     WriteDataPattern();
-
-    KernelAPI::DumpKernelMetrics(mFd,
-        FileSystem::PrepLogFile(mGrpName, mTestName, "kmetrics", "after"));
     return true;
 }
 
@@ -96,7 +96,7 @@ WriteDataPat_r10b::WriteDataPattern()
 
     LOG_NRM("Calc buffer size to write %d logical blks to media",
         WRITE_DATA_PAT_NUM_BLKS);
-    ConstSharedIdentifyPtr namSpcPtr = gInformative->GetIdentifyCmdNamespace(1);
+    ConstSharedIdentifyPtr namSpcPtr = gInformative->GetIdentifyCmdNamspc(1);
     if (namSpcPtr == Identify::NullIdentifyPtr) {
         LOG_ERR("Namespace #1 must exist");
         throw exception();
@@ -197,5 +197,7 @@ WriteDataPat_r10b::SendToIOSQ(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
     iocq->LogCE(iocqMetrics.head_ptr);
 
     union CE ce = iocq->PeekCE(iocqMetrics.head_ptr);
-    ProcessCE::ValidateStatus(ce);  // throws upon error
+    ProcessCE::Validate(ce);  // throws upon error
 }
+
+}   // namespace

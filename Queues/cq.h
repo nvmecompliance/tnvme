@@ -18,7 +18,6 @@
 #define _CQ_H_
 
 #include "queue.h"
-#include "ce.h"
 
 class CQ;    // forward definition
 typedef boost::shared_ptr<CQ>               SharedCQPtr;
@@ -104,9 +103,10 @@ public:
      * @param isrCount Returns the number of ISR's which fired and were counted
      *        that are assoc with this CQ. If this CQ does not use IRQ's, then
      *        this value will remain 0.
+     * @reportOn0 Pass true to report when 0 CE's are awaiting in the CQ
      * @return The number of unreap'd CE's awaiting
      */
-    uint16_t ReapInquiry(uint32_t &isrCount);
+    uint16_t ReapInquiry(uint32_t &isrCount, bool reportOn0 = false);
 
     /**
      * Inquire as to the number of CE's which are present in this CQ. If the
@@ -195,6 +195,14 @@ private:
      * @param q Pass the IOCQ's definition
      */
     void CreateIOCQ(struct nvme_prep_cq &q);
+
+    /**
+     * Calculate if a timeout (TO) period has expired
+     * @param ms Pass the number of ms indicating the TO period
+     * @param initial Pass the time when the period starting
+     * @return true if the TO has expired, false otherwise
+     */
+    bool CalcTimeout(uint16_t ms, struct timeval initial);
 };
 
 

@@ -55,6 +55,11 @@ Identify::Identify(int fd) : AdminCmd(fd, Trackable::OBJ_IDENTIFY)
 {
     Init(Opcode, DATADIR_FROM_DEVICE);
     SetCNS(true);
+
+    // No cmd should ever be created which violates these masking possibilities
+    send_64b_bitmask allowPrpMask = (send_64b_bitmask)
+        (MASK_PRP1_PAGE| MASK_PRP2_PAGE);
+    SetPrpAllowed(allowPrpMask);
 }
 
 
@@ -144,9 +149,6 @@ Identify::Dump(LogFilename filename, string fileHdr) const
     FILE *fp;
 
     Cmd::Dump(filename, fileHdr);
-    PrpData::Dump(filename, "Payload contents:");
-    MetaData::Dump(filename, "Meta data contents:");
-
 
     // Reopen the file and append the same data in a different format
     if ((fp = fopen(filename.c_str(), "a")) == NULL) {
@@ -154,12 +156,16 @@ Identify::Dump(LogFilename filename, string fileHdr) const
         throw exception();
     }
 
+    fprintf(fp, "\n------------------------------------------------------\n");
+    fprintf(fp, "----Detailed decoding of the cmd payload as follows---\n");
+    fprintf(fp, "------------------------------------------------------");
+
     // How do we interpret the data contained herein?
     if (GetCNS()) {
-        for (int i = IDCTRLRCAP_VID; i < IDCTRLRCAP_FENCE; i++)
+        for (int i = 0; i < IDCTRLRCAP_FENCE; i++)
             Dump(fp, i, mIdCtrlrCapMetrics);
     } else {
-        for (int i = IDNAMESPC_NSZE; i < IDNAMESPC_FENCE; i++)
+        for (int i = 0; i < IDNAMESPC_FENCE; i++)
             Dump(fp, i, mIdNamespcType);
     }
     fclose(fp);

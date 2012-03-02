@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-#include "createIOQContigIsr_r10b.h"
+#include "createIOQContigIrq_r10b.h"
 #include "globals.h"
 #include "createACQASQ_r10b.h"
 #include "grpDefs.h"
@@ -22,29 +22,31 @@
 #include "../Queues/iosq.h"
 #include "../Utils/kernelAPI.h"
 #include "../Utils/queues.h"
+#include "../Utils/irq.h"
 
+namespace GrpBasicInit {
 
 #define IOQ_ID                      1
 
 static uint16_t NumEntriesIOQ =     5;
 
 
-CreateIOQContigIsr_r10b::CreateIOQContigIsr_r10b(int fd, string grpName,
+CreateIOQContigIrq_r10b::CreateIOQContigIrq_r10b(int fd, string grpName,
     string testName, ErrorRegs errRegs) :
     Test(fd, grpName, testName, SPECREV_10b, errRegs)
 {
-    // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 7");
-    mTestDesc.SetShort(     "Create contiguous IOCQ(isr) and IOSQ's");
+    mTestDesc.SetShort(     "Create contiguous IOCQ(irq) and IOSQ's");
     // No string size limit for the long description
     mTestDesc.SetLong(
         "Issue the admin commands Create contiguous I/O SQ and Create I/Q "
-        "CQ(isr) to the ASQ and reap the resulting CE's from the ACQ to "
+        "CQ(irq) to the ASQ and reap the resulting CE's from the ACQ to "
         "certify those Q's have been created.");
 }
 
 
-CreateIOQContigIsr_r10b::~CreateIOQContigIsr_r10b()
+CreateIOQContigIrq_r10b::~CreateIOQContigIrq_r10b()
 {
     ///////////////////////////////////////////////////////////////////////////
     // Allocations taken from the heap and not under the control of the
@@ -53,8 +55,8 @@ CreateIOQContigIsr_r10b::~CreateIOQContigIsr_r10b()
 }
 
 
-CreateIOQContigIsr_r10b::
-CreateIOQContigIsr_r10b(const CreateIOQContigIsr_r10b &other) : Test(other)
+CreateIOQContigIrq_r10b::
+CreateIOQContigIrq_r10b(const CreateIOQContigIrq_r10b &other) : Test(other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -63,8 +65,8 @@ CreateIOQContigIsr_r10b(const CreateIOQContigIsr_r10b &other) : Test(other)
 }
 
 
-CreateIOQContigIsr_r10b &
-CreateIOQContigIsr_r10b::operator=(const CreateIOQContigIsr_r10b &other)
+CreateIOQContigIrq_r10b &
+CreateIOQContigIrq_r10b::operator=(const CreateIOQContigIrq_r10b &other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -76,27 +78,25 @@ CreateIOQContigIsr_r10b::operator=(const CreateIOQContigIsr_r10b &other)
 
 
 bool
-CreateIOQContigIsr_r10b::RunCoreTest()
+CreateIOQContigIrq_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
-     * 1) The ASQ & ACQ's have been created by the RsrcMngr for group lifetime
-     * 2) All interrupts are disabled.
-     * 3) Empty ASQ & ACQ's
+     * 1) Test CreateACQASQ_r10b, DeleteIOQContig_r10b, and
+     *    DeleteIOQDiscontig_r10b have run prior.
+     * 2) An individual test within this group cannot run, the entire group
+     *    must be executed every time. Each subsequent test relies on the prior.
      * \endverbatim
      */
     uint64_t work;
     uint32_t isrCount;
-
-    KernelAPI::DumpKernelMetrics(mFd,
-        FileSystem::PrepLogFile(mGrpName, mTestName, "kmetrics", "before"));
 
     // Lookup objs which were created in a prior test within group
     SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
     SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
 
     // Verify assumptions are active/enabled/present/setup
-    if (acq->ReapInquiry(isrCount) != 0) {
+    if (acq->ReapInquiry(isrCount, true) != 0) {
         LOG_ERR("The ACQ should not have any CE's waiting before testing");
         throw exception();
     } else if (gRegisters->Read(CTLSPC_CAP, work) == false) {
@@ -121,8 +121,8 @@ CreateIOQContigIsr_r10b::RunCoreTest()
 
     if (gCtrlrConfig->SetState(ST_DISABLE) == false)
         throw exception();
-    if (gCtrlrConfig->SetIrqScheme(INT_MSIX, 3) == false)
-        throw exception();
+    // All queues will use identical IRQ vector
+    IRQ::SetAnySchemeSpecifyNum(1);     // throws upon error
 
     gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
@@ -131,15 +131,17 @@ CreateIOQContigIsr_r10b::RunCoreTest()
 
     gCtrlrConfig->SetIOCQES(IOCQ::COMMON_ELEMENT_SIZE_PWR_OF_2);
     Queues::CreateIOCQContigToHdw(mFd, mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
-        asq, acq, IOQ_ID, NumEntriesIOQ, true, IOCQ_CONTIG_GROUP_ID, true, 1);
+        asq, acq, IOQ_ID, NumEntriesIOQ, true, IOCQ_CONTIG_GROUP_ID, true, 0);
 
 
     gCtrlrConfig->SetIOSQES(IOSQ::COMMON_ELEMENT_SIZE_PWR_OF_2);
     Queues::CreateIOSQContigToHdw(mFd, mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
         asq, acq, IOQ_ID, NumEntriesIOQ, true, IOSQ_CONTIG_GROUP_ID, IOQ_ID, 0);
 
-
-    KernelAPI::DumpKernelMetrics(mFd,
-        FileSystem::PrepLogFile(mGrpName, mTestName, "kmetrics", "after"));
     return true;
 }
+
+
+
+
+}   // namespace

@@ -19,6 +19,8 @@
 
 #include "../group.h"
 
+namespace GrpNVMReadCmd {
+
 
 /**
 * This class implements NVM cmd set read test cases that don't require data
@@ -31,5 +33,6 @@ public:
     virtual ~GrpNVMReadCmd();
 };
 
+}   // namespace
 
 #endif

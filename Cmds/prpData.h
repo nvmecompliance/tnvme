@@ -99,6 +99,17 @@ protected:
     void SetPrpBuffer(send_64b_bitmask prpFields, uint8_t const *memBuffer,
         uint64_t bufSize);
 
+    /**
+     * Each cmd has unique requirements as to how its PRP ptrs can be
+     * interpreted This method should be called during child class instantiation
+     * to set all the ways a PRP ptr can be interpreted. If ever a test attempts
+     * to set the send_64b_bitmask to anything that what is allowed, an
+     * exception will be thrown. There is no usefulness in supplying illegal
+     * PRP ptrs to the hdw because the spec states the outcome is unpredictable.
+     * @param allowedBitmask Pass all allowed bitmask ptr values
+     */
+    void SetPrpAllowed(send_64b_bitmask allowedBitmask);
+
 
 private:
     /// Used for RW memory for a cmd's user data
@@ -108,10 +119,10 @@ private:
     /// Number of bytes consisting of either mBufRO or mBufRW
     uint64_t mBufSize;
 
+    /// Allowed values of send_64b_bitmask for a cmd's PRP ptrs
+    send_64b_bitmask mPrpAllowed;
     /// What fields in a cmd can we populate for the buffer?
     send_64b_bitmask mPrpFields;
-
-    static const send_64b_bitmask ALLOWED_BITS;
 };
 
 

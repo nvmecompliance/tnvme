@@ -20,12 +20,14 @@
 #include "../Utils/kernelAPI.h"
 #include "../Utils/io.h"
 
+namespace GrpQueues {
+
 
 InitialStateAdmin_r10b::InitialStateAdmin_r10b(int fd, string grpName,
     string testName, ErrorRegs errRegs) :
     Test(fd, grpName, testName, SPECREV_10b, errRegs)
 {
-    // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 4");
     mTestDesc.SetShort(     "Validate new ASQ/ACQ pointer initial states");
     // No string size limit for the long description
@@ -74,11 +76,11 @@ InitialStateAdmin_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
-     * 1) This is the 1st within GrpQueues.
-     * 2) The NVME device is disabled
-     * 3) All interrupts are disabled.
+     * 1) none
      *  \endverbatim
      */
+    if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
+        throw exception();
 
     // Create Admin Q Objects for Group lifetime
     SharedACQPtr acq = CAST_TO_ACQ(
@@ -169,3 +171,5 @@ InitialStateAdmin_r10b::VerifyHeadAndTailDoorBells(SharedACQPtr acq,
         throw exception();
     }
 }
+
+}   // namespace

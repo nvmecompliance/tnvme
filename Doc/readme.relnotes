@@ -1,3 +1,24 @@
+nvmecompliance_release=1.2.0 
+    1) Added test dependencies. The test reference number now indicates its
+       prerequisites. See 
+       https://github.com/nvmecompliance/tnvme/wiki/Test-Numbering
+    2) Avoid PRP misuse. Allow the test developer to set PRP requirements, but
+       never allow the setting of unsupported requirements for this will only
+       lead to a kernel crash. Spec. states this has unknown outcomes.
+    3) Aid in seeking bare, meta, e2e namespaces. Many tests will need this
+       support, thus it was made available for all as a utility class.
+    4) Automate retrieving the get log page error data when the M bit is set
+       within a CE.
+    5) Added C++ namespace's to avoid name collisions.
+    6) Addressed the issue where the log data was becoming too large to handle.
+       See file: manage/runtnvme.sh for this support.
+    7) Removed the long delays from reap inquiry as was a known issue in the
+       previous release.
+    8) Known Issues:
+        a) A problem has been reported by the community that test case 0:1.1.0
+           works correctly under Fedora 2.6.31.5-127.fc12.x86_64 if executed
+           within QEMU, however under real hardware the DUT's data never
+           appears in user space. This investigation is ongoing.
 nvmecompliance_release=1.1.0 Added interrupt support; MSI, MSI-X, no pin based
     1) Interrupts supported in tnvme are abstracted from the scheme set within
        dnvme; test leverage the same user space API no matter the setting used
@@ -12,7 +33,7 @@ nvmecompliance_release=1.1.0 Added interrupt support; MSI, MSI-X, no pin based
        the 1.0b NVMe specification. Outside sources are encouraged to work on
        the test plan marked as "TBD" since those test still need to be 
        described and coded.
-    5) Known deficiencies:
+    5) Known Issues:
         a) Reap inquiry takes much longer than it should, and thus test cases
            take longer to complete. This is due to the polling scheme whereby
            tnvme must keep generating IOCTL calls into dnvme until such time
