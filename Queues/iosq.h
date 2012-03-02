@@ -42,8 +42,6 @@ public:
 
     /// Used to compare for NULL pointers being returned by allocations
     static SharedIOSQPtr NullIOSQPtr;
-    static const uint16_t COMMON_ELEMENT_SIZE;
-    static const uint8_t  COMMON_ELEMENT_SIZE_PWR_OF_2;
 
     uint8_t GetPriority() { return mPriority; }
 

@@ -19,8 +19,6 @@
 #include "globals.h"
 
 SharedIOSQPtr IOSQ::NullIOSQPtr;
-const uint16_t IOSQ::COMMON_ELEMENT_SIZE = 64;
-const uint8_t  IOSQ::COMMON_ELEMENT_SIZE_PWR_OF_2 = 6;
 
 
 IOSQ::IOSQ() : SQ(0, Trackable::OBJTYPE_FENCE)

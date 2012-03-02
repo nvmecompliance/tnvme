@@ -123,12 +123,14 @@ IOQRollChkSame_r10b::IOQRollChkSame(SharedASQPtr asq, SharedACQPtr acq,
     SharedWritePtr writeCmd;
 
 
-    gCtrlrConfig->SetIOCQES(IOCQ::COMMON_ELEMENT_SIZE_PWR_OF_2);
+    gCtrlrConfig->SetIOCQES(gInformative->GetIdentifyCmdCtrlr()->
+        GetValue(IDCTRLRCAP_CQES) & 0xf);
     SharedIOCQPtr iocqContig = Queues::CreateIOCQContigToHdw(mFd, mGrpName,
         mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, numEntriesIOQ,
         false, IOCQ_CONTIG_GROUP_ID, false, 1);
 
-    gCtrlrConfig->SetIOSQES(IOSQ::COMMON_ELEMENT_SIZE_PWR_OF_2);
+    gCtrlrConfig->SetIOSQES(gInformative->GetIdentifyCmdCtrlr()->
+        GetValue(IDCTRLRCAP_SQES) & 0xf);
     SharedIOSQPtr iosqContig = Queues::CreateIOSQContigToHdw(mFd, mGrpName,
         mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, numEntriesIOQ,
         false, IOSQ_CONTIG_GROUP_ID, IOQ_ID, 0);

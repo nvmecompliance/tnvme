@@ -42,8 +42,6 @@ public:
 
     /// Used to compare for NULL pointers being returned by allocations
     static SharedIOCQPtr NullIOCQPtr;
-    static const uint16_t COMMON_ELEMENT_SIZE;
-    static const uint8_t  COMMON_ELEMENT_SIZE_PWR_OF_2;
 
     /**
      * Initialize this object and allocates contiguous Q content memory.

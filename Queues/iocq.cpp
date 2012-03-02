@@ -19,8 +19,6 @@
 #include "globals.h"
 
 SharedIOCQPtr IOCQ::NullIOCQPtr;
-const uint16_t IOCQ::COMMON_ELEMENT_SIZE = 16;
-const uint8_t  IOCQ::COMMON_ELEMENT_SIZE_PWR_OF_2 = 4;
 
 
 IOCQ::IOCQ() : CQ(0, Trackable::OBJTYPE_FENCE)
