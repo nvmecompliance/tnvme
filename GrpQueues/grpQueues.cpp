@@ -41,8 +41,8 @@ GrpQueues::GrpQueues(size_t grpNum, SpecRev specRev, ErrorRegs errRegs,
         APPEND_TEST_AT_XLEVEL(AdminQRollChkSame_r10b, fd, GrpQueues, errRegs)
         APPEND_TEST_AT_XLEVEL(AdminQRollChkDiff_r10b, fd, GrpQueues, errRegs)
         APPEND_TEST_AT_XLEVEL(CreateResources_r10b, fd, GrpQueues, errRegs)
-        APPEND_TEST_AT_YLEVEL(IOQRollChkSame_r10b, fd, GrpQueues, errRegs)
-        APPEND_TEST_AT_YLEVEL(IOQRollChkDiff_r10b, fd, GrpQueues, errRegs)
+//Not quite ready        APPEND_TEST_AT_YLEVEL(IOQRollChkSame_r10b, fd, GrpQueues, errRegs)
+//Not quite ready        APPEND_TEST_AT_YLEVEL(IOQRollChkDiff_r10b, fd, GrpQueues, errRegs)
         break;
 
     default:

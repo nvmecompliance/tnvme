@@ -645,7 +645,7 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
 
 
     // After GrpInformative runs, loop over the cmd line's requested test cases
-    LOG_NRM("Attempting to satisfy <grp>:<x>.<y>.<z>=%ld:%ld.%ld.%ld",
+    LOG_NRM("Attempting to satisfy target test: %ld:%ld.%ld.%ld",
         cl.test.t.group, cl.test.t.xLev, cl.test.t.yLev, cl.test.t.zLev);
     if (cl.test.t.group == INFORM_GRPNUM) {
         LOG_NRM("GrpInformative(%d) runs by dflt, ignoring request",

@@ -133,7 +133,7 @@ ParseSkipTestCmdLine(vector<TestRef> &skipTest, const char *optarg)
     }
 
     // Report what tests will be skipped
-    string output = "Execution will skip test case(s): <grp>:<x>.<y>.<z>=";
+    string output = "Execution will skip test case(s): ";
     char work[20];
     for (size_t i = 0; i < skipTest.size(); i++ ) {
         if ((skipTest[i].xLev == UINT_MAX) ||
