@@ -21,8 +21,6 @@
 
 namespace GrpQueues {
 
-#define WRITE_DATA_PAT_NUM_BLKS     1
-
 
 IOQRollChkSame_r10b::IOQRollChkSame_r10b(int fd, string grpName,
     string testName, ErrorRegs errRegs) :
@@ -84,7 +82,6 @@ IOQRollChkSame_r10b::RunCoreTest()
      * 1) Test CreateResources_r10b has run prior.
      *  \endverbatim
      */
-    uint64_t maxIOQEntries;
 
     // Lookup objs which were created in a prior test within group
     SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
@@ -98,6 +95,7 @@ IOQRollChkSame_r10b::RunCoreTest()
         throw exception();
     }
 
+    uint64_t maxIOQEntries;
     // Determine the max IOQ entries supported
     if (gRegisters->Read(CTLSPC_CAP, maxIOQEntries) == false) {
         LOG_ERR("Unable to determine MQES");
@@ -120,9 +118,6 @@ void
 IOQRollChkSame_r10b::IOQRollChkSame(SharedASQPtr asq, SharedACQPtr acq,
     uint16_t numEntriesIOQ)
 {
-    SharedWritePtr writeCmd;
-
-
     gCtrlrConfig->SetIOCQES(gInformative->GetIdentifyCmdCtrlr()->
         GetValue(IDCTRLRCAP_CQES) & 0xf);
     SharedIOCQPtr iocqContig = Queues::CreateIOCQContigToHdw(mFd, mGrpName,
@@ -138,15 +133,13 @@ IOQRollChkSame_r10b::IOQRollChkSame(SharedASQPtr asq, SharedACQPtr acq,
     LOG_NRM("(IOCQ Size, IOSQ Size)=(%d,%d)", iocqContig->GetNumEntries(),
         iosqContig->GetNumEntries());
 
-    ConstSharedIdentifyPtr namspc = gInformative->Get1stBareMetaE2E();
-    Informative::NamspcType nsType = gInformative->IdentifyNamespace(namspc);
-    SetWriteCmd(namspc, writeCmd, nsType);
+    SharedWritePtr writeCmd = SetWriteCmd();
 
     LOG_NRM("Send #%d cmds to hdw via the contiguous IOQ's",
         iocqContig->GetNumEntries() + 2);
     for (uint32_t numEntries = 0; numEntries <
         (uint32_t)(iosqContig->GetNumEntries() + 2); numEntries++) {
-        SendToIOSQ(iosqContig, iocqContig, writeCmd, "contig");
+        SendToIOSQ(iosqContig, iocqContig, writeCmd);
         VerifyCESQValues(iocqContig, (numEntries + 1) %
             iosqContig->GetNumEntries());
     }
@@ -154,50 +147,43 @@ IOQRollChkSame_r10b::IOQRollChkSame(SharedASQPtr asq, SharedACQPtr acq,
 }
 
 
-void
-IOQRollChkSame_r10b::SetWriteCmd(ConstSharedIdentifyPtr& namSpcPtr,
-    SharedWritePtr& writeCmd, Informative::NamspcType nsType)
+SharedWritePtr
+IOQRollChkSame_r10b::SetWriteCmd()
 {
-    LOG_NRM("Processing write cmd using Bare namspc # 1");
-    uint64_t lbaDataSize = namSpcPtr->GetLBADataSize();
+    Informative::Namspc namspcData = gInformative->Get1stBareMetaE2E();
+    LOG_NRM("Processing write cmd using namspc id %d", namspcData.id);
+    if (namspcData.type != Informative::NS_BARE) {
+        LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
+        if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
+            throw exception();
+    }
 
     LOG_NRM("Create data pattern to write to media");
     SharedMemBufferPtr dataPat = SharedMemBufferPtr(new MemBuffer());
-    dataPat->Init(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize);
+    uint64_t lbaDataSize = namspcData.idCmdNamspc->GetLBADataSize();
+    dataPat->Init(lbaDataSize);
     dataPat->SetDataPattern(MemBuffer::DATAPAT_INC_16BIT);
 
-    LOG_NRM("Create generic write cmd to send data pattern to bare namspc 1");
-    writeCmd = SharedWritePtr(new Write(mFd));
+    SharedWritePtr writeCmd = SharedWritePtr(new Write(mFd));
     send_64b_bitmask prpBitmask = (send_64b_bitmask)(MASK_PRP1_PAGE
         | MASK_PRP2_PAGE | MASK_PRP2_LIST);
-    writeCmd->SetPrpBuffer(prpBitmask, dataPat);
-    writeCmd->SetNSID(1);
-    writeCmd->SetNLB(WRITE_DATA_PAT_NUM_BLKS - 1); // convert to 0-based value
 
-    if (nsType == Informative::NS_META) {
+    if (namspcData.type == Informative::NS_META) {
         writeCmd->AllocMetaBuffer();
-    } else if (nsType == Informative::NS_E2E) {
+        prpBitmask = (send_64b_bitmask)(prpBitmask | MASK_MPTR);
+    } else if (namspcData.type == Informative::NS_E2E) {
         writeCmd->AllocMetaBuffer();
+        prpBitmask = (send_64b_bitmask)(prpBitmask | MASK_MPTR);
         LOG_ERR("Deferring E2E namspc work to the future");
         LOG_ERR("Need to add CRC's to correlate to buf pattern");
         throw exception();
     }
-}
 
+    writeCmd->SetPrpBuffer(prpBitmask, dataPat);
+    writeCmd->SetNSID(namspcData.id);
+    writeCmd->SetNLB(0);
 
-void
-IOQRollChkSame_r10b::SetMetaDataSize()
-{
-    ConstSharedIdentifyPtr namSpcPtr;
-    vector<uint32_t> nameSpc = gInformative->GetMetaNamespaces();
-    if (nameSpc.size()) {
-        namSpcPtr = gInformative->GetIdentifyCmdNamspc(nameSpc[0]);
-        if (namSpcPtr == Identify::NullIdentifyPtr)
-            throw exception();
-        LBAFormat lbaFormat = namSpcPtr->GetLBAFormat();
-        if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
-            throw exception();
-    }
+    return writeCmd;
 }
 
 
@@ -210,36 +196,37 @@ IOQRollChkSame_r10b::DisableAndEnableCtrl()
     gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
         throw exception();
-
-    SetMetaDataSize();
 }
 
 
 void
 IOQRollChkSame_r10b::SendToIOSQ(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
-    SharedWritePtr writeCmd, string qualifier)
+    SharedWritePtr writeCmd)
 {
     uint16_t numCE;
     uint16_t ceRemain;
     uint16_t numReaped;
     uint32_t isrCount;
 
-    LOG_NRM("Send the cmd to hdw via %s IOSQ", qualifier.c_str());
+    LOG_NRM("Send the cmd to hdw via IOSQ %d", iosq->GetQId());
     iosq->Send(writeCmd);
     iosq->Ring();
 
-    LOG_NRM("Wait for the CE to arrive in IOCQ");
+    LOG_NRM("Wait for the CE to arrive in IOCQ %d", iocq->GetQId());
     if (iocq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE, isrCount)
         == false) {
         LOG_ERR("Unable to see completion of cmd");
         iocq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "iocq",
-            qualifier),
+            "reapInq"),
             "Unable to see any CE's in IOCQ, dump entire CQ contents");
         throw exception();
     } else if (numCE != 1) {
         LOG_ERR("The IOCQ should only have 1 CE as a result of a cmd");
         throw exception();
     }
+
+    LOG_NRM("The CQ's metrics before reaping holds head_ptr");
+    struct nvme_gen_cq iocqMetrics = iocq->GetQMetrics();
 
     LOG_NRM("Reaping CE from IOCQ, requires memory to hold reaped CE");
     SharedMemBufferPtr ceMemIOCQ = SharedMemBufferPtr(new MemBuffer());
@@ -248,12 +235,14 @@ IOQRollChkSame_r10b::SendToIOSQ(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
         LOG_ERR("Verified there was 1 CE, but reaping produced %d", numReaped);
         throw exception();
     }
+
+    union CE ce = iocq->PeekCE(iocqMetrics.head_ptr);
+    ProcessCE::Validate(ce, CESTAT_SUCCESS);  // throws upon error
 }
 
 
 void
-IOQRollChkSame_r10b::VerifyCESQValues(SharedIOCQPtr iocq,
-    uint16_t expectedVal)
+IOQRollChkSame_r10b::VerifyCESQValues(SharedIOCQPtr iocq, uint16_t expectedVal)
 {
     union CE ce;
     struct nvme_gen_cq iocqMetrics = iocq->GetQMetrics();

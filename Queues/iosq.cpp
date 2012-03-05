@@ -43,6 +43,19 @@ IOSQ::Init(uint16_t qId, uint16_t numEntries, uint16_t cqId,
     uint8_t priority)
 {
     uint8_t entrySize;
+    uint64_t work;
+
+
+    if (gRegisters->Read(CTLSPC_CAP, work) == false) {
+        LOG_ERR("Unable to determine MQES");
+        throw exception();
+    }
+    // Detect if doing something that looks suspicious/incorrect/illegal
+    work &= CAP_MQES;
+    if ((work + 1) < (uint64_t)numEntries) {
+        LOG_WARN("Creating Q with %d entries, but DUT only allows %d",
+            numEntries, (uint32_t)(work + 1));
+    }
 
     switch (priority) {
 	case 0x00:
@@ -82,18 +95,30 @@ IOSQ::Init(uint16_t qId, uint16_t numEntries,
     const SharedMemBufferPtr memBuffer, uint16_t cqId, uint8_t priority)
 {
     uint8_t entrySize;
+    uint64_t work;
+
+    if (gRegisters->Read(CTLSPC_CAP, work) == false) {
+        LOG_ERR("Unable to determine MQES");
+        throw exception();
+    }
+    // Detect if doing something that looks suspicious/incorrect/illegal
+    work &= CAP_MQES;
+    if ((work + 1) < (uint64_t)numEntries) {
+        LOG_WARN("Creating Q with %d entries, but DUT only allows %d",
+            numEntries, (uint32_t)(work + 1));
+    }
 
     switch (priority) {
-    	case 0x00:
-    	case 0x01:
-    	case 0x10:
-    	case 0x11:
-    		mPriority = priority;
-    		break;
-    	default:
-    		LOG_DBG("Illegal priority value, can't fit within 2 bits");
-    		throw exception();
-    		break;
+    case 0x00:
+    case 0x01:
+    case 0x10:
+    case 0x11:
+        mPriority = priority;
+        break;
+    default:
+        LOG_DBG("Illegal priority value, can't fit within 2 bits");
+        throw exception();
+        break;
     }
 
     if (gCtrlrConfig->GetIOSQES(entrySize) == false) {

@@ -14,8 +14,10 @@
  *  limitations under the License.
  */
 
-#ifndef _IOQROLLCHKDIFF_r10b_H_
-#define _IOQROLLCHKDIFF_r10b_H_
+#ifndef _MANYSQTOCQASSOC_R10B_H_
+#define _MANYSQTOCQASSOC_R10B_H_
+
+#include <map>
 
 #include "test.h"
 #include "globals.h"
@@ -35,20 +37,20 @@ namespace GrpQueues {
  * 1) See notes in the header file of the Test base class
  * \endverbatim
  */
-class IOQRollChkDiff_r10b : public Test
+class ManySQtoCQAssoc_r10b : public Test
 {
 public:
-    IOQRollChkDiff_r10b(int fd, string grpName, string testName,
+    ManySQtoCQAssoc_r10b(int fd, string grpName, string testName,
         ErrorRegs errRegs);
-    virtual ~IOQRollChkDiff_r10b();
+    virtual ~ManySQtoCQAssoc_r10b();
 
     /**
      * IMPORTANT: Read Test::Clone() header comment.
      */
-    virtual IOQRollChkDiff_r10b *Clone() const
-        { return new IOQRollChkDiff_r10b(*this); }
-    IOQRollChkDiff_r10b &operator=(const IOQRollChkDiff_r10b &other);
-    IOQRollChkDiff_r10b(const IOQRollChkDiff_r10b &other);
+    virtual ManySQtoCQAssoc_r10b *Clone() const
+        { return new ManySQtoCQAssoc_r10b(*this); }
+    ManySQtoCQAssoc_r10b &operator=(const ManySQtoCQAssoc_r10b &other);
+    ManySQtoCQAssoc_r10b(const ManySQtoCQAssoc_r10b &other);
 
 
 protected:
@@ -58,14 +60,9 @@ private:
     ///////////////////////////////////////////////////////////////////////////
     // Adding a member variable? Then edit the copy constructor and operator=().
     ///////////////////////////////////////////////////////////////////////////
-    void IOQRollChkDiff(SharedASQPtr asq, SharedACQPtr acq,
-        uint16_t numEntriesIOSQ, uint16_t numEntriesIOCQ);
-    void DisableAndEnableCtrl();
     SharedWritePtr SetWriteCmd();
-    void SendToIOSQ(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
-        SharedWritePtr writeCmd);
-    void VerifyCESQValues(SharedIOCQPtr iocq, uint16_t expectedVal);
-    void VerifyQPointers(SharedIOSQPtr iosq, SharedIOCQPtr iocq);
+    void ReapIOCQAndVerifyCE(SharedIOCQPtr iocq, uint16_t numTil,
+        vector<uint16_t> mSQIDToSQHDVector);
 };
 
 }   // namespace

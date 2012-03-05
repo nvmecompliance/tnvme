@@ -114,16 +114,18 @@ Informative::GetFeaturesNumOfQueues() const
 uint16_t
 Informative::GetFeaturesNumOfIOCQs() const
 {
-    LOG_NRM("Max # of IOCQs alloc'd by DUT = %d", (mGetFeaturesNumOfQ >> 16));
-    return (uint16_t)(mGetFeaturesNumOfQ >> 16);
+    LOG_NRM("Max # of IOCQs alloc'd by DUT = %d",
+       (uint16_t)((mGetFeaturesNumOfQ >> 16) + 1));
+    return (uint16_t)((mGetFeaturesNumOfQ >> 16) + 1);
 }
 
 
 uint16_t
 Informative::GetFeaturesNumOfIOSQs() const
 {
-    LOG_NRM("Max # of IOSQs alloc'd by DUT = %d", (mGetFeaturesNumOfQ & 0xff));
-    return (uint16_t)(mGetFeaturesNumOfQ & 0xff);
+    LOG_NRM("Max # of IOSQs alloc'd by DUT = %d",
+        (uint16_t)((mGetFeaturesNumOfQ & 0xffff) + 1));
+    return (uint16_t)((mGetFeaturesNumOfQ & 0xffff) + 1);
 }
 
 
@@ -231,22 +233,22 @@ Informative::IdentifyNamespace(ConstSharedIdentifyPtr idCmdNamspc) const
 }
 
 
-ConstSharedIdentifyPtr
+Informative::Namspc
 Informative::Get1stBareMetaE2E() const
 {
     vector<uint32_t> namspc;
 
     namspc= GetBareNamespaces();
     if (namspc.size())
-        return GetIdentifyCmdNamspc(namspc[0]);
+        return (Namspc(GetIdentifyCmdNamspc(namspc[0]), namspc[0], NS_BARE));
 
     namspc = GetMetaNamespaces();
     if (namspc.size())
-        return GetIdentifyCmdNamspc(namspc[0]);
+        return (Namspc(GetIdentifyCmdNamspc(namspc[0]), namspc[0], NS_META));
 
     namspc = GetE2ENamespaces();
     if (namspc.size())
-        return GetIdentifyCmdNamspc(namspc[0]);
+        return (Namspc(GetIdentifyCmdNamspc(namspc[0]), namspc[0], NS_E2E));
 
     LOG_ERR("DUT must have 1 of 3 namspc's");
     throw exception();

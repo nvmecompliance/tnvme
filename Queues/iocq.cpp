@@ -50,9 +50,9 @@ IOCQ::Init(uint16_t qId, uint16_t numEntries, bool irqEnabled,
     }
     // Detect if doing something that looks suspicious/incorrect/illegals
     work &= CAP_MQES;
-    if (work < (uint64_t)numEntries) {
+    if ((work + 1) < (uint64_t)numEntries) {
         LOG_WARN("Creating Q with %d entries, but DUT only allows %d",
-            numEntries, (uint32_t)work);
+            numEntries, (uint32_t)(work + 1));
     }
 
     if (gCtrlrConfig->GetIOCQES(entrySize) == false) {
@@ -88,9 +88,9 @@ IOCQ::Init(uint16_t qId, uint16_t numEntries,
     }
     // Detect if doing something that looks suspicious/incorrect/illegal
     work &= CAP_MQES;
-    if (work < (uint64_t)numEntries) {
+    if ((work + 1) < (uint64_t)numEntries) {
         LOG_WARN("Creating Q with %d entries, but DUT only allows %d",
-            numEntries, (uint32_t)work);
+            numEntries, (uint32_t)(work + 1));
     }
 
     if (gCtrlrConfig->GetIOCQES(entrySize) == false) {

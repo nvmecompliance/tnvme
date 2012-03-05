@@ -62,11 +62,10 @@ private:
     void IOQRollChkSame(SharedASQPtr asq, SharedACQPtr acq,
         uint16_t numEntriesIOQ);
     void DisableAndEnableCtrl();
-    void SetMetaDataSize();
-    void SetWriteCmd(ConstSharedIdentifyPtr& namSpcPtr,
-        SharedWritePtr& writeCmd, Informative::NamspcType nsType);
+    void SetMetaDataSize(Informative::Namspc namspcData);
+    SharedWritePtr SetWriteCmd();
     void SendToIOSQ(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
-        SharedWritePtr writeCmd, string qualifier);
+        SharedWritePtr writeCmd);
     void VerifyCESQValues(SharedIOCQPtr iocq, uint16_t expectedVal);
     void VerifyQPointers(SharedIOSQPtr iosq, SharedIOCQPtr iocq);
 };
