@@ -98,15 +98,33 @@ CreateResources_r10b::RunCoreTest()
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
         throw exception();
 
-    gCtrlrConfig->SetIOCQES(gInformative->GetIdentifyCmdCtrlr()->
-        GetValue(IDCTRLRCAP_CQES) & 0xf);
-    Queues::CreateIOCQContigToHdw(mFd, mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
-        asq, acq, IOQ_ID, NumEntriesIOQ, true, IOCQ_GROUP_ID, true, 0);
+    {
+        uint64_t maxIOQEntries;
+        // Determine the max IOQ entries supported
+        if (gRegisters->Read(CTLSPC_CAP, maxIOQEntries) == false) {
+            LOG_ERR("Unable to determine MQES");
+            throw exception();
+        }
+        maxIOQEntries &= CAP_MQES;
+        if (maxIOQEntries < (uint64_t)NumEntriesIOQ) {
+            LOG_NRM("Changing number of Q elements from %d to %d",
+                NumEntriesIOQ, (uint16_t)maxIOQEntries);
+            NumEntriesIOQ = maxIOQEntries;
+        }
 
-    gCtrlrConfig->SetIOSQES(gInformative->GetIdentifyCmdCtrlr()->
-        GetValue(IDCTRLRCAP_SQES) & 0xf);
-    Queues::CreateIOSQContigToHdw(mFd, mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
-        asq, acq, IOQ_ID, NumEntriesIOQ, true, IOSQ_GROUP_ID, IOQ_ID, 0);
+
+        gCtrlrConfig->SetIOCQES(gInformative->GetIdentifyCmdCtrlr()->
+            GetValue(IDCTRLRCAP_CQES) & 0xf);
+        Queues::CreateIOCQContigToHdw(mFd, mGrpName, mTestName,
+            DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, NumEntriesIOQ, true,
+            IOCQ_GROUP_ID, true, 0);
+
+        gCtrlrConfig->SetIOSQES(gInformative->GetIdentifyCmdCtrlr()->
+            GetValue(IDCTRLRCAP_SQES) & 0xf);
+        Queues::CreateIOSQContigToHdw(mFd, mGrpName, mTestName,
+            DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, NumEntriesIOQ, true,
+            IOSQ_GROUP_ID, IOQ_ID, 0);
+    }
 
     return true;
 }

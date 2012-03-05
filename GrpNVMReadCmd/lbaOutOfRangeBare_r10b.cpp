@@ -89,8 +89,8 @@ LBAOutOfRangeBare_r10b::RunCoreTest()
     ConstSharedIdentifyPtr namSpcPtr;
 
     // Lookup objs which were created in a prior test within group
-    SharedIOSQPtr iosq = CAST_TO_IOSQ(gRsrcMngr->GetObj(IOSQ_GROUP_ID))
-    SharedIOCQPtr iocq = CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_GROUP_ID))
+    SharedIOSQPtr iosq = CAST_TO_IOSQ(gRsrcMngr->GetObj(IOSQ_GROUP_ID));
+    SharedIOCQPtr iocq = CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_GROUP_ID));
 
     vector<uint32_t> bare = gInformative->GetBareNamespaces();
     for (size_t i = 1; i < bare.size(); i++) {

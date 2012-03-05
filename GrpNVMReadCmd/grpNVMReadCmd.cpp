@@ -18,6 +18,7 @@
 #include "createResources_r10b.h"
 #include "lbaOutOfRangeBare_r10b.h"
 #include "invalidNamspc_r10b.h"
+#include "unsupportRsvdFields_r10b.h"
 
 namespace GrpNVMReadCmd {
 
@@ -37,6 +38,7 @@ GrpNVMReadCmd::GrpNVMReadCmd(size_t grpNum, SpecRev specRev, ErrorRegs errRegs,
         APPEND_TEST_AT_XLEVEL(CreateResources_r10b, fd, GrpNVMReadCmd, errRegs)
         APPEND_TEST_AT_YLEVEL(LBAOutOfRangeBare_r10b, fd, GrpNVMReadCmd, errRegs)
         APPEND_TEST_AT_YLEVEL(InvalidNamspc_r10b, fd, GrpNVMReadCmd, errRegs)
+        APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r10b, fd, GrpNVMReadCmd, errRegs)
         break;
 
     default:

@@ -85,8 +85,8 @@ InvalidNamspc_r10b::RunCoreTest()
     uint32_t isrCountB4;
 
     // Lookup objs which were created in a prior test within group
-    SharedIOSQPtr iosq = CAST_TO_IOSQ(gRsrcMngr->GetObj(IOSQ_GROUP_ID))
-    SharedIOCQPtr iocq = CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_GROUP_ID))
+    SharedIOSQPtr iosq = CAST_TO_IOSQ(gRsrcMngr->GetObj(IOSQ_GROUP_ID));
+    SharedIOCQPtr iocq = CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_GROUP_ID));
 
     if ((numCE = iocq->ReapInquiry(isrCountB4, true)) != 0) {
         LOG_ERR("Require 0 CE's within CQ %d, not upheld, found %d",
@@ -118,6 +118,7 @@ InvalidNamspc_r10b::RunCoreTest()
 
     return true;
 }
+
 
 void
 InvalidNamspc_r10b::SendCmdToHdw(SharedSQPtr sq, SharedCQPtr cq,
