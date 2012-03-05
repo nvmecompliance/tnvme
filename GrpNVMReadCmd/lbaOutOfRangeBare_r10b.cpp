@@ -142,7 +142,6 @@ LBAOutOfRangeBare_r10b::SendCmdToHdw(SharedSQPtr sq, SharedCQPtr cq,
     string work;
 
 
-
     if ((numCE = cq->ReapInquiry(isrCountB4, true)) != 0) {
         LOG_ERR("Require 0 CE's within CQ %d, not upheld, found %d",
             cq->GetQId(), numCE);
