@@ -21,7 +21,8 @@ SRC =						\
 	createResources_r10b.cpp		\
 	lbaOutOfRangeBare_r10b.cpp		\
 	invalidNamspc_r10b.cpp			\
-	unsupportRsvdFields_r10b.cpp
+	unsupportRsvdFields_r10b.cpp		\
+	ignoreMetaPtrBase_r10b.cpp
 
 .SUFFIXES: .cpp
 

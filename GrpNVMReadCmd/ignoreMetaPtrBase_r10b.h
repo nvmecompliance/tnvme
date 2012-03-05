@@ -14,20 +14,12 @@
  *  limitations under the License.
  */
 
-#ifndef _MANYSQTOCQASSOC_R10B_H_
-#define _MANYSQTOCQASSOC_R10B_H_
-
-#include <map>
+#ifndef _IGNOREMETAPTRBASE_r10b_H_
+#define _IGNOREMETAPTRBASE_r10b_H_
 
 #include "test.h"
-#include "globals.h"
-#include "../Cmds/identify.h"
-#include "../Queues/iocq.h"
-#include "../Queues/iosq.h"
-#include "../Cmds/write.h"
-#include "../Utils/queues.h"
 
-namespace GrpQueues {
+namespace GrpNVMReadCmd {
 
 
 /** \verbatim
@@ -37,32 +29,30 @@ namespace GrpQueues {
  * 1) See notes in the header file of the Test base class
  * \endverbatim
  */
-class ManySQtoCQAssoc_r10b : public Test
+class IgnoreMetaPtrBase_r10b : public Test
 {
 public:
-    ManySQtoCQAssoc_r10b(int fd, string grpName, string testName,
+    IgnoreMetaPtrBase_r10b(int fd, string grpName, string testName,
         ErrorRegs errRegs);
-    virtual ~ManySQtoCQAssoc_r10b();
+    virtual ~IgnoreMetaPtrBase_r10b();
 
     /**
      * IMPORTANT: Read Test::Clone() header comment.
      */
-    virtual ManySQtoCQAssoc_r10b *Clone() const
-        { return new ManySQtoCQAssoc_r10b(*this); }
-    ManySQtoCQAssoc_r10b &operator=(const ManySQtoCQAssoc_r10b &other);
-    ManySQtoCQAssoc_r10b(const ManySQtoCQAssoc_r10b &other);
+    virtual IgnoreMetaPtrBase_r10b *Clone() const
+        { return new IgnoreMetaPtrBase_r10b(*this); }
+    IgnoreMetaPtrBase_r10b &operator=(const IgnoreMetaPtrBase_r10b &other);
+    IgnoreMetaPtrBase_r10b(const IgnoreMetaPtrBase_r10b &other);
 
 
 protected:
     virtual bool RunCoreTest();
 
+
 private:
     ///////////////////////////////////////////////////////////////////////////
     // Adding a member variable? Then edit the copy constructor and operator=().
     ///////////////////////////////////////////////////////////////////////////
-    void SetWriteCmd(SharedWritePtr *writeCmd);
-    void ReapIOCQAndVerifyCE(SharedIOCQPtr iocq, uint16_t numTil,
-        vector<uint16_t> mSQIDToSQHDVector);
 };
 
 }   // namespace
