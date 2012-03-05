@@ -34,14 +34,13 @@ IOQRollChkDiff_r10b::IOQRollChkDiff_r10b(int fd, string grpName,
         "Search for 1 of the following namspcs to run test. Find 1st bare "
         "namspc, or find 1st meta namspc, or find 1st E2E namspc. Create an "
         "IOSQ/IOCQ pair of size 2 and CAP.MQES; however the IOSQ starts "
-        "with max size while the IOCQ starts with min size.  Issue "
+        "with max size while the IOCQ starts with min size. Issue "
         "(max Q size plus 2) generic NVM write cmds, sending 1 block and "
         "approp supporting meta/E2E if necessary to the selected namspc at "
         "LBA 0, to fill and rollover the Q's, reaping each cmd as one is "
         "submitted, verify each CE.SQID and  CE.SQHD is correct while "
         "filling. Verify IOSQ tail_ptr = <calc_based_on_IOSQ_size>, IOCQ "
-        "head_ptr = <calc_based_on_IOCQ_size>, and CE.SQHD = "
-        "<calc_based_on_IOSQ_size>");
+        "head_ptr = <calc_based_on_IOCQ_size>");
 }
 
 
@@ -85,20 +84,6 @@ IOQRollChkDiff_r10b::RunCoreTest()
      *  \endverbatim
      */
     uint64_t maxIOQEntries;
-
-    // Lookup objs which were created in a prior test within group
-    SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
-    SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
-
-    // Verify the min requirements for this test are supported by DUT
-    if (gInformative->GetFeaturesNumOfIOCQs() < IOQ_ID) {
-        LOG_ERR("DUT doesn't support %d IOCQ's", IOQ_ID);
-        throw exception();
-    } else if (gInformative->GetFeaturesNumOfIOSQs() < IOQ_ID) {
-        LOG_ERR("DUT doesn't support %d IOSQ's", IOQ_ID);
-        throw exception();
-    }
-
     // Determine the max IOQ entries supported
     if (gRegisters->Read(CTLSPC_CAP, maxIOQEntries) == false) {
         LOG_ERR("Unable to determine MQES");
@@ -107,21 +92,28 @@ IOQRollChkDiff_r10b::RunCoreTest()
     maxIOQEntries &= CAP_MQES;
 
     // IOSQ Max entries, IOCQ Min entries
-    DisableAndEnableCtrl();
-    IOQRollChkDiff(asq, acq, (uint16_t)maxIOQEntries, 2);
-
+    IOQRollChkDiff((uint16_t)maxIOQEntries, 2);
     // IOSQ Min entries, IOCQ Max entries
-    DisableAndEnableCtrl();
-    IOQRollChkDiff(asq, acq, 2, (uint16_t)maxIOQEntries);
+    IOQRollChkDiff(2, (uint16_t)maxIOQEntries);
 
     return true;
 }
 
 
 void
-IOQRollChkDiff_r10b::IOQRollChkDiff(SharedASQPtr asq, SharedACQPtr acq,
-    uint16_t numEntriesIOSQ, uint16_t numEntriesIOCQ)
+IOQRollChkDiff_r10b::IOQRollChkDiff(uint16_t numEntriesIOSQ,
+    uint16_t numEntriesIOCQ)
 {
+    // Lookup objs which were created in a prior test within group
+    SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
+    SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
+
+    if (gCtrlrConfig->SetState(ST_DISABLE) == false)
+        throw exception();
+
+    gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
+    if (gCtrlrConfig->SetState(ST_ENABLE) == false)
+        throw exception();
 
     gCtrlrConfig->SetIOCQES(gInformative->GetIdentifyCmdCtrlr()->
         GetValue(IDCTRLRCAP_CQES) & 0xf);
@@ -140,14 +132,16 @@ IOQRollChkDiff_r10b::IOQRollChkDiff(SharedASQPtr asq, SharedACQPtr acq,
 
     SharedWritePtr writeCmd = SetWriteCmd();
 
-    LOG_NRM("Send #%d cmds to hdw via the contiguous IOQ's",
-        MAX(iosqContig->GetNumEntries(), iocqContig->GetNumEntries()) + 2);
+    LOG_NRM("Send #%d cmds to hdw via the contiguous IOSQ #%d",
+        MAX(iosqContig->GetNumEntries(), iocqContig->GetNumEntries()) + 2,
+        iosqContig->GetQId());
     for (uint32_t numEntries = 0; numEntries < (uint32_t)(MAX
         (iosqContig->GetNumEntries(), iocqContig->GetNumEntries()) + 2);
         numEntries++) {
-        SendToIOSQ(iosqContig, iocqContig, writeCmd);
-        VerifyCESQValues(iocqContig, (numEntries + 1) %
-            iosqContig->GetNumEntries());
+        iosqContig->Send(writeCmd);
+        iosqContig->Ring();
+        ReapAndVerifyCE(iocqContig,
+            (numEntries + 1) % iosqContig->GetNumEntries());
     }
     VerifyQPointers(iosqContig, iocqContig);
 }
@@ -194,17 +188,12 @@ IOQRollChkDiff_r10b::SetWriteCmd()
 
 
 void
-IOQRollChkDiff_r10b::SendToIOSQ(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
-    SharedWritePtr writeCmd)
+IOQRollChkDiff_r10b::ReapAndVerifyCE(SharedIOCQPtr iocq, uint16_t expectedVal)
 {
     uint16_t numCE;
     uint16_t ceRemain;
     uint16_t numReaped;
     uint32_t isrCount;
-
-    LOG_NRM("Send the cmd to hdw via IOSQ %d", iosq->GetQId());
-    iosq->Send(writeCmd);
-    iosq->Ring();
 
     LOG_NRM("Wait for the CE to arrive in IOCQ %d", iocq->GetQId());
     if (iocq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE, isrCount)
@@ -233,35 +222,6 @@ IOQRollChkDiff_r10b::SendToIOSQ(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
     union CE ce = iocq->PeekCE(iocqMetrics.head_ptr);
     ProcessCE::Validate(ce, CESTAT_SUCCESS);  // throws upon error
 
-}
-
-
-void
-IOQRollChkDiff_r10b::DisableAndEnableCtrl()
-{
-    if (gCtrlrConfig->SetState(ST_DISABLE) == false)
-        throw exception();
-
-    gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
-    if (gCtrlrConfig->SetState(ST_ENABLE) == false)
-        throw exception();
-}
-
-
-void
-IOQRollChkDiff_r10b::VerifyCESQValues(SharedIOCQPtr iocq, uint16_t expectedVal)
-{
-    union CE ce;
-    struct nvme_gen_cq iocqMetrics = iocq->GetQMetrics();
-
-    // The CQ's metrics after reaping holds head_ptr plus 1 needed. Also Take
-    // Q roll over into account
-    if (iocqMetrics.head_ptr == 0) {
-        ce = iocq->PeekCE(iocq->GetNumEntries() - 1);
-    } else {
-        ce = iocq->PeekCE(iocqMetrics.head_ptr - 1);
-    }
-
     if (ce.n.SQID != IOQ_ID) {
         LOG_ERR("Expected CE.SQID = 0x%04X in IOCQ CE but actual "
             "CE.SQID  = 0x%04X", IOQ_ID, ce.n.SQID);
@@ -285,17 +245,8 @@ IOQRollChkDiff_r10b::VerifyCESQValues(SharedIOCQPtr iocq, uint16_t expectedVal)
 void
 IOQRollChkDiff_r10b::VerifyQPointers(SharedIOSQPtr iosq, SharedIOCQPtr iocq)
 {
-    union CE ce;
     struct nvme_gen_cq iocqMetrics = iocq->GetQMetrics();
     struct nvme_gen_sq iosqMetrics = iosq->GetQMetrics();
-
-    // The CQ's metrics after reaping holds head_ptr plus 1 needed. Also Take
-    // Q roll over into account.
-    if (iocqMetrics.head_ptr == 0) {
-        ce = iocq->PeekCE(iocq->GetNumEntries() - 1);
-    } else {
-        ce = iocq->PeekCE(iocqMetrics.head_ptr - 1);
-    }
 
     uint16_t expectedVal = (2 + MAX(iocq->GetNumEntries(),
         iosq->GetNumEntries())) % iocq->GetNumEntries();
@@ -317,13 +268,6 @@ IOQRollChkDiff_r10b::VerifyQPointers(SharedIOSQPtr iosq, SharedIOCQPtr iocq)
         throw exception();
     }
 
-    if (ce.n.SQHD != expectedVal) {
-        LOG_ERR("Expected IO CE.SQHD = 0x%04X but actual CE.SQHD  = 0x%04X",
-            expectedVal, ce.n.SQHD);
-        iocq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "iocq",
-            "CE.SQHD"), "CE SQ Head Pointer Inconsistent");
-        throw exception();
-    }
 }
 
 }   // namespace

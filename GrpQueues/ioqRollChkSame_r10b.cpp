@@ -83,18 +83,6 @@ IOQRollChkSame_r10b::RunCoreTest()
      *  \endverbatim
      */
 
-    // Lookup objs which were created in a prior test within group
-    SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
-    SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
-
-    if (gInformative->GetFeaturesNumOfIOCQs() < IOQ_ID) {
-        LOG_ERR("DUT doesn't support %d IOCQ's", IOQ_ID);
-        throw exception();
-    } else if (gInformative->GetFeaturesNumOfIOSQs() < IOQ_ID) {
-        LOG_ERR("DUT doesn't support %d IOSQ's", IOQ_ID);
-        throw exception();
-    }
-
     uint64_t maxIOQEntries;
     // Determine the max IOQ entries supported
     if (gRegisters->Read(CTLSPC_CAP, maxIOQEntries) == false) {
@@ -104,20 +92,27 @@ IOQRollChkSame_r10b::RunCoreTest()
     maxIOQEntries &= CAP_MQES;
 
     // IO Q Min Sizes
-    DisableAndEnableCtrl();
-    IOQRollChkSame(asq, acq, 2);
-
+    IOQRollChkSame(2);
     // IO Q Max Sizes
-    DisableAndEnableCtrl();
-    IOQRollChkSame(asq, acq, (uint16_t)maxIOQEntries);
+    IOQRollChkSame((uint16_t)maxIOQEntries);
 
     return true;
 }
 
 void
-IOQRollChkSame_r10b::IOQRollChkSame(SharedASQPtr asq, SharedACQPtr acq,
-    uint16_t numEntriesIOQ)
+IOQRollChkSame_r10b::IOQRollChkSame(uint16_t numEntriesIOQ)
 {
+    // Lookup objs which were created in a prior test within group
+    SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
+    SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
+
+    if (gCtrlrConfig->SetState(ST_DISABLE) == false)
+        throw exception();
+
+    gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
+    if (gCtrlrConfig->SetState(ST_ENABLE) == false)
+        throw exception();
+
     gCtrlrConfig->SetIOCQES(gInformative->GetIdentifyCmdCtrlr()->
         GetValue(IDCTRLRCAP_CQES) & 0xf);
     SharedIOCQPtr iocqContig = Queues::CreateIOCQContigToHdw(mFd, mGrpName,
@@ -135,12 +130,13 @@ IOQRollChkSame_r10b::IOQRollChkSame(SharedASQPtr asq, SharedACQPtr acq,
 
     SharedWritePtr writeCmd = SetWriteCmd();
 
-    LOG_NRM("Send #%d cmds to hdw via the contiguous IOQ's",
-        iocqContig->GetNumEntries() + 2);
+    LOG_NRM("Send #%d cmds to hdw via the contiguous IOSQ %d",
+        iocqContig->GetNumEntries() + 2, iosqContig->GetQId());
     for (uint32_t numEntries = 0; numEntries <
         (uint32_t)(iosqContig->GetNumEntries() + 2); numEntries++) {
-        SendToIOSQ(iosqContig, iocqContig, writeCmd);
-        VerifyCESQValues(iocqContig, (numEntries + 1) %
+        iosqContig->Send(writeCmd);
+        iosqContig->Ring();
+        ReapAndVerifyCE(iocqContig, (numEntries + 1) %
             iosqContig->GetNumEntries());
     }
     VerifyQPointers(iosqContig, iocqContig);
@@ -188,29 +184,12 @@ IOQRollChkSame_r10b::SetWriteCmd()
 
 
 void
-IOQRollChkSame_r10b::DisableAndEnableCtrl()
-{
-    if (gCtrlrConfig->SetState(ST_DISABLE) == false)
-        throw exception();
-
-    gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
-    if (gCtrlrConfig->SetState(ST_ENABLE) == false)
-        throw exception();
-}
-
-
-void
-IOQRollChkSame_r10b::SendToIOSQ(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
-    SharedWritePtr writeCmd)
+IOQRollChkSame_r10b::ReapAndVerifyCE(SharedIOCQPtr iocq, uint16_t expectedVal)
 {
     uint16_t numCE;
     uint16_t ceRemain;
     uint16_t numReaped;
     uint32_t isrCount;
-
-    LOG_NRM("Send the cmd to hdw via IOSQ %d", iosq->GetQId());
-    iosq->Send(writeCmd);
-    iosq->Ring();
 
     LOG_NRM("Wait for the CE to arrive in IOCQ %d", iocq->GetQId());
     if (iocq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE, isrCount)
@@ -238,22 +217,6 @@ IOQRollChkSame_r10b::SendToIOSQ(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
 
     union CE ce = iocq->PeekCE(iocqMetrics.head_ptr);
     ProcessCE::Validate(ce, CESTAT_SUCCESS);  // throws upon error
-}
-
-
-void
-IOQRollChkSame_r10b::VerifyCESQValues(SharedIOCQPtr iocq, uint16_t expectedVal)
-{
-    union CE ce;
-    struct nvme_gen_cq iocqMetrics = iocq->GetQMetrics();
-
-    // The CQ's metrics after reaping holds head_ptr plus 1 needed. Also Take
-    // Q roll over into account
-    if (iocqMetrics.head_ptr == 0) {
-        ce = iocq->PeekCE(iocq->GetNumEntries() - 1);
-    } else {
-        ce = iocq->PeekCE(iocqMetrics.head_ptr - 1);
-    }
 
     if (ce.n.SQID != IOQ_ID) {
         LOG_ERR("Expected CE.SQID = 0x%04X in IOCQ CE but actual "
@@ -274,23 +237,16 @@ IOQRollChkSame_r10b::VerifyCESQValues(SharedIOCQPtr iocq, uint16_t expectedVal)
     }
 }
 
+
 void
 IOQRollChkSame_r10b::VerifyQPointers(SharedIOSQPtr iosq, SharedIOCQPtr iocq)
 {
     uint16_t expectedVal = 2;
-    union CE ce;
     struct nvme_gen_cq iocqMetrics = iocq->GetQMetrics();
     struct nvme_gen_sq iosqMetrics = iosq->GetQMetrics();
 
-    // The CQ's metrics after reaping holds head_ptr plus 1 needed. Also Take
-    // Q roll over into account.
-    if (iocqMetrics.head_ptr == 0) {
-        ce = iocq->PeekCE(iocq->GetNumEntries() - 1);
+    if (iosqMetrics.tail_ptr == 0)
         expectedVal = 0;
-    } else {
-        ce = iocq->PeekCE(iocqMetrics.head_ptr - 1);
-    }
-
     if (iosqMetrics.tail_ptr != expectedVal) {
         LOG_ERR("Expected  IO SQ.tail_ptr = 0x%04X but actual "
             "IOSQ.tail_ptr  = 0x%04X", expectedVal, iosqMetrics.tail_ptr);
@@ -299,6 +255,9 @@ IOQRollChkSame_r10b::VerifyQPointers(SharedIOSQPtr iosq, SharedIOCQPtr iocq)
         throw exception();
     }
 
+    expectedVal = 2;
+    if (iocqMetrics.head_ptr == 0)
+        expectedVal = 0;
     if (iocqMetrics.head_ptr != expectedVal) {
         LOG_ERR("Expected IO CQ.head_ptr = 0x%04X but actual "
             "IOCQ.head_ptr = 0x%04X", expectedVal, iocqMetrics.head_ptr);
@@ -307,13 +266,6 @@ IOQRollChkSame_r10b::VerifyQPointers(SharedIOSQPtr iosq, SharedIOCQPtr iocq)
         throw exception();
     }
 
-    if (ce.n.SQHD != expectedVal) {
-        LOG_ERR("Expected IO CE.SQHD = 0x%04X but actual CE.SQHD  = 0x%04X",
-            expectedVal, ce.n.SQHD);
-        iocq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "iocq",
-            "CE.SQHD"), "CE SQ Head Pointer Inconsistent");
-        throw exception();
-    }
 }
 
 }   // namespace
