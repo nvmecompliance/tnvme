@@ -22,6 +22,7 @@
 #include "ioqRollChkSame_r10b.h"
 #include "ioqRollChkDiff_r10b.h"
 #include "manySQtoCQAssoc_r10b.h"
+#include "adminQFull_r10b.h"
 
 namespace GrpQueues {
 
@@ -45,6 +46,7 @@ GrpQueues::GrpQueues(size_t grpNum, SpecRev specRev, ErrorRegs errRegs,
         APPEND_TEST_AT_YLEVEL(IOQRollChkSame_r10b, fd, GrpQueues, errRegs)
         APPEND_TEST_AT_YLEVEL(IOQRollChkDiff_r10b, fd, GrpQueues, errRegs)
         APPEND_TEST_AT_YLEVEL(ManySQtoCQAssoc_r10b, fd, GrpQueues, errRegs)
+        APPEND_TEST_AT_XLEVEL(AdminQFull_r10b, fd, GrpQueues, errRegs)
         break;
 
     default:
