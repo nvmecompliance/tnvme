@@ -98,9 +98,7 @@ FUA_r10b::RunCoreTest()
     IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
         readCmd, "none.set", true);
 
-    LOG_NRM("Set FUA bit");
-    readCmd->SetBit(true, 12, 30);
-
+    readCmd->SetFUA(true);
     IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
         readCmd, "all.set", true);
 
