@@ -16,9 +16,10 @@ LDFLAGS=-lm
 LIBS = -L../ -L/usr/local/lib -lm
 INCLUDES = -I. -I../ -I../../ -I/usr/local/include
 
-SRC =					\
-	grpResets.cpp			\
-	ctrlrResetIOQDeleted_r10b.cpp
+SRC =						\
+	grpResets.cpp				\
+	ctrlrResetIOQDeleted_r10b.cpp		\
+	ctrlrResetNotEffectAdminQ_r10b.cpp
 
 .SUFFIXES: .cpp
 

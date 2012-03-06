@@ -109,12 +109,10 @@ CtrlrResetIOQDeleted_r10b::RunCoreTest()
         throw exception();
     }
 
-    // Create Admin Q Objects for Group lifetime
-    SharedACQPtr acq = CAST_TO_ACQ(
-        gRsrcMngr->AllocObj(Trackable::OBJ_ACQ, ACQ_GROUP_ID))
+    // Create Admin Q Objects with test lifetime
+    SharedACQPtr acq = SharedACQPtr(new ACQ(mFd));
     acq->Init(15);
-    SharedASQPtr asq = CAST_TO_ASQ(
-        gRsrcMngr->AllocObj(Trackable::OBJ_ASQ, ASQ_GROUP_ID))
+    SharedASQPtr asq = SharedASQPtr(new ASQ(mFd));
     asq->Init(15);
 
     VerifyCtrlrResetDeletesIOQs(acq, asq, numEntriesIOQ);

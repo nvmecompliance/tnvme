@@ -97,7 +97,7 @@ Test::Run()
 
 
     LOG_NRM("FAILED test run detected above this log entry");
-    LOG_NRM("--START POST FAILURE STATE DUMP--");
+    LOG_NRM("--------START POST FAILURE STATE DUMP--------");
     try {
         // First gather all non-intrusive data, things that won't change the
         // state of the DUT, effectively taking a snapshot.
@@ -154,7 +154,7 @@ Test::Run()
         LOG_NRM("This 2ndary failure could be caused by a prior");
     }
 
-    LOG_NRM("--END POST FAILURE STATE DUMP--");
+    LOG_NRM("--------END POST FAILURE STATE DUMP--------");
     LOG_NRM("Failed group name: %s", mGrpName.c_str());
     LOG_NRM("Failed test name:  %s", mTestName.c_str());
     return false;

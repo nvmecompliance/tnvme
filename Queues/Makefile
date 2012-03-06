@@ -12,19 +12,18 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 #
-
 LDFLAGS=-lm
 LIBS = -L../ -L/usr/local/lib -lm
 INCLUDES = -I. -I../ -I../../ -I/usr/local/include
 
-SRC = \
-	queue.cpp		\
-	ce.cpp			\
-	cq.cpp			\
-	sq.cpp			\
-	acq.cpp			\
-	asq.cpp			\
-	iocq.cpp		\
+SRC =			\
+	queue.cpp	\
+	ce.cpp		\
+	cq.cpp		\
+	sq.cpp		\
+	acq.cpp		\
+	asq.cpp		\
+	iocq.cpp	\
 	iosq.cpp
 
 .SUFFIXES: .cpp
@@ -35,7 +34,7 @@ OUT = libQueues.a
 all: $(OUT)
 
 .cpp.o:
-	$(CC) $(INCLUDES) $(CFLAGS) -c $< -o $@ $(LDFLAGS)
+	$(CC) $(INCLUDES) $(CFLAGS) $(DFLAGS) -c $< -o $@ $(LDFLAGS)
 
 $(OUT): $(OBJ)
 	ar rcs $(OUT) $(OBJ)

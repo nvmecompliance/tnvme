@@ -16,6 +16,7 @@
 
 #include "grpResets.h"
 #include "ctrlrResetIOQDeleted_r10b.h"
+#include "ctrlrResetNotEffectAdminQ_r10b.h"
 
 namespace GrpResets {
 
@@ -33,6 +34,7 @@ GrpResets::GrpResets(size_t grpNum, SpecRev specRev, ErrorRegs errRegs,
     switch (mSpecRev) {
     case SPECREV_10b:
         APPEND_TEST_AT_XLEVEL(CtrlrResetIOQDeleted_r10b, fd, GrpResets, errRegs)
+        APPEND_TEST_AT_XLEVEL(CtrlrResetNotEffectAdminQ_r10b, fd, GrpResets, errRegs)
         break;
 
     default:

@@ -47,11 +47,6 @@ IO::SendCmdToHdw(string grpName, string testName, uint16_t ms,
         throw exception();
     }
 
-    if (verbose) {
-        cmd->Dump(FileSystem::PrepLogFile(grpName, testName,
-            cmd->GetName(), qualify), "A cmd's contents dumped");
-    }
-
     LOG_NRM("Send the cmd to hdw via SQ %d", sq->GetQId());
     sq->Send(cmd);
     if (verbose) {
@@ -93,6 +88,11 @@ IO::SendCmdToHdw(string grpName, string testName, uint16_t ms,
         LOG_ERR("CQ using IRQ's, but IRQ count not expected (%d != %d)",
             isrCount, (isrCountB4 + 1));
         throw exception();
+    }
+
+    if (verbose) {
+        cmd->Dump(FileSystem::PrepLogFile(grpName, testName,
+            cmd->GetName(), qualify), "A cmd's contents dumped");
     }
 }
 

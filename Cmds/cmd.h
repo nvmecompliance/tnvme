@@ -28,9 +28,9 @@ typedef boost::shared_ptr<Cmd>              SharedCmdPtr;
         boost::shared_polymorphic_downcast<Cmd>(shared_trackable_ptr);
 
 typedef enum {
-    DATADIR_NONE,
+    DATADIR_FROM_DEVICE,
     DATADIR_TO_DEVICE,
-    DATADIR_FROM_DEVICE
+    DATADIR_NONE
 } DataDir;
 
 
