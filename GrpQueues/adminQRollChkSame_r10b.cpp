@@ -111,7 +111,7 @@ AdminQRollChkSame_r10b::RunCoreTest()
         idCmdCap->SetCNS(true);
         SharedMemBufferPtr idMemCap = SharedMemBufferPtr(new MemBuffer());
         idMemCap->InitAlignment(Identify::IDEAL_DATA_SIZE, sizeof(uint64_t),
-            true, 0);
+            false, 0);
         send_64b_bitmask idPrpCap =
             (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE);
         idCmdCap->SetPrpBuffer(idPrpCap, idMemCap);
