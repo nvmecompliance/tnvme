@@ -35,6 +35,11 @@ MetaData::~MetaData()
 void
 MetaData::AllocMetaBuffer()
 {
+    if (GetDataDir() == DATADIR_NONE) {
+        LOG_DBG("Internal prog err: Meta buffer assoc, but no data direction");
+        throw exception();
+    }
+
     if (gRsrcMngr->ReserveMetaBuf(mMetaData) == false) {
         LOG_ERR("Meta data alloc request denied");
         throw exception();

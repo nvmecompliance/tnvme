@@ -265,7 +265,7 @@ IOQRollChkSame_r10b::VerifyQPointers(SharedIOSQPtr iosq, SharedIOCQPtr iocq)
             "head_ptr"), "CQ Metrics Head Pointer Inconsistent");
         throw exception();
     }
-
 }
+
 
 }   // namespace

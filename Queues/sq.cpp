@@ -56,6 +56,8 @@ SQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
     uint64_t work;
 
 
+    LOG_NRM("Create SQ: (id,cqid,entrySize,numEntries) = (%d,%d,%d,%d)",
+        GetQId(), GetCqId(), GetEntrySize(), GetNumEntries());
     Queue::Init(qId, entrySize, numEntries);
     mCqId = cqId;
 
@@ -115,9 +117,6 @@ SQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
         LOG_DBG("Unable to mmap contig memory to user space");
         throw exception();
     }
-
-    LOG_NRM("Created SQ: (id, cqid, entrySize, numEntries) = (%d, %d, %d, %d)",
-        GetQId(), GetCqId(), GetEntrySize(), GetNumEntries());
 }
 
 
@@ -128,6 +127,8 @@ SQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
     uint64_t work;
 
 
+    LOG_NRM("Create SQ: (id,cqid,entrySize,numEntries) = (%d,%d,%d,%d)",
+        GetQId(), GetCqId(), GetEntrySize(), GetNumEntries());
     Queue::Init(qId, entrySize, numEntries);
     mCqId = cqId;
 
@@ -183,9 +184,6 @@ SQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
     q.elements = GetNumEntries();
     q.contig = false;
     CreateIOSQ(q);
-
-    LOG_NRM("Created SQ: (id, cqid, entrySize, numEntries) = (%d, %d, %d, %d)",
-        GetQId(), GetCqId(), GetEntrySize(), GetNumEntries());
 }
 
 

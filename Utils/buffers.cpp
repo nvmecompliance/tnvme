@@ -82,7 +82,7 @@ Buffers::Dump(LogFilename filename, const uint8_t *buf, uint32_t bufOffset,
     unsigned long dumpLen = length;
 
 
-    LOG_NRM("Dump a test obj to filename: %s", filename.c_str());
+    LOG_NRM("Dumping to filename: %s", filename.c_str());
     LOG_NRM("%s", fileHdr.c_str());
     if ((fp = fopen(filename.c_str(), "a")) == NULL) {
         LOG_DBG("Failed to open file: %s", filename.c_str());

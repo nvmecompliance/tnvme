@@ -27,12 +27,6 @@ typedef boost::shared_ptr<Cmd>              SharedCmdPtr;
 #define CAST_TO_Cmd(shared_trackable_ptr)   \
         boost::shared_polymorphic_downcast<Cmd>(shared_trackable_ptr);
 
-typedef enum {
-    DATADIR_FROM_DEVICE,
-    DATADIR_TO_DEVICE,
-    DATADIR_NONE
-} DataDir;
-
 
 /**
 * This class is the base class to all other cmd classes. It is not meant to
@@ -62,9 +56,11 @@ public:
     uint16_t  GetCmdSizeW() const { return (mCmdBuf->GetBufSize() / 2); }
     uint8_t   GetCmdSizeDW() const { return (mCmdBuf->GetBufSize() / 4); }
     nvme_cmds GetCmdSet() const { return mCmdSet; }
-    DataDir   GetDataDir() const { return mDataDir; }
     uint8_t   GetOpcode() const { return GetByte(0, 0); }
     string    GetName() const { return mCmdName; }
+
+    /// Returns the direction of data transfer for the PRP buffer
+    virtual DataDir GetDataDir() const { return mDataDir; }
 
     static const uint8_t BITMASK_FUSE_B;
     static const uint32_t BITMASK_FUSE_DW;

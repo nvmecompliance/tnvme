@@ -1,4 +1,15 @@
-nvmecompliance_release=1.2.0 
+2012-3-7:
+nvmecompliance_release=1.2.1 New tests, bug fixes.
+    1) Bugfix: Read cmds would have issue operating under real world hardware
+       because the DMA direction was not set corrrectly. Under QEMU, this flag
+       was ignored.
+    2) Added numerous new tests, see git log for details.
+    3) Bugfix: Informative::GetFeaturesNumOfIOCQs() and 
+       Informative::GetFeaturesNumOfIOSQs() now correctly return 1 based
+       values as was always stated in the header file doxygen comment.
+
+2012-3-2:
+nvmecompliance_release=1.2.0 Test dependencies, reap delays, enhancements 
     1) Added test dependencies. The test reference number now indicates its
        prerequisites. See 
        https://github.com/nvmecompliance/tnvme/wiki/Test-Numbering
@@ -19,6 +30,8 @@ nvmecompliance_release=1.2.0
            works correctly under Fedora 2.6.31.5-127.fc12.x86_64 if executed
            within QEMU, however under real hardware the DUT's data never
            appears in user space. This investigation is ongoing.
+
+2012-2-16:
 nvmecompliance_release=1.1.0 Added interrupt support; MSI, MSI-X, no pin based
     1) Interrupts supported in tnvme are abstracted from the scheme set within
        dnvme; test leverage the same user space API no matter the setting used
@@ -47,7 +60,10 @@ nvmecompliance_release=1.1.0 Added interrupt support; MSI, MSI-X, no pin based
            should be handled by default by the framework when more info is
            available by dumpting the data to an output file.
 
+2012-1-23:
 vmecompliance_release=1.0.1 Enhancements and bugfixes; added read/write cmds
     1) Planning on supporting interrupts in the future.
     2) Planning on adding tests in the future.
+
+2011-12-23:
 nvmecompliance_release=1.0.0 First official release of the NVME compliance suite

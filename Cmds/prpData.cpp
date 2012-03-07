@@ -38,7 +38,10 @@ PrpData::~PrpData()
 void
 PrpData::SetPrpBuffer(send_64b_bitmask prpFields, SharedMemBufferPtr memBuffer)
 {
-    if (prpFields & ~mPrpAllowed) {
+    if (GetDataDir() == DATADIR_NONE) {
+        LOG_DBG("Internal prog err: PRP buffer assoc, but no data direction");
+        throw exception();
+    } else if (prpFields & ~mPrpAllowed) {
         LOG_DBG("Attempting to set PRP field to disallowed value: 0x%04X",
             prpFields);
         throw exception();
@@ -63,7 +66,10 @@ void
 PrpData::SetPrpBuffer(send_64b_bitmask prpFields, uint8_t const *memBuffer,
     uint64_t bufSize)
 {
-    if (prpFields & ~mPrpAllowed) {
+    if (GetDataDir() == DATADIR_NONE) {
+        LOG_DBG("Internal prog err: PRP buffer assoc, but no data direction");
+        throw exception();
+    } else if (prpFields & ~mPrpAllowed) {
         LOG_DBG("Attempting to set PRP field to disallowed value: 0x%04X",
             prpFields);
         throw exception();

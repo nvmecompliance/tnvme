@@ -63,6 +63,9 @@ CQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
     mIrqVec = irqVec;
 
 
+    LOG_NRM(
+        "Create CQ: (id,entrySize,numEntry,IRQEnable) = (%d,%d,%d,%s)",
+        GetQId(), GetEntrySize(), GetNumEntries(), GetIrqEnabled() ? "T" : "F");
     LOG_NRM("Allocating contiguous CQ memory in dnvme");
     if (numEntries < 2)
         LOG_WARN("Number elements breaches spec requirement");
@@ -104,10 +107,6 @@ CQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
         LOG_DBG("Unable to mmap contig memory to user space");
         throw exception();
     }
-
-    LOG_NRM(
-        "Created CQ: (id, entrySize, numEntry, IRQEnable) = (%d, %d, %d, %s)",
-        GetQId(), GetEntrySize(), GetNumEntries(), GetIrqEnabled() ? "T" : "F");
 }
 
 
@@ -120,6 +119,9 @@ CQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
     mIrqVec = irqVec;
 
 
+    LOG_NRM(
+        "Create CQ: (id,entrySize,numEntry,IRQEnable) = (%d,%d,%d,%s)",
+        GetQId(), GetEntrySize(), GetNumEntries(), GetIrqEnabled() ? "T" : "F");
     LOG_NRM("Allocating discontiguous CQ memory in tnvme");
     if (numEntries < 2)
         LOG_WARN("Number elements breaches spec requirement");
@@ -159,10 +161,6 @@ CQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
     q.elements = GetNumEntries();
     q.contig = false;
     CreateIOCQ(q);
-
-    LOG_NRM(
-        "Created CQ: (id, entrySize, numEntry, IRQEnable) = (%d, %d, %d, %s)",
-        GetQId(), GetEntrySize(), GetNumEntries(), GetIrqEnabled() ? "T" : "F");
 }
 
 

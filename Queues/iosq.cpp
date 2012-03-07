@@ -46,6 +46,8 @@ IOSQ::Init(uint16_t qId, uint16_t numEntries, uint16_t cqId,
     uint64_t work;
 
 
+    LOG_NRM("IOSQ::Init (qId,numEntry,cqId,prior) = (%d,%d,%d,%d)",
+        qId, numEntries, cqId, priority);
     if (gRegisters->Read(CTLSPC_CAP, work) == false) {
         LOG_ERR("Unable to determine MQES");
         throw exception();
@@ -86,6 +88,7 @@ IOSQ::Init(uint16_t qId, uint16_t numEntries, uint16_t cqId,
             (uint16_t)pow(2, entrySize));
         throw exception();
     }
+
     SQ::Init(qId, (uint16_t)pow(2, entrySize), numEntries, cqId);
 }
 
@@ -97,6 +100,8 @@ IOSQ::Init(uint16_t qId, uint16_t numEntries,
     uint8_t entrySize;
     uint64_t work;
 
+    LOG_NRM("IOSQ::Init (qId,numEntry,cqId,prior) = (%d,%d,%d,%d)",
+        qId, numEntries, cqId, priority);
     if (gRegisters->Read(CTLSPC_CAP, work) == false) {
         LOG_ERR("Unable to determine MQES");
         throw exception();

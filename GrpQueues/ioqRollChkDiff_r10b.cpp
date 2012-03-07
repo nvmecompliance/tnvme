@@ -267,7 +267,7 @@ IOQRollChkDiff_r10b::VerifyQPointers(SharedIOSQPtr iosq, SharedIOCQPtr iocq)
             "tail_ptr"), "SQ Metrics Tail Pointer Inconsistent");
         throw exception();
     }
-
 }
+
 
 }   // namespace
