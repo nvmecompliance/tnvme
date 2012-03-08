@@ -117,12 +117,14 @@ CreateIOQContigPoll_r10b::RunCoreTest()
     }
 
 
-    gCtrlrConfig->SetIOCQES(IOCQ::COMMON_ELEMENT_SIZE_PWR_OF_2);
+    gCtrlrConfig->SetIOCQES(gInformative->GetIdentifyCmdCtrlr()->
+        GetValue(IDCTRLRCAP_CQES) & 0xf);
     Queues::CreateIOCQContigToHdw(mFd, mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
         asq, acq, IOQ_ID, NumEntriesIOQ, true, IOCQ_CONTIG_GROUP_ID, false, 0);
 
 
-    gCtrlrConfig->SetIOSQES(IOSQ::COMMON_ELEMENT_SIZE_PWR_OF_2);
+    gCtrlrConfig->SetIOSQES(gInformative->GetIdentifyCmdCtrlr()->
+        GetValue(IDCTRLRCAP_SQES) & 0xf);
     Queues::CreateIOSQContigToHdw(mFd, mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
         asq, acq, IOQ_ID, NumEntriesIOQ, true, IOSQ_CONTIG_GROUP_ID, IOQ_ID, 0);
 

@@ -61,7 +61,7 @@ CreateIOCQ::Init(const SharedIOCQPtr iocq)
 
         // Handle q size
         dword10 &= ~0xffff0000;
-        dword10 |= (((uint32_t)iocq->GetNumEntries()) << 16);
+        dword10 |= (((uint32_t)(iocq->GetNumEntries() - 1)) << 16);
 
         // Handle Q ID
         dword10 &= ~0x0000ffff;

@@ -89,6 +89,11 @@ IO::SendCmdToHdw(string grpName, string testName, uint16_t ms,
             isrCount, (isrCountB4 + 1));
         throw exception();
     }
+
+    if (verbose) {
+        cmd->Dump(FileSystem::PrepLogFile(grpName, testName,
+            cmd->GetName(), qualify), "A cmd's contents dumped");
+    }
 }
 
 

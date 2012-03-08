@@ -101,7 +101,7 @@ public:
      *       Implies: Identify.LBAF[Identify.FLBAS].MS=!0, Identify.DPS_b2:0=0
      * @note E2E: Namespaces supporting meta data, and E2E is enabled;
      *       Implies: Identify.LBAF[Identify.FLBAS].MS=!0, Identify.DPS_b2:0=!0
-     * @return vector containing all desired namespaces; it could be an empty
+     * @return vector containing all desired namespace IDs; it could be an empty
      *       vector indicating no namespaces are present in the DUT, otherwise
      *       throws if anything prevents detecting the requested data.
      */
@@ -109,13 +109,21 @@ public:
     vector<uint32_t> GetMetaNamespaces() const;
     vector<uint32_t> GetE2ENamespaces() const;
 
+    struct Namspc {
+        ConstSharedIdentifyPtr idCmdNamspc; // namspc data struct
+        uint32_t id;    // namspc identifier of the namspc data struct
+        NamspcType type;
+        Namspc(ConstSharedIdentifyPtr n, uint32_t i, NamspcType t) {
+            idCmdNamspc = n; id = i; type = t; }
+    };
+
     /**
      * Seek for the 1st bare namespace, and if not found, seek for the 1st
      * meta namespace, and if not found, seek for the first E2E namespace, and
      * if not found, throw.
-     * @return Namespace if successful, otherwise throws
+     * @return Namespace data if successful, otherwise throws
      */
-    ConstSharedIdentifyPtr Get1stBareMetaE2E() const;
+    Namspc Get1stBareMetaE2E() const;
 
 
 private:

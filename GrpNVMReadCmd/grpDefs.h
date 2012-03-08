@@ -19,10 +19,8 @@
 
 #define ACQ_GROUP_ID                "ACQ"
 #define ASQ_GROUP_ID                "ASQ"
-#define IOCQ_CONTIG_GROUP_ID        "IOCQContig"
-#define IOSQ_CONTIG_GROUP_ID        "IOSQContig"
-#define IOCQ_DISCONTIG_GROUP_ID     "IOCQDiscontig"
-#define IOSQ_DISCONTIG_GROUP_ID     "IOSQDiscontig"
+#define IOCQ_GROUP_ID               "IOCQ"
+#define IOSQ_GROUP_ID               "IOSQ"
 #define IOQ_ID                      1
 
 #define DEFAULT_CMD_WAIT_ms         2000

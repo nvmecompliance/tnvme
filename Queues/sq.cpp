@@ -50,14 +50,15 @@ SQ::~SQ()
 
 
 void
-SQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
-    uint16_t cqId)
+SQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries, uint16_t cqId)
 {
     uint64_t work;
 
 
-    Queue::Init(qId, entrySize, numEntries);
     mCqId = cqId;
+    Queue::Init(qId, entrySize, numEntries);
+    LOG_NRM("Create SQ: (id,cqid,entrySize,numEntries) = (%d,%d,%d,%d)",
+        GetQId(), GetCqId(), GetEntrySize(), GetNumEntries());
 
 
     LOG_NRM("Allocating contiguous SQ memory in dnvme");
@@ -115,9 +116,6 @@ SQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
         LOG_DBG("Unable to mmap contig memory to user space");
         throw exception();
     }
-
-    LOG_NRM("Created SQ: (id, cqid, entrySize, numEntries) = (%d, %d, %d, %d)",
-        GetQId(), GetCqId(), GetEntrySize(), GetNumEntries());
 }
 
 
@@ -128,8 +126,10 @@ SQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
     uint64_t work;
 
 
-    Queue::Init(qId, entrySize, numEntries);
     mCqId = cqId;
+    Queue::Init(qId, entrySize, numEntries);
+    LOG_NRM("Create SQ: (id,cqid,entrySize,numEntries) = (%d,%d,%d,%d)",
+        GetQId(), GetCqId(), GetEntrySize(), GetNumEntries());
 
     LOG_NRM("Allocating discontiguous SQ memory in tnvme");
     if (numEntries < 2) {
@@ -183,9 +183,6 @@ SQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
     q.elements = GetNumEntries();
     q.contig = false;
     CreateIOSQ(q);
-
-    LOG_NRM("Created SQ: (id, cqid, entrySize, numEntries) = (%d, %d, %d, %d)",
-        GetQId(), GetCqId(), GetEntrySize(), GetNumEntries());
 }
 
 

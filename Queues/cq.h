@@ -48,7 +48,10 @@ public:
 
     virtual bool GetIsCQ() { return true; }
 
+    // Returns the requested dnvme metrics pertaining to this CQ
     struct nvme_gen_cq GetQMetrics();
+    /// Logs and returns the requested dnvme metrics pertaining to this CQ
+    struct nvme_gen_cq LogQMetrics();
 
     /**
      * Even though a particular CQ may have IRQ's enabled, this does not mean

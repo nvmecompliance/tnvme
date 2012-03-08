@@ -82,12 +82,11 @@ InitialStateAdmin_r10b::RunCoreTest()
     if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
         throw exception();
 
-    // Create Admin Q Objects for Group lifetime
-    SharedACQPtr acq = CAST_TO_ACQ(
-        gRsrcMngr->AllocObj(Trackable::OBJ_ACQ, ACQ_GROUP_ID))
+    // Create ACQ and ASQ objects which have test life time
+    SharedACQPtr acq = CAST_TO_ACQ(SharedACQPtr(new ACQ(mFd)))
     acq->Init(5);
-    SharedASQPtr asq = CAST_TO_ASQ(
-        gRsrcMngr->AllocObj(Trackable::OBJ_ASQ, ASQ_GROUP_ID))
+
+    SharedASQPtr asq = CAST_TO_ASQ(SharedASQPtr(new ASQ(mFd)))
     asq->Init(5);
 
     ValidateInitialStateAdmin(acq, asq);
@@ -124,7 +123,7 @@ InitialStateAdmin_r10b::SubmitIdentifyCmd(SharedACQPtr acq, SharedASQPtr asq)
     idCmdCap->SetCNS(true);
     SharedMemBufferPtr idMemCap = SharedMemBufferPtr(new MemBuffer());
     idMemCap->InitAlignment(Identify::IDEAL_DATA_SIZE, sizeof(uint64_t),
-        true, 0);
+        false, 0);
     send_64b_bitmask idPrpCap =
         (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE);
     idCmdCap->SetPrpBuffer(idPrpCap, idMemCap);

@@ -21,6 +21,12 @@
 #include "dnvme.h"
 #include "../Singletons/memBuffer.h"
 
+typedef enum {
+    DATADIR_FROM_DEVICE,
+    DATADIR_TO_DEVICE,
+    DATADIR_NONE
+} DataDir;
+
 
 /**
 * This class is the interface for the user data buffer associated with the PRP
@@ -73,6 +79,9 @@ public:
 
     /// Solely used to notify dnvme how to issue a PRP data buffer
     send_64b_bitmask GetPrpBitmask() const { return mPrpFields; }
+
+    /// Returns the direction of data transfer for the PRP buffer
+    virtual DataDir GetDataDir() const = 0;
 
     /**
      * Append the entire contents of this cmd's payload to the named file.

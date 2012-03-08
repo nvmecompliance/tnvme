@@ -14,16 +14,13 @@
  *  limitations under the License.
  */
 
-#ifndef _IOQROLLCHKDIFF_r10b_H_
-#define _IOQROLLCHKDIFF_r10b_H_
+#ifndef _ADMINQFULL_r10b_H_
+#define _ADMINQFULL_r10b_H_
 
 #include "test.h"
-#include "globals.h"
 #include "../Cmds/identify.h"
-#include "../Queues/iocq.h"
-#include "../Queues/iosq.h"
-#include "../Cmds/write.h"
-#include "../Utils/queues.h"
+#include "../Queues/asq.h"
+#include "../Queues/acq.h"
 
 namespace GrpQueues {
 
@@ -35,33 +32,32 @@ namespace GrpQueues {
  * 1) See notes in the header file of the Test base class
  * \endverbatim
  */
-class IOQRollChkDiff_r10b : public Test
+class AdminQFull_r10b : public Test
 {
 public:
-    IOQRollChkDiff_r10b(int fd, string grpName, string testName,
+    AdminQFull_r10b(int fd, string grpName, string testName,
         ErrorRegs errRegs);
-    virtual ~IOQRollChkDiff_r10b();
+    virtual ~AdminQFull_r10b();
 
     /**
      * IMPORTANT: Read Test::Clone() header comment.
      */
-    virtual IOQRollChkDiff_r10b *Clone() const
-        { return new IOQRollChkDiff_r10b(*this); }
-    IOQRollChkDiff_r10b &operator=(const IOQRollChkDiff_r10b &other);
-    IOQRollChkDiff_r10b(const IOQRollChkDiff_r10b &other);
+    virtual AdminQFull_r10b *Clone() const
+        { return new AdminQFull_r10b(*this); }
+    AdminQFull_r10b &operator=(const AdminQFull_r10b &other);
+    AdminQFull_r10b(const AdminQFull_r10b &other);
 
 
 protected:
     virtual bool RunCoreTest();
 
+
 private:
     ///////////////////////////////////////////////////////////////////////////
     // Adding a member variable? Then edit the copy constructor and operator=().
     ///////////////////////////////////////////////////////////////////////////
-    void IOQRollChkDiff(uint16_t numEntriesIOSQ, uint16_t numEntriesIOCQ);
-    SharedWritePtr SetWriteCmd();
-    void ReapAndVerifyCE(SharedIOCQPtr iocq, uint16_t expectedVal);
-    void VerifyQPointers(SharedIOSQPtr iosq, SharedIOCQPtr iocq);
+    void AdminQFull(uint16_t numASQEntries, uint16_t numACQEntries,
+        SharedIdentifyPtr idCmdCtrlr);
 };
 
 }   // namespace

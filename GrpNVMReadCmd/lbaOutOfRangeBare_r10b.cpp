@@ -89,10 +89,8 @@ LBAOutOfRangeBare_r10b::RunCoreTest()
     ConstSharedIdentifyPtr namSpcPtr;
 
     // Lookup objs which were created in a prior test within group
-    SharedIOSQPtr iosqContig = CAST_TO_IOSQ(
-        gRsrcMngr->GetObj(IOSQ_CONTIG_GROUP_ID))
-    SharedIOCQPtr iocqContig = CAST_TO_IOCQ(
-        gRsrcMngr->GetObj(IOCQ_CONTIG_GROUP_ID))
+    SharedIOSQPtr iosq = CAST_TO_IOSQ(gRsrcMngr->GetObj(IOSQ_GROUP_ID));
+    SharedIOCQPtr iocq = CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_GROUP_ID));
 
     vector<uint32_t> bare = gInformative->GetBareNamespaces();
     for (size_t i = 1; i < bare.size(); i++) {
@@ -118,16 +116,16 @@ LBAOutOfRangeBare_r10b::RunCoreTest()
 
         LOG_NRM("Issue cmd where 1st block starts at LBA (Identify.NSZE-2)");
         readCmd->SetSLBA(nsze - 2);
-        IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosqContig,
-            iocqContig, readCmd, "nsze-2", true);
+        IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+            iocq, readCmd, "nsze-2", true);
 
         LOG_NRM("Issue cmd where 1st block starts at LBA (Identify.NSZE-1)");
         readCmd->SetSLBA(nsze - 1);
-        SendCmdToHdw(iosqContig, iocqContig, readCmd, "nsze-1");
+        SendCmdToHdw(iosq, iocq, readCmd, "nsze-1");
 
         LOG_NRM("Issue cmd where 1st block starts at LBA (Identify.NSZE)");
         readCmd->SetSLBA(nsze);
-        SendCmdToHdw(iosqContig, iocqContig, readCmd, "nsze");
+        SendCmdToHdw(iosq, iocq, readCmd, "nsze");
     }
 
     return true;
@@ -142,7 +140,6 @@ LBAOutOfRangeBare_r10b::SendCmdToHdw(SharedSQPtr sq, SharedCQPtr cq,
     uint32_t isrCount;
     uint32_t isrCountB4;
     string work;
-
 
 
     if ((numCE = cq->ReapInquiry(isrCountB4, true)) != 0) {

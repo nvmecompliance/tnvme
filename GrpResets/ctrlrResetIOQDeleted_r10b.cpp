@@ -109,12 +109,10 @@ CtrlrResetIOQDeleted_r10b::RunCoreTest()
         throw exception();
     }
 
-    // Create Admin Q Objects for Group lifetime
-    SharedACQPtr acq = CAST_TO_ACQ(
-        gRsrcMngr->AllocObj(Trackable::OBJ_ACQ, ACQ_GROUP_ID))
+    // Create Admin Q Objects with test lifetime
+    SharedACQPtr acq = SharedACQPtr(new ACQ(mFd));
     acq->Init(15);
-    SharedASQPtr asq = CAST_TO_ASQ(
-        gRsrcMngr->AllocObj(Trackable::OBJ_ASQ, ASQ_GROUP_ID))
+    SharedASQPtr asq = SharedASQPtr(new ASQ(mFd));
     asq->Init(15);
 
     VerifyCtrlrResetDeletesIOQs(acq, asq, numEntriesIOQ);
@@ -138,14 +136,16 @@ CtrlrResetIOQDeleted_r10b::VerifyCtrlrResetDeletesIOQs(SharedACQPtr acq,
         if (gCtrlrConfig->SetState(ST_ENABLE) == false)
             throw exception();
 
-        gCtrlrConfig->SetIOCQES(IOCQ::COMMON_ELEMENT_SIZE_PWR_OF_2);
+        gCtrlrConfig->SetIOCQES(gInformative->GetIdentifyCmdCtrlr()->
+            GetValue(IDCTRLRCAP_CQES) & 0xf);
         Queues::CreateIOCQContigToHdw(mFd, mGrpName, mTestName,
             DEFAULT_CMD_WAIT_ms, asq, acq, IOCQ_ID, numEntriesIOQ, false,
             IOCQ_CONTIG_GROUP_ID, false, 0, work);
 
         // Create 2 IO SQ's, start with SQ ID 1 and associate all SQ's to one
         // CQ with IOCQ_ID
-        gCtrlrConfig->SetIOSQES(IOSQ::COMMON_ELEMENT_SIZE_PWR_OF_2);
+        gCtrlrConfig->SetIOSQES(gInformative->GetIdentifyCmdCtrlr()->
+            GetValue(IDCTRLRCAP_SQES) & 0xf);
         for (uint16_t j = 1; j <= IOSQ_ID; j++) {
             Queues::CreateIOSQContigToHdw(mFd, mGrpName, mTestName,
                 DEFAULT_CMD_WAIT_ms, asq, acq, j, numEntriesIOQ, false,

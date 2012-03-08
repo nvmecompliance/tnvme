@@ -125,21 +125,26 @@ CreateIOQDiscontigIrq_r10b::RunCoreTest()
         throw exception();
     }
 
-
-    gCtrlrConfig->SetIOCQES(IOCQ::COMMON_ELEMENT_SIZE_PWR_OF_2);
+    uint8_t iocqes = (gInformative->GetIdentifyCmdCtrlr()->
+        GetValue(IDCTRLRCAP_CQES) & 0x0f);
+    gCtrlrConfig->SetIOCQES(iocqes);
     LOG_NRM("Allocate discontiguous memory, ID=%d for the IOCQ", IOQ_ID);
     SharedMemBufferPtr iocqMem = SharedMemBufferPtr(new MemBuffer());
-    iocqMem->InitAlignment((NumEntriesIOQ * IOCQ::COMMON_ELEMENT_SIZE),
+    uint32_t iocqElemSize = (1 << iocqes);
+    iocqMem->InitAlignment((NumEntriesIOQ * iocqElemSize),
         sysconf(_SC_PAGESIZE), true, 0);
     Queues::CreateIOCQDiscontigToHdw(mFd, mGrpName, mTestName,
         DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, NumEntriesIOQ, true,
         IOCQ_DISCONTIG_GROUP_ID, true, 0, iocqMem);
 
 
-    gCtrlrConfig->SetIOSQES(IOSQ::COMMON_ELEMENT_SIZE_PWR_OF_2);
+    uint8_t iosqes = (gInformative->GetIdentifyCmdCtrlr()->
+        GetValue(IDCTRLRCAP_SQES) & 0x0f);
+    gCtrlrConfig->SetIOSQES(iosqes);
     LOG_NRM("Allocate discontiguous memory, ID=%d for the IOSQ", IOQ_ID);
     SharedMemBufferPtr iosqMem = SharedMemBufferPtr(new MemBuffer());
-    iosqMem->InitAlignment((NumEntriesIOQ * IOSQ::COMMON_ELEMENT_SIZE),
+    uint32_t iosqElemSize = (1 << iosqes);
+    iosqMem->InitAlignment((NumEntriesIOQ * iosqElemSize),
         sysconf(_SC_PAGESIZE), true, 0);
     Queues::CreateIOSQDiscontigToHdw(mFd, mGrpName, mTestName,
         DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, NumEntriesIOQ, true,

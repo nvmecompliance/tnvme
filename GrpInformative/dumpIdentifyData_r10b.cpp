@@ -116,9 +116,6 @@ DumpIdentifyData_r10b::SendIdentifyCtrlrStruct(SharedASQPtr asq,
     IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
         idCmdCtrlr, "IdCtrlStruct", true);
 
-    idCmdCtrlr->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "IdCtrlStruct"),
-        "The complete admin cmd identify ctrl data structure decoded:");
-
     // Update the Informative singleton for all tests to see and use
     gInformative->SetIdentifyCmdCtrlr(idCmdCtrlr);
 }
@@ -158,13 +155,8 @@ DumpIdentifyData_r10b::SendIdentifyNamespaceStruct(SharedASQPtr asq,
             (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE);
         idCmdNamSpc->SetPrpBuffer(idPrpNamSpc, idMemNamSpc);
 
-
         IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
             idCmdNamSpc, qualifier, true);
-
-        idCmdNamSpc->Dump(
-            FileSystem::PrepLogFile(mGrpName, mTestName, qualifier),
-            "The complete admin cmd identify namespace structure decoded:");
 
         gInformative->SetIdentifyCmdNamespace(idCmdNamSpc);
     }

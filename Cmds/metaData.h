@@ -19,6 +19,7 @@
 
 #include "tnvme.h"
 #include "dnvme.h"
+#include "prpData.h"
 #include "../Singletons/metaRsrc.h"
 #include "../Utils/fileSystem.h"
 
@@ -53,7 +54,7 @@ public:
      * Request dnvme to allocate a contiguous meta data buffer which will be
      * mmap'd back into user space for RW access. Remember all meta data buffers
      * are forced to be of equal size until such time the ctrlr becomes
-     * disabled and a new size can be set in method RsrcMngr::SetMetaAllocSize()
+     * disabled and a new size can be set by method RsrcMngr::SetMetaAllocSize()
      */
     void AllocMetaBuffer();
 
@@ -71,6 +72,9 @@ public:
 
     /// Solely used to notify dnvme how to issue a PRP data buffer
     send_64b_bitmask GetMetaBitmask() const;
+
+    /// Returns the direction of data transfer for the PRP buffer
+    virtual DataDir GetDataDir() const = 0;
 
     /**
      * Append the entire contents of this cmd's meta data to the named file.

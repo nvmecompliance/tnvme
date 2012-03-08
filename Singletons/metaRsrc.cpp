@@ -14,7 +14,6 @@
  *  limitations under the License.
  */
 
-#include <math.h>
 #include "metaRsrc.h"
 #include "../Utils/kernelAPI.h"
 
@@ -58,9 +57,9 @@ MetaRsrc::SetMetaAllocSize(uint16_t allocSize)
         LOG_DBG("Requested meta data alloc size is not modulo %ld",
             sizeof(uint32_t));
         return false;
-    } else if (allocSize > (uint16_t)pow(2, 15)) {
+    } else if (allocSize > (1 << 15)) {
         LOG_DBG("Meta data alloc size exceeds max, 0x%04X > 0x%04X",
-            allocSize, (uint16_t)pow(2, 15));
+            allocSize, (1 << 15));
         return false;
     } else if ((rc = ioctl(mFd, NVME_IOCTL_METABUF_CREATE, allocSize)) < 0) {
         LOG_ERR("Meta data size request denied with error: %d", rc);
@@ -111,7 +110,7 @@ MetaRsrc::ReserveMetaBuf(MetaDataBuf &metaBuf)
             resIter++;
         }
 
-        if (metaBuf.ID < (uint32_t)pow(2, METADATA_UNIQUE_ID_BITS)) {
+        if (metaBuf.ID < (1 << METADATA_UNIQUE_ID_BITS)) {
             LOG_NRM("Alloc meta data buf: size: 0x%08X, ID: 0x%06X",
                 metaBuf.size, metaBuf.ID);
 

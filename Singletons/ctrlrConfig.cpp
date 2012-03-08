@@ -14,7 +14,6 @@
  *  limitations under the License.
  */
 
-#include <math.h>
 #include "ctrlrConfig.h"
 #include "globals.h"
 
@@ -300,8 +299,8 @@ CtrlrConfig::GetIOCQES(uint8_t &value)
 {
     bool retVal;
     retVal = GetRegValue(value, CC_IOCQES, 20);
-    LOG_NRM("Reading CC.IOCQES = 0x%02X; effectively (2^%d) = %d", value, value,
-        (int)pow(2, value));
+    LOG_NRM("Reading CC.IOCQES = 0x%02X; (2^%d) = %d", value, value,
+        (1 << value));
     return retVal;
 }
 
@@ -309,8 +308,8 @@ CtrlrConfig::GetIOCQES(uint8_t &value)
 bool
 CtrlrConfig::SetIOCQES(uint8_t value)
 {
-    LOG_NRM("Writing CC.IOCQES = 0x%02X; effectively (2^%d) = %d", value, value,
-        (int)pow(2, value));
+    LOG_NRM("Writing CC.IOCQES = 0x%02X; (2^%d) = %d", value, value,
+        (1 << value));
     return SetRegValue(value, 0x0f, CC_IOCQES, 20);
 }
 
@@ -320,8 +319,8 @@ CtrlrConfig::GetIOSQES(uint8_t &value)
 {
     bool retVal;
     retVal = GetRegValue(value, CC_IOSQES, 16);
-    LOG_NRM("Reading CC.IOCQES = 0x%02X; effectively (2^%d) = %d", value, value,
-        (int)pow(2, value));
+    LOG_NRM("Reading CC.IOSQES = 0x%02X; (2^%d) = %d", value, value,
+        (1 << value));
     return retVal;
 }
 
@@ -329,8 +328,8 @@ CtrlrConfig::GetIOSQES(uint8_t &value)
 bool
 CtrlrConfig::SetIOSQES(uint8_t value)
 {
-    LOG_NRM("Writing CC.IOSQES = 0x%02X; effectively (2^%d) = %d", value, value,
-        (int)pow(2, value));
+    LOG_NRM("Writing CC.IOSQES = 0x%02X; (2^%d) = %d", value, value,
+        (1 << value));
     return SetRegValue(value, 0x0f, CC_IOSQES, 16);
 }
 

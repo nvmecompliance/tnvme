@@ -15,7 +15,6 @@
  */
 
 #include <string.h>
-#include <math.h>
 #include "identify.h"
 #include "../Utils/buffers.h"
 #include "../Utils/fileSystem.h"
@@ -54,7 +53,6 @@ Identify::Identify() : AdminCmd(0, Trackable::OBJTYPE_FENCE)
 Identify::Identify(int fd) : AdminCmd(fd, Trackable::OBJ_IDENTIFY)
 {
     Init(Opcode, DATADIR_FROM_DEVICE);
-    SetCNS(true);
 
     // No cmd should ever be created which violates these masking possibilities
     send_64b_bitmask allowPrpMask = (send_64b_bitmask)
@@ -239,7 +237,7 @@ uint64_t
 Identify::GetLBADataSize() const
 {
     LBAFormat lbaFormat = GetLBAFormat();
-    uint64_t lbaDataSize = (uint64_t)pow(2.0, lbaFormat.LBADS);
+    uint64_t lbaDataSize = (1 << lbaFormat.LBADS);
     LOG_NRM("Active logical blk size = 0x%016llX",
         (long long unsigned int)lbaDataSize);
     return lbaDataSize;
