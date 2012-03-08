@@ -14,7 +14,6 @@
  *  limitations under the License.
  */
 
-#include <math.h>
 #include "createIOQDiscontigPoll_r10b.h"
 #include "globals.h"
 #include "createACQASQ_r10b.h"
@@ -132,7 +131,7 @@ CreateIOQDiscontigPoll_r10b::RunCoreTest()
     gCtrlrConfig->SetIOCQES(iocqes);
     LOG_NRM("Allocate discontiguous memory, ID=%d for the IOCQ", IOQ_ID);
     SharedMemBufferPtr iocqMem = SharedMemBufferPtr(new MemBuffer());
-    uint32_t iocqElemSize = (uint32_t)pow(2, iocqes);
+    uint32_t iocqElemSize = (1 << iocqes);
     iocqMem->InitAlignment((NumEntriesIOQ * iocqElemSize),
         sysconf(_SC_PAGESIZE), true, 0);
     Queues::CreateIOCQDiscontigToHdw(mFd, mGrpName, mTestName,
@@ -145,7 +144,7 @@ CreateIOQDiscontigPoll_r10b::RunCoreTest()
     gCtrlrConfig->SetIOSQES(iosqes);
     LOG_NRM("Allocate discontiguous memory, ID=%d for the IOSQ", IOQ_ID);
     SharedMemBufferPtr iosqMem = SharedMemBufferPtr(new MemBuffer());
-    uint32_t iosqElemSize = (uint32_t)pow(2, iosqes);
+    uint32_t iosqElemSize = (1 << iosqes);
     iosqMem->InitAlignment((NumEntriesIOQ * iosqElemSize),
         sysconf(_SC_PAGESIZE), true, 0);
     Queues::CreateIOSQDiscontigToHdw(mFd, mGrpName, mTestName,

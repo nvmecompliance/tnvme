@@ -14,7 +14,6 @@
  *  limitations under the License.
  */
 
-#include <math.h>
 #include "queues.h"
 #include "globals.h"
 #include "io.h"
@@ -131,9 +130,9 @@ Queues::CreateIOCQDiscontigToHdw(int fd, string grpName, string testName,
     // Validate the memory correlates to the other params passed in
     if (gCtrlrConfig->GetIOCQES(ioqes) == false)
         throw exception();
-    if (qBackedMem->GetBufSize() < (uint32_t)pow(2, ioqes)) {
+    if (qBackedMem->GetBufSize() < (uint32_t)((1 << ioqes) * numEntries)) {
         LOG_ERR("Supplied buffer size = 0x%08X; inconsistent w/ creation",
-            (uint32_t)pow(2, ioqes));
+            ((1 << ioqes) * numEntries));
         throw exception();
     }
 
@@ -180,9 +179,9 @@ Queues::CreateIOSQDiscontigToHdw(int fd, string grpName, string testName,
     // Validate the memory correlates to the other params passed in
     if (gCtrlrConfig->GetIOCQES(ioqes) == false)
         throw exception();
-    if (qBackedMem->GetBufSize() < (uint32_t)pow(2, ioqes)) {
+    if (qBackedMem->GetBufSize() < (uint32_t)((1 << ioqes) * numEntries)) {
         LOG_ERR("Supplied buffer size = 0x%08X; inconsistent w/ creation",
-            (uint32_t)pow(2, ioqes));
+            ((1 << ioqes) * numEntries));
         throw exception();
     }
 

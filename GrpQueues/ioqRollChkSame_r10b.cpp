@@ -113,17 +113,23 @@ IOQRollChkSame_r10b::IOQRollChkSame(uint16_t numEntriesIOQ)
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
         throw exception();
 
-    gCtrlrConfig->SetIOCQES(gInformative->GetIdentifyCmdCtrlr()->
+    uint8_t iocqes = (gInformative->GetIdentifyCmdCtrlr()->
         GetValue(IDCTRLRCAP_CQES) & 0xf);
-    SharedIOCQPtr iocqContig = Queues::CreateIOCQContigToHdw(mFd, mGrpName,
+    gCtrlrConfig->SetIOCQES(iocqes);
+    SharedMemBufferPtr iocqBackedMem = SharedMemBufferPtr(new MemBuffer());
+    iocqBackedMem->InitOffset1stPage((numEntriesIOQ * (1 << iocqes)), 0, true);
+    SharedIOCQPtr iocqContig = Queues::CreateIOCQDiscontigToHdw(mFd, mGrpName,
         mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, numEntriesIOQ,
-        false, IOCQ_CONTIG_GROUP_ID, false, 1);
+        false, IOCQ_CONTIG_GROUP_ID, false, 1, iocqBackedMem);
 
-    gCtrlrConfig->SetIOSQES(gInformative->GetIdentifyCmdCtrlr()->
+    uint8_t iosqes = (gInformative->GetIdentifyCmdCtrlr()->
         GetValue(IDCTRLRCAP_SQES) & 0xf);
-    SharedIOSQPtr iosqContig = Queues::CreateIOSQContigToHdw(mFd, mGrpName,
+    gCtrlrConfig->SetIOSQES(iosqes);
+    SharedMemBufferPtr iosqBackedMem = SharedMemBufferPtr(new MemBuffer());
+    iosqBackedMem->InitOffset1stPage((numEntriesIOQ * (1 << iosqes)), 0, true);
+    SharedIOSQPtr iosqContig = Queues::CreateIOSQDiscontigToHdw(mFd, mGrpName,
         mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, numEntriesIOQ,
-        false, IOSQ_CONTIG_GROUP_ID, IOQ_ID, 0);
+        false, IOSQ_CONTIG_GROUP_ID, IOQ_ID, 0, iosqBackedMem);
 
     LOG_NRM("(IOCQ Size, IOSQ Size)=(%d,%d)", iocqContig->GetNumEntries(),
         iosqContig->GetNumEntries());

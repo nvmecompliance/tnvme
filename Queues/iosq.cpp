@@ -14,7 +14,6 @@
  *  limitations under the License.
  */
 
-#include <math.h>
 #include "iosq.h"
 #include "globals.h"
 
@@ -48,16 +47,6 @@ IOSQ::Init(uint16_t qId, uint16_t numEntries, uint16_t cqId,
 
     LOG_NRM("IOSQ::Init (qId,numEntry,cqId,prior) = (%d,%d,%d,%d)",
         qId, numEntries, cqId, priority);
-    if (gRegisters->Read(CTLSPC_CAP, work) == false) {
-        LOG_ERR("Unable to determine MQES");
-        throw exception();
-    }
-    // Detect if doing something that looks suspicious/incorrect/illegal
-    work &= CAP_MQES;
-    if ((work + 1) < (uint64_t)numEntries) {
-        LOG_WARN("Creating Q with %d entries, but DUT only allows %d",
-            numEntries, (uint32_t)(work + 1));
-    }
 
     switch (priority) {
 	case 0x00:
@@ -85,11 +74,22 @@ IOSQ::Init(uint16_t qId, uint16_t numEntries, uint16_t cqId,
     uint8_t minElemSize = (uint8_t)((value >> 0) & 0x0f);
     if ((entrySize < minElemSize) || (entrySize > maxElemSize)) {
         LOG_ERR("Reg CC.IOSQES yields a bad element size: 0x%04X",
-            (uint16_t)pow(2, entrySize));
+            (1 << entrySize));
         throw exception();
     }
 
-    SQ::Init(qId, (uint16_t)pow(2, entrySize), numEntries, cqId);
+    // Detect if doing something that looks suspicious/incorrect/illegal
+    if (gRegisters->Read(CTLSPC_CAP, work) == false) {
+        LOG_ERR("Unable to determine MQES");
+        throw exception();
+    }
+    work &= CAP_MQES;
+    if ((work + 1) < (uint64_t)numEntries) {
+        LOG_WARN("Creating Q with %d entries, but DUT only allows %d",
+            numEntries, (uint32_t)(work + 1));
+    }
+
+    SQ::Init(qId, (1 << entrySize), numEntries, cqId);
 }
 
 
@@ -99,6 +99,7 @@ IOSQ::Init(uint16_t qId, uint16_t numEntries,
 {
     uint8_t entrySize;
     uint64_t work;
+
 
     LOG_NRM("IOSQ::Init (qId,numEntry,cqId,prior) = (%d,%d,%d,%d)",
         qId, numEntries, cqId, priority);
@@ -139,8 +140,8 @@ IOSQ::Init(uint16_t qId, uint16_t numEntries,
     uint8_t minElemSize = (uint8_t)((value >> 0) & 0x0f);
     if ((entrySize < minElemSize) || (entrySize > maxElemSize)) {
         LOG_ERR("Reg CC.IOSQES yields a bad element size: 0x%04X",
-            (uint16_t)pow(2, entrySize));
+            (1 << entrySize));
         throw exception();
     }
-    SQ::Init(qId, (uint16_t)pow(2, entrySize), numEntries, memBuffer, cqId);
+    SQ::Init(qId, (1 << entrySize), numEntries, memBuffer, cqId);
 }

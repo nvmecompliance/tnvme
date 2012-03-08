@@ -1,4 +1,4 @@
-2012-3-7:
+2012-3-8:
 nvmecompliance_release=1.2.1 New tests, bug fixes.
     1) Bugfix: Read cmds would have issue operating under real world hardware
        because the DMA direction was not set corrrectly. Under QEMU, this flag
@@ -7,6 +7,12 @@ nvmecompliance_release=1.2.1 New tests, bug fixes.
     3) Bugfix: Informative::GetFeaturesNumOfIOCQs() and 
        Informative::GetFeaturesNumOfIOSQs() now correctly return 1 based
        values as was always stated in the header file doxygen comment.
+    4) All prior issues have been resolved.
+    5) Known Issues:
+        a) There may be a memory leak within dnvme's ability to free back to 
+           the OS any/some of contiguous memory. Evidence shows that looping
+           the current state of the tes software runs into the inability to
+           allocated contig memory.
 
 2012-3-2:
 nvmecompliance_release=1.2.0 Test dependencies, reap delays, enhancements 

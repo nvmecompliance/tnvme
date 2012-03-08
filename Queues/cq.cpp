@@ -61,11 +61,10 @@ CQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
     Queue::Init(qId, entrySize, numEntries);
     mIrqEnabled = irqEnabled;
     mIrqVec = irqVec;
-
-
     LOG_NRM(
         "Create CQ: (id,entrySize,numEntry,IRQEnable) = (%d,%d,%d,%s)",
         GetQId(), GetEntrySize(), GetNumEntries(), GetIrqEnabled() ? "T" : "F");
+
     LOG_NRM("Allocating contiguous CQ memory in dnvme");
     if (numEntries < 2)
         LOG_WARN("Number elements breaches spec requirement");
@@ -117,11 +116,10 @@ CQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
     Queue::Init(qId, entrySize, numEntries);
     mIrqEnabled = irqEnabled;
     mIrqVec = irqVec;
-
-
     LOG_NRM(
         "Create CQ: (id,entrySize,numEntry,IRQEnable) = (%d,%d,%d,%s)",
         GetQId(), GetEntrySize(), GetNumEntries(), GetIrqEnabled() ? "T" : "F");
+
     LOG_NRM("Allocating discontiguous CQ memory in tnvme");
     if (numEntries < 2)
         LOG_WARN("Number elements breaches spec requirement");
@@ -196,6 +194,21 @@ CQ::GetQMetrics()
         LOG_DBG("Get Q metrics failed by dnvme with error: 0x%02X", ret);
         throw exception();
     }
+    return qMetrics;
+}
+
+
+struct nvme_gen_cq
+CQ::LogQMetrics()
+{
+    struct nvme_gen_cq qMetrics = GetQMetrics();
+    LOG_NRM("dnvme metrics pertaining to CQ ID: %d", qMetrics.q_id);
+    LOG_NRM("  tail_ptr       = %d", qMetrics.tail_ptr);
+    LOG_NRM("  head_ptr       = %d", qMetrics.head_ptr);
+    LOG_NRM("  elements       = %d", qMetrics.elements);
+    LOG_NRM("  irq_enabled    = %s", qMetrics.irq_enabled ? "T" : "F");
+    LOG_NRM("  irq_no         = %d", qMetrics.irq_no);
+    LOG_NRM("  pbit_new_entry = %d", qMetrics.pbit_new_entry);
     return qMetrics;
 }
 
@@ -278,6 +291,7 @@ CQ::ReapInquiryWaitAny(uint16_t ms, uint16_t &numCE, uint32_t &isrCount)
         }
     }
 
+    LogQMetrics();
     LOG_ERR("Timed out waiting %d ms for CE's in CQ %d", ms, GetQId());
     return false;
 }
@@ -301,6 +315,7 @@ CQ::ReapInquiryWaitSpecify(uint16_t ms, uint16_t numTil, uint16_t &numCE,
         }
     }
 
+    LogQMetrics();
     LOG_ERR("Timed out waiting %d ms for CE's in CQ %d", ms, GetQId());
     return false;
 }
