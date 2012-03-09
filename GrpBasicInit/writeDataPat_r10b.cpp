@@ -70,7 +70,7 @@ WriteDataPat_r10b::operator=(const WriteDataPat_r10b &other)
 }
 
 
-bool
+void
 WriteDataPat_r10b::RunCoreTest()
 {
     /** \verbatim
@@ -84,7 +84,6 @@ WriteDataPat_r10b::RunCoreTest()
      */
 
     WriteDataPattern();
-    return true;
 }
 
 
@@ -97,10 +96,8 @@ WriteDataPat_r10b::WriteDataPattern()
     LOG_NRM("Calc buffer size to write %d logical blks to media",
         WRITE_DATA_PAT_NUM_BLKS);
     ConstSharedIdentifyPtr namSpcPtr = gInformative->GetIdentifyCmdNamspc(1);
-    if (namSpcPtr == Identify::NullIdentifyPtr) {
-        LOG_ERR("Namespace #1 must exist");
-        throw exception();
-    }
+    if (namSpcPtr == Identify::NullIdentifyPtr)
+        throw FrmwkEx("Namespace #1 must exist");
     uint64_t lbaDataSize = namSpcPtr->GetLBADataSize();
 
 
@@ -113,7 +110,7 @@ WriteDataPat_r10b::WriteDataPattern()
     
 
     LOG_NRM("Create a generic write cmd to send data pattern to namspc 1");
-    SharedWritePtr writeCmd = SharedWritePtr(new Write(mFd));
+    SharedWritePtr writeCmd = SharedWritePtr(new Write());
     send_64b_bitmask prpBitmask = (send_64b_bitmask)
         (MASK_PRP1_PAGE | MASK_PRP2_PAGE | MASK_PRP2_LIST);
     writeCmd->SetPrpBuffer(prpBitmask, dataPat);
@@ -135,8 +132,7 @@ WriteDataPat_r10b::WriteDataPattern()
 
     // To run the discontig part of this test, the hdw must support that feature
     if (gRegisters->Read(CTLSPC_CAP, regVal) == false) {
-        LOG_ERR("Unable to determine Q memory requirements");
-        throw exception();
+        throw FrmwkEx("Unable to determine Q memory requirements");
     } else if (regVal & CAP_CQR) {
         LOG_NRM("Unable to utilize discontig Q's, DUT requires contig");
         return;
@@ -168,14 +164,12 @@ WriteDataPat_r10b::SendToIOSQ(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
     if (iocq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE, isrCount)
         == false) {
 
-        LOG_ERR("Unable to see completion of cmd");
         iocq->Dump(
             FileSystem::PrepLogFile(mGrpName, mTestName, "iocq", qualifier),
             "Unable to see any CE's in IOCQ, dump entire CQ contents");
-        throw exception();
+        throw FrmwkEx("Unable to see completion of cmd");
     } else if (numCE != 1) {
-        LOG_ERR("The IOCQ should only have 1 CE as a result of a cmd");
-        throw exception();
+        throw FrmwkEx("The IOCQ should only have 1 CE as a result of a cmd");
     }
     iocq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "iocq", qualifier),
         "Just B4 reaping IOCQ, dump entire CQ contents");
@@ -190,8 +184,8 @@ WriteDataPat_r10b::SendToIOSQ(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
     if ((numReaped = iocq->Reap(ceRemain, ceMemIOCQ, isrCount, numCE, true))
         != 1) {
 
-        LOG_ERR("Verified there was 1 CE, but reaping produced %d", numReaped);
-        throw exception();
+        throw FrmwkEx("Verified there was 1 CE, but reaping produced %d",
+            numReaped);
     }
     LOG_NRM("The reaped CE is...");
     iocq->LogCE(iocqMetrics.head_ptr);

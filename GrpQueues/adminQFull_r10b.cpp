@@ -73,7 +73,7 @@ AdminQFull_r10b::operator=(const AdminQFull_r10b &other)
 }
 
 
-bool
+void
 AdminQFull_r10b::RunCoreTest()
 {
     /** \verbatim
@@ -82,7 +82,7 @@ AdminQFull_r10b::RunCoreTest()
      *  \endverbatim
      */
     LOG_NRM("Create identify cmd and assoc some buffer memory");
-    SharedIdentifyPtr idCmdCtrlr = SharedIdentifyPtr(new Identify(mFd));
+    SharedIdentifyPtr idCmdCtrlr = SharedIdentifyPtr(new Identify());
     LOG_NRM("Force identify to request ctrlr capabilities struct");
     idCmdCtrlr->SetCNS(true);
     SharedMemBufferPtr idMemCap = SharedMemBufferPtr(new MemBuffer());
@@ -101,8 +101,6 @@ AdminQFull_r10b::RunCoreTest()
     AdminQFull(3, 2, idCmdCtrlr);
     AdminQFull((MAX_ADMIN_Q_SIZE/2), ((MAX_ADMIN_Q_SIZE/2) - 1), idCmdCtrlr);
     AdminQFull(MAX_ADMIN_Q_SIZE, (MAX_ADMIN_Q_SIZE - 1), idCmdCtrlr);
-
-    return true;
 }
 
 
@@ -122,7 +120,7 @@ AdminQFull_r10b::AdminQFull(uint16_t numASQEntries, uint16_t numACQEntries,
     }
 
     if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
-        throw exception();
+        throw FrmwkEx();
 
     // Create Admin Q Objects for test lifetime
     SharedACQPtr acq = CAST_TO_ACQ(SharedACQPtr(new ACQ(mFd)))
@@ -132,7 +130,7 @@ AdminQFull_r10b::AdminQFull(uint16_t numASQEntries, uint16_t numACQEntries,
     asq->Init(numASQEntries);
 
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
-        throw exception();
+        throw FrmwkEx();
 
     uint16_t nCmdsToSubmit = numASQEntries - 1;
     LOG_NRM("Send #%d cmds to hdw via ASQ", nCmdsToSubmit);
@@ -151,12 +149,10 @@ AdminQFull_r10b::AdminQFull(uint16_t numASQEntries, uint16_t numACQEntries,
         LOG_NRM("Wait for the CE to arrive in ACQ");
         if (acq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, (nCmds + 1), numCE,
             isrCount) == false) {
-            LOG_ERR("Unable to see CE for issued cmd #%d", nCmds + 1);
-            throw exception();
+            throw FrmwkEx("Unable to see CE for issued cmd #%d", nCmds + 1);
         } else if (numCE != nCmds + 1) {
-            LOG_ERR("Missing last CE, #%d cmds of #%d received",
+            throw FrmwkEx("Missing last CE, #%d cmds of #%d received",
                 nCmds + 1, numCE);
-            throw exception();
         }
     }
 }

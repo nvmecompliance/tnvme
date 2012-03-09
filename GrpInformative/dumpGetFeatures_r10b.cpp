@@ -70,7 +70,7 @@ DumpGetFeatures_r10b::operator=(const DumpGetFeatures_r10b &other)
 }
 
 
-bool
+void
 DumpGetFeatures_r10b::RunCoreTest()
 {
     /** \verbatim
@@ -86,13 +86,11 @@ DumpGetFeatures_r10b::RunCoreTest()
 
     // Assuming the cmd we issue will result in only a single CE
     if (acq->ReapInquiry(isrCount, true) != 0) {
-        LOG_ERR("The ACQ should not have any CE's waiting before testing");
-        throw exception();
+        throw FrmwkEx(
+            "The ACQ should not have any CE's waiting before testing");
     }
 
     SendGetFeaturesNumOfQueues(asq, acq);
-
-    return true;
 }
 
 
@@ -105,7 +103,7 @@ DumpGetFeatures_r10b::SendGetFeaturesNumOfQueues(SharedASQPtr asq,
 
 
     LOG_NRM("Create get features");
-    SharedGetFeaturesPtr gfNumQ = SharedGetFeaturesPtr(new GetFeatures(mFd));
+    SharedGetFeaturesPtr gfNumQ = SharedGetFeaturesPtr(new GetFeatures());
     LOG_NRM("Force get features to request number of queues");
     gfNumQ->SetFID(GetFeatures::FID_NUM_QUEUES);
     gfNumQ->Dump(
@@ -125,15 +123,14 @@ DumpGetFeatures_r10b::SendGetFeaturesNumOfQueues(SharedASQPtr asq,
     if (acq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE, isrCount)
         == false) {
 
-        LOG_ERR("Unable to see completion of get features cmd");
         acq->Dump(
             FileSystem::PrepLogFile(mGrpName, mTestName, "acq",
             "GetFeat.NumOfQueue"),
             "Unable to see any CE's in CQ0, dump entire CQ contents");
-        throw exception();
+        throw FrmwkEx("Unable to see completion of get features cmd");
     } else if (numCE != 1) {
         LOG_ERR("The ACQ should only have 1 CE as a result of a cmd");
-        throw exception();
+        throw FrmwkEx();
     }
     acq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "acq",
         "GetFeat.NumOfQueue"),
@@ -153,9 +150,8 @@ DumpGetFeatures_r10b::SendGetFeaturesNumOfQueues(SharedASQPtr asq,
         if ((numReaped = acq->Reap(ceRemain, ceMemCap, isrCount, numCE, true))
             != 1) {
 
-            LOG_ERR("Verified there was 1 CE, but reaping produced %d",
+            throw FrmwkEx("Verified there was 1 CE, but reaping produced %d",
                 numReaped);
-            throw exception();
         }
         LOG_NRM("The reaped CE is...");
         acq->LogCE(acqMetrics.head_ptr);

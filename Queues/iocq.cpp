@@ -47,10 +47,8 @@ IOCQ::Init(uint16_t qId, uint16_t numEntries, bool irqEnabled,
     LOG_NRM("IOSQ::Init (qId,numEntry,irqEnable,irqVec) = (%d,%d,%d,%d)",
         qId, numEntries, irqEnabled, irqVec);
 
-    if (gCtrlrConfig->GetIOCQES(entrySize) == false) {
-        LOG_ERR("Unable to learn IOCQ entry size");
-        throw exception();
-    }
+    if (gCtrlrConfig->GetIOCQES(entrySize) == false)
+        throw FrmwkEx("Unable to learn IOCQ entry size");
 
     // Nothing to gain by specifying an element size which the DUT doesn't
     // support, the outcome is undefined, might succeed in crashing the kernel
@@ -59,16 +57,14 @@ IOCQ::Init(uint16_t qId, uint16_t numEntries, bool irqEnabled,
     uint8_t maxElemSize = (uint8_t)((value >> 4) & 0x0f);
     uint8_t minElemSize = (uint8_t)((value >> 0) & 0x0f);
     if ((entrySize < minElemSize) || (entrySize > maxElemSize)) {
-        LOG_ERR("Reg CC.IOCQES yields a bad element size: 0x%04X",
+        throw FrmwkEx("Reg CC.IOCQES yields a bad element size: 0x%04X",
             (1 << entrySize));
-        throw exception();
     }
 
     // Detect if doing something that looks suspicious/incorrect/illegal
-    if (gRegisters->Read(CTLSPC_CAP, work) == false) {
-        LOG_ERR("Unable to determine MQES");
-        throw exception();
-    }
+    if (gRegisters->Read(CTLSPC_CAP, work) == false)
+        throw FrmwkEx("Unable to determine MQES");
+
     work &= CAP_MQES;
     if ((work + 1) < (uint64_t)numEntries) {
         LOG_WARN("Creating Q with %d entries, but DUT only allows %d",
@@ -89,10 +85,9 @@ IOCQ::Init(uint16_t qId, uint16_t numEntries,
 
     LOG_NRM("IOSQ::Init (qId,numEntry,irqEnable,irqVec) = (%d,%d,%d,%d)",
         qId, numEntries, irqEnabled, irqVec);
-    if (gRegisters->Read(CTLSPC_CAP, work) == false) {
-        LOG_ERR("Unable to determine MQES");
-        throw exception();
-    }
+    if (gRegisters->Read(CTLSPC_CAP, work) == false)
+        throw FrmwkEx("Unable to determine MQES");
+
     // Detect if doing something that looks suspicious/incorrect/illegal
     work &= CAP_MQES;
     if ((work + 1) < (uint64_t)numEntries) {
@@ -100,10 +95,8 @@ IOCQ::Init(uint16_t qId, uint16_t numEntries,
             numEntries, (uint32_t)(work + 1));
     }
 
-    if (gCtrlrConfig->GetIOCQES(entrySize) == false) {
-        LOG_ERR("Unable to learn IOCQ entry size");
-        throw exception();
-    }
+    if (gCtrlrConfig->GetIOCQES(entrySize) == false)
+        throw FrmwkEx("Unable to learn IOCQ entry size");
 
     // Nothing to gain by specifying an element size which the DUT doesn't
     // support, the outcome is undefined, might succeed in crashing the kernel
@@ -112,9 +105,8 @@ IOCQ::Init(uint16_t qId, uint16_t numEntries,
     uint8_t maxElemSize = (uint8_t)((value >> 4) & 0x0f);
     uint8_t minElemSize = (uint8_t)((value >> 0) & 0x0f);
     if ((entrySize < minElemSize) || (entrySize > maxElemSize)) {
-        LOG_ERR("Reg CC.IOCQES yields a bad element size: 0x%04X",
+        throw FrmwkEx("Reg CC.IOCQES yields a bad element size: 0x%04X",
             (1 << entrySize));
-        throw exception();
     }
     CQ::Init(qId, (1 << entrySize), numEntries, memBuffer,
         irqEnabled, irqVec);

@@ -29,10 +29,9 @@ class NVMCmd : public Cmd
 {
 public:
     /**
-     * @param fd Pass the opened file descriptor for the device under test
      * @param objBeingCreated Pass the type of object this child class is
      */
-    NVMCmd(int fd, Trackable::ObjType objBeingCreated);
+    NVMCmd(Trackable::ObjType objBeingCreated);
     virtual ~NVMCmd();
 
 
@@ -46,10 +45,6 @@ protected:
      *      is not correct, unknown outcomes will be observed.
      */
     void Init(uint8_t opcode, DataDir dataDir);
-
-
-private:
-    NVMCmd();
 };
 
 

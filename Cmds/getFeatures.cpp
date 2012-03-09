@@ -21,13 +21,7 @@ SharedGetFeaturesPtr GetFeatures::NullGetFeaturesPtr;
 const uint8_t GetFeatures::Opcode = 0x0a;
 
 
-GetFeatures::GetFeatures() : BaseFeatures(0, Trackable::OBJTYPE_FENCE)
-{
-    // This constructor will throw
-}
-
-
-GetFeatures::GetFeatures(int fd) : BaseFeatures(fd, Trackable::OBJ_GETFEATURES)
+GetFeatures::GetFeatures() : BaseFeatures(Trackable::OBJ_GETFEATURES)
 {
     Init(Opcode, DATADIR_FROM_DEVICE);
 

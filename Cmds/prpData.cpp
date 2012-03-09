@@ -16,6 +16,7 @@
 
 #include "prpData.h"
 #include "../Utils/buffers.h"
+#include "../Exception/frmwkEx.h"
 
 using namespace std;
 
@@ -39,15 +40,14 @@ void
 PrpData::SetPrpBuffer(send_64b_bitmask prpFields, SharedMemBufferPtr memBuffer)
 {
     if (GetDataDir() == DATADIR_NONE) {
-        LOG_DBG("Internal prog err: PRP buffer assoc, but no data direction");
-        throw exception();
+        throw FrmwkEx("PRP buffer assoc, but no data direction");
     } else if (prpFields & ~mPrpAllowed) {
-        LOG_DBG("Attempting to set PRP field to disallowed value: 0x%04X",
+        throw FrmwkEx(
+            "Attempting to set PRP field to disallowed value: 0x%04X",
             prpFields);
-        throw exception();
     } else if (mBufRO != NULL) {
-        LOG_DBG("Buffer already setup as RO, cannot also setup RW buffer");
-        throw exception();
+        throw FrmwkEx(
+            "Buffer already setup as RO, cannot also setup RW buffer");
     }
 
     // Do allow associating a new buffer with an existing cmd, free the old 1st.
@@ -67,20 +67,18 @@ PrpData::SetPrpBuffer(send_64b_bitmask prpFields, uint8_t const *memBuffer,
     uint64_t bufSize)
 {
     if (GetDataDir() == DATADIR_NONE) {
-        LOG_DBG("Internal prog err: PRP buffer assoc, but no data direction");
-        throw exception();
+        throw FrmwkEx("PRP buffer assoc, but no data direction");
     } else if (prpFields & ~mPrpAllowed) {
-        LOG_DBG("Attempting to set PRP field to disallowed value: 0x%04X",
+        throw FrmwkEx(
+            "Attempting to set PRP field to disallowed value: 0x%04X",
             prpFields);
-        throw exception();
     } else if (mBufRW != MemBuffer::NullMemBufferPtr) {
-        LOG_DBG("Buffer already setup as RW, cannot also setup RO buffer");
-        throw exception();
+        throw FrmwkEx(
+            "Buffer already setup as RW, cannot also setup RO buffer");
     } else if (((bufSize == 0) && (memBuffer != NULL)) ||
                ((bufSize != 0) && (memBuffer == NULL))) {
-        LOG_DBG("Ambiguous; memBuffer = %p, size = %llu", memBuffer,
+        throw FrmwkEx("Ambiguous; memBuffer = %p, size = %llu", memBuffer,
             (long long unsigned int)bufSize);
-        throw exception();
     }
 
     // This version of SetBuffer() is intended solely for the Creation of IOQ's.
@@ -90,10 +88,8 @@ PrpData::SetPrpBuffer(send_64b_bitmask prpFields, uint8_t const *memBuffer,
     // You most likely want to gCtrlrConfig->SetState(DISABLE_XXXX) and then
     // completely destroy the Create IOQ cmd and the delete the IOQ object
     // representing an IOQ. And finally re-create it all over again is safest.
-    if (mBufRO != NULL) {
-        LOG_DBG("Buffer already setup as RO, not allowing reconfiguring");
-        throw exception();
-    }
+    if (mBufRO != NULL)
+        throw FrmwkEx("Buffer already setup as RO, not allowing reconfig");
 
     mBufRO = memBuffer;
     mBufSize = bufSize;
@@ -127,9 +123,8 @@ PrpData::SetPrpAllowed(send_64b_bitmask allowedBitmask)
         (MASK_PRP1_PAGE | MASK_PRP1_LIST | MASK_PRP2_PAGE | MASK_PRP2_LIST);
 
     if (allowedBitmask & ~PRP_SPECIFIC_BITS) {
-        LOG_DBG("Allowed PRP bitmask violated strict values: 0x%04X",
+        throw FrmwkEx("Allowed PRP bitmask violated strict values: 0x%04X",
             allowedBitmask);
-        throw exception();
     }
     mPrpAllowed = allowedBitmask;
 }

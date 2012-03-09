@@ -17,15 +17,7 @@
 #include "nvmCmd.h"
 
 
-NVMCmd::NVMCmd() :
-    Cmd(0, Trackable::OBJTYPE_FENCE)
-{
-    // This constructor will throw
-}
-
-
-NVMCmd::NVMCmd(int fd, Trackable::ObjType objBeingCreated) :
-    Cmd(fd, objBeingCreated)
+NVMCmd::NVMCmd(Trackable::ObjType objBeingCreated) : Cmd(objBeingCreated)
 {
 }
 

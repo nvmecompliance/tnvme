@@ -53,6 +53,12 @@ public:
     ~Informative();
 
     /**
+     * No reason to protect the file descriptor, each instance of tnvme can
+     * only ever have access to a single DUT.
+     */
+    int GetFD() { return mFd; }
+
+    /**
      * Retrieve a previously fetched identify command's controller struct.
      * @return The requested data
      */

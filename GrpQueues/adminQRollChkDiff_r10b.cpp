@@ -77,7 +77,7 @@ AdminQRollChkDiff_r10b::operator=(const AdminQRollChkDiff_r10b &other)
 }
 
 
-bool
+void
 AdminQRollChkDiff_r10b::RunCoreTest()
 {
     /** \verbatim
@@ -90,14 +90,14 @@ AdminQRollChkDiff_r10b::RunCoreTest()
     uint16_t loopCnt = 0;
 
     if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
-        throw exception();
+        throw FrmwkEx();
 
     while (1) {
         LOG_NRM("(ASQSize, ACQSize, Loop Cnt) = (%d, %d, %d)",
             mASQSize, mACQSize, loopCnt++);
         // Issue cntl'r disable completely for every iteration.
         if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
-            throw exception();
+            throw FrmwkEx();
 
         // Create ACQ and ASQ objects which have test life time
         SharedACQPtr acq = CAST_TO_ACQ(SharedACQPtr(new ACQ(mFd)))
@@ -108,10 +108,10 @@ AdminQRollChkDiff_r10b::RunCoreTest()
 
         gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
         if (gCtrlrConfig->SetState(ST_ENABLE) == false)
-            throw exception();
+            throw FrmwkEx();
 
         LOG_NRM("Create identify cmd and assoc some buffer memory");
-        SharedIdentifyPtr idCmdCap = SharedIdentifyPtr(new Identify(mFd));
+        SharedIdentifyPtr idCmdCap = SharedIdentifyPtr(new Identify());
         LOG_NRM("Force identify to request ctrlr capabilities struct");
         idCmdCap->SetCNS(true);
         SharedMemBufferPtr idMemCap = SharedMemBufferPtr(new MemBuffer());
@@ -139,7 +139,6 @@ AdminQRollChkDiff_r10b::RunCoreTest()
         mACQSize = MAX_ADMIN_Q_SIZE; // Assign MAX Q Size of ACQ.
         mASQSize = MIN_ADMIN_Q_SIZE;
     }
-    return true;
 }
 
 
@@ -159,21 +158,20 @@ AdminQRollChkDiff_r10b::VerifyCESQValues(SharedACQPtr acq,
     }
 
     if (ce.n.SQID != 0) {
-        LOG_ERR("Expected CE.SQID = 0 in ACQ completion entry but actual "
-            "CE.SQID  = 0x%04X", ce.n.SQID);
         acq->Dump(
             FileSystem::PrepLogFile(mGrpName, mTestName, "acq", "CE.SQID"),
             "CE SQ ID Inconsistent");
-        throw exception();
+        throw FrmwkEx("Expected CE.SQID = 0 in ACQ completion entry but actual "
+            "CE.SQID  = 0x%04X", ce.n.SQID);
     }
 
     if (ce.n.SQHD != expectedVal) {
-        LOG_ERR("Expected CE.SQHD = 0x%04X in ACQ completion entry but actual "
-            "CE.SQHD  = 0x%04X", expectedVal, ce.n.SQHD);
         acq->Dump(
             FileSystem::PrepLogFile(mGrpName, mTestName, "acq", "CE.SQHD"),
             "CE SQ Head Pointer Inconsistent");
-        throw exception();
+        throw FrmwkEx(
+            "Expected CE.SQHD = 0x%04X in ACQ completion entry but actual "
+            "CE.SQHD  = 0x%04X", expectedVal, ce.n.SQHD);
     }
 }
 
@@ -201,7 +199,7 @@ AdminQRollChkDiff_r10b::VerifyQPointers(SharedACQPtr acq, SharedASQPtr asq)
         acq->Dump(
             FileSystem::PrepLogFile(mGrpName, mTestName, "acq", "head_ptr"),
             "CQ Metrics Head Pointer Inconsistent");
-        throw exception();
+        throw FrmwkEx();
     }
 
     expectedVal = (2 + MAX(acq->GetNumEntries(), asq->GetNumEntries())) %
@@ -212,7 +210,7 @@ AdminQRollChkDiff_r10b::VerifyQPointers(SharedACQPtr acq, SharedASQPtr asq)
         asq->Dump(
             FileSystem::PrepLogFile(mGrpName, mTestName, "asq", "tail_ptr"),
             "SQ Metrics Tail Pointer Inconsistent");
-        throw exception();
+        throw FrmwkEx();
     }
 
     if (ce.n.SQHD != expectedVal) {
@@ -221,7 +219,7 @@ AdminQRollChkDiff_r10b::VerifyQPointers(SharedACQPtr acq, SharedASQPtr asq)
         acq->Dump(
             FileSystem::PrepLogFile(mGrpName, mTestName, "acq", "CE.SQHD"),
             "CE SQ Head Pointer Inconsistent");
-        throw exception();
+        throw FrmwkEx();
     }
 }
 

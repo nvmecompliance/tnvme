@@ -36,7 +36,7 @@ typedef boost::shared_ptr<const GetLogPage>         ConstSharedGetLogPagePtr;
 class GetLogPage : public AdminCmd
 {
 public:
-    GetLogPage(int fd);
+    GetLogPage();
     virtual ~GetLogPage();
 
     /// Used to compare for NULL pointers being returned by allocations
@@ -78,8 +78,6 @@ public:
 
 
 private:
-    GetLogPage();
-
     /// Details the fields within the get log page error log
     static GetLogPageDataType mErrLogMetrics[];
     /// Details the fields within the get log page smart/health log

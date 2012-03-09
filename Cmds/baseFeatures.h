@@ -29,10 +29,9 @@ class BaseFeatures : public AdminCmd
 {
 public:
     /**
-     * @param fd Pass the opened file descriptor for the device under test
      * @param objBeingCreated Pass the type of object this child class is
      */
-    BaseFeatures(int fd, Trackable::ObjType objBeingCreated);
+    BaseFeatures(Trackable::ObjType objBeingCreated);
     virtual ~BaseFeatures();
 
     /**

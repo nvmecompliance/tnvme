@@ -16,6 +16,7 @@
 
 #include "ctrlrConfig.h"
 #include "globals.h"
+#include "../Exception/frmwkEx.h"
 
 
 const uint8_t CtrlrConfig::CSS_NVM_CMDSET   = 0x00;
@@ -228,8 +229,7 @@ CtrlrConfig::SetState(enum nvme_state state)
         toState = "Disabling completely";
         break;
     default:
-        LOG_DBG("Illegal state detected = %d", state);
-        throw exception();
+        throw FrmwkEx("Illegal state detected = %d", state);
     }
 
     LOG_NRM("%s the NVME device", toState.c_str());

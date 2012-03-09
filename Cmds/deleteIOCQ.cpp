@@ -21,15 +21,7 @@ SharedDeleteIOCQPtr DeleteIOCQ::NullDeleteIOCQPtr;
 const uint8_t DeleteIOCQ::Opcode = 0x04;
 
 
-DeleteIOCQ::DeleteIOCQ() :
-    AdminCmd(0, Trackable::OBJTYPE_FENCE)
-{
-    // This constructor will throw
-}
-
-
-DeleteIOCQ::DeleteIOCQ(int fd) :
-    AdminCmd(fd, Trackable::OBJ_DELETEIOCQ)
+DeleteIOCQ::DeleteIOCQ() : AdminCmd(Trackable::OBJ_DELETEIOCQ)
 {
     AdminCmd::Init(Opcode, DATADIR_NONE);
 }

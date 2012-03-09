@@ -36,7 +36,7 @@ typedef boost::shared_ptr<const Identify>       ConstSharedIdentifyPtr;
 class Identify : public AdminCmd
 {
 public:
-    Identify(int fd);
+    Identify();
     virtual ~Identify();
 
     /// Used to compare for NULL pointers being returned by allocations
@@ -88,8 +88,6 @@ public:
 
 
 private:
-    Identify();
-
     /// Details the fields within the identify controller capabilities struct
     static IdentifyDataType mIdCtrlrCapMetrics[];
     /// Details the fields within the identify namespace struct

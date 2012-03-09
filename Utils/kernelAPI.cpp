@@ -38,13 +38,13 @@ KernelAPI::~KernelAPI()
 
 
 uint8_t *
-KernelAPI::mmap(int fd, size_t bufLength, uint16_t bufID, MmapRegion region)
+KernelAPI::mmap(size_t bufLength, uint16_t bufID, MmapRegion region)
 {
     int prot = PROT_READ;
 
     if (region >= MMAPREGION_FENCE) {
         LOG_DBG("Detected illegal region = %d", region);
-        throw exception();
+        throw FrmwkEx();
     }
 
     if (region == MMR_META)
@@ -53,7 +53,8 @@ KernelAPI::mmap(int fd, size_t bufLength, uint16_t bufID, MmapRegion region)
     off_t encodeOffset = bufID;
     encodeOffset |= ((off_t)region << METADATA_UNIQUE_ID_BITS);
     encodeOffset *= sysconf(_SC_PAGESIZE);
-    return (uint8_t *)::mmap(0, bufLength, prot, MAP_SHARED, fd, encodeOffset);
+    return (uint8_t *)::mmap(0, bufLength, prot, MAP_SHARED,
+        gInformative->GetFD(), encodeOffset);
 }
 
 
@@ -65,23 +66,24 @@ KernelAPI::munmap(uint8_t *memPtr, size_t bufLength)
 
 
 void
-KernelAPI::DumpKernelMetrics(int fd, LogFilename filename)
+KernelAPI::DumpKernelMetrics(LogFilename filename)
 {
     int rc;
 
     struct nvme_file dumpMe = { filename.length(), filename.c_str() };
 
     LOG_NRM("Dump dnvme metrics to filename: %s", filename.c_str());
-    if ((rc = ioctl(fd, NVME_IOCTL_DUMP_METRICS, &dumpMe)) < 0) {
+    if ((rc = ioctl(gInformative->GetFD(), NVME_IOCTL_DUMP_METRICS,
+        &dumpMe)) < 0) {
+
         LOG_DBG("Unable to dump dnvme metrics, error code = %d", rc);
-        throw exception();
+        throw FrmwkEx();
     }
 }
 
 
 void
-KernelAPI::DumpCtrlrSpaceRegs(SpecRev specRev, LogFilename filename,
-    bool verbose)
+KernelAPI::DumpCtrlrSpaceRegs(LogFilename filename, bool verbose)
 {
     int fd;
     string work;
@@ -91,14 +93,12 @@ KernelAPI::DumpCtrlrSpaceRegs(SpecRev specRev, LogFilename filename,
 
 
     LOG_NRM("Dump ctrlr regs to filename: %s", filename.c_str());
-    if ((fd = open(filename.c_str(), FILENAME_FLAGS, FILENAME_MODE)) == -1) {
-        LOG_ERR("file=%s: %s", filename.c_str(), strerror(errno));
-        throw exception();
-    }
+    if ((fd = open(filename.c_str(), FILENAME_FLAGS, FILENAME_MODE)) == -1)
+        throw FrmwkEx("file=%s: %s", filename.c_str(), strerror(errno));
 
     // Read all registers in ctrlr space
     for (int i = 0; i < CTLSPC_FENCE; i++) {
-        if (pciMetrics[i].specRev != specRev)
+        if (pciMetrics[i].specRev != gRegisters->GetSpecRev())
             continue;
 
         if (pciMetrics[i].size > MAX_SUPPORTED_REG_SIZE) {
@@ -133,13 +133,12 @@ KernelAPI::DumpCtrlrSpaceRegs(SpecRev specRev, LogFilename filename,
 
 ERROR_OUT:
     close(fd);
-    throw exception();
+    throw FrmwkEx();
 }
 
 
 void
-KernelAPI::DumpPciSpaceRegs(SpecRev specRev, LogFilename filename,
-    bool verbose)
+KernelAPI::DumpPciSpaceRegs(LogFilename filename, bool verbose)
 {
     int fd;
     string work;
@@ -149,16 +148,14 @@ KernelAPI::DumpPciSpaceRegs(SpecRev specRev, LogFilename filename,
 
 
     LOG_NRM("Dump PCI regs to filename: %s", filename.c_str());
-    if ((fd = open(filename.c_str(), FILENAME_FLAGS, FILENAME_MODE)) == -1) {
-        LOG_ERR("file=%s: %s", filename.c_str(), strerror(errno));
-        throw exception();
-    }
+    if ((fd = open(filename.c_str(), FILENAME_FLAGS, FILENAME_MODE)) == -1)
+        throw FrmwkEx("file=%s: %s", filename.c_str(), strerror(errno));
 
     // Traverse the PCI header registers
     work = "PCI header registers\n";
     write(fd, work.c_str(), work.size());
     for (int j = 0; j < PCISPC_FENCE; j++) {
-        if (pciMetrics[j].specRev != specRev)
+        if (pciMetrics[j].specRev != gRegisters->GetSpecRev())
             continue;
 
         // All PCI hdr regs don't have an associated capability
@@ -197,7 +194,7 @@ KernelAPI::DumpPciSpaceRegs(SpecRev specRev, LogFilename filename,
 
         // Read all registers assoc with the discovered capability
         for (int j = 0; j < PCISPC_FENCE; j++) {
-            if (pciMetrics[j].specRev != specRev)
+            if (pciMetrics[j].specRev != gRegisters->GetSpecRev())
                 continue;
 
             if (pciCap->at(i) == pciMetrics[j].cap) {
@@ -234,7 +231,7 @@ KernelAPI::DumpPciSpaceRegs(SpecRev specRev, LogFilename filename,
 
 ERROR_OUT:
     close(fd);
-    throw exception();
+    throw FrmwkEx();
 }
 
 

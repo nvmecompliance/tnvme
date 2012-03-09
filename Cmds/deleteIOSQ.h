@@ -37,7 +37,7 @@ typedef boost::shared_ptr<const DeleteIOSQ>       ConstSharedDeleteIOSQPtr;
 class DeleteIOSQ : public AdminCmd
 {
 public:
-    DeleteIOSQ(int fd);
+    DeleteIOSQ();
     virtual ~DeleteIOSQ();
 
     /// Used to compare for NULL pointers being returned by allocations
@@ -49,10 +49,6 @@ public:
      * @param iosq Pass the IOCQ object which will initialize this cmd.
      */
     void Init(const SharedIOSQPtr iosq);
-
-
-private:
-    DeleteIOSQ();
 };
 
 

@@ -47,6 +47,7 @@
         return SharedTrackablePtr(new proper(mFd));                 \
         break;
 
+
 typedef pair<string, SharedTrackablePtr> TrackablePair;
 
 
@@ -80,16 +81,16 @@ ObjRsrc::AllocWorker(Trackable::ObjType type)
     INSTANTIATE_OBJ_w_fd(ASQ, ASQ)
     INSTANTIATE_OBJ_w_fd(IOCQ, IOCQ)
     INSTANTIATE_OBJ_w_fd(IOSQ, IOSQ)
-    INSTANTIATE_OBJ_w_fd(IDENTIFY, Identify)
-    INSTANTIATE_OBJ_w_fd(CREATEIOCQ, CreateIOCQ)
-    INSTANTIATE_OBJ_w_fd(CREATEIOSQ, CreateIOSQ)
-    INSTANTIATE_OBJ_w_fd(DELETEIOCQ, DeleteIOCQ)
-    INSTANTIATE_OBJ_w_fd(DELETEIOSQ, DeleteIOSQ)
-    INSTANTIATE_OBJ_w_fd(GETFEATURES, GetFeatures)
-    INSTANTIATE_OBJ_w_fd(SETFEATURES, SetFeatures)
-    INSTANTIATE_OBJ_w_fd(GETLOGPAGE, GetLogPage)
-    INSTANTIATE_OBJ_w_fd(WRITE, Write)
-    INSTANTIATE_OBJ_w_fd(READ, Read)
+    INSTANTIATE_OBJ(IDENTIFY, Identify)
+    INSTANTIATE_OBJ(CREATEIOCQ, CreateIOCQ)
+    INSTANTIATE_OBJ(CREATEIOSQ, CreateIOSQ)
+    INSTANTIATE_OBJ(DELETEIOCQ, DeleteIOCQ)
+    INSTANTIATE_OBJ(DELETEIOSQ, DeleteIOSQ)
+    INSTANTIATE_OBJ(GETFEATURES, GetFeatures)
+    INSTANTIATE_OBJ(SETFEATURES, SetFeatures)
+    INSTANTIATE_OBJ(GETLOGPAGE, GetLogPage)
+    INSTANTIATE_OBJ(WRITE, Write)
+    INSTANTIATE_OBJ(READ, Read)
 
     default:
         LOG_DBG("Unknown obj type specified: 0x%02X", type);

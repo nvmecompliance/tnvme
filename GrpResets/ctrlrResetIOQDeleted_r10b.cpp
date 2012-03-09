@@ -76,7 +76,7 @@ CtrlrResetIOQDeleted_r10b::operator=(const CtrlrResetIOQDeleted_r10b &other)
 }
 
 
-bool
+void
 CtrlrResetIOQDeleted_r10b::RunCoreTest()
 {
     /** \verbatim
@@ -88,13 +88,11 @@ CtrlrResetIOQDeleted_r10b::RunCoreTest()
     uint16_t numEntriesIOQ = 10;
 
     if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
-        throw exception();
+        throw FrmwkEx();
 
     // Verify the min requirements for this test are supported by DUT
-    if (gRegisters->Read(CTLSPC_CAP, work) == false) {
-        LOG_ERR("Unable to determine MQES");
-        throw exception();
-    }
+    if (gRegisters->Read(CTLSPC_CAP, work) == false)
+        throw FrmwkEx("Unable to determine MQES");
 
     work &= CAP_MQES;
     if (work < (uint64_t)numEntriesIOQ) {
@@ -102,11 +100,9 @@ CtrlrResetIOQDeleted_r10b::RunCoreTest()
             numEntriesIOQ, (uint16_t)work);
         numEntriesIOQ = work;
     } else if (gInformative->GetFeaturesNumOfIOCQs() < IOCQ_ID) {
-        LOG_ERR("DUT doesn't support %d IOCQ's", IOCQ_ID);
-        throw exception();
+        throw FrmwkEx("DUT doesn't support %d IOCQ's", IOCQ_ID);
     } else if (gInformative->GetFeaturesNumOfIOSQs() < IOSQ_ID) {
-        LOG_ERR("DUT doesn't support %d IOSQ's", IOSQ_ID);
-        throw exception();
+        throw FrmwkEx("DUT doesn't support %d IOSQ's", IOSQ_ID);
     }
 
     // Create Admin Q Objects with test lifetime
@@ -116,8 +112,6 @@ CtrlrResetIOQDeleted_r10b::RunCoreTest()
     asq->Init(15);
 
     VerifyCtrlrResetDeletesIOQs(acq, asq, numEntriesIOQ);
-
-    return true;
 }
 
 void
@@ -134,11 +128,11 @@ CtrlrResetIOQDeleted_r10b::VerifyCtrlrResetDeletesIOQs(SharedACQPtr acq,
 
         gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
         if (gCtrlrConfig->SetState(ST_ENABLE) == false)
-            throw exception();
+            throw FrmwkEx();
 
         gCtrlrConfig->SetIOCQES(gInformative->GetIdentifyCmdCtrlr()->
             GetValue(IDCTRLRCAP_CQES) & 0xf);
-        Queues::CreateIOCQContigToHdw(mFd, mGrpName, mTestName,
+        Queues::CreateIOCQContigToHdw(mGrpName, mTestName,
             DEFAULT_CMD_WAIT_ms, asq, acq, IOCQ_ID, numEntriesIOQ, false,
             IOCQ_CONTIG_GROUP_ID, false, 0, work);
 
@@ -147,13 +141,13 @@ CtrlrResetIOQDeleted_r10b::VerifyCtrlrResetDeletesIOQs(SharedACQPtr acq,
         gCtrlrConfig->SetIOSQES(gInformative->GetIdentifyCmdCtrlr()->
             GetValue(IDCTRLRCAP_SQES) & 0xf);
         for (uint16_t j = 1; j <= IOSQ_ID; j++) {
-            Queues::CreateIOSQContigToHdw(mFd, mGrpName, mTestName,
+            Queues::CreateIOSQContigToHdw(mGrpName, mTestName,
                 DEFAULT_CMD_WAIT_ms, asq, acq, j, numEntriesIOQ, false,
                 IOSQ_CONTIG_GROUP_ID, IOCQ_ID, 0, work);
         }
 
         if (gCtrlrConfig->SetState(ST_DISABLE) == false)
-            throw exception();
+            throw FrmwkEx();
     }
 }
 

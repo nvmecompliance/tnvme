@@ -21,6 +21,7 @@
 #include "trackable.h"
 #include "../Singletons/memBuffer.h"
 #include "../Utils/fileSystem.h"
+#include "../Exception/frmwkEx.h"
 
 
 /**

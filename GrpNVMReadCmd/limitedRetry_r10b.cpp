@@ -72,7 +72,7 @@ LimitedRetry_r10b::operator=(const LimitedRetry_r10b &other)
 }
 
 
-bool
+void
 LimitedRetry_r10b::RunCoreTest()
 {
     /** \verbatim
@@ -89,9 +89,8 @@ LimitedRetry_r10b::RunCoreTest()
     SharedIOCQPtr iocq = CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_GROUP_ID));
 
     if ((numCE = iocq->ReapInquiry(isrCountB4, true)) != 0) {
-        LOG_ERR("Require 0 CE's within CQ %d, not upheld, found %d",
+        throw FrmwkEx("Require 0 CE's within CQ %d, not upheld, found %d",
             iocq->GetQId(), numCE);
-        throw exception();
     }
 
     SharedReadPtr readCmd = CreateCmd();
@@ -101,8 +100,6 @@ LimitedRetry_r10b::RunCoreTest()
     readCmd->SetLR(true);
     IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
         readCmd, "all.set", true);
-
-    return true;
 }
 
 
@@ -113,7 +110,7 @@ LimitedRetry_r10b::CreateCmd()
     if (namspcData.type != Informative::NS_BARE) {
         LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
         if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
-            throw exception();
+            throw FrmwkEx();
     }
     LOG_NRM("Processing read cmd using namspc id %d", namspcData.id);
 
@@ -122,7 +119,7 @@ LimitedRetry_r10b::CreateCmd()
     SharedMemBufferPtr dataPat = SharedMemBufferPtr(new MemBuffer());
     dataPat->Init(lbaDataSize);
 
-    SharedReadPtr readCmd = SharedReadPtr(new Read(mFd));
+    SharedReadPtr readCmd = SharedReadPtr(new Read());
     send_64b_bitmask prpBitmask = (send_64b_bitmask)(MASK_PRP1_PAGE
         | MASK_PRP2_PAGE | MASK_PRP2_LIST);
 
@@ -134,7 +131,7 @@ LimitedRetry_r10b::CreateCmd()
         prpBitmask = (send_64b_bitmask)(prpBitmask | MASK_MPTR);
         LOG_ERR("Deferring E2E namspc work to the future");
         LOG_ERR("Need to add CRC's to correlate to buf pattern");
-        throw exception();
+        throw FrmwkEx();
     }
 
     readCmd->SetPrpBuffer(prpBitmask, dataPat);

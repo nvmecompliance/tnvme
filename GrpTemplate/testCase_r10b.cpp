@@ -68,7 +68,7 @@ TestCase_r10b::operator=(const TestCase_r10b &other)
 }
 
 
-bool
+void
 TestCase_r10b::RunCoreTest()
 {
     /** \verbatim
@@ -77,9 +77,7 @@ TestCase_r10b::RunCoreTest()
      *  \endverbatim
      */
     if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
-        throw exception();
-
-    return true;
+        throw FrmwkEx();
 }
 
 }   // namespace

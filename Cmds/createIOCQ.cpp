@@ -22,15 +22,7 @@ SharedCreateIOCQPtr CreateIOCQ::NullCreateIOCQPtr;
 const uint8_t CreateIOCQ::Opcode = 0x05;
 
 
-CreateIOCQ::CreateIOCQ() :
-    AdminCmd(0, Trackable::OBJTYPE_FENCE)
-{
-    // This constructor will throw
-}
-
-
-CreateIOCQ::CreateIOCQ(int fd) :
-    AdminCmd(fd, Trackable::OBJ_CREATEIOCQ)
+CreateIOCQ::CreateIOCQ() : AdminCmd(Trackable::OBJ_CREATEIOCQ)
 {
     AdminCmd::Init(Opcode, DATADIR_TO_DEVICE);
 
@@ -86,10 +78,9 @@ CreateIOCQ::Init(const SharedIOCQPtr iocq)
 
             enum nvme_irq_type irq;
             uint16_t numIrqs;
-            if (gCtrlrConfig->GetIrqScheme(irq, numIrqs) == false) {
-                LOG_DBG("Unable to retrieve current IRQ scheme");
-                throw exception();
-            }
+            if (gCtrlrConfig->GetIrqScheme(irq, numIrqs) == false)
+                throw FrmwkEx("Unable to retrieve current IRQ scheme");
+
             switch (irq) {
             case INT_MSI_MULTI:
             case INT_MSIX:
@@ -100,8 +91,7 @@ CreateIOCQ::Init(const SharedIOCQPtr iocq)
                 ;   // Required to be zero
                 break;
             default:
-                LOG_DBG("Unsupported IRQ scheme, what to do?");
-                throw exception();
+                throw FrmwkEx("Unsupported IRQ scheme, what to do?");
             }
         } else {
             dword11 &= ~0x00000002;

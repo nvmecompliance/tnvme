@@ -74,7 +74,7 @@ DeleteIOQDiscontig_r10b::operator=(const DeleteIOQDiscontig_r10b &other)
 }
 
 
-bool
+void
 DeleteIOQDiscontig_r10b::RunCoreTest()
 {
     /** \verbatim
@@ -91,11 +91,10 @@ DeleteIOQDiscontig_r10b::RunCoreTest()
 
     // DUT must support discontig memory backing a IOQ to run this test
     if (gRegisters->Read(CTLSPC_CAP, regVal) == false) {
-        LOG_ERR("Unable to determine Q memory requirements");
-        throw exception();
+        throw FrmwkEx("Unable to determine Q memory requirements");
     } else if (regVal & CAP_CQR) {
         LOG_NRM("Unable to utilize discontig Q's, DUT requires contig");
-        return true;
+        return;
     }
 
     // Lookup objs which were created in a prior test within group
@@ -108,7 +107,7 @@ DeleteIOQDiscontig_r10b::RunCoreTest()
     LOG_NRM("Lookup IOSQ which was created in a prior test within group");
     SharedIOSQPtr iosq =
         CAST_TO_IOSQ(gRsrcMngr->GetObj(IOSQ_DISCONTIG_GROUP_ID))
-    Queues::DeleteIOSQToHdw(mFd, mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+    Queues::DeleteIOSQToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
         iosq, asq, acq);
     // Not explicitly necessary, but is more clean to free what is not needed
     gRsrcMngr->FreeObj(IOSQ_DISCONTIG_GROUP_ID);
@@ -117,12 +116,10 @@ DeleteIOQDiscontig_r10b::RunCoreTest()
     LOG_NRM("Lookup IOCQ which was created in a prior test within group");
     SharedIOCQPtr iocq =
         CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_DISCONTIG_GROUP_ID))
-    Queues::DeleteIOCQToHdw(mFd, mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+    Queues::DeleteIOCQToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
         iocq, asq, acq);
     // Not explicitly necessary, but is more clean to free what is not needed
     gRsrcMngr->FreeObj(IOCQ_DISCONTIG_GROUP_ID);
-
-    return true;
 }
 
 }   // namespace

@@ -73,8 +73,8 @@ CQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
         if (gCtrlrConfig->IsStateEnabled()) {
             // At best this will cause tnvme to seg fault or a kernel crash
             // The NVME spec states unpredictable outcomes will occur.
-            LOG_DBG("Creating an ASQ while ctrlr is enabled is a shall not");
-            throw exception();
+            throw FrmwkEx(
+                "Creating an ASQ while ctrlr is enabled is a shall not");
         }
 
         // We are creating a contiguous ACQ. ACQ's have a constant well known
@@ -88,8 +88,8 @@ CQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
             GetQId(), GetEntrySize(), GetNumEntries());
 
         if ((ret = ioctl(mFd, NVME_IOCTL_CREATE_ADMN_Q, &q)) < 0) {
-            LOG_DBG("Q Creation failed by dnvme with error: 0x%02X", ret);
-            throw exception();
+            throw FrmwkEx(
+                "Q Creation failed by dnvme with error: 0x%02X", ret);
         }
     } else {
         // We are creating a contiguous IOCQ.
@@ -101,11 +101,9 @@ CQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
     }
 
     // Contiguous Q's are created in dnvme and must be mapped back to user space
-    mContigBuf = KernelAPI::mmap(mFd, GetQSize(), GetQId(), KernelAPI::MMR_CQ);
-    if (mContigBuf == NULL) {
-        LOG_DBG("Unable to mmap contig memory to user space");
-        throw exception();
-    }
+    mContigBuf = KernelAPI::mmap(GetQSize(), GetQId(), KernelAPI::MMR_CQ);
+    if (mContigBuf == NULL)
+        throw FrmwkEx("Unable to mmap contig memory to user space");
 }
 
 
@@ -125,26 +123,22 @@ CQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
         LOG_WARN("Number elements breaches spec requirement");
 
     if (memBuffer == MemBuffer::NullMemBufferPtr) {
-        LOG_DBG("Passing an uninitialized SharedMemBufferPtr");
-        throw exception();
+        throw FrmwkEx("Passing an uninitialized SharedMemBufferPtr");
     } else if (GetIsAdmin()) {
         // There are no appropriate methods for an NVME device to report ASC/ACQ
         // creation errors, thus since ASC/ASQ may only be contiguous then don't
         // allow these problems to be injected, at best they will only succeed
         // to seg fault the app or crash the kernel.
-        LOG_DBG("Illegal memory alignment will corrupt");
-        throw exception();
+        throw FrmwkEx("Illegal memory alignment will corrupt");
     } else  if (memBuffer->GetBufSize() < GetQSize()) {
         LOG_DBG("Q buffer memory ambiguous to passed size params");
-        LOG_DBG("Mem buffer size = %d, Q size = %d", memBuffer->GetBufSize(),
-            GetQSize());
-        throw exception();
+        throw FrmwkEx("Mem buffer size = %d, Q size = %d",
+            memBuffer->GetBufSize(), GetQSize());
     } else if (memBuffer->GetAlignment() != sysconf(_SC_PAGESIZE)) {
         // Nonconformance to page alignment will seg fault the app or crash
         // the kernel. This state is not testable since no errors can be
         // reported by hdw, thus disallow this attempt.
-        LOG_DBG("Q content memory shall be page aligned");
-        throw exception();
+        throw FrmwkEx("Q content memory shall be page aligned");
     }
 
     // Zero out the content memory so the P-bit correlates to a newly alloc'd Q.
@@ -172,8 +166,8 @@ CQ::CreateIOCQ(struct nvme_prep_cq &q)
         GetNumEntries());
 
     if ((ret = ioctl(mFd, NVME_IOCTL_PREPARE_CQ_CREATION, &q)) < 0) {
-        LOG_DBG("Q Creation failed by dnvme with error: 0x%02X", ret);
-        throw exception();
+        throw FrmwkEx(
+            "Q Creation failed by dnvme with error: 0x%02X", ret);
     }
 }
 
@@ -191,8 +185,8 @@ CQ::GetQMetrics()
     getQMetrics.buffer = (uint8_t *)&qMetrics;
 
     if ((ret = ioctl(mFd, NVME_IOCTL_GET_Q_METRICS, &getQMetrics)) < 0) {
-        LOG_DBG("Get Q metrics failed by dnvme with error: 0x%02X", ret);
-        throw exception();
+        throw FrmwkEx(
+            "Get Q metrics failed by dnvme with error: 0x%02X", ret);
     }
     return qMetrics;
 }
@@ -228,8 +222,7 @@ CQ::PeekCE(uint16_t indexPtr)
             return *dataPtr;
     }
 
-    LOG_DBG("Unable to locate index within Q");
-    throw exception();
+    throw FrmwkEx("Unable to locate index within Q");
 }
 
 
@@ -261,10 +254,8 @@ CQ::ReapInquiry(uint32_t &isrCount, bool reportOn0)
     struct nvme_reap_inquiry inq;
 
     inq.q_id = GetQId();
-    if ((rc = ioctl(mFd, NVME_IOCTL_REAP_INQUIRY, &inq)) < 0) {
-        LOG_ERR("Error during reap inquiry, rc =%d", rc);
-        throw exception();
-    }
+    if ((rc = ioctl(mFd, NVME_IOCTL_REAP_INQUIRY, &inq)) < 0)
+        throw FrmwkEx("Error during reap inquiry, rc =%d", rc);
 
     isrCount = inq.isr_count;
     if (inq.num_remaining || reportOn0) {
@@ -280,10 +271,8 @@ CQ::ReapInquiryWaitAny(uint16_t ms, uint16_t &numCE, uint32_t &isrCount)
 {
     struct timeval initial;
 
-    if (gettimeofday(&initial, &TZ_NULL) != 0) {
-        LOG_DBG("Cannot retrieve system time");
-        throw exception();
-    }
+    if (gettimeofday(&initial, &TZ_NULL) != 0)
+        throw FrmwkEx("Cannot retrieve system time");
 
     while (CalcTimeout(ms, initial) == false) {
         if ((numCE = ReapInquiry(isrCount)) != 0) {
@@ -291,8 +280,16 @@ CQ::ReapInquiryWaitAny(uint16_t ms, uint16_t &numCE, uint32_t &isrCount)
         }
     }
 
-    LogQMetrics();
     LOG_ERR("Timed out waiting %d ms for CE's in CQ %d", ms, GetQId());
+    struct nvme_gen_cq qMetrics = LogQMetrics();
+    LOG_NRM("qMetrics.head_ptr dump follows:");
+    LogCE(qMetrics.head_ptr);
+    LOG_NRM("qMetrics.tail_ptr dump follows:");
+    LogCE(qMetrics.tail_ptr);
+    LOG_NRM("qMetrics.head_ptr+1 dump follows:");
+    LogCE((qMetrics.head_ptr + 1) % qMetrics.elements);
+    LOG_NRM("qMetrics.tail_ptr+1 dump follows:");
+    LogCE((qMetrics.tail_ptr + 1) % qMetrics.elements);
     return false;
 }
 
@@ -303,10 +300,8 @@ CQ::ReapInquiryWaitSpecify(uint16_t ms, uint16_t numTil, uint16_t &numCE,
 {
     struct timeval initial;
 
-    if (gettimeofday(&initial, &TZ_NULL) != 0) {
-        LOG_DBG("Cannot retrieve system time");
-        throw exception();
-    }
+    if (gettimeofday(&initial, &TZ_NULL) != 0)
+        throw FrmwkEx("Cannot retrieve system time");
 
     while (CalcTimeout(ms, initial) == false) {
         if ((numCE = ReapInquiry(isrCount)) != 0) {
@@ -315,37 +310,32 @@ CQ::ReapInquiryWaitSpecify(uint16_t ms, uint16_t numTil, uint16_t &numCE,
         }
     }
 
-    LogQMetrics();
     LOG_ERR("Timed out waiting %d ms for CE's in CQ %d", ms, GetQId());
+    struct nvme_gen_cq qMetrics = LogQMetrics();
+    LOG_NRM("qMetrics.head_ptr dump follows:");
+    LogCE(qMetrics.head_ptr);
+    LOG_NRM("qMetrics.tail_ptr dump follows:");
+    LogCE(qMetrics.tail_ptr);
+    LOG_NRM("qMetrics.head_ptr+1 dump follows:");
+    LogCE((qMetrics.head_ptr + 1) % qMetrics.elements);
+    LOG_NRM("qMetrics.tail_ptr+1 dump follows:");
+    LogCE((qMetrics.tail_ptr + 1) % qMetrics.elements);
     return false;
 }
 
 
 bool
-CQ::CalcTimeout(uint16_t ms, struct timeval initial)
+CQ::CalcTimeout(uint16_t ms, struct timeval &initial)
 {
     struct timeval current;
-    time_t sTO = (ms / 1000);                           // sec Time Out (sTO)
-    suseconds_t usTO = ((ms - (sTO * 1000)) * 1000);    // usec Time Out (usTO)
+    if (gettimeofday(&current, &TZ_NULL) != 0)
+        throw FrmwkEx("Cannot retrieve system time");
 
-
-    if (gettimeofday(&current, &TZ_NULL) != 0) {
-        LOG_DBG("Cannot retrieve system time");
-        throw exception();
-    }
-
-    if ((current.tv_usec - initial.tv_usec) < 0) {
-        if (((current.tv_sec - initial.tv_sec) >= sTO) &&
-            (current.tv_usec >= usTO)) {
-           return true;
-        }
-
-    } else {
-        if (((current.tv_sec - initial.tv_sec) >= sTO) &&
-            ((current.tv_usec - initial.tv_usec) >= usTO)) {
-           return true;
-        }
-    }
+    uint64_t initial_us = ((1000000 * initial.tv_sec) + initial.tv_usec);
+    uint64_t current_us = ((1000000 * current.tv_sec) + current.tv_usec);
+    uint64_t timeout_us = ((uint64_t)ms * 1000);
+    if ((current_us - initial_us) >= timeout_us)
+        return true;
     return false;
 }
 
@@ -381,10 +371,8 @@ CQ::Reap(uint16_t &ceRemain, SharedMemBufferPtr memBuffer, uint32_t &isrCount,
     reap.elements = ceDesire;
     reap.size = memBuffer->GetBufSize();
     reap.buffer = memBuffer->GetBuffer();
-    if ((rc = ioctl(mFd, NVME_IOCTL_REAP, &reap)) < 0) {
-        LOG_ERR("Error during reaping CE's, rc =%d", rc);
-        throw exception();
-    }
+    if ((rc = ioctl(mFd, NVME_IOCTL_REAP, &reap)) < 0)
+        throw FrmwkEx("Error during reaping CE's, rc =%d", rc);
 
     isrCount = reap.isr_count;
     ceRemain = reap.num_remaining;
@@ -404,10 +392,8 @@ CQ::Dump(LogFilename filename, string fileHdr)
     Queue::Dump(filename, fileHdr);
 
     // Reopen the file and append the same data in a different format
-    if ((fp = fopen(filename.c_str(), "a")) == NULL) {
-        LOG_DBG("Failed to open file: %s", filename.c_str());
-        throw exception();
-    }
+    if ((fp = fopen(filename.c_str(), "a")) == NULL)
+        throw FrmwkEx("Failed to open file: %s", filename.c_str());
 
     fprintf(fp, "\nFurther decoding details of the above raw dump follow:\n");
     for (uint32_t i = 0; i < GetNumEntries(); i++) {

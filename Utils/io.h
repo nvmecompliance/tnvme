@@ -19,6 +19,8 @@
 
 #include "tnvme.h"
 #include "../Queues/ce.h"
+#include "../Queues/sq.h"
+#include "../Queues/cq.h"
 
 
 /**

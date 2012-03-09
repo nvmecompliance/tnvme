@@ -48,6 +48,12 @@ public:
     ~Registers();
 
     /**
+     * No reason to protect the specification revision being targeted, each
+     * instance of tnvme can only ever target a single revision of the spec.
+     */
+    SpecRev GetSpecRev() { return mSpecRev; }
+
+    /**
      * Read a register value from the appropriate address space.
      * @param reg Pass which register to read.
      * @param value Returns the value read, if and only if successful. The

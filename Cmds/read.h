@@ -35,7 +35,7 @@ typedef boost::shared_ptr<const Read>       ConstSharedReadPtr;
 class Read : public NVMCmd
 {
 public:
-    Read(int fd);
+    Read();
     virtual ~Read();
 
     /// Used to compare for NULL pointers being returned by allocations
@@ -125,10 +125,6 @@ public:
      */
     void     SetELBAT(uint16_t elbat);
     uint16_t GetELBAT() const;
-
-
-private:
-    Read();
 };
 
 

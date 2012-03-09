@@ -75,7 +75,7 @@ CreateResources_r10b::operator=(const CreateResources_r10b &other)
 }
 
 
-bool
+void
 CreateResources_r10b::RunCoreTest()
 {
     /** \verbatim
@@ -96,15 +96,14 @@ CreateResources_r10b::RunCoreTest()
 
     gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
-        throw exception();
+        throw FrmwkEx();
 
     {
         uint64_t maxIOQEntries;
         // Determine the max IOQ entries supported
-        if (gRegisters->Read(CTLSPC_CAP, maxIOQEntries) == false) {
-            LOG_ERR("Unable to determine MQES");
-            throw exception();
-        }
+        if (gRegisters->Read(CTLSPC_CAP, maxIOQEntries) == false)
+            throw FrmwkEx("Unable to determine MQES");
+
         maxIOQEntries &= CAP_MQES;
         if (maxIOQEntries < (uint64_t)NumEntriesIOQ) {
             LOG_NRM("Changing number of Q elements from %d to %d",
@@ -115,18 +114,16 @@ CreateResources_r10b::RunCoreTest()
 
         gCtrlrConfig->SetIOCQES(gInformative->GetIdentifyCmdCtrlr()->
             GetValue(IDCTRLRCAP_CQES) & 0xf);
-        Queues::CreateIOCQContigToHdw(mFd, mGrpName, mTestName,
+        Queues::CreateIOCQContigToHdw(mGrpName, mTestName,
             DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, NumEntriesIOQ, true,
             IOCQ_GROUP_ID, true, 0);
 
         gCtrlrConfig->SetIOSQES(gInformative->GetIdentifyCmdCtrlr()->
             GetValue(IDCTRLRCAP_SQES) & 0xf);
-        Queues::CreateIOSQContigToHdw(mFd, mGrpName, mTestName,
+        Queues::CreateIOSQContigToHdw(mGrpName, mTestName,
             DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, NumEntriesIOQ, true,
             IOSQ_GROUP_ID, IOQ_ID, 0);
     }
-
-    return true;
 }
 
 }   // namespace

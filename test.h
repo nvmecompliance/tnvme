@@ -137,12 +137,10 @@ protected:
 
     /**
      * Forcing children to implement the core logic of each test case.
-     * @return true upon success, otherwise false. Children are allowed to
-     * throw exceptions also, either throwing or the use of return codes is
-     * acceptable. Throwing is considered an error.
+     * @return Nothing; children are forced to throw exceptions derived from
+     *         class FrmwkEx() when a test failure occurs.
      */
-    virtual bool RunCoreTest();
-
+    virtual void RunCoreTest();
 
     /**
      * Resets the sticky error bits of the PCI address space. Prior errors

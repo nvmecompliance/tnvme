@@ -76,7 +76,7 @@ CreateIOQContigPoll_r10b::operator=(const CreateIOQContigPoll_r10b &other)
 }
 
 
-bool
+void
 CreateIOQContigPoll_r10b::RunCoreTest()
 {
     /** \verbatim
@@ -95,11 +95,10 @@ CreateIOQContigPoll_r10b::RunCoreTest()
 
     // Verify assumptions are active/enabled/present/setup
     if (acq->ReapInquiry(isrCount, true) != 0) {
-        LOG_ERR("The ACQ should not have any CE's waiting before testing");
-        throw exception();
+        throw FrmwkEx(
+            "The ACQ should not have any CE's waiting before testing");
     } else if (gRegisters->Read(CTLSPC_CAP, work) == false) {
-        LOG_ERR("Unable to determine MQES");
-        throw exception();
+        throw FrmwkEx("Unable to determine MQES");
     }
 
     // Verify the min requirements for this test are supported by DUT
@@ -109,26 +108,23 @@ CreateIOQContigPoll_r10b::RunCoreTest()
             NumEntriesIOQ, (uint16_t)work);
         NumEntriesIOQ = work;
     } else if (gInformative->GetFeaturesNumOfIOCQs() < IOQ_ID) {
-        LOG_ERR("DUT doesn't support %d IOCQ's", IOQ_ID);
-        throw exception();
+        throw FrmwkEx("DUT doesn't support %d IOCQ's", IOQ_ID);
     } else if (gInformative->GetFeaturesNumOfIOSQs() < IOQ_ID) {
         LOG_ERR("DUT doesn't support %d IOSQ's", IOQ_ID);
-        throw exception();
+        throw FrmwkEx();
     }
 
 
     gCtrlrConfig->SetIOCQES(gInformative->GetIdentifyCmdCtrlr()->
         GetValue(IDCTRLRCAP_CQES) & 0xf);
-    Queues::CreateIOCQContigToHdw(mFd, mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+    Queues::CreateIOCQContigToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
         asq, acq, IOQ_ID, NumEntriesIOQ, true, IOCQ_CONTIG_GROUP_ID, false, 0);
 
 
     gCtrlrConfig->SetIOSQES(gInformative->GetIdentifyCmdCtrlr()->
         GetValue(IDCTRLRCAP_SQES) & 0xf);
-    Queues::CreateIOSQContigToHdw(mFd, mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+    Queues::CreateIOSQContigToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
         asq, acq, IOQ_ID, NumEntriesIOQ, true, IOSQ_CONTIG_GROUP_ID, IOQ_ID, 0);
-
-    return true;
 }
 
 }   // namespace

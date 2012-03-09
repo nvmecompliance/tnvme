@@ -71,7 +71,7 @@ InitialStateAdmin_r10b::operator=(const InitialStateAdmin_r10b &other)
 }
 
 
-bool
+void
 InitialStateAdmin_r10b::RunCoreTest()
 {
     /** \verbatim
@@ -80,7 +80,7 @@ InitialStateAdmin_r10b::RunCoreTest()
      *  \endverbatim
      */
     if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
-        throw exception();
+        throw FrmwkEx();
 
     // Create ACQ and ASQ objects which have test life time
     SharedACQPtr acq = CAST_TO_ACQ(SharedACQPtr(new ACQ(mFd)))
@@ -90,8 +90,6 @@ InitialStateAdmin_r10b::RunCoreTest()
     asq->Init(5);
 
     ValidateInitialStateAdmin(acq, asq);
-
-    return true;
 }
 
 void
@@ -104,13 +102,13 @@ InitialStateAdmin_r10b::ValidateInitialStateAdmin(SharedACQPtr acq,
     for (uint16_t i = 0; i < 2; i++) {
         gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
         if (gCtrlrConfig->SetState(ST_ENABLE) == false)
-            throw exception();
+            throw FrmwkEx();
 
         SubmitIdentifyCmd(acq, asq);
         VerifyHeadAndTailDoorBells(acq, asq);
 
         if (gCtrlrConfig->SetState(ST_DISABLE) == false)
-            throw exception();
+            throw FrmwkEx();
     }
 }
 
@@ -118,7 +116,7 @@ void
 InitialStateAdmin_r10b::SubmitIdentifyCmd(SharedACQPtr acq, SharedASQPtr asq)
 {
     LOG_NRM("Create identify cmd and assoc some buffer memory");
-    SharedIdentifyPtr idCmdCap = SharedIdentifyPtr(new Identify(mFd));
+    SharedIdentifyPtr idCmdCap = SharedIdentifyPtr(new Identify());
     LOG_NRM("Force identify to request ctrlr capabilities struct");
     idCmdCap->SetCNS(true);
     SharedMemBufferPtr idMemCap = SharedMemBufferPtr(new MemBuffer());
@@ -144,30 +142,28 @@ InitialStateAdmin_r10b::VerifyHeadAndTailDoorBells(SharedACQPtr acq,
 
     // Verify ASQ tail_ptr, ACQ head_ptr and CE.SQHD position values equal to 1.
     if (asqMetrics.tail_ptr != 1) {
-        LOG_ERR("Expected  ASQ.tail_ptr = 0x0001 but actual "
-            "ASQ.tail_ptr  = 0x%04X", asqMetrics.tail_ptr);
         asq->Dump(
             FileSystem::PrepLogFile(mGrpName, mTestName, "asq", "tail_ptr"),
             "SQ Metrics Tail Pointer Inconsistent");
-        throw exception();
+        throw FrmwkEx("Expected  ASQ.tail_ptr = 0x0001 but actual "
+            "ASQ.tail_ptr  = 0x%04X", asqMetrics.tail_ptr);
     }
     if (acqMetrics.head_ptr != 1) {
-        LOG_ERR("Expected ACQ.head_ptr = 0x0001 but actual "
-            "ACQ.head_ptr = 0x%04X", acqMetrics.head_ptr);
         acq->Dump(
             FileSystem::PrepLogFile(mGrpName, mTestName, "acq", "head_ptr"),
             "CQ Metrics Head Pointer Inconsistent");
-        throw exception();
+        throw FrmwkEx("Expected ACQ.head_ptr = 0x0001 but actual "
+            "ACQ.head_ptr = 0x%04X", acqMetrics.head_ptr);
     }
     // The CQ's metrics after reaping holds head_ptr plus 1 needed
     union CE ce = acq->PeekCE(acqMetrics.head_ptr - 1);
     if (ce.n.SQHD != 1) {
-        LOG_ERR("Expected CE.SQHD = 0x0001 in ACQ completion entry but actual "
-            "CE.SQHD  = 0x%04X", ce.n.SQHD);
         acq->Dump(
             FileSystem::PrepLogFile(mGrpName, mTestName, "acq", "CE.SQHD"),
             "CE SQ Head Pointer Inconsistent");
-        throw exception();
+        throw FrmwkEx(
+            "Expected CE.SQHD = 0x0001 in ACQ completion entry but actual "
+            "CE.SQHD  = 0x%04X", ce.n.SQHD);
     }
 }
 

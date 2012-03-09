@@ -70,7 +70,7 @@ CreateACQASQ_r10b::operator=(const CreateACQASQ_r10b &other)
 }
 
 
-bool
+void
 CreateACQASQ_r10b::RunCoreTest()
 {
     /** \verbatim
@@ -90,9 +90,7 @@ CreateACQASQ_r10b::RunCoreTest()
 
     gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
-        throw exception();
-
-    return true;
+        throw FrmwkEx();
 }
 
 }   // namespace

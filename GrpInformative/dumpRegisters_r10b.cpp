@@ -63,7 +63,7 @@ DumpRegisters_r10b::operator=(const DumpRegisters_r10b &other)
 }
 
 
-bool
+void
 DumpRegisters_r10b::RunCoreTest()
 {
     /** \verbatim
@@ -72,11 +72,10 @@ DumpRegisters_r10b::RunCoreTest()
      *  \endverbatim
      */
 
-    KernelAPI::DumpPciSpaceRegs(mSpecRev,
+    KernelAPI::DumpPciSpaceRegs(
         FileSystem::PrepLogFile(mGrpName, mTestName, "pci", "regs"), false);
-    KernelAPI::DumpCtrlrSpaceRegs(mSpecRev,
+    KernelAPI::DumpCtrlrSpaceRegs(
         FileSystem::PrepLogFile(mGrpName, mTestName, "ctrl", "regs"), false);
-    return true;
 }
 
 }   // namespace

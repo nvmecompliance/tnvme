@@ -35,16 +35,12 @@ typedef boost::shared_ptr<const GetFeatures>        ConstSharedGetFeaturesPtr;
 class GetFeatures : public BaseFeatures
 {
 public:
-    GetFeatures(int fd);
+    GetFeatures();
     virtual ~GetFeatures();
 
     /// Used to compare for NULL pointers being returned by allocations
     static SharedGetFeaturesPtr NullGetFeaturesPtr;
     static const uint8_t Opcode;
-
-
-private:
-    GetFeatures();
 };
 
 

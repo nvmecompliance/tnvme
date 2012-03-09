@@ -21,15 +21,7 @@ SharedCreateIOSQPtr CreateIOSQ::NullCreateIOSQPtr;
 const uint8_t CreateIOSQ::Opcode = 0x01;
 
 
-CreateIOSQ::CreateIOSQ() :
-    AdminCmd(0, Trackable::OBJTYPE_FENCE)
-{
-    // This constructor will throw
-}
-
-
-CreateIOSQ::CreateIOSQ(int fd) :
-    AdminCmd(fd, Trackable::OBJ_CREATEIOSQ)
+CreateIOSQ::CreateIOSQ() : AdminCmd(Trackable::OBJ_CREATEIOSQ)
 {
     AdminCmd::Init(Opcode, DATADIR_TO_DEVICE);
 

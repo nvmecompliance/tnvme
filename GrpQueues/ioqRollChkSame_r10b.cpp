@@ -74,7 +74,7 @@ IOQRollChkSame_r10b::operator=(const IOQRollChkSame_r10b &other)
 }
 
 
-bool
+void
 IOQRollChkSame_r10b::RunCoreTest()
 {
     /** \verbatim
@@ -87,7 +87,7 @@ IOQRollChkSame_r10b::RunCoreTest()
     // Determine the max IOQ entries supported
     if (gRegisters->Read(CTLSPC_CAP, maxIOQEntries) == false) {
         LOG_ERR("Unable to determine MQES");
-        throw exception();
+        throw FrmwkEx();
     }
     maxIOQEntries &= CAP_MQES;
 
@@ -95,8 +95,6 @@ IOQRollChkSame_r10b::RunCoreTest()
     IOQRollChkSame(2);
     // IO Q Max Sizes
     IOQRollChkSame((uint16_t)maxIOQEntries);
-
-    return true;
 }
 
 void
@@ -107,18 +105,18 @@ IOQRollChkSame_r10b::IOQRollChkSame(uint16_t numEntriesIOQ)
     SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
 
     if (gCtrlrConfig->SetState(ST_DISABLE) == false)
-        throw exception();
+        throw FrmwkEx();
 
     gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
-        throw exception();
+        throw FrmwkEx();
 
     uint8_t iocqes = (gInformative->GetIdentifyCmdCtrlr()->
         GetValue(IDCTRLRCAP_CQES) & 0xf);
     gCtrlrConfig->SetIOCQES(iocqes);
     SharedMemBufferPtr iocqBackedMem = SharedMemBufferPtr(new MemBuffer());
     iocqBackedMem->InitOffset1stPage((numEntriesIOQ * (1 << iocqes)), 0, true);
-    SharedIOCQPtr iocqContig = Queues::CreateIOCQDiscontigToHdw(mFd, mGrpName,
+    SharedIOCQPtr iocqContig = Queues::CreateIOCQDiscontigToHdw(mGrpName,
         mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, numEntriesIOQ,
         false, IOCQ_CONTIG_GROUP_ID, false, 1, iocqBackedMem);
 
@@ -127,7 +125,7 @@ IOQRollChkSame_r10b::IOQRollChkSame(uint16_t numEntriesIOQ)
     gCtrlrConfig->SetIOSQES(iosqes);
     SharedMemBufferPtr iosqBackedMem = SharedMemBufferPtr(new MemBuffer());
     iosqBackedMem->InitOffset1stPage((numEntriesIOQ * (1 << iosqes)), 0, true);
-    SharedIOSQPtr iosqContig = Queues::CreateIOSQDiscontigToHdw(mFd, mGrpName,
+    SharedIOSQPtr iosqContig = Queues::CreateIOSQDiscontigToHdw(mGrpName,
         mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, numEntriesIOQ,
         false, IOSQ_CONTIG_GROUP_ID, IOQ_ID, 0, iosqBackedMem);
 
@@ -157,7 +155,7 @@ IOQRollChkSame_r10b::SetWriteCmd()
     if (namspcData.type != Informative::NS_BARE) {
         LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
         if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
-            throw exception();
+            throw FrmwkEx();
     }
 
     LOG_NRM("Create data pattern to write to media");
@@ -166,7 +164,7 @@ IOQRollChkSame_r10b::SetWriteCmd()
     dataPat->Init(lbaDataSize);
     dataPat->SetDataPattern(MemBuffer::DATAPAT_INC_16BIT);
 
-    SharedWritePtr writeCmd = SharedWritePtr(new Write(mFd));
+    SharedWritePtr writeCmd = SharedWritePtr(new Write());
     send_64b_bitmask prpBitmask = (send_64b_bitmask)(MASK_PRP1_PAGE
         | MASK_PRP2_PAGE | MASK_PRP2_LIST);
 
@@ -178,7 +176,7 @@ IOQRollChkSame_r10b::SetWriteCmd()
         prpBitmask = (send_64b_bitmask)(prpBitmask | MASK_MPTR);
         LOG_ERR("Deferring E2E namspc work to the future");
         LOG_ERR("Need to add CRC's to correlate to buf pattern");
-        throw exception();
+       throw FrmwkEx();
     }
 
     writeCmd->SetPrpBuffer(prpBitmask, dataPat);
@@ -200,14 +198,13 @@ IOQRollChkSame_r10b::ReapAndVerifyCE(SharedIOCQPtr iocq, uint16_t expectedVal)
     LOG_NRM("Wait for the CE to arrive in IOCQ %d", iocq->GetQId());
     if (iocq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE, isrCount)
         == false) {
-        LOG_ERR("Unable to see completion of cmd");
+
         iocq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "iocq",
             "reapInq"),
             "Unable to see any CE's in IOCQ, dump entire CQ contents");
-        throw exception();
+        throw FrmwkEx("Unable to see completion of cmd");
     } else if (numCE != 1) {
-        LOG_ERR("The IOCQ should only have 1 CE as a result of a cmd");
-        throw exception();
+        throw FrmwkEx("The IOCQ should only have 1 CE as a result of a cmd");
     }
 
     LOG_NRM("The CQ's metrics before reaping holds head_ptr");
@@ -217,29 +214,28 @@ IOQRollChkSame_r10b::ReapAndVerifyCE(SharedIOCQPtr iocq, uint16_t expectedVal)
     SharedMemBufferPtr ceMemIOCQ = SharedMemBufferPtr(new MemBuffer());
     if ((numReaped = iocq->Reap(ceRemain, ceMemIOCQ, isrCount, numCE, true))
         != 1) {
-        LOG_ERR("Verified there was 1 CE, but reaping produced %d", numReaped);
-        throw exception();
+
+        throw FrmwkEx("Verified there was 1 CE, but reaping produced %d",
+            numReaped);
     }
 
     union CE ce = iocq->PeekCE(iocqMetrics.head_ptr);
     ProcessCE::Validate(ce, CESTAT_SUCCESS);  // throws upon error
 
     if (ce.n.SQID != IOQ_ID) {
-        LOG_ERR("Expected CE.SQID = 0x%04X in IOCQ CE but actual "
-            "CE.SQID  = 0x%04X", IOQ_ID, ce.n.SQID);
         iocq->Dump(
             FileSystem::PrepLogFile(mGrpName, mTestName, "iocq", "CE.SQID"),
             "CE SQ ID Inconsistent");
-        throw exception();
+        throw FrmwkEx("Expected CE.SQID = 0x%04X in IOCQ CE but actual "
+            "CE.SQID  = 0x%04X", IOQ_ID, ce.n.SQID);
     }
 
     if (ce.n.SQHD != expectedVal) {
-        LOG_ERR("Expected CE.SQHD = 0x%04X in IOCQ CE but actual "
-            "CE.SQHD  = 0x%04X", expectedVal, ce.n.SQHD);
         iocq->Dump(
             FileSystem::PrepLogFile(mGrpName, mTestName, "iocq", "CE.SQHD"),
             "CE SQ Head Pointer Inconsistent");
-        throw exception();
+        throw FrmwkEx("Expected CE.SQHD = 0x%04X in IOCQ CE but actual "
+            "CE.SQHD  = 0x%04X", expectedVal, ce.n.SQHD);
     }
 }
 
@@ -254,22 +250,20 @@ IOQRollChkSame_r10b::VerifyQPointers(SharedIOSQPtr iosq, SharedIOCQPtr iocq)
     if (iosqMetrics.tail_ptr == 0)
         expectedVal = 0;
     if (iosqMetrics.tail_ptr != expectedVal) {
-        LOG_ERR("Expected  IO SQ.tail_ptr = 0x%04X but actual "
-            "IOSQ.tail_ptr  = 0x%04X", expectedVal, iosqMetrics.tail_ptr);
         iosq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "iosq",
             "tail_ptr"), "SQ Metrics Tail Pointer Inconsistent");
-        throw exception();
+        throw FrmwkEx("Expected  IO SQ.tail_ptr = 0x%04X but actual "
+            "IOSQ.tail_ptr  = 0x%04X", expectedVal, iosqMetrics.tail_ptr);
     }
 
     expectedVal = 2;
     if (iocqMetrics.head_ptr == 0)
         expectedVal = 0;
     if (iocqMetrics.head_ptr != expectedVal) {
-        LOG_ERR("Expected IO CQ.head_ptr = 0x%04X but actual "
-            "IOCQ.head_ptr = 0x%04X", expectedVal, iocqMetrics.head_ptr);
         iocq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "iocq",
             "head_ptr"), "CQ Metrics Head Pointer Inconsistent");
-        throw exception();
+        throw FrmwkEx("Expected IO CQ.head_ptr = 0x%04X but actual "
+            "IOCQ.head_ptr = 0x%04X", expectedVal, iocqMetrics.head_ptr);
     }
 }
 

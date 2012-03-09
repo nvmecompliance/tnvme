@@ -16,6 +16,7 @@
 
 #include "metaRsrc.h"
 #include "../Utils/kernelAPI.h"
+#include "../Exception/frmwkEx.h"
 
 
 MetaRsrc::MetaRsrc()
@@ -116,19 +117,19 @@ MetaRsrc::ReserveMetaBuf(MetaDataBuf &metaBuf)
 
             // Request dnvme to reserve us some contiguous memory
             if ((rc = ioctl(mFd, NVME_IOCTL_METABUF_ALLOC, metaBuf.ID)) < 0) {
-                LOG_ERR("Meta data alloc request denied with error: %d", rc);
-                throw exception();
+                throw FrmwkEx(
+                    "Meta data alloc request denied with error: %d", rc);
             }
 
             // Map that memory back to user space for RW access
-            metaBuf.buf = KernelAPI::mmap(mFd, metaBuf.size, metaBuf.ID,
+            metaBuf.buf = KernelAPI::mmap(metaBuf.size, metaBuf.ID,
                 KernelAPI::MMR_META);
             if (metaBuf.buf == NULL) {
                 LOG_DBG("Unable to mmap contig memory to user space");
                 // Have to free the memory, not useful if we can't access it
                 if ((rc =ioctl(mFd, NVME_IOCTL_METABUF_DELETE, metaBuf.ID)) < 0)
                     LOG_ERR("Meta data free request denied with error: %d", rc);
-                throw exception();
+                throw FrmwkEx();
             }
 
             mMetaReserved.insert(resIter, metaBuf);

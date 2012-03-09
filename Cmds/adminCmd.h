@@ -29,10 +29,9 @@ class AdminCmd : public Cmd
 {
 public:
     /**
-     * @param fd Pass the opened file descriptor for the device under test
      * @param objBeingCreated Pass the type of object this child class is
      */
-    AdminCmd(int fd, Trackable::ObjType objBeingCreated);
+    AdminCmd(Trackable::ObjType objBeingCreated);
     virtual ~AdminCmd();
 
 

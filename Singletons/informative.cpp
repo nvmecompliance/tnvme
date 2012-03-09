@@ -16,6 +16,7 @@
 
 #include "informative.h"
 #include "globals.h"
+#include "../Exception/frmwkEx.h"
 
 
 bool Informative::mInstanceFlag = false;
@@ -72,10 +73,9 @@ Informative::Clear()
 ConstSharedIdentifyPtr
 Informative::GetIdentifyCmdCtrlr() const
 {
-    if (mIdentifyCmdCtrlr == Identify::NullIdentifyPtr) {
-        LOG_DBG("Framework bug: Identify data not allowed to be NULL");
-        throw exception();
-    }
+    if (mIdentifyCmdCtrlr == Identify::NullIdentifyPtr)
+        throw FrmwkEx("Identify data not allowed to be NULL");
+
     return mIdentifyCmdCtrlr;
 }
 
@@ -92,10 +92,9 @@ Informative::GetIdentifyCmdNamspc(uint64_t namspcId) const
         return Identify::NullIdentifyPtr;
     }
 
-    if (mIdentifyCmdNamspc[namspcId-1] == Identify::NullIdentifyPtr) {
-        LOG_DBG("Framework bug: Identify data not allowed to be NULL");
-        throw exception();
-    }
+    if (mIdentifyCmdNamspc[namspcId-1] == Identify::NullIdentifyPtr)
+        throw FrmwkEx("Identify data not allowed to be NULL");
+
     return mIdentifyCmdNamspc[namspcId-1];
 }
 
@@ -228,8 +227,7 @@ Informative::IdentifyNamespace(ConstSharedIdentifyPtr idCmdNamspc) const
         return NS_E2E;
     }
 
-    LOG_ERR("Namspc is unidentifiable");
-    throw exception();
+    throw FrmwkEx("Namspc is unidentifiable");
 }
 
 
@@ -250,7 +248,6 @@ Informative::Get1stBareMetaE2E() const
     if (namspc.size())
         return (Namspc(GetIdentifyCmdNamspc(namspc[0]), namspc[0], NS_E2E));
 
-    LOG_ERR("DUT must have 1 of 3 namspc's");
-    throw exception();
+    throw FrmwkEx("DUT must have 1 of 3 namspc's");
 }
 

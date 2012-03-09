@@ -16,6 +16,7 @@
 
 #include "trackable.h"
 #include "tnvme.h"
+#include "Exception/frmwkEx.h"
 
 
 SharedTrackablePtr Trackable::NullTrackablePtr;
@@ -23,10 +24,8 @@ SharedTrackablePtr Trackable::NullTrackablePtr;
 
 Trackable::Trackable(ObjType objBeingCreated)
 {
-    if (objBeingCreated >= OBJTYPE_FENCE) {
-        LOG_DBG("Illegal constructor");
-        throw exception();
-    }
+    if (objBeingCreated >= OBJTYPE_FENCE)
+        throw FrmwkEx("Illegal constructor");
 
     mObjType = objBeingCreated;
 }
@@ -60,8 +59,7 @@ Trackable::GetObjName(ObjType obj)
     case OBJ_WRITE:         name = "Write";              break;
     case OBJ_READ:          name = "Read";               break;
     default:
-        LOG_ERR("Forgot to label this unknown obj");
-        throw exception();
+        throw FrmwkEx("Forgot to label this unknown obj");
     }
     return name;
 }

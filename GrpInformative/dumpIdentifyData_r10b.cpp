@@ -71,7 +71,7 @@ DumpIdentifyData_r10b::operator=(const DumpIdentifyData_r10b &other)
 }
 
 
-bool
+void
 DumpIdentifyData_r10b::RunCoreTest()
 {
     /** \verbatim
@@ -87,14 +87,12 @@ DumpIdentifyData_r10b::RunCoreTest()
 
     // Assuming the cmd we issue will result in only a single CE
     if (acq->ReapInquiry(isrCount, true) != 0) {
-        LOG_ERR("The ACQ should not have any CE's waiting before testing");
-        throw exception();
+        throw FrmwkEx(
+            "The ACQ should not have any CE's waiting before testing");
     }
 
     SendIdentifyCtrlrStruct(asq, acq);
     SendIdentifyNamespaceStruct(asq, acq);
-
-    return true;
 }
 
 
@@ -103,7 +101,7 @@ DumpIdentifyData_r10b::SendIdentifyCtrlrStruct(SharedASQPtr asq,
     SharedACQPtr acq)
 {
     LOG_NRM("Create 1st identify cmd and assoc some buffer memory");
-    SharedIdentifyPtr idCmdCtrlr = SharedIdentifyPtr(new Identify(mFd));
+    SharedIdentifyPtr idCmdCtrlr = SharedIdentifyPtr(new Identify());
     LOG_NRM("Force identify to request ctrlr capabilities struct");
     idCmdCtrlr->SetCNS(true);
     SharedMemBufferPtr idMemCap = SharedMemBufferPtr(new MemBuffer());
@@ -130,10 +128,8 @@ DumpIdentifyData_r10b::SendIdentifyNamespaceStruct(SharedASQPtr asq,
 
 
     ConstSharedIdentifyPtr idCmdCtrlr = gInformative->GetIdentifyCmdCtrlr();
-    if ((numNamSpc = idCmdCtrlr->GetValue(IDCTRLRCAP_NN)) == 0) {
-        LOG_ERR("Required to support >= 1 namespace");
-        throw exception();
-    }
+    if ((numNamSpc = idCmdCtrlr->GetValue(IDCTRLRCAP_NN)) == 0)
+        throw FrmwkEx("Required to support >= 1 namespace");
 
     LOG_NRM("Gather %lld identify namspc structs from DUT",
         (unsigned long long)numNamSpc);
@@ -143,7 +139,7 @@ DumpIdentifyData_r10b::SendIdentifyNamespaceStruct(SharedASQPtr asq,
 
         LOG_NRM("Create identify cmd #%llu & assoc some buffer memory",
             (long long unsigned int)namSpc);
-        SharedIdentifyPtr idCmdNamSpc = SharedIdentifyPtr(new Identify(mFd));
+        SharedIdentifyPtr idCmdNamSpc = SharedIdentifyPtr(new Identify());
         LOG_NRM("Force identify to request namespace struct #%llu",
             (long long unsigned int)namSpc);
         idCmdNamSpc->SetCNS(false);

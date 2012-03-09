@@ -72,7 +72,7 @@ VerifyDataPat_r10b::operator=(const VerifyDataPat_r10b &other)
 }
 
 
-bool
+void
 VerifyDataPat_r10b::RunCoreTest()
 {
     /** \verbatim
@@ -84,7 +84,6 @@ VerifyDataPat_r10b::RunCoreTest()
      */
 
     VerifyDataPattern();
-    return true;
 }
 
 
@@ -97,10 +96,8 @@ VerifyDataPat_r10b::VerifyDataPattern()
     LOG_NRM("Calc buffer size to read %d log blks from media",
         WRITE_DATA_PAT_NUM_BLKS);
     ConstSharedIdentifyPtr namSpcPtr = gInformative->GetIdentifyCmdNamspc(1);
-    if (namSpcPtr == Identify::NullIdentifyPtr) {
-        LOG_ERR("Namespace #1 must exist");
-        throw exception();
-    }
+    if (namSpcPtr == Identify::NullIdentifyPtr)
+        throw FrmwkEx("Namespace #1 must exist");
     uint64_t lbaDataSize = namSpcPtr->GetLBADataSize();
 
 
@@ -116,7 +113,7 @@ VerifyDataPat_r10b::VerifyDataPattern()
     readMem->Init(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize);
 
     LOG_NRM("Create a generic read cmd to read data from namspc 1");
-    SharedReadPtr readCmd = SharedReadPtr(new Read(mFd));
+    SharedReadPtr readCmd = SharedReadPtr(new Read());
     send_64b_bitmask prpBitmask = (send_64b_bitmask)
         (MASK_PRP1_PAGE | MASK_PRP2_PAGE | MASK_PRP2_LIST);
     readCmd->SetPrpBuffer(prpBitmask, readMem);
@@ -138,8 +135,7 @@ VerifyDataPat_r10b::VerifyDataPattern()
 
     // To run the discontig part of this test, the hdw must support that feature
     if (gRegisters->Read(CTLSPC_CAP, regVal) == false) {
-        LOG_ERR("Unable to determine Q memory requirements");
-        throw exception();
+        throw FrmwkEx("Unable to determine Q memory requirements");
     } else if (regVal & CAP_CQR) {
         LOG_NRM("Unable to utilize discontig Q's, DUT requires contig");
         return;

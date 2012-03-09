@@ -44,13 +44,7 @@ IdentifyDataType Identify::mIdNamespcType[] =
 #undef ZZ
 
 
-Identify::Identify() : AdminCmd(0, Trackable::OBJTYPE_FENCE)
-{
-    // This constructor will throw
-}
-
-
-Identify::Identify(int fd) : AdminCmd(fd, Trackable::OBJ_IDENTIFY)
+Identify::Identify() : AdminCmd(Trackable::OBJ_IDENTIFY)
 {
     Init(Opcode, DATADIR_FROM_DEVICE);
 
@@ -95,10 +89,8 @@ Identify::GetCNS() const
 uint64_t
 Identify::GetValue(IdCtrlrCap field) const
 {
-    if (field >= IDCTRLRCAP_FENCE) {
-        LOG_DBG("Unknown ctrlr cap field: %d", field);
-        throw exception();
-    }
+    if (field >= IDCTRLRCAP_FENCE)
+        throw FrmwkEx("Unknown ctrlr cap field: %d", field);
 
     return GetValue(field, mIdCtrlrCapMetrics);
 }
@@ -107,10 +99,9 @@ Identify::GetValue(IdCtrlrCap field) const
 uint64_t
 Identify::GetValue(IdNamespc field) const
 {
-    if (field >= IDNAMESPC_FENCE) {
-        LOG_DBG("Unknown namespace field: %d", field);
-        throw exception();
-    }
+    if (field >= IDNAMESPC_FENCE)
+        throw FrmwkEx("Unknown namespace field: %d", field);
+
     return GetValue(field, mIdNamespcType);
 }
 
@@ -122,14 +113,14 @@ Identify::GetValue(int field, IdentifyDataType *idData) const
     uint64_t value = 0;
 
     if (idData[field].length > sizeof(uint64_t)) {
-        LOG_DBG("sizeof(%s) > %ld bytes", idData[field].desc, sizeof(uint64_t));
-        throw exception();
+        throw FrmwkEx("sizeof(%s) > %ld bytes", idData[field].desc,
+            sizeof(uint64_t));
     } else if ((idData[field].length + idData[field].offset) >=
         GetPrpBufferSize()) {
         LOG_DBG("Detected illegal def in IDxxxxx_TABLE or buffer is to small");
         LOG_DBG("Reference calc (%d): %d + %d >= %ld", field,
             idData[field].length, idData[field].offset, GetPrpBufferSize());
-        throw exception();
+        throw FrmwkEx();
     }
 
     for (int i = 0; i < idData[field].length; i++) {
@@ -149,10 +140,8 @@ Identify::Dump(LogFilename filename, string fileHdr) const
     Cmd::Dump(filename, fileHdr);
 
     // Reopen the file and append the same data in a different format
-    if ((fp = fopen(filename.c_str(), "a")) == NULL) {
-        LOG_DBG("Failed to open file: %s", filename.c_str());
-        throw exception();
-    }
+    if ((fp = fopen(filename.c_str(), "a")) == NULL)
+        throw FrmwkEx("Failed to open file: %s", filename.c_str());
 
     fprintf(fp, "\n------------------------------------------------------\n");
     fprintf(fp, "----Detailed decoding of the cmd payload as follows---\n");
@@ -186,7 +175,7 @@ Identify::Dump(FILE *fp, int field, IdentifyDataType *idData) const
         LOG_DBG("Detected illegal definition in IDxxxxx_TABLE");
         LOG_DBG("Reference calc (%d): %d + %d >= %ld", field,
             idData[field].length, idData[field].offset, GetPrpBufferSize());
-        throw exception();
+        throw FrmwkEx();
     }
 
     unsigned long addr = idData[field].offset;
@@ -215,10 +204,8 @@ Identify::GetLBAFormat() const
 {
     LBAFormat lbaFormat;
 
-    if (GetCNS()) {
-        LOG_DBG("This cmd does not contain a namespace data struct");
-        throw exception();
-    }
+    if (GetCNS())
+        throw FrmwkEx("This cmd does not contain a namespace data struct");
 
     uint64_t flbas = GetValue(IDNAMESPC_FLBAS);
     uint8_t formatIdx = (uint8_t)(flbas & 0x0f);

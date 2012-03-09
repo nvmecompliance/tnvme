@@ -53,13 +53,11 @@ Queue::GetIsContig()
     if ((mContigBuf == NULL) &&
         (mDiscontigBuf == MemBuffer::NullMemBufferPtr)) {
 
-        LOG_DBG("Detected an uninitialized Q");
-        throw exception();
+        throw FrmwkEx("Detected an uninitialized Q");
     } else if ((mContigBuf != NULL) &&
         (mDiscontigBuf != MemBuffer::NullMemBufferPtr)) {
 
-        LOG_DBG("Detected an illegally configured Q");
-        throw exception();
+        throw FrmwkEx("Detected an illegally configured Q");
     }
     return (mContigBuf != NULL);
 }
@@ -79,11 +77,10 @@ void
 Queue::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries)
 {
     if (mDiscontigBuf != MemBuffer::NullMemBufferPtr) {
-        LOG_DBG("Obj already init'd for discontiguous parameters");
-        throw exception();
+        throw FrmwkEx("Obj already init'd for discontiguous parameters");
     } else if (mContigBuf != NULL) {
-        LOG_DBG("Obj does not support re-allocations, create a new obj");
-        throw exception();
+        throw FrmwkEx(
+            "Obj does not support re-allocations, create a new obj");
     }
 
     mQId = qId;

@@ -42,9 +42,8 @@ IO::SendCmdToHdw(string grpName, string testName, uint16_t ms,
 
 
     if ((numCE = cq->ReapInquiry(isrCountB4, true)) != 0) {
-        LOG_ERR("Require 0 CE's within CQ %d, not upheld, found %d",
+        throw FrmwkEx("Require 0 CE's within CQ %d, not upheld, found %d",
             cq->GetQId(), numCE);
-        throw exception();
     }
 
     LOG_NRM("Send the cmd to hdw via SQ %d", sq->GetQId());
@@ -66,10 +65,10 @@ IO::SendCmdToHdw(string grpName, string testName, uint16_t ms,
         cq->Dump(
             FileSystem::PrepLogFile(grpName, testName, "cq." + cmd->GetName(),
             qualify), work);
-        throw exception();
+        throw FrmwkEx();
     } else if (numCE != 1) {
-        LOG_ERR("1 cmd caused %d CE's to arrive in CQ %d", numCE, cq->GetQId());
-        throw exception();
+        throw FrmwkEx("1 cmd caused %d CE's to arrive in CQ %d",
+            numCE, cq->GetQId());
     }
     if (verbose) {
         work = str(boost::format("Just B4 reaping CQ %d, dump entire CQ") %
@@ -85,9 +84,8 @@ IO::SendCmdToHdw(string grpName, string testName, uint16_t ms,
     if (gCtrlrConfig->IrqsEnabled() && cq->GetIrqEnabled() &&
         (isrCount != (isrCountB4 + 1))) {
 
-        LOG_ERR("CQ using IRQ's, but IRQ count not expected (%d != %d)",
+        throw FrmwkEx("CQ using IRQ's, but IRQ count not expected (%d != %d)",
             isrCount, (isrCountB4 + 1));
-        throw exception();
     }
 
     if (verbose) {
@@ -119,7 +117,7 @@ IO::ReapCE(SharedCQPtr cq, uint16_t numCE, uint32_t &isrCount,
         cq->Dump(
             FileSystem::PrepLogFile(grpName, testName, "cq.error", qualify),
             work);
-        throw exception();
+        throw FrmwkEx();
     }
     union CE ce = cq->PeekCE(cqMetrics.head_ptr);
     ProcessCE::Validate(ce, status);  // throws upon error

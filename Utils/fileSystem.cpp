@@ -20,6 +20,7 @@
 #include <errno.h>
 #include <boost/filesystem/operations.hpp>
 #include "fileSystem.h"
+#include "../Exception/frmwkEx.h"
 
 using namespace std;
 
@@ -95,10 +96,8 @@ FileSystem::PrepLogFile(string grpName, string className, string objName,
 {
     string file;
 
-    if (grpName.empty() || className.empty() || objName.empty()) {
-        LOG_DBG("Mandatory params are empty");
-        throw exception();
-    }
+    if (grpName.empty() || className.empty() || objName.empty())
+        throw FrmwkEx("Mandatory params are empty");
 
     file += (mUseGrpInfo) ? mLogDirGrpInfo : mLogDirPending;
     file += grpName + ".";

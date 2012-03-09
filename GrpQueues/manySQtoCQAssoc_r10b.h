@@ -54,7 +54,7 @@ public:
 
 
 protected:
-    virtual bool RunCoreTest();
+    virtual void RunCoreTest();
 
 private:
     ///////////////////////////////////////////////////////////////////////////

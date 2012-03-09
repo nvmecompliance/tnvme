@@ -17,9 +17,7 @@
 #include "tnvme.h"
 #include "test.h"
 #include "globals.h"
-#include "Utils/kernelAPI.h"
-#include "Utils/io.h"
-#include "Cmds/getLogPage.h"
+#include "./Utils/kernelAPI.h"
 
 
 Test::Test(int fd, string grpName, string testName, SpecRev specRev,
@@ -82,82 +80,39 @@ Test::Run()
 {
     try {
         ResetStatusRegErrors();
-        KernelAPI::DumpKernelMetrics(mFd, FileSystem::PrepLogFile(mGrpName,
+        KernelAPI::DumpKernelMetrics(FileSystem::PrepLogFile(mGrpName,
             mTestName, "kmetrics", "preTestRun"));
 
-        if (RunCoreTest()) {
-            if (GetStatusRegErrors()) {
-                LOG_NRM("SUCCESSFUL test case run");
-                return true;
-            }
+        RunCoreTest();  // Forced to throw upon errors, returns upon success
+
+        // What do the PCI registers say about errors that may have occurred?
+        if (GetStatusRegErrors() == false) {
+            LOG_NRM("Failed group name: %s", mGrpName.c_str());
+            LOG_NRM("Failed test name:  %s", mTestName.c_str());
+            return false;
         }
+    } catch (FrmwkEx &ex) {
+        LOG_NRM("Failed group name: %s", mGrpName.c_str());
+        LOG_NRM("Failed test name:  %s", mTestName.c_str());
+        return false;
     } catch (...) {
-        ;   // Don't let exceptions propagate, fall thru to return boolean error
+        // If this exception is thrown from some library which tnvme links
+        // with then there is nothing that can be done about this. However,
+        // If the source of this exception is source within the compliance
+        // suite, then remove it, see class note in file Exception/frmwkEx.h
+        LOG_ERR("******************************************************");
+        LOG_ERR("******************************************************");
+        LOG_ERR("*  Unsupp'd exception, replace with \"throw FrmwkEx\"  *");
+        LOG_ERR("*     see class note in file Exception/frmwkEx.h     *");
+        LOG_ERR("******************************************************");
+        LOG_ERR("******************************************************");
+        LOG_NRM("Failed group name: %s", mGrpName.c_str());
+        LOG_NRM("Failed test name:  %s", mTestName.c_str());
+        return false;
     }
 
-
-    LOG_NRM("FAILED test run detected above this log entry");
-    LOG_NRM("--------START POST FAILURE STATE DUMP--------");
-    try {
-        // First gather all non-intrusive data, things that won't change the
-        // state of the DUT, effectively taking a snapshot.
-        KernelAPI::DumpKernelMetrics(mFd, FileSystem::PrepLogFile(mGrpName,
-            mTestName, "kmetrics", "postFailure"));
-        KernelAPI::DumpPciSpaceRegs(mSpecRev,
-            FileSystem::PrepLogFile(mGrpName, mTestName, "pci",
-            "regs.postFailure"), false);
-        KernelAPI::DumpCtrlrSpaceRegs(mSpecRev,
-            FileSystem::PrepLogFile(mGrpName, mTestName, "ctrl",
-            "regs.postFailure"), false);
-
-        // Now we can change the state of the DUT. We don't know the state of
-        // the ACQ/ASQ, or even if there are any in existence; place the DUT
-        // into a well known state and then interact gathering instrusive data
-        if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false) {
-            throw exception();
-        }
-
-        SharedACQPtr acq =
-            CAST_TO_ACQ(gRsrcMngr->AllocObj(Trackable::OBJ_ACQ, "ACQ"))
-        acq->Init(2);
-
-        SharedASQPtr asq =
-            CAST_TO_ASQ(gRsrcMngr->AllocObj(Trackable::OBJ_ASQ, "ASQ"))
-        asq->Init(2);
-
-        if (gCtrlrConfig->SetState(ST_ENABLE) == false)
-            throw exception();
-
-        LOG_NRM("Create get log page cmd and assoc some buffer memory");
-        SharedGetLogPagePtr getLogPg = SharedGetLogPagePtr(new GetLogPage(mFd));
-        LOG_NRM("Force identify to request error information");
-        getLogPg->SetLID(GetLogPage::LOGID_ERROR_INFO);
-
-        ConstSharedIdentifyPtr idCmdCtrlr = gInformative->GetIdentifyCmdCtrlr();
-        uint64_t errLogPgEntries = (idCmdCtrlr->GetValue(IDCTRLRCAP_ELPE) + 1);
-        uint32_t bufSize = (errLogPgEntries * GetLogPage::ERRINFO_DATA_SIZE);
-        uint16_t numDWAvail = (bufSize / sizeof(uint32_t));
-        getLogPg->SetNUMD(numDWAvail);
-
-        SharedMemBufferPtr cmdMem = SharedMemBufferPtr(new MemBuffer());
-        cmdMem->InitAlignment(bufSize, sysconf(_SC_PAGESIZE), true, 0);
-        send_64b_bitmask prpReq =
-            (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE);
-        getLogPg->SetPrpBuffer(prpReq, cmdMem);
-
-        IO::SendCmdToHdw(mGrpName, mTestName, 2000, asq, acq, getLogPg, "",
-            false);
-        getLogPg->Dump(FileSystem::PrepLogFile(mGrpName, mTestName,
-            "LogPageErr.postFailure"),
-            "Failed test post dump of error log page:");
-    } catch (...) {
-        LOG_NRM("This 2ndary failure could be caused by a prior");
-    }
-
-    LOG_NRM("--------END POST FAILURE STATE DUMP--------");
-    LOG_NRM("Failed group name: %s", mGrpName.c_str());
-    LOG_NRM("Failed test name:  %s", mTestName.c_str());
-    return false;
+    LOG_NRM("SUCCESSFUL test case run");
+    return true;
 }
 
 
@@ -257,10 +212,9 @@ Test::ReportOffendingBitPos(uint64_t val, uint64_t expectedVal)
 }
 
 
-bool
+void
 Test::RunCoreTest()
 {
     LOG_ERR("Children must over ride to provide functionality");
-    return false;
 }
 

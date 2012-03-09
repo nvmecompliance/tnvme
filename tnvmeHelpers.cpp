@@ -26,6 +26,7 @@
 #include "Utils/kernelAPI.h"
 #include "Queues/ce.h"
 #include "Cmds/setFeatures.h"
+#include "Exception/frmwkEx.h"
 
 
 /**
@@ -610,7 +611,8 @@ ParseQueuesCmdLine(NumQueues &numQueues, const char *optarg)
  * @param fd Pass file descriptor representing device to commune with
  * @return true upon successful parsing, otherwise false.
  */
-bool SetFeaturesNumberOfQueues(NumQueues &numQueues, int fd)
+bool
+SetFeaturesNumberOfQueues(NumQueues &numQueues, int fd)
 {
     uint16_t numCE;
     uint16_t ceRemain;
@@ -622,7 +624,7 @@ bool SetFeaturesNumberOfQueues(NumQueues &numQueues, int fd)
         LOG_NRM("Setting number of Q's; ncqr=0x%04X, nsqr=0x%04X",
             numQueues.ncqr, numQueues.nsqr);
         if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
-            throw exception();
+            throw FrmwkEx();
 
         LOG_NRM("Prepare the admin Q's to setup this request");
         SharedACQPtr acq = SharedACQPtr(new ACQ(fd));
@@ -631,24 +633,21 @@ bool SetFeaturesNumberOfQueues(NumQueues &numQueues, int fd)
         asq->Init(2);
         gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
         if (gCtrlrConfig->SetState(ST_ENABLE) == false)
-            throw exception();
+            throw FrmwkEx();
 
         LOG_NRM("Create the cmd to carry this data to the DUT");
         SharedSetFeaturesPtr sfNumOfQ =
-            SharedSetFeaturesPtr(new SetFeatures(fd));
+            SharedSetFeaturesPtr(new SetFeatures());
         sfNumOfQ->SetFID(BaseFeatures::FID_NUM_QUEUES);
         sfNumOfQ->SetNumberOfQueues(numQueues.ncqr, numQueues.nsqr);
 
         LOG_NRM("Send the cmd to the ASQ, wait for it to complete");
         asq->Send(sfNumOfQ);
         asq->Ring();
-        if (acq->ReapInquiryWaitSpecify(2000, 1, numCE, isrCount) == false) {
-            LOG_ERR("Unable to see completion of Set Features cmd");
-            throw exception();
-        } else if (numCE != 1) {
-            LOG_ERR("The ACQ should only have 1 CE as a result of a cmd");
-            throw exception();
-        }
+        if (acq->ReapInquiryWaitSpecify(2000, 1, numCE, isrCount) == false)
+            throw FrmwkEx("Unable to see completion of Set Features cmd");
+        else if (numCE != 1)
+            throw FrmwkEx("The ACQ should only have 1 CE as a result of a cmd");
 
         LOG_NRM("The CQ's metrics before reaping holds head_ptr needed");
         struct nvme_gen_cq acqMetrics = acq->GetQMetrics();
@@ -659,9 +658,8 @@ bool SetFeaturesNumberOfQueues(NumQueues &numQueues, int fd)
         if ((numReaped = acq->Reap(ceRemain, ceMemIOCQ, isrCount, numCE, true))
             != 1) {
 
-            LOG_ERR("Verified there was 1 CE, but reaping produced %d",
+            throw FrmwkEx("Verified there was 1 CE, but reaping produced %d",
                 numReaped);
-            throw exception();
         }
         LOG_NRM("The reaped get features CE is...");
         acq->LogCE(acqMetrics.head_ptr);

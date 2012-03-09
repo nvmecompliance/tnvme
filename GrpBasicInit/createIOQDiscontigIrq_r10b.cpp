@@ -78,7 +78,7 @@ CreateIOQDiscontigIrq_r10b::operator=(const CreateIOQDiscontigIrq_r10b &other)
 }
 
 
-bool
+void
 CreateIOQDiscontigIrq_r10b::RunCoreTest()
 {
     /** \verbatim
@@ -98,17 +98,15 @@ CreateIOQDiscontigIrq_r10b::RunCoreTest()
 
     // Verify assumptions are active/enabled/present/setup
     if (acq->ReapInquiry(isrCount, true) != 0) {
-        LOG_ERR("The ACQ should not have any CE's waiting before testing");
-        throw exception();
+        throw FrmwkEx(
+            "The ACQ should not have any CE's waiting before testing");
     } else if (gRegisters->Read(CTLSPC_CAP, regVal) == false) {
-        LOG_ERR("Unable to determine Q memory requirements");
-        throw exception();
+        throw FrmwkEx("Unable to determine Q memory requirements");
     } else if (regVal & CAP_CQR) {
         LOG_NRM("Unable to utilize discontig Q's, DUT requires contig");
-        return true;
+        return;
     } if (gRegisters->Read(CTLSPC_CAP, work) == false) {
-        LOG_ERR("Unable to determine MQES");
-        throw exception();
+        throw FrmwkEx("Unable to determine MQES");
     }
 
     // Verify the min requirements for this test are supported by DUT
@@ -118,11 +116,9 @@ CreateIOQDiscontigIrq_r10b::RunCoreTest()
             NumEntriesIOQ, (uint16_t)work);
         NumEntriesIOQ = work;
     } else if (gInformative->GetFeaturesNumOfIOCQs() < IOQ_ID) {
-        LOG_ERR("DUT doesn't support %d IOCQ's", IOQ_ID);
-        throw exception();
+        throw FrmwkEx("DUT doesn't support %d IOCQ's", IOQ_ID);
     } else if (gInformative->GetFeaturesNumOfIOSQs() < IOQ_ID) {
-        LOG_ERR("DUT doesn't support %d IOSQ's", IOQ_ID);
-        throw exception();
+        throw FrmwkEx("DUT doesn't support %d IOSQ's", IOQ_ID);
     }
 
     uint8_t iocqes = (gInformative->GetIdentifyCmdCtrlr()->
@@ -133,7 +129,7 @@ CreateIOQDiscontigIrq_r10b::RunCoreTest()
     uint32_t iocqElemSize = (1 << iocqes);
     iocqMem->InitAlignment((NumEntriesIOQ * iocqElemSize),
         sysconf(_SC_PAGESIZE), true, 0);
-    Queues::CreateIOCQDiscontigToHdw(mFd, mGrpName, mTestName,
+    Queues::CreateIOCQDiscontigToHdw(mGrpName, mTestName,
         DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, NumEntriesIOQ, true,
         IOCQ_DISCONTIG_GROUP_ID, true, 0, iocqMem);
 
@@ -146,11 +142,9 @@ CreateIOQDiscontigIrq_r10b::RunCoreTest()
     uint32_t iosqElemSize = (1 << iosqes);
     iosqMem->InitAlignment((NumEntriesIOQ * iosqElemSize),
         sysconf(_SC_PAGESIZE), true, 0);
-    Queues::CreateIOSQDiscontigToHdw(mFd, mGrpName, mTestName,
+    Queues::CreateIOSQDiscontigToHdw(mGrpName, mTestName,
         DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, NumEntriesIOQ, true,
         IOSQ_DISCONTIG_GROUP_ID, IOQ_ID, 0, iosqMem);
-
-    return true;
 }
 
 }   // namespace

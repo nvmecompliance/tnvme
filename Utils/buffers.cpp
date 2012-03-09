@@ -41,9 +41,8 @@ Buffers::Log(const uint8_t *buf, uint32_t bufOffset, unsigned long length,
 
     LOG_NRM("Logging %s obj contents....", objName.c_str());
     if (bufOffset >= totalBufSize) {
-        LOG_DBG("Offset into buffer 0x%08X >= to buffer size 0x%08X",
+        throw FrmwkEx("Offset into buffer 0x%08X >= to buffer size 0x%08X",
             bufOffset, totalBufSize);
-        throw exception();
     }
     data = &(buf[bufOffset]);
     if (length == ULONG_MAX)
@@ -84,10 +83,8 @@ Buffers::Dump(LogFilename filename, const uint8_t *buf, uint32_t bufOffset,
 
     LOG_NRM("Dumping to filename: %s", filename.c_str());
     LOG_NRM("%s", fileHdr.c_str());
-    if ((fp = fopen(filename.c_str(), "a")) == NULL) {
-        LOG_DBG("Failed to open file: %s", filename.c_str());
-        throw exception();
-    }
+    if ((fp = fopen(filename.c_str(), "a")) == NULL)
+        throw FrmwkEx("Failed to open file: %s", filename.c_str());
     fprintf(fp, "%s\n", fileHdr.c_str());
 
     if (totalBufSize == 0) {
@@ -128,5 +125,5 @@ Dump_EXIT_SUCCESS:
 
 Dump_EXIT_ERROR:
     fclose(fp);
-    throw exception();
+    throw FrmwkEx();
 }

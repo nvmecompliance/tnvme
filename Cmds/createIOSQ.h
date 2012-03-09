@@ -37,7 +37,7 @@ typedef boost::shared_ptr<const CreateIOSQ>       ConstSharedCreateIOSQPtr;
 class CreateIOSQ : public AdminCmd
 {
 public:
-    CreateIOSQ(int fd);
+    CreateIOSQ();
     virtual ~CreateIOSQ();
 
     /// Used to compare for NULL pointers being returned by allocations
@@ -49,10 +49,6 @@ public:
      * @param iosq Pass the IOSQ object which will initialize this cmd.
      */
     void Init(const SharedIOSQPtr iosq);
-
-
-private:
-    CreateIOSQ();
 };
 
 

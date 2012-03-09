@@ -17,7 +17,7 @@
 # Ubuntu: sudo apt-get install libboost1.42-all-dev
 APP_NAME = tnvme
 export CC = g++				# Mods here affect all sub-makes
-export DFLAGS = -g -DDEBUG		# comment here affects all sub-makes
+#export DFLAGS = -g -DDEBUG		# comment here affects all sub-makes
 export CFLAGS = -O0 -W -Wall -Werror	# mods here affect all sub-makes
 LDFLAGS = $(foreach stem, $(SUBDIRS),./$(stem)/lib$(stem).a)
 LDFLAGS += -lboost_filesystem
@@ -34,7 +34,8 @@ SUBDIRS:=			\
 	GrpNVMReadCmd		\
 	Queues			\
 	Cmds			\
-	Utils
+	Utils			\
+	Exception
 
 SOURCES:=			\
 	globals.cpp		\

@@ -69,7 +69,7 @@ CreateResources_r10b::operator=(const CreateResources_r10b &other)
 }
 
 
-bool
+void
 CreateResources_r10b::RunCoreTest()
 {
     /** \verbatim
@@ -87,9 +87,7 @@ CreateResources_r10b::RunCoreTest()
 
     gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
-        throw exception();
-
-    return true;
+        throw FrmwkEx();
 }
 
 }   // namespace

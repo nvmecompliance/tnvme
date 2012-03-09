@@ -21,13 +21,7 @@ SharedSetFeaturesPtr SetFeatures::NullSetFeaturesPtr;
 const uint8_t SetFeatures::Opcode = 0x09;
 
 
-SetFeatures::SetFeatures() : BaseFeatures(0, Trackable::OBJTYPE_FENCE)
-{
-    // This constructor will throw
-}
-
-
-SetFeatures::SetFeatures(int fd) : BaseFeatures(fd, Trackable::OBJ_SETFEATURES)
+SetFeatures::SetFeatures() : BaseFeatures(Trackable::OBJ_SETFEATURES)
 {
     Init(Opcode, DATADIR_TO_DEVICE);
 

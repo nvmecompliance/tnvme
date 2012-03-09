@@ -47,7 +47,6 @@ public:
      * In the end the number of IRQ's and number of CE's will be verified to
      * guarantee that only 1 CE arrived as a result of sending this 1 cmd.
      * @note Method uses pre-existing values of CC.IOCQES
-     * @param fd Pass the device FD, not the filename, to communicate
      * @param grpName Pass the name of the group to which this test belongs
      * @param testName Pass the name of the child testclass
      * @param ms Pass the max number of ms to wait until numTil CE's arrive.
@@ -67,13 +66,13 @@ public:
      * @param verbose Pass true to dump resources to dump files, otherwise false
      * @return The newly create object or throws upon errors
      */
-    static SharedIOCQPtr CreateIOCQContigToHdw(int fd, string grpName,
+    static SharedIOCQPtr CreateIOCQContigToHdw(string grpName,
         string testName, uint16_t ms, SharedASQPtr asq, SharedACQPtr acq,
         uint16_t qId, uint16_t numEntries, bool grpLifetime, string grpID,
         bool irqEnabled, uint16_t irqVec, string qualify = "",
         bool verbose = true);
     /// param qBackedMem is not modified, nor err chk'd; it must setup by caller
-    static SharedIOCQPtr CreateIOCQDiscontigToHdw(int fd, string grpName,
+    static SharedIOCQPtr CreateIOCQDiscontigToHdw(string grpName,
         string testName, uint16_t ms, SharedASQPtr asq, SharedACQPtr acq,
         uint16_t qId, uint16_t numEntries, bool grpLifetime, string grpID,
         bool irqEnabled, uint16_t irqVec, SharedMemBufferPtr qBackedMem,
@@ -86,7 +85,6 @@ public:
      * In the end the number of IRQ's and number of CE's will be verified to
      * guarantee that only 1 CE arrived as a result of sending this 1 cmd.
      * @note Method uses pre-existing values of CC.IOSQES
-     * @param fd Pass the device FD, not the filename, to communicate
      * @param grpName Pass the name of the group to which this test belongs
      * @param testName Pass the name of the child testclass
      * @param ms Pass the max number of ms to wait until numTil CE's arrive.
@@ -104,13 +102,13 @@ public:
      * @param verbose Pass true to dump resources to dump files, otherwise false
      * @return The newly create object or throws upon errors
      */
-    static SharedIOSQPtr CreateIOSQContigToHdw(int fd, string grpName,
+    static SharedIOSQPtr CreateIOSQContigToHdw(string grpName,
         string testName, uint16_t ms, SharedASQPtr asq, SharedACQPtr acq,
         uint16_t qId, uint16_t numEntries, bool grpLifetime, string grpID,
         uint16_t cqId, uint8_t priority, string qualify = "",
         bool verbose = true);
     /// param qBackedMem is not modified, nor err chk'd; it must setup by caller
-    static SharedIOSQPtr CreateIOSQDiscontigToHdw(int fd, string grpName,
+    static SharedIOSQPtr CreateIOSQDiscontigToHdw(string grpName,
         string testName, uint16_t ms, SharedASQPtr asq, SharedACQPtr acq,
         uint16_t qId, uint16_t numEntries, bool grpLifetime, string grpID,
         uint16_t cqId, uint8_t priority, SharedMemBufferPtr qBackedMem,
@@ -123,7 +121,6 @@ public:
      * In the end the number of IRQ's and number of CE's will be verified to
      * guarantee that only 1 CE arrived as a result of sending this 1 cmd.
      * @note Throws upon errors
-     * @param fd Pass the device FD, not the filename, to communicate
      * @param grpName Pass the name of the group to which this test belongs
      * @param testName Pass the name of the child testclass
      * @param ms Pass the max number of ms to wait until numTil CE's arrive.
@@ -133,10 +130,10 @@ public:
      * @param qualify Pass a qualifying string to append to each dump file
      * @param verbose Pass true to dump resources to dump files, otherwise false
      */
-    static void DeleteIOCQToHdw(int fd, string grpName, string testName,
+    static void DeleteIOCQToHdw(string grpName, string testName,
         uint16_t ms, SharedIOCQPtr iocq, SharedASQPtr asq, SharedACQPtr acq,
         string qualify = "", bool verbose = true);
-    static void DeleteIOSQToHdw(int fd, string grpName, string testName,
+    static void DeleteIOSQToHdw(string grpName, string testName,
         uint16_t ms, SharedIOSQPtr iosq, SharedASQPtr asq, SharedACQPtr acq,
         string qualify = "", bool verbose = true);
 

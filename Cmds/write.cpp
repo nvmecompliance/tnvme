@@ -21,13 +21,7 @@ SharedWritePtr Write::NullWritePtr;
 const uint8_t Write::Opcode = 0x01;
 
 
-Write::Write() : NVMCmd(0, Trackable::OBJTYPE_FENCE)
-{
-    // This constructor will throw
-}
-
-
-Write::Write(int fd) : NVMCmd(fd, Trackable::OBJ_WRITE)
+Write::Write() : NVMCmd(Trackable::OBJ_WRITE)
 {
     Init(Opcode, DATADIR_TO_DEVICE);
 

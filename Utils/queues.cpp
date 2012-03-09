@@ -34,7 +34,7 @@ Queues::~Queues()
 
 
 SharedIOCQPtr
-Queues::CreateIOCQContigToHdw(int fd, string grpName, string testName,
+Queues::CreateIOCQContigToHdw(string grpName, string testName,
     uint16_t ms, SharedASQPtr asq, SharedACQPtr acq, uint16_t qId,
     uint16_t numEntries, bool grpLifetime, string grpID, bool irqEnabled,
     uint16_t irqVec, string qualify, bool verbose)
@@ -55,13 +55,13 @@ Queues::CreateIOCQContigToHdw(int fd, string grpName, string testName,
         iocq = CAST_TO_IOCQ(gRsrcMngr->AllocObj(Trackable::OBJ_IOCQ, grpID));
     } else {
         LOG_NRM("Create an IOCQ object with test lifetime");
-        iocq = SharedIOCQPtr(new IOCQ(fd));
+        iocq = SharedIOCQPtr(new IOCQ(gInformative->GetFD()));
     }
     LOG_NRM("Allocate contiguous memory; IOCQ has ID=%d", qId);
     iocq->Init(qId, numEntries, irqEnabled, irqVec);
 
     LOG_NRM("Form a Create IOCQ cmd to perform queue creation");
-    SharedCreateIOCQPtr createIOCQCmd = SharedCreateIOCQPtr(new CreateIOCQ(fd));
+    SharedCreateIOCQPtr createIOCQCmd = SharedCreateIOCQPtr(new CreateIOCQ());
     createIOCQCmd->Init(iocq);
 
     IO::SendCmdToHdw(grpName, testName, ms, asq, acq, createIOCQCmd, workStr,
@@ -71,7 +71,7 @@ Queues::CreateIOCQContigToHdw(int fd, string grpName, string testName,
 
 
 SharedIOSQPtr
-Queues::CreateIOSQContigToHdw(int fd, string grpName, string testName,
+Queues::CreateIOSQContigToHdw(string grpName, string testName,
     uint16_t ms, SharedASQPtr asq, SharedACQPtr acq, uint16_t qId,
     uint16_t numEntries, bool grpLifetime, string grpID, uint16_t cqId,
     uint8_t priority, string qualify, bool verbose)
@@ -92,13 +92,13 @@ Queues::CreateIOSQContigToHdw(int fd, string grpName, string testName,
         iosq = CAST_TO_IOSQ(gRsrcMngr->AllocObj(Trackable::OBJ_IOSQ, grpID));
     } else {
         LOG_NRM("Create an IOSQ object with test lifetime");
-        iosq = SharedIOSQPtr(new IOSQ(fd));
+        iosq = SharedIOSQPtr(new IOSQ(gInformative->GetFD()));
     }
     LOG_NRM("Allocate contiguous memory; IOSQ has ID=%d", qId);
     iosq->Init(qId, numEntries, cqId, priority);
 
     LOG_NRM("Form a Create IOSQ cmd to perform queue creation");
-    SharedCreateIOSQPtr createIOSQCmd = SharedCreateIOSQPtr(new CreateIOSQ(fd));
+    SharedCreateIOSQPtr createIOSQCmd = SharedCreateIOSQPtr(new CreateIOSQ());
     createIOSQCmd->Init(iosq);
 
     IO::SendCmdToHdw(grpName, testName, ms, asq, acq, createIOSQCmd, workStr,
@@ -108,7 +108,7 @@ Queues::CreateIOSQContigToHdw(int fd, string grpName, string testName,
 
 
 SharedIOCQPtr
-Queues::CreateIOCQDiscontigToHdw(int fd, string grpName, string testName,
+Queues::CreateIOCQDiscontigToHdw(string grpName, string testName,
     uint16_t ms, SharedASQPtr asq, SharedACQPtr acq, uint16_t qId,
     uint16_t numEntries, bool grpLifetime, string grpID, bool irqEnabled,
     uint16_t irqVec, SharedMemBufferPtr qBackedMem, string qualify,
@@ -129,25 +129,24 @@ Queues::CreateIOCQDiscontigToHdw(int fd, string grpName, string testName,
 
     // Validate the memory correlates to the other params passed in
     if (gCtrlrConfig->GetIOCQES(ioqes) == false)
-        throw exception();
+        throw FrmwkEx();
     if (qBackedMem->GetBufSize() < (uint32_t)((1 << ioqes) * numEntries)) {
-        LOG_ERR("Supplied buffer size = 0x%08X; inconsistent w/ creation",
+        throw FrmwkEx("Supplied buffer size = 0x%08X; inconsistent w/ creation",
             ((1 << ioqes) * numEntries));
-        throw exception();
     }
 
     if (grpLifetime) {
         iocq = CAST_TO_IOCQ(gRsrcMngr->AllocObj(Trackable::OBJ_IOCQ, grpID));
     } else {
         LOG_NRM("Create an IOCQ object with test lifetime");
-        iocq = SharedIOCQPtr(new IOCQ(fd));
+        iocq = SharedIOCQPtr(new IOCQ(gInformative->GetFD()));
     }
 
     LOG_NRM("Assoc discontiguous memory; IOCQ has ID=%d", qId);
     iocq->Init(qId, numEntries, qBackedMem, irqEnabled, irqVec);
 
     LOG_NRM("Form a Create IOCQ cmd to perform queue creation");
-    SharedCreateIOCQPtr createIOCQCmd = SharedCreateIOCQPtr(new CreateIOCQ(fd));
+    SharedCreateIOCQPtr createIOCQCmd = SharedCreateIOCQPtr(new CreateIOCQ());
     createIOCQCmd->Init(iocq);
 
     IO::SendCmdToHdw(grpName, testName, ms, asq, acq, createIOCQCmd, workStr,
@@ -157,7 +156,7 @@ Queues::CreateIOCQDiscontigToHdw(int fd, string grpName, string testName,
 
 
 SharedIOSQPtr
-Queues::CreateIOSQDiscontigToHdw(int fd, string grpName, string testName,
+Queues::CreateIOSQDiscontigToHdw(string grpName, string testName,
     uint16_t ms, SharedASQPtr asq, SharedACQPtr acq, uint16_t qId,
     uint16_t numEntries, bool grpLifetime, string grpID, uint16_t cqId,
     uint8_t priority, SharedMemBufferPtr qBackedMem, string qualify,
@@ -178,24 +177,23 @@ Queues::CreateIOSQDiscontigToHdw(int fd, string grpName, string testName,
 
     // Validate the memory correlates to the other params passed in
     if (gCtrlrConfig->GetIOCQES(ioqes) == false)
-        throw exception();
+        throw FrmwkEx();
     if (qBackedMem->GetBufSize() < (uint32_t)((1 << ioqes) * numEntries)) {
-        LOG_ERR("Supplied buffer size = 0x%08X; inconsistent w/ creation",
+        throw FrmwkEx("Supplied buffer size = 0x%08X; inconsistent w/ creation",
             ((1 << ioqes) * numEntries));
-        throw exception();
     }
 
     if (grpLifetime) {
         iosq = CAST_TO_IOSQ(gRsrcMngr->AllocObj(Trackable::OBJ_IOSQ, grpID));
     } else {
         LOG_NRM("Create an IOSQ object with test lifetime");
-        iosq = SharedIOSQPtr(new IOSQ(fd));
+        iosq = SharedIOSQPtr(new IOSQ(gInformative->GetFD()));
     }
     LOG_NRM("Assoc discontiguous memory; IOSQ has ID=%d", qId);
     iosq->Init(qId, numEntries, qBackedMem, cqId, priority);
 
     LOG_NRM("Form a Create IOSQ cmd to perform queue creation");
-    SharedCreateIOSQPtr createIOSQCmd = SharedCreateIOSQPtr(new CreateIOSQ(fd));
+    SharedCreateIOSQPtr createIOSQCmd = SharedCreateIOSQPtr(new CreateIOSQ());
     createIOSQCmd->Init(iosq);
 
     IO::SendCmdToHdw(grpName, testName, ms, asq, acq, createIOSQCmd, workStr,
@@ -205,7 +203,7 @@ Queues::CreateIOSQDiscontigToHdw(int fd, string grpName, string testName,
 
 
 void
-Queues::DeleteIOCQToHdw(int fd, string grpName, string testName, uint16_t ms,
+Queues::DeleteIOCQToHdw(string grpName, string testName, uint16_t ms,
     SharedIOCQPtr iocq, SharedASQPtr asq, SharedACQPtr acq, string qualify,
     bool verbose)
 {
@@ -223,7 +221,7 @@ Queues::DeleteIOCQToHdw(int fd, string grpName, string testName, uint16_t ms,
     workStr = work;
 
     LOG_NRM("Form a Delete IOCQ cmd to perform queue deletion");
-    SharedDeleteIOCQPtr deleteIOCQCmd = SharedDeleteIOCQPtr(new DeleteIOCQ(fd));
+    SharedDeleteIOCQPtr deleteIOCQCmd = SharedDeleteIOCQPtr(new DeleteIOCQ());
     deleteIOCQCmd->Init(iocq);
 
     IO::SendCmdToHdw(grpName, testName, ms, asq, acq, deleteIOCQCmd, workStr,
@@ -232,7 +230,7 @@ Queues::DeleteIOCQToHdw(int fd, string grpName, string testName, uint16_t ms,
 
 
 void
-Queues::DeleteIOSQToHdw(int fd, string grpName, string testName, uint16_t ms,
+Queues::DeleteIOSQToHdw(string grpName, string testName, uint16_t ms,
     SharedIOSQPtr iosq, SharedASQPtr asq, SharedACQPtr acq, string qualify,
     bool verbose)
 {
@@ -250,7 +248,7 @@ Queues::DeleteIOSQToHdw(int fd, string grpName, string testName, uint16_t ms,
     workStr = work;
 
     LOG_NRM("Form a Delete IOSQ cmd to perform queue deletion");
-    SharedDeleteIOSQPtr deleteIOSQCmd = SharedDeleteIOSQPtr(new DeleteIOSQ(fd));
+    SharedDeleteIOSQPtr deleteIOSQCmd = SharedDeleteIOSQPtr(new DeleteIOSQ());
     deleteIOSQCmd->Init(iosq);
 
     IO::SendCmdToHdw(grpName, testName, ms, asq, acq, deleteIOSQCmd, workStr,

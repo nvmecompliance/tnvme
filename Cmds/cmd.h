@@ -21,6 +21,7 @@
 #include "trackable.h"
 #include "prpData.h"
 #include "metaData.h"
+#include "../Exception/frmwkEx.h"
 
 class Cmd;    // forward definition
 typedef boost::shared_ptr<Cmd>              SharedCmdPtr;
@@ -40,10 +41,9 @@ class Cmd : public Trackable, public PrpData, public MetaData
 {
 public:
     /**
-     * @param fd Pass the opened file descriptor for the device under test
      * @param objBeingCreated Pass the type of object this child class is
      */
-    Cmd(int fd, Trackable::ObjType objBeingCreated);
+    Cmd(Trackable::ObjType objBeingCreated);
     virtual ~Cmd();
 
     /// Dump the entire contents of the cmd buffer to the logging endpoint
@@ -127,9 +127,6 @@ public:
 
 
 protected:
-    /// file descriptor to the device under test
-    int mFd;
-
     /**
      * Initialize this object.
      * @param cmdSet Pass which cmd set this cmd belongs

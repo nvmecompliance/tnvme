@@ -56,7 +56,7 @@ ASQ::Send(SharedCmdPtr cmd)
 
         LOG_ERR("Invoking IOCQ with IRQ's, but dnvme disabled IRQ's");
         LOG_ERR("Rethink test case, see gCtrlrConfig->SetIrqScheme()");
-        throw exception();
+        throw FrmwkEx();
     }
 
     SQ::Send(cmd);

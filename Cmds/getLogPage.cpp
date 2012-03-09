@@ -51,13 +51,7 @@ GetLogPageDataType GetLogPage::mFwLogMetrics[] =
 #undef ZZ
 
 
-GetLogPage::GetLogPage() : AdminCmd(0, Trackable::OBJTYPE_FENCE)
-{
-    // This constructor will throw
-}
-
-
-GetLogPage::GetLogPage(int fd) : AdminCmd(fd, Trackable::OBJ_GETLOGPAGE)
+GetLogPage::GetLogPage() : AdminCmd(Trackable::OBJ_GETLOGPAGE)
 {
     Init(Opcode, DATADIR_FROM_DEVICE);
 
@@ -133,10 +127,8 @@ GetLogPage::Dump(LogFilename filename, string fileHdr) const
     Cmd::Dump(filename, fileHdr);
 
     // Reopen the file and append the same data in a different format
-    if ((fp = fopen(filename.c_str(), "a")) == NULL) {
-        LOG_DBG("Failed to open file: %s", filename.c_str());
-        throw exception();
-    }
+    if ((fp = fopen(filename.c_str(), "a")) == NULL)
+        throw FrmwkEx("Failed to open file: %s", filename.c_str());
 
     fprintf(fp, "\n------------------------------------------------------\n");
     fprintf(fp, "----Detailed decoding of the cmd payload as follows---\n");
@@ -184,7 +176,7 @@ GetLogPage::Dump(FILE *fp, int field, GetLogPageDataType *logData) const
         LOG_DBG("Detected illegal definition in XXXLOG_TABLE");
         LOG_DBG("Reference calc (%d): %d + %d >= %ld", field,
             logData[field].length, logData[field].offset, GetPrpBufferSize());
-        throw exception();
+        throw FrmwkEx();
     }
 
     unsigned long addr = logData[field].offset;

@@ -21,13 +21,7 @@ SharedReadPtr Read::NullReadPtr;
 const uint8_t Read::Opcode = 0x02;
 
 
-Read::Read() : NVMCmd(0, Trackable::OBJTYPE_FENCE)
-{
-    // This constructor will throw
-}
-
-
-Read::Read(int fd) : NVMCmd(fd, Trackable::OBJ_READ)
+Read::Read() : NVMCmd(Trackable::OBJ_READ)
 {
     Init(Opcode, DATADIR_FROM_DEVICE);
 

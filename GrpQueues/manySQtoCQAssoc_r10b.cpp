@@ -74,7 +74,7 @@ ManySQtoCQAssoc_r10b::operator=(const ManySQtoCQAssoc_r10b &other)
 }
 
 
-bool
+void
 ManySQtoCQAssoc_r10b::RunCoreTest()
 {
     /** \verbatim
@@ -90,10 +90,8 @@ ManySQtoCQAssoc_r10b::RunCoreTest()
     {
         uint64_t maxIOQEntries;
         // Determine the max IOQ entries supported
-        if (gRegisters->Read(CTLSPC_CAP, maxIOQEntries) == false) {
-            LOG_ERR("Unable to determine MQES");
-            throw exception();
-        }
+        if (gRegisters->Read(CTLSPC_CAP, maxIOQEntries) == false)
+            throw FrmwkEx("Unable to determine MQES");
         maxIOQEntries &= CAP_MQES;
         if (maxIOQEntries < (uint64_t)NumEntriesIOQ) {
             LOG_NRM("Changing number of Q elements from %d to %d",
@@ -104,18 +102,18 @@ ManySQtoCQAssoc_r10b::RunCoreTest()
 
     // Set the controller to initial state.
     if (gCtrlrConfig->SetState(ST_DISABLE) == false)
-        throw exception();
+        throw FrmwkEx();
 
     gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
-        throw exception();
+        throw FrmwkEx();
 
     SharedWritePtr writeCmd = SetWriteCmd();
 
     // Create one IOCQ for test lifetime.
     gCtrlrConfig->SetIOCQES(gInformative->GetIdentifyCmdCtrlr()->
         GetValue(IDCTRLRCAP_CQES) & 0xf);
-    SharedIOCQPtr iocqContig = Queues::CreateIOCQContigToHdw(mFd, mGrpName,
+    SharedIOCQPtr iocqContig = Queues::CreateIOCQContigToHdw(mGrpName,
         mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, NumEntriesIOQ,
         false, IOCQ_CONTIG_GROUP_ID, false, 0, "iocq", true);
 
@@ -128,7 +126,7 @@ ManySQtoCQAssoc_r10b::RunCoreTest()
         GetValue(IDCTRLRCAP_SQES) & 0xf);
     for (uint16_t j = 1; j <= gInformative->GetFeaturesNumOfIOSQs(); j++) {
         LOG_NRM("Creating contig IOSQ#%d", j);
-        SharedIOSQPtr iosqContig = Queues::CreateIOSQContigToHdw(mFd, mGrpName,
+        SharedIOSQPtr iosqContig = Queues::CreateIOSQContigToHdw(mGrpName,
             mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, j, NumEntriesIOQ, false,
             IOSQ_CONTIG_GROUP_ID, IOQ_ID, 0, "iosq", true);
 
@@ -145,8 +143,6 @@ ManySQtoCQAssoc_r10b::RunCoreTest()
         }
         ReapIOCQAndVerifyCE(iocqContig, j, mSQIDToSQHDVector);
     }
-
-    return true;
 }
 
 
@@ -158,7 +154,7 @@ ManySQtoCQAssoc_r10b::SetWriteCmd()
     if (namspcData.type != Informative::NS_BARE) {
         LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
         if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
-            throw exception();
+            throw FrmwkEx();
     }
 
     LOG_NRM("Create data pattern to write to media");
@@ -167,7 +163,7 @@ ManySQtoCQAssoc_r10b::SetWriteCmd()
     dataPat->Init(lbaDataSize);
     dataPat->SetDataPattern(MemBuffer::DATAPAT_INC_16BIT);
 
-    SharedWritePtr writeCmd = SharedWritePtr(new Write(mFd));
+    SharedWritePtr writeCmd = SharedWritePtr(new Write());
     send_64b_bitmask prpBitmask = (send_64b_bitmask)(MASK_PRP1_PAGE
         | MASK_PRP2_PAGE | MASK_PRP2_LIST);
 
@@ -179,7 +175,7 @@ ManySQtoCQAssoc_r10b::SetWriteCmd()
         prpBitmask = (send_64b_bitmask)(prpBitmask | MASK_MPTR);
         LOG_ERR("Deferring E2E namspc work to the future");
         LOG_ERR("Need to add CRC's to correlate to buf pattern");
-        throw exception();
+        throw FrmwkEx();
     }
 
     writeCmd->SetPrpBuffer(prpBitmask, dataPat);
@@ -203,12 +199,10 @@ ManySQtoCQAssoc_r10b::ReapIOCQAndVerifyCE(SharedIOCQPtr iocq, uint16_t numTil,
     for (uint16_t i = 0; i < numTil; i++) {
         LOG_NRM("Wait for the CE to arrive in IOCQ");
         if (iocq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE,
-            isrCount) == false) {
-            LOG_ERR("Unable to see completion of cmd");
-            throw exception();
+            isrCount) == false) {\
+            throw FrmwkEx("Unable to see completion of cmd");
         } else if (numCE == 0) {
-            LOG_ERR("IOCQ should have one new CE for each IOSQ");
-            throw exception();
+            throw FrmwkEx("IOCQ should have one new CE for each IOSQ");
         }
 
         LOG_NRM("The CQ's metrics before reaping holds head_ptr");
@@ -219,9 +213,9 @@ ManySQtoCQAssoc_r10b::ReapIOCQAndVerifyCE(SharedIOCQPtr iocq, uint16_t numTil,
         SharedMemBufferPtr ceMemIOCQ = SharedMemBufferPtr(new MemBuffer());
         if ((numReaped = iocq->Reap(ceRemain, ceMemIOCQ, isrCount, 1, true))
             != 1) {
-            LOG_ERR("Requested to reap 1 CE, but reaping produced %d",
+
+            throw FrmwkEx("Requested to reap 1 CE, but reaping produced %d",
                 numReaped);
-            throw exception();
         }
 
         union CE ce = iocq->PeekCE(iocqMetrics.head_ptr);
@@ -229,9 +223,8 @@ ManySQtoCQAssoc_r10b::ReapIOCQAndVerifyCE(SharedIOCQPtr iocq, uint16_t numTil,
 
         LOG_NRM("Validate CE of IOSQ ID=%d", ce.n.SQID);
         if (ce.n.SQHD != mSQIDToSQHDVector[ce.n.SQID]) {
-            LOG_ERR("Expected CE.SQHD = 0x%04X in IOCQ CE but actual "
+            throw FrmwkEx("Expected CE.SQHD = 0x%04X in IOCQ CE but actual "
                 "CE.SQHD  = 0x%04X", mSQIDToSQHDVector[ce.n.SQID], ce.n.SQHD);
-            throw exception();
         }
 
         mSQIDToSQHDVector[ce.n.SQID] = USHRT_MAX; // strike off this sq id
@@ -240,8 +233,7 @@ ManySQtoCQAssoc_r10b::ReapIOCQAndVerifyCE(SharedIOCQPtr iocq, uint16_t numTil,
     // Validate all SQIDs submitted have arrived.
     for (uint16_t it = 0; it < mSQIDToSQHDVector.size(); it++) {
         if (mSQIDToSQHDVector[it] != USHRT_MAX) {
-            LOG_ERR("Never received CE for SQID %d", it);
-            throw exception();
+            throw FrmwkEx("Never received CE for SQID %d", it);
         }
     }
 }

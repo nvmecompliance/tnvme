@@ -205,7 +205,7 @@ private:
      * @param initial Pass the time when the period starting
      * @return true if the TO has expired, false otherwise
      */
-    bool CalcTimeout(uint16_t ms, struct timeval initial);
+    bool CalcTimeout(uint16_t ms, struct timeval &initial);
 };
 
 

@@ -77,7 +77,7 @@ LBAOutOfRangeBare_r10b::operator=(const LBAOutOfRangeBare_r10b &other)
 }
 
 
-bool
+void
 LBAOutOfRangeBare_r10b::RunCoreTest()
 {
     /** \verbatim
@@ -95,10 +95,8 @@ LBAOutOfRangeBare_r10b::RunCoreTest()
     vector<uint32_t> bare = gInformative->GetBareNamespaces();
     for (size_t i = 1; i < bare.size(); i++) {
         namSpcPtr = gInformative->GetIdentifyCmdNamspc(i);
-        if (namSpcPtr == Identify::NullIdentifyPtr) {
-            LOG_ERR("Identify namspc struct #%d doesn't exist", bare[i]);
-            throw exception();
-        }
+        if (namSpcPtr == Identify::NullIdentifyPtr)
+            throw FrmwkEx("Identify namspc struct #%d doesn't exist", bare[i]);
         nsze = namSpcPtr->GetValue(IDNAMESPC_NSZE);
 
         LOG_NRM("Create memory to contain read payload");
@@ -107,7 +105,7 @@ LBAOutOfRangeBare_r10b::RunCoreTest()
         readMem->Init(RD_NUM_BLKS * lbaDataSize);
 
         LOG_NRM("Create a read cmd to read data from namspc %d", bare[i]);
-        SharedReadPtr readCmd = SharedReadPtr(new Read(mFd));
+        SharedReadPtr readCmd = SharedReadPtr(new Read());
         send_64b_bitmask prpBitmask = (send_64b_bitmask)
             (MASK_PRP1_PAGE | MASK_PRP2_PAGE | MASK_PRP2_LIST);
         readCmd->SetPrpBuffer(prpBitmask, readMem);
@@ -127,8 +125,6 @@ LBAOutOfRangeBare_r10b::RunCoreTest()
         readCmd->SetSLBA(nsze);
         SendCmdToHdw(iosq, iocq, readCmd, "nsze");
     }
-
-    return true;
 }
 
 
@@ -143,9 +139,8 @@ LBAOutOfRangeBare_r10b::SendCmdToHdw(SharedSQPtr sq, SharedCQPtr cq,
 
 
     if ((numCE = cq->ReapInquiry(isrCountB4, true)) != 0) {
-        LOG_ERR("Require 0 CE's within CQ %d, not upheld, found %d",
+        throw FrmwkEx("Require 0 CE's within CQ %d, not upheld, found %d",
             cq->GetQId(), numCE);
-        throw exception();
     }
 
     LOG_NRM("Send the cmd to hdw via SQ %d", sq->GetQId());
@@ -161,16 +156,15 @@ LBAOutOfRangeBare_r10b::SendCmdToHdw(SharedSQPtr sq, SharedCQPtr cq,
     if (cq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE, isrCount)
         == false) {
 
-        LOG_ERR("Unable to see CE for issued cmd");
         work = str(boost::format(
             "Unable to see any CE's in CQ %d, dump entire CQ") % cq->GetQId());
         cq->Dump(
             FileSystem::PrepLogFile(mGrpName, mTestName, "cq." + cmd->GetName(),
             qualify), work);
-        throw exception();
+        throw FrmwkEx("Unable to see CE for issued cmd");
     } else if (numCE != 1) {
         LOG_ERR("1 cmd caused %d CE's to arrive in CQ %d", numCE, cq->GetQId());
-        throw exception();
+        throw FrmwkEx();
     }
     work = str(boost::format("Just B4 reaping CQ %d, dump entire CQ") %
         cq->GetQId());
@@ -185,9 +179,8 @@ LBAOutOfRangeBare_r10b::SendCmdToHdw(SharedSQPtr sq, SharedCQPtr cq,
     if (gCtrlrConfig->IrqsEnabled() && cq->GetIrqEnabled() &&
         (isrCount != (isrCountB4 + 1))) {
 
-        LOG_ERR("CQ using IRQ's, but IRQ count not expected (%d != %d)",
+        throw FrmwkEx("CQ using IRQ's, but IRQ count not expected (%d != %d)",
             isrCount, (isrCountB4 + 1));
-        throw exception();
     }
 }
 

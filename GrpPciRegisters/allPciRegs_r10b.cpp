@@ -66,7 +66,7 @@ AllPciRegs_r10b::operator=(const AllPciRegs_r10b &other)
 }
 
 
-bool
+void
 AllPciRegs_r10b::RunCoreTest()
 {
     /** \verbatim
@@ -75,11 +75,10 @@ AllPciRegs_r10b::RunCoreTest()
      *  \endverbatim
      */
     if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
-        throw exception();
+        throw FrmwkEx();
 
     ValidateDefaultValues();
     ValidateROBitsAfterWriting();
-    return true;
 }
 
 
@@ -137,16 +136,16 @@ AllPciRegs_r10b::ValidateROBitsAfterWriting()
         if (pciMetrics[j].cap == PCICAP_FENCE) {
             LOG_NRM("Validate RO attribute after trying to write 1");
             if (gRegisters->Read((PciSpc)j, origValue) == false)
-                throw exception();
+                throw FrmwkEx();
             value = (origValue | pciMetrics[j].maskRO);
             if (gRegisters->Write((PciSpc)j, value) == false)
-                throw exception();
+                throw FrmwkEx();
             ValidatePciHdrRegisterROAttribute((PciSpc)j);
 
             LOG_NRM("Validate RO attribute after trying to write 0");
             value = (origValue & ~pciMetrics[j].maskRO);
             if (gRegisters->Write((PciSpc)j, value) == false)
-                throw exception();
+                throw FrmwkEx();
             ValidatePciHdrRegisterROAttribute((PciSpc)j);
         }
     }
@@ -165,16 +164,16 @@ AllPciRegs_r10b::ValidateROBitsAfterWriting()
             if (pciCap->at(i) == pciMetrics[j].cap) {
                 LOG_NRM("Validate RO attribute after trying to write 1");
                 if (gRegisters->Read((PciSpc)j, origValue) == false)
-                    throw exception();
+                    throw FrmwkEx();
                 value = (origValue | pciMetrics[j].maskRO);
                 if (gRegisters->Write((PciSpc)j, value) == false)
-                    throw exception();
+                    throw FrmwkEx();
                 ValidatePciCapRegisterROAttribute((PciSpc)j);
 
                 LOG_NRM("Validate RO attribute after trying to write 0");
                 value = (origValue & ~pciMetrics[j].maskRO);
                 if (gRegisters->Write((PciSpc)j, value) == false)
-                    throw exception();
+                    throw FrmwkEx();
                 ValidatePciCapRegisterROAttribute((PciSpc)j);
             }
         }
@@ -211,7 +210,7 @@ AllPciRegs_r10b::ValidatePciCapRegisterROAttribute(PciSpc reg)
                 pciMetrics[reg].offset + (k * DWORD_LEN),
                 (uint8_t *)&value) == false) {
 
-                throw exception();
+                throw FrmwkEx();
             } else {
                 // Ignore the implementation specific bits, and bits that
                 // the manufacturer can make a decision as to their type of
@@ -229,12 +228,12 @@ AllPciRegs_r10b::ValidatePciCapRegisterROAttribute(PciSpc reg)
                     LOG_ERR("%s RO bit #%d has incorrect value",
                         pciMetrics[reg].desc,
                         ReportOffendingBitPos(value, expectedValue));
-                    throw exception();
+                    throw FrmwkEx();
                 }
             }
         }
     } else if (gRegisters->Read(reg, value) == false) {
-        throw exception();
+        throw FrmwkEx();
     } else {
         // Ignore the implementation specific bits, and bits that
         // the manufacturer can make a decision as to their type of
@@ -249,9 +248,9 @@ AllPciRegs_r10b::ValidatePciCapRegisterROAttribute(PciSpc reg)
             pciMetrics[reg].maskRO);
 
         if (value != expectedValue) {
-            LOG_ERR("%s RO bit #%d has incorrect value", pciMetrics[reg].desc,
+            throw FrmwkEx(
+                "%s RO bit #%d has incorrect value", pciMetrics[reg].desc,
                 ReportOffendingBitPos(value, expectedValue));
-            throw exception();
         }
     }
 }
@@ -271,7 +270,7 @@ AllPciRegs_r10b::ValidatePciHdrRegisterROAttribute(PciSpc reg)
                 pciMetrics[reg].offset + (k * sizeof(value)),
                 (uint8_t *)&value) == false) {
 
-                throw exception();
+                throw FrmwkEx();
             } else {
                 // Ignore the implementation specific bits, and bits that the
                 // manufacturer can make a decision as to their type of access
@@ -288,36 +287,33 @@ AllPciRegs_r10b::ValidatePciHdrRegisterROAttribute(PciSpc reg)
                     // Learn the behavior of this register, supported or not?
                     uint64_t cmdReg;
                     if (gRegisters->Read(PCISPC_CMD, cmdReg) == false)
-                        throw exception();
+                        throw FrmwkEx();
 
                     if (cmdReg & CMD_IOSE) {
                         if (value != expectedValue) {
-                            LOG_ERR("%s RO bit #%d has incorrect value",
+                            throw FrmwkEx("%s RO bit #%d has incorrect value",
                                 pciMetrics[reg].desc,
                                 ReportOffendingBitPos(value, expectedValue));
-                            throw exception();
                         }
                     } else {  // Optional index/Data pair register not supported
                         expectedValue = 0;
                         if (value != expectedValue) {
-                            LOG_ERR("%s RO bit #%d has incorrect value",
+                            throw FrmwkEx("%s RO bit #%d has incorrect value",
                                 pciMetrics[reg].desc,
                                 ReportOffendingBitPos(value, expectedValue));
-                            throw exception();
                         }
                     }
                 } else {    // generically handled all other registers
                     if (value != expectedValue) {
-                        LOG_ERR("%s RO bit #%d has incorrect value",
+                        throw FrmwkEx("%s RO bit #%d has incorrect value",
                             pciMetrics[reg].desc,
                             ReportOffendingBitPos(value, expectedValue));
-                        throw exception();
                     }
                 }
             }
         }
     } else if (gRegisters->Read(reg, value) == false) {
-        throw exception();
+        throw FrmwkEx();
     } else {
         // Ignore the implementation specific bits, and bits that the
         // manufacturer can make a decision as to their type of access RW/RO
@@ -333,30 +329,27 @@ AllPciRegs_r10b::ValidatePciHdrRegisterROAttribute(PciSpc reg)
             // Learn the behavior of this register, supported or not?
             uint64_t cmdReg;
             if (gRegisters->Read(PCISPC_CMD, cmdReg) == false)
-                throw exception();
+                throw FrmwkEx();
 
             if (cmdReg & CMD_IOSE) {
                 if (value != expectedValue) {
-                    LOG_ERR("%s RO bit #%d has incorrect value",
+                    throw FrmwkEx("%s RO bit #%d has incorrect value",
                         pciMetrics[reg].desc,
                         ReportOffendingBitPos(value, expectedValue));
-                    throw exception();
                 }
             } else {    // Optional index/Data pair register not supported
                 expectedValue = 0;
                 if (value != expectedValue) {
-                    LOG_ERR("%s RO bit #%d has incorrect value",
+                    throw FrmwkEx("%s RO bit #%d has incorrect value",
                         pciMetrics[reg].desc,
                         ReportOffendingBitPos(value, expectedValue));
-                    throw exception();
                 }
             }
         } else {    // generically handled all other registers
             if (value != expectedValue) {
-                LOG_ERR("%s RO bit #%d has incorrect value",
+                throw FrmwkEx("%s RO bit #%d has incorrect value",
                     pciMetrics[reg].desc,
                     ReportOffendingBitPos(value, expectedValue));
-                throw exception();
             }
         }
     }

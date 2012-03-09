@@ -32,14 +32,14 @@ const uint8_t BaseFeatures::FID_SW_PROGRESS          = 0x80;
 
 
 BaseFeatures::BaseFeatures() :
-    AdminCmd(0, Trackable::OBJTYPE_FENCE)
+    AdminCmd(Trackable::OBJTYPE_FENCE)
 {
     // This constructor will throw
 }
 
 
-BaseFeatures::BaseFeatures(int fd, Trackable::ObjType objBeingCreated) :
-    AdminCmd(fd, objBeingCreated)
+BaseFeatures::BaseFeatures(Trackable::ObjType objBeingCreated) :
+    AdminCmd(objBeingCreated)
 {
 }
 

@@ -71,7 +71,7 @@ CtrlrResetNotEffectAdminQ_r10b::operator=(const CtrlrResetNotEffectAdminQ_r10b &
 }
 
 
-bool
+void
 CtrlrResetNotEffectAdminQ_r10b::RunCoreTest()
 {
     /** \verbatim
@@ -80,7 +80,7 @@ CtrlrResetNotEffectAdminQ_r10b::RunCoreTest()
      *  \endverbatim
      */
     if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
-        throw exception();
+        throw FrmwkEx();
 
     // Create Admin Q Objects with test lifetime
     SharedACQPtr acq = SharedACQPtr(new ACQ(mFd));
@@ -89,19 +89,17 @@ CtrlrResetNotEffectAdminQ_r10b::RunCoreTest()
     asq->Init(15);
 
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
-        throw exception();
+        throw FrmwkEx();
 
     SendIdentifyCtrlrStruct(asq, acq);
 
     LOG_NRM("CC.EN=0, does not reset AQA/ASQ/ACQ registers");
     if (gCtrlrConfig->SetState(ST_DISABLE) == false)
-        throw exception();
+        throw FrmwkEx();
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
-        throw exception();
+        throw FrmwkEx();
 
     SendIdentifyCtrlrStruct(asq, acq);
-
-    return true;
 }
 
 
@@ -110,7 +108,7 @@ CtrlrResetNotEffectAdminQ_r10b::SendIdentifyCtrlrStruct(SharedASQPtr asq,
     SharedACQPtr acq)
 {
     LOG_NRM("Create 1st identify cmd and assoc some buffer memory");
-    SharedIdentifyPtr idCmdCtrlr = SharedIdentifyPtr(new Identify(mFd));
+    SharedIdentifyPtr idCmdCtrlr = SharedIdentifyPtr(new Identify());
     LOG_NRM("Force identify to request ctrlr capabilities struct");
     idCmdCtrlr->SetCNS(true);
     SharedMemBufferPtr idMemCap = SharedMemBufferPtr(new MemBuffer());

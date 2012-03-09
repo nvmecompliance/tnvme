@@ -35,7 +35,7 @@ typedef boost::shared_ptr<const SetFeatures>        ConstSharedSetFeaturesPtr;
 class SetFeatures : public BaseFeatures
 {
 public:
-    SetFeatures(int fd);
+    SetFeatures();
     virtual ~SetFeatures();
 
     /// Used to compare for NULL pointers being returned by allocations
@@ -50,10 +50,6 @@ public:
      */
     void SetNumberOfQueues(uint16_t ncqr, uint16_t nsqr);
     uint32_t GetNumberOfQueues() const;
-
-
-private:
-    SetFeatures();
 };
 
 

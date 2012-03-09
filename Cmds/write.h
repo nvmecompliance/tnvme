@@ -35,7 +35,7 @@ typedef boost::shared_ptr<const Write>       ConstSharedWritePtr;
 class Write : public NVMCmd
 {
 public:
-    Write(int fd);
+    Write();
     virtual ~Write();
 
     /// Used to compare for NULL pointers being returned by allocations
@@ -125,10 +125,6 @@ public:
      */
     void     SetLBAT(uint16_t lbat);
     uint16_t GetLBAT() const;
-
-
-private:
-    Write();
 };
 
 

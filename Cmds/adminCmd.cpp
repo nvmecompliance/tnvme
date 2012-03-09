@@ -17,15 +17,13 @@
 #include "adminCmd.h"
 
 
-AdminCmd::AdminCmd() :
-    Cmd(0, Trackable::OBJTYPE_FENCE)
+AdminCmd::AdminCmd() : Cmd(Trackable::OBJTYPE_FENCE)
 {
     // This constructor will throw
 }
 
 
-AdminCmd::AdminCmd(int fd, Trackable::ObjType objBeingCreated) :
-    Cmd(fd, objBeingCreated)
+AdminCmd::AdminCmd(Trackable::ObjType objBeingCreated) : Cmd(objBeingCreated)
 {
 }
 
