@@ -280,7 +280,8 @@ CQ::ReapInquiryWaitAny(uint16_t ms, uint16_t &numCE, uint32_t &isrCount)
         }
     }
 
-    LOG_ERR("Timed out waiting %d ms for CE's in CQ %d", ms, GetQId());
+    LOG_ERR("Timed out waiting %d ms for any CE in CQ %d, found %d",
+        ms, GetQId(), numCE);
     struct nvme_gen_cq qMetrics = LogQMetrics();
     LOG_NRM("qMetrics.head_ptr dump follows:");
     LogCE(qMetrics.head_ptr);
@@ -310,7 +311,8 @@ CQ::ReapInquiryWaitSpecify(uint16_t ms, uint16_t numTil, uint16_t &numCE,
         }
     }
 
-    LOG_ERR("Timed out waiting %d ms for CE's in CQ %d", ms, GetQId());
+    LOG_ERR("Timed out waiting %d ms for %d CE's in CQ %d, found %d",
+        ms, numTil, GetQId(), numCE);
     struct nvme_gen_cq qMetrics = LogQMetrics();
     LOG_NRM("qMetrics.head_ptr dump follows:");
     LogCE(qMetrics.head_ptr);
@@ -328,6 +330,7 @@ bool
 CQ::CalcTimeout(uint16_t ms, struct timeval &initial)
 {
     struct timeval current;
+
     if (gettimeofday(&current, &TZ_NULL) != 0)
         throw FrmwkEx("Cannot retrieve system time");
 

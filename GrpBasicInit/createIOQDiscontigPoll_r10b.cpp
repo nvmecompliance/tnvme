@@ -108,7 +108,7 @@ CreateIOQDiscontigPoll_r10b::RunCoreTest()
     } if (gRegisters->Read(CTLSPC_CAP, work) == false) {
         throw FrmwkEx("Unable to determine MQES");
     }
-throw FrmwkEx(); //todd
+
     // Verify the min requirements for this test are supported by DUT
     work &= CAP_MQES;
     if (work < (uint64_t)NumEntriesIOQ) {

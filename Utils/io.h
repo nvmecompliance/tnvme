@@ -69,7 +69,7 @@ public:
      * @param qualify Pass a qualifying string to append to each dump file
      * @param status Pass the expected status to verify with
      */
-    static void ReapCE(SharedCQPtr cq, uint16_t numCE,  uint32_t &isrCount,
+    static void ReapCE(SharedCQPtr cq, uint16_t numCE, uint32_t &isrCount,
         string grpName, string testName, string qualify,
         CEStat status = CESTAT_SUCCESS);
 

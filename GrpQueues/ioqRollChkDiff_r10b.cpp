@@ -164,7 +164,6 @@ IOQRollChkDiff_r10b::SetWriteCmd()
     SharedMemBufferPtr dataPat = SharedMemBufferPtr(new MemBuffer());
     uint64_t lbaDataSize = namspcData.idCmdNamspc->GetLBADataSize();
     dataPat->Init(lbaDataSize);
-    dataPat->SetDataPattern(MemBuffer::DATAPAT_INC_16BIT);
 
     SharedWritePtr writeCmd = SharedWritePtr(new Write());
     send_64b_bitmask prpBitmask = (send_64b_bitmask)(MASK_PRP1_PAGE

@@ -34,7 +34,7 @@ AdminQFull_r10b::AdminQFull_r10b(int fd, string grpName,
     // No string size limit for the long description
     mTestDesc.SetLong(
         "Create 2 cases where size: {ASQ=ACQ, ASQ=ACQ+1}, however within "
-        "each case, 3 samples of the queue pairs are {min, mid, max}sized. "
+        "each case, 3 samples of the queue pairs are {min, mid, max} sized. "
         "Submit ((ASQ.size-1) cmds into ASQ always fills both queues, "
         "submit, ring each cmd, wait for CE to arrive, continue pattern. "
         "Verify in = case all CE's arrive, in > case all but 1 CE's "
@@ -111,14 +111,6 @@ AdminQFull_r10b::AdminQFull(uint16_t numASQEntries, uint16_t numACQEntries,
     uint16_t numCE;
     uint32_t isrCount;
 
-    // Check if the test requirements are satisfied.
-    if ((numASQEntries != numACQEntries) &&
-        (numASQEntries != (numACQEntries + 1))) {
-        LOG_ERR("Cannot continue test with given Q sizes, refer test desc. "
-            "ASQ Entries #%d, ACQ Entries #%d", numASQEntries, numACQEntries);
-        return;
-    }
-
     if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
         throw FrmwkEx();
 
@@ -140,17 +132,29 @@ AdminQFull_r10b::AdminQFull(uint16_t numASQEntries, uint16_t numACQEntries,
         asq->Send(idCmdCtrlr);
         asq->Ring();
 
-        // when asq size = acq size + 1, last CE will never arrive.
-        if ((numASQEntries == numACQEntries + 1) &&
-            (nCmds == nCmdsToSubmit - 1)) {
-            break;
-        }
-
         LOG_NRM("Wait for the CE to arrive in ACQ");
         if (acq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, (nCmds + 1), numCE,
             isrCount) == false) {
+            // when asq size = acq size + 1, last CE will never arrive.
+            if ((numASQEntries == numACQEntries + 1) &&
+                (nCmds == nCmdsToSubmit - 1)) {
+                // Reap one element from IOCQ to make room for last CE.
+                IO::ReapCE(acq, 1, isrCount, mGrpName, mTestName, "ACQCE",
+                    CESTAT_SUCCESS);
+                if (acq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, nCmds,
+                    numCE, isrCount) == false) {
+                    acq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName,
+                        "acq." + idCmdCtrlr->GetName()), "Dump entire ACQ");
+                    throw FrmwkEx("Unable to see last CE as expected");
+                }
+                break;
+            }
+            acq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName,
+                "acq." + idCmdCtrlr->GetName()), "Dump Entire ACQ");
             throw FrmwkEx("Unable to see CE for issued cmd #%d", nCmds + 1);
         } else if (numCE != nCmds + 1) {
+            acq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName,
+                "acq." + idCmdCtrlr->GetName()), "Dump Entire ACQ");
             throw FrmwkEx("Missing last CE, #%d cmds of #%d received",
                 nCmds + 1, numCE);
         }

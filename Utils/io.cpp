@@ -59,13 +59,12 @@ IO::SendCmdToHdw(string grpName, string testName, uint16_t ms,
 
     LOG_NRM("Wait for the CE to arrive in CQ %d", cq->GetQId());
     if (cq->ReapInquiryWaitSpecify(ms, 1, numCE, isrCount) == false) {
-        LOG_ERR("Unable to see CE for issued cmd");
         work = str(boost::format(
             "Unable to see any CE's in CQ %d, dump entire CQ") % cq->GetQId());
         cq->Dump(
             FileSystem::PrepLogFile(grpName, testName, "cq." + cmd->GetName(),
             qualify), work);
-        throw FrmwkEx();
+        throw FrmwkEx(work);
     } else if (numCE != 1) {
         throw FrmwkEx("1 cmd caused %d CE's to arrive in CQ %d",
             numCE, cq->GetQId());
@@ -113,11 +112,10 @@ IO::ReapCE(SharedCQPtr cq, uint16_t numCE, uint32_t &isrCount,
     if ((numReaped = cq->Reap(ceRemain, ceMem, isrCount, numCE, true)) != 1) {
         work = str(boost::format("Verified CE's exist, desired %d, reaped %d")
             % numCE % numReaped);
-        LOG_ERR_STR(work);
         cq->Dump(
             FileSystem::PrepLogFile(grpName, testName, "cq.error", qualify),
             work);
-        throw FrmwkEx();
+        throw FrmwkEx(work);
     }
     union CE ce = cq->PeekCE(cqMetrics.head_ptr);
     ProcessCE::Validate(ce, status);  // throws upon error
