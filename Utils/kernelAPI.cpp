@@ -42,10 +42,8 @@ KernelAPI::mmap(size_t bufLength, uint16_t bufID, MmapRegion region)
 {
     int prot = PROT_READ;
 
-    if (region >= MMAPREGION_FENCE) {
-        LOG_DBG("Detected illegal region = %d", region);
-        throw FrmwkEx();
-    }
+    if (region >= MMAPREGION_FENCE)
+        throw FrmwkEx("Detected illegal region = %d", region);
 
     if (region == MMR_META)
         prot |= PROT_WRITE;
@@ -76,8 +74,7 @@ KernelAPI::DumpKernelMetrics(LogFilename filename)
     if ((rc = ioctl(gInformative->GetFD(), NVME_IOCTL_DUMP_METRICS,
         &dumpMe)) < 0) {
 
-        LOG_DBG("Unable to dump dnvme metrics, error code = %d", rc);
-        throw FrmwkEx();
+        throw FrmwkEx("Unable to dump dnvme metrics, error code = %d", rc);
     }
 }
 

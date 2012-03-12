@@ -225,10 +225,9 @@ AllPciRegs_r10b::ValidatePciCapRegisterROAttribute(PciSpc reg)
                     pciMetrics[reg].maskRO);
 
                 if (value != expectedValue) {
-                    LOG_ERR("%s RO bit #%d has incorrect value",
+                    throw FrmwkEx("%s RO bit #%d has incorrect value",
                         pciMetrics[reg].desc,
-                        ReportOffendingBitPos(value, expectedValue));
-                    throw FrmwkEx();
+                        ReportOffendingBitPos(value, expectedValue));\
                 }
             }
         }

@@ -90,6 +90,9 @@ IgnoreMetaPtrBase_r10b::RunCoreTest()
     SharedIOCQPtr iocq = CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_GROUP_ID));
 
     if ((numCE = iocq->ReapInquiry(isrCountB4, true)) != 0) {
+        iocq->Dump(
+            FileSystem::PrepLogFile(mGrpName, mTestName, "iocq",
+            "notEmpty"), "Test assumption have not been met");
         throw FrmwkEx("Require 0 CE's within CQ %d, not upheld, found %d",
             iocq->GetQId(), numCE);
     }

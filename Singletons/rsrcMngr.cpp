@@ -15,6 +15,7 @@
  */
 
 #include "rsrcMngr.h"
+#include "../Exception/frmwkEx.h"
 
 
 bool RsrcMngr::mInstanceFlag = false;
@@ -43,10 +44,8 @@ RsrcMngr::RsrcMngr(int fd, SpecRev specRev) :
     ObjRsrc(fd), MetaRsrc(fd)
 {
     mFd = fd;
-    if (mFd < 0) {
-        LOG_DBG("Object created with a bad FD=%d", fd);
-        return;
-    }
+    if (mFd < 0)
+        throw FrmwkEx("Object created with a bad FD=%d", fd);
 
     mSpecRev = specRev;
 }

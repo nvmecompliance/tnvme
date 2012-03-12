@@ -47,16 +47,6 @@ using namespace std;
 #define LOG_DBG(fmt, ...)       ;
 #endif
 
-#ifdef DEBUG_DEEP
-// Debug statements which were needed at 1 point in time but they end up
-// cluttering up the logging system. Quiet these logs until needed again.
-#define LOG_DBG_DEEP(fmt, ...)  \
-    fprintf(stderr, "%s-dbg-deep:%s:%d: " fmt "\n", LEVEL, __FILE__,        \
-        __LINE__, ## __VA_ARGS__);
-#else
-#define LOG_DBG_DEEP(fmt, ...)  ;
-#endif
-
 
 #define MAX_CHAR_PER_LINE_DESCRIPTION       63
 

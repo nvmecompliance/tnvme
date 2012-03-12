@@ -91,7 +91,7 @@ Buffers::Dump(LogFilename filename, const uint8_t *buf, uint32_t bufOffset,
         fprintf(fp, "0x00000000: BUFFER IS EMPTY\n");
         goto Dump_EXIT_SUCCESS;
     } else if (bufOffset >= totalBufSize) {
-        LOG_DBG("Offset into buffer 0x%08X >= to buffer size 0x%08X",
+        LOG_ERR("Offset into buffer 0x%08X >= to buffer size 0x%08X",
             bufOffset, totalBufSize);
         goto Dump_EXIT_ERROR;
     }

@@ -779,7 +779,7 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
                             numSkipped++;
                             break;
                         case Group::TR_NOTFOUND:
-                            LOG_DBG("Internal programming error, ambiguous");
+                            LOG_ERR("Internal programming error, ambiguous");
                             goto ABORT_OUT;
                         }
                         if ((cl.ignore == false) && (allTestsPass == false)) {
@@ -825,7 +825,7 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
                                 numSkipped++;
                                 break;
                             case Group::TR_NOTFOUND:
-                                LOG_DBG("Internal program error, ambiguous");
+                                LOG_ERR("Internal program error, ambiguous");
                                 goto ABORT_OUT;
                             }
                             if ((cl.ignore == false) &&

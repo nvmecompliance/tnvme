@@ -107,7 +107,7 @@ WriteDataPat_r10b::WriteDataPattern()
     dataPat->SetDataPattern(MemBuffer::DATAPAT_INC_16BIT);
     dataPat->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "DataPat"),
         "Write buffer's data pattern");
-    
+
 
     LOG_NRM("Create a generic write cmd to send data pattern to namspc 1");
     SharedWritePtr writeCmd = SharedWritePtr(new Write());
@@ -169,6 +169,9 @@ WriteDataPat_r10b::SendToIOSQ(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
             "Unable to see any CE's in IOCQ, dump entire CQ contents");
         throw FrmwkEx("Unable to see completion of cmd");
     } else if (numCE != 1) {
+        iocq->Dump(
+            FileSystem::PrepLogFile(mGrpName, mTestName, "iocq", qualifier),
+            "Unable to see any CE's in IOCQ, dump entire CQ contents");
         throw FrmwkEx("The IOCQ should only have 1 CE as a result of a cmd");
     }
     iocq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "iocq", qualifier),

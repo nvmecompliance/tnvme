@@ -68,7 +68,7 @@ FileSystem::SetRootLogDir(string dir)
             return false;
         }
     } catch (...) {
-        LOG_DBG("boost::filesystem exception");
+        LOG_ERR("boost::filesystem exception");
         return false;
     }
 }

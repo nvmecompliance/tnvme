@@ -117,10 +117,9 @@ Identify::GetValue(int field, IdentifyDataType *idData) const
             sizeof(uint64_t));
     } else if ((idData[field].length + idData[field].offset) >=
         GetPrpBufferSize()) {
-        LOG_DBG("Detected illegal def in IDxxxxx_TABLE or buffer is to small");
-        LOG_DBG("Reference calc (%d): %d + %d >= %ld", field,
+        LOG_ERR("Detected illegal def in IDxxxxx_TABLE or buffer is to small");
+        throw FrmwkEx("Reference calc (%d): %d + %d >= %ld", field,
             idData[field].length, idData[field].offset, GetPrpBufferSize());
-        throw FrmwkEx();
     }
 
     for (int i = 0; i < idData[field].length; i++) {
@@ -172,10 +171,9 @@ Identify::Dump(FILE *fp, int field, IdentifyDataType *idData) const
 
     data = &((GetROPrpBuffer())[idData[field].offset]);
     if ((idData[field].length + idData[field].offset) > GetPrpBufferSize()) {
-        LOG_DBG("Detected illegal definition in IDxxxxx_TABLE");
-        LOG_DBG("Reference calc (%d): %d + %d >= %ld", field,
+        LOG_ERR("Detected illegal definition in IDxxxxx_TABLE");
+        throw FrmwkEx("Reference calc (%d): %d + %d >= %ld", field,
             idData[field].length, idData[field].offset, GetPrpBufferSize());
-        throw FrmwkEx();
     }
 
     unsigned long addr = idData[field].offset;

@@ -28,10 +28,8 @@ Queue::Queue(int fd, Trackable::ObjType objBeingCreated) :
     Trackable(objBeingCreated)
 {
     mFd = fd;
-    if (mFd < 0) {
-        LOG_DBG("Object created with a bad FD=%d", fd);
-        return;
-    }
+    if (mFd < 0)
+        throw FrmwkEx("Object created with a bad FD=%d", fd);
 
     mQId = 0;
     mEntrySize = 0;

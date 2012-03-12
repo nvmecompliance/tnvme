@@ -98,6 +98,9 @@ CreateIOQDiscontigPoll_r10b::RunCoreTest()
 
     // Verify assumptions are active/enabled/present/setup
     if (acq->ReapInquiry(isrCount, true) != 0) {
+        acq->Dump(
+            FileSystem::PrepLogFile(mGrpName, mTestName, "acq",
+            "notEmpty"), "Test assumption have not been met");
         throw FrmwkEx(
             "The ACQ should not have any CE's waiting before testing");
     } else if (gRegisters->Read(CTLSPC_CAP, regVal) == false) {

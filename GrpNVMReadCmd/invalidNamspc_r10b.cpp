@@ -89,6 +89,9 @@ InvalidNamspc_r10b::RunCoreTest()
     SharedIOCQPtr iocq = CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_GROUP_ID));
 
     if ((numCE = iocq->ReapInquiry(isrCountB4, true)) != 0) {
+        iocq->Dump(
+            FileSystem::PrepLogFile(mGrpName, mTestName, "iocq",
+            "notEmpty"), "Test assumption have not been met");
         throw FrmwkEx("Require 0 CE's within CQ %d, not upheld, found %d",
             iocq->GetQId(), numCE);
     }
@@ -143,8 +146,13 @@ InvalidNamspc_r10b::SendCmdToHdw(SharedSQPtr sq, SharedCQPtr cq,
             qualify), work);
         throw FrmwkEx("Unable to see CE for issued cmd");
     } else if (numCE != 1) {
-        LOG_ERR("1 cmd caused %d CE's to arrive in CQ %d", numCE, cq->GetQId());
-        throw FrmwkEx();
+        work = str(boost::format(
+            "Unable to see any CE's in CQ %d, dump entire CQ") % cq->GetQId());
+        cq->Dump(
+            FileSystem::PrepLogFile(mGrpName, mTestName, "cq." + cmd->GetName(),
+            qualify), work);
+        throw FrmwkEx("1 cmd caused %d CE's to arrive in CQ %d",
+            numCE, cq->GetQId());
     }
 
     LOG_NRM("The CQ's metrics before reaping holds head_ptr");

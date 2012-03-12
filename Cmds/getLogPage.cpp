@@ -80,9 +80,9 @@ GetLogPage::SetNUMD(uint16_t numDW)
     numDWAvail = ((errLogPgEntries * ERRINFO_DATA_SIZE) / sizeof(uint32_t));
     if (numDWAvail > numDW) {
         // per the spec this action is undef'd, so don't allow it
-        LOG_ERR("Request %d DWORDS > %lld available yields undef'd results",
+        throw FrmwkEx(
+            "Request %d DWORDS > %lld available yields undef'd results",
             numDW, (unsigned long long)numDWAvail);
-        throw  exception();
     }
 
     uint16_t curVal = GetWord(10, 1);
@@ -173,10 +173,9 @@ GetLogPage::Dump(FILE *fp, int field, GetLogPageDataType *logData) const
 
     data = &((GetROPrpBuffer())[logData[field].offset]);
     if ((logData[field].length + logData[field].offset) > GetPrpBufferSize()) {
-        LOG_DBG("Detected illegal definition in XXXLOG_TABLE");
-        LOG_DBG("Reference calc (%d): %d + %d >= %ld", field,
+        LOG_ERR("Detected illegal definition in XXXLOG_TABLE");
+        throw FrmwkEx("Reference calc (%d): %d + %d >= %ld", field,
             logData[field].length, logData[field].offset, GetPrpBufferSize());
-        throw FrmwkEx();
     }
 
     unsigned long addr = logData[field].offset;

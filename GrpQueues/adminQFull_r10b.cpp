@@ -135,6 +135,7 @@ AdminQFull_r10b::AdminQFull(uint16_t numASQEntries, uint16_t numACQEntries,
         LOG_NRM("Wait for the CE to arrive in ACQ");
         if (acq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, (nCmds + 1), numCE,
             isrCount) == false) {
+
             // when asq size = acq size + 1, last CE will never arrive.
             if ((numASQEntries == numACQEntries + 1) &&
                 (nCmds == nCmdsToSubmit - 1)) {
@@ -152,6 +153,7 @@ AdminQFull_r10b::AdminQFull(uint16_t numASQEntries, uint16_t numACQEntries,
             acq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName,
                 "acq." + idCmdCtrlr->GetName()), "Dump Entire ACQ");
             throw FrmwkEx("Unable to see CE for issued cmd #%d", nCmds + 1);
+
         } else if (numCE != nCmds + 1) {
             acq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName,
                 "acq." + idCmdCtrlr->GetName()), "Dump Entire ACQ");

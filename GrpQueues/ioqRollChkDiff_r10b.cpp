@@ -176,8 +176,7 @@ IOQRollChkDiff_r10b::SetWriteCmd()
         writeCmd->AllocMetaBuffer();
         prpBitmask = (send_64b_bitmask)(prpBitmask | MASK_MPTR);
         LOG_ERR("Deferring E2E namspc work to the future");
-        LOG_ERR("Need to add CRC's to correlate to buf pattern");
-        throw FrmwkEx();
+        throw FrmwkEx("Need to add CRC's to correlate to buf pattern");
     }
 
     writeCmd->SetPrpBuffer(prpBitmask, dataPat);

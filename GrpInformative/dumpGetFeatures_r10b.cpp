@@ -86,6 +86,9 @@ DumpGetFeatures_r10b::RunCoreTest()
 
     // Assuming the cmd we issue will result in only a single CE
     if (acq->ReapInquiry(isrCount, true) != 0) {
+        acq->Dump(
+            FileSystem::PrepLogFile(mGrpName, mTestName, "acq",
+            "notEmpty"), "Test assumption have not been met");
         throw FrmwkEx(
             "The ACQ should not have any CE's waiting before testing");
     }
@@ -129,6 +132,10 @@ DumpGetFeatures_r10b::SendGetFeaturesNumOfQueues(SharedASQPtr asq,
             "Unable to see any CE's in CQ0, dump entire CQ contents");
         throw FrmwkEx("Unable to see completion of get features cmd");
     } else if (numCE != 1) {
+        acq->Dump(
+            FileSystem::PrepLogFile(mGrpName, mTestName, "acq",
+            "GetFeat.NumOfQueue"),
+            "Unable to see any CE's in CQ0, dump entire CQ contents");
         LOG_ERR("The ACQ should only have 1 CE as a result of a cmd");
         throw FrmwkEx();
     }

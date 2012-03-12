@@ -194,32 +194,29 @@ AdminQRollChkDiff_r10b::VerifyQPointers(SharedACQPtr acq, SharedASQPtr asq)
     uint16_t expectedVal = (2 + MAX(acq->GetNumEntries(),
         asq->GetNumEntries())) % acq->GetNumEntries();
     if (acqMetrics.head_ptr != expectedVal) {
-        LOG_ERR("Expected ACQ.head_ptr = 0x%04X but actual "
-            "ACQ.head_ptr = 0x%04X", expectedVal, acqMetrics.head_ptr);
         acq->Dump(
             FileSystem::PrepLogFile(mGrpName, mTestName, "acq", "head_ptr"),
             "CQ Metrics Head Pointer Inconsistent");
-        throw FrmwkEx();
+        throw FrmwkEx("Expected ACQ.head_ptr = 0x%04X but actual "
+            "ACQ.head_ptr = 0x%04X", expectedVal, acqMetrics.head_ptr);
     }
 
     expectedVal = (2 + MAX(acq->GetNumEntries(), asq->GetNumEntries())) %
         asq->GetNumEntries();
     if (asqMetrics.tail_ptr != expectedVal) {
-        LOG_ERR("Expected  ASQ.tail_ptr = 0x%04X but actual "
-            "ASQ.tail_ptr  = 0x%04X", expectedVal, asqMetrics.tail_ptr);
         asq->Dump(
             FileSystem::PrepLogFile(mGrpName, mTestName, "asq", "tail_ptr"),
             "SQ Metrics Tail Pointer Inconsistent");
-        throw FrmwkEx();
+        throw FrmwkEx("Expected  ASQ.tail_ptr = 0x%04X but actual "
+            "ASQ.tail_ptr  = 0x%04X", expectedVal, asqMetrics.tail_ptr);
     }
 
     if (ce.n.SQHD != expectedVal) {
-        LOG_ERR("Expected CE.SQHD = 0x%04X in ACQ completion entry but actual "
-            "CE.SQHD  = 0x%04X", expectedVal, ce.n.SQHD);
         acq->Dump(
             FileSystem::PrepLogFile(mGrpName, mTestName, "acq", "CE.SQHD"),
             "CE SQ Head Pointer Inconsistent");
-        throw FrmwkEx();
+        throw FrmwkEx("Expected CE.SQHD = 0x%04X in ACQ completion entry but actual "
+            "CE.SQHD  = 0x%04X", expectedVal, ce.n.SQHD);
     }
 }
 

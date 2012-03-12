@@ -14,6 +14,7 @@
  *  limitations under the License.
  */
 
+#include "../Exception/frmwkEx.h"
 #include "grpCtrlRegisters.h"
 #include "allCtrlRegs_r10b.h"
 #include "ctrlrResetDefaults_r10b.h"
@@ -39,8 +40,7 @@ GrpCtrlRegisters::GrpCtrlRegisters(size_t grpNum, SpecRev specRev,
 
     default:
     case SPECREVTYPE_FENCE:
-        LOG_DBG("Object created with an unknown SpecRev=%d", specRev);
-        break;
+        throw FrmwkEx("Object created with an unknown SpecRev=%d", specRev);
     }
 }
 

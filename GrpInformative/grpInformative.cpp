@@ -43,8 +43,7 @@ GrpInformative::GrpInformative(size_t grpNum, SpecRev specRev,
 
     default:
     case SPECREVTYPE_FENCE:
-        LOG_DBG("Object created with an unknown SpecRev=%d", specRev);
-        break;
+        throw FrmwkEx("Object created with an unknown SpecRev=%d", specRev);
     }
 }
 

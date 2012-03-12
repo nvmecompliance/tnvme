@@ -48,10 +48,8 @@ CtrlrConfig::CtrlrConfig(int fd, SpecRev specRev) :
     SubjectCtrlrState(ST_DISABLE_COMPLETELY)
 {
     mFd = fd;
-    if (mFd < 0) {
-        LOG_DBG("Object created with a bad FD=%d", fd);
-        return;
-    }
+    if (mFd < 0)
+        throw FrmwkEx("Object created with a bad FD=%d", fd);
 
     mSpecRev = specRev;
 
@@ -144,7 +142,7 @@ bool
 CtrlrConfig::SetIrqScheme(enum nvme_irq_type newIrq, uint16_t numIrqs)
 {
     if (IsStateEnabled()) {
-        LOG_DBG("The NVMe must be disabled in order to change the IRQ scheme");
+        LOG_ERR("The NVMe must be disabled in order to change the IRQ scheme");
         return false;
     }
 
@@ -281,7 +279,7 @@ CtrlrConfig::SetRegValue(uint8_t value, uint8_t valueMask, uint64_t regMask,
     uint8_t bitShift)
 {
     if (value & ~valueMask) {
-        LOG_DBG("Parameter value is to large: 0x%02X", value);
+        LOG_ERR("Parameter value is to large: 0x%02X", value);
         return false;
     }
 
@@ -388,7 +386,7 @@ CtrlrConfig::SetMPS()
         LOG_NRM("Writing CC.MPS for a 4096 byte page size");
         return SetRegValue(0, 0x0f, CC_MPS, 7);
     default:
-        LOG_DBG("Kernel reporting unsupported page size: 0x%08lX",
+        LOG_ERR("Kernel reporting unsupported page size: 0x%08lX",
             sysconf(_SC_PAGESIZE));
         return false;
     }

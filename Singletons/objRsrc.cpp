@@ -60,10 +60,8 @@ ObjRsrc::ObjRsrc()
 ObjRsrc::ObjRsrc(int fd)
 {
     mFd = fd;
-    if (mFd < 0) {
-        LOG_DBG("Object created with a bad FD=%d", fd);
-        return;
-    }
+    if (mFd < 0)
+        throw FrmwkEx("Object created with a bad FD=%d", fd);
 }
 
 
@@ -93,8 +91,7 @@ ObjRsrc::AllocWorker(Trackable::ObjType type)
     INSTANTIATE_OBJ(READ, Read)
 
     default:
-        LOG_DBG("Unknown obj type specified: 0x%02X", type);
-        break;
+        throw FrmwkEx("Unknown obj type specified: 0x%02X", type);
     }
 
     return Trackable::NullTrackablePtr;
@@ -105,13 +102,13 @@ SharedTrackablePtr
 ObjRsrc::AllocObj(Trackable::ObjType type, string lookupName)
 {
     if (lookupName.length() == 0) {
-        LOG_DBG("Parameter lookupName has no value");
+        LOG_ERR("Parameter lookupName has no value");
         return Trackable::NullTrackablePtr;
     }
 
     SharedTrackablePtr newObj = AllocWorker(type);
     if (newObj == Trackable::NullTrackablePtr) {
-        LOG_DBG("System unable to create object from heap");
+        LOG_ERR("System unable to create object from heap");
         return Trackable::NullTrackablePtr;
     }
 
@@ -119,7 +116,7 @@ ObjRsrc::AllocObj(Trackable::ObjType type, string lookupName)
     pair<TrackableMap::iterator, bool> result;
     result = mObjGrpLife.insert(TrackablePair(lookupName, newObj));
     if (result.second == false) {
-        LOG_DBG("Created object with collisions in lookupName: %s",
+        LOG_ERR("Created object with collisions in lookupName: %s",
             lookupName.c_str());
         return Trackable::NullTrackablePtr;
     }

@@ -37,8 +37,7 @@ GrpTemplate::GrpTemplate(size_t grpNum, SpecRev specRev, ErrorRegs errRegs,
 
     default:
     case SPECREVTYPE_FENCE:
-        LOG_DBG("Object created with an unknown SpecRev=%d", specRev);
-        break;
+        throw FrmwkEx("Object created with an unknown SpecRev=%d", specRev);
     }
 }
 

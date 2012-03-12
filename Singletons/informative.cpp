@@ -44,10 +44,8 @@ void Informative::KillInstance()
 Informative::Informative(int fd, SpecRev specRev)
 {
     mFd = fd;
-    if (mFd < 0) {
-        LOG_DBG("Object created with a bad FD=%d", fd);
-        return;
-    }
+    if (mFd < 0)
+        throw FrmwkEx("Object created with a bad FD=%d", fd);
 
     mSpecRev = specRev;
     Clear();
@@ -84,11 +82,11 @@ ConstSharedIdentifyPtr
 Informative::GetIdentifyCmdNamspc(uint64_t namspcId) const
 {
     if (namspcId > mIdentifyCmdNamspc.size()) {
-        LOG_DBG("Requested Identify namspc struct %llu, out of %lu",
+        LOG_ERR("Requested Identify namspc struct %llu, out of %lu",
             (long long unsigned int)namspcId, mIdentifyCmdNamspc.size());
         return Identify::NullIdentifyPtr;
     } else if (namspcId == 0) {
-        LOG_DBG("Namespace ID 0 is illegal, must start at 1");
+        LOG_ERR("Namespace ID 0 is illegal, must start at 1");
         return Identify::NullIdentifyPtr;
     }
 

@@ -29,10 +29,8 @@ MetaRsrc::MetaRsrc()
 MetaRsrc::MetaRsrc(int fd)
 {
     mFd = fd;
-    if (mFd < 0) {
-        LOG_DBG("Object created with a bad FD=%d", fd);
-        return;
-    }
+    if (mFd < 0)
+        throw FrmwkEx("Object created with a bad FD=%d", fd);
 
     mMetaAllocSize = 0;
 }
@@ -52,14 +50,14 @@ MetaRsrc::SetMetaAllocSize(uint16_t allocSize)
     if (mMetaAllocSize == allocSize) {
         ;    // Already setup, no need to resend
     } else if (mMetaAllocSize != 0) {
-        LOG_DBG("Attempt to reset meta data alloc size w/o 1st disabling");
+        LOG_ERR("Attempt to reset meta data alloc size w/o 1st disabling");
         return false;
     } else if (allocSize % sizeof(uint32_t)) {
-        LOG_DBG("Requested meta data alloc size is not modulo %ld",
+        LOG_ERR("Requested meta data alloc size is not modulo %ld",
             sizeof(uint32_t));
         return false;
     } else if (allocSize > (1 << 15)) {
-        LOG_DBG("Meta data alloc size exceeds max, 0x%04X > 0x%04X",
+        LOG_ERR("Meta data alloc size exceeds max, 0x%04X > 0x%04X",
             allocSize, (1 << 15));
         return false;
     } else if ((rc = ioctl(mFd, NVME_IOCTL_METABUF_CREATE, allocSize)) < 0) {
@@ -125,7 +123,7 @@ MetaRsrc::ReserveMetaBuf(MetaDataBuf &metaBuf)
             metaBuf.buf = KernelAPI::mmap(metaBuf.size, metaBuf.ID,
                 KernelAPI::MMR_META);
             if (metaBuf.buf == NULL) {
-                LOG_DBG("Unable to mmap contig memory to user space");
+                LOG_ERR("Unable to mmap contig memory to user space");
                 // Have to free the memory, not useful if we can't access it
                 if ((rc =ioctl(mFd, NVME_IOCTL_METABUF_DELETE, metaBuf.ID)) < 0)
                     LOG_ERR("Meta data free request denied with error: %d", rc);

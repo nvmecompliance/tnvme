@@ -42,6 +42,9 @@ IO::SendCmdToHdw(string grpName, string testName, uint16_t ms,
 
 
     if ((numCE = cq->ReapInquiry(isrCountB4, true)) != 0) {
+        cq->Dump(
+            FileSystem::PrepLogFile(grpName, testName, "cq",
+            "notEmpty"), "Test assumption have not been met");
         throw FrmwkEx("Require 0 CE's within CQ %d, not upheld, found %d",
             cq->GetQId(), numCE);
     }
@@ -66,6 +69,11 @@ IO::SendCmdToHdw(string grpName, string testName, uint16_t ms,
             qualify), work);
         throw FrmwkEx(work);
     } else if (numCE != 1) {
+        work = str(boost::format(
+            "Unable to see any CE's in CQ %d, dump entire CQ") % cq->GetQId());
+        cq->Dump(
+            FileSystem::PrepLogFile(grpName, testName, "cq." + cmd->GetName(),
+            qualify), work);
         throw FrmwkEx("1 cmd caused %d CE's to arrive in CQ %d",
             numCE, cq->GetQId());
     }

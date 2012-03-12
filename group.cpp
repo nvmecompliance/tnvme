@@ -108,7 +108,7 @@ Group::TestExists(TestRef tr)
         (tr.xLev >= mTests.size()) ||
         (tr.yLev >= mTests[tr.xLev].size()) ||
         (tr.zLev >= mTests[tr.xLev][tr.yLev].size())) {
-        LOG_DBG_DEEP("Test case %ld:%ld.%ld.%ld does not exist within group",
+        LOG_DBG("Test case %ld:%ld.%ld.%ld does not exist within group",
             tr.group, tr.xLev, tr.yLev, tr.zLev);
         return false;
     }
@@ -127,7 +127,7 @@ Group::IteraterToTestRef(TestIteratorType testIter, TestRef &tr)
     // actually is a test object at the testIter index within mTests[][][].
     // Start from the beginning and traverse the entire matrix to attain a
     // valid test object for execution.
-    LOG_DBG_DEEP("Parse mTest matrix %ld seeking test @ iter=%ld",
+    LOG_DBG("Parse mTest matrix %ld seeking test @ iter=%ld",
         mGrpNum, testIter);
     while (count < testIter) {
         if (TestExists(TestRef(mGrpNum, x, y, z+1))) {
@@ -164,7 +164,7 @@ Group::TestRefToIterator(TestRef tr, TestIteratorType &testIter)
     TestRef proposedTr;
     testIter = GetTestIterator();
 
-    LOG_DBG_DEEP("Parse mTest matrix %ld seeking test @ %ld:%ld.%ld",
+    LOG_DBG("Parse mTest matrix %ld seeking test @ %ld:%ld.%ld",
         mGrpNum, tr.xLev, tr.yLev, tr.zLev);
     while (IteraterToTestRef(testIter, proposedTr)) {
         if (tr == proposedTr)
@@ -272,7 +272,7 @@ Group::GetTestDependency(TestRef test, TestRef &cfgDepend,
                 LOG_NRM("Targeted test has a configuration dependency");
                 return true;
             } else {
-                LOG_DBG("Unable to locate configuration dependency");
+                LOG_ERR("Unable to locate configuration dependency");
                 return false;
             }
         } else {
@@ -280,7 +280,7 @@ Group::GetTestDependency(TestRef test, TestRef &cfgDepend,
             if (TestRefToIterator(seqTest, seqDepend)) {
                 LOG_NRM("Targeted test has a sequence dependency");
             } else {
-                LOG_DBG("Unable to locate sequence test dependency");
+                LOG_ERR("Unable to locate sequence test dependency");
                 return false;
             }
 
@@ -291,13 +291,13 @@ Group::GetTestDependency(TestRef test, TestRef &cfgDepend,
                     LOG_NRM("Targeted test has a configuration dependency");
                     return true;
                 } else {
-                    LOG_DBG("Unable to locate configuration dependency");
+                    LOG_ERR("Unable to locate configuration dependency");
                     return false;
                 }
             }
             return true;
         }
     }
-    LOG_DBG("Targeted test does not belong to this group: %ld", mGrpNum);
+    LOG_ERR("Targeted test does not belong to this group: %ld", mGrpNum);
     return false;
 }

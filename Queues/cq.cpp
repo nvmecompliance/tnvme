@@ -131,7 +131,7 @@ CQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
         // to seg fault the app or crash the kernel.
         throw FrmwkEx("Illegal memory alignment will corrupt");
     } else  if (memBuffer->GetBufSize() < GetQSize()) {
-        LOG_DBG("Q buffer memory ambiguous to passed size params");
+        LOG_ERR("Q buffer memory ambiguous to passed size params");
         throw FrmwkEx("Mem buffer size = %d, Q size = %d",
             memBuffer->GetBufSize(), GetQSize());
     } else if (memBuffer->GetAlignment() != sysconf(_SC_PAGESIZE)) {

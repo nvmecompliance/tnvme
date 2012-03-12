@@ -16,6 +16,7 @@
 
 #include "registers.h"
 #include "tnvme.h"
+#include "../Exception/frmwkEx.h"
 
 
 // Register metrics (meta data) to aid interfacing with the kernel driver
@@ -61,10 +62,8 @@ Registers::Registers(int fd, SpecRev specRev)
     LOG_NRM("Constructing register access");
 
     mFd = fd;
-    if (mFd < 0) {
-        LOG_DBG("Object created with a bad FD=%d", fd);
-        return;
-    }
+    if (mFd < 0)
+        throw FrmwkEx("Object created with a bad FD=%d", fd);
 
     mSpecRev = specRev;
     DiscoverPciCapabilities();
@@ -120,7 +119,7 @@ Registers::Read(nvme_io_space regSpc, uint16_t rsize, uint16_t roffset,
         return false;
     } else if ((rc = ioctl(mFd, NVME_IOCTL_READ_GENERIC, &io)) < 0) {
         LOG_ERR("Error reading %s: %d returned", rdesc, rc);
-        LOG_DBG("io.{type,offset,nBytes,acc_type,buffer} = "
+        LOG_ERR("io.{type,offset,nBytes,acc_type,buffer} = "
             "{%d, 0x%04X, 0x%04X, 0x%04X, %p}",
             io.type, io.offset, io.nBytes, io.type, io.buffer);
         return false;
@@ -151,7 +150,7 @@ Registers::Read(nvme_io_space regSpc, uint16_t rsize, uint16_t roffset,
 
     if ((rc = ioctl(mFd, NVME_IOCTL_READ_GENERIC, &io)) < 0) {
         LOG_ERR("Error reading reg offset 0x%08X: %d returned", roffset, rc);
-        LOG_DBG("io.{type,offset,nBytes,acc_type,buffer} = "
+        LOG_ERR("io.{type,offset,nBytes,acc_type,buffer} = "
             "{%d, 0x%04X, 0x%04X, 0x%04X, %p}",
             io.type, io.offset, io.nBytes, io.type, io.buffer);
         return false;
@@ -174,7 +173,7 @@ Registers::Read(nvme_io_space regSpc, uint16_t rsize, uint16_t roffset,
 
     if ((rc = ioctl(mFd, NVME_IOCTL_READ_GENERIC, &io)) < 0) {
         LOG_ERR("Error reading reg offset 0x%08X: %d returned", roffset, rc);
-        LOG_DBG("io.{type,offset,nBytes,acc_type,buffer} = "
+        LOG_ERR("io.{type,offset,nBytes,acc_type,buffer} = "
             "{%d, 0x%04X, 0x%04X, 0x%04X, %p}",
             io.type, io.offset, io.nBytes, io.type, io.buffer);
         return false;
@@ -238,7 +237,7 @@ Registers::Write(nvme_io_space regSpc, uint16_t rsize, uint16_t roffset,
         return false;
     } else if ((rc = ioctl(mFd, NVME_IOCTL_WRITE_GENERIC, &io)) < 0) {
         LOG_ERR("Error writing %s: %d returned", rdesc, rc);
-        LOG_DBG("io.{type,offset,nBytes,acc_type,buffer} = "
+        LOG_ERR("io.{type,offset,nBytes,acc_type,buffer} = "
             "{%d, 0x%04X, 0x%04X, 0x%04X, %p}",
             io.type, io.offset, io.nBytes, io.type, io.buffer);
         return false;
@@ -269,7 +268,7 @@ Registers::Write(nvme_io_space regSpc, uint16_t rsize, uint16_t roffset,
 
     if ((rc = ioctl(mFd, NVME_IOCTL_WRITE_GENERIC, &io)) < 0) {
         LOG_ERR("Error writing reg offset 0x%08X: %d returned", roffset, rc);
-        LOG_DBG("io.{type,offset,nBytes,acc_type,buffer} = "
+        LOG_ERR("io.{type,offset,nBytes,acc_type,buffer} = "
             "{%d, 0x%04X, 0x%04X, 0x%04X, %p}",
             io.type, io.offset, io.nBytes, io.type, io.buffer);
         return false;
@@ -292,7 +291,7 @@ Registers::Write(nvme_io_space regSpc, uint16_t rsize, uint16_t roffset,
 
     if ((rc = ioctl(mFd, NVME_IOCTL_WRITE_GENERIC, &io)) < 0) {
         LOG_ERR("Error writing reg offset 0x%08X: %d returned", roffset, rc);
-        LOG_DBG("io.{type,offset,nBytes,acc_type,buffer} = "
+        LOG_ERR("io.{type,offset,nBytes,acc_type,buffer} = "
             "{%d, 0x%04X, 0x%04X, 0x%04X, %p}",
             io.type, io.offset, io.nBytes, io.type, io.buffer);
         return false;

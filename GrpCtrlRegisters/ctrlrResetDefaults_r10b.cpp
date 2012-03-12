@@ -193,9 +193,9 @@ CtrlrResetDefaults_r10b::ValidateCtrlrRWDefaultsAfterReset(std::map <int,
             throw FrmwkEx();
         value &= ~ctlMetrics[j].maskRO;
         if (value != expectedVal) {
-            LOG_ERR("%s RW bit #%d has incorrect value", ctlMetrics[j].desc,
-            ReportOffendingBitPos(value, expectedVal));
-            throw FrmwkEx();
+            throw FrmwkEx(
+                "%s RW bit #%d has incorrect value", ctlMetrics[j].desc,
+                ReportOffendingBitPos(value, expectedVal));
         }
     }
 }

@@ -94,10 +94,8 @@ Read::SetPRINFO(uint8_t prinfo)
 {
     LOG_NRM("Setting PRINFO = 0x%01X", prinfo);
 
-    if (prinfo > 0x0f) {
-        LOG_DBG("Value to large; must fit within 4 bits");
-        return;
-    }
+    if (prinfo > 0x0f)
+        throw FrmwkEx("Value to large; must fit within 4 bits");
 
     uint16_t work = GetWord(12, 1);
     work &= ~0x3C00;
@@ -122,7 +120,7 @@ Read::SetNLB(uint16_t nlb)
 }
 
 
-uint16_t 
+uint16_t
 Read::GetNLB() const
 {
     LOG_NRM("Getting NLB");
@@ -167,10 +165,8 @@ Read::SetDSMAccessLatent(uint8_t accessLat)
 {
     LOG_NRM("Setting DSM-Access Latency = 0x%01X", accessLat);
 
-    if (accessLat > 0x03) {
-        LOG_DBG("Value to large; must fit within 2 bits");
-        return;
-    }
+    if (accessLat > 0x03)
+        throw FrmwkEx("Value to large; must fit within 2 bits");
 
     uint8_t work = GetByte(13, 0);
     work &= ~0x30;
@@ -193,10 +189,8 @@ Read::SetDSMAccessFreq(uint8_t accessFreq)
 {
     LOG_NRM("Setting DSM-Access Freq = 0x%01X", accessFreq);
 
-    if (accessFreq > 0x0f) {
-        LOG_DBG("Value to large; must fit within 4 bits");
-        return;
-    }
+    if (accessFreq > 0x0f)
+        throw FrmwkEx("Value to large; must fit within 4 bits");
 
     uint8_t work = GetByte(13, 0);
     work &= ~0x0f;
@@ -258,6 +252,6 @@ uint16_t
 Read::GetELBAT() const
 {
     LOG_NRM("Getting ELBAT");
-    return GetWord(15, 0); 
+    return GetWord(15, 0);
 }
 

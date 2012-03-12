@@ -139,6 +139,9 @@ LBAOutOfRangeBare_r10b::SendCmdToHdw(SharedSQPtr sq, SharedCQPtr cq,
 
 
     if ((numCE = cq->ReapInquiry(isrCountB4, true)) != 0) {
+        cq->Dump(
+            FileSystem::PrepLogFile(mGrpName, mTestName, "cq",
+            "notEmpty"), "Test assumption have not been met");
         throw FrmwkEx("Require 0 CE's within CQ %d, not upheld, found %d",
             cq->GetQId(), numCE);
     }
@@ -163,8 +166,13 @@ LBAOutOfRangeBare_r10b::SendCmdToHdw(SharedSQPtr sq, SharedCQPtr cq,
             qualify), work);
         throw FrmwkEx("Unable to see CE for issued cmd");
     } else if (numCE != 1) {
-        LOG_ERR("1 cmd caused %d CE's to arrive in CQ %d", numCE, cq->GetQId());
-        throw FrmwkEx();
+        work = str(boost::format(
+            "Unable to see any CE's in CQ %d, dump entire CQ") % cq->GetQId());
+        cq->Dump(
+            FileSystem::PrepLogFile(mGrpName, mTestName, "cq." + cmd->GetName(),
+            qualify), work);
+        throw FrmwkEx("1 cmd caused %d CE's to arrive in CQ %d",
+            numCE, cq->GetQId());
     }
     work = str(boost::format("Just B4 reaping CQ %d, dump entire CQ") %
         cq->GetQId());

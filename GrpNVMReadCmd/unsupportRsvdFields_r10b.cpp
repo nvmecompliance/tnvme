@@ -91,6 +91,9 @@ UnsupportRsvdFields_r10b::RunCoreTest()
     SharedIOCQPtr iocq = CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_GROUP_ID));
 
     if ((numCE = iocq->ReapInquiry(isrCountB4, true)) != 0) {
+        iocq->Dump(
+            FileSystem::PrepLogFile(mGrpName, mTestName, "iocq",
+            "notEmpty"), "Test assumption have not been met");
         throw FrmwkEx("Require 0 CE's within CQ %d, not upheld, found %d",
             iocq->GetQId(), numCE);
     }
@@ -147,8 +150,7 @@ UnsupportRsvdFields_r10b::CreateCmd()
         readCmd->AllocMetaBuffer();
         prpBitmask = (send_64b_bitmask)(prpBitmask | MASK_MPTR);
         LOG_ERR("Deferring E2E namspc work to the future");
-        LOG_ERR("Need to add CRC's to correlate to buf pattern");
-        throw FrmwkEx();
+        throw FrmwkEx("Need to add CRC's to correlate to buf pattern");
     }
 
     readCmd->SetPrpBuffer(prpBitmask, dataPat);

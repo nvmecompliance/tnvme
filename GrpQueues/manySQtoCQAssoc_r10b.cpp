@@ -173,8 +173,7 @@ ManySQtoCQAssoc_r10b::SetWriteCmd()
         writeCmd->AllocMetaBuffer();
         prpBitmask = (send_64b_bitmask)(prpBitmask | MASK_MPTR);
         LOG_ERR("Deferring E2E namspc work to the future");
-        LOG_ERR("Need to add CRC's to correlate to buf pattern");
-        throw FrmwkEx();
+        throw FrmwkEx("Need to add CRC's to correlate to buf pattern");
     }
 
     writeCmd->SetPrpBuffer(prpBitmask, dataPat);
@@ -198,9 +197,14 @@ ManySQtoCQAssoc_r10b::ReapIOCQAndVerifyCE(SharedIOCQPtr iocq, uint16_t numTil,
     for (uint16_t i = 0; i < numTil; i++) {
         LOG_NRM("Wait for the CE to arrive in IOCQ");
         if (iocq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE,
-            isrCount) == false) {\
-            throw FrmwkEx("Unable to see completion of cmd");
+            isrCount) == false) {
+
+            iocq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "missing"),
+                "Unable to see completion of cmd");
+            throw FrmwkEx();
         } else if (numCE == 0) {
+            iocq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "missing"),
+                "Unable to see completion of cmd");
             throw FrmwkEx("IOCQ should have one new CE for each IOSQ");
         }
 
