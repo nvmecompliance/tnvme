@@ -50,8 +50,13 @@ FrmwkEx::FrmwkEx(const char *fmt, ...)
     va_list arg;
 
     va_start(arg, fmt);
-    snprintf(work, sizeof(work), fmt, arg);
+    vsnprintf(work, sizeof(work), fmt, arg);
     va_end(arg);
+
+    mMsg = work;
+    LOG_ERR("FAILURE:%s", mMsg.c_str());
+    PreliminaryProcessing();    // Override in children provides custom logic
+    gCtrlrConfig->SetState(ST_DISABLE);
 }
 
 

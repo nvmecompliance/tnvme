@@ -21,7 +21,6 @@
 #include "../Utils/buffers.h"
 
 SharedCQPtr CQ::NullCQPtr;
-static struct timezone TZ_NULL = {0, 0};
 
 
 CQ::CQ() :
@@ -271,7 +270,7 @@ CQ::ReapInquiryWaitAny(uint16_t ms, uint16_t &numCE, uint32_t &isrCount)
 {
     struct timeval initial;
 
-    if (gettimeofday(&initial, &TZ_NULL) != 0)
+    if (gettimeofday(&initial, NULL) != 0)
         throw FrmwkEx("Cannot retrieve system time");
 
     while (CalcTimeout(ms, initial) == false) {
@@ -301,7 +300,7 @@ CQ::ReapInquiryWaitSpecify(uint16_t ms, uint16_t numTil, uint16_t &numCE,
 {
     struct timeval initial;
 
-    if (gettimeofday(&initial, &TZ_NULL) != 0)
+    if (gettimeofday(&initial, NULL) != 0)
         throw FrmwkEx("Cannot retrieve system time");
 
     while (CalcTimeout(ms, initial) == false) {
@@ -331,14 +330,17 @@ CQ::CalcTimeout(uint16_t ms, struct timeval &initial)
 {
     struct timeval current;
 
-    if (gettimeofday(&current, &TZ_NULL) != 0)
+    if (gettimeofday(&current, NULL) != 0)
         throw FrmwkEx("Cannot retrieve system time");
 
-    uint64_t initial_us = ((1000000 * initial.tv_sec) + initial.tv_usec);
-    uint64_t current_us = ((1000000 * current.tv_sec) + current.tv_usec);
-    uint64_t timeout_us = ((uint64_t)ms * 1000);
-    if ((current_us - initial_us) >= timeout_us)
+    time_t initial_us = (((time_t)1000000 * initial.tv_sec) + initial.tv_usec);
+    time_t current_us = (((time_t)1000000 * current.tv_sec) + current.tv_usec);
+    time_t timeout_us = ((time_t)ms * (time_t)1000);
+    if ((current_us - initial_us) >= timeout_us) {
+        LOG_NRM("Timeout: (cur - init) >= TO: (%ld - %ld) >= %ld",
+            current_us, initial_us, timeout_us);
         return true;
+    }
     return false;
 }
 

@@ -145,10 +145,10 @@ IOQFull_r10b::IOQFull(uint16_t numIOSQEntries, uint16_t numIOCQEntries,
         mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, numIOSQEntries,
         false, IOSQ_CONTIG_GROUP_ID, IOQ_ID, 0, iosqBackedMem);
 
-    uint16_t nCmdsToSubmit = numIOSQEntries - 1;
+    uint16_t nCmdsToSubmit = (numIOSQEntries - 1);
     LOG_NRM("Send #%d cmds to hdw via IOSQ", nCmdsToSubmit);
     for (uint16_t nCmds = 0; nCmds < nCmdsToSubmit; nCmds++) {
-        LOG_NRM("Sending #%d of #%d NVM Write Cmds thru IOSQ", nCmds + 1,
+        LOG_NRM("Sending #%d of #%d NVM Write Cmds thru IOSQ", (nCmds + 1),
             nCmdsToSubmit);
         iosq->Send(writeCmd);
         iosq->Ring();
@@ -156,26 +156,25 @@ IOQFull_r10b::IOQFull(uint16_t numIOSQEntries, uint16_t numIOCQEntries,
         LOG_NRM("Wait for the CE to arrive in IOCQ");
         if (iocq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, (nCmds + 1),
             numCE, isrCount) == false) {
-            // if iosq size equals (iocq size + 1), last CE will not arrive.
-            if ((numIOSQEntries == numIOCQEntries + 1) &&
-                (nCmds == nCmdsToSubmit - 1)) {
+
+            // if (iosq size == (iocq size + 1)); last CE will not arrive.
+            if ((numIOSQEntries == (numIOCQEntries + 1)) &&
+                (nCmds == (nCmdsToSubmit - 1))) {
+
                 // Reap one element from IOCQ to make room for last CE.
                 IO::ReapCE(iocq, 1, isrCount, mGrpName, mTestName, "IOCQCE",
                     CESTAT_SUCCESS);
+
                 if (iocq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, nCmds,
-                    numCE, isrCount) == false) {
-                    work = str(boost::format("Dump entire CQ %d") %
-                        iocq->GetQId());
-                    iocq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName,
-                        "iocq." + writeCmd->GetName()), work);
-                    throw FrmwkEx("Unable to see last CE as expected");
+                    numCE, isrCount)) {
+                    break;  // Seen the last CE, all if fine
                 }
-                break;
             }
             work = str(boost::format("Dump entire CQ %d") % iocq->GetQId());
             iocq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName,
                 "iocq." + writeCmd->GetName()), work);
             throw FrmwkEx("Unable to see CE for issued cmd #%d", nCmds + 1);
+
         } else if (numCE != nCmds + 1) {
             work = str(boost::format("Dump entire CQ %d") % iocq->GetQId());
             iocq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName,
@@ -184,7 +183,6 @@ IOQFull_r10b::IOQFull(uint16_t numIOSQEntries, uint16_t numIOCQEntries,
                 nCmds + 1, numCE);
         }
     }
-
 }
 
 
