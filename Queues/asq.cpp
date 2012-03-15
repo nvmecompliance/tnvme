@@ -39,7 +39,7 @@ ASQ::~ASQ()
 
 
 void
-ASQ::Init(uint16_t numEntries)
+ASQ::Init(uint32_t numEntries)
 {
     SQ::Init(0, IDEAL_ELEMENT_SIZE, numEntries, 0);
 }

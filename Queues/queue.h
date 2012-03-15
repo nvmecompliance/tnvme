@@ -52,7 +52,7 @@ public:
     bool GetIsContig();
 
     uint16_t GetQId() { return mQId; }
-    uint16_t GetNumEntries() { return mNumEntries; }
+    uint32_t GetNumEntries() { return mNumEntries; }
     uint16_t GetEntrySize() { return mEntrySize; }
 
     /// Get the memory which encompasses the Q's contents
@@ -83,7 +83,7 @@ protected:
     /// mQId==0 implies admin Q
     uint16_t mQId;
     uint16_t mEntrySize;
-    uint16_t mNumEntries;
+    uint32_t mNumEntries;
 
     /// dnvme alloc'd Q memory which is mmap'd back into user space as RO
     uint8_t *mContigBuf;
@@ -96,7 +96,7 @@ protected:
      * @param entrySize Pass the number of bytes encompassing each element
      * @param numEntries Pass the number of elements within the Q
      */
-    void Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries);
+    void Init(uint16_t qId, uint16_t entrySize, uint32_t numEntries);
 
 
 private:

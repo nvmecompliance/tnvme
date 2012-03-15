@@ -61,8 +61,8 @@ private:
     // Adding a member variable? Then edit the copy constructor and operator=().
     ///////////////////////////////////////////////////////////////////////////
     SharedWritePtr SetWriteCmd();
-    void ReapIOCQAndVerifyCE(SharedIOCQPtr iocq, uint16_t numTil,
-        vector<uint16_t> mSQIDToSQHDVector);
+    void ReapIOCQAndVerifyCE(SharedIOCQPtr iocq, uint32_t numTil,
+        vector<uint32_t> mSQIDToSQHDVector);
 };
 
 }   // namespace

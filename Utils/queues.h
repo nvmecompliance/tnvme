@@ -68,13 +68,13 @@ public:
      */
     static SharedIOCQPtr CreateIOCQContigToHdw(string grpName,
         string testName, uint16_t ms, SharedASQPtr asq, SharedACQPtr acq,
-        uint16_t qId, uint16_t numEntries, bool grpLifetime, string grpID,
+        uint16_t qId, uint32_t numEntries, bool grpLifetime, string grpID,
         bool irqEnabled, uint16_t irqVec, string qualify = "",
         bool verbose = true);
     /// param qBackedMem is not modified, nor err chk'd; it must setup by caller
     static SharedIOCQPtr CreateIOCQDiscontigToHdw(string grpName,
         string testName, uint16_t ms, SharedASQPtr asq, SharedACQPtr acq,
-        uint16_t qId, uint16_t numEntries, bool grpLifetime, string grpID,
+        uint16_t qId, uint32_t numEntries, bool grpLifetime, string grpID,
         bool irqEnabled, uint16_t irqVec, SharedMemBufferPtr qBackedMem,
         string qualify = "", bool verbose = true);
 
@@ -104,13 +104,13 @@ public:
      */
     static SharedIOSQPtr CreateIOSQContigToHdw(string grpName,
         string testName, uint16_t ms, SharedASQPtr asq, SharedACQPtr acq,
-        uint16_t qId, uint16_t numEntries, bool grpLifetime, string grpID,
+        uint16_t qId, uint32_t numEntries, bool grpLifetime, string grpID,
         uint16_t cqId, uint8_t priority, string qualify = "",
         bool verbose = true);
     /// param qBackedMem is not modified, nor err chk'd; it must setup by caller
     static SharedIOSQPtr CreateIOSQDiscontigToHdw(string grpName,
         string testName, uint16_t ms, SharedASQPtr asq, SharedACQPtr acq,
-        uint16_t qId, uint16_t numEntries, bool grpLifetime, string grpID,
+        uint16_t qId, uint32_t numEntries, bool grpLifetime, string grpID,
         uint16_t cqId, uint8_t priority, SharedMemBufferPtr qBackedMem,
         string qualify = "", bool verbose = true);
 

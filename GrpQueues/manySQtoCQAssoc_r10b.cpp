@@ -21,7 +21,7 @@
 
 namespace GrpQueues {
 
-static uint16_t NumEntriesIOQ =    5;
+static uint32_t NumEntriesIOQ =    5;
 
 ManySQtoCQAssoc_r10b::ManySQtoCQAssoc_r10b(int fd, string grpName,
     string testName, ErrorRegs errRegs) :
@@ -93,9 +93,10 @@ ManySQtoCQAssoc_r10b::RunCoreTest()
         if (gRegisters->Read(CTLSPC_CAP, maxIOQEntries) == false)
             throw FrmwkEx("Unable to determine MQES");
         maxIOQEntries &= CAP_MQES;
+        maxIOQEntries += 1;      // convert to 1-based
         if (maxIOQEntries < (uint64_t)NumEntriesIOQ) {
-            LOG_NRM("Changing number of Q elements from %d to %d",
-                NumEntriesIOQ, (uint16_t)maxIOQEntries);
+            LOG_NRM("Changing number of Q elements from %d to %lld",
+                NumEntriesIOQ, (unsigned long long)maxIOQEntries);
             NumEntriesIOQ = maxIOQEntries;
         }
     }
@@ -118,13 +119,13 @@ ManySQtoCQAssoc_r10b::RunCoreTest()
         false, IOCQ_CONTIG_GROUP_ID, false, 0, "iocq", true);
 
     vector<SharedIOSQPtr> iosqContigVector;
-    vector<uint16_t> mSQIDToSQHDVector;
+    vector<uint32_t> mSQIDToSQHDVector;
     mSQIDToSQHDVector.push_back(USHRT_MAX); // vector position 0 is not used.
 
     // Create Maximum allowed IOSQs and associate with same IOCQ.
     gCtrlrConfig->SetIOSQES(gInformative->GetIdentifyCmdCtrlr()->
         GetValue(IDCTRLRCAP_SQES) & 0xf);
-    for (uint16_t j = 1; j <= gInformative->GetFeaturesNumOfIOSQs(); j++) {
+    for (uint32_t j = 1; j <= gInformative->GetFeaturesNumOfIOSQs(); j++) {
         LOG_NRM("Creating contig IOSQ#%d", j);
         SharedIOSQPtr iosqContig = Queues::CreateIOSQContigToHdw(mGrpName,
             mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, j, NumEntriesIOQ, false,
@@ -185,16 +186,16 @@ ManySQtoCQAssoc_r10b::SetWriteCmd()
 
 
 void
-ManySQtoCQAssoc_r10b::ReapIOCQAndVerifyCE(SharedIOCQPtr iocq, uint16_t numTil,
-    vector<uint16_t> mSQIDToSQHDVector)
+ManySQtoCQAssoc_r10b::ReapIOCQAndVerifyCE(SharedIOCQPtr iocq, uint32_t numTil,
+    vector<uint32_t> mSQIDToSQHDVector)
 {
-    uint16_t numCE;
-    uint16_t ceRemain;
-    uint16_t numReaped;
+    uint32_t numCE;
+    uint32_t ceRemain;
+    uint32_t numReaped;
     uint32_t isrCount;
 
     // Reap one CE and verify and do for all the CE's in CQ.
-    for (uint16_t i = 0; i < numTil; i++) {
+    for (uint32_t i = 0; i < numTil; i++) {
         LOG_NRM("Wait for the CE to arrive in IOCQ");
         if (iocq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE,
             isrCount) == false) {
@@ -234,7 +235,7 @@ ManySQtoCQAssoc_r10b::ReapIOCQAndVerifyCE(SharedIOCQPtr iocq, uint16_t numTil,
     }
 
     // Validate all SQIDs submitted have arrived.
-    for (uint16_t it = 0; it < mSQIDToSQHDVector.size(); it++) {
+    for (uint32_t it = 0; it < mSQIDToSQHDVector.size(); it++) {
         if (mSQIDToSQHDVector[it] != USHRT_MAX) {
             throw FrmwkEx("Never received CE for SQID %d", it);
         }

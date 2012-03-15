@@ -49,6 +49,7 @@ using namespace std;
 
 
 #define MAX_CHAR_PER_LINE_DESCRIPTION       63
+#define SYSTEMWIDE_CMD_WAIT_ms              3000
 
 
 typedef enum {

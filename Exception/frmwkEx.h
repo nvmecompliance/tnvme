@@ -52,6 +52,8 @@ protected:
 
 private:
     string mMsg;
+
+    static bool mPrelimProcessingInProgress;
 };
 
 

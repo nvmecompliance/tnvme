@@ -109,7 +109,7 @@ public:
      * @reportOn0 Pass true to report when 0 CE's are awaiting in the CQ
      * @return The number of unreap'd CE's awaiting
      */
-    uint16_t ReapInquiry(uint32_t &isrCount, bool reportOn0 = false);
+    uint32_t ReapInquiry(uint32_t &isrCount, bool reportOn0 = false);
 
     /**
      * Inquire as to the number of CE's which are present in this CQ. If the
@@ -122,7 +122,7 @@ public:
      *        this value will remain 0.
      * @return true when CE's are awaiting to be reaped, otherwise a timeout
      */
-    bool ReapInquiryWaitAny(uint16_t ms, uint16_t &numCE, uint32_t &isrCount);
+    bool ReapInquiryWaitAny(uint32_t ms, uint32_t &numCE, uint32_t &isrCount);
 
     /**
      * Wait until at least the specified number of CE's become available or
@@ -135,7 +135,7 @@ public:
      *        this value will remain 0.
      * @return true when CE's are awaiting to be reaped, otherwise a timeout
      */
-    bool ReapInquiryWaitSpecify(uint16_t ms, uint16_t numTil, uint16_t &numCE,
+    bool ReapInquiryWaitSpecify(uint32_t ms, uint32_t numTil, uint32_t &numCE,
         uint32_t &isrCount);
 
     /**
@@ -155,8 +155,8 @@ public:
      *      the buffer is not modified.
      * @return Returns the actual number of CE's reaped
      */
-    uint16_t Reap(uint16_t &ceRemain, SharedMemBufferPtr memBuffer,
-        uint32_t &isrCount, uint16_t ceDesire = 0, bool zeroMem = false);
+    uint32_t Reap(uint32_t &ceRemain, SharedMemBufferPtr memBuffer,
+        uint32_t &isrCount, uint32_t ceDesire = 0, bool zeroMem = false);
 
 
 protected:
@@ -168,7 +168,7 @@ protected:
      * @param irqEnabled Pass true if IRQ's are to be enabled for this Q
      * @param irqVec if (irqEnabled==true) then what the IRQ's vector
      */
-    void Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
+    void Init(uint16_t qId, uint16_t entrySize, uint32_t numEntries,
         bool irqEnabled, uint16_t irqVec);
 
     /**
@@ -183,7 +183,7 @@ protected:
      * @param irqEnabled Pass true if IRQ's are to be enabled for this Q
      * @param irqVec if (irqEnabled==true) then what the IRQ's vector
      */
-    void Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
+    void Init(uint16_t qId, uint16_t entrySize, uint32_t numEntries,
         const SharedMemBufferPtr memBuffer, bool irqEnabled, uint16_t irqVec);
 
 
@@ -203,9 +203,10 @@ private:
      * Calculate if a timeout (TO) period has expired
      * @param ms Pass the number of ms indicating the TO period
      * @param initial Pass the time when the period starting
+     * @param delta Return the calc'd time passage as the number of ms.
      * @return true if the TO has expired, false otherwise
      */
-    bool CalcTimeout(uint16_t ms, struct timeval &initial);
+    bool CalcTimeout(uint32_t ms, struct timeval &initial, uint32_t &delta);
 };
 
 

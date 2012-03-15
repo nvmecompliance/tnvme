@@ -108,7 +108,7 @@ void
 AdminQFull_r10b::AdminQFull(uint16_t numASQEntries, uint16_t numACQEntries,
     SharedIdentifyPtr idCmdCtrlr)
 {
-    uint16_t numCE;
+    uint32_t numCE;
     uint32_t isrCount;
 
     if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
@@ -124,9 +124,9 @@ AdminQFull_r10b::AdminQFull(uint16_t numASQEntries, uint16_t numACQEntries,
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
         throw FrmwkEx();
 
-    uint16_t nCmdsToSubmit = numASQEntries - 1;
+    uint32_t nCmdsToSubmit = numASQEntries - 1;
     LOG_NRM("Send #%d cmds to hdw via ASQ", nCmdsToSubmit);
-    for (uint16_t nCmds = 0; nCmds < nCmdsToSubmit; nCmds++) {
+    for (uint32_t nCmds = 0; nCmds < nCmdsToSubmit; nCmds++) {
         LOG_NRM("Sending #%d of #%d Identify Cmds thru ASQ", nCmds + 1,
             nCmdsToSubmit);
         asq->Send(idCmdCtrlr);

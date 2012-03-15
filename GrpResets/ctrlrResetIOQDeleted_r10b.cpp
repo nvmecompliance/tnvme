@@ -85,7 +85,7 @@ CtrlrResetIOQDeleted_r10b::RunCoreTest()
      *  \endverbatim
      */
     uint64_t work;
-    uint16_t numEntriesIOQ = 10;
+    uint32_t numEntriesIOQ = 10;
 
     if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
         throw FrmwkEx();
@@ -95,9 +95,10 @@ CtrlrResetIOQDeleted_r10b::RunCoreTest()
         throw FrmwkEx("Unable to determine MQES");
 
     work &= CAP_MQES;
+    work += 1;      // convert to 1-based
     if (work < (uint64_t)numEntriesIOQ) {
-        LOG_NRM("Changing number of Q element from %d to %d",
-            numEntriesIOQ, (uint16_t)work);
+        LOG_NRM("Changing number of Q element from %d to %lld",
+            numEntriesIOQ, (unsigned long long)work);
         numEntriesIOQ = work;
     } else if (gInformative->GetFeaturesNumOfIOCQs() < IOCQ_ID) {
         throw FrmwkEx("DUT doesn't support %d IOCQ's", IOCQ_ID);
@@ -116,14 +117,14 @@ CtrlrResetIOQDeleted_r10b::RunCoreTest()
 
 void
 CtrlrResetIOQDeleted_r10b::VerifyCtrlrResetDeletesIOQs(SharedACQPtr acq,
-    SharedASQPtr asq, uint16_t numEntriesIOQ)
+    SharedASQPtr asq, uint32_t numEntriesIOQ)
 {
     char work[20];
 
     // Set ctrl'r to enable state, create IOQ's and then disable the ctrl'r.
     // Re-enable the ctrl'r and try to create the same IOQ's, verify that
     // these IOQ's are created successfully.
-    for (uint16_t i = 0; i < 2; i++) {
+    for (uint32_t i = 0; i < 2; i++) {
         snprintf(work, sizeof(work), "iter%d", i);
 
         gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
@@ -140,7 +141,7 @@ CtrlrResetIOQDeleted_r10b::VerifyCtrlrResetDeletesIOQs(SharedACQPtr acq,
         // CQ with IOCQ_ID
         gCtrlrConfig->SetIOSQES(gInformative->GetIdentifyCmdCtrlr()->
             GetValue(IDCTRLRCAP_SQES) & 0xf);
-        for (uint16_t j = 1; j <= IOSQ_ID; j++) {
+        for (uint32_t j = 1; j <= IOSQ_ID; j++) {
             Queues::CreateIOSQContigToHdw(mGrpName, mTestName,
                 DEFAULT_CMD_WAIT_ms, asq, acq, j, numEntriesIOQ, false,
                 IOSQ_CONTIG_GROUP_ID, IOCQ_ID, 0, work);

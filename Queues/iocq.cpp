@@ -37,8 +37,7 @@ IOCQ::~IOCQ()
 
 
 void
-IOCQ::Init(uint16_t qId, uint16_t numEntries, bool irqEnabled,
-    uint16_t irqVec)
+IOCQ::Init(uint16_t qId, uint32_t numEntries, bool irqEnabled, uint16_t irqVec)
 {
     uint8_t entrySize;
     uint64_t work;
@@ -66,6 +65,7 @@ IOCQ::Init(uint16_t qId, uint16_t numEntries, bool irqEnabled,
         throw FrmwkEx("Unable to determine MQES");
 
     work &= CAP_MQES;
+    work += 1;      // convert to 1-based
     if ((work + 1) < (uint64_t)numEntries) {
         LOG_WARN("Creating Q with %d entries, but DUT only allows %d",
             numEntries, (uint32_t)(work + 1));
@@ -76,7 +76,7 @@ IOCQ::Init(uint16_t qId, uint16_t numEntries, bool irqEnabled,
 
 
 void
-IOCQ::Init(uint16_t qId, uint16_t numEntries,
+IOCQ::Init(uint16_t qId, uint32_t numEntries,
     const SharedMemBufferPtr memBuffer, bool irqEnabled, uint16_t irqVec)
 {
     uint8_t entrySize;
@@ -90,6 +90,7 @@ IOCQ::Init(uint16_t qId, uint16_t numEntries,
 
     // Detect if doing something that looks suspicious/incorrect/illegal
     work &= CAP_MQES;
+    work += 1;      // convert to 1-based
     if ((work + 1) < (uint64_t)numEntries) {
         LOG_WARN("Creating Q with %d entries, but DUT only allows %d",
             numEntries, (uint32_t)(work + 1));

@@ -82,7 +82,7 @@ UnsupportRsvdFields_r10b::RunCoreTest()
      * 1) Test CreateResources_r10b has run prior.
      * \endverbatim
      */
-    uint16_t numCE;
+    uint32_t numCE;
     uint32_t isrCountB4;
 
 

@@ -147,9 +147,9 @@ void
 WriteDataPat_r10b::SendToIOSQ(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
     SharedWritePtr writeCmd, string qualifier)
 {
-    uint16_t numCE;
-    uint16_t ceRemain;
-    uint16_t numReaped;
+    uint32_t numCE;
+    uint32_t ceRemain;
+    uint32_t numReaped;
     uint32_t isrCount;
 
 

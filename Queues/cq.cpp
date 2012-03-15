@@ -23,8 +23,7 @@
 SharedCQPtr CQ::NullCQPtr;
 
 
-CQ::CQ() :
-    Queue(0, Trackable::OBJTYPE_FENCE)
+CQ::CQ() : Queue(0, Trackable::OBJTYPE_FENCE)
 {
     // This constructor will throw
 }
@@ -40,21 +39,16 @@ CQ::CQ(int fd, Trackable::ObjType objBeingCreated) :
 
 CQ::~CQ()
 {
-    try {
-        // Cleanup duties for this Q's buffer
-        if (GetIsContig()) {
-            // Contiguous memory is alloc'd and owned by the kernel
-            KernelAPI::munmap(mContigBuf, GetQSize());
-        }
-    } catch (...) {
-        ;   // Destructors should never throw. If the object is deleted B4
-            // it is Init'd() properly, it could throw, so catch and ignore
+    // Cleanup duties for this Q's buffer
+    if (GetIsContig()) {
+        // Contiguous memory is alloc'd and owned by the kernel
+        KernelAPI::munmap(mContigBuf, GetQSize());
     }
 }
 
 
 void
-CQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
+CQ::Init(uint16_t qId, uint16_t entrySize, uint32_t numEntries,
     bool irqEnabled, uint16_t irqVec)
 {
     Queue::Init(qId, entrySize, numEntries);
@@ -66,7 +60,7 @@ CQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
 
     LOG_NRM("Allocating contiguous CQ memory in dnvme");
     if (numEntries < 2)
-        LOG_WARN("Number elements breaches spec requirement");
+        throw FrmwkEx("Number elements breaches spec requirement");
 
     if (GetIsAdmin()) {
         if (gCtrlrConfig->IsStateEnabled()) {
@@ -86,10 +80,8 @@ CQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
         LOG_NRM("Init contig ACQ: (id, entrySize, numEntries) = (%d, %d, %d)",
             GetQId(), GetEntrySize(), GetNumEntries());
 
-        if ((ret = ioctl(mFd, NVME_IOCTL_CREATE_ADMN_Q, &q)) < 0) {
-            throw FrmwkEx(
-                "Q Creation failed by dnvme with error: 0x%02X", ret);
-        }
+        if ((ret = ioctl(mFd, NVME_IOCTL_CREATE_ADMN_Q, &q)) < 0)
+            throw FrmwkEx("Q Creation failed by dnvme with error: 0x%02X", ret);
     } else {
         // We are creating a contiguous IOCQ.
         struct nvme_prep_cq q;
@@ -107,7 +99,7 @@ CQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
 
 
 void
-CQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
+CQ::Init(uint16_t qId, uint16_t entrySize, uint32_t numEntries,
     const SharedMemBufferPtr memBuffer, bool irqEnabled, uint16_t irqVec)
 {
     Queue::Init(qId, entrySize, numEntries);
@@ -119,7 +111,7 @@ CQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
 
     LOG_NRM("Allocating discontiguous CQ memory in tnvme");
     if (numEntries < 2)
-        LOG_WARN("Number elements breaches spec requirement");
+        throw FrmwkEx("Number elements breaches spec requirement");
 
     if (memBuffer == MemBuffer::NullMemBufferPtr) {
         throw FrmwkEx("Passing an uninitialized SharedMemBufferPtr");
@@ -164,10 +156,8 @@ CQ::CreateIOCQ(struct nvme_prep_cq &q)
         q.contig ? "contig" : "discontig", GetQId(), GetEntrySize(),
         GetNumEntries());
 
-    if ((ret = ioctl(mFd, NVME_IOCTL_PREPARE_CQ_CREATION, &q)) < 0) {
-        throw FrmwkEx(
-            "Q Creation failed by dnvme with error: 0x%02X", ret);
-    }
+    if ((ret = ioctl(mFd, NVME_IOCTL_PREPARE_CQ_CREATION, &q)) < 0)
+        throw FrmwkEx("Q Creation failed by dnvme with error: 0x%02X", ret);
 }
 
 
@@ -216,7 +206,7 @@ CQ::PeekCE(uint16_t indexPtr)
     else
         dataPtr = (union CE *)mDiscontigBuf->GetBuffer();
 
-    for (int i = 0; i < GetNumEntries(); i++, dataPtr++) {
+    for (uint32_t i = 0; i < GetNumEntries(); i++, dataPtr++) {
         if (i == indexPtr)
             return *dataPtr;
     }
@@ -246,7 +236,7 @@ CQ::DumpCE(uint16_t indexPtr, LogFilename filename, string fileHdr)
 }
 
 
-uint16_t
+uint32_t
 CQ::ReapInquiry(uint32_t &isrCount, bool reportOn0)
 {
     int rc;
@@ -266,15 +256,21 @@ CQ::ReapInquiry(uint32_t &isrCount, bool reportOn0)
 
 
 bool
-CQ::ReapInquiryWaitAny(uint16_t ms, uint16_t &numCE, uint32_t &isrCount)
+CQ::ReapInquiryWaitAny(uint32_t ms, uint32_t &numCE, uint32_t &isrCount)
 {
-    struct timeval initial;
+    uint32_t delta;
 
+    // Avoid a common mistake, waiting longer than a day?
+    if (ms > 86400000)
+        LOG_WARN("Waiting > 1 day, is this reasonable?");
+
+    struct timeval initial;
     if (gettimeofday(&initial, NULL) != 0)
         throw FrmwkEx("Cannot retrieve system time");
 
-    while (CalcTimeout(ms, initial) == false) {
+    while (CalcTimeout(ms, initial, delta) == false) {
         if ((numCE = ReapInquiry(isrCount)) != 0) {
+            LOG_NRM("Waited for CE(s) approx: %d ms", delta);
             return true;
         }
     }
@@ -295,18 +291,25 @@ CQ::ReapInquiryWaitAny(uint16_t ms, uint16_t &numCE, uint32_t &isrCount)
 
 
 bool
-CQ::ReapInquiryWaitSpecify(uint16_t ms, uint16_t numTil, uint16_t &numCE,
+CQ::ReapInquiryWaitSpecify(uint32_t ms, uint32_t numTil, uint32_t &numCE,
     uint32_t &isrCount)
 {
-    struct timeval initial;
+    uint32_t delta;
 
+    // Avoid a common mistake, waiting longer than a day?
+    if (ms > 86400000)
+        LOG_WARN("Waiting > 1 day, is this reasonable?");
+
+    struct timeval initial;
     if (gettimeofday(&initial, NULL) != 0)
         throw FrmwkEx("Cannot retrieve system time");
 
-    while (CalcTimeout(ms, initial) == false) {
+    while (CalcTimeout(ms, initial, delta) == false) {
         if ((numCE = ReapInquiry(isrCount)) != 0) {
-            if (numCE >= numTil)
+            if (numCE >= numTil) {
+                LOG_NRM("Waited for CE(s) approx: %d ms", delta);
                 return true;
+            }
         }
     }
 
@@ -326,7 +329,7 @@ CQ::ReapInquiryWaitSpecify(uint16_t ms, uint16_t numTil, uint16_t &numCE,
 
 
 bool
-CQ::CalcTimeout(uint16_t ms, struct timeval &initial)
+CQ::CalcTimeout(uint32_t ms, struct timeval &initial, uint32_t &delta)
 {
     struct timeval current;
 
@@ -336,7 +339,8 @@ CQ::CalcTimeout(uint16_t ms, struct timeval &initial)
     time_t initial_us = (((time_t)1000000 * initial.tv_sec) + initial.tv_usec);
     time_t current_us = (((time_t)1000000 * current.tv_sec) + current.tv_usec);
     time_t timeout_us = ((time_t)ms * (time_t)1000);
-    if ((current_us - initial_us) >= timeout_us) {
+    delta = (current_us - initial_us);
+    if (delta >= timeout_us) {
         LOG_NRM("Timeout: (cur - init) >= TO: (%ld - %ld) >= %ld",
             current_us, initial_us, timeout_us);
         return true;
@@ -345,9 +349,9 @@ CQ::CalcTimeout(uint16_t ms, struct timeval &initial)
 }
 
 
-uint16_t
-CQ::Reap(uint16_t &ceRemain, SharedMemBufferPtr memBuffer, uint32_t &isrCount,
-    uint16_t ceDesire, bool zeroMem)
+uint32_t
+CQ::Reap(uint32_t &ceRemain, SharedMemBufferPtr memBuffer, uint32_t &isrCount,
+    uint32_t ceDesire, bool zeroMem)
 {
     int rc;
     struct nvme_reap reap;

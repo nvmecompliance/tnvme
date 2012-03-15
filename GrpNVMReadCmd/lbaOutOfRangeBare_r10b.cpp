@@ -132,7 +132,7 @@ void
 LBAOutOfRangeBare_r10b::SendCmdToHdw(SharedSQPtr sq, SharedCQPtr cq,
     SharedCmdPtr cmd, string qualify)
 {
-    uint16_t numCE;
+    uint32_t numCE;
     uint32_t isrCount;
     uint32_t isrCountB4;
     string work;

@@ -81,7 +81,7 @@ InvalidNamspc_r10b::RunCoreTest()
      * \endverbatim
      */
     string work;
-    uint16_t numCE;
+    uint32_t numCE;
     uint32_t isrCountB4;
 
     // Lookup objs which were created in a prior test within group
@@ -125,9 +125,9 @@ InvalidNamspc_r10b::SendCmdToHdw(SharedSQPtr sq, SharedCQPtr cq,
     SharedCmdPtr cmd, string qualify)
 {
     uint32_t isrCount;
-    uint16_t numCE;
-    uint16_t ceRemain;
-    uint16_t numReaped;
+    uint32_t numCE;
+    uint32_t ceRemain;
+    uint32_t numReaped;
     string work;
 
 

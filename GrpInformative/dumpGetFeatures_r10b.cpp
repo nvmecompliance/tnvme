@@ -101,7 +101,7 @@ void
 DumpGetFeatures_r10b::SendGetFeaturesNumOfQueues(SharedASQPtr asq,
     SharedACQPtr acq)
 {
-    uint16_t numCE;
+    uint32_t numCE;
     uint32_t isrCount;
 
 
@@ -144,8 +144,8 @@ DumpGetFeatures_r10b::SendGetFeaturesNumOfQueues(SharedASQPtr asq,
         "Just B4 reaping CQ0, dump entire CQ contents");
 
     {
-        uint16_t ceRemain;
-        uint16_t numReaped;
+        uint32_t ceRemain;
+        uint32_t numReaped;
 
 
         LOG_NRM("The CQ's metrics before reaping holds head_ptr needed");

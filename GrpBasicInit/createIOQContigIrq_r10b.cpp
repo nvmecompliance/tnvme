@@ -28,7 +28,7 @@ namespace GrpBasicInit {
 
 #define IOQ_ID                      1
 
-static uint16_t NumEntriesIOQ =     5;
+static uint32_t NumEntriesIOQ =     5;
 
 
 CreateIOQContigIrq_r10b::CreateIOQContigIrq_r10b(int fd, string grpName,
@@ -108,9 +108,10 @@ CreateIOQContigIrq_r10b::RunCoreTest()
 
     // Verify the min requirements for this test are supported by DUT
     work &= CAP_MQES;
+    work += 1;      // convert to 1-based
     if (work < (uint64_t)NumEntriesIOQ) {
-        LOG_NRM("Changing number of Q element from %d to %d",
-            NumEntriesIOQ, (uint16_t)work);
+        LOG_NRM("Changing number of Q element from %d to %lld",
+            NumEntriesIOQ, (unsigned long long)work);
         NumEntriesIOQ = work;
     } else if (gInformative->GetFeaturesNumOfIOCQs() < IOQ_ID) {
         throw FrmwkEx("DUT doesn't support %d IOCQ's", IOQ_ID);

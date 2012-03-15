@@ -57,7 +57,7 @@ private:
     // Adding a member variable? Then edit the copy constructor and operator=().
     ///////////////////////////////////////////////////////////////////////////
     void VerifyCtrlrResetDeletesIOQs(SharedACQPtr acq, SharedASQPtr asq,
-        uint16_t numEntriesIOQ);
+        uint32_t numEntriesIOQ);
 };
 
 }   // namespace

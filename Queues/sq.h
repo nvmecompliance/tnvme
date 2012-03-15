@@ -93,7 +93,7 @@ protected:
      * @param numEntries Pass the number of elements within the Q
      * @param cqId Pass the assoc CQ ID to which this SQ will be associated
      */
-    void Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
+    void Init(uint16_t qId, uint16_t entrySize, uint32_t numEntries,
         uint16_t cqId);
 
     /**
@@ -107,7 +107,7 @@ protected:
      *      results.
      * @param cqId Pass the assoc CQ ID to which this SQ will be associated
      */
-    void Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
+    void Init(uint16_t qId, uint16_t entrySize, uint32_t numEntries,
         const SharedMemBufferPtr memBuffer, uint16_t cqId);
 
 

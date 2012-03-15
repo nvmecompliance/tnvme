@@ -38,7 +38,7 @@ IOSQ::~IOSQ()
 
 
 void
-IOSQ::Init(uint16_t qId, uint16_t numEntries, uint16_t cqId,
+IOSQ::Init(uint16_t qId, uint32_t numEntries, uint16_t cqId,
     uint8_t priority)
 {
     uint8_t entrySize;
@@ -78,6 +78,7 @@ IOSQ::Init(uint16_t qId, uint16_t numEntries, uint16_t cqId,
         throw FrmwkEx("Unable to determine MQES");
 
     work &= CAP_MQES;
+    work += 1;      // convert to 1-based
     if ((work + 1) < (uint64_t)numEntries) {
         LOG_WARN("Creating Q with %d entries, but DUT only allows %d",
             numEntries, (uint32_t)(work + 1));
@@ -88,7 +89,7 @@ IOSQ::Init(uint16_t qId, uint16_t numEntries, uint16_t cqId,
 
 
 void
-IOSQ::Init(uint16_t qId, uint16_t numEntries,
+IOSQ::Init(uint16_t qId, uint32_t numEntries,
     const SharedMemBufferPtr memBuffer, uint16_t cqId, uint8_t priority)
 {
     uint8_t entrySize;
@@ -102,6 +103,7 @@ IOSQ::Init(uint16_t qId, uint16_t numEntries,
 
     // Detect if doing something that looks suspicious/incorrect/illegal
     work &= CAP_MQES;
+    work += 1;      // convert to 1-based
     if ((work + 1) < (uint64_t)numEntries) {
         LOG_WARN("Creating Q with %d entries, but DUT only allows %d",
             numEntries, (uint32_t)(work + 1));

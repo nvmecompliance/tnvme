@@ -35,7 +35,7 @@ IO::SendCmdToHdw(string grpName, string testName, uint16_t ms,
     SharedSQPtr sq, SharedCQPtr cq, SharedCmdPtr cmd, string qualify,
     bool verbose)
 {
-    uint16_t numCE;
+    uint32_t numCE;
     uint32_t isrCount;
     uint32_t isrCountB4;
     string work;
@@ -103,11 +103,11 @@ IO::SendCmdToHdw(string grpName, string testName, uint16_t ms,
 
 
 void
-IO::ReapCE(SharedCQPtr cq, uint16_t numCE, uint32_t &isrCount,
+IO::ReapCE(SharedCQPtr cq, uint32_t numCE, uint32_t &isrCount,
     string grpName, string testName, string qualify, CEStat status)
 {
-    uint16_t ceRemain;
-    uint16_t numReaped;
+    uint32_t ceRemain;
+    uint32_t numReaped;
     string work;
 
 

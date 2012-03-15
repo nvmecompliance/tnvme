@@ -58,9 +58,9 @@ private:
     ///////////////////////////////////////////////////////////////////////////
     // Adding a member variable? Then edit the copy constructor and operator=().
     ///////////////////////////////////////////////////////////////////////////
-    void IOQRollChkDiff(uint16_t numEntriesIOSQ, uint16_t numEntriesIOCQ);
+    void IOQRollChkDiff(uint32_t numEntriesIOSQ, uint32_t numEntriesIOCQ);
     SharedWritePtr SetWriteCmd();
-    void ReapAndVerifyCE(SharedIOCQPtr iocq, uint16_t expectedVal);
+    void ReapAndVerifyCE(SharedIOCQPtr iocq, uint32_t expectedVal);
     void VerifyQPointers(SharedIOSQPtr iosq, SharedIOCQPtr iocq);
 };
 

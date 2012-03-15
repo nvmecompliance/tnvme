@@ -204,7 +204,7 @@ AllPciRegs_r10b::ValidatePciCapRegisterROAttribute(PciSpc reg)
 
 
     if (pciMetrics[reg].size > MAX_SUPPORTED_REG_SIZE) {
-        for (uint16_t k = 0; (k*DWORD_LEN) < pciMetrics[reg].size; k++) {
+        for (uint32_t k = 0; (k*DWORD_LEN) < pciMetrics[reg].size; k++) {
 
             if (gRegisters->Read(NVMEIO_PCI_HDR, DWORD_LEN,
                 pciMetrics[reg].offset + (k * DWORD_LEN),

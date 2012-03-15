@@ -36,21 +36,16 @@ SQ::SQ(int fd, Trackable::ObjType objBeingCreated) :
 
 SQ::~SQ()
 {
-    try {
-        // Cleanup duties for this Q's buffer
-        if (GetIsContig()) {
-            // Contiguous memory is alloc'd and owned by the kernel
-            KernelAPI::munmap(mContigBuf, GetQSize());
-        }
-    } catch (...) {
-        ;   // Destructors should never throw. If the object is deleted B4
-            // it is Init'd() properly, it could throw, so catch and ignore
+    // Cleanup duties for this Q's buffer
+    if (GetIsContig()) {
+        // Contiguous memory is alloc'd and owned by the kernel
+        KernelAPI::munmap(mContigBuf, GetQSize());
     }
 }
 
 
 void
-SQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries, uint16_t cqId)
+SQ::Init(uint16_t qId, uint16_t entrySize, uint32_t numEntries, uint16_t cqId)
 {
     uint64_t work;
 
@@ -63,13 +58,14 @@ SQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries, uint16_t cqId)
 
     LOG_NRM("Allocating contiguous SQ memory in dnvme");
     if (numEntries < 2) {
-        LOG_WARN("Number elements breaches spec requirement");
+        throw FrmwkEx("Number elements breaches spec requirement");
     } else if (gRegisters->Read(CTLSPC_CAP, work) == false) {
         throw FrmwkEx("Unable to determine MQES");
     }
 
     // Detect if doing something that looks suspicious/incorrect/illegal
     work &= CAP_MQES;
+    work += 1;      // convert to 1-based
     if (work < (uint64_t)numEntries) {
         LOG_WARN("Creating Q with %d entries, but DUT only allows %d",
             numEntries, (uint32_t)work);
@@ -117,7 +113,7 @@ SQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries, uint16_t cqId)
 
 
 void
-SQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
+SQ::Init(uint16_t qId, uint16_t entrySize, uint32_t numEntries,
     const SharedMemBufferPtr memBuffer, uint16_t cqId)
 {
     uint64_t work;
@@ -130,13 +126,14 @@ SQ::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries,
 
     LOG_NRM("Allocating discontiguous SQ memory in tnvme");
     if (numEntries < 2) {
-        LOG_WARN("Number elements breaches spec requirement");
+        throw FrmwkEx("Number elements breaches spec requirement");
     } else if (gRegisters->Read(CTLSPC_CAP, work) == false) {
         throw FrmwkEx("Unable to determine MQES");
     }
 
     // Detect if doing something that looks suspicious/incorrect/illegal
     work &= CAP_MQES;
+    work += 1;      // convert to 1-based
     if (work < (uint64_t)numEntries) {
         LOG_WARN("Creating Q with %d entries, but DUT only allows %d",
             numEntries, (uint32_t)work);
@@ -220,7 +217,7 @@ SQ::PeekSE(uint16_t indexPtr)
     else
         dataPtr = (union SE *)mDiscontigBuf->GetBuffer();
 
-    for (int i = 0; i < GetNumEntries(); i++, dataPtr++) {
+    for (uint32_t i = 0; i < GetNumEntries(); i++, dataPtr++) {
         if (i == indexPtr)
             return *dataPtr;
     }

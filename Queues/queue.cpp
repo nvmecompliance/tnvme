@@ -72,7 +72,7 @@ Queue::GetQBuffer()
 
 
 void
-Queue::Init(uint16_t qId, uint16_t entrySize, uint16_t numEntries)
+Queue::Init(uint16_t qId, uint16_t entrySize, uint32_t numEntries)
 {
     if (mDiscontigBuf != MemBuffer::NullMemBufferPtr) {
         throw FrmwkEx("Obj already init'd for discontiguous parameters");

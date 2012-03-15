@@ -82,7 +82,7 @@ IgnoreMetaPtrBase_r10b::RunCoreTest()
      * \endverbatim
      */
     string work;
-    uint16_t numCE;
+    uint32_t numCE;
     uint32_t isrCountB4;
 
     // Lookup objs which were created in a prior test within group

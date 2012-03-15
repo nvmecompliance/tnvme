@@ -614,9 +614,9 @@ ParseQueuesCmdLine(NumQueues &numQueues, const char *optarg)
 bool
 SetFeaturesNumberOfQueues(NumQueues &numQueues, int fd)
 {
-    uint16_t numCE;
-    uint16_t ceRemain;
-    uint16_t numReaped;
+    uint32_t numCE;
+    uint32_t ceRemain;
+    uint32_t numReaped;
     uint32_t isrCount;
 
 

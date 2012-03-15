@@ -27,7 +27,7 @@ namespace GrpQueues {
 #define IOSQ_DISCONTIG_GROUP_ID     "IOSQDiscontig"
 #define IOQ_ID                      1
 
-#define DEFAULT_CMD_WAIT_ms         2000
+#define DEFAULT_CMD_WAIT_ms         SYSTEMWIDE_CMD_WAIT_ms
 
 #define MAX(a,b)                    (((a) > (b)) ? (a) : (b))
 

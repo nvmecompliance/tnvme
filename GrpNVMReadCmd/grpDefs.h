@@ -23,6 +23,6 @@
 #define IOSQ_GROUP_ID               "IOSQ"
 #define IOQ_ID                      1
 
-#define DEFAULT_CMD_WAIT_ms         2000
+#define DEFAULT_CMD_WAIT_ms         SYSTEMWIDE_CMD_WAIT_ms
 
 #endif

@@ -58,7 +58,7 @@ private:
     // Adding a member variable? Then edit the copy constructor and operator=().
     ///////////////////////////////////////////////////////////////////////////
     SharedWritePtr SetWriteCmd();
-    void IOQFull(uint16_t numIOSQEntries, uint16_t numIOCQEntries,
+    void IOQFull(uint32_t numIOSQEntries, uint32_t numIOCQEntries,
         SharedASQPtr asq, SharedACQPtr acq, SharedWritePtr writeCmd);
 };
 

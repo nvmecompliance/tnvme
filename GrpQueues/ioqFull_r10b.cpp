@@ -91,7 +91,8 @@ IOQFull_r10b::RunCoreTest()
         LOG_ERR("Unable to determine MQES");
         throw FrmwkEx();
     }
-    uint16_t maxIOQEntries = (uint16_t)(ctrlCapReg & CAP_MQES);
+    uint32_t maxIOQEntries = (ctrlCapReg & CAP_MQES);
+    maxIOQEntries += 1;      // convert to 1-based
 
     // Lookup objs which were created in a prior test within group
     SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
@@ -113,11 +114,11 @@ IOQFull_r10b::RunCoreTest()
 
 
 void
-IOQFull_r10b::IOQFull(uint16_t numIOSQEntries, uint16_t numIOCQEntries,
+IOQFull_r10b::IOQFull(uint32_t numIOSQEntries, uint32_t numIOCQEntries,
         SharedASQPtr asq, SharedACQPtr acq, SharedWritePtr writeCmd)
 {
     string work;
-    uint16_t numCE;
+    uint32_t numCE;
     uint32_t isrCount;
 
     // Reset the controller.
@@ -145,9 +146,9 @@ IOQFull_r10b::IOQFull(uint16_t numIOSQEntries, uint16_t numIOCQEntries,
         mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, numIOSQEntries,
         false, IOSQ_CONTIG_GROUP_ID, IOQ_ID, 0, iosqBackedMem);
 
-    uint16_t nCmdsToSubmit = (numIOSQEntries - 1);
+    uint32_t nCmdsToSubmit = (numIOSQEntries - 1);
     LOG_NRM("Send #%d cmds to hdw via IOSQ", nCmdsToSubmit);
-    for (uint16_t nCmds = 0; nCmds < nCmdsToSubmit; nCmds++) {
+    for (uint32_t nCmds = 0; nCmds < nCmdsToSubmit; nCmds++) {
         LOG_NRM("Sending #%d of #%d NVM Write Cmds thru IOSQ", (nCmds + 1),
             nCmdsToSubmit);
         iosq->Send(writeCmd);

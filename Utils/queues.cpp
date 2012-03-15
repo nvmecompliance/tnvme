@@ -36,7 +36,7 @@ Queues::~Queues()
 SharedIOCQPtr
 Queues::CreateIOCQContigToHdw(string grpName, string testName,
     uint16_t ms, SharedASQPtr asq, SharedACQPtr acq, uint16_t qId,
-    uint16_t numEntries, bool grpLifetime, string grpID, bool irqEnabled,
+    uint32_t numEntries, bool grpLifetime, string grpID, bool irqEnabled,
     uint16_t irqVec, string qualify, bool verbose)
 {
     char work[20];
@@ -73,7 +73,7 @@ Queues::CreateIOCQContigToHdw(string grpName, string testName,
 SharedIOSQPtr
 Queues::CreateIOSQContigToHdw(string grpName, string testName,
     uint16_t ms, SharedASQPtr asq, SharedACQPtr acq, uint16_t qId,
-    uint16_t numEntries, bool grpLifetime, string grpID, uint16_t cqId,
+    uint32_t numEntries, bool grpLifetime, string grpID, uint16_t cqId,
     uint8_t priority, string qualify, bool verbose)
 {
     char work[20];
@@ -110,7 +110,7 @@ Queues::CreateIOSQContigToHdw(string grpName, string testName,
 SharedIOCQPtr
 Queues::CreateIOCQDiscontigToHdw(string grpName, string testName,
     uint16_t ms, SharedASQPtr asq, SharedACQPtr acq, uint16_t qId,
-    uint16_t numEntries, bool grpLifetime, string grpID, bool irqEnabled,
+    uint32_t numEntries, bool grpLifetime, string grpID, bool irqEnabled,
     uint16_t irqVec, SharedMemBufferPtr qBackedMem, string qualify,
     bool verbose)
 {
@@ -158,7 +158,7 @@ Queues::CreateIOCQDiscontigToHdw(string grpName, string testName,
 SharedIOSQPtr
 Queues::CreateIOSQDiscontigToHdw(string grpName, string testName,
     uint16_t ms, SharedASQPtr asq, SharedACQPtr acq, uint16_t qId,
-    uint16_t numEntries, bool grpLifetime, string grpID, uint16_t cqId,
+    uint32_t numEntries, bool grpLifetime, string grpID, uint16_t cqId,
     uint8_t priority, SharedMemBufferPtr qBackedMem, string qualify,
     bool verbose)
 {

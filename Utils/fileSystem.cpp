@@ -67,7 +67,7 @@ FileSystem::SetRootLogDir(string dir)
             LOG_ERR("Root log directory is missing: %s", dir.c_str());
             return false;
         }
-    } catch (...) {
+    } catch (exception &exc) {
         LOG_ERR("boost::filesystem exception");
         return false;
     }

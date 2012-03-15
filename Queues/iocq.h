@@ -52,7 +52,7 @@ public:
      *        must be among the set from (0 - (n-1)) where n is is spec'd
      *        during a call to CtrlrConfig::SetIrqScheme().
      */
-    void Init(uint16_t qId, uint16_t numEntries, bool irqEnabled,
+    void Init(uint16_t qId, uint32_t numEntries, bool irqEnabled,
         uint16_t irqVec);
 
     /**
@@ -68,7 +68,7 @@ public:
      *        must be among the set from (0 - (n-1)) where n is is spec'd
      *        during a call to CtrlrConfig::SetIrqScheme()
      */
-    void Init(uint16_t qId, uint16_t numEntries,
+    void Init(uint16_t qId, uint32_t numEntries,
         const SharedMemBufferPtr memBuffer, bool irqEnabled, uint16_t irqVec);
 
 

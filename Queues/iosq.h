@@ -52,7 +52,7 @@ public:
      * @param cqId Pass the assoc CQ ID to which this SQ will be associated
      * @param priority Pass this Q's priority value, must be a 2 bit value
      */
-    void Init(uint16_t qId, uint16_t numEntries, uint16_t cqId,
+    void Init(uint16_t qId, uint32_t numEntries, uint16_t cqId,
         uint8_t priority);
 
     /**
@@ -66,7 +66,7 @@ public:
      * @param cqId Pass the assoc CQ ID to which this SQ will be associated
      * @param priority Pass this Q's priority value, must be a 2 bit value
      */
-    void Init(uint16_t qId, uint16_t numEntries,
+    void Init(uint16_t qId, uint32_t numEntries,
         const SharedMemBufferPtr memBuffer, uint16_t cqId, uint8_t priority);
 
 

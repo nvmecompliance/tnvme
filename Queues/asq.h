@@ -48,7 +48,7 @@ public:
      * Initialize this object and allocates a contiguous ACQ
      * @param numEntries Pass the number of elements within the Q
      */
-    void Init(uint16_t numEntries);
+    void Init(uint32_t numEntries);
 
     /**
      * Issue the specified cmd to this queue, but does not ring any doorbell.

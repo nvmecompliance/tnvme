@@ -88,15 +88,16 @@ IOQRollChkSame_r10b::RunCoreTest()
     if (gRegisters->Read(CTLSPC_CAP, maxIOQEntries) == false)
         throw FrmwkEx("Unable to determine MQES");
     maxIOQEntries &= CAP_MQES;
+    maxIOQEntries += 1;      // convert to 1-based
 
     // IO Q Min Sizes
     IOQRollChkSame(2);
     // IO Q Max Sizes
-    IOQRollChkSame((uint16_t)maxIOQEntries);
+    IOQRollChkSame((uint32_t)maxIOQEntries);
 }
 
 void
-IOQRollChkSame_r10b::IOQRollChkSame(uint16_t numEntriesIOQ)
+IOQRollChkSame_r10b::IOQRollChkSame(uint32_t numEntriesIOQ)
 {
     // Lookup objs which were created in a prior test within group
     SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
@@ -180,11 +181,11 @@ IOQRollChkSame_r10b::SetWriteCmd()
 
 
 void
-IOQRollChkSame_r10b::ReapAndVerifyCE(SharedIOCQPtr iocq, uint16_t expectedVal)
+IOQRollChkSame_r10b::ReapAndVerifyCE(SharedIOCQPtr iocq, uint32_t expectedVal)
 {
-    uint16_t numCE;
-    uint16_t ceRemain;
-    uint16_t numReaped;
+    uint32_t numCE;
+    uint32_t ceRemain;
+    uint32_t numReaped;
     uint32_t isrCount;
 
     LOG_NRM("Wait for the CE to arrive in IOCQ %d", iocq->GetQId());
@@ -235,7 +236,7 @@ IOQRollChkSame_r10b::ReapAndVerifyCE(SharedIOCQPtr iocq, uint16_t expectedVal)
 void
 IOQRollChkSame_r10b::VerifyQPointers(SharedIOSQPtr iosq, SharedIOCQPtr iocq)
 {
-    uint16_t expectedVal = 2;
+    uint32_t expectedVal = 2;
     struct nvme_gen_cq iocqMetrics = iocq->GetQMetrics();
     struct nvme_gen_sq iosqMetrics = iosq->GetQMetrics();
 

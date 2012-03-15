@@ -38,7 +38,7 @@ ACQ::~ACQ()
 
 
 void
-ACQ::Init(uint16_t numEntries)
+ACQ::Init(uint32_t numEntries)
 {
     LOG_WARN("Even though ACQ IRQ's enabled, may not be globally");
     CQ::Init(0, IDEAL_ELEMENT_SIZE, numEntries, true, 0);

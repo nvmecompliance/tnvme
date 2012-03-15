@@ -27,7 +27,7 @@
 
 namespace GrpNVMReadCmd {
 
-static uint16_t NumEntriesIOQ =     2;
+static uint32_t NumEntriesIOQ =     2;
 
 
 CreateResources_r10b::CreateResources_r10b(int fd, string grpName, string testName,
@@ -105,9 +105,10 @@ CreateResources_r10b::RunCoreTest()
             throw FrmwkEx("Unable to determine MQES");
 
         maxIOQEntries &= CAP_MQES;
+        maxIOQEntries += 1;      // convert to 1-based
         if (maxIOQEntries < (uint64_t)NumEntriesIOQ) {
-            LOG_NRM("Changing number of Q elements from %d to %d",
-                NumEntriesIOQ, (uint16_t)maxIOQEntries);
+            LOG_NRM("Changing number of Q elements from %d to %lld",
+                NumEntriesIOQ, (unsigned long long)maxIOQEntries);
             NumEntriesIOQ = maxIOQEntries;
         }
 
