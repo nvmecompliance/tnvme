@@ -26,7 +26,11 @@ SRC =						\
 	ignoreMetaPtrBare_r10b.cpp		\
 	protInfoIgnoreBare_r10b.cpp		\
 	FUA_r10b.cpp				\
+<<<<<<< HEAD
 #	limitedRetry_r10b.cpp
+=======
+	limitedRetry_r10b.cpp
+>>>>>>> newTest
 
 .SUFFIXES: .cpp
 

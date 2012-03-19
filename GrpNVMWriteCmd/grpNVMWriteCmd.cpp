@@ -22,7 +22,11 @@
 #include "ignoreMetaPtrBare_r10b.h"
 #include "protInfoIgnoreBare_r10b.h"
 #include "FUA_r10b.h"
+<<<<<<< HEAD
 //todo#include "limitedRetry_r10b.h"
+=======
+#include "limitedRetry_r10b.h"
+>>>>>>> newTest
 
 namespace GrpNVMWriteCmd {
 
@@ -46,7 +50,11 @@ GrpNVMWriteCmd::GrpNVMWriteCmd(size_t grpNum, SpecRev specRev,
         APPEND_TEST_AT_YLEVEL(IgnoreMetaPtrBare_r10b, fd, GrpNVMWriteCmd, errRegs)
         APPEND_TEST_AT_YLEVEL(ProtInfoIgnoreBare_r10b, fd, GrpNVMWriteCmd, errRegs)
         APPEND_TEST_AT_YLEVEL(FUA_r10b, fd, GrpNVMWriteCmd, errRegs)
+<<<<<<< HEAD
 //todo        APPEND_TEST_AT_YLEVEL(LimitedRetry_r10b, fd, GrpNVMWriteCmd, errRegs)
+=======
+        APPEND_TEST_AT_YLEVEL(LimitedRetry_r10b, fd, GrpNVMWriteCmd, errRegs)
+>>>>>>> newTest
         break;
 
     default:
