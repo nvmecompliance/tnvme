@@ -53,11 +53,12 @@ public:
      * @param cq Pass pre-existing CQ to reap CE to verify successful creation
      * @param cmd Pass the cmd to issue into the supplied CQ
      * @param qualify Pass a qualifying string to append to each dump file
+     * @param status Pass the expected status to verify with
      * @param verbose Pass true to dump resources to dump files, otherwise false
      */
     static void SendCmdToHdw(string grpName, string testName, uint16_t ms,
         SharedSQPtr sq, SharedCQPtr cq, SharedCmdPtr cmd, string qualify,
-        bool verbose);
+        bool verbose, CEStat status = CESTAT_SUCCESS);
 
     /**
      * Reap a specified number of CE's from the specified CQ.

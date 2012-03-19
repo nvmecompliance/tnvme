@@ -33,7 +33,7 @@ IO::~IO()
 void
 IO::SendCmdToHdw(string grpName, string testName, uint16_t ms,
     SharedSQPtr sq, SharedCQPtr cq, SharedCmdPtr cmd, string qualify,
-    bool verbose)
+    bool verbose, CEStat status)
 {
     uint32_t numCE;
     uint32_t isrCount;
@@ -85,7 +85,7 @@ IO::SendCmdToHdw(string grpName, string testName, uint16_t ms,
     }
 
     // throws if an error occurs
-    ReapCE(cq, numCE, isrCount, grpName, testName, qualify);
+    ReapCE(cq, numCE, isrCount, grpName, testName, qualify, status);
 
     // Single cmd submitted on empty ASQ should always yield 1 IRQ on ACQ
     if (gCtrlrConfig->IrqsEnabled() && cq->GetIrqEnabled() &&
