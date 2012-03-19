@@ -22,7 +22,7 @@ SRC =						\
 	lbaOutOfRangeBare_r10b.cpp		\
 	invalidNamspc_r10b.cpp			\
 	unsupportRsvdFields_r10b.cpp		\
-#	ignoreMetaPtrBase_r10b.cpp		\
+	ignoreMetaPtrBase_r10b.cpp		\
 #	FUA_r10b.cpp				\
 #	limitedRetry_r10b.cpp
 
