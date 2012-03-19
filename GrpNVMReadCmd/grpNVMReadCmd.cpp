@@ -19,7 +19,8 @@
 #include "lbaOutOfRangeBare_r10b.h"
 #include "invalidNamspc_r10b.h"
 #include "unsupportRsvdFields_r10b.h"
-#include "ignoreMetaPtrBase_r10b.h"
+#include "ignoreMetaPtrBare_r10b.h"
+#include "protInfoIgnoreBare_r10b.h"
 #include "FUA_r10b.h"
 #include "limitedRetry_r10b.h"
 
@@ -42,7 +43,7 @@ GrpNVMReadCmd::GrpNVMReadCmd(size_t grpNum, SpecRev specRev, ErrorRegs errRegs,
         APPEND_TEST_AT_YLEVEL(LBAOutOfRangeBare_r10b, fd, GrpNVMReadCmd, errRegs)
         APPEND_TEST_AT_YLEVEL(InvalidNamspc_r10b, fd, GrpNVMReadCmd, errRegs)
         APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r10b, fd, GrpNVMReadCmd, errRegs)
-        APPEND_TEST_AT_YLEVEL(IgnoreMetaPtrBase_r10b, fd, GrpNVMReadCmd, errRegs)
+        APPEND_TEST_AT_YLEVEL(IgnoreMetaPtrBare_r10b, fd, GrpNVMReadCmd, errRegs)
         APPEND_TEST_AT_YLEVEL(FUA_r10b, fd, GrpNVMReadCmd, errRegs)
         APPEND_TEST_AT_YLEVEL(LimitedRetry_r10b, fd, GrpNVMReadCmd, errRegs)
         break;

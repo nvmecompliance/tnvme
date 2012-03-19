@@ -14,8 +14,8 @@
  *  limitations under the License.
  */
 
-#ifndef _IGNOREMETAPTRBASE_r10b_H_
-#define _IGNOREMETAPTRBASE_r10b_H_
+#ifndef _IGNOREMETAPTRBARE_r10b_H_
+#define _IGNOREMETAPTRBARE_r10b_H_
 
 #include "test.h"
 
@@ -29,20 +29,20 @@ namespace GrpNVMReadCmd {
  * 1) See notes in the header file of the Test base class
  * \endverbatim
  */
-class IgnoreMetaPtrBase_r10b : public Test
+class IgnoreMetaPtrBare_r10b : public Test
 {
 public:
-    IgnoreMetaPtrBase_r10b(int fd, string grpName, string testName,
+    IgnoreMetaPtrBare_r10b(int fd, string grpName, string testName,
         ErrorRegs errRegs);
-    virtual ~IgnoreMetaPtrBase_r10b();
+    virtual ~IgnoreMetaPtrBare_r10b();
 
     /**
      * IMPORTANT: Read Test::Clone() header comment.
      */
-    virtual IgnoreMetaPtrBase_r10b *Clone() const
-        { return new IgnoreMetaPtrBase_r10b(*this); }
-    IgnoreMetaPtrBase_r10b &operator=(const IgnoreMetaPtrBase_r10b &other);
-    IgnoreMetaPtrBase_r10b(const IgnoreMetaPtrBase_r10b &other);
+    virtual IgnoreMetaPtrBare_r10b *Clone() const
+        { return new IgnoreMetaPtrBare_r10b(*this); }
+    IgnoreMetaPtrBare_r10b &operator=(const IgnoreMetaPtrBare_r10b &other);
+    IgnoreMetaPtrBare_r10b(const IgnoreMetaPtrBare_r10b &other);
 
 
 protected:

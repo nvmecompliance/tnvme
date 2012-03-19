@@ -94,8 +94,8 @@ LBAOutOfRangeBare_r10b::RunCoreTest()
     SharedIOCQPtr iocq = CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_GROUP_ID));
 
     vector<uint32_t> bare = gInformative->GetBareNamespaces();
-    for (size_t i = 1; i < bare.size(); i++) {
-        namSpcPtr = gInformative->GetIdentifyCmdNamspc(i);
+    for (size_t i = 0; i < bare.size(); i++) {
+        namSpcPtr = gInformative->GetIdentifyCmdNamspc(bare[i]);
         if (namSpcPtr == Identify::NullIdentifyPtr)
             throw FrmwkEx("Identify namspc struct #%d doesn't exist", bare[i]);
         nsze = namSpcPtr->GetValue(IDNAMESPC_NSZE);
@@ -117,17 +117,17 @@ LBAOutOfRangeBare_r10b::RunCoreTest()
         snprintf(work, sizeof(work), "nsze-2.%01d", (uint32_t)i);
         writeCmd->SetSLBA(nsze - 2);
         IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
-            iocq, writeCmd, string(work), true);
+            iocq, writeCmd, work, true);
 
         LOG_NRM("Issue cmd where 1st block starts at LBA (Identify.NSZE-1)");
         snprintf(work, sizeof(work), "nsze-1.%d01d", (uint32_t)i);
         writeCmd->SetSLBA(nsze - 1);
-        SendCmdToHdw(iosq, iocq, writeCmd, string(work));
+        SendCmdToHdw(iosq, iocq, writeCmd, work);
 
         LOG_NRM("Issue cmd where 1st block starts at LBA (Identify.NSZE)");
         snprintf(work, sizeof(work), "nsze.%01d", (uint32_t)i);
         writeCmd->SetSLBA(nsze);
-        SendCmdToHdw(iosq, iocq, writeCmd, string(work));
+        SendCmdToHdw(iosq, iocq, writeCmd, work);
     }
 }
 

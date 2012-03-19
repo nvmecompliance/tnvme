@@ -15,33 +15,34 @@
  */
 
 #include "boost/format.hpp"
-#include "ignoreMetaPtrBase_r10b.h"
+#include "protInfoIgnoreBare_r10b.h"
 #include "globals.h"
 #include "grpDefs.h"
 #include "../Queues/iocq.h"
 #include "../Queues/iosq.h"
 #include "../Utils/io.h"
-#include "../Cmds/write.h"
+#include "../Cmds/read.h"
 
-namespace GrpNVMWriteCmd {
+namespace GrpNVMReadCmd {
 
 
-IgnoreMetaPtrBase_r10b::IgnoreMetaPtrBase_r10b(int fd, string mGrpName, string mTestName,
+ProtInfoIgnoreBare_r10b::ProtInfoIgnoreBare_r10b(int fd, string mGrpName, string mTestName,
     ErrorRegs errRegs) :
     Test(fd, mGrpName, mTestName, SPECREV_10b, errRegs)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 4,6");
-    mTestDesc.SetShort(     "Verify metadata ptr is not used for bare namspc");
+    mTestDesc.SetShort(     "Verify protection info (PRINFO) is ignored for bare namspc");
     // No string size limit for the long description
     mTestDesc.SetLong(
-        "MPTR is only used if metadata is not interleaved with the data. For "
-        "all bare namspcs from Identify.NN issue a single write cmd sending 1 "
-        "data block at LBA 0; set the meta ptr to max value, expect success.");
+        "For all bare namspcs from Identify.NN; For each namspc issue multiple "
+        "read cmds where each is reading 1 data block at LBA 0 and vary the "
+        "values of DW12.PRINFO.PRACT from 0x0 to 0x0f, expect success for "
+        "all.");
 }
 
 
-IgnoreMetaPtrBase_r10b::~IgnoreMetaPtrBase_r10b()
+ProtInfoIgnoreBare_r10b::~ProtInfoIgnoreBare_r10b()
 {
     ///////////////////////////////////////////////////////////////////////////
     // Allocations taken from the heap and not under the control of the
@@ -50,8 +51,8 @@ IgnoreMetaPtrBase_r10b::~IgnoreMetaPtrBase_r10b()
 }
 
 
-IgnoreMetaPtrBase_r10b::
-IgnoreMetaPtrBase_r10b(const IgnoreMetaPtrBase_r10b &other) : Test(other)
+ProtInfoIgnoreBare_r10b::
+ProtInfoIgnoreBare_r10b(const ProtInfoIgnoreBare_r10b &other) : Test(other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -60,8 +61,8 @@ IgnoreMetaPtrBase_r10b(const IgnoreMetaPtrBase_r10b &other) : Test(other)
 }
 
 
-IgnoreMetaPtrBase_r10b &
-IgnoreMetaPtrBase_r10b::operator=(const IgnoreMetaPtrBase_r10b &other)
+ProtInfoIgnoreBare_r10b &
+ProtInfoIgnoreBare_r10b::operator=(const ProtInfoIgnoreBare_r10b &other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -73,16 +74,17 @@ IgnoreMetaPtrBase_r10b::operator=(const IgnoreMetaPtrBase_r10b &other)
 
 
 void
-IgnoreMetaPtrBase_r10b::RunCoreTest()
+ProtInfoIgnoreBare_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
      * 1) Test CreateResources_r10b has run prior.
      * \endverbatim
      */
-    string work;
+    char context[256];
     uint32_t numCE;
     uint32_t isrCountB4;
+    ConstSharedIdentifyPtr namSpcPtr;
 
     // Lookup objs which were created in a prior test within group
     SharedIOSQPtr iosq = CAST_TO_IOSQ(gRsrcMngr->GetObj(IOSQ_GROUP_ID));
@@ -96,32 +98,39 @@ IgnoreMetaPtrBase_r10b::RunCoreTest()
             iocq->GetQId(), numCE);
     }
 
-    LOG_NRM("Setup read cmd's values that won't change per namspc");
-    SharedMemBufferPtr writeMem = SharedMemBufferPtr(new MemBuffer());
-    uint64_t lbaDataSize = 512;
-    writeMem->Init(lbaDataSize);
+    vector<uint32_t> bare = gInformative->GetBareNamespaces();
+    for (size_t i = 0; i < bare.size(); i++) {
 
-    SharedWritePtr writeCmd = SharedWritePtr(new Write());
-    send_64b_bitmask prpBitmask = (send_64b_bitmask)
-        (MASK_PRP1_PAGE | MASK_PRP2_PAGE | MASK_PRP2_LIST);
-    writeCmd->SetPrpBuffer(prpBitmask, writeMem);
-    writeCmd->SetNLB(0);    // convert to 0-based value
-    writeCmd->SetSLBA(0);
+        namSpcPtr = gInformative->GetIdentifyCmdNamspc(bare[i]);
+        if (namSpcPtr == Identify::NullIdentifyPtr)
+            throw FrmwkEx("Identify namspc struct #%d doesn't exist", bare[i]);
 
-    LOG_NRM("Set MPTR in cmd to max value");
-    writeCmd->SetDword(0xffffffff, 4);
-    writeCmd->SetDword(0xffffffff, 5);
+        LOG_NRM("Create memory to contain read payload");
+        SharedMemBufferPtr readMem = SharedMemBufferPtr(new MemBuffer());
+        uint64_t lbaDataSize = namSpcPtr->GetLBADataSize();
+        readMem->Init(lbaDataSize);
 
-    LOG_NRM("For all bare namspc's issue cmd with non-zero meta ptr");
-    vector<uint32_t> bareNamspc = gInformative->GetBareNamespaces();
-    for (size_t i = 1; i <= bareNamspc.size(); i++) {
-        writeCmd->SetNSID(i);
-        work = str(boost::format("namspc%d") % i);
-        IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
-            writeCmd, work, true);
+        LOG_NRM("Create a read cmd to read data from namspc %d", bare[i]);
+        SharedReadPtr readCmd = SharedReadPtr(new Read());
+        send_64b_bitmask prpBitmask = (send_64b_bitmask)
+            (MASK_PRP1_PAGE | MASK_PRP2_PAGE | MASK_PRP2_LIST);
+        readCmd->SetPrpBuffer(prpBitmask, readMem);
+        readCmd->SetNSID(bare[i]);
+        readCmd->SetNLB(0);    // convert to 0-based value
+
+        for (uint16_t protInfo = 0; protInfo < 0x0f; protInfo++) {
+            uint8_t work = readCmd->GetByte(12, 3);
+            work &= ~0x3c;  // PRINFO specific bits
+            work |= (protInfo << 3);
+            readCmd->SetByte(work, 12, 3);
+
+            snprintf(context, sizeof(context), "ns%d.protInfo0x%02X",
+                (uint32_t)i, protInfo);
+            IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+                iocq, readCmd, context, true);
+        }
     }
 }
 
 
 }   // namespace
-

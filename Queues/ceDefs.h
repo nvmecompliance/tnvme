@@ -38,7 +38,7 @@ typedef enum SCT {
     ZZ(CESTAT_ABRT_SQ_DEL,       SCT_GENERIC, 0x08, "Cmd aborted due to SQ deletion")       \
     ZZ(CESTAT_ABRT_FAIL_FUSE,    SCT_GENERIC, 0x09, "Cmd aborted due to failed fused cmd")  \
     ZZ(CESTAT_ABRT_MISS_FUSE,    SCT_GENERIC, 0x0a, "Cmd aborted due to missing fused cmd") \
-    ZZ(CESTAT_INVAL_NAMSPC,      SCT_GENERIC, 0x0b, "Invalid namespace for format")         \
+    ZZ(CESTAT_INVAL_NAMSPC,      SCT_GENERIC, 0x0b, "Invalid namespace or format")         \
     ZZ(CESTAT_LBA_OUT_RANGE,     SCT_GENERIC, 0x80, "LBA out of range")                     \
     ZZ(CESTAT_CAP_EXCEEDED,      SCT_GENERIC, 0x81, "Capacity exceeded")                    \
     ZZ(CESTAT_NAMSPC_NOT_RDY,    SCT_GENERIC, 0x82, "Namespace not ready")                  \
