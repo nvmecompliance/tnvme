@@ -25,7 +25,7 @@ SRC =						\
 	ignoreMetaPtrBare_r10b.cpp		\
 	ignoreMetaPtrBare_r10b.cpp		\
 	protInfoIgnoreBare_r10b.cpp		\
-#	FUA_r10b.cpp				\
+	FUA_r10b.cpp				\
 #	limitedRetry_r10b.cpp
 
 .SUFFIXES: .cpp
