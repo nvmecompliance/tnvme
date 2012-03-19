@@ -26,7 +26,8 @@ SRC =					\
 	ioqRollChkDiff_r10b.cpp		\
 	manySQtoCQAssoc_r10b.cpp	\
 	adminQFull_r10b.cpp		\
-	ioqFull_r10b.cpp
+	ioqFull_r10b.cpp		\
+	manyCmdSubmit_r10b.cpp
 
 .SUFFIXES: .cpp
 

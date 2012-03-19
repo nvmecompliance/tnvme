@@ -33,13 +33,13 @@ IOQRollChkSame_r10b::IOQRollChkSame_r10b(int fd, string grpName,
     mTestDesc.SetLong(
         "Search for 1 of the following namspcs to run test. Find 1st bare "
         "namspc, or find 1st meta namspc, or find 1st E2E namspc. Create an "
-        "IOSQ/IOCQ pair of size 2 and CAP.MQES; the pairs are the same size. "
-        "Issue (max Q size plus 2) generic NVM write cmds, sending 1 block "
-        "and approp supporting meta/E2E if necessary to the selected namspc "
-        "at LBA 0, to fill and rollover the Q's, reaping each cmd as one is "
-        "submitted, verify each CE.SQID is correct while filling. At the end "
-        "of reaping all CE's verify IOSQ tail_ptr = 2, IOCQ head_ptr = 2, "
-        "and CE.SQHD = 2.");
+        "IOSQ/IOCQ pair of size 2 and (CAP.MQES + 1); the pairs are the same "
+        "size. Issue (max Q size plus 2) generic NVM write cmds, sending 1 "
+        "block and approp supporting meta/E2E if necessary to the selected "
+        "namspc at LBA 0, to fill and rollover the Q's, reaping each cmd as "
+        "one is submitted, verify each CE.SQID is correct while filling. "
+        "At the end of reaping all CE's verify IOSQ tail_ptr = 2, "
+        "IOCQ head_ptr = 2, and CE.SQHD = 2.");
 }
 
 
@@ -103,13 +103,6 @@ IOQRollChkSame_r10b::IOQRollChkSame(uint32_t numEntriesIOQ)
     SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
     SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
 
-    if (gCtrlrConfig->SetState(ST_DISABLE) == false)
-        throw FrmwkEx();
-
-    gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
-    if (gCtrlrConfig->SetState(ST_ENABLE) == false)
-        throw FrmwkEx();
-
     uint8_t iocqes = (gInformative->GetIdentifyCmdCtrlr()->
         GetValue(IDCTRLRCAP_CQES) & 0xf);
     gCtrlrConfig->SetIOCQES(iocqes);
@@ -139,6 +132,12 @@ IOQRollChkSame_r10b::IOQRollChkSame(uint32_t numEntriesIOQ)
             iosq->GetNumEntries());
     }
     VerifyQPointers(iosq, iocq);
+
+    // Delete IOSQ before the IOCQ to comply with spec.
+    Queues::DeleteIOSQToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+        iosq, asq, acq);
+    Queues::DeleteIOCQToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+        iocq, asq, acq);
 }
 
 

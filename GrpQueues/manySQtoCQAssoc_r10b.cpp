@@ -101,24 +101,16 @@ ManySQtoCQAssoc_r10b::RunCoreTest()
         }
     }
 
-    // Set the controller to initial state.
-    if (gCtrlrConfig->SetState(ST_DISABLE) == false)
-        throw FrmwkEx();
-
-    gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
-    if (gCtrlrConfig->SetState(ST_ENABLE) == false)
-        throw FrmwkEx();
-
     SharedWritePtr writeCmd = SetWriteCmd();
 
     // Create one IOCQ for test lifetime.
     gCtrlrConfig->SetIOCQES(gInformative->GetIdentifyCmdCtrlr()->
         GetValue(IDCTRLRCAP_CQES) & 0xf);
-    SharedIOCQPtr iocqContig = Queues::CreateIOCQContigToHdw(mGrpName,
+    SharedIOCQPtr iocq = Queues::CreateIOCQContigToHdw(mGrpName,
         mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, NumEntriesIOQ,
         false, IOCQ_CONTIG_GROUP_ID, false, 0, "iocq", true);
 
-    vector<SharedIOSQPtr> iosqContigVector;
+    vector<SharedIOSQPtr> iosqVector;
     vector<uint32_t> mSQIDToSQHDVector;
     mSQIDToSQHDVector.push_back(USHRT_MAX); // vector position 0 is not used.
 
@@ -127,23 +119,32 @@ ManySQtoCQAssoc_r10b::RunCoreTest()
         GetValue(IDCTRLRCAP_SQES) & 0xf);
     for (uint32_t j = 1; j <= gInformative->GetFeaturesNumOfIOSQs(); j++) {
         LOG_NRM("Creating contig IOSQ#%d", j);
-        SharedIOSQPtr iosqContig = Queues::CreateIOSQContigToHdw(mGrpName,
+        SharedIOSQPtr iosq = Queues::CreateIOSQContigToHdw(mGrpName,
             mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, j, NumEntriesIOQ, false,
             IOSQ_CONTIG_GROUP_ID, IOQ_ID, 0, "iosq", true);
 
-        iosqContigVector.push_back(iosqContig);
+        iosqVector.push_back(iosq);
         mSQIDToSQHDVector.push_back(0);
 
-        for (vector <SharedIOSQPtr>::iterator iosq = iosqContigVector.begin();
-            iosq < iosqContigVector.end(); iosq++) {
+        for (vector <SharedIOSQPtr>::iterator iosq = iosqVector.begin();
+            iosq < iosqVector.end(); iosq++) {
             (*iosq)->Send(writeCmd);
             (*iosq)->Ring();
             mSQIDToSQHDVector[(*iosq)->GetQId()] =
                 ++mSQIDToSQHDVector[(*iosq)->GetQId()] %
                     (*iosq)->GetNumEntries();
         }
-        ReapIOCQAndVerifyCE(iocqContig, j, mSQIDToSQHDVector);
+        ReapIOCQAndVerifyCE(iocq, j, mSQIDToSQHDVector);
     }
+
+    // Delete all IOSQs before the IOCQ to comply with spec.
+    for (vector <SharedIOSQPtr>::iterator iosq = iosqVector.begin();
+        iosq < iosqVector.end(); iosq++) {
+        Queues::DeleteIOSQToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+            *iosq, asq, acq);
+    }
+    Queues::DeleteIOCQToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+        iocq, asq, acq);
 }
 
 

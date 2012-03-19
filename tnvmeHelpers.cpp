@@ -644,8 +644,10 @@ SetFeaturesNumberOfQueues(NumQueues &numQueues, int fd)
         LOG_NRM("Send the cmd to the ASQ, wait for it to complete");
         asq->Send(sfNumOfQ);
         asq->Ring();
-        if (acq->ReapInquiryWaitSpecify(2000, 1, numCE, isrCount) == false)
+        if (acq->ReapInquiryWaitSpecify(SYSTEMWIDE_CMD_WAIT_ms, 1, numCE,
+            isrCount) == false) {
             throw FrmwkEx("Unable to see completion of Set Features cmd");
+        }
         else if (numCE != 1)
             throw FrmwkEx("The ACQ should only have 1 CE as a result of a cmd");
 

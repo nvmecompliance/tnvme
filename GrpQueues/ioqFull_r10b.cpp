@@ -121,13 +121,6 @@ IOQFull_r10b::IOQFull(uint32_t numIOSQEntries, uint32_t numIOCQEntries,
     uint32_t numCE;
     uint32_t isrCount;
 
-    // Reset the controller.
-    if (gCtrlrConfig->SetState(ST_DISABLE) == false)
-        throw FrmwkEx();
-    gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
-    if (gCtrlrConfig->SetState(ST_ENABLE) == false)
-        throw FrmwkEx();
-
     uint8_t iocqes = (gInformative->GetIdentifyCmdCtrlr()->
         GetValue(IDCTRLRCAP_CQES) & 0xf);
     gCtrlrConfig->SetIOCQES(iocqes);
@@ -184,6 +177,12 @@ IOQFull_r10b::IOQFull(uint32_t numIOSQEntries, uint32_t numIOCQEntries,
                 nCmds + 1, numCE);
         }
     }
+
+    // Delete IOSQ before the IOCQ to comply with spec.
+    Queues::DeleteIOSQToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+        iosq, asq, acq);
+    Queues::DeleteIOCQToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+        iocq, asq, acq);
 }
 
 
