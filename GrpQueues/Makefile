@@ -27,7 +27,8 @@ SRC =					\
 	manySQtoCQAssoc_r10b.cpp	\
 	adminQFull_r10b.cpp		\
 	ioqFull_r10b.cpp		\
-	manyCmdSubmit_r10b.cpp
+	manyCmdSubmit_r10b.cpp		\
+	illegalDeleteQs_r10b.cpp
 
 .SUFFIXES: .cpp
 
