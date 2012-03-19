@@ -32,6 +32,7 @@ SUBDIRS:=			\
 	GrpResets		\
 	GrpQueues		\
 	GrpNVMReadCmd		\
+	GrpNVMWriteCmd		\
 	Queues			\
 	Cmds			\
 	Utils			\

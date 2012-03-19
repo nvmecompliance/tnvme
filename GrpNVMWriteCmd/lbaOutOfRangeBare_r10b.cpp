@@ -21,11 +21,11 @@
 #include "../Queues/iocq.h"
 #include "../Queues/iosq.h"
 #include "../Utils/io.h"
-#include "../Cmds/read.h"
+#include "../Cmds/write.h"
 
-namespace GrpNVMReadCmd {
+namespace GrpNVMWriteCmd {
 
-#define RD_NUM_BLKS                 2
+#define WR_NUM_BLKS                 2
 
 
 LBAOutOfRangeBare_r10b::LBAOutOfRangeBare_r10b(int fd, string mGrpName, string mTestName,
@@ -34,12 +34,12 @@ LBAOutOfRangeBare_r10b::LBAOutOfRangeBare_r10b(int fd, string mGrpName, string m
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 4,6");
-    mTestDesc.SetShort(     "Issue read and cause SC=LBA Out of Range on bare namspcs");
+    mTestDesc.SetShort(     "Issue write and cause SC=LBA Out of Range on bare namspcs");
     // No string size limit for the long description
     mTestDesc.SetLong(
         "For all bare namspcs from Identify.NN, determine Identify.NSZE; For "
-        "each namspc cause many scenarios by issuing a single read cmd "
-        "requesting 2 data blocks. 1) Issue cmd where 1st block starts at LBA "
+        "each namspc cause many scenarios by issuing a single write cmd "
+        "sending 2 data blocks. 1) Issue cmd where 1st block starts at LBA "
         "(Identify.NSZE - 1), expect failure 2) Issue cmd where 1st block "
         "starts at LBA Identify.NSZE, expect failure. 3) Issue cmd where 1st "
         "block starts at 2nd to last max LBA value, expect success.");
@@ -101,33 +101,33 @@ LBAOutOfRangeBare_r10b::RunCoreTest()
         nsze = namSpcPtr->GetValue(IDNAMESPC_NSZE);
 
         LOG_NRM("Create memory to contain read payload");
-        SharedMemBufferPtr readMem = SharedMemBufferPtr(new MemBuffer());
+        SharedMemBufferPtr writeMem = SharedMemBufferPtr(new MemBuffer());
         uint64_t lbaDataSize = namSpcPtr->GetLBADataSize();
-        readMem->Init(RD_NUM_BLKS * lbaDataSize);
+        writeMem->Init(WR_NUM_BLKS * lbaDataSize);
 
         LOG_NRM("Create a read cmd to read data from namspc %d", bare[i]);
-        SharedReadPtr readCmd = SharedReadPtr(new Read());
+        SharedWritePtr writeCmd = SharedWritePtr(new Write());
         send_64b_bitmask prpBitmask = (send_64b_bitmask)
             (MASK_PRP1_PAGE | MASK_PRP2_PAGE | MASK_PRP2_LIST);
-        readCmd->SetPrpBuffer(prpBitmask, readMem);
-        readCmd->SetNSID(bare[i]);
-        readCmd->SetNLB(RD_NUM_BLKS - 1);    // convert to 0-based value
+        writeCmd->SetPrpBuffer(prpBitmask, writeMem);
+        writeCmd->SetNSID(bare[i]);
+        writeCmd->SetNLB(WR_NUM_BLKS - 1);    // convert to 0-based value
 
         LOG_NRM("Issue cmd where 1st block starts at LBA (Identify.NSZE-2)");
         snprintf(work, sizeof(work), "nsze-2.%01d", (uint32_t)i);
-        readCmd->SetSLBA(nsze - 2);
+        writeCmd->SetSLBA(nsze - 2);
         IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
-            iocq, readCmd, string(work), true);
+            iocq, writeCmd, string(work), true);
 
         LOG_NRM("Issue cmd where 1st block starts at LBA (Identify.NSZE-1)");
-        snprintf(work, sizeof(work), "nsze-1.%01d", (uint32_t)i);
-        readCmd->SetSLBA(nsze - 1);
-        SendCmdToHdw(iosq, iocq, readCmd, string(work));
+        snprintf(work, sizeof(work), "nsze-1.%d01d", (uint32_t)i);
+        writeCmd->SetSLBA(nsze - 1);
+        SendCmdToHdw(iosq, iocq, writeCmd, string(work));
 
         LOG_NRM("Issue cmd where 1st block starts at LBA (Identify.NSZE)");
         snprintf(work, sizeof(work), "nsze.%01d", (uint32_t)i);
-        readCmd->SetSLBA(nsze);
-        SendCmdToHdw(iosq, iocq, readCmd, string(work));
+        writeCmd->SetSLBA(nsze);
+        SendCmdToHdw(iosq, iocq, writeCmd, string(work));
     }
 }
 
