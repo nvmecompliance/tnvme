@@ -18,7 +18,7 @@
 #include "createResources_r10b.h"
 #include "lbaOutOfRangeBare_r10b.h"
 #include "invalidNamspc_r10b.h"
-//todo#include "unsupportRsvdFields_r10b.h"
+#include "unsupportRsvdFields_r10b.h"
 //todo#include "ignoreMetaPtrBase_r10b.h"
 //todo#include "FUA_r10b.h"
 //todo#include "limitedRetry_r10b.h"
@@ -41,7 +41,7 @@ GrpNVMWriteCmd::GrpNVMWriteCmd(size_t grpNum, SpecRev specRev,
         APPEND_TEST_AT_XLEVEL(CreateResources_r10b, fd, GrpNVMWriteCmd, errRegs)
         APPEND_TEST_AT_YLEVEL(LBAOutOfRangeBare_r10b, fd, GrpNVMWriteCmd, errRegs)
         APPEND_TEST_AT_YLEVEL(InvalidNamspc_r10b, fd, GrpNVMWriteCmd, errRegs)
-//todo        APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r10b, fd, GrpNVMWriteCmd, errRegs)
+        APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r10b, fd, GrpNVMWriteCmd, errRegs)
 //todo        APPEND_TEST_AT_YLEVEL(IgnoreMetaPtrBase_r10b, fd, GrpNVMWriteCmd, errRegs)
 //todo        APPEND_TEST_AT_YLEVEL(FUA_r10b, fd, GrpNVMWriteCmd, errRegs)
 //todo        APPEND_TEST_AT_YLEVEL(LimitedRetry_r10b, fd, GrpNVMWriteCmd, errRegs)
