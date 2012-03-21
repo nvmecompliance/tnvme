@@ -26,7 +26,7 @@
 #include "ioqFull_r10b.h"
 #include "manyCmdSubmit_r10b.h"
 #include "illegalDeleteQs_r10b.h"
-
+#include "illegalCreateOrder_r10b.h"
 
 namespace GrpQueues {
 
@@ -54,6 +54,7 @@ GrpQueues::GrpQueues(size_t grpNum, SpecRev specRev, ErrorRegs errRegs,
         APPEND_TEST_AT_YLEVEL(IOQFull_r10b, fd, GrpQueues, errRegs)
         APPEND_TEST_AT_YLEVEL(ManyCmdSubmit_r10b, fd, GrpQueues, errRegs)
         APPEND_TEST_AT_YLEVEL(IllegalDeleteQs_r10b, fd, GrpQueues, errRegs)
+        APPEND_TEST_AT_XLEVEL(IllegalCreateOrder_r10b, fd, GrpQueues, errRegs)
         break;
 
     default:
