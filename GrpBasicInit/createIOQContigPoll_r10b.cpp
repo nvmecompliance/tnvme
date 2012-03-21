@@ -23,9 +23,9 @@
 #include "../Utils/kernelAPI.h"
 #include "../Utils/queues.h"
 
-namespace GrpBasicInit {
-
 #define IOQ_ID                      1
+
+namespace GrpBasicInit {
 
 static uint32_t NumEntriesIOQ =     5;
 

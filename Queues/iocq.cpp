@@ -43,7 +43,7 @@ IOCQ::Init(uint16_t qId, uint32_t numEntries, bool irqEnabled, uint16_t irqVec)
     uint64_t work;
 
 
-    LOG_NRM("IOSQ::Init (qId,numEntry,irqEnable,irqVec) = (%d,%d,%d,%d)",
+    LOG_NRM("IOCQ::Init (qId,numEntry,irqEnable,irqVec) = (%d,%d,%d,%d)",
         qId, numEntries, irqEnabled, irqVec);
 
     if (gCtrlrConfig->GetIOCQES(entrySize) == false)

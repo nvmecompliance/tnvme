@@ -54,6 +54,8 @@ private:
     string mMsg;
 
     static bool mPrelimProcessingInProgress;
+
+    void DumpStateOfTheSystem();
 };
 
 

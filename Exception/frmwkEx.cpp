@@ -32,8 +32,7 @@ bool FrmwkEx::mPrelimProcessingInProgress = false;
 FrmwkEx::FrmwkEx()
 {
     LOG_ERR("FAILURE:no reason supplied");
-    PreliminaryProcessing();    // Override in children provides custom logic
-    gCtrlrConfig->SetState(ST_DISABLE);
+    DumpStateOfTheSystem();
 }
 
 
@@ -41,8 +40,7 @@ FrmwkEx::FrmwkEx(string &msg)
 {
     mMsg = msg;
     LOG_ERR("FAILURE:%s", mMsg.c_str());
-    PreliminaryProcessing();    // Override in children provides custom logic
-    gCtrlrConfig->SetState(ST_DISABLE);
+    DumpStateOfTheSystem();
 }
 
 
@@ -57,13 +55,23 @@ FrmwkEx::FrmwkEx(const char *fmt, ...)
 
     mMsg = work;
     LOG_ERR("FAILURE:%s", mMsg.c_str());
-    PreliminaryProcessing();    // Override in children provides custom logic
-    gCtrlrConfig->SetState(ST_DISABLE);
+    DumpStateOfTheSystem();
 }
 
 
 FrmwkEx::~FrmwkEx()
 {
+}
+
+void
+FrmwkEx::DumpStateOfTheSystem()
+{
+    LOG_NRM("-------------------------------------------");
+    LOG_NRM("-------START POST FAILURE STATE DUMP-------");
+    PreliminaryProcessing();    // Override in children provides custom logic
+    gCtrlrConfig->SetState(ST_DISABLE);
+    LOG_NRM("--------END POST FAILURE STATE DUMP--------");
+    LOG_NRM("-------------------------------------------");
 }
 
 
@@ -77,7 +85,6 @@ FrmwkEx::PreliminaryProcessing()
     }
     mPrelimProcessingInProgress = true;
 
-    LOG_NRM("--------START POST FAILURE STATE DUMP--------");
     // First gather all non-intrusive data, things that won't change the
     // state of the DUT, effectively taking a snapshot.
     KernelAPI::DumpKernelMetrics(FileSystem::PrepLogFile(GRP_NAME,

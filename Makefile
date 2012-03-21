@@ -26,6 +26,7 @@ INCLUDES = -I./ -I../
 SUBDIRS:=			\
 	Singletons		\
 	GrpInformative		\
+	GrpInterrupts		\
 	GrpPciRegisters		\
 	GrpCtrlRegisters	\
 	GrpBasicInit		\

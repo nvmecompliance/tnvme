@@ -24,9 +24,9 @@
 #include "../Utils/queues.h"
 #include "../Utils/irq.h"
 
-namespace GrpBasicInit {
-
 #define IOQ_ID                      1
+
+namespace GrpBasicInit {
 
 static uint32_t NumEntriesIOQ =     5;
 
@@ -141,8 +141,6 @@ CreateIOQContigIrq_r10b::RunCoreTest()
     Queues::CreateIOSQContigToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
         asq, acq, IOQ_ID, NumEntriesIOQ, true, IOSQ_CONTIG_GROUP_ID, IOQ_ID, 0);
 }
-
-
 
 
 }   // namespace

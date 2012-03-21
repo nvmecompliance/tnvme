@@ -24,9 +24,9 @@
 #include "../Utils/queues.h"
 #include "../Singletons/informative.h"
 
-namespace GrpBasicInit {
-
 #define IOQ_ID                      2
+
+namespace GrpBasicInit {
 
 static uint32_t NumEntriesIOQ =     5;
 
