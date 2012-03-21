@@ -104,8 +104,6 @@ ManySQtoCQAssoc_r10b::RunCoreTest()
     SharedWritePtr writeCmd = SetWriteCmd();
 
     // Create one IOCQ for test lifetime.
-    gCtrlrConfig->SetIOCQES(gInformative->GetIdentifyCmdCtrlr()->
-        GetValue(IDCTRLRCAP_CQES) & 0xf);
     SharedIOCQPtr iocq = Queues::CreateIOCQContigToHdw(mGrpName,
         mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, NumEntriesIOQ,
         false, IOCQ_CONTIG_GROUP_ID, false, 0, "iocq", true);
@@ -115,8 +113,6 @@ ManySQtoCQAssoc_r10b::RunCoreTest()
     mSQIDToSQHDVector.push_back(USHRT_MAX); // vector position 0 is not used.
 
     // Create Maximum allowed IOSQs and associate with same IOCQ.
-    gCtrlrConfig->SetIOSQES(gInformative->GetIdentifyCmdCtrlr()->
-        GetValue(IDCTRLRCAP_SQES) & 0xf);
     for (uint32_t j = 1; j <= gInformative->GetFeaturesNumOfIOSQs(); j++) {
         LOG_NRM("Creating contig IOSQ#%d", j);
         SharedIOSQPtr iosq = Queues::CreateIOSQContigToHdw(mGrpName,
@@ -127,7 +123,7 @@ ManySQtoCQAssoc_r10b::RunCoreTest()
         mSQIDToSQHDVector.push_back(0);
 
         for (vector <SharedIOSQPtr>::iterator iosq = iosqVector.begin();
-            iosq < iosqVector.end(); iosq++) {
+            iosq != iosqVector.end(); iosq++) {
             (*iosq)->Send(writeCmd);
             (*iosq)->Ring();
             mSQIDToSQHDVector[(*iosq)->GetQId()] =
@@ -139,7 +135,7 @@ ManySQtoCQAssoc_r10b::RunCoreTest()
 
     // Delete all IOSQs before the IOCQ to comply with spec.
     for (vector <SharedIOSQPtr>::iterator iosq = iosqVector.begin();
-        iosq < iosqVector.end(); iosq++) {
+        iosq != iosqVector.end(); iosq++) {
         Queues::DeleteIOSQToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
             *iosq, asq, acq);
     }

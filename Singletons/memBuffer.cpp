@@ -201,7 +201,7 @@ MemBuffer::SetDataPattern(DataPattern dataPat, uint64_t initVal)
         {
             LOG_NRM("Write data pattern: constant 16 bit");
             uint16_t *rawPtr = (uint16_t *)GetBuffer();
-            for (uint64_t i = 0; (GetBufSize() / sizeof(uint16_t)); i++)
+            for (uint64_t i = 0; i < (GetBufSize() / sizeof(uint16_t)); i++)
                 *rawPtr++ = (uint16_t)initVal;
         }
         break;
@@ -210,7 +210,7 @@ MemBuffer::SetDataPattern(DataPattern dataPat, uint64_t initVal)
         {
             LOG_NRM("Write data pattern: constant 32 bit");
             uint32_t *rawPtr = (uint32_t *)GetBuffer();
-            for (uint64_t i = 0; (GetBufSize() / sizeof(uint32_t)); i++)
+            for (uint64_t i = 0; i < (GetBufSize() / sizeof(uint32_t)); i++)
                 *rawPtr++ = (uint32_t)initVal;
         }
         break;
@@ -219,7 +219,7 @@ MemBuffer::SetDataPattern(DataPattern dataPat, uint64_t initVal)
         {
             LOG_NRM("Write data pattern: incrementing 8 bit");
             uint8_t *rawPtr = (uint8_t *)GetBuffer();
-            for (uint64_t i = 0; (GetBufSize() / sizeof(uint8_t)); i++)
+            for (uint64_t i = 0; i < (GetBufSize() / sizeof(uint8_t)); i++)
                 *rawPtr++ = (uint8_t)initVal++;
         }
         break;
@@ -237,7 +237,7 @@ MemBuffer::SetDataPattern(DataPattern dataPat, uint64_t initVal)
         {
             LOG_NRM("Write data pattern: incrementing 32 bit");
             uint32_t *rawPtr = (uint32_t *)GetBuffer();
-            for (uint64_t i = 0; (GetBufSize() / sizeof(uint32_t)); i++)
+            for (uint64_t i = 0; i < (GetBufSize() / sizeof(uint32_t)); i++)
                 *rawPtr++ = (uint32_t)initVal++;
         }
         break;

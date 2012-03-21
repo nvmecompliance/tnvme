@@ -93,6 +93,7 @@ IllegalCreateOrder_r10b::RunCoreTest()
     uint8_t iosqes = (gInformative->GetIdentifyCmdCtrlr()->
         GetValue(IDCTRLRCAP_SQES) & 0xf);
     gCtrlrConfig->SetIOSQES(iosqes);
+
     SharedIOSQPtr iosq = SharedIOSQPtr(new IOSQ(mFd));
     LOG_NRM("Associate IOSQ #%d to unallocated IOCQ #%d", IOQ_ID, IOQ_ID);
     iosq->Init(IOQ_ID, NumEntriesIOQ, IOQ_ID, 0);

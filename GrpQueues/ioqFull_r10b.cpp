@@ -123,7 +123,6 @@ IOQFull_r10b::IOQFull(uint32_t numIOSQEntries, uint32_t numIOCQEntries,
 
     uint8_t iocqes = (gInformative->GetIdentifyCmdCtrlr()->
         GetValue(IDCTRLRCAP_CQES) & 0xf);
-    gCtrlrConfig->SetIOCQES(iocqes);
     SharedMemBufferPtr iocqBackedMem = SharedMemBufferPtr(new MemBuffer());
     iocqBackedMem->InitOffset1stPage((numIOCQEntries * (1 << iocqes)), 0, true);
     SharedIOCQPtr iocq = Queues::CreateIOCQDiscontigToHdw(mGrpName,
@@ -132,7 +131,6 @@ IOQFull_r10b::IOQFull(uint32_t numIOSQEntries, uint32_t numIOCQEntries,
 
     uint8_t iosqes = (gInformative->GetIdentifyCmdCtrlr()->
         GetValue(IDCTRLRCAP_SQES) & 0xf);
-    gCtrlrConfig->SetIOSQES(iosqes);
     SharedMemBufferPtr iosqBackedMem = SharedMemBufferPtr(new MemBuffer());
     iosqBackedMem->InitOffset1stPage((numIOSQEntries * (1 << iosqes)), 0, true);
     SharedIOSQPtr iosq = Queues::CreateIOSQDiscontigToHdw(mGrpName,

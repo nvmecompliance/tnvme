@@ -98,16 +98,10 @@ ManyCmdSubmit_r10b::RunCoreTest()
     uint32_t maxIOQEntries = (uint32_t)(ctrlCapReg & CAP_MQES);
     maxIOQEntries += 1;     // convert to 1-based.
 
-    uint8_t iocqes = (gInformative->GetIdentifyCmdCtrlr()->
-        GetValue(IDCTRLRCAP_CQES) & 0xf);
-    gCtrlrConfig->SetIOCQES(iocqes);
     SharedIOCQPtr iocq = Queues::CreateIOCQContigToHdw(mGrpName,
         mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, maxIOQEntries,
         false, IOCQ_CONTIG_GROUP_ID, true, 0);
 
-    uint8_t iosqes = (gInformative->GetIdentifyCmdCtrlr()->
-        GetValue(IDCTRLRCAP_SQES) & 0xf);
-    gCtrlrConfig->SetIOSQES(iosqes);
     SharedIOSQPtr iosq = Queues::CreateIOSQContigToHdw(mGrpName,
         mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, maxIOQEntries,
         false, IOSQ_CONTIG_GROUP_ID, IOQ_ID, 0);

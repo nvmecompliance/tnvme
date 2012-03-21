@@ -29,7 +29,8 @@ SRC =					\
 	ioqFull_r10b.cpp		\
 	manyCmdSubmit_r10b.cpp		\
 	illegalDeleteQs_r10b.cpp	\
-	illegalCreateOrder_r10b.cpp
+	illegalCreateOrder_r10b.cpp	\
+	maxIOQ_r10b.cpp
 
 .SUFFIXES: .cpp
 

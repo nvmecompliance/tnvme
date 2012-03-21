@@ -95,6 +95,11 @@ CreateResources_r10b::RunCoreTest()
     gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
         throw FrmwkEx();
+
+    gCtrlrConfig->SetIOCQES(gInformative->GetIdentifyCmdCtrlr()->
+        GetValue(IDCTRLRCAP_CQES) & 0xf);
+    gCtrlrConfig->SetIOSQES(gInformative->GetIdentifyCmdCtrlr()->
+        GetValue(IDCTRLRCAP_SQES) & 0xf);
 }
 
 }   // namespace

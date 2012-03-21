@@ -103,16 +103,10 @@ IOQRollChkSame_r10b::IOQRollChkSame(uint32_t numEntriesIOQ)
     SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
     SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
 
-    uint8_t iocqes = (gInformative->GetIdentifyCmdCtrlr()->
-        GetValue(IDCTRLRCAP_CQES) & 0xf);
-    gCtrlrConfig->SetIOCQES(iocqes);
     SharedIOCQPtr iocq = Queues::CreateIOCQContigToHdw(mGrpName,
         mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, numEntriesIOQ,
         false, IOCQ_CONTIG_GROUP_ID, false, 1);
 
-    uint8_t iosqes = (gInformative->GetIdentifyCmdCtrlr()->
-        GetValue(IDCTRLRCAP_SQES) & 0xf);
-    gCtrlrConfig->SetIOSQES(iosqes);
     SharedIOSQPtr iosq = Queues::CreateIOSQContigToHdw(mGrpName,
         mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, numEntriesIOQ,
         false, IOSQ_CONTIG_GROUP_ID, IOQ_ID, 0);
