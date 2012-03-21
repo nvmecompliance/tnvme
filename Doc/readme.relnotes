@@ -1,3 +1,29 @@
+2012-3-21:
+nvmecompliance_release=1.2.2 New tests, bug fixes.
+    1) Added numerous new tests, see git log for details.
+    2) Bugfix: Couldn't create the max sized IOQ's because of the use of an 
+       uint16_t doesn hold the value 65536, i.e. the max possible size. This
+       bug manifested itself within tnvme, dnvme, and QEMU.
+    3) Bugfix: The timeout waiting to "reap inquire" upon a CQ wasn't waiting
+       the correct amount of time per the call's spec'd number of millisec.
+    4) Bugfix: Possible seg fault when a test fails. The old way to notify the
+       framwork of a compliance violation was to throw std::exception(). This
+       could cause a seg fault under the right conditions. See git entry for
+       details. The new method of indicating a failure is to throw a custom
+       class defined within ./tnvme/Exception/FrmwkEx().
+    5) Code cleanup, remove use of <math.h> lib.
+    6) All prior "Known Issues" have been resolved.
+    7) Known Issues:
+        a) GrpInformative's test 1.1.0 "Issue the identify cmd", under real
+           world hdw does do the data transfer, but only part of the page
+           length of data is actually correct. The buffer's are being zero'd
+           before being sent to hardware, after a successful CE arrives in the
+           ACQ, the data being dump to files in directory
+           ./Logs/GrpInformative of the form:
+           GrpInformative.DumpIdentifyData_r10b.Identify.xxxx is currupted. The
+           latter portion of the transfer is corrupted and only some of the
+           time. Anticipation is that the bug resides within dnvme only.
+
 2012-3-8:
 nvmecompliance_release=1.2.1 New tests, bug fixes.
     1) Bugfix: Read cmds would have issue operating under real world hardware
@@ -7,7 +33,7 @@ nvmecompliance_release=1.2.1 New tests, bug fixes.
     3) Bugfix: Informative::GetFeaturesNumOfIOCQs() and 
        Informative::GetFeaturesNumOfIOSQs() now correctly return 1 based
        values as was always stated in the header file doxygen comment.
-    4) All prior issues have been resolved.
+    4) All prior "Known Issues" have been resolved.
     5) Known Issues:
         a) There may be a memory leak within dnvme's ability to free back to 
            the OS any/some of contiguous memory. Evidence shows that looping
