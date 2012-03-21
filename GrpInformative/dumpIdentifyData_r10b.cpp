@@ -79,20 +79,10 @@ DumpIdentifyData_r10b::RunCoreTest()
      * 1) Test CreateResources_r10b has run prior.
      *  \endverbatim
      */
-    uint32_t isrCount;
 
     // Lookup objs which were created in a prior test within group
     SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
     SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
-
-    // Assuming the cmd we issue will result in only a single CE
-    if (acq->ReapInquiry(isrCount, true) != 0) {
-        acq->Dump(
-            FileSystem::PrepLogFile(mGrpName, mTestName, "acq",
-            "notEmpty"), "Test assumption have not been met");
-        throw FrmwkEx(
-            "The ACQ should not have any CE's waiting before testing");
-    }
 
     SendIdentifyCtrlrStruct(asq, acq);
     SendIdentifyNamespaceStruct(asq, acq);

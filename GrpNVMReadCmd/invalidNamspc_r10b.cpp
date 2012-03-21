@@ -81,20 +81,10 @@ InvalidNamspc_r10b::RunCoreTest()
      * \endverbatim
      */
     string work;
-    uint32_t numCE;
-    uint32_t isrCountB4;
 
     // Lookup objs which were created in a prior test within group
     SharedIOSQPtr iosq = CAST_TO_IOSQ(gRsrcMngr->GetObj(IOSQ_GROUP_ID));
     SharedIOCQPtr iocq = CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_GROUP_ID));
-
-    if ((numCE = iocq->ReapInquiry(isrCountB4, true)) != 0) {
-        iocq->Dump(
-            FileSystem::PrepLogFile(mGrpName, mTestName, "iocq",
-            "notEmpty"), "Test assumption have not been met");
-        throw FrmwkEx("Require 0 CE's within CQ %d, not upheld, found %d",
-            iocq->GetQId(), numCE);
-    }
 
     LOG_NRM("Setup read cmd's values that won't change per namspc");
     SharedMemBufferPtr readMem = SharedMemBufferPtr(new MemBuffer());
