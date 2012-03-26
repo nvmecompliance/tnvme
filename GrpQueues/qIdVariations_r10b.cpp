@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-#include "sqcqSizeMismatch_r10b.h"
+#include "qIdVariations_r10b.h"
 #include "grpDefs.h"
 #include "../Utils/queues.h"
 #include "../Utils/io.h"
@@ -24,31 +24,32 @@
 namespace GrpQueues {
 
 
-SQCQSizeMismatch_r10b::SQCQSizeMismatch_r10b(int fd, string grpName,
+QIDVariations_r10b::QIDVariations_r10b(int fd, string grpName,
     string testName, ErrorRegs errRegs) :
     Test(fd, grpName, testName, SPECREV_10b, errRegs)
 {
     // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-    mTestDesc.SetCompliance("revision 1.0b, section 4");
-    mTestDesc.SetShort(     "Create IOCQ/IOSQ pairs while mismatch Q sizes.");
+    mTestDesc.SetCompliance("revision 1.0b, section 5");
+    mTestDesc.SetShort(     "Vary the QID pair's.");
     // No string size limit for the long description
     mTestDesc.SetLong(
         "Search for 1 of the following namspcs to run test. Find 1st bare "
         "namspc, or find 1st meta namspc, or find 1st E2E namspc. Create X "
-        "IOSQ/IOCQ pairs, where X = max num IOQ's the DUT supports. Range "
-        "the size of each IOSQ from 2 to (X+2), and range the sizeof the "
-        "correlating IOCQ's from (X+2) to 2. If the DUT supports 65536 "
-        "IOQ’s, then 2 IOQ’s of each type must be max’d at (CAP.MQES+1). "
-        "After all IOQ’s have been created, for each IOQ pair, fill up "
-        "completely the IOSQ's with write cmds sending 1 block and approp "
-        "supporting meta/E2E if necessary to the selected namspc at LBA 0, "
-        "data pattern is a don't care. Reap all cmds successfully from the "
-        "associated IOCQ. Verify the associated IOSQ for each CE reaped "
-        "from all IOCQ's.");
+        "IOSQ/IOCQ pairs, where X = max num IOQ's the DUT supports. Range the "
+        "size of each IOSQ from 2 to (X+2), and range the sizeof the "
+        "correlating IOCQ's from (X+2) to 2. If the DUT supports 65536 IOQ’s, "
+        "then 2 IOQ’s of each type must be max’d at (CAP.MQES + 1). Create all "
+        "IOCQ's with QID's ranging from 1 to X, then Create the correlating "
+        "IOSQ's with QID's ranging from X to 1. After all IOQ’s have been "
+        "created, for each IOQ pair, fill up completely the IOSQ's with write "
+        "cmds sending 1 block and approp supporting meta/E2E if necessary to "
+        "the selected namspc at LBA 0, data pattern is a don't care. Reap all "
+        "cmds successfully from the associated IOCQ. Verify the associated "
+        "IOSQ for each CE reaped from all IOCQ's.");
 }
 
 
-SQCQSizeMismatch_r10b::~SQCQSizeMismatch_r10b()
+QIDVariations_r10b::~QIDVariations_r10b()
 {
     ///////////////////////////////////////////////////////////////////////////
     // Allocations taken from the heap and not under the control of the
@@ -57,8 +58,8 @@ SQCQSizeMismatch_r10b::~SQCQSizeMismatch_r10b()
 }
 
 
-SQCQSizeMismatch_r10b::
-SQCQSizeMismatch_r10b(const SQCQSizeMismatch_r10b &other) : Test(other)
+QIDVariations_r10b::
+QIDVariations_r10b(const QIDVariations_r10b &other) : Test(other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -67,8 +68,8 @@ SQCQSizeMismatch_r10b(const SQCQSizeMismatch_r10b &other) : Test(other)
 }
 
 
-SQCQSizeMismatch_r10b &
-SQCQSizeMismatch_r10b::operator=(const SQCQSizeMismatch_r10b &other)
+QIDVariations_r10b &
+QIDVariations_r10b::operator=(const QIDVariations_r10b &other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -80,7 +81,7 @@ SQCQSizeMismatch_r10b::operator=(const SQCQSizeMismatch_r10b &other)
 
 
 void
-SQCQSizeMismatch_r10b::RunCoreTest()
+QIDVariations_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
@@ -101,23 +102,36 @@ SQCQSizeMismatch_r10b::RunCoreTest()
 
     SharedWritePtr writeCmd = SetWriteCmd();
 
-    vector<SharedIOSQPtr> IOSQVec;
-    vector<SharedIOCQPtr> IOCQVec;
-
     uint32_t maxIOQSupport = MIN(gInformative->GetFeaturesNumOfIOSQs(),
         gInformative->GetFeaturesNumOfIOCQs());
     uint32_t NumEntriesIOSQ = 2; // IOSQ range: 2 to X + 2
     uint32_t NumEntriesIOCQ = ((maxIOQSupport + 2) > maxIOQEntries) ?
         maxIOQEntries : (maxIOQSupport + 2); // IOCQ range: X + 2 to 2
 
+    uint8_t iocqes = (gInformative->GetIdentifyCmdCtrlr()->
+        GetValue(IDCTRLRCAP_CQES) & 0xf);
+    uint8_t iosqes = (gInformative->GetIdentifyCmdCtrlr()->
+        GetValue(IDCTRLRCAP_SQES) & 0xf);
+
+    vector<SharedIOSQPtr> IOSQVec;
+    vector<SharedIOCQPtr> IOCQVec;
     // Create all supported  queues.
     for (uint32_t ioqId = 1; ioqId <= maxIOQSupport; ioqId++) {
-        SharedIOCQPtr iocq = Queues::CreateIOCQContigToHdw(mGrpName,
+        SharedMemBufferPtr iocqBackedMem = SharedMemBufferPtr(new MemBuffer());
+        iocqBackedMem->InitOffset1stPage((NumEntriesIOCQ * (1 << iocqes)), 0,
+            true);
+        SharedIOCQPtr iocq = Queues::CreateIOCQDiscontigToHdw(mGrpName,
             mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, ioqId, NumEntriesIOCQ,
-            false, IOCQ_CONTIG_GROUP_ID, false, 0);
-        SharedIOSQPtr iosq = Queues::CreateIOSQContigToHdw(mGrpName,
-            mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, ioqId, NumEntriesIOSQ,
-            false, IOSQ_CONTIG_GROUP_ID, ioqId, 0);
+            false, IOCQ_CONTIG_GROUP_ID, false, 0, iocqBackedMem);
+
+        SharedMemBufferPtr iosqBackedMem = SharedMemBufferPtr(new MemBuffer());
+        iosqBackedMem->InitOffset1stPage((NumEntriesIOSQ * (1 << iosqes)), 0,
+            true);
+        SharedIOSQPtr iosq = Queues::CreateIOSQDiscontigToHdw(mGrpName,
+            mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
+            ((maxIOQSupport - ioqId) + 1), NumEntriesIOSQ, false,
+            IOSQ_CONTIG_GROUP_ID, ioqId, 0, iosqBackedMem);
+
         IOSQVec.push_back(iosq);
         IOCQVec.push_back(iocq);
 
@@ -157,7 +171,7 @@ SQCQSizeMismatch_r10b::RunCoreTest()
 
 
 SharedWritePtr
-SQCQSizeMismatch_r10b::SetWriteCmd()
+QIDVariations_r10b::SetWriteCmd()
 {
     Informative::Namspc namspcData = gInformative->Get1stBareMetaE2E();
     LOG_NRM("Processing write cmd using namspc id %d", namspcData.id);
@@ -195,7 +209,7 @@ SQCQSizeMismatch_r10b::SetWriteCmd()
 
 
 void
-SQCQSizeMismatch_r10b::ReapVerifyOnCQ(SharedIOCQPtr iocq, SharedIOSQPtr iosq)
+QIDVariations_r10b::ReapVerifyOnCQ(SharedIOCQPtr iocq, SharedIOSQPtr iosq)
 {
     uint32_t numCE;
     uint32_t ceRemain;

@@ -55,7 +55,7 @@ VerifySpecCompatibility(SpecRev specRev)
     }
 
     if ((tgtMajor != hdwMajor) || (tgtMinor != hdwMinor)) {
-        LOG_ERR("(Targeted vs hdw) revision incompatible (%d.%d != %d.%d)",
+        LOG_ERR("(Targeted vs hdw) spec rev incompatibility (%d.%d != %d.%d)",
             tgtMajor, tgtMinor, hdwMajor, hdwMinor);
         return false;
     }
