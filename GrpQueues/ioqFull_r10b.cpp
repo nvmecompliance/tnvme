@@ -120,22 +120,35 @@ IOQFull_r10b::IOQFull(uint32_t numIOSQEntries, uint32_t numIOCQEntries,
     string work;
     uint32_t numCE;
     uint32_t isrCount;
+    SharedIOCQPtr iocq;
+    SharedIOSQPtr iosq;
 
-    uint8_t iocqes = (gInformative->GetIdentifyCmdCtrlr()->
-        GetValue(IDCTRLRCAP_CQES) & 0xf);
-    SharedMemBufferPtr iocqBackedMem = SharedMemBufferPtr(new MemBuffer());
-    iocqBackedMem->InitOffset1stPage((numIOCQEntries * (1 << iocqes)), 0, true);
-    SharedIOCQPtr iocq = Queues::CreateIOCQDiscontigToHdw(mGrpName,
-        mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, numIOCQEntries,
-        false, IOCQ_CONTIG_GROUP_ID, false, 1, iocqBackedMem);
+    if (Queues::SupportDiscontigIOQ() == true) {
+        uint8_t iocqes = (gInformative->GetIdentifyCmdCtrlr()->
+            GetValue(IDCTRLRCAP_CQES) & 0xf);
+        SharedMemBufferPtr iocqBackedMem = SharedMemBufferPtr(new MemBuffer());
+        iocqBackedMem->
+            InitOffset1stPage((numIOCQEntries * (1 << iocqes)), 0, true);
+        iocq = Queues::CreateIOCQDiscontigToHdw(mGrpName,
+            mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, numIOCQEntries,
+            false, IOCQ_CONTIG_GROUP_ID, false, 1, iocqBackedMem);
 
-    uint8_t iosqes = (gInformative->GetIdentifyCmdCtrlr()->
-        GetValue(IDCTRLRCAP_SQES) & 0xf);
-    SharedMemBufferPtr iosqBackedMem = SharedMemBufferPtr(new MemBuffer());
-    iosqBackedMem->InitOffset1stPage((numIOSQEntries * (1 << iosqes)), 0, true);
-    SharedIOSQPtr iosq = Queues::CreateIOSQDiscontigToHdw(mGrpName,
-        mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, numIOSQEntries,
-        false, IOSQ_CONTIG_GROUP_ID, IOQ_ID, 0, iosqBackedMem);
+        uint8_t iosqes = (gInformative->GetIdentifyCmdCtrlr()->
+            GetValue(IDCTRLRCAP_SQES) & 0xf);
+        SharedMemBufferPtr iosqBackedMem = SharedMemBufferPtr(new MemBuffer());
+        iosqBackedMem->
+            InitOffset1stPage((numIOSQEntries * (1 << iosqes)), 0, true);
+        iosq = Queues::CreateIOSQDiscontigToHdw(mGrpName,
+            mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, numIOSQEntries,
+            false, IOSQ_CONTIG_GROUP_ID, IOQ_ID, 0, iosqBackedMem);
+    } else {
+        iocq = Queues::CreateIOCQContigToHdw(mGrpName,
+            mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, numIOCQEntries,
+            false, IOCQ_CONTIG_GROUP_ID, false, 1);
+        iosq = Queues::CreateIOSQContigToHdw(mGrpName,
+            mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, numIOSQEntries,
+            false, IOSQ_CONTIG_GROUP_ID, IOQ_ID, 0);
+    }
 
     uint32_t nCmdsToSubmit = (numIOSQEntries - 1);
     LOG_NRM("Send #%d cmds to hdw via IOSQ", nCmdsToSubmit);

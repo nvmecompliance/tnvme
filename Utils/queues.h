@@ -39,6 +39,11 @@ public:
     Queues();
     virtual ~Queues();
 
+    /*
+     * Does the DUT support discontiguous IOQ's.
+     * @return true if DUT supports discontig backed IOQ memory, otherwise false
+     */
+    static bool SupportDiscontigIOQ();
 
     /**
      * Creates, in hdw, an IOCQ and returns the resource.

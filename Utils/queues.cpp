@@ -254,3 +254,17 @@ Queues::DeleteIOSQToHdw(string grpName, string testName, uint16_t ms,
     IO::SendCmdToHdw(grpName, testName, ms, asq, acq, deleteIOSQCmd, workStr,
         verbose);
 }
+
+
+bool
+Queues::SupportDiscontigIOQ()
+{
+    uint64_t regVal;
+    if (gRegisters->Read(CTLSPC_CAP, regVal) == false)
+        throw FrmwkEx("Failed reading controller capabilities (CAP) register.");
+
+    if (regVal & CAP_CQR)
+        return false;
+
+    return true;
+}

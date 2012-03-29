@@ -117,20 +117,34 @@ QIDVariations_r10b::RunCoreTest()
     vector<SharedIOCQPtr> IOCQVec;
     // Create all supported  queues.
     for (uint32_t ioqId = 1; ioqId <= maxIOQSupport; ioqId++) {
-        SharedMemBufferPtr iocqBackedMem = SharedMemBufferPtr(new MemBuffer());
-        iocqBackedMem->InitOffset1stPage((NumEntriesIOCQ * (1 << iocqes)), 0,
-            true);
-        SharedIOCQPtr iocq = Queues::CreateIOCQDiscontigToHdw(mGrpName,
-            mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, ioqId, NumEntriesIOCQ,
-            false, IOCQ_CONTIG_GROUP_ID, false, 0, iocqBackedMem);
+        SharedIOCQPtr iocq;
+        SharedIOSQPtr iosq;
+        if (Queues::SupportDiscontigIOQ() == true) {
+            SharedMemBufferPtr iocqBackedMem =
+                SharedMemBufferPtr(new MemBuffer());
+            iocqBackedMem->InitOffset1stPage
+                ((NumEntriesIOCQ * (1 << iocqes)), 0, true);
+            iocq = Queues::CreateIOCQDiscontigToHdw(mGrpName, mTestName,
+                DEFAULT_CMD_WAIT_ms, asq, acq, ioqId, NumEntriesIOCQ,
+                false, IOCQ_CONTIG_GROUP_ID, false, 0, iocqBackedMem);
 
-        SharedMemBufferPtr iosqBackedMem = SharedMemBufferPtr(new MemBuffer());
-        iosqBackedMem->InitOffset1stPage((NumEntriesIOSQ * (1 << iosqes)), 0,
-            true);
-        SharedIOSQPtr iosq = Queues::CreateIOSQDiscontigToHdw(mGrpName,
-            mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
-            ((maxIOQSupport - ioqId) + 1), NumEntriesIOSQ, false,
-            IOSQ_CONTIG_GROUP_ID, ioqId, 0, iosqBackedMem);
+            SharedMemBufferPtr iosqBackedMem =
+                SharedMemBufferPtr(new MemBuffer());
+            iosqBackedMem->InitOffset1stPage
+                ((NumEntriesIOSQ * (1 << iosqes)), 0,true);
+            iosq = Queues::CreateIOSQDiscontigToHdw(mGrpName, mTestName,
+                DEFAULT_CMD_WAIT_ms, asq, acq, ((maxIOQSupport - ioqId) + 1),
+                NumEntriesIOSQ, false, IOSQ_CONTIG_GROUP_ID, ioqId, 0,
+                iosqBackedMem);
+        } else {
+            iocq = Queues::CreateIOCQContigToHdw(mGrpName,
+                mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, ioqId, NumEntriesIOCQ,
+                false, IOCQ_CONTIG_GROUP_ID, false, 0);
+            iosq = Queues::CreateIOSQContigToHdw(mGrpName,
+                mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
+                ((maxIOQSupport - ioqId) + 1), NumEntriesIOSQ, false,
+                IOSQ_CONTIG_GROUP_ID, ioqId, 0);
+        }
 
         IOSQVec.push_back(iosq);
         IOCQVec.push_back(iocq);
