@@ -9,6 +9,7 @@ tnvme
 .cproject
 .project
 *.a
+*.o
 doxygen.log
 dump.reg.pci
 dump.reg.ctrl

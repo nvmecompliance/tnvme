@@ -14,6 +14,7 @@
  *  limitations under the License.
  */
 
+#include <string.h>
 #include "metaData.h"
 #include "globals.h"
 #include "../Utils/buffers.h"
@@ -59,4 +60,83 @@ MetaData::Dump(LogFilename filename, string fileHdr) const
 {
     Buffers::Dump(filename, mMetaData.buf, 0, ULONG_MAX, GetMetaBufferSize(),
         fileHdr);
+}
+
+
+void
+MetaData::SetDataPattern(DataPattern dataPat, uint64_t initVal)
+{
+    LOG_NRM("Write data pattern: initial value = 0x%016llX",
+        (long long unsigned int)initVal);
+
+    if (GetMetaBuffer() == NULL)
+        return;
+
+    switch (dataPat)
+    {
+    case DATAPAT_CONST_8BIT:
+        {
+            LOG_NRM("Write data pattern: constant 8 bit");
+            memset(GetMetaBuffer(), (uint8_t)initVal, GetMetaBufferSize());
+        }
+        break;
+
+    case DATAPAT_CONST_16BIT:
+        {
+            LOG_NRM("Write data pattern: constant 16 bit");
+            uint16_t *rawPtr = (uint16_t *)GetMetaBuffer();
+            for (uint64_t i = 0; i < (GetMetaBufferSize() / sizeof(uint16_t));
+                i++) {
+                *rawPtr++ = (uint16_t)initVal;
+            }
+        }
+        break;
+
+    case DATAPAT_CONST_32BIT:
+        {
+            LOG_NRM("Write data pattern: constant 32 bit");
+            uint32_t *rawPtr = (uint32_t *)GetMetaBuffer();
+            for (uint64_t i = 0; i < (GetMetaBufferSize() / sizeof(uint32_t));
+                i++) {
+                *rawPtr++ = (uint32_t)initVal;
+            }
+        }
+        break;
+
+    case DATAPAT_INC_8BIT:
+        {
+            LOG_NRM("Write data pattern: incrementing 8 bit");
+            uint8_t *rawPtr = (uint8_t *)GetMetaBuffer();
+            for (uint64_t i = 0; i < (GetMetaBufferSize() / sizeof(uint8_t));
+                i++) {
+                *rawPtr++ = (uint8_t)initVal++;
+            }
+        }
+        break;
+
+    case DATAPAT_INC_16BIT:
+        {
+            LOG_NRM("Write data pattern: incrementing 16 bit");
+            uint16_t *rawPtr = (uint16_t *)GetMetaBuffer();
+            for (uint64_t i = 0; i < (GetMetaBufferSize() / sizeof(uint16_t));
+                i++) {
+                *rawPtr++ = (uint16_t)initVal++;
+            }
+        }
+        break;
+
+    case DATAPAT_INC_32BIT:
+        {
+            LOG_NRM("Write data pattern: incrementing 32 bit");
+            uint32_t *rawPtr = (uint32_t *)GetMetaBuffer();
+            for (uint64_t i = 0; i < (GetMetaBufferSize() / sizeof(uint32_t));
+                i++) {
+                *rawPtr++ = (uint32_t)initVal++;
+            }
+        }
+        break;
+
+    default:
+        throw FrmwkEx("Unsupported data pattern %d", dataPat);
+    }
 }
