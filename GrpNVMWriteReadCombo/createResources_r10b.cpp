@@ -18,9 +18,12 @@
 #include "globals.h"
 #include "grpDefs.h"
 #include "../Utils/irq.h"
+#include "../Utils/queues.h"
+
 
 namespace GrpNVMWriteReadCombo {
 
+static uint32_t NumEntriesIOQ =     2;
 
 
 CreateResources_r10b::CreateResources_r10b(int fd, string grpName,
@@ -91,6 +94,33 @@ CreateResources_r10b::RunCoreTest()
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
         throw FrmwkEx();
 
+    {
+        uint64_t maxIOQEntries;
+        // Determine the max IOQ entries supported
+        if (gRegisters->Read(CTLSPC_CAP, maxIOQEntries) == false)
+            throw FrmwkEx("Unable to determine MQES");
+
+        maxIOQEntries &= CAP_MQES;
+        maxIOQEntries += 1;      // convert to 1-based
+        if (maxIOQEntries < (uint64_t)NumEntriesIOQ) {
+            LOG_NRM("Changing number of Q elements from %d to %lld",
+                NumEntriesIOQ, (unsigned long long)maxIOQEntries);
+            NumEntriesIOQ = maxIOQEntries;
+        }
+
+
+        gCtrlrConfig->SetIOCQES(gInformative->GetIdentifyCmdCtrlr()->
+            GetValue(IDCTRLRCAP_CQES) & 0xf);
+        Queues::CreateIOCQContigToHdw(mGrpName, mTestName,
+            DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, NumEntriesIOQ, true,
+            IOCQ_GROUP_ID, true, 0);
+
+        gCtrlrConfig->SetIOSQES(gInformative->GetIdentifyCmdCtrlr()->
+            GetValue(IDCTRLRCAP_SQES) & 0xf);
+        Queues::CreateIOSQContigToHdw(mGrpName, mTestName,
+            DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, NumEntriesIOQ, true,
+            IOSQ_GROUP_ID, IOQ_ID, 0);
+    }
 }
 
 }   // namespace

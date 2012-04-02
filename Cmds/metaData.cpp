@@ -64,7 +64,7 @@ MetaData::Dump(LogFilename filename, string fileHdr) const
 
 
 void
-MetaData::SetDataPattern(DataPattern dataPat, uint64_t initVal)
+MetaData::SetMetaDataPattern(DataPattern dataPat, uint64_t initVal)
 {
     LOG_NRM("Write data pattern: initial value = 0x%016llX",
         (long long unsigned int)initVal);

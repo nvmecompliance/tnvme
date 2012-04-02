@@ -18,6 +18,13 @@
 #define _PRPOFFSETSINGLEPGSINGLEBLK_r10b_H_
 
 #include "test.h"
+#include "globals.h"
+#include "../Utils/queues.h"
+#include "../Utils/io.h"
+#include "../Cmds/metaData.h"
+#include "../Cmds/write.h"
+#include "../Cmds/read.h"
+
 
 namespace GrpNVMWriteReadCombo {
 
@@ -55,6 +62,13 @@ private:
     ///////////////////////////////////////////////////////////////////////////
     // Adding a member variable? Then edit the copy constructor and operator=().
     ///////////////////////////////////////////////////////////////////////////
+    SharedWritePtr SetWriteCmd(Informative::Namspc namspcData,
+        SharedMemBufferPtr dataPat);
+    SharedReadPtr CreateReadCmd(Informative::Namspc namspcData,
+        SharedMemBufferPtr dataPat);
+    void VerifyDataPattern(SharedReadPtr readCmd,
+        MemBuffer::DataPattern dataPattern, uint64_t wrVal);
+
 };
 
 }   // namespace

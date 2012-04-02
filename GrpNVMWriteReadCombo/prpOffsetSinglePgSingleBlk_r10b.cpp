@@ -14,9 +14,11 @@
  *  limitations under the License.
  */
 
+#include "boost/format.hpp"
 #include "prpOffsetSinglePgSingleBlk_r10b.h"
-#include "globals.h"
 #include "grpDefs.h"
+#include "../Cmds/cmd.h"
+
 
 namespace GrpNVMWriteReadCombo {
 
@@ -91,8 +93,206 @@ PRPOffsetSinglePgSingleBlk_r10b::RunCoreTest()
      * 1) Test CreateResources_r10b has run prior.
      * \endverbatim
      */
+    string work;
 
+    /* Initialize random seed to 17 */
+    srand (17);
+
+    // Lookup objs which were created in a prior test within group
+    SharedIOSQPtr iosq = CAST_TO_IOSQ(gRsrcMngr->GetObj(IOSQ_GROUP_ID));
+    SharedIOCQPtr iocq = CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_GROUP_ID));
+
+    Informative::Namspc namspcData = gInformative->Get1stBareMetaE2E();
+    if (namspcData.type != Informative::NS_BARE) {
+        LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
+        if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
+            throw FrmwkEx();
+    }
+
+    SharedMemBufferPtr writeMem = SharedMemBufferPtr(new MemBuffer());
+    SharedWritePtr writeCmd = SetWriteCmd(namspcData, writeMem);
+
+    SharedMemBufferPtr readMem = SharedMemBufferPtr(new MemBuffer());
+    SharedReadPtr readCmd = CreateReadCmd(namspcData, readMem);
+
+    MemBuffer::DataPattern dataPattern;
+    MetaData::DataPattern metaDataPattern;
+
+    uint8_t mpsRegVal;
+    if (gCtrlrConfig->GetMPS(mpsRegVal) == false)
+        throw FrmwkEx("Unable to get MPS value from CC.");
+    uint64_t X =  (uint64_t)(1 << (mpsRegVal + 12)) -
+        namspcData.idCmdNamspc->GetLBADataSize();
+
+    uint64_t wrVal;
+    uint32_t prp2RandVal[2];
+    for (uint64_t memOffset = 0; memOffset <= X; memOffset += 4) {
+        if ((memOffset % 8) != 0) {
+            dataPattern = MemBuffer::DATAPAT_CONST_8BIT;
+            metaDataPattern = MetaData::DATAPAT_CONST_8BIT;
+            wrVal = memOffset;
+            prp2RandVal[0] = rand();
+            prp2RandVal[1] = rand();
+            work = str(boost::format("dataPatt.constb.memOff.%d") % memOffset);
+        } else {
+            dataPattern = MemBuffer::DATAPAT_INC_16BIT;
+            metaDataPattern = MetaData::DATAPAT_INC_16BIT;
+            wrVal = memOffset;
+            prp2RandVal[0] = 0;
+            prp2RandVal[1] = 0;
+            work = str(boost::format("dataPatt.incw.memOff.%d") % memOffset);
+        }
+
+        writeMem->InitOffset1stPage(Identify::IDEAL_DATA_SIZE, memOffset,
+            false);
+        writeMem->SetDataPattern(dataPattern, wrVal);
+        if (namspcData.type != Informative::NS_BARE)
+            writeCmd->SetMetaDataPattern(metaDataPattern, wrVal);
+
+        // Set 64 bits of PRP2 in CDW 8 & 9 with random or zero for write cmd.
+        writeCmd->SetDword(prp2RandVal[0], 8);
+        writeCmd->SetDword(prp2RandVal[1], 9);
+
+        IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
+            writeCmd, work, true);
+
+        // Set 64 bits of PRP2 in CDW 8 & 9 with random or zero for read cmd.
+        readCmd->SetDword(prp2RandVal[0], 8);
+        readCmd->SetDword(prp2RandVal[1], 9);
+
+        IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
+            readCmd, work, true);
+
+        VerifyDataPattern(readCmd, dataPattern, wrVal);
+    }
 }
 
+
+SharedWritePtr
+PRPOffsetSinglePgSingleBlk_r10b::SetWriteCmd(Informative::Namspc namspcData,
+    SharedMemBufferPtr dataPat)
+{
+    LOG_NRM("Processing write cmd using namspc id %d", namspcData.id);
+    uint64_t lbaDataSize = namspcData.idCmdNamspc->GetLBADataSize();
+    dataPat->Init(lbaDataSize);
+
+    SharedWritePtr writeCmd = SharedWritePtr(new Write());
+    send_64b_bitmask prpBitmask = (send_64b_bitmask)(MASK_PRP1_PAGE);
+
+    if (namspcData.type == Informative::NS_META) {
+        writeCmd->AllocMetaBuffer();
+        prpBitmask = (send_64b_bitmask)(prpBitmask | MASK_MPTR);
+    } else if (namspcData.type == Informative::NS_E2E) {
+        writeCmd->AllocMetaBuffer();
+        prpBitmask = (send_64b_bitmask)(prpBitmask | MASK_MPTR);
+        LOG_ERR("Deferring E2E namspc work to the future");
+        throw FrmwkEx("Need to add CRC's to correlate to buf pattern");
+    }
+
+    writeCmd->SetPrpBuffer(prpBitmask, dataPat);
+    writeCmd->SetNSID(namspcData.id);
+    writeCmd->SetNLB(0);
+
+    return writeCmd;
+}
+
+
+SharedReadPtr
+PRPOffsetSinglePgSingleBlk_r10b::CreateReadCmd(Informative::Namspc namspcData,
+    SharedMemBufferPtr dataPat)
+{
+    LOG_NRM("Processing read cmd using namspc id %d", namspcData.id);
+    uint64_t lbaDataSize = namspcData.idCmdNamspc->GetLBADataSize();
+    dataPat->Init(lbaDataSize);
+
+    SharedReadPtr readCmd = SharedReadPtr(new Read());
+    send_64b_bitmask prpBitmask = (send_64b_bitmask)(MASK_PRP1_PAGE);
+
+    if (namspcData.type == Informative::NS_META) {
+        readCmd->AllocMetaBuffer();
+        prpBitmask = (send_64b_bitmask)(prpBitmask | MASK_MPTR);
+    } else if (namspcData.type == Informative::NS_E2E) {
+        readCmd->AllocMetaBuffer();
+        prpBitmask = (send_64b_bitmask)(prpBitmask | MASK_MPTR);
+        LOG_ERR("Deferring E2E namspc work to the future");
+        throw FrmwkEx("Need to add CRC's to correlate to buf pattern");
+    }
+
+    readCmd->SetPrpBuffer(prpBitmask, dataPat);
+    readCmd->SetNSID(namspcData.id);
+    readCmd->SetNLB(0);
+    return readCmd;
+}
+
+
+void
+PRPOffsetSinglePgSingleBlk_r10b::VerifyDataPattern(SharedReadPtr readCmd,
+    MemBuffer::DataPattern dataPattern, uint64_t wrVal)
+{
+    LOG_NRM("Compare read vs written data to verify");
+    uint16_t mWrVal = (uint16_t)wrVal;
+    if (dataPattern == MemBuffer::DATAPAT_INC_16BIT) {
+        const uint16_t *rdBuffPtr = (const uint16_t *)readCmd->GetROPrpBuffer();
+        for (uint64_t i = 0; i <
+            (readCmd->GetPrpBufferSize() / sizeof(uint16_t)); i++) {
+            if (*rdBuffPtr++ != mWrVal++) {
+                readCmd->Dump(
+                    FileSystem::PrepLogFile(mGrpName, mTestName, "ReadPayload"),
+                    "Data read from media miscompared from written");
+                throw FrmwkEx("Read data mismatch for 16bit inc prp data "
+                    "read ptr: 0x%08X, read value: 0x%02X, write value: 0x%02X",
+                    rdBuffPtr, *rdBuffPtr, mWrVal);
+            }
+        }
+        // Check if meta data exists and then compare meta buffer data.
+        const uint16_t *rdMetaPtr = (const uint16_t *)readCmd->GetMetaBuffer();
+        mWrVal = (uint16_t)wrVal;
+        if (rdMetaPtr) {
+            LOG_NRM("Compare read vs written meta data to verify");
+            for (uint64_t i = 0; i <
+                (readCmd->GetMetaBufferSize() / sizeof(uint16_t)); i++) {
+                if (*rdMetaPtr++ != mWrVal++) {
+                    readCmd->Dump(
+                        FileSystem::PrepLogFile(mGrpName, mTestName,
+                        "MetaPayload"),
+                        "Meta Data read from media miscompared from written");
+                    throw FrmwkEx("Read data mismatch for 16bit inc meta data "
+                        "read ptr: 0x%08X, read val: 0x%02X, write val: 0x%02X",
+                        rdBuffPtr, *rdBuffPtr, mWrVal);
+                }
+            }
+        }
+    } else if (dataPattern == MemBuffer::DATAPAT_CONST_8BIT) {
+        const uint8_t *rdBuffPtr = readCmd->GetROPrpBuffer();
+        for (uint64_t i = 0; i <
+            (readCmd->GetPrpBufferSize() / sizeof(uint8_t)); i++) {
+            if (*rdBuffPtr++ != (uint8_t)wrVal) {
+                readCmd->Dump(
+                    FileSystem::PrepLogFile(mGrpName, mTestName, "ReadPayload"),
+                    "Data read from media miscompared from written");
+                throw FrmwkEx("Read data mismatch for 8bit const data "
+                    "read ptr: 0x%08X, read value: 0x%02X, write value: 0x%02X",
+                    rdBuffPtr, *rdBuffPtr, wrVal);
+            }
+        }
+        // Check if meta data exists and then compare meta buffer data.
+        const uint8_t *rdMetaPtr = readCmd->GetMetaBuffer();
+        if (rdMetaPtr) {
+            LOG_NRM("Compare read vs written meta data to verify");
+            for (uint64_t i = 0; i <
+                (readCmd->GetMetaBufferSize() / sizeof(uint8_t)); i++) {
+                if (*rdMetaPtr++ != (uint8_t)wrVal) {
+                    readCmd->Dump(
+                        FileSystem::PrepLogFile(mGrpName, mTestName,
+                        "MetaPayload"),
+                        "Meta Data read from media miscompared from written");
+                    throw FrmwkEx("Read data mismatch for 8bit const meta data "
+                        "read ptr: 0x%08X, read val: 0x%02X, write val: 0x%02X",
+                        rdBuffPtr, *rdBuffPtr, wrVal);
+                }
+            }
+        }
+    }
+}
 
 }   // namespace

@@ -101,7 +101,7 @@ public:
      * @param dataPat Pass the desired data pattern/series to calc next value
      * @param initVal Pass the 1st value of the pattern/series
      */
-    void SetDataPattern(DataPattern dataPat, uint64_t initVal = 0);
+    void SetMetaDataPattern(DataPattern dataPat, uint64_t initVal = 0);
 
 
 private:
