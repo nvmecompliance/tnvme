@@ -17,7 +17,6 @@
 #include "boost/format.hpp"
 #include "prpOffsetSinglePgSingleBlk_r10b.h"
 #include "grpDefs.h"
-#include "../Cmds/cmd.h"
 
 
 namespace GrpNVMWriteReadCombo {
@@ -94,36 +93,35 @@ PRPOffsetSinglePgSingleBlk_r10b::RunCoreTest()
      * \endverbatim
      */
     string work;
+    unsigned int seed = 17;
 
     /* Initialize random seed to 17 */
-    srand (17);
+    srand (seed);
 
     // Lookup objs which were created in a prior test within group
     SharedIOSQPtr iosq = CAST_TO_IOSQ(gRsrcMngr->GetObj(IOSQ_GROUP_ID));
     SharedIOCQPtr iocq = CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_GROUP_ID));
 
     Informative::Namspc namspcData = gInformative->Get1stBareMetaE2E();
+    send_64b_bitmask prpBitmask = (send_64b_bitmask)(MASK_PRP1_PAGE);
     if (namspcData.type != Informative::NS_BARE) {
+        prpBitmask = (send_64b_bitmask)(prpBitmask | MASK_MPTR);
         LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
         if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
             throw FrmwkEx();
     }
-
-    SharedMemBufferPtr writeMem = SharedMemBufferPtr(new MemBuffer());
-    SharedWritePtr writeCmd = SetWriteCmd(namspcData, writeMem);
-
-    SharedMemBufferPtr readMem = SharedMemBufferPtr(new MemBuffer());
-    SharedReadPtr readCmd = CreateReadCmd(namspcData, readMem);
-
-    MemBuffer::DataPattern dataPattern;
-    MetaData::DataPattern metaDataPattern;
+    uint64_t lbaDataSize = namspcData.idCmdNamspc->GetLBADataSize();
 
     uint8_t mpsRegVal;
     if (gCtrlrConfig->GetMPS(mpsRegVal) == false)
         throw FrmwkEx("Unable to get MPS value from CC.");
-    uint64_t X =  (uint64_t)(1 << (mpsRegVal + 12)) -
-        namspcData.idCmdNamspc->GetLBADataSize();
+    uint64_t X =  (uint64_t)(1 << (mpsRegVal + 12)) - lbaDataSize;
 
+    SharedWritePtr writeCmd = CreateWriteCmd(namspcData);
+    SharedReadPtr readCmd = CreateReadCmd(namspcData);
+
+    MemBuffer::DataPattern dataPattern;
+    MetaData::DataPattern metaDataPattern;
     uint64_t wrVal;
     uint32_t prp2RandVal[2];
     for (uint64_t memOffset = 0; memOffset <= X; memOffset += 4) {
@@ -131,20 +129,20 @@ PRPOffsetSinglePgSingleBlk_r10b::RunCoreTest()
             dataPattern = MemBuffer::DATAPAT_CONST_8BIT;
             metaDataPattern = MetaData::DATAPAT_CONST_8BIT;
             wrVal = memOffset;
-            prp2RandVal[0] = rand();
-            prp2RandVal[1] = rand();
-            work = str(boost::format("dataPatt.constb.memOff.%d") % memOffset);
+            prp2RandVal[0] = rand_r(&seed);
+            prp2RandVal[1] = rand_r(&seed);
+            work = str(boost::format("dataPat.constb.memOff.%d") % memOffset);
         } else {
             dataPattern = MemBuffer::DATAPAT_INC_16BIT;
             metaDataPattern = MetaData::DATAPAT_INC_16BIT;
             wrVal = memOffset;
             prp2RandVal[0] = 0;
             prp2RandVal[1] = 0;
-            work = str(boost::format("dataPatt.incw.memOff.%d") % memOffset);
+            work = str(boost::format("dataPat.incw.memOff.%d") % memOffset);
         }
-
-        writeMem->InitOffset1stPage(Identify::IDEAL_DATA_SIZE, memOffset,
-            false);
+        SharedMemBufferPtr writeMem = SharedMemBufferPtr(new MemBuffer());
+        writeMem->InitOffset1stPage(lbaDataSize, memOffset, false);
+        writeCmd->SetPrpBuffer(prpBitmask, writeMem);
         writeMem->SetDataPattern(dataPattern, wrVal);
         if (namspcData.type != Informative::NS_BARE)
             writeCmd->SetMetaDataPattern(metaDataPattern, wrVal);
@@ -155,6 +153,10 @@ PRPOffsetSinglePgSingleBlk_r10b::RunCoreTest()
 
         IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
             writeCmd, work, true);
+
+        SharedMemBufferPtr readMem = SharedMemBufferPtr(new MemBuffer());
+        readMem->InitOffset1stPage(lbaDataSize, memOffset, false);
+        readCmd->SetPrpBuffer(prpBitmask, readMem);
 
         // Set 64 bits of PRP2 in CDW 8 & 9 with random or zero for read cmd.
         readCmd->SetDword(prp2RandVal[0], 8);
@@ -169,56 +171,37 @@ PRPOffsetSinglePgSingleBlk_r10b::RunCoreTest()
 
 
 SharedWritePtr
-PRPOffsetSinglePgSingleBlk_r10b::SetWriteCmd(Informative::Namspc namspcData,
-    SharedMemBufferPtr dataPat)
+PRPOffsetSinglePgSingleBlk_r10b::CreateWriteCmd(Informative::Namspc namspcData)
 {
-    LOG_NRM("Processing write cmd using namspc id %d", namspcData.id);
-    uint64_t lbaDataSize = namspcData.idCmdNamspc->GetLBADataSize();
-    dataPat->Init(lbaDataSize);
-
     SharedWritePtr writeCmd = SharedWritePtr(new Write());
-    send_64b_bitmask prpBitmask = (send_64b_bitmask)(MASK_PRP1_PAGE);
 
     if (namspcData.type == Informative::NS_META) {
         writeCmd->AllocMetaBuffer();
-        prpBitmask = (send_64b_bitmask)(prpBitmask | MASK_MPTR);
     } else if (namspcData.type == Informative::NS_E2E) {
         writeCmd->AllocMetaBuffer();
-        prpBitmask = (send_64b_bitmask)(prpBitmask | MASK_MPTR);
         LOG_ERR("Deferring E2E namspc work to the future");
         throw FrmwkEx("Need to add CRC's to correlate to buf pattern");
     }
 
-    writeCmd->SetPrpBuffer(prpBitmask, dataPat);
     writeCmd->SetNSID(namspcData.id);
     writeCmd->SetNLB(0);
-
     return writeCmd;
 }
 
 
 SharedReadPtr
-PRPOffsetSinglePgSingleBlk_r10b::CreateReadCmd(Informative::Namspc namspcData,
-    SharedMemBufferPtr dataPat)
+PRPOffsetSinglePgSingleBlk_r10b::CreateReadCmd(Informative::Namspc namspcData)
 {
-    LOG_NRM("Processing read cmd using namspc id %d", namspcData.id);
-    uint64_t lbaDataSize = namspcData.idCmdNamspc->GetLBADataSize();
-    dataPat->Init(lbaDataSize);
-
     SharedReadPtr readCmd = SharedReadPtr(new Read());
-    send_64b_bitmask prpBitmask = (send_64b_bitmask)(MASK_PRP1_PAGE);
 
     if (namspcData.type == Informative::NS_META) {
         readCmd->AllocMetaBuffer();
-        prpBitmask = (send_64b_bitmask)(prpBitmask | MASK_MPTR);
     } else if (namspcData.type == Informative::NS_E2E) {
         readCmd->AllocMetaBuffer();
-        prpBitmask = (send_64b_bitmask)(prpBitmask | MASK_MPTR);
         LOG_ERR("Deferring E2E namspc work to the future");
         throw FrmwkEx("Need to add CRC's to correlate to buf pattern");
     }
 
-    readCmd->SetPrpBuffer(prpBitmask, dataPat);
     readCmd->SetNSID(namspcData.id);
     readCmd->SetNLB(0);
     return readCmd;

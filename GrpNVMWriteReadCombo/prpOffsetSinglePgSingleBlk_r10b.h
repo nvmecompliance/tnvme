@@ -62,10 +62,8 @@ private:
     ///////////////////////////////////////////////////////////////////////////
     // Adding a member variable? Then edit the copy constructor and operator=().
     ///////////////////////////////////////////////////////////////////////////
-    SharedWritePtr SetWriteCmd(Informative::Namspc namspcData,
-        SharedMemBufferPtr dataPat);
-    SharedReadPtr CreateReadCmd(Informative::Namspc namspcData,
-        SharedMemBufferPtr dataPat);
+    SharedWritePtr CreateWriteCmd(Informative::Namspc namspcData);
+    SharedReadPtr CreateReadCmd(Informative::Namspc namspcData);
     void VerifyDataPattern(SharedReadPtr readCmd,
         MemBuffer::DataPattern dataPattern, uint64_t wrVal);
 

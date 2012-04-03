@@ -52,12 +52,12 @@ public:
 
     /**
      * This method is only safe to use if and only if the
-     * SetBuffer(SharedMemBufferPtr) was used to setup a buffer. This allows
+     * SetPrpBuffer(SharedMemBufferPtr) was used to setup a buffer. This allows
      * access to that RW buffer, however some commands must enforce RO buffers
      * and thus this method won't be useful because it cannot guarantee RO
      * access. A MemBuffer::NullMemBufferPtr will be returned if the
-     * the SetBuffer(SharedMemBufferPtr) version wasn't used to setup a buffer,
-     * or there is no buffer setup at all.
+     * the SetPrpBuffer(SharedMemBufferPtr) version wasn't used to setup a
+     * buffer, or there is no buffer setup at all.
      * @return A pointer to RW memory, otherwise MemBuffer::NullMemBufferPtr.
      */
     SharedMemBufferPtr GetRWPrpBuffer() { return mBufRW; }

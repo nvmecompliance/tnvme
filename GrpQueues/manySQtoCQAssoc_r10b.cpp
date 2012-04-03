@@ -166,10 +166,8 @@ ManySQtoCQAssoc_r10b::SetWriteCmd()
 
     if (namspcData.type == Informative::NS_META) {
         writeCmd->AllocMetaBuffer();
-        prpBitmask = (send_64b_bitmask)(prpBitmask | MASK_MPTR);
     } else if (namspcData.type == Informative::NS_E2E) {
         writeCmd->AllocMetaBuffer();
-        prpBitmask = (send_64b_bitmask)(prpBitmask | MASK_MPTR);
         LOG_ERR("Deferring E2E namspc work to the future");
         throw FrmwkEx("Need to add CRC's to correlate to buf pattern");
     }
