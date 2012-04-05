@@ -18,7 +18,8 @@
 #include "identify.h"
 #include "../Utils/buffers.h"
 #include "../Utils/fileSystem.h"
-
+#include "../Singletons/regDefs.h"
+#include "../globals.h"
 
 #define CNS_BITMASK         0x01
 
@@ -226,4 +227,26 @@ Identify::GetLBADataSize() const
     LOG_NRM("Active logical blk size = 0x%016llX",
         (long long unsigned int)lbaDataSize);
     return lbaDataSize;
+}
+
+
+uint32_t
+Identify::GetMaxDataXferSize() const
+{
+    if (GetCNS() == false)
+        throw FrmwkEx("This cmd does not contain a ctrlr data struct");
+
+    uint8_t mdts = GetValue(IDCTRLRCAP_MDTS);
+    if (mdts == 0)
+        return mdts;
+
+    uint64_t ctrlCap;
+    if (gRegisters->Read(CTLSPC_CAP, ctrlCap) == false)
+       throw FrmwkEx("Unable to determine CAP.MPSMIN");
+
+    uint32_t mpsMin = (uint32_t)(1 << (12 + ((ctrlCap & CAP_MPSMIN) >> 48)));
+    uint32_t mdtsCalc = (1 << mdts) * mpsMin;
+
+    LOG_NRM("Calculated Maximum Data Transfer Size (bytes) = 0x%08X", mdtsCalc);
+    return mdtsCalc;
 }

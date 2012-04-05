@@ -19,7 +19,8 @@ INCLUDES = -I. -I../ -I../../ -I/usr/local/include
 SRC =						\
 	grpNVMWriteReadCombo.cpp		\
 	createResources_r10b.cpp		\
-	prpOffsetSinglePgSingleBlk_r10b.cpp
+	prpOffsetSinglePgSingleBlk_r10b.cpp	\
+	prpOffsetSinglePgMultiBlk_r10b.cpp
 
 .SUFFIXES: .cpp
 
