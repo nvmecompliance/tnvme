@@ -194,6 +194,8 @@ main(int argc, char *argv[])
         exit(0);
     }
 
+    // Disable buffering stdout, risk not seeing statements merged with logging
+    setbuf(stdout, NULL);
 
     // Seek for all possible devices that this app may commune
     DIR *devDir = opendir("/dev");
