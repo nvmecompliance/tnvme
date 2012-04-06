@@ -19,6 +19,7 @@
 #include "prpOffsetSinglePgSingleBlk_r10b.h"
 #include "prpOffsetSinglePgMultiBlk_r10b.h"
 #include "prpOffsetDualPgMultiBlk_r10b.h"
+#include "prpOffsetMultiPgMultiBlk_r10b.h"
 
 namespace GrpNVMWriteReadCombo {
 
@@ -39,6 +40,7 @@ GrpNVMWriteReadCombo::GrpNVMWriteReadCombo(size_t grpNum, SpecRev specRev,
         APPEND_TEST_AT_YLEVEL(PRPOffsetSinglePgSingleBlk_r10b, fd, GrpNVMWriteReadCombo, errRegs)
         APPEND_TEST_AT_XLEVEL(PRPOffsetSinglePgMultiBlk_r10b, fd, GrpNVMWriteReadCombo, errRegs)
         APPEND_TEST_AT_XLEVEL(PRPOffsetDualPgMultiBlk_r10b, fd, GrpNVMWriteReadCombo, errRegs)
+        APPEND_TEST_AT_XLEVEL(PRPOffsetMultiPgMultiBlk_r10b, fd, GrpNVMWriteReadCombo, errRegs)
 
         break;
 

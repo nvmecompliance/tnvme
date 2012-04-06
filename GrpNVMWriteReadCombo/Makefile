@@ -21,7 +21,8 @@ SRC =						\
 	createResources_r10b.cpp		\
 	prpOffsetSinglePgSingleBlk_r10b.cpp	\
 	prpOffsetSinglePgMultiBlk_r10b.cpp	\
-	prpOffsetDualPgMultiBlk_r10b.cpp
+	prpOffsetDualPgMultiBlk_r10b.cpp	\
+	prpOffsetMultiPgMultiBlk_r10b.cpp
 
 .SUFFIXES: .cpp
 
