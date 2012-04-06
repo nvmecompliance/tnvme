@@ -28,8 +28,7 @@ PRPOffsetSinglePgSingleBlk_r10b::PRPOffsetSinglePgSingleBlk_r10b(int fd,
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 6");
-    mTestDesc.SetShort(     "Vary buffer offset for single-page/single-blk "
-                            "against PRP1/PRP2.");
+    mTestDesc.SetShort(     "Vary buff offset for single-page/single-blk against PRP1/PRP2.");
     // No string size limit for the long description
     mTestDesc.SetLong(
         "Search for 1 of the following namspcs to run test. Find 1st bare "
@@ -105,7 +104,6 @@ PRPOffsetSinglePgSingleBlk_r10b::RunCoreTest()
     Informative::Namspc namspcData = gInformative->Get1stBareMetaE2E();
     send_64b_bitmask prpBitmask = (send_64b_bitmask)(MASK_PRP1_PAGE);
     if (namspcData.type != Informative::NS_BARE) {
-        prpBitmask = (send_64b_bitmask)(prpBitmask | MASK_MPTR);
         LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
         if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
             throw FrmwkEx();

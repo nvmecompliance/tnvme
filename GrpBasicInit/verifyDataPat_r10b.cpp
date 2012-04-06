@@ -163,6 +163,7 @@ VerifyDataPat_r10b::SendToIOSQ(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
         writtenPayload->Dump(
             FileSystem::PrepLogFile(mGrpName, mTestName, "WrittenPayload"),
             "Data read from media miscompared from written");
+        throw FrmwkEx("Data miscompare");
     }
 }
 

@@ -108,18 +108,37 @@ CreateResources_r10b::RunCoreTest()
             NumEntriesIOQ = maxIOQEntries;
         }
 
-
-        gCtrlrConfig->SetIOCQES(gInformative->GetIdentifyCmdCtrlr()->
+        uint8_t iocqes = (gInformative->GetIdentifyCmdCtrlr()->
             GetValue(IDCTRLRCAP_CQES) & 0xf);
-        Queues::CreateIOCQContigToHdw(mGrpName, mTestName,
-            DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, NumEntriesIOQ, true,
-            IOCQ_GROUP_ID, true, 0);
-
-        gCtrlrConfig->SetIOSQES(gInformative->GetIdentifyCmdCtrlr()->
+        uint8_t iosqes = (gInformative->GetIdentifyCmdCtrlr()->
             GetValue(IDCTRLRCAP_SQES) & 0xf);
-        Queues::CreateIOSQContigToHdw(mGrpName, mTestName,
-            DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, NumEntriesIOQ, true,
-            IOSQ_GROUP_ID, IOQ_ID, 0);
+        gCtrlrConfig->SetIOCQES(iocqes);
+        gCtrlrConfig->SetIOSQES(iosqes);
+        if (Queues::SupportDiscontigIOQ() == true) {
+             SharedMemBufferPtr iocqBackedMem =
+                 SharedMemBufferPtr(new MemBuffer());
+             iocqBackedMem->InitOffset1stPage
+                 ((NumEntriesIOQ * (1 << iocqes)), 0, true);
+             Queues::CreateIOCQDiscontigToHdw(mGrpName, mTestName,
+                 DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, NumEntriesIOQ, true,
+                 IOCQ_GROUP_ID, true, 0, iocqBackedMem);
+
+             SharedMemBufferPtr iosqBackedMem =
+                 SharedMemBufferPtr(new MemBuffer());
+             iosqBackedMem->InitOffset1stPage
+                 ((NumEntriesIOQ * (1 << iosqes)), 0, true);
+             Queues::CreateIOSQDiscontigToHdw(mGrpName, mTestName,
+                 DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, NumEntriesIOQ, true,
+                 IOSQ_GROUP_ID, IOQ_ID, 0, iosqBackedMem);
+         } else {
+            Queues::CreateIOCQContigToHdw(mGrpName, mTestName,
+                DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, NumEntriesIOQ, true,
+                IOCQ_GROUP_ID, true, 0);
+
+            Queues::CreateIOSQContigToHdw(mGrpName, mTestName,
+                DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, NumEntriesIOQ, true,
+                IOSQ_GROUP_ID, IOQ_ID, 0);
+         }
     }
 }
 

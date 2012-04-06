@@ -51,6 +51,8 @@ using namespace std;
 #define MAX_CHAR_PER_LINE_DESCRIPTION       63
 #define SYSTEMWIDE_CMD_WAIT_ms              3000
 
+#define UINT32_MAX  ((uint32_t)-1)
+
 
 typedef enum {
     SPECREV_10b,             // http://www.nvmexpress.org/ spec. rev. 1.0b

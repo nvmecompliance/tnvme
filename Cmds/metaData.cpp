@@ -64,7 +64,8 @@ MetaData::Dump(LogFilename filename, string fileHdr) const
 
 
 void
-MetaData::SetMetaDataPattern(DataPattern dataPat, uint64_t initVal)
+MetaData::SetMetaDataPattern(DataPattern dataPat, uint64_t initVal,
+    uint32_t offset, uint32_t length)
 {
     LOG_NRM("Write data pattern: initial value = 0x%016llX",
         (long long unsigned int)initVal);
@@ -72,71 +73,84 @@ MetaData::SetMetaDataPattern(DataPattern dataPat, uint64_t initVal)
     if (GetMetaBuffer() == NULL)
         return;
 
+    length = (length == UINT32_MAX) ? GetMetaBufferSize() : length;
+    if ((length + offset) > GetMetaBufferSize())
+        throw FrmwkEx("Length exceeds total meta buffer allocated size");
+
     switch (dataPat)
     {
     case DATAPAT_CONST_8BIT:
         {
             LOG_NRM("Write data pattern: constant 8 bit");
-            memset(GetMetaBuffer(), (uint8_t)initVal, GetMetaBufferSize());
+            uint8_t *rawPtr = GetMetaBuffer() + offset;
+            for (uint64_t i = 0; i < length; i++)
+                *rawPtr++ = (uint8_t)initVal;
         }
         break;
 
     case DATAPAT_CONST_16BIT:
         {
             LOG_NRM("Write data pattern: constant 16 bit");
-            uint16_t *rawPtr = (uint16_t *)GetMetaBuffer();
-            for (uint64_t i = 0; i < (GetMetaBufferSize() / sizeof(uint16_t));
-                i++) {
+            uint16_t *rawPtr = (uint16_t *)(GetMetaBuffer() + offset);
+            for (uint64_t i = 0; i < length; i++)
                 *rawPtr++ = (uint16_t)initVal;
-            }
         }
         break;
 
     case DATAPAT_CONST_32BIT:
         {
             LOG_NRM("Write data pattern: constant 32 bit");
-            uint32_t *rawPtr = (uint32_t *)GetMetaBuffer();
-            for (uint64_t i = 0; i < (GetMetaBufferSize() / sizeof(uint32_t));
-                i++) {
+            uint32_t *rawPtr = (uint32_t *)(GetMetaBuffer() + offset);
+            for (uint64_t i = 0; i < length; i++)
                 *rawPtr++ = (uint32_t)initVal;
-            }
         }
         break;
 
     case DATAPAT_INC_8BIT:
         {
             LOG_NRM("Write data pattern: incrementing 8 bit");
-            uint8_t *rawPtr = (uint8_t *)GetMetaBuffer();
-            for (uint64_t i = 0; i < (GetMetaBufferSize() / sizeof(uint8_t));
-                i++) {
+            uint8_t *rawPtr = GetMetaBuffer() + offset;
+            for (uint64_t i = 0; i < length; i++)
                 *rawPtr++ = (uint8_t)initVal++;
-            }
         }
         break;
 
     case DATAPAT_INC_16BIT:
         {
             LOG_NRM("Write data pattern: incrementing 16 bit");
-            uint16_t *rawPtr = (uint16_t *)GetMetaBuffer();
-            for (uint64_t i = 0; i < (GetMetaBufferSize() / sizeof(uint16_t));
-                i++) {
+            uint16_t *rawPtr = (uint16_t *)(GetMetaBuffer() + offset);
+            for (uint64_t i = 0; i < length; i++)
                 *rawPtr++ = (uint16_t)initVal++;
-            }
         }
         break;
 
     case DATAPAT_INC_32BIT:
         {
             LOG_NRM("Write data pattern: incrementing 32 bit");
-            uint32_t *rawPtr = (uint32_t *)GetMetaBuffer();
-            for (uint64_t i = 0; i < (GetMetaBufferSize() / sizeof(uint32_t));
-                i++) {
+            uint32_t *rawPtr = (uint32_t *)(GetMetaBuffer() + offset);
+            for (uint64_t i = 0; i < length; i++)
                 *rawPtr++ = (uint32_t)initVal++;
-            }
         }
         break;
 
     default:
         throw FrmwkEx("Unsupported data pattern %d", dataPat);
     }
+}
+
+
+bool
+MetaData::CompareMetaBuffer(SharedMemBufferPtr compTo)
+{
+    if (compTo->GetBufSize() > GetMetaBufferSize()) {
+        throw FrmwkEx("Compare buffer size > max meta buff size: %d > %d",
+            compTo->GetBufSize(), GetMetaBufferSize());
+    }
+
+    if (memcmp(compTo->GetBuffer(), GetMetaBuffer(),
+        compTo->GetBufSize()) != 0) {
+        LOG_ERR("Detected data miscompare.");
+        return false;
+    }
+    return true;
 }
