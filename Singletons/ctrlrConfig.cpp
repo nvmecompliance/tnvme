@@ -233,7 +233,7 @@ CtrlrConfig::SetState(enum nvme_state state)
     }
 
     LOG_NRM("%s the NVME device", toState.c_str());
-    if (ioctl(mFd, NVME_IOCTL_DEVICE_STATE, &state) < 0) {
+    if (ioctl(mFd, NVME_IOCTL_DEVICE_STATE, state) < 0) {
         LOG_ERR("Could not set state, currently %s",
             IsStateEnabled() ? "enabled" : "disabled");
         LOG_NRM("dnvme waits a TO period for CC.RDY to indicate ready" );

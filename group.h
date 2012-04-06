@@ -52,7 +52,7 @@
 #define FORMAT_GROUP_DESCRIPTION(stdStr, grpObjPtr)                           \
     {                                                                         \
         char charray[80];                                                     \
-        sprintf(charray, "%ld: Group:%s",                                     \
+        snprintf(charray, 80, "%ld: Group:%s",                                \
                 grpObjPtr->GetGroupNumber(),                                  \
                 grpObjPtr->GetGroupDescription().c_str());                    \
         stdStr = charray;                                                     \
@@ -62,7 +62,7 @@
 #define FORMAT_TEST_NUM(stdStr, padStr, x, y, z)                              \
     {                                                                         \
         char num[40];                                                         \
-        sprintf(num, "%s%ld.%ld.%ld: Test:", padStr, x, y, z);                \
+        snprintf(num, 40, "%s%ld.%ld.%ld: Test:", padStr, x, y, z);           \
         stdStr = num;                                                         \
     }
 
