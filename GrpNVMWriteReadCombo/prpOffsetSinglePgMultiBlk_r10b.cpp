@@ -96,6 +96,7 @@ PRPOffsetSinglePgMultiBlk_r10b::RunCoreTest()
      * \endverbatim
      */
     string work;
+    bool enableLog;
     unsigned int seed = 51;
     srand (seed);
 
@@ -169,8 +170,8 @@ PRPOffsetSinglePgMultiBlk_r10b::RunCoreTest()
         return;
     }
 
-    for (int64_t pgOffset = 0; pgOffset <= X; pgOffset += 4) {
-        Y = (ccMPS - pgOffset) / lbaDataSize;
+    for (int64_t pgOff = 0; pgOff <= X; pgOff += 4) {
+        Y = (ccMPS - pgOff) / lbaDataSize;
         for (uint64_t nLBAs = 1; nLBAs <= Y; nLBAs++) {
             if ((maxDtXferSz != 0) && (maxDtXferSz < (lbaDataSize * nLBAs))) {
                 // If the total data xfer exceeds the maximum data xfer
@@ -182,18 +183,18 @@ PRPOffsetSinglePgMultiBlk_r10b::RunCoreTest()
             if ((nLBAs % 2) != 0) {
                 dataPat = MemBuffer::DATAPAT_INC_8BIT;
                 metaDataPat = MetaData::DATAPAT_INC_8BIT;
-                wrVal = pgOffset + nLBAs;
+                wrVal = pgOff + nLBAs;
                 prp2RandVal[0] = rand_r(&seed);
                 prp2RandVal[1] = rand_r(&seed);
             } else {
                 dataPat = MemBuffer::DATAPAT_CONST_16BIT;
                 metaDataPat = MetaData::DATAPAT_CONST_16BIT;
-                wrVal = pgOffset + nLBAs;
+                wrVal = pgOff + nLBAs;
                 prp2RandVal[0] = 0;
                 prp2RandVal[1] = 0;
             }
-            work = str(boost::format("pgOff.%d.nlba.%d") % pgOffset % nLBAs);
-            writeMem->InitOffset1stPage((lbaDataSize * nLBAs), pgOffset, false);
+            work = str(boost::format("pgOff.%d.nlba.%d") % pgOff % nLBAs);
+            writeMem->InitOffset1stPage((lbaDataSize * nLBAs), pgOff, false);
             writeCmd->SetPrpBuffer(prpBitmask, writeMem);
             writeMem->SetDataPattern(dataPat, wrVal);
             writeCmd->SetNLB(nLBAs - 1); // convert to 0 based.
@@ -202,13 +203,17 @@ PRPOffsetSinglePgMultiBlk_r10b::RunCoreTest()
             if (namspcData.type != Informative::NS_BARE)
                 writeCmd->SetMetaDataPattern(metaDataPat, wrVal, 0, metabufSz);
 
+            enableLog = false;
+            if ((pgOff <= 8) || (pgOff >= (X - 8)))
+                enableLog = true;
+
             // Set 64 bits of PRP2 in CDW 8 & 9 with random or zero.
             writeCmd->SetDword(prp2RandVal[0], 8);
             writeCmd->SetDword(prp2RandVal[1], 9);
             IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
-                iocq, writeCmd, work, true);
+                iocq, writeCmd, work, enableLog);
 
-            readMem->InitOffset1stPage((lbaDataSize * nLBAs), pgOffset, false);
+            readMem->InitOffset1stPage((lbaDataSize * nLBAs), pgOff, false);
             readCmd->SetPrpBuffer(prpBitmask, readMem);
             readCmd->SetNLB(nLBAs - 1); // convert to 0 based.
 
@@ -216,7 +221,7 @@ PRPOffsetSinglePgMultiBlk_r10b::RunCoreTest()
             readCmd->SetDword(prp2RandVal[0], 8);
             readCmd->SetDword(prp2RandVal[1], 9);
             IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
-                iocq, readCmd, work, true);
+                iocq, readCmd, work, enableLog);
 
             VerifyDataPat(readCmd, dataPat, wrVal, metabufSz);
         }

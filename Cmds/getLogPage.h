@@ -74,7 +74,7 @@ public:
      *      FileSystem::PrepLogFile().
      * @param fileHdr Pass a custom file header description to dump
      */
-    void Dump(LogFilename filename, string fileHdr) const;
+    virtual void Dump(LogFilename filename, string fileHdr) const;
 
 
 private:

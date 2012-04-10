@@ -91,6 +91,7 @@ PRPOffsetDualPgMultiBlk_r10b::RunCoreTest()
      * \endverbatim
      */
     string work;
+    bool enableLog;
 
     if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
         throw FrmwkEx();
@@ -162,8 +163,8 @@ PRPOffsetDualPgMultiBlk_r10b::RunCoreTest()
         return;
     }
 
-    for (int64_t pgOffset = 0; pgOffset <= X; pgOffset += 4) {
-        Y = ((2 * ccMPS) - pgOffset) / lbaDataSize;
+    for (int64_t pgOff = 0; pgOff <= X; pgOff += 4) {
+        Y = ((2 * ccMPS) - pgOff) / lbaDataSize;
         for (uint64_t nLBAs = 1; nLBAs <= Y; nLBAs++) {
             if ((maxDtXferSz != 0) && (maxDtXferSz < (lbaDataSize * nLBAs))) {
                 // If the total data xfer exceeds the maximum data xfer
@@ -175,14 +176,14 @@ PRPOffsetDualPgMultiBlk_r10b::RunCoreTest()
             if ((nLBAs % 2) != 0) {
                 dataPat = MemBuffer::DATAPAT_INC_32BIT;
                 metaDataPat = MetaData::DATAPAT_INC_32BIT;
-                wrVal = pgOffset + nLBAs;
+                wrVal = pgOff + nLBAs;
             } else {
                 dataPat = MemBuffer::DATAPAT_CONST_16BIT;
                 metaDataPat = MetaData::DATAPAT_CONST_16BIT;
-                wrVal = pgOffset + nLBAs;
+                wrVal = pgOff + nLBAs;
             }
-            work = str(boost::format("pgOff.%d.nlba.%d") % pgOffset % nLBAs);
-            writeMem->InitOffset1stPage((lbaDataSize * nLBAs), pgOffset, false);
+            work = str(boost::format("pgOff.%d.nlba.%d") % pgOff % nLBAs);
+            writeMem->InitOffset1stPage((lbaDataSize * nLBAs), pgOff, false);
             writeCmd->SetPrpBuffer(prpBitmask, writeMem);
             writeMem->SetDataPattern(dataPat, wrVal);
             writeCmd->SetNLB(nLBAs - 1); // convert to 0 based.
@@ -191,15 +192,19 @@ PRPOffsetDualPgMultiBlk_r10b::RunCoreTest()
             if (namspcData.type != Informative::NS_BARE)
                 writeCmd->SetMetaDataPattern(metaDataPat, wrVal, 0, metabufSz);
 
-            IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
-                iocq, writeCmd, work, true);
+            enableLog = false;
+            if ((pgOff <= 8) || (pgOff >= (X - 8)))
+                enableLog = true;
 
-            readMem->InitOffset1stPage((lbaDataSize * nLBAs), pgOffset, false);
+            IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+                iocq, writeCmd, work, enableLog);
+
+            readMem->InitOffset1stPage((lbaDataSize * nLBAs), pgOff, false);
             readCmd->SetPrpBuffer(prpBitmask, readMem);
             readCmd->SetNLB(nLBAs - 1); // convert to 0 based.
 
             IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
-                iocq, readCmd, work, true);
+                iocq, readCmd, work, enableLog);
 
             VerifyDataPat(readCmd, dataPat, wrVal, metabufSz);
         }

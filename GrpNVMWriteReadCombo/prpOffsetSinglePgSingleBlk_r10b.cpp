@@ -92,6 +92,7 @@ PRPOffsetSinglePgSingleBlk_r10b::RunCoreTest()
      * \endverbatim
      */
     string work;
+    bool enableLog;
     unsigned int seed = 17;
 
     /* Initialize random seed to 17 */
@@ -122,24 +123,24 @@ PRPOffsetSinglePgSingleBlk_r10b::RunCoreTest()
     MetaData::DataPattern metaDataPattern;
     uint64_t wrVal;
     uint32_t prp2RandVal[2];
-    for (uint64_t memOffset = 0; memOffset <= X; memOffset += 4) {
-        if ((memOffset % 8) != 0) {
+    for (uint64_t pgOff = 0; pgOff <= X; pgOff += 4) {
+        if ((pgOff % 8) != 0) {
             dataPattern = MemBuffer::DATAPAT_CONST_8BIT;
             metaDataPattern = MetaData::DATAPAT_CONST_8BIT;
-            wrVal = memOffset;
+            wrVal = pgOff;
             prp2RandVal[0] = rand_r(&seed);
             prp2RandVal[1] = rand_r(&seed);
-            work = str(boost::format("dataPat.constb.memOff.%d") % memOffset);
+            work = str(boost::format("dataPat.constb.memOff.%d") % pgOff);
         } else {
             dataPattern = MemBuffer::DATAPAT_INC_16BIT;
             metaDataPattern = MetaData::DATAPAT_INC_16BIT;
-            wrVal = memOffset;
+            wrVal = pgOff;
             prp2RandVal[0] = 0;
             prp2RandVal[1] = 0;
-            work = str(boost::format("dataPat.incw.memOff.%d") % memOffset);
+            work = str(boost::format("dataPat.incw.memOff.%d") % pgOff);
         }
         SharedMemBufferPtr writeMem = SharedMemBufferPtr(new MemBuffer());
-        writeMem->InitOffset1stPage(lbaDataSize, memOffset, false);
+        writeMem->InitOffset1stPage(lbaDataSize, pgOff, false);
         writeCmd->SetPrpBuffer(prpBitmask, writeMem);
         writeMem->SetDataPattern(dataPattern, wrVal);
         if (namspcData.type != Informative::NS_BARE)
@@ -149,11 +150,15 @@ PRPOffsetSinglePgSingleBlk_r10b::RunCoreTest()
         writeCmd->SetDword(prp2RandVal[0], 8);
         writeCmd->SetDword(prp2RandVal[1], 9);
 
+        enableLog = false;
+        if ((pgOff <= 8) || (pgOff >= (X - 8)))
+            enableLog = true;
+
         IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
-            writeCmd, work, true);
+            writeCmd, work, enableLog);
 
         SharedMemBufferPtr readMem = SharedMemBufferPtr(new MemBuffer());
-        readMem->InitOffset1stPage(lbaDataSize, memOffset, false);
+        readMem->InitOffset1stPage(lbaDataSize, pgOff, false);
         readCmd->SetPrpBuffer(prpBitmask, readMem);
 
         // Set 64 bits of PRP2 in CDW 8 & 9 with random or zero for read cmd.
@@ -161,7 +166,7 @@ PRPOffsetSinglePgSingleBlk_r10b::RunCoreTest()
         readCmd->SetDword(prp2RandVal[1], 9);
 
         IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
-            readCmd, work, true);
+            readCmd, work, enableLog);
 
         VerifyDataPattern(readCmd, dataPattern, wrVal);
     }
