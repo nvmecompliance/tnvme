@@ -23,7 +23,8 @@ SRC =						\
 	prpOffsetSinglePgMultiBlk_r10b.cpp	\
 	prpOffsetDualPgMultiBlk_r10b.cpp	\
 	prpOffsetMultiPgMultiBlk_r10b.cpp	\
-	startingLBABare_r10b.cpp
+	startingLBABare_r10b.cpp		\
+	nlbaBare_r10b.cpp
 
 .SUFFIXES: .cpp
 

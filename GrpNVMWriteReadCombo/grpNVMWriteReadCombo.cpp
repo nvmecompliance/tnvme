@@ -21,6 +21,7 @@
 #include "prpOffsetDualPgMultiBlk_r10b.h"
 #include "prpOffsetMultiPgMultiBlk_r10b.h"
 #include "startingLBABare_r10b.h"
+#include "nlbaBare_r10b.h"
 
 namespace GrpNVMWriteReadCombo {
 
@@ -37,12 +38,13 @@ GrpNVMWriteReadCombo::GrpNVMWriteReadCombo(size_t grpNum, SpecRev specRev,
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Strategy
     switch (mSpecRev) {
     case SPECREV_10b:
-        APPEND_TEST_AT_XLEVEL(CreateResources_r10b, fd, GrpNVMWriteReadCombo, errRegs)
-        APPEND_TEST_AT_YLEVEL(PRPOffsetSinglePgSingleBlk_r10b, fd, GrpNVMWriteReadCombo, errRegs)
-        APPEND_TEST_AT_YLEVEL(StartingLBABare_r10b, fd, GrpNVMWriteReadCombo, errRegs)
         APPEND_TEST_AT_XLEVEL(PRPOffsetSinglePgMultiBlk_r10b, fd, GrpNVMWriteReadCombo, errRegs)
         APPEND_TEST_AT_XLEVEL(PRPOffsetDualPgMultiBlk_r10b, fd, GrpNVMWriteReadCombo, errRegs)
         APPEND_TEST_AT_XLEVEL(PRPOffsetMultiPgMultiBlk_r10b, fd, GrpNVMWriteReadCombo, errRegs)
+        APPEND_TEST_AT_XLEVEL(CreateResources_r10b, fd, GrpNVMWriteReadCombo, errRegs)
+        APPEND_TEST_AT_YLEVEL(PRPOffsetSinglePgSingleBlk_r10b, fd, GrpNVMWriteReadCombo, errRegs)
+        APPEND_TEST_AT_YLEVEL(StartingLBABare_r10b, fd, GrpNVMWriteReadCombo, errRegs)
+        APPEND_TEST_AT_YLEVEL(NLBABare_r10b, fd, GrpNVMWriteReadCombo, errRegs)
 
         break;
 

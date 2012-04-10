@@ -25,4 +25,6 @@
 
 #define DEFAULT_CMD_WAIT_ms         SYSTEMWIDE_CMD_WAIT_ms
 
+#define MIN(a,b)                    (((a) < (b)) ? (a) : (b))
+
 #endif
