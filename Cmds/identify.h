@@ -56,9 +56,12 @@ public:
 
     /**
      * Retrieve the specified PRP payload parameter. If the value can fit within
-     * an uint64_t then it will be returned otherwise it will throw.
+     * an uint64_t then it will be returned, otherwise it will throw.
+     * Additionally, the correct data structure must be backing this cmd or
+     * it will also throw.
      * @param field Pass which struct field to return
-     * @return The value if it fits, otherwise will throw if too large.
+     * @return The value if it fits, otherwise will throw either if too large,
+     *         or the incorrect data structure is backing this cmd.
      */
     uint64_t GetValue(IdCtrlrCap field) const;
     uint64_t GetValue(IdNamespc field) const;
@@ -93,7 +96,7 @@ public:
      *      FileSystem::PrepLogFile().
      * @param fileHdr Pass a custom file header description to dump
      */
-    void Dump(LogFilename filename, string fileHdr) const;
+    virtual void Dump(LogFilename filename, string fileHdr) const;
 
 
 private:

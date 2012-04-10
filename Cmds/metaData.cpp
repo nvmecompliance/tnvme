@@ -92,7 +92,7 @@ MetaData::SetMetaDataPattern(DataPattern dataPat, uint64_t initVal,
         {
             LOG_NRM("Write data pattern: constant 16 bit");
             uint16_t *rawPtr = (uint16_t *)(GetMetaBuffer() + offset);
-            for (uint64_t i = 0; i < length; i++)
+            for (uint64_t i = 0; i < (length / sizeof(uint16_t)); i++)
                 *rawPtr++ = (uint16_t)initVal;
         }
         break;
@@ -101,7 +101,7 @@ MetaData::SetMetaDataPattern(DataPattern dataPat, uint64_t initVal,
         {
             LOG_NRM("Write data pattern: constant 32 bit");
             uint32_t *rawPtr = (uint32_t *)(GetMetaBuffer() + offset);
-            for (uint64_t i = 0; i < length; i++)
+            for (uint64_t i = 0; i < (length / sizeof(uint32_t)); i++)
                 *rawPtr++ = (uint32_t)initVal;
         }
         break;
@@ -119,7 +119,7 @@ MetaData::SetMetaDataPattern(DataPattern dataPat, uint64_t initVal,
         {
             LOG_NRM("Write data pattern: incrementing 16 bit");
             uint16_t *rawPtr = (uint16_t *)(GetMetaBuffer() + offset);
-            for (uint64_t i = 0; i < length; i++)
+            for (uint64_t i = 0; i < (length / sizeof(uint16_t)); i++)
                 *rawPtr++ = (uint16_t)initVal++;
         }
         break;
@@ -128,7 +128,7 @@ MetaData::SetMetaDataPattern(DataPattern dataPat, uint64_t initVal,
         {
             LOG_NRM("Write data pattern: incrementing 32 bit");
             uint32_t *rawPtr = (uint32_t *)(GetMetaBuffer() + offset);
-            for (uint64_t i = 0; i < length; i++)
+            for (uint64_t i = 0; i < (length / sizeof(uint32_t)); i++)
                 *rawPtr++ = (uint32_t)initVal++;
         }
         break;

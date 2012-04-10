@@ -202,7 +202,7 @@ PRPOffsetMultiPgMultiBlk_r10b::RunCoreTest()
                     writeCmd->SetMetaDataPattern(metaPat, wrVal, 0, metabufSz);
 
                 enableLog = false;
-                if ((pgOff <= 32) || (pgOff >= (X - 32)))
+                if ((pgOff <= 8) || (pgOff >= (X - 8)))
                     enableLog = true;
 
                 IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,

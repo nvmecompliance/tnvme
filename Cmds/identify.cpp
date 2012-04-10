@@ -92,6 +92,8 @@ Identify::GetValue(IdCtrlrCap field) const
 {
     if (field >= IDCTRLRCAP_FENCE)
         throw FrmwkEx("Unknown ctrlr cap field: %d", field);
+    else if (GetCNS() == false)
+        throw FrmwkEx("This cmd does not contain a ctrlr data struct");
 
     return GetValue(field, mIdCtrlrCapMetrics);
 }
@@ -102,6 +104,8 @@ Identify::GetValue(IdNamespc field) const
 {
     if (field >= IDNAMESPC_FENCE)
         throw FrmwkEx("Unknown namespace field: %d", field);
+    else if (GetCNS())
+        throw FrmwkEx("This cmd does not contain a namespace data struct");
 
     return GetValue(field, mIdNamespcType);
 }
@@ -163,7 +167,7 @@ void
 Identify::Dump(FILE *fp, int field, IdentifyDataType *idData) const
 {
     const uint8_t *data;
-    const int BUF_SIZE = 20;
+    const int BUF_SIZE = 40;
     char work[BUF_SIZE];
     string output;
     unsigned long dumpLen = idData[field].length;
@@ -178,23 +182,55 @@ Identify::Dump(FILE *fp, int field, IdentifyDataType *idData) const
     }
 
     unsigned long addr = idData[field].offset;
-    for (unsigned long j = 0; j < dumpLen; j++, addr++) {
-        if ((j % 16) == 15) {
-            snprintf(work, BUF_SIZE, " %02X\n", *data++);
-            output += work;
-            fprintf(fp, "%s", output.c_str());
-            output.clear();
-        } else if ((j % 16) == 0) {
-            snprintf(work, BUF_SIZE, "0x%08X: %02X",
-                (uint32_t)addr, *data++);
-            output += work;
-        } else {
-            snprintf(work, BUF_SIZE, " %02X", *data++);
-            output += work;
-        }
-    }
-    if (output.length() != 0)
+    switch (dumpLen) {
+    case 1:
+        snprintf(work, BUF_SIZE, "0x%08X: 0x%02X", (uint32_t)addr,
+            *((uint8_t *)data));
+        output += work;
         fprintf(fp, "%s\n", output.c_str());
+        break;
+
+    case 2:
+        snprintf(work, BUF_SIZE, "0x%08X: 0x%04X", (uint32_t)addr,
+            *((uint16_t *)data));
+        output += work;
+        fprintf(fp, "%s\n", output.c_str());
+        break;
+
+    case 4:
+        snprintf(work, BUF_SIZE, "0x%08X: 0x%08X", (uint32_t)addr,
+            *((uint32_t *)data));
+        output += work;
+        fprintf(fp, "%s\n", output.c_str());
+        break;
+
+    case 8:
+        snprintf(work, BUF_SIZE, "0x%08X: 0x%016lX", (uint32_t)addr,
+            *((uint64_t *)data));
+        output += work;
+        fprintf(fp, "%s\n", output.c_str());
+        break;
+
+    default:
+        for (unsigned long j = 0; j < dumpLen; j++, addr++) {
+            if ((j % 16) == 15) {
+                snprintf(work, BUF_SIZE, " %02X\n", *data++);
+                output += work;
+                fprintf(fp, "%s", output.c_str());
+                output.clear();
+            } else if ((j % 16) == 0) {
+                snprintf(work, BUF_SIZE, "0x%08X: %02X",
+                    (uint32_t)addr, *data++);
+                output += work;
+            } else {
+                snprintf(work, BUF_SIZE, " %02X", *data++);
+                output += work;
+            }
+        }
+        if (output.length() != 0)
+            fprintf(fp, "%s\n", output.c_str());
+        break;
+    }
 }
 
 

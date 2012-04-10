@@ -107,12 +107,19 @@ public:
     } DataPattern;
 
     /**
-     * Write all the data consisting of this buffer starting with the stated
-     * initial value and progressing according to the desired pattern/series.
+     * Write a data pattern to a segment of the data buffer. This segment
+     * is defined by the offset from the start of the data buffer and
+     * continues 'patLength' bytes. This segment is the only portion affected.
+     * This segment starts with the stated initial value and progress according
+     * to the desired pattern/series.
      * @param dataPat Pass the desired data pattern/series to calc next value
      * @param initVal Pass the 1st value of the pattern/series
+     * @param offset Pass offset into the meta buf which is start of the segment
+     * @param length Pass the number of bytes of the segment length, value
+     *        of UINT32_MAX implies infinite length.
      */
-    void SetDataPattern(DataPattern dataPat, uint64_t initVal = 0);
+    void SetDataPattern(DataPattern dataPat, uint64_t initVal = 0,
+        uint32_t offset = 0, uint32_t length = UINT32_MAX);
 
     /// Zero out all memory bytes
     void Zero() { SetDataPattern(DATAPAT_CONST_8BIT, 0); }
