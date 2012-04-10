@@ -1,3 +1,27 @@
+2012-4-10:
+nvmecompliance_release=1.3.0 New tests, bug fixes in dnvme.
+    1) Added numerous new tests, see git log for details.
+    2) Small bugfixes in tnvme, not a complete list:
+        a) Flushing stdout wasn't being performed, thus wasn't in log output
+        b) GrpBasicInit::verifyDataPat_r10b wasn't causing error when err occur
+        c) No longer assuming all DUT's can support discontig IOQ's memory.
+           Attempts to use discontig memory but will default to contig when
+           necessary.
+        d) Cmds/Metadata::SetMetaDataPattern() overwrote memory it didn't own.
+        e) Cmds/Cmd::Dump() was not virtual and thus children weren't able to
+           explicitly change the behavior or the Dump().
+    3) Bugfix: dnvme: load/unload inefficiencies fixed and symmetry of
+       call backs redone. Mapping of IO memory not needed and removed.
+    4) Bugfix: dnvme: direct kernel usage of user space virtual ptrs.
+    5) Bugfix: dnvme: The full use of 64 bit addr space was not enabled.
+    6) Known Issues:
+        a) The DMA corruption issue is half working. It works on systems where
+           the IOMMU is disabled, however the inverse is not working. In the
+           cases where the IOMMU is enabled the buffer's contents are in fact
+           being xferr'd to completeness, however the data is phase shifted
+           within the buffer, always a constant 16 bytes. This fix is a work
+           in progress.
+
 2012-3-21:
 nvmecompliance_release=1.2.2 New tests, bug fixes.
     1) Added numerous new tests, see git log for details.
