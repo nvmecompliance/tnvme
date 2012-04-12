@@ -60,6 +60,18 @@ typedef enum {
 } SpecRev;
 
 
+typedef enum {
+    DATAPAT_CONST_8BIT,
+    DATAPAT_CONST_16BIT,
+    DATAPAT_CONST_32BIT,
+    DATAPAT_INC_8BIT,
+    DATAPAT_INC_16BIT,
+    DATAPAT_INC_32BIT,
+
+    DATAPATTERN_FENCE           // always must be last element
+} DataPattern;
+
+
 /**
  * Combination/permutation not listed below should be considered illegal. The
  * last permutation listed, request spec'd test within spec'd group, causes

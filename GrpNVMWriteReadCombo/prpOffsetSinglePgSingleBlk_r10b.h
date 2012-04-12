@@ -65,7 +65,7 @@ private:
     SharedWritePtr CreateWriteCmd(Informative::Namspc namspcData);
     SharedReadPtr CreateReadCmd(Informative::Namspc namspcData);
     void VerifyDataPattern(SharedReadPtr readCmd,
-        MemBuffer::DataPattern dataPattern, uint64_t wrVal);
+        DataPattern dataPattern, uint64_t wrVal);
 
 };
 

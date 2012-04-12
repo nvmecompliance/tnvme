@@ -119,21 +119,18 @@ PRPOffsetSinglePgSingleBlk_r10b::RunCoreTest()
     SharedWritePtr writeCmd = CreateWriteCmd(namspcData);
     SharedReadPtr readCmd = CreateReadCmd(namspcData);
 
-    MemBuffer::DataPattern dataPattern;
-    MetaData::DataPattern metaDataPattern;
+    DataPattern dataPattern;
     uint64_t wrVal;
     uint32_t prp2RandVal[2];
     for (uint64_t pgOff = 0; pgOff <= X; pgOff += 4) {
         if ((pgOff % 8) != 0) {
-            dataPattern = MemBuffer::DATAPAT_CONST_8BIT;
-            metaDataPattern = MetaData::DATAPAT_CONST_8BIT;
+            dataPattern = DATAPAT_CONST_8BIT;
             wrVal = pgOff;
             prp2RandVal[0] = rand_r(&seed);
             prp2RandVal[1] = rand_r(&seed);
             work = str(boost::format("dataPat.constb.memOff.%d") % pgOff);
         } else {
-            dataPattern = MemBuffer::DATAPAT_INC_16BIT;
-            metaDataPattern = MetaData::DATAPAT_INC_16BIT;
+            dataPattern = DATAPAT_INC_16BIT;
             wrVal = pgOff;
             prp2RandVal[0] = 0;
             prp2RandVal[1] = 0;
@@ -144,7 +141,7 @@ PRPOffsetSinglePgSingleBlk_r10b::RunCoreTest()
         writeCmd->SetPrpBuffer(prpBitmask, writeMem);
         writeMem->SetDataPattern(dataPattern, wrVal);
         if (namspcData.type != Informative::NS_BARE)
-            writeCmd->SetMetaDataPattern(metaDataPattern, wrVal);
+            writeCmd->SetMetaDataPattern(dataPattern, wrVal);
 
         // Set 64 bits of PRP2 in CDW 8 & 9 with random or zero for write cmd.
         writeCmd->SetDword(prp2RandVal[0], 8);
@@ -213,11 +210,11 @@ PRPOffsetSinglePgSingleBlk_r10b::CreateReadCmd(Informative::Namspc namspcData)
 
 void
 PRPOffsetSinglePgSingleBlk_r10b::VerifyDataPattern(SharedReadPtr readCmd,
-    MemBuffer::DataPattern dataPattern, uint64_t wrVal)
+    DataPattern dataPattern, uint64_t wrVal)
 {
     LOG_NRM("Compare read vs written data to verify");
     uint16_t mWrVal = (uint16_t)wrVal;
-    if (dataPattern == MemBuffer::DATAPAT_INC_16BIT) {
+    if (dataPattern == DATAPAT_INC_16BIT) {
         const uint16_t *rdBuffPtr = (const uint16_t *)readCmd->GetROPrpBuffer();
         for (uint64_t i = 0; i <
             (readCmd->GetPrpBufferSize() / sizeof(uint16_t)); i++) {
@@ -248,7 +245,7 @@ PRPOffsetSinglePgSingleBlk_r10b::VerifyDataPattern(SharedReadPtr readCmd,
                 }
             }
         }
-    } else if (dataPattern == MemBuffer::DATAPAT_CONST_8BIT) {
+    } else if (dataPattern == DATAPAT_CONST_8BIT) {
         const uint8_t *rdBuffPtr = readCmd->GetROPrpBuffer();
         for (uint64_t i = 0; i <
             (readCmd->GetPrpBufferSize() / sizeof(uint8_t)); i++) {

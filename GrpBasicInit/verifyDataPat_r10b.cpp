@@ -104,7 +104,7 @@ VerifyDataPat_r10b::VerifyDataPattern()
     LOG_NRM("Create data pattern to compare against");
     SharedMemBufferPtr dataPat = SharedMemBufferPtr(new MemBuffer());
     dataPat->Init(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize);
-    dataPat->SetDataPattern(MemBuffer::DATAPAT_INC_16BIT);
+    dataPat->SetDataPattern(DATAPAT_INC_16BIT);
     dataPat->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "DataPat"),
         "Verify buffer's data pattern");
     

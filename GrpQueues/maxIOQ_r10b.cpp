@@ -129,8 +129,7 @@ MaxIOQ_r10b::RunCoreTest()
     vector <SharedIOCQPtr>::iterator iocq = IOCQVec.begin();
     for (vector <SharedIOSQPtr>::iterator iosq = IOSQVec.begin();
         iosq != IOSQVec.end(); iosq++, iocq++) {
-        writeMem->SetDataPattern(MemBuffer::DATAPAT_CONST_16BIT,
-            (*iosq)->GetQId());
+        writeMem->SetDataPattern(DATAPAT_CONST_16BIT, (*iosq)->GetQId());
         work = str(boost::format("dataPattern.0x%04X") % (*iosq)->GetQId());
         IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, *iosq, *iocq,
             writeCmd, work, true);

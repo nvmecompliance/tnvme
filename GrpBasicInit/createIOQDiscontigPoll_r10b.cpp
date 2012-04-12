@@ -28,7 +28,7 @@
 
 namespace GrpBasicInit {
 
-static uint32_t NumEntriesIOQ =     5;
+uint32_t CreateIOQDiscontigPoll_r10b::NumEntriesIOQ =     5;
 
 
 CreateIOQDiscontigPoll_r10b::CreateIOQDiscontigPoll_r10b(int fd, string grpName,

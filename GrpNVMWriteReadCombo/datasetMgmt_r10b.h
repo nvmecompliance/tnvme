@@ -14,17 +14,12 @@
  *  limitations under the License.
  */
 
-#ifndef _PRPOFFSETDUALPGMULTIBLK_r10b_H_
-#define _PRPOFFSETDUALPGMULTIBLK_r10b_H_
+#ifndef _DATASETMGMT_r10b_H_
+#define _DATASETMGMT_r10b_H_
 
 #include "test.h"
-#include "globals.h"
-#include "../Utils/queues.h"
-#include "../Utils/io.h"
-#include "../Cmds/metaData.h"
-#include "../Cmds/write.h"
 #include "../Cmds/read.h"
-
+#include "../Cmds/write.h"
 
 namespace GrpNVMWriteReadCombo {
 
@@ -36,22 +31,22 @@ namespace GrpNVMWriteReadCombo {
  * 1) See notes in the header file of the Test base class
  * \endverbatim
  */
-class PRPOffsetDualPgMultiBlk_r10b : public Test
+class DatasetMgmt_r10b : public Test
 {
 public:
-    PRPOffsetDualPgMultiBlk_r10b(int fd, string grpName, string testName,
+    DatasetMgmt_r10b(int fd, string grpName, string testName,
         ErrorRegs errRegs);
-    virtual ~PRPOffsetDualPgMultiBlk_r10b();
+    virtual ~DatasetMgmt_r10b();
 
     /**
      * IMPORTANT: Read Test::Clone() header comment.
      */
-    virtual PRPOffsetDualPgMultiBlk_r10b *Clone() const
-        { return new PRPOffsetDualPgMultiBlk_r10b(*this); }
-    PRPOffsetDualPgMultiBlk_r10b &operator=
-        (const PRPOffsetDualPgMultiBlk_r10b &other);
-    PRPOffsetDualPgMultiBlk_r10b
-        (const PRPOffsetDualPgMultiBlk_r10b &other);
+    virtual DatasetMgmt_r10b *Clone() const
+        { return new DatasetMgmt_r10b(*this); }
+    DatasetMgmt_r10b &operator=
+        (const DatasetMgmt_r10b &other);
+    DatasetMgmt_r10b
+        (const DatasetMgmt_r10b &other);
 
 
 protected:
@@ -62,10 +57,7 @@ private:
     ///////////////////////////////////////////////////////////////////////////
     // Adding a member variable? Then edit the copy constructor and operator=().
     ///////////////////////////////////////////////////////////////////////////
-    void InitTstRsrcs(SharedASQPtr asq, SharedACQPtr acq, SharedIOSQPtr &iosq,
-        SharedIOCQPtr &iocq);
-    void VerifyDataPat(SharedReadPtr readCmd, DataPattern dataPat,
-        uint64_t wrVal, uint64_t metabufSz);
+    void VerifyDataPat(SharedReadPtr readCmd, SharedWritePtr writeCmd);
 };
 
 }   // namespace
