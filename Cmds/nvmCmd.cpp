@@ -28,7 +28,14 @@ NVMCmd::~NVMCmd()
 
 
 void
-NVMCmd::Init(uint8_t opcode, DataDir dataDir)
+NVMCmd::Init(uint8_t opcode, uint16_t cmdSize)
 {
-    Cmd::Init(CMD_NVM, opcode, dataDir, 64);
+    Cmd::Init(CMD_NVM, opcode, DATADIR_NONE, cmdSize);
+}
+
+
+void
+NVMCmd::Init(uint8_t opcode, DataDir dataDir, uint16_t cmdSize)
+{
+    Cmd::Init(CMD_NVM, opcode, dataDir, cmdSize);
 }

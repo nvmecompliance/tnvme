@@ -95,17 +95,6 @@ public:
     uint32_t GetBufSize() { return mVirBufSize; }
     uint32_t GetAlignment() { return mAlignment; }
 
-    typedef enum {
-        DATAPAT_CONST_8BIT,
-        DATAPAT_CONST_16BIT,
-        DATAPAT_CONST_32BIT,
-        DATAPAT_INC_8BIT,
-        DATAPAT_INC_16BIT,
-        DATAPAT_INC_32BIT,
-
-        DATAPATTERN_FENCE           // always must be last element
-    } DataPattern;
-
     /**
      * Write a data pattern to a segment of the data buffer. This segment
      * is defined by the offset from the start of the data buffer and

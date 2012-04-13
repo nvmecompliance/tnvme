@@ -34,7 +34,14 @@ AdminCmd::~AdminCmd()
 
 
 void
-AdminCmd::Init(uint8_t opcode, DataDir dataDir)
+AdminCmd::Init(uint8_t opcode, uint16_t cmdSize)
 {
-    Cmd::Init(CMD_ADMIN, opcode, dataDir, 64);
+    Cmd::Init(CMD_ADMIN, opcode, DATADIR_NONE, cmdSize);
+}
+
+
+void
+AdminCmd::Init(uint8_t opcode, DataDir dataDir, uint16_t cmdSize)
+{
+    Cmd::Init(CMD_ADMIN, opcode, dataDir, cmdSize);
 }

@@ -104,7 +104,7 @@ WriteDataPat_r10b::WriteDataPattern()
     LOG_NRM("Create data pattern to write to media");
     SharedMemBufferPtr dataPat = SharedMemBufferPtr(new MemBuffer());
     dataPat->Init(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize);
-    dataPat->SetDataPattern(MemBuffer::DATAPAT_INC_16BIT);
+    dataPat->SetDataPattern(DATAPAT_INC_16BIT);
     dataPat->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "DataPat"),
         "Write buffer's data pattern");
 

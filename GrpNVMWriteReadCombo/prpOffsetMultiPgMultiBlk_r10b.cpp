@@ -152,8 +152,7 @@ PRPOffsetMultiPgMultiBlk_r10b::RunCoreTest()
         throw FrmwkEx("Need to add CRC's to correlate to buf pattern");
     }
 
-    MemBuffer::DataPattern dataPat;
-    MetaData::DataPattern metaPat;
+    DataPattern dataPat;
     uint64_t wrVal;
     uint64_t Y;
 
@@ -175,12 +174,10 @@ PRPOffsetMultiPgMultiBlk_r10b::RunCoreTest()
             // nLBA = {(0, 1, 2), (3, 4, 5), (7, 8, 9), (15, 16, 17), ...}
             for (uint64_t nLBA = (lbaPow2 - 1); nLBA <= (lbaPow2 + 1); nLBA++) {
                 if ((++altPattern % 2) != 0) {
-                    dataPat = MemBuffer::DATAPAT_INC_32BIT;
-                    metaPat = MetaData::DATAPAT_INC_32BIT;
+                    dataPat = DATAPAT_INC_32BIT;
                     wrVal = pgOff + nLBA;
                 } else {
-                    dataPat = MemBuffer::DATAPAT_CONST_32BIT;
-                    metaPat = MetaData::DATAPAT_CONST_32BIT;
+                    dataPat = DATAPAT_CONST_32BIT;
                     wrVal = pgOff + nLBA;
                 }
                 uint64_t dtPayloadSz = lbaDataSize * nLBA;
@@ -199,7 +196,7 @@ PRPOffsetMultiPgMultiBlk_r10b::RunCoreTest()
 
                 uint64_t metabufSz = nLBA * lbaFormat.MS;
                 if (namspcData.type != Informative::NS_BARE)
-                    writeCmd->SetMetaDataPattern(metaPat, wrVal, 0, metabufSz);
+                    writeCmd->SetMetaDataPattern(dataPat, wrVal, 0, metabufSz);
 
                 enableLog = false;
                 if ((pgOff <= 8) || (pgOff >= (X - 8)))
@@ -262,7 +259,7 @@ PRPOffsetMultiPgMultiBlk_r10b::InitTstRsrcs(SharedASQPtr asq, SharedACQPtr acq,
 
 void
 PRPOffsetMultiPgMultiBlk_r10b::VerifyDataPat(SharedReadPtr readCmd,
-    MemBuffer::DataPattern dataPat, uint64_t wrVal, uint64_t metabufSz)
+    DataPattern dataPat, uint64_t wrVal, uint64_t metabufSz)
 {
     LOG_NRM("Compare read vs written data to verify");
     SharedMemBufferPtr wrPayload = SharedMemBufferPtr(new MemBuffer());

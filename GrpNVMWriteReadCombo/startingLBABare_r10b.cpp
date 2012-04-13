@@ -108,12 +108,15 @@ StartingLBABare_r10b::RunCoreTest()
     SharedReadPtr readCmd = SharedReadPtr(new Read());
     SharedMemBufferPtr readMem = SharedMemBufferPtr(new MemBuffer());
 
-    MemBuffer::DataPattern dataPat[] = {
-        MemBuffer::DATAPAT_INC_8BIT, MemBuffer::DATAPAT_CONST_8BIT,
-        MemBuffer::DATAPAT_INC_16BIT, MemBuffer::DATAPAT_CONST_16BIT,
-        MemBuffer::DATAPAT_INC_32BIT, MemBuffer::DATAPAT_CONST_32BIT
+    DataPattern dataPat[] = {
+        DATAPAT_INC_8BIT,
+        DATAPAT_CONST_8BIT,
+        DATAPAT_INC_16BIT,
+        DATAPAT_CONST_16BIT,
+        DATAPAT_INC_32BIT,
+        DATAPAT_CONST_32BIT
     };
-    uint64_t dpArrSize = sizeof(dataPat)/sizeof(dataPat[0]);
+    uint64_t dpArrSize = sizeof(dataPat) / sizeof(dataPat[0]);
 
     vector<uint32_t> bare = gInformative->GetBareNamespaces();
     for (size_t i = 0; i < bare.size(); i++) {

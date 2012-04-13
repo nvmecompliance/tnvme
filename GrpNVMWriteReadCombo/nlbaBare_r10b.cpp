@@ -27,7 +27,7 @@
 namespace GrpNVMWriteReadCombo {
 
 // Maximum number of bits for logical blks (NLB) in cmd DWORD 12 for rd/wr cmd.
-#define NLB_CDW12_BITS          16
+#define CDW12_NLB_BITS          16
 
 
 NLBABare_r10b::NLBABare_r10b(int fd,
@@ -111,12 +111,15 @@ NLBABare_r10b::RunCoreTest()
     send_64b_bitmask prpBitmask = (send_64b_bitmask)
         (MASK_PRP1_PAGE | MASK_PRP2_PAGE | MASK_PRP2_LIST);
 
-    MemBuffer::DataPattern dataPat[] = {
-        MemBuffer::DATAPAT_INC_8BIT, MemBuffer::DATAPAT_CONST_8BIT,
-        MemBuffer::DATAPAT_INC_16BIT, MemBuffer::DATAPAT_CONST_16BIT,
-        MemBuffer::DATAPAT_INC_32BIT, MemBuffer::DATAPAT_CONST_32BIT
+    DataPattern dataPat[] = {
+        DATAPAT_INC_8BIT,
+        DATAPAT_CONST_8BIT,
+        DATAPAT_INC_16BIT,
+        DATAPAT_CONST_16BIT,
+        DATAPAT_INC_32BIT,
+        DATAPAT_CONST_32BIT
     };
-    uint64_t dpArrSize = sizeof(dataPat)/sizeof(dataPat[0]);
+    uint64_t dpArrSize = sizeof(dataPat) / sizeof(dataPat[0]);
 
     vector<uint32_t> bare = gInformative->GetBareNamespaces();
     for (size_t i = 0; i < bare.size(); i++) {
@@ -125,7 +128,7 @@ NLBABare_r10b::RunCoreTest()
             throw FrmwkEx("Identify namspc struct #%d doesn't exist", bare[i]);
 
         uint64_t lbaDataSize = namSpcPtr->GetLBADataSize();
-        uint64_t maxWrBlks = (1 << NLB_CDW12_BITS); // 1-based value.
+        uint64_t maxWrBlks = (1 << CDW12_NLB_BITS); // 1-based value.
         if (maxDtXferSz != 0)
             maxWrBlks = MIN(maxWrBlks, (maxDtXferSz / lbaDataSize) + 1);
 

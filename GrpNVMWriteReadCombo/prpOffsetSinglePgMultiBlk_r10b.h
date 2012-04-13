@@ -64,7 +64,7 @@ private:
     ///////////////////////////////////////////////////////////////////////////
     void InitTstRsrcs(SharedASQPtr asq, SharedACQPtr acq, SharedIOSQPtr &iosq,
         SharedIOCQPtr &iocq);
-    void VerifyDataPat(SharedReadPtr readCmd, MemBuffer::DataPattern dataPat,
+    void VerifyDataPat(SharedReadPtr readCmd, DataPattern dataPat,
         uint64_t wrVal, uint64_t metabufSz);
 };
 

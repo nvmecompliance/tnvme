@@ -158,8 +158,7 @@ PRPOffsetSinglePgMultiBlk_r10b::RunCoreTest()
         throw FrmwkEx("Need to add CRC's to correlate to buf pattern");
     }
 
-    MemBuffer::DataPattern dataPat;
-    MetaData::DataPattern metaDataPat;
+    DataPattern dataPat;
     uint64_t wrVal;
     uint32_t prp2RandVal[2];
     uint64_t Y;
@@ -181,14 +180,12 @@ PRPOffsetSinglePgMultiBlk_r10b::RunCoreTest()
                 break;
             }
             if ((nLBAs % 2) != 0) {
-                dataPat = MemBuffer::DATAPAT_INC_8BIT;
-                metaDataPat = MetaData::DATAPAT_INC_8BIT;
+                dataPat = DATAPAT_INC_8BIT;
                 wrVal = pgOff + nLBAs;
                 prp2RandVal[0] = rand_r(&seed);
                 prp2RandVal[1] = rand_r(&seed);
             } else {
-                dataPat = MemBuffer::DATAPAT_CONST_16BIT;
-                metaDataPat = MetaData::DATAPAT_CONST_16BIT;
+                dataPat = DATAPAT_CONST_16BIT;
                 wrVal = pgOff + nLBAs;
                 prp2RandVal[0] = 0;
                 prp2RandVal[1] = 0;
@@ -201,7 +198,7 @@ PRPOffsetSinglePgMultiBlk_r10b::RunCoreTest()
 
             uint64_t metabufSz = nLBAs * lbaFormat.MS;
             if (namspcData.type != Informative::NS_BARE)
-                writeCmd->SetMetaDataPattern(metaDataPat, wrVal, 0, metabufSz);
+                writeCmd->SetMetaDataPattern(dataPat, wrVal, 0, metabufSz);
 
             enableLog = false;
             if ((pgOff <= 8) || (pgOff >= (X - 8)))
@@ -269,7 +266,7 @@ PRPOffsetSinglePgMultiBlk_r10b::InitTstRsrcs(SharedASQPtr asq, SharedACQPtr acq,
 
 void
 PRPOffsetSinglePgMultiBlk_r10b::VerifyDataPat(SharedReadPtr readCmd,
-    MemBuffer::DataPattern dataPat, uint64_t wrVal, uint64_t metabufSz)
+    DataPattern dataPat, uint64_t wrVal, uint64_t metabufSz)
 {
     LOG_NRM("Compare read vs written data to verify");
     SharedMemBufferPtr wrPayload = SharedMemBufferPtr(new MemBuffer());
