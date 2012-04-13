@@ -36,15 +36,20 @@
  * @param capital Pass the class name in all CAPITAL letters
  * @param proper Pass the proper name of the class to instantiate
  */
-#define INSTANTIATE_OBJ(capital, proper)                            \
-    case Trackable::OBJ_ ## capital:                                \
-        LOG_NRM("Obj %s is born with group lifetime", #proper);     \
-        return SharedTrackablePtr(new proper());                    \
+#define INSTANTIATE_OBJ(capital, proper)                                       \
+    case Trackable::OBJ_ ## capital:                                           \
+        LOG_NRM("Obj %s is born with group lifetime", #proper);                \
+        return SharedTrackablePtr(new proper());                               \
         break;
-#define INSTANTIATE_OBJ_w_fd(capital, proper)                       \
-    case Trackable::OBJ_ ## capital:                                \
-        LOG_NRM("Obj %s is born with group lifetime", #proper);     \
-        return SharedTrackablePtr(new proper(mFd));                 \
+#define INSTANTIATE_OBJ_w_fd(capital, proper)                                  \
+    case Trackable::OBJ_ ## capital:                                           \
+        LOG_NRM("Obj %s is born with group lifetime", #proper);                \
+        return SharedTrackablePtr(new proper(mFd));                            \
+        break;
+#define INSTANTIATE_OBJ_w_type(capital, proper)                                \
+    case Trackable::OBJ_ ## capital:                                           \
+        LOG_NRM("Obj %s is born with group lifetime", #proper);                \
+        return SharedTrackablePtr(new proper(Trackable::OBJ_ ## capital));     \
         break;
 
 
@@ -73,12 +78,20 @@ ObjRsrc::~ObjRsrc()
 SharedTrackablePtr
 ObjRsrc::AllocWorker(Trackable::ObjType type)
 {
+    // List new objects here so that ObjRsrs may instantiate any resource
     switch (type) {
-    INSTANTIATE_OBJ(MEMBUFFER, MemBuffer)
+    // These objects are rare, require special treatment in constructors
+    INSTANTIATE_OBJ_w_type(ADMINCMD, AdminCmd)
+    INSTANTIATE_OBJ_w_type(NVMCMD, NVMCmd)
+
+    // These objects require file descriptors in their constructors
     INSTANTIATE_OBJ_w_fd(ACQ, ACQ)
     INSTANTIATE_OBJ_w_fd(ASQ, ASQ)
     INSTANTIATE_OBJ_w_fd(IOCQ, IOCQ)
     INSTANTIATE_OBJ_w_fd(IOSQ, IOSQ)
+
+    // These objects are the basic type of initialization we should see
+    INSTANTIATE_OBJ(MEMBUFFER, MemBuffer)
     INSTANTIATE_OBJ(IDENTIFY, Identify)
     INSTANTIATE_OBJ(CREATEIOCQ, CreateIOCQ)
     INSTANTIATE_OBJ(CREATEIOSQ, CreateIOSQ)
@@ -87,6 +100,7 @@ ObjRsrc::AllocWorker(Trackable::ObjType type)
     INSTANTIATE_OBJ(GETFEATURES, GetFeatures)
     INSTANTIATE_OBJ(SETFEATURES, SetFeatures)
     INSTANTIATE_OBJ(GETLOGPAGE, GetLogPage)
+
     INSTANTIATE_OBJ(WRITE, Write)
     INSTANTIATE_OBJ(READ, Read)
 
