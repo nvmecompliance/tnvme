@@ -42,6 +42,7 @@
 #include "GrpNVMWriteCmd/grpNVMWriteCmd.h"
 #include "GrpInterrupts/grpInterrupts.h"
 #include "GrpNVMWriteReadCombo/grpNVMWriteReadCombo.h"
+#include "GrpGeneralCmds/grpGeneralCmds.h"
 
 void
 InstantiateGroups(vector<Group *> &groups, int &fd, struct CmdLine &cl)
@@ -61,6 +62,7 @@ InstantiateGroups(vector<Group *> &groups, int &fd, struct CmdLine &cl)
     groups.push_back(new GrpCtrlRegisters::GrpCtrlRegisters(groups.size(), cl.rev, cl.errRegs, fd));
     groups.push_back(new GrpBasicInit::GrpBasicInit(groups.size(), cl.rev, cl.errRegs, fd));
     groups.push_back(new GrpResets::GrpResets(groups.size(), cl.rev, cl.errRegs, fd));
+    groups.push_back(new GrpGeneralCmds::GrpGeneralCmds(groups.size(), cl.rev, cl.errRegs, fd));
     groups.push_back(new GrpQueues::GrpQueues(groups.size(), cl.rev, cl.errRegs, fd));
     groups.push_back(new GrpNVMReadCmd::GrpNVMReadCmd(groups.size(), cl.rev, cl.errRegs, fd));
     groups.push_back(new GrpNVMWriteCmd::GrpNVMWriteCmd(groups.size(), cl.rev, cl.errRegs, fd));

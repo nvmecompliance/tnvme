@@ -14,36 +14,27 @@
  *  limitations under the License.
  */
 
-#include "adminCmd.h"
+#ifndef _GRPGENERALCMDS_H_
+#define _GRPGENERALCMDS_H_
+
+#include "../group.h"
+#include "../Exception/frmwkEx.h"
 
 
-SharedAdminCmdPtr AdminCmd::NullAdminCmdPtr;
+namespace GrpGeneralCmds {
 
 
-AdminCmd::AdminCmd() : Cmd(Trackable::OBJ_ADMINCMD)
+/**
+* This class tests a command's features that are common to all command sets.
+*/
+class GrpGeneralCmds : public Group
 {
-}
+public:
+    GrpGeneralCmds(size_t grpNum, SpecRev specRev, ErrorRegs errRegs,
+        int fd);
+    virtual ~GrpGeneralCmds();
+};
 
+}   // namespace
 
-AdminCmd::AdminCmd(Trackable::ObjType objBeingCreated) : Cmd(objBeingCreated)
-{
-}
-
-
-AdminCmd::~AdminCmd()
-{
-}
-
-
-void
-AdminCmd::Init(uint8_t opcode, uint16_t cmdSize)
-{
-    Cmd::Init(CMD_ADMIN, opcode, DATADIR_NONE, cmdSize);
-}
-
-
-void
-AdminCmd::Init(uint8_t opcode, DataDir dataDir, uint16_t cmdSize)
-{
-    Cmd::Init(CMD_ADMIN, opcode, dataDir, cmdSize);
-}
+#endif

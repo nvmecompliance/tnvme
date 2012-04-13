@@ -14,36 +14,15 @@
  *  limitations under the License.
  */
 
-#include "adminCmd.h"
+#ifndef _GRPDEFS_H_
+#define _GRPDEFS_H_
 
+#define ACQ_GROUP_ID                "ACQ"
+#define ASQ_GROUP_ID                "ASQ"
+#define IOCQ_GROUP_ID               "IOCQ"
+#define IOSQ_GROUP_ID               "IOSQ"
+#define IOQ_ID                      1
 
-SharedAdminCmdPtr AdminCmd::NullAdminCmdPtr;
+#define DEFAULT_CMD_WAIT_ms         SYSTEMWIDE_CMD_WAIT_ms
 
-
-AdminCmd::AdminCmd() : Cmd(Trackable::OBJ_ADMINCMD)
-{
-}
-
-
-AdminCmd::AdminCmd(Trackable::ObjType objBeingCreated) : Cmd(objBeingCreated)
-{
-}
-
-
-AdminCmd::~AdminCmd()
-{
-}
-
-
-void
-AdminCmd::Init(uint8_t opcode, uint16_t cmdSize)
-{
-    Cmd::Init(CMD_ADMIN, opcode, DATADIR_NONE, cmdSize);
-}
-
-
-void
-AdminCmd::Init(uint8_t opcode, DataDir dataDir, uint16_t cmdSize)
-{
-    Cmd::Init(CMD_ADMIN, opcode, dataDir, cmdSize);
-}
+#endif

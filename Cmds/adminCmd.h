@@ -20,6 +20,13 @@
 #include "cmd.h"
 
 
+class AdminCmd;    // forward definition
+typedef boost::shared_ptr<AdminCmd>             SharedAdminCmdPtr;
+typedef boost::shared_ptr<const AdminCmd>       ConstSharedAdminCmdPtr;
+#define CAST_TO_ADMINCMD(shared_trackable_ptr)  \
+    boost::shared_polymorphic_downcast<AdminCmd>(shared_trackable_ptr);
+
+
 /**
 * This class is the base class to admin cmd set.
 *
@@ -32,7 +39,11 @@ public:
      * @param objBeingCreated Pass the type of object this child class is
      */
     AdminCmd(Trackable::ObjType objBeingCreated);
+    AdminCmd();
     virtual ~AdminCmd();
+
+    /// Used to compare for NULL pointers being returned by allocations
+    static SharedAdminCmdPtr NullAdminCmdPtr;
 
     /**
      * Is intended to initialize this object as a general cmd. Children derived
@@ -57,10 +68,6 @@ protected:
      * @param cmdSize Pass the number of bytes consisting of a single cmd.
      */
     void Init(uint8_t opcode, DataDir dataDir, uint16_t cmdSize = 64);
-
-
-private:
-    AdminCmd();
 };
 
 

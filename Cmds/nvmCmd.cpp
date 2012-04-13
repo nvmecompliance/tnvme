@@ -17,6 +17,14 @@
 #include "nvmCmd.h"
 
 
+SharedNVMCmdPtr NVMCmd::NullNVMCmdPtr;
+
+
+NVMCmd::NVMCmd() : Cmd(Trackable::OBJ_NVMCMD)
+{
+}
+
+
 NVMCmd::NVMCmd(Trackable::ObjType objBeingCreated) : Cmd(objBeingCreated)
 {
 }

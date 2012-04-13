@@ -207,4 +207,16 @@ struct IdNamespcStruct {
 } __attribute__((__packed__));
 
 
+////////////////////////////////////////////////////////////////////////////////
+//                   REGISTER BIT DEFINITIONS FOLLOW
+////////////////////////////////////////////////////////////////////////////////
+
+/// Bit definitions for IDCTRLRCAP_ONCS
+typedef enum ONCSBits {
+    ONCS_SUP_COMP_CMD    = 0x0001,
+    ONCS_SUP_WR_UNC_CMD  = 0x0002,
+    ONCS_SUP_DSM_CMD     = 0x0004
+} ONCSBits;
+
+
 #endif

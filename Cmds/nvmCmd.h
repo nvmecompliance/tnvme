@@ -20,6 +20,13 @@
 #include "cmd.h"
 
 
+class NVMCmd;    // forward definition
+typedef boost::shared_ptr<NVMCmd>             SharedNVMCmdPtr;
+typedef boost::shared_ptr<const NVMCmd>       ConstSharedNVMCmdPtr;
+#define CAST_TO_NVMCMD(shared_trackable_ptr)  \
+    boost::shared_polymorphic_downcast<NVMCmd>(shared_trackable_ptr);
+
+
 /**
 * This class is the base class to NVM cmd set.
 *
@@ -32,7 +39,11 @@ public:
      * @param objBeingCreated Pass the type of object this child class is
      */
     NVMCmd(Trackable::ObjType objBeingCreated);
+    NVMCmd();
     virtual ~NVMCmd();
+
+    /// Used to compare for NULL pointers being returned by allocations
+    static SharedNVMCmdPtr NullNVMCmdPtr;
 
     /**
      * Is intended to initialize this object as a general cmd. Children derived
