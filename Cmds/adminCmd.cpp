@@ -22,6 +22,9 @@ SharedAdminCmdPtr AdminCmd::NullAdminCmdPtr;
 
 AdminCmd::AdminCmd() : Cmd(Trackable::OBJ_ADMINCMD)
 {
+    // No cmd should ever be created which violates these masking possibilities
+    send_64b_bitmask allowPrpMask = (send_64b_bitmask)0;
+    SetPrpAllowed(allowPrpMask);
 }
 
 

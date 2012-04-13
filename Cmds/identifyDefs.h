@@ -218,5 +218,11 @@ typedef enum ONCSBits {
     ONCS_SUP_DSM_CMD     = 0x0004
 } ONCSBits;
 
+/// Bit definitions for IDCTRLRCAP_OACS
+typedef enum OACSBits {
+    OACS_SUP_SECURITY_CMD     = 0x0001,
+    OACS_SUP_FORMAT_NVM_CMD   = 0x0002,
+    OACS_SUP_FIRMWARE_CMD     = 0x0004
+} OACSBits;
 
 #endif

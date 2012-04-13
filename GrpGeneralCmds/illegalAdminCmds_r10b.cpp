@@ -14,8 +14,9 @@
  *  limitations under the License.
  */
 
+#include <initializer_list>
 #include "boost/format.hpp"
-#include "illegalNVMCmds_r10b.h"
+#include "illegalAdminCmds_r10b.h"
 #include "globals.h"
 #include "grpDefs.h"
 #include "../Queues/iocq.h"
@@ -27,30 +28,30 @@
 namespace GrpGeneralCmds {
 
 
-#define VENDOR_SPEC_OPC             0x80
+#define VENDOR_SPEC_OPC             0xC0
 
+const uint8_t IllegalAdminCmds_r10b::FW_ACTIVATE_OPCODE         = 0x10;
+const uint8_t IllegalAdminCmds_r10b::FW_DOWNLOAD_OPCODE         = 0x11;
+const uint8_t IllegalAdminCmds_r10b::FORMAT_NVM_OPCODE          = 0x80;
+const uint8_t IllegalAdminCmds_r10b::SECURITY_SEND_OPCODE       = 0x81;
+const uint8_t IllegalAdminCmds_r10b::SECURITY_RECEIVE_OPCODE    = 0x82;
 
-const uint8_t IllegalNVMCmds_r10b::WRITE_UNCORR_OPCODE  = 0x04;
-const uint8_t IllegalNVMCmds_r10b::COMPARE_OPCODE       = 0x05;
-const uint8_t IllegalNVMCmds_r10b::DSM_OPCODE           = 0x09;
-
-
-IllegalNVMCmds_r10b::IllegalNVMCmds_r10b(int fd,
+IllegalAdminCmds_r10b::IllegalAdminCmds_r10b(int fd,
     string mGrpName, string mTestName, ErrorRegs errRegs) :
     Test(fd, mGrpName, mTestName, SPECREV_10b, errRegs)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-    mTestDesc.SetCompliance("revision 1.0b, section 6");
-    mTestDesc.SetShort(     "Issue illegal nvm cmd set opcodes.");
+    mTestDesc.SetCompliance("revision 1.0b, section 5");
+    mTestDesc.SetShort(     "Issue illegal admin cmd set opcodes.");
     // No string size limit for the long description
     mTestDesc.SetLong(
-        "Don't test vendor specific opcodes, then determine all supported NVM "
-        "cmds and issue all other illegal opcodes.  Verify status code in the "
-        "CE of IOCQ is 1h.");
+        "Don't test vendor specific opcodes, then determine all supported "
+        "admin cmds based upon the admin cmd set and issue all other illegal "
+        "opcodes.  Verify status code in the CE of ACQ is 1h.");
 }
 
 
-IllegalNVMCmds_r10b::~IllegalNVMCmds_r10b()
+IllegalAdminCmds_r10b::~IllegalAdminCmds_r10b()
 {
     ///////////////////////////////////////////////////////////////////////////
     // Allocations taken from the heap and not under the control of the
@@ -59,8 +60,8 @@ IllegalNVMCmds_r10b::~IllegalNVMCmds_r10b()
 }
 
 
-IllegalNVMCmds_r10b::
-IllegalNVMCmds_r10b(const IllegalNVMCmds_r10b &other) :
+IllegalAdminCmds_r10b::
+IllegalAdminCmds_r10b(const IllegalAdminCmds_r10b &other) :
     Test(other)
 {
     ///////////////////////////////////////////////////////////////////////////
@@ -70,8 +71,8 @@ IllegalNVMCmds_r10b(const IllegalNVMCmds_r10b &other) :
 }
 
 
-IllegalNVMCmds_r10b &
-IllegalNVMCmds_r10b::operator=(const IllegalNVMCmds_r10b
+IllegalAdminCmds_r10b &
+IllegalAdminCmds_r10b::operator=(const IllegalAdminCmds_r10b
     &other)
 {
     ///////////////////////////////////////////////////////////////////////////
@@ -84,7 +85,7 @@ IllegalNVMCmds_r10b::operator=(const IllegalNVMCmds_r10b
 
 
 void
-IllegalNVMCmds_r10b::RunCoreTest()
+IllegalAdminCmds_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
@@ -95,43 +96,51 @@ IllegalNVMCmds_r10b::RunCoreTest()
     list<uint8_t> illegalOpCodes = GetIllegalOpcodes();
 
     // Lookup objs which were created in a prior test within group
-    SharedIOSQPtr iosq = CAST_TO_IOSQ(gRsrcMngr->GetObj(IOSQ_GROUP_ID));
-    SharedIOCQPtr iocq = CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_GROUP_ID));
+    SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
+    SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
 
-    LOG_NRM("Form a Generic NVM cmd to send to an IOSQ.");
-    SharedNVMCmdPtr genericNVMCmd = SharedNVMCmdPtr(new NVMCmd());
+    LOG_NRM("Form a Generic Admin cmd to send to an ASQ.");
+    SharedAdminCmdPtr genericAdminCmd = SharedAdminCmdPtr(new AdminCmd());
 
     for (list<uint8_t>::iterator opCode = illegalOpCodes.begin();
         opCode != illegalOpCodes.end(); opCode++) {
-
-        genericNVMCmd->Init(*opCode);
+        LOG_NRM("Sending admin cmd with illegal opcode = 0x%X", (uint)*opCode);
+        genericAdminCmd->Init(*opCode);
 
         work = str(boost::format("IllegalOpcode.%d") % (uint)*opCode);
-        IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
-            iocq, genericNVMCmd, work, true, CESTAT_INVAL_OPCODE);
+        IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq,
+            acq, genericAdminCmd, work, true, CESTAT_INVAL_OPCODE);
     }
 }
 
 
 list<uint8_t>
-IllegalNVMCmds_r10b::GetIllegalOpcodes()
+IllegalAdminCmds_r10b::GetIllegalOpcodes()
 {
     list<uint8_t> illegalOpCodes;
 
-    for (uint8_t opCode = 0x3; opCode < VENDOR_SPEC_OPC; opCode++)
+    illegalOpCodes.push_back(0x03);
+    illegalOpCodes.push_back(0x07);
+    illegalOpCodes.push_back(0x0B);
+
+    for (uint8_t opCode = 0x0D; opCode < VENDOR_SPEC_OPC; opCode++)
         illegalOpCodes.push_back(opCode);
 
     uint8_t optNVMCmds = (gInformative->GetIdentifyCmdCtrlr()->
-        GetValue(IDCTRLRCAP_ONCS) & 0x7);
+        GetValue(IDCTRLRCAP_OACS) & 0x7);
 
-    if ((optNVMCmds & ONCS_SUP_COMP_CMD) != 0)
-        illegalOpCodes.remove(COMPARE_OPCODE);
+    if ((optNVMCmds & OACS_SUP_SECURITY_CMD) != 0) {
+        illegalOpCodes.remove(SECURITY_SEND_OPCODE);
+        illegalOpCodes.remove(SECURITY_RECEIVE_OPCODE);
+    }
 
-    if ((optNVMCmds & ONCS_SUP_WR_UNC_CMD) != 0)
-        illegalOpCodes.remove(WRITE_UNCORR_OPCODE);
+    if ((optNVMCmds & OACS_SUP_FORMAT_NVM_CMD) != 0)
+        illegalOpCodes.remove(FORMAT_NVM_OPCODE);
 
-    if ((optNVMCmds & ONCS_SUP_DSM_CMD) != 0)
-        illegalOpCodes.remove(DSM_OPCODE);
+    if ((optNVMCmds & OACS_SUP_FIRMWARE_CMD) != 0) {
+        illegalOpCodes.remove(FW_ACTIVATE_OPCODE);
+        illegalOpCodes.remove(FW_DOWNLOAD_OPCODE);
+    }
 
     return illegalOpCodes;
 }
