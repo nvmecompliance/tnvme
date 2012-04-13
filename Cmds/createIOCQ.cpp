@@ -24,7 +24,7 @@ const uint8_t CreateIOCQ::Opcode = 0x05;
 
 CreateIOCQ::CreateIOCQ() : AdminCmd(Trackable::OBJ_CREATEIOCQ)
 {
-    AdminCmd::Init(Opcode, DATADIR_TO_DEVICE);
+    AdminCmd::Init(Opcode, DATADIR_FROM_DEVICE);
 
     // No cmd should ever be created which violates these masking possibilities
     send_64b_bitmask allowPrpMask = (send_64b_bitmask)

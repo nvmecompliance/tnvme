@@ -22,9 +22,10 @@
 #include "../Singletons/memBuffer.h"
 
 typedef enum {
+    DATADIR_NONE,
     DATADIR_FROM_DEVICE,
     DATADIR_TO_DEVICE,
-    DATADIR_NONE
+    DATADIR_BIDIRECTIONAL
 } DataDir;
 
 
