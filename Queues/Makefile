@@ -24,7 +24,8 @@ SRC =			\
 	acq.cpp		\
 	asq.cpp		\
 	iocq.cpp	\
-	iosq.cpp
+	iosq.cpp	\
+	backdoor.cpp
 
 .SUFFIXES: .cpp
 

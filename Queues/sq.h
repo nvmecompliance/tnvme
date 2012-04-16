@@ -19,6 +19,7 @@
 
 #include "queue.h"
 #include "se.h"
+#include "backdoor.h"
 #include "../Cmds/cmd.h"
 
 class SQ;    // forward definition
@@ -35,7 +36,7 @@ typedef boost::shared_ptr<SQ>               SharedSQPtr;
 *
 * @note This class may throw exceptions.
 */
-class SQ : public Queue
+class SQ : public Queue, public Backdoor
 {
 public:
     /**

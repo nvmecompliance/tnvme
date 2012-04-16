@@ -21,14 +21,17 @@
 SharedSQPtr SQ::NullSQPtr;
 
 
-SQ::SQ() : Queue(0, Trackable::OBJTYPE_FENCE)
+SQ::SQ() :
+    Queue(0, Trackable::OBJTYPE_FENCE),
+    Backdoor(0)
 {
     // This constructor will throw
 }
 
 
 SQ::SQ(int fd, Trackable::ObjType objBeingCreated) :
-    Queue(fd, objBeingCreated)
+    Queue(fd, objBeingCreated),
+    Backdoor(fd)
 {
     mCqId = 0;
 }
