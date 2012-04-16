@@ -19,7 +19,8 @@ INCLUDES = -I. -I../ -I../../ -I/usr/local/include
 SRC =					\
 	grpGeneralCmds.cpp		\
 	createResources_r10b.cpp	\
-	illegalNVMCmds_r10b.cpp
+	illegalNVMCmds_r10b.cpp		\
+	illegalAdminCmds_r10b.cpp
 
 .SUFFIXES: .cpp
 
