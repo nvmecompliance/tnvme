@@ -84,6 +84,7 @@ ManyCmdSubmit_r10b::RunCoreTest()
     uint32_t ceRemain;
     uint32_t numReaped;
     uint32_t numCE;
+    uint16_t uniqueId;
 
     // Lookup objs which were created in a prior test within group
     SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
@@ -113,7 +114,7 @@ ManyCmdSubmit_r10b::RunCoreTest()
         LOG_NRM("Sending #%d simultaneous NVM write cmds to IOSQ", x);
         // Issue x simultaneous NVM write cmds.
         for (nCmds = 1; nCmds <= x; nCmds++)
-            iosq->Send(writeCmd);
+            iosq->Send(writeCmd, uniqueId);
         iosq->Ring();
 
         // Variable wait time w.r.t "x" and expect all CE's to arrive in CQ.

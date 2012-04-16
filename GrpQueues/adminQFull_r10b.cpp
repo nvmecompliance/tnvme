@@ -110,6 +110,7 @@ AdminQFull_r10b::AdminQFull(uint16_t numASQEntries, uint16_t numACQEntries,
 {
     uint32_t numCE;
     uint32_t isrCount;
+    uint16_t uniqueId;
 
     if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
         throw FrmwkEx();
@@ -129,7 +130,7 @@ AdminQFull_r10b::AdminQFull(uint16_t numASQEntries, uint16_t numACQEntries,
     for (uint32_t nCmds = 0; nCmds < nCmdsToSubmit; nCmds++) {
         LOG_NRM("Sending #%d of #%d Identify Cmds thru ASQ", nCmds + 1,
             nCmdsToSubmit);
-        asq->Send(idCmdCtrlr);
+        asq->Send(idCmdCtrlr, uniqueId);
         asq->Ring();
 
         LOG_NRM("Wait for the CE to arrive in ACQ");

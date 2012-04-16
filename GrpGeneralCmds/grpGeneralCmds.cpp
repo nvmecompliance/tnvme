@@ -18,6 +18,7 @@
 #include "createResources_r10b.h"
 #include "illegalNVMCmds_r10b.h"
 #include "illegalAdminCmds_r10b.h"
+#include "cidAcceptedASQ_r10b.h"
 
 namespace GrpGeneralCmds {
 
@@ -37,6 +38,7 @@ GrpGeneralCmds::GrpGeneralCmds(size_t grpNum, SpecRev specRev,
         APPEND_TEST_AT_XLEVEL(CreateResources_r10b, fd, GrpGeneralCmds, errRegs)
         APPEND_TEST_AT_YLEVEL(IllegalNVMCmds_r10b, fd, GrpGeneralCmds, errRegs)
         APPEND_TEST_AT_YLEVEL(IllegalAdminCmds_r10b, fd, GrpGeneralCmds, errRegs)
+        APPEND_TEST_AT_YLEVEL(CIDAcceptedASQ_r10b, fd, GrpGeneralCmds, errRegs)
 
         break;
 

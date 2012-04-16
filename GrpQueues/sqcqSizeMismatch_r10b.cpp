@@ -87,7 +87,7 @@ SQCQSizeMismatch_r10b::RunCoreTest()
      * 1) Test CreateResources_r10b has run prior.
      *  \endverbatim
      */
-
+    uint16_t uniqueId;
     // Lookup objs which were created in a prior test within group
     SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
     SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
@@ -133,7 +133,7 @@ SQCQSizeMismatch_r10b::RunCoreTest()
     for (iosq = IOSQVec.begin(); iosq != IOSQVec.end(); iosq++) {
         for (uint32_t numCmds = 1; numCmds < ((*iosq)->GetNumEntries());
             numCmds++) {
-            (*iosq)->Send(writeCmd);
+            (*iosq)->Send(writeCmd, uniqueId);
         }
         (*iosq)->Ring();
     }

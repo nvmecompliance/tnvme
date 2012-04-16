@@ -83,6 +83,7 @@ ManySQtoCQAssoc_r10b::RunCoreTest()
      *  \endverbatim
      */
 
+    uint16_t uniqueId;
     // Lookup objs which were created in a prior test within group
     SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
     SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
@@ -124,7 +125,7 @@ ManySQtoCQAssoc_r10b::RunCoreTest()
 
         for (vector <SharedIOSQPtr>::iterator iosq = iosqVector.begin();
             iosq != iosqVector.end(); iosq++) {
-            (*iosq)->Send(writeCmd);
+            (*iosq)->Send(writeCmd, uniqueId);
             (*iosq)->Ring();
             mSQIDToSQHDVector[(*iosq)->GetQId()] =
                 ++mSQIDToSQHDVector[(*iosq)->GetQId()] %

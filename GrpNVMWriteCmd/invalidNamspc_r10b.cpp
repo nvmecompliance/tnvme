@@ -129,10 +129,11 @@ InvalidNamspc_r10b::SendCmdToHdw(SharedSQPtr sq, SharedCQPtr cq,
     uint32_t ceRemain;
     uint32_t numReaped;
     string work;
+    uint16_t uniqueId;
 
 
     LOG_NRM("Send the cmd to hdw via SQ %d", sq->GetQId());
-    sq->Send(cmd);
+    sq->Send(cmd, uniqueId);
     sq->Ring();
 
     LOG_NRM("Wait for the CE to arrive in CQ %d", cq->GetQId());

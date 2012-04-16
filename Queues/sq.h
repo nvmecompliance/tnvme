@@ -76,8 +76,9 @@ public:
     /**
      * Issue the specified cmd to this queue, but does not ring any doorbell.
      * @param cmd Pass the cmd to send to this queue.
+     * @param uniqueId Returns the dnvme assigned unique cmd ID
      */
-    virtual void Send(SharedCmdPtr cmd);
+    virtual void Send(SharedCmdPtr cmd, uint16_t &uniqueId);
 
     /**
      * Ring the doorbell assoc with this SQ. This will commit to hardware all

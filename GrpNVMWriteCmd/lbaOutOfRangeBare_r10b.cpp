@@ -140,6 +140,7 @@ LBAOutOfRangeBare_r10b::SendCmdToHdw(SharedSQPtr sq, SharedCQPtr cq,
     uint32_t isrCount;
     uint32_t isrCountB4;
     string work;
+    uint16_t uniqueId;
 
 
     if ((numCE = cq->ReapInquiry(isrCountB4, true)) != 0) {
@@ -151,7 +152,7 @@ LBAOutOfRangeBare_r10b::SendCmdToHdw(SharedSQPtr sq, SharedCQPtr cq,
     }
 
     LOG_NRM("Send the cmd to hdw via SQ %d", sq->GetQId());
-    sq->Send(cmd);
+    sq->Send(cmd, uniqueId);
     work = str(boost::format(
         "Just B4 ringing SQ %d doorbell, dump entire SQ") % sq->GetQId());
     sq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName,

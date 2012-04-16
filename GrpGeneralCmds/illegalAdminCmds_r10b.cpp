@@ -126,18 +126,18 @@ IllegalAdminCmds_r10b::GetIllegalOpcodes()
     for (uint8_t opCode = 0x0D; opCode < VENDOR_SPEC_OPC; opCode++)
         illegalOpCodes.push_back(opCode);
 
-    uint8_t optNVMCmds = (gInformative->GetIdentifyCmdCtrlr()->
+    uint8_t optAdminCmds = (gInformative->GetIdentifyCmdCtrlr()->
         GetValue(IDCTRLRCAP_OACS) & 0x7);
 
-    if ((optNVMCmds & OACS_SUP_SECURITY_CMD) != 0) {
+    if ((optAdminCmds & OACS_SUP_SECURITY_CMD) != 0) {
         illegalOpCodes.remove(SECURITY_SEND_OPCODE);
         illegalOpCodes.remove(SECURITY_RECEIVE_OPCODE);
     }
 
-    if ((optNVMCmds & OACS_SUP_FORMAT_NVM_CMD) != 0)
+    if ((optAdminCmds & OACS_SUP_FORMAT_NVM_CMD) != 0)
         illegalOpCodes.remove(FORMAT_NVM_OPCODE);
 
-    if ((optNVMCmds & OACS_SUP_FIRMWARE_CMD) != 0) {
+    if ((optAdminCmds & OACS_SUP_FIRMWARE_CMD) != 0) {
         illegalOpCodes.remove(FW_ACTIVATE_OPCODE);
         illegalOpCodes.remove(FW_DOWNLOAD_OPCODE);
     }

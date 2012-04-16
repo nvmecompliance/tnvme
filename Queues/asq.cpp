@@ -46,7 +46,7 @@ ASQ::Init(uint32_t numEntries)
 
 
 void
-ASQ::Send(SharedCmdPtr cmd)
+ASQ::Send(SharedCmdPtr cmd, uint16_t &uniqueId)
 {
     // Detect if doing something that looks suspicious/incorrect/illegal
     if ((cmd->GetCmdSet() == CMD_ADMIN) &&
@@ -58,5 +58,5 @@ ASQ::Send(SharedCmdPtr cmd)
         throw FrmwkEx("Rethink test case, see gCtrlrConfig->SetIrqScheme()");
     }
 
-    SQ::Send(cmd);
+    SQ::Send(cmd, uniqueId);
 }

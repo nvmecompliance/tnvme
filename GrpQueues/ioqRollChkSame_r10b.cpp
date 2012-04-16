@@ -99,6 +99,8 @@ IOQRollChkSame_r10b::RunCoreTest()
 void
 IOQRollChkSame_r10b::IOQRollChkSame(uint32_t numEntriesIOQ)
 {
+    uint16_t uniqueId;
+
     // Lookup objs which were created in a prior test within group
     SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
     SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
@@ -120,7 +122,7 @@ IOQRollChkSame_r10b::IOQRollChkSame(uint32_t numEntriesIOQ)
         iocq->GetNumEntries() + 2, iosq->GetQId());
     for (uint32_t numEntries = 0; numEntries <
         (uint32_t)(iosq->GetNumEntries() + 2); numEntries++) {
-        iosq->Send(writeCmd);
+        iosq->Send(writeCmd, uniqueId);
         iosq->Ring();
         ReapAndVerifyCE(iocq, (numEntries + 1) %
             iosq->GetNumEntries());

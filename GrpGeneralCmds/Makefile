@@ -20,7 +20,8 @@ SRC =					\
 	grpGeneralCmds.cpp		\
 	createResources_r10b.cpp	\
 	illegalNVMCmds_r10b.cpp		\
-	illegalAdminCmds_r10b.cpp
+	illegalAdminCmds_r10b.cpp	\
+	cidAcceptedASQ_r10b.cpp
 
 .SUFFIXES: .cpp
 

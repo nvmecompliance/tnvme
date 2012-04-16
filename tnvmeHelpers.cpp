@@ -618,6 +618,7 @@ SetFeaturesNumberOfQueues(NumQueues &numQueues, int fd)
     uint32_t ceRemain;
     uint32_t numReaped;
     uint32_t isrCount;
+    uint16_t uniqueId;
 
 
     try {   // The objects to perform this work throw exceptions
@@ -642,7 +643,7 @@ SetFeaturesNumberOfQueues(NumQueues &numQueues, int fd)
         sfNumOfQ->SetNumberOfQueues(numQueues.ncqr, numQueues.nsqr);
 
         LOG_NRM("Send the cmd to the ASQ, wait for it to complete");
-        asq->Send(sfNumOfQ);
+        asq->Send(sfNumOfQ, uniqueId);
         asq->Ring();
         if (acq->ReapInquiryWaitSpecify(SYSTEMWIDE_CMD_WAIT_ms, 1, numCE,
             isrCount) == false) {

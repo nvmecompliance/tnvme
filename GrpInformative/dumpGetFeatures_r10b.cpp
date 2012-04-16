@@ -103,6 +103,7 @@ DumpGetFeatures_r10b::SendGetFeaturesNumOfQueues(SharedASQPtr asq,
 {
     uint32_t numCE;
     uint32_t isrCount;
+    uint16_t uniqueId;
 
 
     LOG_NRM("Create get features");
@@ -115,7 +116,7 @@ DumpGetFeatures_r10b::SendGetFeaturesNumOfQueues(SharedASQPtr asq,
 
 
     LOG_NRM("Send the get features cmd to hdw");
-    asq->Send(gfNumQ);
+    asq->Send(gfNumQ, uniqueId);
     asq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "asq",
         "GetFeat.NumOfQueue"),
         "Just B4 ringing SQ0 doorbell, dump entire SQ contents");

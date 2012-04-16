@@ -254,7 +254,7 @@ SQ::LogSE(uint16_t indexPtr)
 
 
 void
-SQ::Send(SharedCmdPtr cmd)
+SQ::Send(SharedCmdPtr cmd, uint16_t &uniqueId)
 {
     int rc;
     string cmdSet;
@@ -286,6 +286,9 @@ SQ::Send(SharedCmdPtr cmd)
 
     if ((rc = ioctl(mFd, NVME_IOCTL_SEND_64B_CMD, &io)) < 0)
         throw FrmwkEx("Error sending cmd, rc =%d", rc);
+
+    // Allow tnvme to learn of the unique cmd ID which was assigned by dnvme
+    uniqueId = io.unique_id;
 }
 
 

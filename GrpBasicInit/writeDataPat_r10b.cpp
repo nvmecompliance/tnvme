@@ -151,10 +151,11 @@ WriteDataPat_r10b::SendToIOSQ(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
     uint32_t ceRemain;
     uint32_t numReaped;
     uint32_t isrCount;
+    uint16_t uniqueId;
 
 
     LOG_NRM("Send the cmd to hdw via %s IOSQ", qualifier.c_str());
-    iosq->Send(writeCmd);
+    iosq->Send(writeCmd, uniqueId);
     iosq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "iosq", qualifier),
         "Just B4 ringing SQ doorbell, dump entire IOSQ contents");
     iosq->Ring();

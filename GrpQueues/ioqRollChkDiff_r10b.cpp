@@ -101,6 +101,8 @@ void
 IOQRollChkDiff_r10b::IOQRollChkDiff(uint32_t numEntriesIOSQ,
     uint32_t numEntriesIOCQ)
 {
+    uint16_t uniqueId;
+
     // Lookup objs which were created in a prior test within group
     SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
     SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
@@ -124,7 +126,7 @@ IOQRollChkDiff_r10b::IOQRollChkDiff(uint32_t numEntriesIOSQ,
     for (uint32_t numEntries = 0; numEntries < (uint32_t)(MAX
         (iosq->GetNumEntries(), iocq->GetNumEntries()) + 2);
         numEntries++) {
-        iosq->Send(writeCmd);
+        iosq->Send(writeCmd, uniqueId);
         iosq->Ring();
         ReapAndVerifyCE(iocq,
             (numEntries + 1) % iosq->GetNumEntries());

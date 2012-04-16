@@ -122,6 +122,7 @@ IOQFull_r10b::IOQFull(uint32_t numIOSQEntries, uint32_t numIOCQEntries,
     uint32_t isrCount;
     SharedIOCQPtr iocq;
     SharedIOSQPtr iosq;
+    uint16_t uniqueId;
 
     if (Queues::SupportDiscontigIOQ() == true) {
         uint8_t iocqes = (gInformative->GetIdentifyCmdCtrlr()->
@@ -155,7 +156,7 @@ IOQFull_r10b::IOQFull(uint32_t numIOSQEntries, uint32_t numIOCQEntries,
     for (uint32_t nCmds = 0; nCmds < nCmdsToSubmit; nCmds++) {
         LOG_NRM("Sending #%d of #%d NVM Write Cmds thru IOSQ", (nCmds + 1),
             nCmdsToSubmit);
-        iosq->Send(writeCmd);
+        iosq->Send(writeCmd, uniqueId);
         iosq->Ring();
 
         LOG_NRM("Wait for the CE to arrive in IOCQ");
