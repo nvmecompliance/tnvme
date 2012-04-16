@@ -28,6 +28,7 @@
 #include "../Cmds/getFeatures.h"
 #include "../Cmds/setFeatures.h"
 #include "../Cmds/getLogPage.h"
+#include "../Cmds/formatNVM.h"
 #include "../Cmds/write.h"
 #include "../Cmds/read.h"
 
@@ -100,6 +101,7 @@ ObjRsrc::AllocWorker(Trackable::ObjType type)
     INSTANTIATE_OBJ(GETFEATURES, GetFeatures)
     INSTANTIATE_OBJ(SETFEATURES, SetFeatures)
     INSTANTIATE_OBJ(GETLOGPAGE, GetLogPage)
+    INSTANTIATE_OBJ(FORMATNVM, FormatNVM)
 
     INSTANTIATE_OBJ(WRITE, Write)
     INSTANTIATE_OBJ(READ, Read)

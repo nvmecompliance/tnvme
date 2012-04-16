@@ -32,7 +32,8 @@ SRC =				\
 	setFeatures.cpp		\
 	write.cpp		\
 	read.cpp		\
-	getLogPage.cpp
+	getLogPage.cpp		\
+	formatNVM.cpp
 
 .SUFFIXES: .cpp
 

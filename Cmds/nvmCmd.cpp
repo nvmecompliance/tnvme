@@ -22,9 +22,6 @@ SharedNVMCmdPtr NVMCmd::NullNVMCmdPtr;
 
 NVMCmd::NVMCmd() : Cmd(Trackable::OBJ_NVMCMD)
 {
-    // No cmd should ever be created which violates these masking possibilities
-    send_64b_bitmask allowPrpMask = (send_64b_bitmask)0;
-    SetPrpAllowed(allowPrpMask);
 }
 
 

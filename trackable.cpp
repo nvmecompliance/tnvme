@@ -57,6 +57,7 @@ Trackable::GetObjName(ObjType obj)
     case OBJ_GETFEATURES:   name = "GetFeatures";        break;
     case OBJ_SETFEATURES:   name = "SetFeatures";        break;
     case OBJ_GETLOGPAGE:    name = "GetLogPage";         break;
+    case OBJ_FORMATNVM:     name = "FormatNVM";          break;
     case OBJ_NVMCMD:        name = "NVMCmd";             break;
     case OBJ_WRITE:         name = "Write";              break;
     case OBJ_READ:          name = "Read";               break;
