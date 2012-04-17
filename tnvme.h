@@ -32,9 +32,6 @@ using namespace std;
 #define LOG_ERR(fmt, ...)       \
     fprintf(stderr, "%s-err:%s:%d: " fmt "\n", LEVEL, __FILE__, __LINE__,   \
         ## __VA_ARGS__);
-#define LOG_ERR_STR(str)        \
-    fprintf(stderr, "%s-err:%s:%d: " "%s" "\n", LEVEL, __FILE__, __LINE__,  \
-        str.c_str());
 #define LOG_WARN(fmt, ...)      \
     fprintf(stderr, "%s-warn:%s:%d: " fmt "\n", LEVEL, __FILE__, __LINE__,  \
         ## __VA_ARGS__);
@@ -120,6 +117,21 @@ struct ErrorRegs {
     uint32_t        csts;    // Ctrl'r addr space CSTS reg bitmask
 };
 
+struct FormatDUT {
+    uint32_t        nsid;    // The namespace ID to which Format NVM cmd is sent
+    uint8_t         ses;     // Format NVM cmd; DW10.ses value
+    uint8_t         pi;      // Format NVM cmd; DW10.pi value
+    uint8_t         lbaf;    // Format NVM cmd; DW10.lbaf value
+    bool            pil;     // Format NVM cmd; DW10.pil value
+    bool            ms;      // Format NVM cmd; DW10.ms value
+};
+
+struct Format {
+    bool                req;    // requested by cmd line
+    vector<FormatDUT>   cmds;   // Array of Admin cmd set; format NVM cmds to issue
+};
+
+
 struct CmdLine {
     bool            summary;
     bool            ignore;
@@ -130,6 +142,7 @@ struct CmdLine {
     TestTarget      test;
     string          device;
     vector<TestRef> skiptest;
+    Format          format;
     RmmapIo         rmmap;
     WmmapIo         wmmap;
     NumQueues       numQueues;

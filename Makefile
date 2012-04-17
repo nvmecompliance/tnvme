@@ -14,14 +14,21 @@
 #
 
 # Compiling tnvme requires the boost libraries to be installed
-# Ubuntu: sudo apt-get install libboost1.42-all-dev
+# Also see: https://github.com/nvmecompliance/tnvme/wiki/Compiling
+# Example Ubuntu: sudo apt-get install libboost1.42-all-dev
+# Example Ubuntu: sudo apt-get install libxml++2.6-dev libxml++2.6-doc
+
 APP_NAME = tnvme
 export CC = g++				# Mods here affect all sub-makes
 #export DFLAGS = -g -DDEBUG		# comment here affects all sub-makes
 export CFLAGS = -O0 -W -Wall -Werror	# mods here affect all sub-makes
 LDFLAGS = $(foreach stem, $(SUBDIRS),./$(stem)/lib$(stem).a)
-LDFLAGS += -lboost_filesystem
-INCLUDES = -I./ -I../
+INCLUDES = -I./ -I../ 
+
+# Notify the compiler/linker where the Boost library and hdr files are located
+CFLAGS += -lboost_filesystem
+# Notify the compiler/linker where the XML library and hdr files are located
+CFLAGS += $(shell pkg-config libxml++-2.6 --cflags --libs) 
 
 SUBDIRS:=			\
 	Singletons		\
@@ -48,6 +55,7 @@ SOURCES:=			\
 	testDescribe.cpp	\
 	tnvme.cpp		\
 	tnvmeHelpers.cpp	\
+	tnvmeParsers.cpp	\
 	trackable.cpp
 
 #

@@ -25,6 +25,7 @@
 #include <errno.h>
 #include "tnvme.h"
 #include "tnvmeHelpers.h"
+#include "tnvmeParsers.h"
 #include "version.h"
 #include "globals.h"
 #include "Utils/kernelAPI.h"
@@ -105,14 +106,17 @@ Usage(void) {
     printf("  -k(--skiptest) <filename>           A file contains a list of tests to skip\n");
     printf("  -g(--log) <dirname>                 Pass the base log dir path which is req'd\n");
     printf("                                      to exist before app execution; dflt=\"./\"\n");
+    printf("  -i(--ignore)                        Ignore detected errors; An error causes\n");
+    printf("                                      the next test within the next group to\n");
+    printf("                                      execute, not next test within same group.\n");
     printf("  -q(--queues) <ncqr:nsqr>            Write <ncqr> and <nsqr> as values by the\n");
     printf("                                      Set Features, ID=7. Must be only option.\n");
     printf("                                      Option missing indicates tnvme to read\n");
     printf("                                      and learn a previous set value.\n");
     printf("                                      until next power cycle. Requires base 16\n");
-    printf("  -i(--ignore)                        Ignore detected errors; An error causes\n");
-    printf("                                      the next test within the next group to\n");
-    printf("                                      execute, not next test within same group.\n");
+    printf("  -f(--format) <filename>             A file contains admin cmd set-format NVM\n");
+    printf("                                      cmd instructions to send to device\n");
+    printf("                                      Must be only option.\n");
     printf("  -e(--error) <STS:PXDS:AERUCES:CSTS> Set reg bitmask for bits indicating error\n");
     printf("                                      state after each test completes.\n");
     printf("                                      Value=0 indicates ignore all errors.\n");
@@ -148,7 +152,7 @@ main(int argc, char *argv[])
     bool deviceFound = false;
     bool accessingHdw = true;
     uint64_t regVal = 0;
-    const char *short_opt = "hslzia::t::v:p:d:k:r:w:q:e:g:";
+    const char *short_opt = "hslzia::t::v:p:d:k:f:r:w:q:e:g:";
     static struct option long_opt[] = {
         // {name,           has_arg,            flag,   val}
         {   "help",         no_argument,        NULL,   'h'},
@@ -163,6 +167,7 @@ main(int argc, char *argv[])
         {   "ignore",       no_argument,        NULL,   'i'},
         {   "loop",         required_argument,  NULL,   'p'},
         {   "skiptest",     required_argument,  NULL,   'k'},
+        {   "format",       required_argument,  NULL,   'f'},
         {   "list",         no_argument,        NULL,   'l'},
         {   "queues",       required_argument,  NULL,   'q'},
         {   "error",        required_argument,  NULL,   'e'},
@@ -249,6 +254,13 @@ main(int argc, char *argv[])
         case 'k':
             if (ParseSkipTestCmdLine(cmdLine.skiptest, optarg) == false) {
                 printf("Unable to parse --skiptest cmd line\n");
+                exit(1);
+            }
+            break;
+
+        case 'f':
+            if (ParseFormatCmdLine(cmdLine.format, optarg) == false) {
+                printf("Unable to parse --format cmd line\n");
                 exit(1);
             }
             break;
@@ -367,8 +379,12 @@ main(int argc, char *argv[])
     }
 
 
-    fflush(stdout);
-    if (cmdLine.numQueues.req) {
+    if (cmdLine.format.req) {
+        if ((exitCode = !FormatDevice(cmdLine.format, fd)))
+            printf("FAILURE: Formatting device\n");
+        else
+            printf("SUCCESS: Formatting device\n");
+    } else if (cmdLine.numQueues.req) {
         if ((exitCode = !SetFeaturesNumberOfQueues(cmdLine.numQueues, fd)))
             printf("FAILURE: Setting number of queues\n");
         else

@@ -17,17 +17,12 @@
 #ifndef _TNVMEHELPERS_H_
 #define _TNVMEHELPERS_H_
 
-#include "group.h"
+#include "tnvme.h"
 
 
 bool VerifySpecCompatibility(SpecRev specRev);
-bool ParseTargetCmdLine(TestTarget &target, const char *optarg);
-bool ParseSkipTestCmdLine(vector<TestRef> &skipTest, const char *optarg);
-bool ParseRmmapCmdLine(RmmapIo &rmmap, const char *optarg);
-bool ParseWmmapCmdLine(WmmapIo &wmmap, const char *optarg);
-bool ParseQueuesCmdLine(NumQueues &numQueues, const char *optarg);
-bool ParseErrorCmdLine(ErrorRegs &errRegs, const char *optarg);
 bool SetFeaturesNumberOfQueues(NumQueues &numQueues, int fd);
+bool FormatDevice(Format &format, int fd);
 
 
 #endif
