@@ -228,7 +228,7 @@ CQ::LogCE(uint16_t indexPtr)
 
 
 void
-CQ::DumpCE(uint16_t indexPtr, LogFilename filename, string fileHdr)
+CQ::DumpCE(uint16_t indexPtr, DumpFilename filename, string fileHdr)
 {
     union CE ce = PeekCE(indexPtr);
     Buffers::Dump(filename, (const uint8_t *)&ce, 0, sizeof(CE), sizeof(CE),
@@ -392,7 +392,7 @@ CQ::Reap(uint32_t &ceRemain, SharedMemBufferPtr memBuffer, uint32_t &isrCount,
 
 
 void
-CQ::Dump(LogFilename filename, string fileHdr)
+CQ::Dump(DumpFilename filename, string fileHdr)
 {
     FILE *fp;
     union CE ce;

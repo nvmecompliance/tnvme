@@ -90,7 +90,7 @@ public:
      *      FileSystem::PrepLogFile().
      * @param fileHdr Pass a custom file header description to dump
      */
-    void DumpCE(uint16_t indexPtr, LogFilename filename, string fileHdr);
+    void DumpCE(uint16_t indexPtr, DumpFilename filename, string fileHdr);
 
     /**
      * Send the entire contents of this Q to the named file.
@@ -98,7 +98,7 @@ public:
      *      FileSystem::PrepLogFile().
      * @param fileHdr Pass a custom file header description to dump
      */
-    virtual void Dump(LogFilename filename, string fileHdr);
+    virtual void Dump(DumpFilename filename, string fileHdr);
 
     /**
      * Inquire as to the number of CE's which are present in this CQ. Returns

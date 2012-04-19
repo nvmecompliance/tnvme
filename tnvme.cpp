@@ -74,7 +74,8 @@ InstantiateGroups(vector<Group *> &groups, int &fd, struct CmdLine &cl)
 
 
 #define NO_DEVICES              "no devices found"
-#define INFORM_GRPNUM      0
+#define INFORM_GRPNUM           0
+#define BASE_DUMP_DIR           "./Dump"
 
 
 void Usage(void);
@@ -91,7 +92,7 @@ Usage(void) {
     //80->  xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     printf("%s (revision %d.%d)\n", APPNAME, VER_MAJOR, VER_MINOR);
     printf("  -h(--help)                          Display this help\n");
-    printf("  -v(--rev) <spec>                    All options forced to target specified\n");
+    printf("  -v(--rev) <spec>                    All options are forced to target spec'd\n");
     printf("                                      NVME revision {1.0b}; dflt=1.0b\n");
     printf("  -s(--summary)                       Summarize all groups and tests\n");
     printf("  -a(--detail) [<grp> | <grp>:<test>] Detailed group and test description for:\n");
@@ -104,11 +105,16 @@ Usage(void) {
     printf("  -z(--reset)                         Ctrl'r level reset via CC.EN\n");
     printf("  -p(--loop) <count>                  Loop test execution <count> times; dflt=1\n");
     printf("  -k(--skiptest) <filename>           A file contains a list of tests to skip\n");
-    printf("  -g(--log) <dirname>                 Pass the base log dir path which is req'd\n");
-    printf("                                      to exist before app execution; dflt=\"./\"\n");
+    printf("  -u(--dump) <dirname>                Pass the base dump directory path.\n");
+    printf("                                      dflt=\"%s\"\n", BASE_DUMP_DIR);
     printf("  -i(--ignore)                        Ignore detected errors; An error causes\n");
     printf("                                      the next test within the next group to\n");
     printf("                                      execute, not next test within same group.\n");
+    printf("  -e(--error) <STS:PXDS:AERUCES:CSTS> Set reg bitmask for bits indicating error\n");
+    printf("                                      state after each test completes.\n");
+    printf("                                      Value=0 indicates ignore all errors.\n");
+    printf("                                      Require base 16 values.\n");
+    printf("                      --- Advanced/Debug Options Follow ---\n");
     printf("  -q(--queues) <ncqr:nsqr>            Write <ncqr> and <nsqr> as values by the\n");
     printf("                                      Set Features, ID=7. Must be only option.\n");
     printf("                                      Option missing indicates tnvme to read\n");
@@ -116,11 +122,7 @@ Usage(void) {
     printf("                                      until next power cycle. Requires base 16\n");
     printf("  -f(--format) <filename>             A file contains admin cmd set-format NVM\n");
     printf("                                      cmd instructions to send to device\n");
-    printf("                                      Must be only option.\n");
-    printf("  -e(--error) <STS:PXDS:AERUCES:CSTS> Set reg bitmask for bits indicating error\n");
-    printf("                                      state after each test completes.\n");
-    printf("                                      Value=0 indicates ignore all errors.\n");
-    printf("                                      Require base 16 values.\n");
+    printf("                                      Must be only option. Ex: format.xml file\n");
     printf("  -r(--rmmap) <space:off:size:acc>    Read memmap'd I/O registers from\n");
     printf("                                      <space>={PCI | BAR01} at <off> bytes\n");
     printf("                                      from start of space for <size> bytes\n");
@@ -141,7 +143,7 @@ main(int argc, char *argv[])
     int c;
     int fd = -1;
     int idx = 0;
-    int exitCode = 0;
+    int exitCode = 0;   // assume success
     char *endptr;
     long tmp;
     string work;
@@ -152,7 +154,7 @@ main(int argc, char *argv[])
     bool deviceFound = false;
     bool accessingHdw = true;
     uint64_t regVal = 0;
-    const char *short_opt = "hslzia::t::v:p:d:k:f:r:w:q:e:g:";
+    const char *short_opt = "hslzia::t::v:p:d:k:f:r:w:q:e:u:";
     static struct option long_opt[] = {
         // {name,           has_arg,            flag,   val}
         {   "help",         no_argument,        NULL,   'h'},
@@ -171,7 +173,7 @@ main(int argc, char *argv[])
         {   "list",         no_argument,        NULL,   'l'},
         {   "queues",       required_argument,  NULL,   'q'},
         {   "error",        required_argument,  NULL,   'e'},
-        {   "log",          required_argument,  NULL,   'g'},
+        {   "dump",         required_argument,  NULL,   'u'},
         {   NULL,           no_argument,        NULL,    0}
     };
 
@@ -189,11 +191,13 @@ main(int argc, char *argv[])
     cmdLine.numQueues.req = false;
     cmdLine.numQueues.ncqr = 0;
     cmdLine.numQueues.nsqr = 0;
+    cmdLine.format.req = false;
+    cmdLine.format.cmds.empty();
     cmdLine.errRegs.sts = (STS_SSE | STS_STA | STS_RMA | STS_RTA);
     cmdLine.errRegs.pxds = (PXDS_TP | PXDS_FED);
     cmdLine.errRegs.aeruces = 0;
     cmdLine.errRegs.csts = CSTS_CFS;
-    cmdLine.log = "./";
+    cmdLine.dump = BASE_DUMP_DIR;
 
     if (argc == 1) {
         printf("%s is a compliance test suite for NVM Express hardware.\n",
@@ -201,13 +205,13 @@ main(int argc, char *argv[])
         exit(0);
     }
 
-    // Disable buffering stdout, risk not seeing statements merged with logging
+    // Disable buffering stdout, risk not seeing statements merged with dump dir
     setbuf(stdout, NULL);
 
     // Seek for all possible devices that this app may commune
     DIR *devDir = opendir("/dev");
     if (devDir == NULL) {
-        printf("Unable to open system /dev directory\n");
+        LOG_ERR("Unable to open system /dev directory");
         exit(1);
     }
     while ((dirEntry = readdir(devDir)) != NULL) {
@@ -217,7 +221,6 @@ main(int argc, char *argv[])
     }
     if (devices.size())
         cmdLine.device = devices[0];    // Default to 1st element listed
-
 
     // Report what we are about to process
     work = "";
@@ -238,7 +241,7 @@ main(int argc, char *argv[])
 
         case 'a':
             if (ParseTargetCmdLine(cmdLine.detail, optarg) == false) {
-                printf("Unable to parse --detail cmd line\n");
+                LOG_ERR("Unable to parse --detail cmd line");
                 exit(1);
             }
             accessingHdw = false;
@@ -246,42 +249,42 @@ main(int argc, char *argv[])
 
         case 't':
             if (ParseTargetCmdLine(cmdLine.test, optarg) == false) {
-                printf("Unable to parse --test cmd line\n");
+                LOG_ERR("Unable to parse --test cmd line");
                 exit(1);
             }
             break;
 
         case 'k':
             if (ParseSkipTestCmdLine(cmdLine.skiptest, optarg) == false) {
-                printf("Unable to parse --skiptest cmd line\n");
+                LOG_ERR("Unable to parse --skiptest cmd line");
                 exit(1);
             }
             break;
 
         case 'f':
             if (ParseFormatCmdLine(cmdLine.format, optarg) == false) {
-                printf("Unable to parse --format cmd line\n");
+                LOG_ERR("Unable to parse --format cmd line");
                 exit(1);
             }
             break;
 
         case 'r':
             if (ParseRmmapCmdLine(cmdLine.rmmap, optarg) == false) {
-                printf("Unable to parse --rmmap cmd line\n");
+                LOG_ERR("Unable to parse --rmmap cmd line");
                 exit(1);
             }
             break;
 
         case 'w':
             if (ParseWmmapCmdLine(cmdLine.wmmap, optarg) == false) {
-                printf("Unable to parse --wmmap cmd line\n");
+                LOG_ERR("Unable to parse --wmmap cmd line");
                 exit(1);
             }
             break;
 
         case 'e':
             if (ParseErrorCmdLine(cmdLine.errRegs, optarg) == false) {
-                printf("Unable to parse --error cmd line\n");
+                LOG_ERR("Unable to parse --error cmd line");
                 exit(1);
             }
             break;
@@ -296,8 +299,8 @@ main(int argc, char *argv[])
                 }
             }
             if (deviceFound == false) {
-                printf("/dev/%s is not among possible devices "
-                    "which can be tested\n", work.c_str());
+                LOG_ERR("/dev/%s is not among possible devices "
+                    "which can be tested", work.c_str());
                 exit(1);
             }
             break;
@@ -305,10 +308,10 @@ main(int argc, char *argv[])
         case 'p':
             tmp = strtol(optarg, &endptr, 10);
             if (*endptr != '\0') {
-                printf("Unrecognized --loop <count>=%s\n", optarg);
+                LOG_ERR("Unrecognized --loop <count>=%s", optarg);
                 exit(1);
             } else if (tmp <= 0) {
-                printf("Negative/zero values for --loop are unproductive\n");
+                LOG_ERR("Negative/zero values for --loop are unproductive");
                 exit(1);
             }
             cmdLine.loop = tmp;
@@ -327,7 +330,7 @@ main(int argc, char *argv[])
 
         case 'q':
             if (ParseQueuesCmdLine(cmdLine.numQueues, optarg) == false) {
-                printf("Unable to parse --queues cmd line\n");
+                LOG_ERR("Unable to parse --queues cmd line");
                 exit(1);
             }
             break;
@@ -337,8 +340,8 @@ main(int argc, char *argv[])
             accessingHdw = false;
             break;
 
-        case 'g':
-            cmdLine.log = optarg;
+        case 'u':
+            cmdLine.dump = optarg;
             break;
 
         default:
@@ -348,13 +351,13 @@ main(int argc, char *argv[])
         case 'i':   cmdLine.ignore = true;              break;
         }
     }
-;
+
     if (optind < argc) {
-        printf("Unable to parse all cmd line arguments: %d of %d: ",
+        fprintf(stderr, "Unable to parse all cmd line arguments: %d of %d: ",
             optind, argc);
         while (optind < argc)
-            printf("%s ", argv[optind++]);
-        printf("\n");
+            fprintf(stderr, "%s ", argv[optind++]);
+        fprintf(stderr, "\n");
         Usage();
         exit(1);
     }
@@ -369,26 +372,44 @@ main(int argc, char *argv[])
 
         LOG_NRM("Checking for unintended device under low powered states");
         if (gRegisters->Read(PCISPC_PMCS, regVal) == false) {
+            LOG_ERR("Mandatory PMCAP PCI capabilities is missing");
             exit(1);
         } else if (regVal & 0x03) {
             LOG_WARN("PCI power state not fully operational");
         }
 
-        if (FileSystem::SetRootLogDir(cmdLine.log) == false)
+        if (FileSystem::SetRootDumpDir(cmdLine.dump) == false) {
+            LOG_ERR("Unable to establish \"%s\" dump directory",
+                cmdLine.dump.c_str());
             exit(1);
+        }
+
+        // Clean out any garbage in the dump directories
+        FileSystem::SetBaseDumpDir(false);   // prep GrpPending
+        if (FileSystem::PrepDumpDir() == false) {
+            LOG_ERR("Unable to establish GrpPending dump directory");
+            exit(1);
+        }
+        FileSystem::SetBaseDumpDir(true);    // prep GrpInformative
+        if (FileSystem::PrepDumpDir() == false) {
+            LOG_ERR("Unable to establish GrpInformative dump directory");
+            exit(1);
+        }
     }
 
 
     if (cmdLine.format.req) {
-        if ((exitCode = !FormatDevice(cmdLine.format, fd)))
-            printf("FAILURE: Formatting device\n");
-        else
-            printf("SUCCESS: Formatting device\n");
+        if ((exitCode = !FormatDevice(cmdLine.format, fd))) {
+            LOG_ERR("FAILURE: Formatting device");
+        } else {
+            LOG_NRM("SUCCESS: Formatting device");
+        }
     } else if (cmdLine.numQueues.req) {
-        if ((exitCode = !SetFeaturesNumberOfQueues(cmdLine.numQueues, fd)))
-            printf("FAILURE: Setting number of queues\n");
-        else
-            printf("SUCCESS: Setting number of queues\n");
+        if ((exitCode = !SetFeaturesNumberOfQueues(cmdLine.numQueues, fd))) {
+            LOG_ERR("FAILURE: Setting number of queues");
+        } else {
+            LOG_NRM("SUCCESS: Setting number of queues");
+        }
     } else if (cmdLine.summary) {
         for (size_t i = 0; i < groups.size(); i++) {
             FORMAT_GROUP_DESCRIPTION(work, groups[i])
@@ -406,7 +427,8 @@ main(int argc, char *argv[])
 
         } else {    // user spec'd a group they are interested in
             if (cmdLine.detail.t.group >= groups.size()) {
-                printf("Specified test group does not exist\n");
+                LOG_ERR("Specified test group %ld does not exist",
+                    cmdLine.detail.t.group);
             } else {
                 for (size_t i = 0; i < groups.size(); i++) {
                     if (i == cmdLine.detail.t.group) {
@@ -441,17 +463,19 @@ main(int argc, char *argv[])
             cmdLine.wmmap.offset, cmdLine.wmmap.acc,
             (uint8_t *)(&cmdLine.wmmap.value));
     } else if (cmdLine.reset) {
-        if ((exitCode = !gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY)))
-            printf("FAILURE: reset\n");
-        else
-            printf("SUCCESS: reset\n");
+        if ((exitCode = !gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY))) {
+            LOG_ERR("FAILURE: reset");
+        } else {
+            LOG_NRM("SUCCESS: reset");
+        }
         // At this point we cannot enable the ctrlr because that requires
         // ACQ/ASQ's to be created, ctrlr simply won't become ready w/o these.
     } else if (cmdLine.test.req) {
-        if ((exitCode = !ExecuteTests(cmdLine, groups)))
-            printf("FAILURE: testing\n");
-        else
-            printf("SUCCESS: testing\n");
+        if ((exitCode = !ExecuteTests(cmdLine, groups))) {
+            LOG_ERR("FAILURE: testing");
+        } else {
+            LOG_NRM("SUCCESS: testing");
+        }
     }
 
     // cleanup duties
@@ -521,12 +545,12 @@ BuildTestFoundation(vector<Group *> &groups, int &fd, struct CmdLine &cl)
     // interaction model is needed. No more than 1 test can occur at any time
     // to any device and all tests must be single threaded.
     if (cl.device.compare(NO_DEVICES) == 0) {
-        printf("There are no devices present\n");
+        LOG_ERR("There are no devices present");
         return false;
     }
     if ((fd = open(cl.device.c_str(), O_RDWR)) == -1) {
         if ((errno == EACCES) || (errno == EAGAIN)) {
-            printf("%s may need permission set for current user\n",
+            LOG_ERR("%s may need permission set for current user",
                 cl.device.c_str());
         }
         LOG_ERR("device=%s: %s", cl.device.c_str(), strerror(errno));
@@ -534,7 +558,7 @@ BuildTestFoundation(vector<Group *> &groups, int &fd, struct CmdLine &cl)
     }
     if (fcntl(fd, F_SETLK, &fdlock) == -1) {
         if ((errno == EACCES) || (errno == EAGAIN)) {
-            printf("%s has been locked by another process\n",
+            LOG_ERR("%s has been locked by another process",
                 cl.device.c_str());
         }
         LOG_ERR("%s", strerror(errno));
@@ -542,19 +566,19 @@ BuildTestFoundation(vector<Group *> &groups, int &fd, struct CmdLine &cl)
 
     // Validate the dnvme was compiled with the same version of API as tnvme
     if ((ret = ioctl(fd, NVME_IOCTL_GET_DRIVER_METRICS, &gDriverMetrics)) < 0) {
-        printf("Unable to extract driver version information");
+        LOG_ERR("Unable to extract driver version information");
         return false;
     }
-    printf("tnvme binary: v/%d.%d\n", VER_MAJOR, VER_MINOR);
-    printf("tnvme compiled against dnvme API: v/%d.%d.%d\n",
+    LOG_NRM("tnvme binary: v/%d.%d", VER_MAJOR, VER_MINOR);
+    LOG_NRM("tnvme compiled against dnvme API: v/%d.%d.%d",
         ((API_VERSION >> 16) & 0xFF),
         ((API_VERSION >> 8) & 0xFF), ((API_VERSION >> 0) & 0xFF));
-    printf("dnvme API residing within kernel: v/%d.%d.%d\n",
+    LOG_NRM("dnvme API residing within kernel: v/%d.%d.%d",
         ((gDriverMetrics.api_version >> 16) & 0xFF),
         ((gDriverMetrics.api_version >> 8) & 0xFF),
         ((gDriverMetrics.api_version >> 0) & 0xFF));
     if (gDriverMetrics.api_version != API_VERSION) {
-        printf("dnvme vs tnvme version mismatch, refusing to execute\n");
+        LOG_ERR("dnvme vs tnvme version mismatch, refusing to execute");
         return false;
     }
 
@@ -617,18 +641,6 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
     } else if (VerifySpecCompatibility(cl.rev) == false) {
         LOG_ERR("Targeted compliance revision incompatible with hdw");
         goto ABORT_OUT;
-    } else {
-        // Clean out any garbage in the logging directories
-        FileSystem::SetBaseLogDir(false);   // prep GrpPending
-        if (FileSystem::PrepLogDir() == false) {
-            LOG_WARN("Unable to establish GrpPending logging directory");
-            goto ABORT_OUT;
-        }
-        FileSystem::SetBaseLogDir(true);    // prep GrpInformative
-        if (FileSystem::PrepLogDir() == false) {
-            LOG_WARN("Unable to establish GrpInformative logging directory");
-            goto ABORT_OUT;
-        }
     }
 
 
@@ -686,10 +698,10 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
         for (size_t iGrp = (INFORM_GRPNUM + 1); iGrp < groups.size(); iGrp++) {
             allHaveRun = false;
 
-            // Clean out any garbage in the logging directory
-            FileSystem::SetBaseLogDir(false);
-            if (FileSystem::PrepLogDir() == false)
-                LOG_WARN("Unable to cleanup logging between group runs");
+            // Clean out any garbage in the dump directory
+            FileSystem::SetBaseDumpDir(false);
+            if (FileSystem::PrepDumpDir() == false)
+                LOG_WARN("Unable to cleanup dump between group runs");
 
             // Now handle anything spec'd in the --test <cmd line option>
             if (cl.test.t.group == UINT_MAX) {

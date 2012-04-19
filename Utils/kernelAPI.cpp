@@ -64,7 +64,7 @@ KernelAPI::munmap(uint8_t *memPtr, size_t bufLength)
 
 
 void
-KernelAPI::DumpKernelMetrics(LogFilename filename)
+KernelAPI::DumpKernelMetrics(DumpFilename filename)
 {
     int rc;
 
@@ -80,7 +80,7 @@ KernelAPI::DumpKernelMetrics(LogFilename filename)
 
 
 void
-KernelAPI::DumpCtrlrSpaceRegs(LogFilename filename, bool verbose)
+KernelAPI::DumpCtrlrSpaceRegs(DumpFilename filename, bool verbose)
 {
     int fd;
     string work;
@@ -135,7 +135,7 @@ ERROR_OUT:
 
 
 void
-KernelAPI::DumpPciSpaceRegs(LogFilename filename, bool verbose)
+KernelAPI::DumpPciSpaceRegs(DumpFilename filename, bool verbose)
 {
     int fd;
     string work;

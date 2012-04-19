@@ -105,7 +105,7 @@ WriteDataPat_r10b::WriteDataPattern()
     SharedMemBufferPtr dataPat = SharedMemBufferPtr(new MemBuffer());
     dataPat->Init(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize);
     dataPat->SetDataPattern(DATAPAT_INC_16BIT);
-    dataPat->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "DataPat"),
+    dataPat->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "DataPat"),
         "Write buffer's data pattern");
 
 
@@ -156,7 +156,7 @@ WriteDataPat_r10b::SendToIOSQ(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
 
     LOG_NRM("Send the cmd to hdw via %s IOSQ", qualifier.c_str());
     iosq->Send(writeCmd, uniqueId);
-    iosq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "iosq", qualifier),
+    iosq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "iosq", qualifier),
         "Just B4 ringing SQ doorbell, dump entire IOSQ contents");
     iosq->Ring();
 
@@ -166,16 +166,16 @@ WriteDataPat_r10b::SendToIOSQ(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
         == false) {
 
         iocq->Dump(
-            FileSystem::PrepLogFile(mGrpName, mTestName, "iocq", qualifier),
+            FileSystem::PrepDumpFile(mGrpName, mTestName, "iocq", qualifier),
             "Unable to see any CE's in IOCQ, dump entire CQ contents");
         throw FrmwkEx("Unable to see completion of cmd");
     } else if (numCE != 1) {
         iocq->Dump(
-            FileSystem::PrepLogFile(mGrpName, mTestName, "iocq", qualifier),
+            FileSystem::PrepDumpFile(mGrpName, mTestName, "iocq", qualifier),
             "Unable to see any CE's in IOCQ, dump entire CQ contents");
         throw FrmwkEx("The IOCQ should only have 1 CE as a result of a cmd");
     }
-    iocq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "iocq", qualifier),
+    iocq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "iocq", qualifier),
         "Just B4 reaping IOCQ, dump entire CQ contents");
 
 

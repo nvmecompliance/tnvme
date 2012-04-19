@@ -79,7 +79,7 @@ Test::Run()
 {
     try {
         ResetStatusRegErrors();
-        KernelAPI::DumpKernelMetrics(FileSystem::PrepLogFile(mGrpName,
+        KernelAPI::DumpKernelMetrics(FileSystem::PrepDumpFile(mGrpName,
             mTestName, "kmetrics", "preTestRun"));
 
         RunCoreTest();  // Forced to throw upon errors, returns upon success

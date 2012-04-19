@@ -120,12 +120,12 @@ ManyCmdSubmit_r10b::RunCoreTest()
         // Variable wait time w.r.t "x" and expect all CE's to arrive in CQ.
         if (iocq->ReapInquiryWaitSpecify((DEFAULT_CMD_WAIT_ms + x * 5),
             x, numCE, isrCount) == false) {
-            iocq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName,
+            iocq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName,
                 "iocq.reqpinq." + writeCmd->GetName()), "Dump Entire IOCQ");
             LogCEAndCQMetrics(iocq);
             throw FrmwkEx("Unable to see CEs for issued cmds #%d", x);
         } else if (numCE != x) {
-            iocq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName,
+            iocq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName,
                 "iocq.reqpinq." + writeCmd->GetName()), "Dump Entire IOCQ");
             LogCEAndCQMetrics(iocq);
             throw FrmwkEx("The IOCQ should only have #%d CE's as a result "
@@ -134,7 +134,7 @@ ManyCmdSubmit_r10b::RunCoreTest()
 
         SharedMemBufferPtr ceMem = SharedMemBufferPtr(new MemBuffer());
         if ((numReaped = iocq->Reap(ceRemain, ceMem, isrCount, x, true)) != x) {
-            iocq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName,
+            iocq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName,
                 "iocq.reap." + writeCmd->GetName()), "Dump Entire IOCQ");
             LogCEAndCQMetrics(iocq);
             throw FrmwkEx("Unable to reap on IOCQ #%d. Reaped #%d of #%d",

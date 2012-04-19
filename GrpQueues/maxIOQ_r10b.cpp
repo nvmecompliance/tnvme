@@ -217,7 +217,7 @@ MaxIOQ_r10b::VerifyDataPattern(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
         i++) {
         if (*rdBuffPtr++ != (uint16_t)iosq->GetQId()) {
             readCmd->Dump(
-                FileSystem::PrepLogFile(mGrpName, mTestName, "ReadPayload"),
+                FileSystem::PrepDumpFile(mGrpName, mTestName, "ReadPayload"),
                 "Data read from media miscompared from written");
             throw FrmwkEx("Read data mismatch for SQID #%d, pattern 0x%02X",
                 iosq->GetQId(), (uint16_t)iosq->GetQId());

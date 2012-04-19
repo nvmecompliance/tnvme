@@ -145,18 +145,18 @@ AdminQFull_r10b::AdminQFull(uint16_t numASQEntries, uint16_t numACQEntries,
                     CESTAT_SUCCESS);
                 if (acq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, nCmds,
                     numCE, isrCount) == false) {
-                    acq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName,
+                    acq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName,
                         "acq." + idCmdCtrlr->GetName()), "Dump entire ACQ");
                     throw FrmwkEx("Unable to see last CE as expected");
                 }
                 break;
             }
-            acq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName,
+            acq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName,
                 "acq." + idCmdCtrlr->GetName()), "Dump Entire ACQ");
             throw FrmwkEx("Unable to see CE for issued cmd #%d", nCmds + 1);
 
         } else if (numCE != nCmds + 1) {
-            acq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName,
+            acq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName,
                 "acq." + idCmdCtrlr->GetName()), "Dump Entire ACQ");
             throw FrmwkEx("Missing last CE, #%d cmds of #%d received",
                 nCmds + 1, numCE);

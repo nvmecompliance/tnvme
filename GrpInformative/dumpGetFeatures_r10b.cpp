@@ -87,7 +87,7 @@ DumpGetFeatures_r10b::RunCoreTest()
     // Assuming the cmd we issue will result in only a single CE
     if (acq->ReapInquiry(isrCount, true) != 0) {
         acq->Dump(
-            FileSystem::PrepLogFile(mGrpName, mTestName, "acq",
+            FileSystem::PrepDumpFile(mGrpName, mTestName, "acq",
             "notEmpty"), "Test assumption have not been met");
         throw FrmwkEx(
             "The ACQ should not have any CE's waiting before testing");
@@ -111,13 +111,13 @@ DumpGetFeatures_r10b::SendGetFeaturesNumOfQueues(SharedASQPtr asq,
     LOG_NRM("Force get features to request number of queues");
     gfNumQ->SetFID(GetFeatures::FID_NUM_QUEUES);
     gfNumQ->Dump(
-        FileSystem::PrepLogFile(mGrpName, mTestName, "GetFeat", "NumOfQueue"),
+        FileSystem::PrepDumpFile(mGrpName, mTestName, "GetFeat", "NumOfQueue"),
         "The get features number of queues cmd");
 
 
     LOG_NRM("Send the get features cmd to hdw");
     asq->Send(gfNumQ, uniqueId);
-    asq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "asq",
+    asq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "asq",
         "GetFeat.NumOfQueue"),
         "Just B4 ringing SQ0 doorbell, dump entire SQ contents");
     asq->Ring();
@@ -128,19 +128,19 @@ DumpGetFeatures_r10b::SendGetFeaturesNumOfQueues(SharedASQPtr asq,
         == false) {
 
         acq->Dump(
-            FileSystem::PrepLogFile(mGrpName, mTestName, "acq",
+            FileSystem::PrepDumpFile(mGrpName, mTestName, "acq",
             "GetFeat.NumOfQueue"),
             "Unable to see any CE's in CQ0, dump entire CQ contents");
         throw FrmwkEx("Unable to see completion of get features cmd");
     } else if (numCE != 1) {
         acq->Dump(
-            FileSystem::PrepLogFile(mGrpName, mTestName, "acq",
+            FileSystem::PrepDumpFile(mGrpName, mTestName, "acq",
             "GetFeat.NumOfQueue"),
             "Unable to see any CE's in CQ0, dump entire CQ contents");
         LOG_ERR("The ACQ should only have 1 CE as a result of a cmd");
         throw FrmwkEx();
     }
-    acq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "acq",
+    acq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "acq",
         "GetFeat.NumOfQueue"),
         "Just B4 reaping CQ0, dump entire CQ contents");
 
@@ -163,7 +163,7 @@ DumpGetFeatures_r10b::SendGetFeaturesNumOfQueues(SharedASQPtr asq,
         }
         LOG_NRM("The reaped CE is...");
         acq->LogCE(acqMetrics.head_ptr);
-        acq->DumpCE(acqMetrics.head_ptr, FileSystem::PrepLogFile
+        acq->DumpCE(acqMetrics.head_ptr, FileSystem::PrepDumpFile
             (mGrpName, mTestName, "CE", "GetFeat.NumOfQueue"),
             "The CE of the Get Features cmd; Number of Q's feature ID:");
 

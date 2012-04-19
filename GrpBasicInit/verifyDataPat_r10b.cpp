@@ -105,7 +105,7 @@ VerifyDataPat_r10b::VerifyDataPattern()
     SharedMemBufferPtr dataPat = SharedMemBufferPtr(new MemBuffer());
     dataPat->Init(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize);
     dataPat->SetDataPattern(DATAPAT_INC_16BIT);
-    dataPat->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "DataPat"),
+    dataPat->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "DataPat"),
         "Verify buffer's data pattern");
     
     LOG_NRM("Create memory to contain read payload");
@@ -158,10 +158,10 @@ VerifyDataPat_r10b::SendToIOSQ(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
     LOG_NRM("Compare read vs written data to verify");
     if (readPayload->Compare(writtenPayload) == false) {
         readPayload->Dump(
-            FileSystem::PrepLogFile(mGrpName, mTestName, "ReadPayload"),
+            FileSystem::PrepDumpFile(mGrpName, mTestName, "ReadPayload"),
             "Data read from media miscompared from written");
         writtenPayload->Dump(
-            FileSystem::PrepLogFile(mGrpName, mTestName, "WrittenPayload"),
+            FileSystem::PrepDumpFile(mGrpName, mTestName, "WrittenPayload"),
             "Data read from media miscompared from written");
         throw FrmwkEx("Data miscompare");
     }

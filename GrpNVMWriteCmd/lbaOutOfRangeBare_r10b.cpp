@@ -145,7 +145,7 @@ LBAOutOfRangeBare_r10b::SendCmdToHdw(SharedSQPtr sq, SharedCQPtr cq,
 
     if ((numCE = cq->ReapInquiry(isrCountB4, true)) != 0) {
         cq->Dump(
-            FileSystem::PrepLogFile(mGrpName, mTestName, "cq",
+            FileSystem::PrepDumpFile(mGrpName, mTestName, "cq",
             "notEmpty"), "Test assumption have not been met");
         throw FrmwkEx("Require 0 CE's within CQ %d, not upheld, found %d",
             cq->GetQId(), numCE);
@@ -155,7 +155,7 @@ LBAOutOfRangeBare_r10b::SendCmdToHdw(SharedSQPtr sq, SharedCQPtr cq,
     sq->Send(cmd, uniqueId);
     work = str(boost::format(
         "Just B4 ringing SQ %d doorbell, dump entire SQ") % sq->GetQId());
-    sq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName,
+    sq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName,
         "sq." + cmd->GetName(), qualify), work);
     sq->Ring();
 
@@ -167,21 +167,21 @@ LBAOutOfRangeBare_r10b::SendCmdToHdw(SharedSQPtr sq, SharedCQPtr cq,
         work = str(boost::format(
             "Unable to see any CE's in CQ %d, dump entire CQ") % cq->GetQId());
         cq->Dump(
-            FileSystem::PrepLogFile(mGrpName, mTestName, "cq." + cmd->GetName(),
+            FileSystem::PrepDumpFile(mGrpName, mTestName, "cq." + cmd->GetName(),
             qualify), work);
         throw FrmwkEx("Unable to see CE for issued cmd");
     } else if (numCE != 1) {
         work = str(boost::format(
             "Unable to see any CE's in CQ %d, dump entire CQ") % cq->GetQId());
         cq->Dump(
-            FileSystem::PrepLogFile(mGrpName, mTestName, "cq." + cmd->GetName(),
+            FileSystem::PrepDumpFile(mGrpName, mTestName, "cq." + cmd->GetName(),
             qualify), work);
         throw FrmwkEx("1 cmd caused %d CE's to arrive in CQ %d",
             numCE, cq->GetQId());
     }
     work = str(boost::format("Just B4 reaping CQ %d, dump entire CQ") %
         cq->GetQId());
-    cq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName,
+    cq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName,
         "cq." + cmd->GetName(), qualify), work);
 
     // throws if an error occurs

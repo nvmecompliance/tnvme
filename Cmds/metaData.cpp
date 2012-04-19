@@ -56,7 +56,7 @@ MetaData::GetMetaBitmask() const
 
 
 void
-MetaData::Dump(LogFilename filename, string fileHdr) const
+MetaData::Dump(DumpFilename filename, string fileHdr) const
 {
     Buffers::Dump(filename, mMetaData.buf, 0, ULONG_MAX, GetMetaBufferSize(),
         fileHdr);

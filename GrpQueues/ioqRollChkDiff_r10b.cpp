@@ -190,7 +190,7 @@ IOQRollChkDiff_r10b::ReapAndVerifyCE(SharedIOCQPtr iocq, uint32_t expectedVal)
     if (iocq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE, isrCount)
         == false) {
 
-        iocq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "iocq",
+        iocq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "iocq",
             "reapInq"),
             "Unable to see any CE's in IOCQ, dump entire CQ contents");
         throw FrmwkEx("Unable to see completion of cmd");
@@ -215,7 +215,7 @@ IOQRollChkDiff_r10b::ReapAndVerifyCE(SharedIOCQPtr iocq, uint32_t expectedVal)
 
     if (ce.n.SQID != IOQ_ID) {
         iocq->Dump(
-            FileSystem::PrepLogFile(mGrpName, mTestName, "iocq", "CE.SQID"),
+            FileSystem::PrepDumpFile(mGrpName, mTestName, "iocq", "CE.SQID"),
             "CE SQ ID Inconsistent");
         throw FrmwkEx("Expected CE.SQID = 0x%04X in IOCQ CE but actual "
             "CE.SQID  = 0x%04X", IOQ_ID, ce.n.SQID);
@@ -223,7 +223,7 @@ IOQRollChkDiff_r10b::ReapAndVerifyCE(SharedIOCQPtr iocq, uint32_t expectedVal)
 
     if (ce.n.SQHD != expectedVal) {
         iocq->Dump(
-            FileSystem::PrepLogFile(mGrpName, mTestName, "iocq", "CE.SQHD"),
+            FileSystem::PrepDumpFile(mGrpName, mTestName, "iocq", "CE.SQHD"),
             "CE SQ Head Pointer Inconsistent");
         throw FrmwkEx("Expected CE.SQHD = 0x%04X in IOCQ CE but actual "
             "CE.SQHD  = 0x%04X", expectedVal, ce.n.SQHD);
@@ -240,7 +240,7 @@ IOQRollChkDiff_r10b::VerifyQPointers(SharedIOSQPtr iosq, SharedIOCQPtr iocq)
     uint32_t expectedVal = (2 + MAX(iocq->GetNumEntries(),
         iosq->GetNumEntries())) % iocq->GetNumEntries();
     if (iocqMetrics.head_ptr != expectedVal) {
-        iocq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "iocq",
+        iocq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "iocq",
             "head_ptr"), "CQ Metrics Head Pointer Inconsistent");
         throw FrmwkEx("Expected IO CQ.head_ptr = 0x%04X but actual "
             "IOCQ.head_ptr = 0x%04X", expectedVal, iocqMetrics.head_ptr);
@@ -249,7 +249,7 @@ IOQRollChkDiff_r10b::VerifyQPointers(SharedIOSQPtr iosq, SharedIOCQPtr iocq)
     expectedVal = (2 + MAX(iocq->GetNumEntries(), iosq->GetNumEntries())) %
         iosq->GetNumEntries();
     if (iosqMetrics.tail_ptr != expectedVal) {
-        iosq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "iosq",
+        iosq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "iosq",
             "tail_ptr"), "SQ Metrics Tail Pointer Inconsistent");
         throw FrmwkEx("Expected  IO SQ.tail_ptr = 0x%04X but actual "
             "IOSQ.tail_ptr  = 0x%04X", expectedVal, iosqMetrics.tail_ptr);

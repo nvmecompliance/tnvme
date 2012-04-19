@@ -276,10 +276,10 @@ PRPOffsetSinglePgMultiBlk_r10b::VerifyDataPat(SharedReadPtr readCmd,
     SharedMemBufferPtr rdPayload = readCmd->GetRWPrpBuffer();
     if (rdPayload->Compare(wrPayload) == false) {
         rdPayload->Dump(
-            FileSystem::PrepLogFile(mGrpName, mTestName, "ReadPayload"),
+            FileSystem::PrepDumpFile(mGrpName, mTestName, "ReadPayload"),
             "Data read from media miscompared from written");
         wrPayload->Dump(
-            FileSystem::PrepLogFile(mGrpName, mTestName, "WrittenPayload"),
+            FileSystem::PrepDumpFile(mGrpName, mTestName, "WrittenPayload"),
             "Data read from media miscompared from written");
         throw FrmwkEx("Data miscompare");
     }
@@ -291,10 +291,10 @@ PRPOffsetSinglePgMultiBlk_r10b::VerifyDataPat(SharedReadPtr readCmd,
 
         if (readCmd->CompareMetaBuffer(metaWrPayload) == false) {
             readCmd->Dump(
-                FileSystem::PrepLogFile(mGrpName, mTestName, "MetaRdPayload"),
+                FileSystem::PrepDumpFile(mGrpName, mTestName, "MetaRdPayload"),
                 "Meta Data read from media miscompared from written");
             metaWrPayload->Dump(
-                FileSystem::PrepLogFile(mGrpName, mTestName, "MetaWrPayload"),
+                FileSystem::PrepDumpFile(mGrpName, mTestName, "MetaWrPayload"),
                 "Meta Data read from media miscompared from written");
             throw FrmwkEx("Meta Data miscompare");
         }

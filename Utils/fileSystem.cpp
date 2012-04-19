@@ -25,8 +25,8 @@
 using namespace std;
 
 bool FileSystem::mUseGrpInfo = true;
-string FileSystem::mLogDirPending;
-string FileSystem::mLogDirGrpInfo;
+string FileSystem::mDumpDirPending;
+string FileSystem::mDumpDirGrpInfo;
 
 
 FileSystem::FileSystem()
@@ -40,31 +40,31 @@ FileSystem::~FileSystem()
 
 
 bool
-FileSystem::SetRootLogDir(string dir)
+FileSystem::SetRootDumpDir(string dir)
 {
     char work[256];
 
-    mLogDirPending = (dir + "/GrpPending/");
-    mLogDirGrpInfo = (dir + "/GrpInformative/");
+    mDumpDirPending = (dir + "/GrpPending/");
+    mDumpDirGrpInfo = (dir + "/GrpInformative/");
     try {
         if (boost::filesystem::exists(dir.c_str())) {
-            SetBaseLogDir(false);
+            SetBaseDumpDir(false);
             snprintf(work, sizeof(work), "mkdir -p -m 777 %s",
-                mLogDirPending.c_str());
+                mDumpDirPending.c_str());
             system(work);
-            if (PrepLogDir() == false)
+            if (PrepDumpDir() == false)
                 return false;
 
-            SetBaseLogDir(true);    // this is the default
+            SetBaseDumpDir(true);    // this is the default
             snprintf(work, sizeof(work), "mkdir -p -m 777 %s",
-                mLogDirGrpInfo.c_str());
+                mDumpDirGrpInfo.c_str());
             system(work);
-            if (PrepLogDir() == false)
+            if (PrepDumpDir() == false)
                 return false;
 
             return true;
         } else {
-            LOG_ERR("Root log directory is missing: %s", dir.c_str());
+            LOG_ERR("Root dump directory is missing: %s", dir.c_str());
             return false;
         }
     } catch (exception &exc) {
@@ -75,15 +75,20 @@ FileSystem::SetRootLogDir(string dir)
 
 
 bool
-FileSystem::PrepLogDir()
+FileSystem::PrepDumpDir()
 {
     char work[256];
-    string logDir = (mUseGrpInfo) ? mLogDirGrpInfo : mLogDirPending;
+    string dumpDir = (mUseGrpInfo) ? mDumpDirGrpInfo : mDumpDirPending;
 
-    snprintf(work, sizeof(work), "rm -rf %s*", logDir.c_str());
+
+    if (dumpDir.empty()) {
+        LOG_ERR("cmd line option --dump=<empty> is dangerous, not allowing");
+        return false;
+    }
+    snprintf(work, sizeof(work), "rm -rf %s*", dumpDir.c_str());
     system(work);
     if (boost::filesystem::exists(work)) {
-        LOG_ERR("Unable to remove files within: %s", logDir.c_str());
+        LOG_ERR("Unable to remove files within: %s", dumpDir.c_str());
         return false;
     }
     return true;
@@ -91,7 +96,7 @@ FileSystem::PrepLogDir()
 
 
 string
-FileSystem::PrepLogFile(string grpName, string className, string objName,
+FileSystem::PrepDumpFile(string grpName, string className, string objName,
     string qualifier)
 {
     string file;
@@ -99,7 +104,7 @@ FileSystem::PrepLogFile(string grpName, string className, string objName,
     if (grpName.empty() || className.empty() || objName.empty())
         throw FrmwkEx("Mandatory params are empty");
 
-    file += (mUseGrpInfo) ? mLogDirGrpInfo : mLogDirPending;
+    file += (mUseGrpInfo) ? mDumpDirGrpInfo : mDumpDirPending;
     file += grpName + ".";
     file += className + ".";
     file += objName;

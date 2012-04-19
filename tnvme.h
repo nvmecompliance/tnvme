@@ -147,7 +147,7 @@ struct CmdLine {
     WmmapIo         wmmap;
     NumQueues       numQueues;
     ErrorRegs       errRegs;
-    string          log;
+    string          dump;
 };
 
 

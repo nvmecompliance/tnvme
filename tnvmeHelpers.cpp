@@ -68,7 +68,7 @@ bool
 FormatDevice(Format &format, int fd)
 {
     try {   // The objects to perform this work throw exceptions
-
+        FileSystem::SetBaseDumpDir(false);   // Log into GrpPending
         if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
             throw FrmwkEx();
 
@@ -102,12 +102,14 @@ FormatDevice(Format &format, int fd)
             IO::SendCmdToHdw("tnvme", "format", SYSTEMWIDE_CMD_WAIT_ms,
                 asq, acq, formatNVM, "", true);
         }
-        printf("The operation succeeded to format device\n");
+        LOG_NRM("The operation succeeded to format device");
     } catch (...) {
-        printf("Operation failed to format device\n");
+        LOG_ERR("Operation failed to format device");
+        gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY);
         return false;
     }
 
+    gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY);
     return true;
 }
 
@@ -129,6 +131,8 @@ SetFeaturesNumberOfQueues(NumQueues &numQueues, int fd)
 
         LOG_NRM("Setting number of Q's; ncqr=0x%04X, nsqr=0x%04X",
             numQueues.ncqr, numQueues.nsqr);
+
+        FileSystem::SetBaseDumpDir(false);   // Log into GrpPending
         if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
             throw FrmwkEx();
 
@@ -149,11 +153,13 @@ SetFeaturesNumberOfQueues(NumQueues &numQueues, int fd)
 
         IO::SendCmdToHdw("tnvme", "queues", SYSTEMWIDE_CMD_WAIT_ms,
             asq, acq, sfNumOfQ, "", true);
-        printf("The operation succeeded to set number of queues\n");
+        LOG_NRM("The operation succeeded to set number of queues");
     } catch (...) {
-        printf("Operation failed to set number of queues\n");
+        LOG_ERR("Operation failed to set number of queues");
+        gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY);
         return false;
     }
 
+    gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY);
     return true;
 }

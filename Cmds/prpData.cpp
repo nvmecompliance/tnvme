@@ -109,7 +109,7 @@ PrpData::GetROPrpBuffer() const
 
 
 void
-PrpData::Dump(LogFilename filename, string fileHdr) const
+PrpData::Dump(DumpFilename filename, string fileHdr) const
 {
     const uint8_t *buf = GetROPrpBuffer();
     Buffers::Dump(filename, buf, 0, ULONG_MAX, GetPrpBufferSize(), fileHdr);

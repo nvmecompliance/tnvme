@@ -87,11 +87,11 @@ FrmwkEx::PreliminaryProcessing()
 
     // First gather all non-intrusive data, things that won't change the
     // state of the DUT, effectively taking a snapshot.
-    KernelAPI::DumpKernelMetrics(FileSystem::PrepLogFile(GRP_NAME,
+    KernelAPI::DumpKernelMetrics(FileSystem::PrepDumpFile(GRP_NAME,
         TEST_NAME, "kmetrics"));
-    KernelAPI::DumpPciSpaceRegs(FileSystem::PrepLogFile(GRP_NAME,
+    KernelAPI::DumpPciSpaceRegs(FileSystem::PrepDumpFile(GRP_NAME,
         TEST_NAME, "pci", "regs"), false);
-    KernelAPI::DumpCtrlrSpaceRegs(FileSystem::PrepLogFile(GRP_NAME,
+    KernelAPI::DumpCtrlrSpaceRegs(FileSystem::PrepDumpFile(GRP_NAME,
         TEST_NAME, "ctrl", "regs"), false);
 
     // Now we can change the state of the DUT. We don't know the state of
@@ -127,7 +127,7 @@ FrmwkEx::PreliminaryProcessing()
 
     IO::SendCmdToHdw(GRP_NAME, TEST_NAME, SYSTEMWIDE_CMD_WAIT_ms, asq, acq,
         getLogPg, "", false);
-    getLogPg->Dump(FileSystem::PrepLogFile(GRP_NAME, TEST_NAME,
+    getLogPg->Dump(FileSystem::PrepDumpFile(GRP_NAME, TEST_NAME,
         "LogPageErr"), "Failed test post dump of error log page:");
 }
 

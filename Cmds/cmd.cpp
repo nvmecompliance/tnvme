@@ -241,7 +241,7 @@ Cmd::GetCID() const
 
 
 void
-Cmd::Dump(LogFilename filename, string fileHdr) const
+Cmd::Dump(DumpFilename filename, string fileHdr) const
 {
     FILE *fp;
 

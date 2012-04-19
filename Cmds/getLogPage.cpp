@@ -120,7 +120,7 @@ GetLogPage::GetLID() const
 
 
 void
-GetLogPage::Dump(LogFilename filename, string fileHdr) const
+GetLogPage::Dump(DumpFilename filename, string fileHdr) const
 {
     FILE *fp;
 

@@ -62,7 +62,7 @@ public:
      * @param totalBufSize Pass the total number of bytes within the buffer
      * @param fileHdr Pass a custom file header description to dump
      */
-    static void Dump(LogFilename filename, const uint8_t *buf,
+    static void Dump(DumpFilename filename, const uint8_t *buf,
         uint32_t bufOffset, unsigned long length, uint32_t totalBufSize,
         string fileHdr);
 };

@@ -44,7 +44,7 @@ IO::SendCmdToHdw(string grpName, string testName, uint16_t ms,
 
     if ((numCE = cq->ReapInquiry(isrCountB4, true)) != 0) {
         cq->Dump(
-            FileSystem::PrepLogFile(grpName, testName, "cq",
+            FileSystem::PrepDumpFile(grpName, testName, "cq",
             "notEmpty"), "Test assumption have not been met");
         throw FrmwkEx("Require 0 CE's within CQ %d, not upheld, found %d",
             cq->GetQId(), numCE);
@@ -55,7 +55,7 @@ IO::SendCmdToHdw(string grpName, string testName, uint16_t ms,
     if (verbose) {
         work = str(boost::format(
             "Just B4 ringing SQ %d doorbell, dump entire SQ") % sq->GetQId());
-        sq->Dump(FileSystem::PrepLogFile(grpName, testName,
+        sq->Dump(FileSystem::PrepDumpFile(grpName, testName,
             "sq." + cmd->GetName(), qualify), work);
     }
     sq->Ring();
@@ -66,14 +66,14 @@ IO::SendCmdToHdw(string grpName, string testName, uint16_t ms,
         work = str(boost::format(
             "Unable to see any CE's in CQ %d, dump entire CQ") % cq->GetQId());
         cq->Dump(
-            FileSystem::PrepLogFile(grpName, testName, "cq." + cmd->GetName(),
+            FileSystem::PrepDumpFile(grpName, testName, "cq." + cmd->GetName(),
             qualify), work);
         throw FrmwkEx(work);
     } else if (numCE != 1) {
         work = str(boost::format(
             "Unable to see any CE's in CQ %d, dump entire CQ") % cq->GetQId());
         cq->Dump(
-            FileSystem::PrepLogFile(grpName, testName, "cq." + cmd->GetName(),
+            FileSystem::PrepDumpFile(grpName, testName, "cq." + cmd->GetName(),
             qualify), work);
         throw FrmwkEx("1 cmd caused %d CE's to arrive in CQ %d",
             numCE, cq->GetQId());
@@ -81,7 +81,7 @@ IO::SendCmdToHdw(string grpName, string testName, uint16_t ms,
     if (verbose) {
         work = str(boost::format("Just B4 reaping CQ %d, dump entire CQ") %
             cq->GetQId());
-        cq->Dump(FileSystem::PrepLogFile(grpName, testName,
+        cq->Dump(FileSystem::PrepDumpFile(grpName, testName,
             "cq." + cmd->GetName(), qualify), work);
     }
 
@@ -97,7 +97,7 @@ IO::SendCmdToHdw(string grpName, string testName, uint16_t ms,
     }
 
     if (verbose) {
-        cmd->Dump(FileSystem::PrepLogFile(grpName, testName,
+        cmd->Dump(FileSystem::PrepDumpFile(grpName, testName,
             cmd->GetName(), qualify), "A cmd's contents dumped");
     }
 }
@@ -122,7 +122,7 @@ IO::ReapCE(SharedCQPtr cq, uint32_t numCE, uint32_t &isrCount,
         work = str(boost::format("Verified CE's exist, desired %d, reaped %d")
             % numCE % numReaped);
         cq->Dump(
-            FileSystem::PrepLogFile(grpName, testName, "cq.error", qualify),
+            FileSystem::PrepDumpFile(grpName, testName, "cq.error", qualify),
             work);
         throw FrmwkEx(work);
     }

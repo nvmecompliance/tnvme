@@ -137,7 +137,7 @@ Identify::GetValue(int field, IdentifyDataType *idData) const
 
 
 void
-Identify::Dump(LogFilename filename, string fileHdr) const
+Identify::Dump(DumpFilename filename, string fileHdr) const
 {
     FILE *fp;
 

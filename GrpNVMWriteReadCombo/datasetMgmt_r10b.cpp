@@ -176,10 +176,10 @@ DatasetMgmt_r10b::VerifyDataPat(SharedReadPtr readCmd, SharedWritePtr writeCmd)
     SharedMemBufferPtr wrPayload = writeCmd->GetRWPrpBuffer();
     if (rdPayload->Compare(wrPayload) == false) {
         readCmd->Dump(
-            FileSystem::PrepLogFile(mGrpName, mTestName, "ReadCmd"),
+            FileSystem::PrepDumpFile(mGrpName, mTestName, "ReadCmd"),
             "Read command");
         writeCmd->Dump(
-            FileSystem::PrepLogFile(mGrpName, mTestName, "WriteCmd"),
+            FileSystem::PrepDumpFile(mGrpName, mTestName, "WriteCmd"),
             "Write command");
         throw FrmwkEx("Data miscompare");
     }
@@ -190,10 +190,10 @@ DatasetMgmt_r10b::VerifyDataPat(SharedReadPtr readCmd, SharedWritePtr writeCmd)
         const uint8_t *metaWrBuff = writeCmd->GetMetaBuffer();
         if (memcmp(metaRdBuff, metaWrBuff, writeCmd->GetMetaBufferSize())) {
             readCmd->Dump(
-                FileSystem::PrepLogFile(mGrpName, mTestName, "ReadCmdMeta"),
+                FileSystem::PrepDumpFile(mGrpName, mTestName, "ReadCmdMeta"),
                 "Read command with meta data");
             writeCmd->Dump(
-                FileSystem::PrepLogFile(mGrpName, mTestName, "WriteCmdMeta"),
+                FileSystem::PrepDumpFile(mGrpName, mTestName, "WriteCmdMeta"),
                 "Write command with meta data");
             throw FrmwkEx("Meta data miscompare");
         }

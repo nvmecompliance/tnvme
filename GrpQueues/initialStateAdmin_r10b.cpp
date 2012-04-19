@@ -143,14 +143,14 @@ InitialStateAdmin_r10b::VerifyHeadAndTailDoorBells(SharedACQPtr acq,
     // Verify ASQ tail_ptr, ACQ head_ptr and CE.SQHD position values equal to 1.
     if (asqMetrics.tail_ptr != 1) {
         asq->Dump(
-            FileSystem::PrepLogFile(mGrpName, mTestName, "asq", "tail_ptr"),
+            FileSystem::PrepDumpFile(mGrpName, mTestName, "asq", "tail_ptr"),
             "SQ Metrics Tail Pointer Inconsistent");
         throw FrmwkEx("Expected  ASQ.tail_ptr = 0x0001 but actual "
             "ASQ.tail_ptr  = 0x%04X", asqMetrics.tail_ptr);
     }
     if (acqMetrics.head_ptr != 1) {
         acq->Dump(
-            FileSystem::PrepLogFile(mGrpName, mTestName, "acq", "head_ptr"),
+            FileSystem::PrepDumpFile(mGrpName, mTestName, "acq", "head_ptr"),
             "CQ Metrics Head Pointer Inconsistent");
         throw FrmwkEx("Expected ACQ.head_ptr = 0x0001 but actual "
             "ACQ.head_ptr = 0x%04X", acqMetrics.head_ptr);
@@ -159,7 +159,7 @@ InitialStateAdmin_r10b::VerifyHeadAndTailDoorBells(SharedACQPtr acq,
     union CE ce = acq->PeekCE(acqMetrics.head_ptr - 1);
     if (ce.n.SQHD != 1) {
         acq->Dump(
-            FileSystem::PrepLogFile(mGrpName, mTestName, "acq", "CE.SQHD"),
+            FileSystem::PrepDumpFile(mGrpName, mTestName, "acq", "CE.SQHD"),
             "CE SQ Head Pointer Inconsistent");
         throw FrmwkEx(
             "Expected CE.SQHD = 0x0001 in ACQ completion entry but actual "

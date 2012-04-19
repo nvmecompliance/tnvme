@@ -196,11 +196,11 @@ ManySQtoCQAssoc_r10b::ReapIOCQAndVerifyCE(SharedIOCQPtr iocq, uint32_t numTil,
         if (iocq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE,
             isrCount) == false) {
 
-            iocq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "missing"),
+            iocq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "missing"),
                 "Unable to see completion of cmd");
             throw FrmwkEx();
         } else if (numCE == 0) {
-            iocq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "missing"),
+            iocq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "missing"),
                 "Unable to see completion of cmd");
             throw FrmwkEx("IOCQ should have one new CE for each IOSQ");
         }

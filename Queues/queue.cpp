@@ -95,7 +95,7 @@ Queue::Log(uint32_t bufOffset, unsigned long length)
 
 
 void
-Queue::Dump(LogFilename filename, string fileHdr)
+Queue::Dump(DumpFilename filename, string fileHdr)
 {
     Buffers::Dump(filename, GetQBuffer(), 0, ULONG_MAX, GetQSize(), fileHdr);
 }

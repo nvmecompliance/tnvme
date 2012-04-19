@@ -23,9 +23,9 @@
 
 /**
  * Enforce type checking to ensure logs end up the proper location. Use
- * method FileSystem::PrepLogFile() to create this name
+ * method FileSystem::PrepDumpFile() to create this name
  */
-typedef string                      LogFilename;
+typedef string                      DumpFilename;
 
 
 /**
@@ -47,7 +47,7 @@ public:
      * Initializes the file system to use the specific root logging directory by
      * verifying it exists. It must exists and will not be created. Under the
      * root log directory 2 base logging directories are setup and cleaned. The
-     * default base log directory will be SetBaseLogDir(true). The logging
+     * default base log directory will be SetBaseDumpDir(true). The logging
      * directory structure is as follows:
      *     1) root_log_dir/GrpInformative or
      *     2) root_log_dir/GrpPending
@@ -55,7 +55,7 @@ public:
      * @param dir Pass the name of the root log directory to certify
      * @return true if successful, otherwise false;
      */
-    static bool SetRootLogDir(string dir);
+    static bool SetRootDumpDir(string dir);
 
     /**
      * Sets 1 of 2 possible base logging directories. GrpInformative gets its
@@ -64,9 +64,10 @@ public:
      *     1) root_log_dir/GrpInformative or
      *     2) root_log_dir/GrpPending
      * @note This method will not throw
-     * @param useGrpInfo Pass true for mLogDirPending, false for mLogDirPending
+     * @param useGrpInfo Pass true for mDumpDirPending, false for
+     *        mDumpDirPending
      */
-    static void SetBaseLogDir(bool useGrpInfo) { mUseGrpInfo = useGrpInfo; }
+    static void SetBaseDumpDir(bool useGrpInfo) { mUseGrpInfo = useGrpInfo; }
 
     /**
      * Cleans all files from the base logging directory. Each new group which
@@ -76,7 +77,7 @@ public:
      * @note This method will not throw
      * @return true if successful, otherwise false;
      */
-    static bool PrepLogDir();
+    static bool PrepDumpDir();
 
     /**
      * Creates a filename from the parameters within the base logging directory.
@@ -87,15 +88,15 @@ public:
      * @param qualifier (optional) Pass any extra qualifications
      * @return A properly formated filename for logging purposes
      */
-    static LogFilename PrepLogFile(string grpName, string className,
+    static DumpFilename PrepDumpFile(string grpName, string className,
         string objName, string qualifier = "");
 
 
 private:
-    /// true uses mLogDirGrpInfo; false uses mLogDirPending
+    /// true uses mDumpDirGrpInfo; false uses mDumpDirPending
     static bool mUseGrpInfo;
-    static string mLogDirPending;
-    static string mLogDirGrpInfo;
+    static string mDumpDirPending;
+    static string mDumpDirGrpInfo;
 };
 
 

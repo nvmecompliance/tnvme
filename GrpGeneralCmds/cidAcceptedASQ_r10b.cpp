@@ -91,7 +91,7 @@ CIDAcceptedASQ_r10b::RunCoreTest()
     // Verifying that the ACQ is empty.
     if (acq->ReapInquiry(isrCount, true) != 0) {
         acq->Dump(
-            FileSystem::PrepLogFile(mGrpName, mTestName, "acq",
+            FileSystem::PrepDumpFile(mGrpName, mTestName, "acq",
             "notEmpty"), "Test assumption have not been met");
         throw FrmwkEx(
             "The ACQ should not have any CE's waiting before testing");
@@ -119,9 +119,9 @@ CIDAcceptedASQ_r10b::RunCoreTest()
 
         asq->Send(idCmdCap, currCID);
         if (currCID != (uint16_t)(prevCID + 1)) {
-            asq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "asq.fail"),
+            asq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "asq.fail"),
                 "Dump Entire ASQ");
-            acq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "acq.fail"),
+            acq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "acq.fail"),
                 "Dump Entire ACQ");
             throw FrmwkEx("Current CID(%d) != prev + 1(%d)", currCID, prevCID);
         }
@@ -142,14 +142,14 @@ CIDAcceptedASQ_r10b::ReapVerifyCID(SharedASQPtr asq, SharedACQPtr acq,
 
     if (acq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE, isrCount)
         == false) {
-        acq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "acq.fail"),
+        acq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "acq.fail"),
             "Dump Entire ACQ");
         throw FrmwkEx("Unable to see CEs for issued cmd");
     }
 
     SharedMemBufferPtr ceMem = SharedMemBufferPtr(new MemBuffer());
     if ((numReaped = acq->Reap(ceRemain, ceMem, isrCount, numCE, true)) != 1) {
-        acq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "acq.fail"),
+        acq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "acq.fail"),
             "Dump Entire ACQ");
         throw FrmwkEx("Unable to reap on ACQ");
     }
@@ -157,9 +157,9 @@ CIDAcceptedASQ_r10b::ReapVerifyCID(SharedASQPtr asq, SharedACQPtr acq,
     union CE *ce = (union CE *)ceMem->GetBuffer();
     ProcessCE::Validate(*ce);  // throws upon error
     if (ce->n.CID != currCID) {
-        asq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "asq.fail"),
+        asq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "asq.fail"),
             "Dump Entire ASQ");
-        acq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName, "acq.fail"),
+        acq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "acq.fail"),
             "Dump Entire ACQ");
         throw FrmwkEx("Received CID %d but expected %d", ce->n.CID, currCID);
     }

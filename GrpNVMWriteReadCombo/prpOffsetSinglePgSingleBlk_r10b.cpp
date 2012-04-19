@@ -220,7 +220,7 @@ PRPOffsetSinglePgSingleBlk_r10b::VerifyDataPattern(SharedReadPtr readCmd,
             (readCmd->GetPrpBufferSize() / sizeof(uint16_t)); i++) {
             if (*rdBuffPtr++ != mWrVal++) {
                 readCmd->Dump(
-                    FileSystem::PrepLogFile(mGrpName, mTestName, "ReadPayload"),
+                    FileSystem::PrepDumpFile(mGrpName, mTestName, "ReadPayload"),
                     "Data read from media miscompared from written");
                 throw FrmwkEx("Read data mismatch for 16bit inc prp data "
                     "read ptr: 0x%08X, read value: 0x%02X, write value: 0x%02X",
@@ -236,7 +236,7 @@ PRPOffsetSinglePgSingleBlk_r10b::VerifyDataPattern(SharedReadPtr readCmd,
                 (readCmd->GetMetaBufferSize() / sizeof(uint16_t)); i++) {
                 if (*rdMetaPtr++ != mWrVal++) {
                     readCmd->Dump(
-                        FileSystem::PrepLogFile(mGrpName, mTestName,
+                        FileSystem::PrepDumpFile(mGrpName, mTestName,
                         "MetaPayload"),
                         "Meta Data read from media miscompared from written");
                     throw FrmwkEx("Read data mismatch for 16bit inc meta data "
@@ -251,7 +251,7 @@ PRPOffsetSinglePgSingleBlk_r10b::VerifyDataPattern(SharedReadPtr readCmd,
             (readCmd->GetPrpBufferSize() / sizeof(uint8_t)); i++) {
             if (*rdBuffPtr++ != (uint8_t)wrVal) {
                 readCmd->Dump(
-                    FileSystem::PrepLogFile(mGrpName, mTestName, "ReadPayload"),
+                    FileSystem::PrepDumpFile(mGrpName, mTestName, "ReadPayload"),
                     "Data read from media miscompared from written");
                 throw FrmwkEx("Read data mismatch for 8bit const data "
                     "read ptr: 0x%08X, read value: 0x%02X, write value: 0x%02X",
@@ -266,7 +266,7 @@ PRPOffsetSinglePgSingleBlk_r10b::VerifyDataPattern(SharedReadPtr readCmd,
                 (readCmd->GetMetaBufferSize() / sizeof(uint8_t)); i++) {
                 if (*rdMetaPtr++ != (uint8_t)wrVal) {
                     readCmd->Dump(
-                        FileSystem::PrepLogFile(mGrpName, mTestName,
+                        FileSystem::PrepDumpFile(mGrpName, mTestName,
                         "MetaPayload"),
                         "Meta Data read from media miscompared from written");
                     throw FrmwkEx("Read data mismatch for 8bit const meta data "

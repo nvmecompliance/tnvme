@@ -105,7 +105,7 @@ CtrlrResetDefaults_r10b::VerifyCtrlrResetDefaults()
 
     // Dump Controller space registers to known file before ctrlr reset
     KernelAPI::DumpCtrlrSpaceRegs(FileSystem::
-        PrepLogFile(mGrpName, mTestName, "ctrlRegs", "beforeReset"), false);
+        PrepDumpFile(mGrpName, mTestName, "ctrlRegs", "beforeReset"), false);
 
     ModifyRWBitsOfCtrlrRegisters(ctrlRegsMap);
 
@@ -115,7 +115,7 @@ CtrlrResetDefaults_r10b::VerifyCtrlrResetDefaults()
 
     // Dump Controller space registers to known file after ctrlr reset
     KernelAPI::DumpCtrlrSpaceRegs(FileSystem::
-        PrepLogFile(mGrpName, mTestName, "ctrlRegs", "afterReset"), false);
+        PrepDumpFile(mGrpName, mTestName, "ctrlRegs", "afterReset"), false);
 
     ValidateCtrlrRWDefaultsAfterReset(ctrlRegsMap);
 }

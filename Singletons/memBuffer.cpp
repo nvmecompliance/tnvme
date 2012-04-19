@@ -172,7 +172,7 @@ MemBuffer::Log(uint32_t bufOffset, unsigned long length)
 
 
 void
-MemBuffer::Dump(LogFilename filename, string fileHdr)
+MemBuffer::Dump(DumpFilename filename, string fileHdr)
 {
     Buffers::Dump(filename, GetBuffer(), 0, ULONG_MAX, GetBufSize(), fileHdr);
 

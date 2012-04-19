@@ -159,7 +159,7 @@ AdminQRollChkDiff_r10b::VerifyCESQValues(SharedACQPtr acq,
 
     if (ce.n.SQID != 0) {
         acq->Dump(
-            FileSystem::PrepLogFile(mGrpName, mTestName, "acq", "CE.SQID"),
+            FileSystem::PrepDumpFile(mGrpName, mTestName, "acq", "CE.SQID"),
             "CE SQ ID Inconsistent");
         throw FrmwkEx("Expected CE.SQID = 0 in ACQ completion entry but actual "
             "CE.SQID  = 0x%04X", ce.n.SQID);
@@ -167,7 +167,7 @@ AdminQRollChkDiff_r10b::VerifyCESQValues(SharedACQPtr acq,
 
     if (ce.n.SQHD != expectedVal) {
         acq->Dump(
-            FileSystem::PrepLogFile(mGrpName, mTestName, "acq", "CE.SQHD"),
+            FileSystem::PrepDumpFile(mGrpName, mTestName, "acq", "CE.SQHD"),
             "CE SQ Head Pointer Inconsistent");
         throw FrmwkEx(
             "Expected CE.SQHD = 0x%04X in ACQ completion entry but actual "
@@ -195,7 +195,7 @@ AdminQRollChkDiff_r10b::VerifyQPointers(SharedACQPtr acq, SharedASQPtr asq)
         asq->GetNumEntries())) % acq->GetNumEntries();
     if (acqMetrics.head_ptr != expectedVal) {
         acq->Dump(
-            FileSystem::PrepLogFile(mGrpName, mTestName, "acq", "head_ptr"),
+            FileSystem::PrepDumpFile(mGrpName, mTestName, "acq", "head_ptr"),
             "CQ Metrics Head Pointer Inconsistent");
         throw FrmwkEx("Expected ACQ.head_ptr = 0x%04X but actual "
             "ACQ.head_ptr = 0x%04X", expectedVal, acqMetrics.head_ptr);
@@ -205,7 +205,7 @@ AdminQRollChkDiff_r10b::VerifyQPointers(SharedACQPtr acq, SharedASQPtr asq)
         asq->GetNumEntries();
     if (asqMetrics.tail_ptr != expectedVal) {
         asq->Dump(
-            FileSystem::PrepLogFile(mGrpName, mTestName, "asq", "tail_ptr"),
+            FileSystem::PrepDumpFile(mGrpName, mTestName, "asq", "tail_ptr"),
             "SQ Metrics Tail Pointer Inconsistent");
         throw FrmwkEx("Expected  ASQ.tail_ptr = 0x%04X but actual "
             "ASQ.tail_ptr  = 0x%04X", expectedVal, asqMetrics.tail_ptr);
@@ -213,7 +213,7 @@ AdminQRollChkDiff_r10b::VerifyQPointers(SharedACQPtr acq, SharedASQPtr asq)
 
     if (ce.n.SQHD != expectedVal) {
         acq->Dump(
-            FileSystem::PrepLogFile(mGrpName, mTestName, "acq", "CE.SQHD"),
+            FileSystem::PrepDumpFile(mGrpName, mTestName, "acq", "CE.SQHD"),
             "CE SQ Head Pointer Inconsistent");
         throw FrmwkEx("Expected CE.SQHD = 0x%04X in ACQ completion entry but actual "
             "CE.SQHD  = 0x%04X", expectedVal, ce.n.SQHD);

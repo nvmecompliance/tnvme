@@ -135,7 +135,7 @@ public:
      *      FileSystem::PrepLogFile().
      * @param fileHdr Pass a custom file header description to dump
      */
-    void Dump(LogFilename filename, string fileHdr);
+    void Dump(DumpFilename filename, string fileHdr);
 
 
 private:

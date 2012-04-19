@@ -73,9 +73,9 @@ DumpRegisters_r10b::RunCoreTest()
      */
 
     KernelAPI::DumpPciSpaceRegs(
-        FileSystem::PrepLogFile(mGrpName, mTestName, "pci", "regs"), false);
+        FileSystem::PrepDumpFile(mGrpName, mTestName, "pci", "regs"), false);
     KernelAPI::DumpCtrlrSpaceRegs(
-        FileSystem::PrepLogFile(mGrpName, mTestName, "ctrl", "regs"), false);
+        FileSystem::PrepDumpFile(mGrpName, mTestName, "ctrl", "regs"), false);
 }
 
 }   // namespace

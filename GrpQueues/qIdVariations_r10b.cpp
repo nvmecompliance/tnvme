@@ -234,7 +234,7 @@ QIDVariations_r10b::ReapVerifyOnCQ(SharedIOCQPtr iocq, SharedIOSQPtr iosq)
         if (iocq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE,
             isrCount) == false) {
             iocq->Dump(
-                FileSystem::PrepLogFile(mGrpName, mTestName, "iocq", "reapInq"),
+                FileSystem::PrepDumpFile(mGrpName, mTestName, "iocq", "reapInq"),
                 "Unable to see any CE's in IOCQ, dump entire CQ contents");
             throw FrmwkEx("Unable to see completion of cmd");
         }
@@ -246,7 +246,7 @@ QIDVariations_r10b::ReapVerifyOnCQ(SharedIOCQPtr iocq, SharedIOSQPtr iosq)
         if ((numReaped = iocq->Reap(ceRemain, ceMemIOCQ, isrCount, 1, true))
             != 1) {
             iocq->Dump(
-                FileSystem::PrepLogFile(mGrpName, mTestName, "iocq", "reap"),
+                FileSystem::PrepDumpFile(mGrpName, mTestName, "iocq", "reap"),
                 "Unable to see any CE's in IOCQ, dump entire CQ contents");
             throw FrmwkEx("Verified there was 1 CE, but reaping failed");
         }
@@ -259,7 +259,7 @@ QIDVariations_r10b::ReapVerifyOnCQ(SharedIOCQPtr iocq, SharedIOSQPtr iosq)
 
         if (ce.n.SQID != iosq->GetQId()) {
             iocq->Dump(
-                FileSystem::PrepLogFile(mGrpName, mTestName, "iocq", "sqId"),
+                FileSystem::PrepDumpFile(mGrpName, mTestName, "iocq", "sqId"),
                 "Wrong SQID in the CE of IOCQ, dump entire CQ contents");
             throw FrmwkEx("Invalid SQID %d in CE, expected SQID", ce.n.SQID,
                 iosq->GetQId());

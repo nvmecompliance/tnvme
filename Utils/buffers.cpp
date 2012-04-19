@@ -70,7 +70,7 @@ Buffers::Log(const uint8_t *buf, uint32_t bufOffset, unsigned long length,
 
 
 void
-Buffers::Dump(LogFilename filename, const uint8_t *buf, uint32_t bufOffset,
+Buffers::Dump(DumpFilename filename, const uint8_t *buf, uint32_t bufOffset,
     unsigned long length, uint32_t totalBufSize, string fileHdr)
 {
     const uint8_t *data;

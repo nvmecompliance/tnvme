@@ -177,13 +177,13 @@ IOQFull_r10b::IOQFull(uint32_t numIOSQEntries, uint32_t numIOCQEntries,
                 }
             }
             work = str(boost::format("Dump entire CQ %d") % iocq->GetQId());
-            iocq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName,
+            iocq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName,
                 "iocq." + writeCmd->GetName()), work);
             throw FrmwkEx("Unable to see CE for issued cmd #%d", nCmds + 1);
 
         } else if (numCE != nCmds + 1) {
             work = str(boost::format("Dump entire CQ %d") % iocq->GetQId());
-            iocq->Dump(FileSystem::PrepLogFile(mGrpName, mTestName,
+            iocq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName,
                 "iocq." + writeCmd->GetName()), work);
             throw FrmwkEx("Missing last CE, #%d cmds of #%d received",
                 nCmds + 1, numCE);
