@@ -19,6 +19,7 @@
 #include "illegalNVMCmds_r10b.h"
 #include "illegalAdminCmds_r10b.h"
 #include "cidAcceptedASQ_r10b.h"
+#include "cidAcceptedIOSQ_r10b.h"
 
 namespace GrpGeneralCmds {
 
@@ -35,6 +36,7 @@ GrpGeneralCmds::GrpGeneralCmds(size_t grpNum, SpecRev specRev,
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Strategy
     switch (mSpecRev) {
     case SPECREV_10b:
+        APPEND_TEST_AT_XLEVEL(CIDAcceptedIOSQ_r10b, fd, GrpGeneralCmds, errRegs)
         APPEND_TEST_AT_XLEVEL(CreateResources_r10b, fd, GrpGeneralCmds, errRegs)
         APPEND_TEST_AT_YLEVEL(IllegalNVMCmds_r10b, fd, GrpGeneralCmds, errRegs)
         APPEND_TEST_AT_YLEVEL(IllegalAdminCmds_r10b, fd, GrpGeneralCmds, errRegs)
