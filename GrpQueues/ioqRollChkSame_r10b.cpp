@@ -124,8 +124,7 @@ IOQRollChkSame_r10b::IOQRollChkSame(uint32_t numEntriesIOQ)
         (uint32_t)(iosq->GetNumEntries() + 2); numEntries++) {
         iosq->Send(writeCmd, uniqueId);
         iosq->Ring();
-        ReapAndVerifyCE(iocq, (numEntries + 1) %
-            iosq->GetNumEntries());
+        ReapAndVerifyCE(iocq, (numEntries + 1) % iosq->GetNumEntries());
     }
     VerifyQPointers(iosq, iocq);
 

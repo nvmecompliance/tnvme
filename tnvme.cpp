@@ -73,9 +73,9 @@ InstantiateGroups(vector<Group *> &groups, int &fd, struct CmdLine &cl)
 // ------------------------------EDIT HERE---------------------------------
 
 
+#define BASE_DUMP_DIR           "./Dump"
 #define NO_DEVICES              "no devices found"
 #define INFORM_GRPNUM           0
-#define BASE_DUMP_DIR           "./Dump"
 
 
 void Usage(void);
@@ -211,7 +211,7 @@ main(int argc, char *argv[])
     // Seek for all possible devices that this app may commune
     DIR *devDir = opendir("/dev");
     if (devDir == NULL) {
-        LOG_ERR("Unable to open system /dev directory");
+        printf("Unable to open system /dev directory\n");
         exit(1);
     }
     while ((dirEntry = readdir(devDir)) != NULL) {
@@ -226,7 +226,7 @@ main(int argc, char *argv[])
     work = "";
     for (int i = 0; i < argc; i++)
         work += argv[i] + string(" ");
-    LOG_NRM("Parsing cmd line: %s", work.c_str());
+    printf("Parsing cmd line: %s\n", work.c_str());
 
 
     // Parse cmd line options
@@ -241,7 +241,7 @@ main(int argc, char *argv[])
 
         case 'a':
             if (ParseTargetCmdLine(cmdLine.detail, optarg) == false) {
-                LOG_ERR("Unable to parse --detail cmd line");
+                printf("Unable to parse --detail cmd line\n");
                 exit(1);
             }
             accessingHdw = false;
@@ -249,42 +249,42 @@ main(int argc, char *argv[])
 
         case 't':
             if (ParseTargetCmdLine(cmdLine.test, optarg) == false) {
-                LOG_ERR("Unable to parse --test cmd line");
+                printf("Unable to parse --test cmd line\n");
                 exit(1);
             }
             break;
 
         case 'k':
             if (ParseSkipTestCmdLine(cmdLine.skiptest, optarg) == false) {
-                LOG_ERR("Unable to parse --skiptest cmd line");
+                printf("Unable to parse --skiptest cmd line\n");
                 exit(1);
             }
             break;
 
         case 'f':
             if (ParseFormatCmdLine(cmdLine.format, optarg) == false) {
-                LOG_ERR("Unable to parse --format cmd line");
+                printf("Unable to parse --format cmd line\n");
                 exit(1);
             }
             break;
 
         case 'r':
             if (ParseRmmapCmdLine(cmdLine.rmmap, optarg) == false) {
-                LOG_ERR("Unable to parse --rmmap cmd line");
+                printf("Unable to parse --rmmap cmd line\n");
                 exit(1);
             }
             break;
 
         case 'w':
             if (ParseWmmapCmdLine(cmdLine.wmmap, optarg) == false) {
-                LOG_ERR("Unable to parse --wmmap cmd line");
+                printf("Unable to parse --wmmap cmd line\n");
                 exit(1);
             }
             break;
 
         case 'e':
             if (ParseErrorCmdLine(cmdLine.errRegs, optarg) == false) {
-                LOG_ERR("Unable to parse --error cmd line");
+                printf("Unable to parse --error cmd line\n");
                 exit(1);
             }
             break;
@@ -299,8 +299,8 @@ main(int argc, char *argv[])
                 }
             }
             if (deviceFound == false) {
-                LOG_ERR("/dev/%s is not among possible devices "
-                    "which can be tested", work.c_str());
+                printf("/dev/%s is not among possible devices "
+                    "which can be tested\n", work.c_str());
                 exit(1);
             }
             break;
@@ -308,10 +308,10 @@ main(int argc, char *argv[])
         case 'p':
             tmp = strtol(optarg, &endptr, 10);
             if (*endptr != '\0') {
-                LOG_ERR("Unrecognized --loop <count>=%s", optarg);
+                printf("Unrecognized --loop <count>=%s\n", optarg);
                 exit(1);
             } else if (tmp <= 0) {
-                LOG_ERR("Negative/zero values for --loop are unproductive");
+                printf("Negative/zero values for --loop are unproductive\n");
                 exit(1);
             }
             cmdLine.loop = tmp;
@@ -330,7 +330,7 @@ main(int argc, char *argv[])
 
         case 'q':
             if (ParseQueuesCmdLine(cmdLine.numQueues, optarg) == false) {
-                LOG_ERR("Unable to parse --queues cmd line");
+                printf("Unable to parse --queues cmd line\n");
                 exit(1);
             }
             break;
@@ -353,33 +353,35 @@ main(int argc, char *argv[])
     }
 
     if (optind < argc) {
-        fprintf(stderr, "Unable to parse all cmd line arguments: %d of %d: ",
+        printf("Unable to parse all cmd line arguments: %d of %d: ",
             optind, argc);
         while (optind < argc)
-            fprintf(stderr, "%s ", argv[optind++]);
-        fprintf(stderr, "\n");
+            printf("%s ", argv[optind++]);
+        printf("\n");
         Usage();
         exit(1);
     }
 
     // Execute cmd line options which require the test infrastructure
-    if (BuildTestFoundation(groups, fd, cmdLine) == false)
+    if (BuildTestFoundation(groups, fd, cmdLine) == false) {
+        printf("Unable to build the test foundation\n");
         exit(1);
+    }
 
     // Accessing hardware requires specific checks and inquiries before running
     if (accessingHdw) {
         BuildSingletons(fd, cmdLine);
 
-        LOG_NRM("Checking for unintended device under low powered states");
+        printf("Checking for unintended device under low powered states\n");
         if (gRegisters->Read(PCISPC_PMCS, regVal) == false) {
-            LOG_ERR("Mandatory PMCAP PCI capabilities is missing");
+            printf("Mandatory PMCAP PCI capabilities is missing\n");
             exit(1);
         } else if (regVal & 0x03) {
-            LOG_WARN("PCI power state not fully operational");
+            printf("PCI power state not fully operational\n");
         }
 
         if (FileSystem::SetRootDumpDir(cmdLine.dump) == false) {
-            LOG_ERR("Unable to establish \"%s\" dump directory",
+            printf("Unable to establish \"%s\" dump directory\n",
                 cmdLine.dump.c_str());
             exit(1);
         }
@@ -387,12 +389,12 @@ main(int argc, char *argv[])
         // Clean out any garbage in the dump directories
         FileSystem::SetBaseDumpDir(false);   // prep GrpPending
         if (FileSystem::PrepDumpDir() == false) {
-            LOG_ERR("Unable to establish GrpPending dump directory");
+            printf("Unable to establish GrpPending dump directory\n");
             exit(1);
         }
         FileSystem::SetBaseDumpDir(true);    // prep GrpInformative
         if (FileSystem::PrepDumpDir() == false) {
-            LOG_ERR("Unable to establish GrpInformative dump directory");
+            printf("Unable to establish GrpInformative dump directory\n");
             exit(1);
         }
     }
@@ -400,15 +402,15 @@ main(int argc, char *argv[])
 
     if (cmdLine.format.req) {
         if ((exitCode = !FormatDevice(cmdLine.format, fd))) {
-            LOG_ERR("FAILURE: Formatting device");
+            printf("FAILURE: Formatting device\n");
         } else {
-            LOG_NRM("SUCCESS: Formatting device");
+            printf("SUCCESS: Formatting device\n");
         }
     } else if (cmdLine.numQueues.req) {
         if ((exitCode = !SetFeaturesNumberOfQueues(cmdLine.numQueues, fd))) {
-            LOG_ERR("FAILURE: Setting number of queues");
+            printf("FAILURE: Setting number of queues\n");
         } else {
-            LOG_NRM("SUCCESS: Setting number of queues");
+            printf("SUCCESS: Setting number of queues\n");
         }
     } else if (cmdLine.summary) {
         for (size_t i = 0; i < groups.size(); i++) {
@@ -427,7 +429,7 @@ main(int argc, char *argv[])
 
         } else {    // user spec'd a group they are interested in
             if (cmdLine.detail.t.group >= groups.size()) {
-                LOG_ERR("Specified test group %ld does not exist",
+                printf("Specified test group %ld does not exist\n",
                     cmdLine.detail.t.group);
             } else {
                 for (size_t i = 0; i < groups.size(); i++) {
@@ -455,26 +457,23 @@ main(int argc, char *argv[])
         uint8_t *value = new uint8_t[cmdLine.rmmap.size];
         gRegisters->Read(cmdLine.rmmap.space, cmdLine.rmmap.size,
             cmdLine.rmmap.offset, cmdLine.rmmap.acc, value);
-        string result = gRegisters->FormatRegister(cmdLine.rmmap.space,
-            cmdLine.rmmap.size, cmdLine.rmmap.offset, value);
-        printf("%s\n", result.c_str());
     } else if (cmdLine.wmmap.req) {
         gRegisters->Write(cmdLine.wmmap.space, cmdLine.wmmap.size,
             cmdLine.wmmap.offset, cmdLine.wmmap.acc,
             (uint8_t *)(&cmdLine.wmmap.value));
     } else if (cmdLine.reset) {
         if ((exitCode = !gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY))) {
-            LOG_ERR("FAILURE: reset");
+            printf("FAILURE: reset\n");
         } else {
-            LOG_NRM("SUCCESS: reset");
+            printf("SUCCESS: reset\n");
         }
         // At this point we cannot enable the ctrlr because that requires
         // ACQ/ASQ's to be created, ctrlr simply won't become ready w/o these.
     } else if (cmdLine.test.req) {
         if ((exitCode = !ExecuteTests(cmdLine, groups))) {
-            LOG_ERR("FAILURE: testing");
+            printf("FAILURE: testing\n");
         } else {
-            LOG_NRM("SUCCESS: testing");
+            printf("SUCCESS: testing\n");
         }
     }
 

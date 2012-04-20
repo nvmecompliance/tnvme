@@ -126,10 +126,10 @@ IOQRollChkDiff_r10b::IOQRollChkDiff(uint32_t numEntriesIOSQ,
     for (uint32_t numEntries = 0; numEntries < (uint32_t)(MAX
         (iosq->GetNumEntries(), iocq->GetNumEntries()) + 2);
         numEntries++) {
+
         iosq->Send(writeCmd, uniqueId);
         iosq->Ring();
-        ReapAndVerifyCE(iocq,
-            (numEntries + 1) % iosq->GetNumEntries());
+        ReapAndVerifyCE(iocq, (numEntries + 1) % iosq->GetNumEntries());
     }
     VerifyQPointers(iosq, iocq);
 
@@ -138,7 +138,6 @@ IOQRollChkDiff_r10b::IOQRollChkDiff(uint32_t numEntriesIOSQ,
         iosq, asq, acq);
     Queues::DeleteIOCQToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
         iocq, asq, acq);
-
 }
 
 

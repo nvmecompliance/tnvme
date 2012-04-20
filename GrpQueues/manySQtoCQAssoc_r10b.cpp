@@ -21,7 +21,8 @@
 
 namespace GrpQueues {
 
-static uint32_t NumEntriesIOQ =    5;
+static uint32_t NumEntriesIOQ = 5;
+
 
 ManySQtoCQAssoc_r10b::ManySQtoCQAssoc_r10b(int fd, string grpName,
     string testName, ErrorRegs errRegs) :
@@ -84,6 +85,7 @@ ManySQtoCQAssoc_r10b::RunCoreTest()
      */
 
     uint16_t uniqueId;
+
     // Lookup objs which were created in a prior test within group
     SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
     SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
