@@ -108,21 +108,41 @@ Informative::GetFeaturesNumOfQueues() const
 }
 
 
-uint16_t
+uint32_t
 Informative::GetFeaturesNumOfIOCQs() const
 {
-    LOG_NRM("Max # of IOCQs alloc'd by DUT = %d",
-       (uint16_t)((mGetFeaturesNumOfQ >> 16) + 1));
-    return (uint16_t)((mGetFeaturesNumOfQ >> 16) + 1);
+    uint32_t work = ((mGetFeaturesNumOfQ >> 16) + (uint32_t)1);
+    LOG_NRM("Max # of IOCQs alloc'd by DUT = %d",work);
+
+    // This warning is to make people aware that although the Set Features cmd
+    // with ID=0x07 is based upon a 0-based number and theoretically states a
+    // device could support 0x10000 IOQ's, that in fact a device can never
+    // create that many. The Create IOQ cmd's only allow 16 bits to
+    // represent a QID and those are 1-based values. Thus QID 0x10000 is not
+    // possible and therefore 0x10000 IOQ's are not possible since IOQ's
+    // are defined to be those from 1 to 0xffff.
+    if (work > 0xffff)
+        LOG_WARN("Remember devices cannot support > 0xffff IOQ's");
+    return work;
 }
 
 
-uint16_t
+uint32_t
 Informative::GetFeaturesNumOfIOSQs() const
 {
-    LOG_NRM("Max # of IOSQs alloc'd by DUT = %d",
-        (uint16_t)((mGetFeaturesNumOfQ & 0xffff) + 1));
-    return (uint16_t)((mGetFeaturesNumOfQ & 0xffff) + 1);
+    uint32_t work = ((mGetFeaturesNumOfQ & 0xffff) + (uint32_t)1);
+    LOG_NRM("Max # of IOSQs alloc'd by DUT = %d", work);
+
+    // This warning is to make people aware that although the Set Features cmd
+    // with ID=0x07 is based upon a 0-based number and theoretically states a
+    // device could support 0x10000 IOQ's, that in fact a device can never
+    // create that many. The Create IOQ cmd's only allow 16 bits to
+    // represent a QID and those are 1-based values. Thus QID 0x10000 is not
+    // possible and therefore 0x10000 IOQ's are not possible since IOQ's
+    // are defined to be those from 1 to 0xffff.
+    if (work > 0xffff)
+        LOG_WARN("Remember devices cannot support > 0xffff IOQ's");
+    return work;
 }
 
 

@@ -80,9 +80,9 @@ public:
      */
     uint32_t GetFeaturesNumOfQueues() const;
     /// @return Derives the value from DW0 of the CE & converts to a 1-base val
-    uint16_t GetFeaturesNumOfIOCQs() const;
+    uint32_t GetFeaturesNumOfIOCQs() const;
     /// @return Derives the value from DW0 of the CE & converts to a 1-base val
-    uint16_t GetFeaturesNumOfIOSQs() const;
+    uint32_t GetFeaturesNumOfIOSQs() const;
 
     typedef enum {
         NS_BARE,
