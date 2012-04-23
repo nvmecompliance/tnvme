@@ -30,6 +30,7 @@
 #include "maxIOQ_r10b.h"
 #include "sqcqSizeMismatch_r10b.h"
 #include "qIdVariations_r10b.h"
+#include "illegalCreateQs_r10b.h"
 
 namespace GrpQueues {
 
@@ -61,6 +62,7 @@ GrpQueues::GrpQueues(size_t grpNum, SpecRev specRev, ErrorRegs errRegs,
         APPEND_TEST_AT_YLEVEL(MaxIOQ_r10b, fd, GrpQueues, errRegs)
         APPEND_TEST_AT_YLEVEL(SQCQSizeMismatch_r10b, fd, GrpQueues, errRegs)
         APPEND_TEST_AT_YLEVEL(QIDVariations_r10b, fd, GrpQueues, errRegs)
+        APPEND_TEST_AT_YLEVEL(IllegalCreateQs_r10b, fd, GrpQueues, errRegs)
 
         break;
 

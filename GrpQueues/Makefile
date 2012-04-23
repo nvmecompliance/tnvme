@@ -32,7 +32,8 @@ SRC =					\
 	illegalCreateOrder_r10b.cpp	\
 	maxIOQ_r10b.cpp			\
 	sqcqSizeMismatch_r10b.cpp	\
-	qIdVariations_r10b.cpp
+	qIdVariations_r10b.cpp		\
+	illegalCreateQs_r10b.cpp
 
 .SUFFIXES: .cpp
 
