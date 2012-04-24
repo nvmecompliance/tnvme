@@ -54,11 +54,10 @@ Cmd::Init(nvme_cmds cmdSet, uint8_t opcode, DataDir dataDir, uint16_t cmdSize)
     switch (cmdSet) {
     case CMD_ADMIN:
     case CMD_NVM:
-    case CMD_AON:
         mCmdSet = cmdSet;
         break;
     default:
-        throw FrmwkEx("Illegal cmd set specified: %d", cmdSet);
+        throw FrmwkEx(HERE, "Illegal cmd set specified: %d", cmdSet);
     }
 
     switch (dataDir) {
@@ -68,11 +67,11 @@ Cmd::Init(nvme_cmds cmdSet, uint8_t opcode, DataDir dataDir, uint16_t cmdSize)
         mDataDir = dataDir;
         break;
     default:
-        throw FrmwkEx("Illegal data direction specified: %d", dataDir);
+        throw FrmwkEx(HERE, "Illegal data direction specified: %d", dataDir);
     }
 
     if (cmdSize % sizeof(uint32_t) != 0)
-        throw FrmwkEx("Illegal cmd size specified: %d", cmdSize);
+        throw FrmwkEx(HERE, "Illegal cmd size specified: %d", cmdSize);
 
     // Cmd buffers shall be DWORD aligned according to NVME spec., however
     // user space only has option to spec. QWORD alignment.
@@ -85,7 +84,7 @@ uint32_t
 Cmd::GetDword(uint8_t whichDW) const
 {
     if (whichDW >= GetCmdSizeDW())
-        throw FrmwkEx("Cmd is not large enough to get requested value");
+        throw FrmwkEx(HERE, "Cmd is not large enough to get requested value");
 
     return ((uint32_t *)mCmdBuf->GetBuffer())[whichDW];
 }
@@ -95,9 +94,9 @@ uint16_t
 Cmd::GetWord(uint8_t whichDW, uint8_t dwOffset) const
 {
     if (whichDW >= GetCmdSizeDW())
-        throw FrmwkEx("Cmd is not large enough to get requested value");
+        throw FrmwkEx(HERE, "Cmd is not large enough to get requested value");
     else if (dwOffset > 1)
-        throw FrmwkEx("Illegal DW offset parameter passed: %d", dwOffset);
+        throw FrmwkEx(HERE, "Illegal DW offset parameter passed: %d", dwOffset);
 
     return (uint16_t)(GetDword(whichDW) >> (dwOffset * 16));
 }
@@ -107,9 +106,9 @@ uint8_t
 Cmd::GetByte(uint8_t whichDW, uint8_t dwOffset) const
 {
     if (whichDW >= GetCmdSizeDW())
-        throw FrmwkEx("Cmd is not large enough to get requested value");
+        throw FrmwkEx(HERE, "Cmd is not large enough to get requested value");
     else if (dwOffset > 3)
-        throw FrmwkEx("Illegal DW offset parameter passed: %d", dwOffset);
+        throw FrmwkEx(HERE, "Illegal DW offset parameter passed: %d", dwOffset);
 
     return (uint8_t)(GetDword(whichDW) >> (dwOffset * 8));
 }
@@ -119,9 +118,9 @@ bool
 Cmd::GetBit(uint8_t whichDW, uint8_t dwOffset) const
 {
     if (whichDW >= GetCmdSizeDW())
-        throw FrmwkEx("Cmd is not large enough to get requested value");
+        throw FrmwkEx(HERE, "Cmd is not large enough to get requested value");
     else if (dwOffset > 31)
-        throw FrmwkEx("Illegal DW offset parameter passed: %d", dwOffset);
+        throw FrmwkEx(HERE, "Illegal DW offset parameter passed: %d", dwOffset);
 
     return (GetDword(whichDW) & (0x00000001 << dwOffset));
 }
@@ -131,7 +130,7 @@ void
 Cmd::SetDword(uint32_t newVal, uint8_t whichDW)
 {
     if (whichDW >= GetCmdSizeDW())
-        throw FrmwkEx("Cmd is not large enough to set requested value");
+        throw FrmwkEx(HERE, "Cmd is not large enough to set requested value");
 
     uint32_t *dw = (uint32_t *)mCmdBuf->GetBuffer();
     dw[whichDW] = newVal;
@@ -142,11 +141,11 @@ void
 Cmd::SetWord(uint16_t newVal, uint8_t whichDW, uint8_t dwOffset)
 {
     if (whichDW >= GetCmdSizeDW()) {
-        throw FrmwkEx(
+        throw FrmwkEx(HERE, 
             "Cmd is not large enough (%d DWORDS) to set req'd DWORD %d",
             GetCmdSizeDW(), whichDW);
     } else if (dwOffset > 1) {
-        throw FrmwkEx("Illegal DW offset parameter passed: %d", dwOffset);
+        throw FrmwkEx(HERE, "Illegal DW offset parameter passed: %d", dwOffset);
     }
     uint32_t dw = GetDword(whichDW);
     dw &= ~(0x0000ffff << (dwOffset * 16));
@@ -159,11 +158,11 @@ void
 Cmd::SetByte(uint8_t newVal, uint8_t whichDW, uint8_t dwOffset)
 {
     if (whichDW >= GetCmdSizeDW()) {
-        throw FrmwkEx(
+        throw FrmwkEx(HERE, 
             "Cmd is not large enough (%d DWORDS) to set req'd DWORD %d",
             GetCmdSizeDW(), whichDW);
     } else if (dwOffset > 3) {
-        throw FrmwkEx("Illegal DW offset parameter passed: %d", dwOffset);
+        throw FrmwkEx(HERE, "Illegal DW offset parameter passed: %d", dwOffset);
     }
     uint32_t dw = GetDword(whichDW);
     dw &= ~(0x000000ff << (dwOffset * 8));
@@ -176,10 +175,11 @@ void
 Cmd::SetBit(bool newVal, uint8_t whichDW, uint8_t dwOffset)
 {
     if (whichDW >= GetCmdSizeDW()) {
-        throw FrmwkEx("Cmd is not large enough (%d DWORDS) to set req'd DWORD %d",
+        throw FrmwkEx(HERE,
+            "Cmd is not large enough (%d DWORDS) to set req'd DWORD %d",
             GetCmdSizeDW(), whichDW);
     } else if (dwOffset > 31) {
-        throw FrmwkEx("Illegal DW offset parameter passed: %d", dwOffset);
+        throw FrmwkEx(HERE, "Illegal DW offset parameter passed: %d", dwOffset);
     }
     uint32_t dw = GetDword(whichDW);
     dw &= ~(0x00000001 << dwOffset);
@@ -246,7 +246,7 @@ Cmd::Dump(DumpFilename filename, string fileHdr) const
     FILE *fp;
 
     if ((fp = fopen(filename.c_str(), "a")) == NULL)
-        throw FrmwkEx("Failed to open file: %s", filename.c_str());
+        throw FrmwkEx(HERE, "Failed to open file: %s", filename.c_str());
 
     fprintf(fp, "This file: %s\n", filename.c_str());
     fprintf(fp, "%s\n\n", fileHdr.c_str());

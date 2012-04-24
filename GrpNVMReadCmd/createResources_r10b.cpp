@@ -96,13 +96,13 @@ CreateResources_r10b::RunCoreTest()
 
     gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
-        throw FrmwkEx();
+        throw FrmwkEx(HERE);
 
     {
         uint64_t maxIOQEntries;
         // Determine the max IOQ entries supported
         if (gRegisters->Read(CTLSPC_CAP, maxIOQEntries) == false)
-            throw FrmwkEx("Unable to determine MQES");
+            throw FrmwkEx(HERE, "Unable to determine MQES");
 
         maxIOQEntries &= CAP_MQES;
         maxIOQEntries += 1;      // convert to 1-based

@@ -61,9 +61,9 @@ SQ::Init(uint16_t qId, uint16_t entrySize, uint32_t numEntries, uint16_t cqId)
 
     LOG_NRM("Allocating contiguous SQ memory in dnvme");
     if (numEntries < 2) {
-        throw FrmwkEx("Number elements breaches spec requirement");
+        throw FrmwkEx(HERE, "Number elements breaches spec requirement");
     } else if (gRegisters->Read(CTLSPC_CAP, work) == false) {
-        throw FrmwkEx("Unable to determine MQES");
+        throw FrmwkEx(HERE, "Unable to determine MQES");
     }
 
     // Detect if doing something that looks suspicious/incorrect/illegal
@@ -79,7 +79,7 @@ SQ::Init(uint16_t qId, uint16_t entrySize, uint32_t numEntries, uint16_t cqId)
         if (gCtrlrConfig->IsStateEnabled()) {
             // At best this will cause tnvme to seg fault or a kernel crash
             // The NVME spec states unpredictable outcomes will occur.
-            throw FrmwkEx(
+            throw FrmwkEx(HERE, 
                 "Creating an ASQ while ctrlr is enabled is a shall not");
         }
 
@@ -95,7 +95,7 @@ SQ::Init(uint16_t qId, uint16_t entrySize, uint32_t numEntries, uint16_t cqId)
             GetNumEntries());
 
         if ((ret = ioctl(mFd, NVME_IOCTL_CREATE_ADMN_Q, &q)) < 0) {
-            throw FrmwkEx(
+            throw FrmwkEx(HERE, 
                 "Q Creation failed by dnvme with error: 0x%02X", ret);
         }
     } else {
@@ -111,7 +111,7 @@ SQ::Init(uint16_t qId, uint16_t entrySize, uint32_t numEntries, uint16_t cqId)
     // Contiguous Q's are created in dnvme and must be mapped back to user space
     mContigBuf = KernelAPI::mmap(GetQSize(), GetQId(), KernelAPI::MMR_SQ);
     if (mContigBuf == NULL)
-        throw FrmwkEx("Unable to mmap contig memory to user space");
+        throw FrmwkEx(HERE, "Unable to mmap contig memory to user space");
 }
 
 
@@ -129,9 +129,9 @@ SQ::Init(uint16_t qId, uint16_t entrySize, uint32_t numEntries,
 
     LOG_NRM("Allocating discontiguous SQ memory in tnvme");
     if (numEntries < 2) {
-        throw FrmwkEx("Number elements breaches spec requirement");
+        throw FrmwkEx(HERE, "Number elements breaches spec requirement");
     } else if (gRegisters->Read(CTLSPC_CAP, work) == false) {
-        throw FrmwkEx("Unable to determine MQES");
+        throw FrmwkEx(HERE, "Unable to determine MQES");
     }
 
     // Detect if doing something that looks suspicious/incorrect/illegal
@@ -144,22 +144,22 @@ SQ::Init(uint16_t qId, uint16_t entrySize, uint32_t numEntries,
 
 
     if (memBuffer == MemBuffer::NullMemBufferPtr) {
-        throw FrmwkEx("Passing an uninitialized SharedMemBufferPtr");
+        throw FrmwkEx(HERE, "Passing an uninitialized SharedMemBufferPtr");
     } else if (GetIsAdmin()) {
         // There are no appropriate methods for an NVME device to report ASC/ACQ
         // creation errors, thus since ASC/ASQ may only be contiguous then don't
         // allow these problems to be injected, at best they will only succeed
         // to seg fault the app or crash the kernel.
-        throw FrmwkEx("Illegal memory alignment will corrupt");
+        throw FrmwkEx(HERE, "Illegal memory alignment will corrupt");
     } else  if (memBuffer->GetBufSize() < GetQSize()) {
         LOG_ERR("Q buffer memory ambiguous to passed size params");
-        throw FrmwkEx("Mem buffer size = %d, Q size = %d",
+        throw FrmwkEx(HERE, "Mem buffer size = %d, Q size = %d",
             memBuffer->GetBufSize(), GetQSize());
     } else if (memBuffer->GetAlignment() != sysconf(_SC_PAGESIZE)) {
         // Nonconformance to page alignment will seg fault the app or crash
         // the kernel. This state is not testable since no errors can be
         // reported by hdw, thus disallow this attempt.
-        throw FrmwkEx("Q content memory shall be page aligned");
+        throw FrmwkEx(HERE, "Q content memory shall be page aligned");
     }
 
     // Zero out the content memory so the P-bit correlates to a newly alloc'd Q.
@@ -184,7 +184,7 @@ SQ::CreateIOSQ(struct nvme_prep_sq &q)
     int ret;
 
     if ((ret = ioctl(mFd, NVME_IOCTL_PREPARE_SQ_CREATION, &q)) < 0) {
-        throw FrmwkEx(
+        throw FrmwkEx(HERE, 
             "Q Creation failed by dnvme with error: 0x%02X", ret);
     }
 }
@@ -203,7 +203,7 @@ SQ::GetQMetrics()
     getQMetrics.buffer = (uint8_t *)&qMetrics;
 
     if ((ret = ioctl(mFd, NVME_IOCTL_GET_Q_METRICS, &getQMetrics)) < 0) {
-        throw FrmwkEx(
+        throw FrmwkEx(HERE, 
             "Get Q metrics failed by dnvme with error: 0x%02X", ret);
     }
     return qMetrics;
@@ -225,7 +225,7 @@ SQ::PeekSE(uint16_t indexPtr)
             return *dataPtr;
     }
 
-    throw FrmwkEx("Unable to locate index within Q");
+    throw FrmwkEx(HERE, "Unable to locate index within Q");
 }
 
 
@@ -285,7 +285,7 @@ SQ::Send(SharedCmdPtr cmd, uint16_t &uniqueId)
         cmdSet.c_str(), cmd->GetOpcode(), io.data_buf_size, io.q_id);
 
     if ((rc = ioctl(mFd, NVME_IOCTL_SEND_64B_CMD, &io)) < 0)
-        throw FrmwkEx("Error sending cmd, rc =%d", rc);
+        throw FrmwkEx(HERE, "Error sending cmd, rc =%d", rc);
 
     // Allow tnvme to learn of the unique cmd ID which was assigned by dnvme
     uniqueId = io.unique_id;
@@ -300,5 +300,5 @@ SQ::Ring()
 
     LOG_NRM("Ring doorbell for SQ %d", sqId);
     if ((rc = ioctl(mFd, NVME_IOCTL_RING_SQ_DOORBELL, sqId)) < 0)
-        throw FrmwkEx("Error ringing doorbell, rc =%d", rc);
+        throw FrmwkEx(HERE, "Error ringing doorbell, rc =%d", rc);
 }

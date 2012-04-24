@@ -79,7 +79,7 @@ CreateIOCQ::Init(const SharedIOCQPtr iocq)
             enum nvme_irq_type irq;
             uint16_t numIrqs;
             if (gCtrlrConfig->GetIrqScheme(irq, numIrqs) == false)
-                throw FrmwkEx("Unable to retrieve current IRQ scheme");
+                throw FrmwkEx(HERE, "Unable to retrieve current IRQ scheme");
 
             switch (irq) {
             case INT_MSI_MULTI:
@@ -91,7 +91,7 @@ CreateIOCQ::Init(const SharedIOCQPtr iocq)
                 ;   // Required to be zero
                 break;
             default:
-                throw FrmwkEx("Unsupported IRQ scheme, what to do?");
+                throw FrmwkEx(HERE, "Unsupported IRQ scheme, what to do?");
             }
         } else {
             dword11 &= ~0x00000002;

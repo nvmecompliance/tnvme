@@ -24,8 +24,8 @@
 namespace GrpInformative {
 
 
-CreateResources_r10b::CreateResources_r10b(int fd, string grpName, string testName,
-    ErrorRegs errRegs) :
+CreateResources_r10b::CreateResources_r10b(int fd, string grpName,
+    string testName, ErrorRegs errRegs) :
     Test(fd, grpName, testName, SPECREV_10b, errRegs)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -87,7 +87,7 @@ CreateResources_r10b::RunCoreTest()
 
     gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
-        throw FrmwkEx();
+        throw FrmwkEx(HERE);
 }
 
 }   // namespace

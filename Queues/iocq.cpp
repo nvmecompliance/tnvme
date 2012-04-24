@@ -47,7 +47,7 @@ IOCQ::Init(uint16_t qId, uint32_t numEntries, bool irqEnabled, uint16_t irqVec)
         qId, numEntries, irqEnabled, irqVec);
 
     if (gCtrlrConfig->GetIOCQES(entrySize) == false)
-        throw FrmwkEx("Unable to learn IOCQ entry size");
+        throw FrmwkEx(HERE, "Unable to learn IOCQ entry size");
 
     // Nothing to gain by specifying an element size which the DUT doesn't
     // support, the outcome is undefined, might succeed in crashing the kernel
@@ -56,13 +56,13 @@ IOCQ::Init(uint16_t qId, uint32_t numEntries, bool irqEnabled, uint16_t irqVec)
     uint8_t maxElemSize = (uint8_t)((value >> 4) & 0x0f);
     uint8_t minElemSize = (uint8_t)((value >> 0) & 0x0f);
     if ((entrySize < minElemSize) || (entrySize > maxElemSize)) {
-        throw FrmwkEx("Reg CC.IOCQES yields a bad element size: 0x%04X",
+        throw FrmwkEx(HERE, "Reg CC.IOCQES yields a bad element size: 0x%04X",
             (1 << entrySize));
     }
 
     // Detect if doing something that looks suspicious/incorrect/illegal
     if (gRegisters->Read(CTLSPC_CAP, work) == false)
-        throw FrmwkEx("Unable to determine MQES");
+        throw FrmwkEx(HERE, "Unable to determine MQES");
 
     work &= CAP_MQES;
     work += 1;      // convert to 1-based
@@ -86,7 +86,7 @@ IOCQ::Init(uint16_t qId, uint32_t numEntries,
     LOG_NRM("IOSQ::Init (qId,numEntry,irqEnable,irqVec) = (%d,%d,%d,%d)",
         qId, numEntries, irqEnabled, irqVec);
     if (gRegisters->Read(CTLSPC_CAP, work) == false)
-        throw FrmwkEx("Unable to determine MQES");
+        throw FrmwkEx(HERE, "Unable to determine MQES");
 
     // Detect if doing something that looks suspicious/incorrect/illegal
     work &= CAP_MQES;
@@ -97,7 +97,7 @@ IOCQ::Init(uint16_t qId, uint32_t numEntries,
     }
 
     if (gCtrlrConfig->GetIOCQES(entrySize) == false)
-        throw FrmwkEx("Unable to learn IOCQ entry size");
+        throw FrmwkEx(HERE, "Unable to learn IOCQ entry size");
 
     // Nothing to gain by specifying an element size which the DUT doesn't
     // support, the outcome is undefined, might succeed in crashing the kernel
@@ -106,7 +106,7 @@ IOCQ::Init(uint16_t qId, uint32_t numEntries,
     uint8_t maxElemSize = (uint8_t)((value >> 4) & 0x0f);
     uint8_t minElemSize = (uint8_t)((value >> 0) & 0x0f);
     if ((entrySize < minElemSize) || (entrySize > maxElemSize)) {
-        throw FrmwkEx("Reg CC.IOCQES yields a bad element size: 0x%04X",
+        throw FrmwkEx(HERE, "Reg CC.IOCQES yields a bad element size: 0x%04X",
             (1 << entrySize));
     }
     CQ::Init(qId, (1 << entrySize), numEntries, memBuffer,

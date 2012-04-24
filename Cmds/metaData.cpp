@@ -38,10 +38,10 @@ void
 MetaData::AllocMetaBuffer()
 {
     if (GetDataDir() == DATADIR_NONE)
-        throw FrmwkEx("Meta buffer assoc, but no data direction");
+        throw FrmwkEx(HERE, "Meta buffer assoc, but no data direction");
 
     if (gRsrcMngr->ReserveMetaBuf(mMetaData) == false)
-        throw FrmwkEx("Meta data alloc request denied");
+        throw FrmwkEx(HERE, "Meta data alloc request denied");
 }
 
 
@@ -75,7 +75,7 @@ MetaData::SetMetaDataPattern(DataPattern dataPat, uint64_t initVal,
 
     length = (length == UINT32_MAX) ? GetMetaBufferSize() : length;
     if ((length + offset) > GetMetaBufferSize())
-        throw FrmwkEx("Length exceeds total meta buffer allocated size");
+        throw FrmwkEx(HERE, "Length exceeds total meta buffer allocated size");
 
     switch (dataPat)
     {
@@ -134,7 +134,7 @@ MetaData::SetMetaDataPattern(DataPattern dataPat, uint64_t initVal,
         break;
 
     default:
-        throw FrmwkEx("Unsupported data pattern %d", dataPat);
+        throw FrmwkEx(HERE, "Unsupported data pattern %d", dataPat);
     }
 }
 
@@ -143,7 +143,7 @@ bool
 MetaData::CompareMetaBuffer(SharedMemBufferPtr compTo)
 {
     if (compTo->GetBufSize() > GetMetaBufferSize()) {
-        throw FrmwkEx("Compare buffer size > max meta buff size: %d > %d",
+        throw FrmwkEx(HERE, "Compare buffer size > max meta buff size: %d > %d",
             compTo->GetBufSize(), GetMetaBufferSize());
     }
 

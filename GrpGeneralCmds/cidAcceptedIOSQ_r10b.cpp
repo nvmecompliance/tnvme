@@ -89,7 +89,7 @@ CIDAcceptedIOSQ_r10b::RunCoreTest()
      * \endverbatim
      */
     if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
-        throw FrmwkEx();
+        throw FrmwkEx(HERE);
 
     // Create ACQ and ASQ objects which have test life time
     SharedACQPtr acq = CAST_TO_ACQ(SharedACQPtr(new ACQ(mFd)))
@@ -101,7 +101,7 @@ CIDAcceptedIOSQ_r10b::RunCoreTest()
 
     gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
-        throw FrmwkEx();
+        throw FrmwkEx(HERE);
 
     vector<SharedIOSQPtr> iosqs;
     SharedIOCQPtr iocq;
@@ -129,7 +129,7 @@ CIDAcceptedIOSQ_r10b::RunCoreTest()
                     "iosq.fail." + (*iosq)->GetQId()), "Dump Entire IOSQ");
                 iocq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName,
                     "iocq.fail." + iocq->GetQId()), "Dump Entire IOCQ");
-                throw FrmwkEx("curCID(%d) != (prevCID + 1)(%d)", curCID,
+                throw FrmwkEx(HERE, "curCID(%d) != (prevCID + 1)(%d)", curCID,
                     (prevCID + 1));
             }
         }
@@ -193,7 +193,7 @@ CIDAcceptedIOSQ_r10b::CreateWriteCmd()
     if (namspcData.type != Informative::NS_BARE) {
         LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
         if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
-            throw FrmwkEx();
+            throw FrmwkEx(HERE);
     }
 
     SharedMemBufferPtr wrMemBuf = SharedMemBufferPtr(new MemBuffer());
@@ -209,7 +209,7 @@ CIDAcceptedIOSQ_r10b::CreateWriteCmd()
     } else if (namspcData.type == Informative::NS_E2E) {
         writeCmd->AllocMetaBuffer();
         LOG_ERR("Deferring E2E namspc work to the future");
-        throw FrmwkEx("Need to add CRC's to correlate to buf pattern");
+        throw FrmwkEx(HERE, "Need to add CRC's to correlate to buf pattern");
     }
 
     writeCmd->SetPrpBuffer(prpBitmask, wrMemBuf);
@@ -234,7 +234,7 @@ CIDAcceptedIOSQ_r10b::ReapVerifyCID(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
             "Dump Entire IOCQ");
         iosq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "iosq.fail"),
             "Dump Entire IOSQ");
-        throw FrmwkEx("Unable to see CEs for issued cmd");
+        throw FrmwkEx(HERE, "Unable to see CEs for issued cmd");
     }
 
     SharedMemBufferPtr ceMem = SharedMemBufferPtr(new MemBuffer());
@@ -243,7 +243,7 @@ CIDAcceptedIOSQ_r10b::ReapVerifyCID(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
             "Dump Entire IOCQ");
         iosq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "iosq.fail"),
             "Dump Entire IOSQ");
-        throw FrmwkEx("Unable to reap on IOCQ");
+        throw FrmwkEx(HERE, "Unable to reap on IOCQ");
     }
 
     union CE *ce = (union CE *)ceMem->GetBuffer();
@@ -254,7 +254,8 @@ CIDAcceptedIOSQ_r10b::ReapVerifyCID(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
             "Dump Entire IOCQ");
         iosq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "iosq.fail"),
             "Dump Entire IOSQ");
-        throw FrmwkEx("Received CID %d but expected %d", ce->n.CID, expCID);
+        throw FrmwkEx(HERE, "Received CID %d but expected %d", ce->n.CID,
+            expCID);
     }
 
     if (ce->n.SQID != iosq->GetQId()) {
@@ -262,7 +263,8 @@ CIDAcceptedIOSQ_r10b::ReapVerifyCID(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
             "Dump Entire IOCQ");
         iosq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "iosq.fail"),
             "Dump Entire IOSQ");
-        throw FrmwkEx("Rx'd SDID %d but expt'd %d", ce->n.SQID, iosq->GetQId());
+        throw FrmwkEx(HERE, "Rx'd SDID %d but expt'd %d", ce->n.SQID,
+            iosq->GetQId());
     }
 
 }

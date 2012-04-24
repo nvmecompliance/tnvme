@@ -82,7 +82,7 @@ DeleteIOQContig_r10b::RunCoreTest()
      *    run prior, or Both test CreateIOQContigIrq_r10b &
      *    CreateIOQDiscontigIrq_r10b has run prior
      * 2) An individual test within this group cannot run, the entire group
-     *    must be executed every time. Each subsequent test relies on the prior.s.
+     *    must be executed every time. Each subsequent test relies on the prior.
      * \endverbatim
      */
 

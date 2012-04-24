@@ -27,8 +27,8 @@
 namespace GrpNVMReadCmd {
 
 
-InvalidNamspc_r10b::InvalidNamspc_r10b(int fd, string mGrpName, string mTestName,
-    ErrorRegs errRegs) :
+InvalidNamspc_r10b::InvalidNamspc_r10b(int fd, string mGrpName,
+    string mTestName, ErrorRegs errRegs) :
     Test(fd, mGrpName, mTestName, SPECREV_10b, errRegs)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -133,16 +133,16 @@ InvalidNamspc_r10b::SendCmdToHdw(SharedSQPtr sq, SharedCQPtr cq,
         work = str(boost::format(
             "Unable to see any CE's in CQ %d, dump entire CQ") % cq->GetQId());
         cq->Dump(
-            FileSystem::PrepDumpFile(mGrpName, mTestName, "cq." + cmd->GetName(),
-            qualify), work);
-        throw FrmwkEx("Unable to see CE for issued cmd");
+            FileSystem::PrepDumpFile(mGrpName, mTestName, "cq." +
+            cmd->GetName(), qualify), work);
+        throw FrmwkEx(HERE, "Unable to see CE for issued cmd");
     } else if (numCE != 1) {
         work = str(boost::format(
             "Unable to see any CE's in CQ %d, dump entire CQ") % cq->GetQId());
         cq->Dump(
-            FileSystem::PrepDumpFile(mGrpName, mTestName, "cq." + cmd->GetName(),
-            qualify), work);
-        throw FrmwkEx("1 cmd caused %d CE's to arrive in CQ %d",
+            FileSystem::PrepDumpFile(mGrpName, mTestName, "cq." +
+            cmd->GetName(), qualify), work);
+        throw FrmwkEx(HERE, "1 cmd caused %d CE's to arrive in CQ %d",
             numCE, cq->GetQId());
     }
 
@@ -158,7 +158,7 @@ InvalidNamspc_r10b::SendCmdToHdw(SharedSQPtr sq, SharedCQPtr cq,
         cq->Dump(
             FileSystem::PrepDumpFile(mGrpName, mTestName, "cq.error", qualify),
             work);
-        throw FrmwkEx(work);
+        throw FrmwkEx(HERE, work);
     }
     union CE ce = cq->PeekCE(cqMetrics.head_ptr);
     ProcessCE::Validate(ce, CESTAT_INVAL_NAMSPC);  // throws upon error

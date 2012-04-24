@@ -48,7 +48,7 @@ ProcessCE::Validate(union CE &ce, CEStat status)
     if ((ce.n.SF.b.SCT != mCEStatMetrics[status].sct) ||
         (ce.n.SF.b.SC  != mCEStatMetrics[status].sc)) {
 
-        throw FrmwkEx(
+        throw FrmwkEx(HERE, 
             "Expected (SCT:SC) 0x%02X:0x%02X, but detected 0x%02X:0x%02X",
             mCEStatMetrics[status].sct, mCEStatMetrics[status].sc,
             ce.n.SF.b.SCT, ce.n.SF.b.SC);
@@ -56,7 +56,7 @@ ProcessCE::Validate(union CE &ce, CEStat status)
                (ce.n.SF.b.SC  != mCEStatMetrics[CESTAT_SUCCESS].sc)) {
 
         if (ce.n.SF.b.M) {
-            throw FrmwkEx(
+            throw FrmwkEx(HERE, 
                 "Illegal 'M' bit set while CE indicates success");
         }
     }
@@ -74,7 +74,7 @@ ProcessCE::ValidateDetailed(union CE &ce, StatbyBits &status)
         (status.SC  != ce.n.SF.b.SC) ||
         (status.SCT != ce.n.SF.b.SCT)) {
 
-        throw FrmwkEx(
+        throw FrmwkEx(HERE, 
             "Expected (DNR:M:P:SCT:SC) 0x%02X:0x%01X:0x%01X:0x%02X:0x%02X, "
             "but detected x%02X:0x%01X:0x%01X:0x%02X:0x%02X",
             status.DNR, status.M, status.P, status.SC, status.SCT,
@@ -84,7 +84,7 @@ ProcessCE::ValidateDetailed(union CE &ce, StatbyBits &status)
                (ce.n.SF.b.SC  != mCEStatMetrics[CESTAT_SUCCESS].sc)) {
 
         if (ce.n.SF.b.M) {
-            throw FrmwkEx(
+            throw FrmwkEx(HERE, 
                 "Illegal 'M' bit set while CE indicates success");
         }
     }

@@ -80,7 +80,7 @@ InitialStateAdmin_r10b::RunCoreTest()
      *  \endverbatim
      */
     if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
-        throw FrmwkEx();
+        throw FrmwkEx(HERE);
 
     // Create ACQ and ASQ objects which have test life time
     SharedACQPtr acq = CAST_TO_ACQ(SharedACQPtr(new ACQ(mFd)))
@@ -102,13 +102,13 @@ InitialStateAdmin_r10b::ValidateInitialStateAdmin(SharedACQPtr acq,
     for (uint16_t i = 0; i < 2; i++) {
         gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
         if (gCtrlrConfig->SetState(ST_ENABLE) == false)
-            throw FrmwkEx();
+            throw FrmwkEx(HERE);
 
         SubmitIdentifyCmd(acq, asq);
         VerifyHeadAndTailDoorBells(acq, asq);
 
         if (gCtrlrConfig->SetState(ST_DISABLE) == false)
-            throw FrmwkEx();
+            throw FrmwkEx(HERE);
     }
 }
 
@@ -145,14 +145,14 @@ InitialStateAdmin_r10b::VerifyHeadAndTailDoorBells(SharedACQPtr acq,
         asq->Dump(
             FileSystem::PrepDumpFile(mGrpName, mTestName, "asq", "tail_ptr"),
             "SQ Metrics Tail Pointer Inconsistent");
-        throw FrmwkEx("Expected  ASQ.tail_ptr = 0x0001 but actual "
+        throw FrmwkEx(HERE, "Expected  ASQ.tail_ptr = 0x0001 but actual "
             "ASQ.tail_ptr  = 0x%04X", asqMetrics.tail_ptr);
     }
     if (acqMetrics.head_ptr != 1) {
         acq->Dump(
             FileSystem::PrepDumpFile(mGrpName, mTestName, "acq", "head_ptr"),
             "CQ Metrics Head Pointer Inconsistent");
-        throw FrmwkEx("Expected ACQ.head_ptr = 0x0001 but actual "
+        throw FrmwkEx(HERE, "Expected ACQ.head_ptr = 0x0001 but actual "
             "ACQ.head_ptr = 0x%04X", acqMetrics.head_ptr);
     }
     // The CQ's metrics after reaping holds head_ptr plus 1 needed
@@ -161,7 +161,7 @@ InitialStateAdmin_r10b::VerifyHeadAndTailDoorBells(SharedACQPtr acq,
         acq->Dump(
             FileSystem::PrepDumpFile(mGrpName, mTestName, "acq", "CE.SQHD"),
             "CE SQ Head Pointer Inconsistent");
-        throw FrmwkEx(
+        throw FrmwkEx(HERE, 
             "Expected CE.SQHD = 0x0001 in ACQ completion entry but actual "
             "CE.SQHD  = 0x%04X", ce.n.SQHD);
     }

@@ -97,7 +97,7 @@ WriteDataPat_r10b::WriteDataPattern()
         WRITE_DATA_PAT_NUM_BLKS);
     ConstSharedIdentifyPtr namSpcPtr = gInformative->GetIdentifyCmdNamspc(1);
     if (namSpcPtr == Identify::NullIdentifyPtr)
-        throw FrmwkEx("Namespace #1 must exist");
+        throw FrmwkEx(HERE, "Namespace #1 must exist");
     uint64_t lbaDataSize = namSpcPtr->GetLBADataSize();
 
 
@@ -132,7 +132,7 @@ WriteDataPat_r10b::WriteDataPattern()
 
     // To run the discontig part of this test, the hdw must support that feature
     if (gRegisters->Read(CTLSPC_CAP, regVal) == false) {
-        throw FrmwkEx("Unable to determine Q memory requirements");
+        throw FrmwkEx(HERE, "Unable to determine Q memory requirements");
     } else if (regVal & CAP_CQR) {
         LOG_NRM("Unable to utilize discontig Q's, DUT requires contig");
         return;
@@ -168,12 +168,13 @@ WriteDataPat_r10b::SendToIOSQ(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
         iocq->Dump(
             FileSystem::PrepDumpFile(mGrpName, mTestName, "iocq", qualifier),
             "Unable to see any CE's in IOCQ, dump entire CQ contents");
-        throw FrmwkEx("Unable to see completion of cmd");
+        throw FrmwkEx(HERE, "Unable to see completion of cmd");
     } else if (numCE != 1) {
         iocq->Dump(
             FileSystem::PrepDumpFile(mGrpName, mTestName, "iocq", qualifier),
             "Unable to see any CE's in IOCQ, dump entire CQ contents");
-        throw FrmwkEx("The IOCQ should only have 1 CE as a result of a cmd");
+        throw FrmwkEx(HERE,
+            "The IOCQ should only have 1 CE as a result of a cmd");
     }
     iocq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "iocq", qualifier),
         "Just B4 reaping IOCQ, dump entire CQ contents");
@@ -188,7 +189,7 @@ WriteDataPat_r10b::SendToIOSQ(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
     if ((numReaped = iocq->Reap(ceRemain, ceMemIOCQ, isrCount, numCE, true))
         != 1) {
 
-        throw FrmwkEx("Verified there was 1 CE, but reaping produced %d",
+        throw FrmwkEx(HERE, "Verified there was 1 CE, but reaping produced %d",
             numReaped);
     }
     LOG_NRM("The reaped CE is...");

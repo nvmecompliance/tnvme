@@ -75,7 +75,7 @@ MemBuffer::InitOffset1stPage(uint32_t bufSize, uint32_t offset1stPg,
         "Init buffer; size: 0x%08X, offset: 0x%08X, init: %d, value: 0x%02X",
         bufSize, offset1stPg, initMem, initVal);
     if (offset1stPg % sizeof(uint32_t) != 0) {
-        throw FrmwkEx("Offset into page 1 not aligned to: 0x%02lX",
+        throw FrmwkEx(HERE, "Offset into page 1 not aligned to: 0x%02lX",
             sizeof(uint32_t));
     }
 
@@ -92,7 +92,7 @@ MemBuffer::InitOffset1stPage(uint32_t bufSize, uint32_t offset1stPg,
     err = posix_memalign((void **)&mRealBaseAddr, align, realBufSize);
     if (err) {
         InitMemberVariables();
-        throw FrmwkEx("Memory allocation failed with error code: 0x%02X",
+        throw FrmwkEx(HERE, "Memory allocation failed with error code: 0x%02X",
             err);
     }
     mVirBaseAddr = (mRealBaseAddr + offset1stPg);
@@ -115,7 +115,7 @@ MemBuffer::InitAlignment(uint32_t bufSize, uint32_t align, bool initMem,
     LOG_NRM("Init buffer; size: 0x%08X, align: 0x%08X, init: %d, value: 0x%02X",
         bufSize, align, initMem, initVal);
     if (align % sizeof(void *) != 0) {
-        throw FrmwkEx("Req'd alignment 0x%08X, is not modulo 0x%02lX",
+        throw FrmwkEx(HERE, "Req'd alignment 0x%08X, is not modulo 0x%02lX",
             align, sizeof(void *));
     }
 
@@ -128,7 +128,7 @@ MemBuffer::InitAlignment(uint32_t bufSize, uint32_t align, bool initMem,
     err = posix_memalign((void **)&mRealBaseAddr, align, mVirBufSize);
     if (err) {
         InitMemberVariables();
-        throw FrmwkEx("Memory allocation failed with error code: 0x%02X",
+        throw FrmwkEx(HERE, "Memory allocation failed with error code: 0x%02X",
             err);
     }
     mVirBaseAddr = mRealBaseAddr;
@@ -154,7 +154,7 @@ MemBuffer::Init(uint32_t bufSize, bool initMem, uint8_t initVal)
     mRealBaseAddr = new (nothrow) uint8_t[mVirBufSize];
     if (mRealBaseAddr == NULL) {
         InitMemberVariables();
-        throw FrmwkEx("Memory allocation failed");
+        throw FrmwkEx(HERE, "Memory allocation failed");
     }
     mVirBaseAddr = mRealBaseAddr;
     mAlignment = 0;
@@ -191,7 +191,7 @@ MemBuffer::SetDataPattern(DataPattern dataPat, uint64_t initVal,
 
     length = (length == UINT32_MAX) ? GetBufSize() : length;
     if ((length + offset) > GetBufSize())
-        throw FrmwkEx("Length exceeds total buffer size");
+        throw FrmwkEx(HERE, "Length exceeds total buffer size");
 
     switch (dataPat)
     {
@@ -252,7 +252,7 @@ MemBuffer::SetDataPattern(DataPattern dataPat, uint64_t initVal,
         break;
 
     default:
-        throw FrmwkEx("Unsupported data pattern %d", dataPat);
+        throw FrmwkEx(HERE, "Unsupported data pattern %d", dataPat);
     }
 }
 
@@ -261,7 +261,7 @@ bool
 MemBuffer::Compare(SharedMemBufferPtr compTo)
 {
     if (compTo->GetBufSize() != GetBufSize()) {
-        throw FrmwkEx("Compare buffers not same size: %d != %d",
+        throw FrmwkEx(HERE, "Compare buffers not same size: %d != %d",
             compTo->GetBufSize(), GetBufSize());
     }
 

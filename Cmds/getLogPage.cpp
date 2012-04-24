@@ -80,7 +80,7 @@ GetLogPage::SetNUMD(uint16_t numDW)
     numDWAvail = ((errLogPgEntries * ERRINFO_DATA_SIZE) / sizeof(uint32_t));
     if (numDWAvail > numDW) {
         // per the spec this action is undef'd, so don't allow it
-        throw FrmwkEx(
+        throw FrmwkEx(HERE, 
             "Request %d DWORDS > %lld available yields undef'd results",
             numDW, (unsigned long long)numDWAvail);
     }
@@ -128,7 +128,7 @@ GetLogPage::Dump(DumpFilename filename, string fileHdr) const
 
     // Reopen the file and append the same data in a different format
     if ((fp = fopen(filename.c_str(), "a")) == NULL)
-        throw FrmwkEx("Failed to open file: %s", filename.c_str());
+        throw FrmwkEx(HERE, "Failed to open file: %s", filename.c_str());
 
     fprintf(fp, "\n------------------------------------------------------\n");
     fprintf(fp, "----Detailed decoding of the cmd payload as follows---\n");
@@ -174,7 +174,7 @@ GetLogPage::Dump(FILE *fp, int field, GetLogPageDataType *logData) const
     data = &((GetROPrpBuffer())[logData[field].offset]);
     if ((logData[field].length + logData[field].offset) > GetPrpBufferSize()) {
         LOG_ERR("Detected illegal definition in XXXLOG_TABLE");
-        throw FrmwkEx("Reference calc (%d): %d + %d >= %ld", field,
+        throw FrmwkEx(HERE, "Reference calc (%d): %d + %d >= %ld", field,
             logData[field].length, logData[field].offset, GetPrpBufferSize());
     }
 

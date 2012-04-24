@@ -79,7 +79,7 @@ IllegalCreateOrder_r10b::RunCoreTest()
     const uint32_t NumEntriesIOQ = 2;
 
     if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
-        throw FrmwkEx();
+        throw FrmwkEx(HERE);
 
     // Create Admin Q Objects for test lifetime
     SharedACQPtr acq = SharedACQPtr(new ACQ(mFd));
@@ -88,7 +88,7 @@ IllegalCreateOrder_r10b::RunCoreTest()
     asq->Init(5);
 
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
-        throw FrmwkEx();
+        throw FrmwkEx(HERE);
 
     uint8_t iosqes = (gInformative->GetIdentifyCmdCtrlr()->
         GetValue(IDCTRLRCAP_SQES) & 0xf);

@@ -129,9 +129,10 @@ Queues::CreateIOCQDiscontigToHdw(string grpName, string testName,
 
     // Validate the memory correlates to the other params passed in
     if (gCtrlrConfig->GetIOCQES(ioqes) == false)
-        throw FrmwkEx();
+        throw FrmwkEx(HERE);
     if (qBackedMem->GetBufSize() < (uint32_t)((1 << ioqes) * numEntries)) {
-        throw FrmwkEx("Supplied buffer size = 0x%08X; inconsistent w/ creation",
+        throw FrmwkEx(HERE,
+            "Supplied buffer size = 0x%08X; inconsistent w/ creation",
             ((1 << ioqes) * numEntries));
     }
 
@@ -177,9 +178,10 @@ Queues::CreateIOSQDiscontigToHdw(string grpName, string testName,
 
     // Validate the memory correlates to the other params passed in
     if (gCtrlrConfig->GetIOCQES(ioqes) == false)
-        throw FrmwkEx();
+        throw FrmwkEx(HERE);
     if (qBackedMem->GetBufSize() < (uint32_t)((1 << ioqes) * numEntries)) {
-        throw FrmwkEx("Supplied buffer size = 0x%08X; inconsistent w/ creation",
+        throw FrmwkEx(HERE,
+            "Supplied buffer size = 0x%08X; inconsistent w/ creation",
             ((1 << ioqes) * numEntries));
     }
 
@@ -260,8 +262,10 @@ bool
 Queues::SupportDiscontigIOQ()
 {
     uint64_t regVal;
-    if (gRegisters->Read(CTLSPC_CAP, regVal) == false)
-        throw FrmwkEx("Failed reading controller capabilities (CAP) register.");
+    if (gRegisters->Read(CTLSPC_CAP, regVal) == false) {
+        throw FrmwkEx(HERE,
+            "Failed reading controller capabilities (CAP) register.");
+    }
 
     if (regVal & CAP_CQR)
         return false;

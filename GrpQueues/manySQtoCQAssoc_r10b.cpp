@@ -94,7 +94,7 @@ ManySQtoCQAssoc_r10b::RunCoreTest()
         uint64_t maxIOQEntries;
         // Determine the max IOQ entries supported
         if (gRegisters->Read(CTLSPC_CAP, maxIOQEntries) == false)
-            throw FrmwkEx("Unable to determine MQES");
+            throw FrmwkEx(HERE, "Unable to determine MQES");
         maxIOQEntries &= CAP_MQES;
         maxIOQEntries += 1;      // convert to 1-based
         if (maxIOQEntries < (uint64_t)NumEntriesIOQ) {
@@ -155,7 +155,7 @@ ManySQtoCQAssoc_r10b::SetWriteCmd()
     if (namspcData.type != Informative::NS_BARE) {
         LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
         if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
-            throw FrmwkEx();
+            throw FrmwkEx(HERE);
     }
 
     LOG_NRM("Create data pattern to write to media");
@@ -172,7 +172,7 @@ ManySQtoCQAssoc_r10b::SetWriteCmd()
     } else if (namspcData.type == Informative::NS_E2E) {
         writeCmd->AllocMetaBuffer();
         LOG_ERR("Deferring E2E namspc work to the future");
-        throw FrmwkEx("Need to add CRC's to correlate to buf pattern");
+        throw FrmwkEx(HERE, "Need to add CRC's to correlate to buf pattern");
     }
 
     writeCmd->SetPrpBuffer(prpBitmask, dataPat);
@@ -200,11 +200,11 @@ ManySQtoCQAssoc_r10b::ReapIOCQAndVerifyCE(SharedIOCQPtr iocq, uint32_t numTil,
 
             iocq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "missing"),
                 "Unable to see completion of cmd");
-            throw FrmwkEx();
+            throw FrmwkEx(HERE);
         } else if (numCE == 0) {
             iocq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "missing"),
                 "Unable to see completion of cmd");
-            throw FrmwkEx("IOCQ should have one new CE for each IOSQ");
+            throw FrmwkEx(HERE, "IOCQ should have one new CE for each IOSQ");
         }
 
         LOG_NRM("The CQ's metrics before reaping holds head_ptr");
@@ -216,7 +216,7 @@ ManySQtoCQAssoc_r10b::ReapIOCQAndVerifyCE(SharedIOCQPtr iocq, uint32_t numTil,
         if ((numReaped = iocq->Reap(ceRemain, ceMemIOCQ, isrCount, 1, true))
             != 1) {
 
-            throw FrmwkEx("Requested to reap 1 CE, but reaping produced %d",
+            throw FrmwkEx(HERE, "Requested to reap 1 CE, but reaping produced %d",
                 numReaped);
         }
 
@@ -225,7 +225,7 @@ ManySQtoCQAssoc_r10b::ReapIOCQAndVerifyCE(SharedIOCQPtr iocq, uint32_t numTil,
 
         LOG_NRM("Validate CE of IOSQ ID=%d", ce.n.SQID);
         if (ce.n.SQHD != mSQIDToSQHDVector[ce.n.SQID]) {
-            throw FrmwkEx("Expected CE.SQHD = 0x%04X in IOCQ CE but actual "
+            throw FrmwkEx(HERE, "Expected CE.SQHD = 0x%04X in IOCQ CE but actual "
                 "CE.SQHD  = 0x%04X", mSQIDToSQHDVector[ce.n.SQID], ce.n.SQHD);
         }
 
@@ -235,7 +235,7 @@ ManySQtoCQAssoc_r10b::ReapIOCQAndVerifyCE(SharedIOCQPtr iocq, uint32_t numTil,
     // Validate all SQIDs submitted have arrived.
     for (uint32_t it = 0; it < mSQIDToSQHDVector.size(); it++) {
         if (mSQIDToSQHDVector[it] != USHRT_MAX) {
-            throw FrmwkEx("Never received CE for SQID %d", it);
+            throw FrmwkEx(HERE, "Never received CE for SQID %d", it);
         }
     }
 }

@@ -318,8 +318,10 @@ ParseFormatCmdLine(Format &format, const char *optarg)
                             continue;
 
                         case xmlpp::TextReader::Element:
-                            if (ExtractXMLValue(xmlFile, cmd, nodeName) == false)
+                            if (ExtractXMLValue(xmlFile, cmd, nodeName) ==
+                                false) {
                                 return false;
+                            }
                             break;
 
                         case xmlpp::TextReader::EndElement:

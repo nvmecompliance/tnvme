@@ -40,13 +40,13 @@ void
 PrpData::SetPrpBuffer(send_64b_bitmask prpFields, SharedMemBufferPtr memBuffer)
 {
     if (GetDataDir() == DATADIR_NONE) {
-        throw FrmwkEx("PRP buffer assoc, but no data direction");
+        throw FrmwkEx(HERE, "PRP buffer assoc, but no data direction");
     } else if (prpFields & ~mPrpAllowed) {
-        throw FrmwkEx(
+        throw FrmwkEx(HERE, 
             "Attempting to set PRP field to disallowed value: 0x%04X",
             prpFields);
     } else if (mBufRO != NULL) {
-        throw FrmwkEx(
+        throw FrmwkEx(HERE, 
             "Buffer already setup as RO, cannot also setup RW buffer");
     }
 
@@ -67,17 +67,17 @@ PrpData::SetPrpBuffer(send_64b_bitmask prpFields, uint8_t const *memBuffer,
     uint64_t bufSize)
 {
     if (GetDataDir() == DATADIR_NONE) {
-        throw FrmwkEx("PRP buffer assoc, but no data direction");
+        throw FrmwkEx(HERE, "PRP buffer assoc, but no data direction");
     } else if (prpFields & ~mPrpAllowed) {
-        throw FrmwkEx(
+        throw FrmwkEx(HERE, 
             "Attempting to set PRP field to disallowed value: 0x%04X",
             prpFields);
     } else if (mBufRW != MemBuffer::NullMemBufferPtr) {
-        throw FrmwkEx(
+        throw FrmwkEx(HERE, 
             "Buffer already setup as RW, cannot also setup RO buffer");
     } else if (((bufSize == 0) && (memBuffer != NULL)) ||
                ((bufSize != 0) && (memBuffer == NULL))) {
-        throw FrmwkEx("Ambiguous; memBuffer = %p, size = %llu", memBuffer,
+        throw FrmwkEx(HERE, "Ambiguous; memBuffer = %p, size = %llu", memBuffer,
             (long long unsigned int)bufSize);
     }
 
@@ -88,8 +88,10 @@ PrpData::SetPrpBuffer(send_64b_bitmask prpFields, uint8_t const *memBuffer,
     // You most likely want to gCtrlrConfig->SetState(DISABLE_XXXX) and then
     // completely destroy the Create IOQ cmd and the delete the IOQ object
     // representing an IOQ. And finally re-create it all over again is safest.
-    if (mBufRO != NULL)
-        throw FrmwkEx("Buffer already setup as RO, not allowing reconfig");
+    if (mBufRO != NULL) {
+        throw FrmwkEx(HERE,
+            "Buffer already setup as RO, not allowing reconfig");
+    }
 
     mBufRO = memBuffer;
     mBufSize = bufSize;
@@ -123,7 +125,8 @@ PrpData::SetPrpAllowed(send_64b_bitmask allowedBitmask)
         (MASK_PRP1_PAGE | MASK_PRP1_LIST | MASK_PRP2_PAGE | MASK_PRP2_LIST);
 
     if (allowedBitmask & ~PRP_SPECIFIC_BITS) {
-        throw FrmwkEx("Allowed PRP bitmask violated strict values: 0x%04X",
+        throw FrmwkEx(HERE,
+            "Allowed PRP bitmask violated strict values: 0x%04X",
             allowedBitmask);
     }
     mPrpAllowed = allowedBitmask;

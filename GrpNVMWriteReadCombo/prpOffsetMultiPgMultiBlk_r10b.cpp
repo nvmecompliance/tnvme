@@ -94,7 +94,7 @@ PRPOffsetMultiPgMultiBlk_r10b::RunCoreTest()
     bool enableLog;
 
     if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
-        throw FrmwkEx();
+        throw FrmwkEx(HERE);
 
     // Create ACQ and ASQ objects which have test life time
     SharedACQPtr acq = CAST_TO_ACQ(SharedACQPtr(new ACQ(mFd)))
@@ -106,7 +106,7 @@ PRPOffsetMultiPgMultiBlk_r10b::RunCoreTest()
 
     gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
-        throw FrmwkEx();
+        throw FrmwkEx(HERE);
 
     SharedIOCQPtr iocq;
     SharedIOSQPtr iosq;
@@ -115,7 +115,7 @@ PRPOffsetMultiPgMultiBlk_r10b::RunCoreTest()
     // Compute memory page size from CC.MPS.
     uint8_t mpsRegVal;
     if (gCtrlrConfig->GetMPS(mpsRegVal) == false)
-        throw FrmwkEx("Unable to get MPS value from CC.");
+        throw FrmwkEx(HERE, "Unable to get MPS value from CC.");
     uint64_t ccMPS = (uint64_t)(1 << (mpsRegVal + 12));
 
     Informative::Namspc namspcData = gInformative->Get1stBareMetaE2E();
@@ -126,7 +126,7 @@ PRPOffsetMultiPgMultiBlk_r10b::RunCoreTest()
     if (namspcData.type != Informative::NS_BARE) {
         if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS * (ccMPS / lbaDataSize))
             == false) {
-            throw FrmwkEx("Unable to allocate Meta buffers.");
+            throw FrmwkEx(HERE, "Unable to allocate Meta buffers.");
         }
     }
 
@@ -149,7 +149,7 @@ PRPOffsetMultiPgMultiBlk_r10b::RunCoreTest()
         writeCmd->AllocMetaBuffer();
         readCmd->AllocMetaBuffer();
         LOG_ERR("Deferring E2E namspc work to the future");
-        throw FrmwkEx("Need to add CRC's to correlate to buf pattern");
+        throw FrmwkEx(HERE, "Need to add CRC's to correlate to buf pattern");
     }
 
     DataPattern dataPat;
@@ -277,7 +277,7 @@ PRPOffsetMultiPgMultiBlk_r10b::VerifyDataPat(SharedReadPtr readCmd,
         wrPayload->Dump(
             FileSystem::PrepDumpFile(mGrpName, mTestName, "WrittenPayload"),
             "Data read from media miscompared from written");
-        throw FrmwkEx("Data miscompare");
+        throw FrmwkEx(HERE, "Data miscompare");
     }
 
     if (readCmd->GetMetaBuffer() != NULL) {
@@ -292,7 +292,7 @@ PRPOffsetMultiPgMultiBlk_r10b::VerifyDataPat(SharedReadPtr readCmd,
             metaWrPayload->Dump(
                 FileSystem::PrepDumpFile(mGrpName, mTestName, "MetaWrPayload"),
                 "Meta Data read from media miscompared from written");
-            throw FrmwkEx("Meta Data miscompare");
+            throw FrmwkEx(HERE, "Meta Data miscompare");
         }
     }
 }

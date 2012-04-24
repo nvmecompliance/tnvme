@@ -63,7 +63,7 @@ Registers::Registers(int fd, SpecRev specRev)
 
     mFd = fd;
     if (mFd < 0)
-        throw FrmwkEx("Object created with a bad FD=%d", fd);
+        throw FrmwkEx(HERE, "Object created with a bad FD=%d", fd);
 
     mSpecRev = specRev;
     DiscoverPciCapabilities();

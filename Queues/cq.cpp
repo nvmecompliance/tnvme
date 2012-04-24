@@ -60,13 +60,13 @@ CQ::Init(uint16_t qId, uint16_t entrySize, uint32_t numEntries,
 
     LOG_NRM("Allocating contiguous CQ memory in dnvme");
     if (numEntries < 2)
-        throw FrmwkEx("Number elements breaches spec requirement");
+        throw FrmwkEx(HERE, "Number elements breaches spec requirement");
 
     if (GetIsAdmin()) {
         if (gCtrlrConfig->IsStateEnabled()) {
             // At best this will cause tnvme to seg fault or a kernel crash
             // The NVME spec states unpredictable outcomes will occur.
-            throw FrmwkEx(
+            throw FrmwkEx(HERE, 
                 "Creating an ASQ while ctrlr is enabled is a shall not");
         }
 
@@ -80,8 +80,10 @@ CQ::Init(uint16_t qId, uint16_t entrySize, uint32_t numEntries,
         LOG_NRM("Init contig ACQ: (id, entrySize, numEntries) = (%d, %d, %d)",
             GetQId(), GetEntrySize(), GetNumEntries());
 
-        if ((ret = ioctl(mFd, NVME_IOCTL_CREATE_ADMN_Q, &q)) < 0)
-            throw FrmwkEx("Q Creation failed by dnvme with error: 0x%02X", ret);
+        if ((ret = ioctl(mFd, NVME_IOCTL_CREATE_ADMN_Q, &q)) < 0) {
+            throw FrmwkEx(HERE, "Q Creation failed by dnvme with error: 0x%02X",
+                ret);
+        }
     } else {
         // We are creating a contiguous IOCQ.
         struct nvme_prep_cq q;
@@ -94,7 +96,7 @@ CQ::Init(uint16_t qId, uint16_t entrySize, uint32_t numEntries,
     // Contiguous Q's are created in dnvme and must be mapped back to user space
     mContigBuf = KernelAPI::mmap(GetQSize(), GetQId(), KernelAPI::MMR_CQ);
     if (mContigBuf == NULL)
-        throw FrmwkEx("Unable to mmap contig memory to user space");
+        throw FrmwkEx(HERE, "Unable to mmap contig memory to user space");
 }
 
 
@@ -111,25 +113,25 @@ CQ::Init(uint16_t qId, uint16_t entrySize, uint32_t numEntries,
 
     LOG_NRM("Allocating discontiguous CQ memory in tnvme");
     if (numEntries < 2)
-        throw FrmwkEx("Number elements breaches spec requirement");
+        throw FrmwkEx(HERE, "Number elements breaches spec requirement");
 
     if (memBuffer == MemBuffer::NullMemBufferPtr) {
-        throw FrmwkEx("Passing an uninitialized SharedMemBufferPtr");
+        throw FrmwkEx(HERE, "Passing an uninitialized SharedMemBufferPtr");
     } else if (GetIsAdmin()) {
         // There are no appropriate methods for an NVME device to report ASC/ACQ
         // creation errors, thus since ASC/ASQ may only be contiguous then don't
         // allow these problems to be injected, at best they will only succeed
         // to seg fault the app or crash the kernel.
-        throw FrmwkEx("Illegal memory alignment will corrupt");
+        throw FrmwkEx(HERE, "Illegal memory alignment will corrupt");
     } else  if (memBuffer->GetBufSize() < GetQSize()) {
         LOG_ERR("Q buffer memory ambiguous to passed size params");
-        throw FrmwkEx("Mem buffer size = %d, Q size = %d",
+        throw FrmwkEx(HERE, "Mem buffer size = %d, Q size = %d",
             memBuffer->GetBufSize(), GetQSize());
     } else if (memBuffer->GetAlignment() != sysconf(_SC_PAGESIZE)) {
         // Nonconformance to page alignment will seg fault the app or crash
         // the kernel. This state is not testable since no errors can be
         // reported by hdw, thus disallow this attempt.
-        throw FrmwkEx("Q content memory shall be page aligned");
+        throw FrmwkEx(HERE, "Q content memory shall be page aligned");
     }
 
     // Zero out the content memory so the P-bit correlates to a newly alloc'd Q.
@@ -156,8 +158,10 @@ CQ::CreateIOCQ(struct nvme_prep_cq &q)
         q.contig ? "contig" : "discontig", GetQId(), GetEntrySize(),
         GetNumEntries());
 
-    if ((ret = ioctl(mFd, NVME_IOCTL_PREPARE_CQ_CREATION, &q)) < 0)
-        throw FrmwkEx("Q Creation failed by dnvme with error: 0x%02X", ret);
+    if ((ret = ioctl(mFd, NVME_IOCTL_PREPARE_CQ_CREATION, &q)) < 0) {
+        throw FrmwkEx(HERE, "Q Creation failed by dnvme with error: 0x%02X",
+            ret);
+    }
 }
 
 
@@ -174,7 +178,7 @@ CQ::GetQMetrics()
     getQMetrics.buffer = (uint8_t *)&qMetrics;
 
     if ((ret = ioctl(mFd, NVME_IOCTL_GET_Q_METRICS, &getQMetrics)) < 0) {
-        throw FrmwkEx(
+        throw FrmwkEx(HERE, 
             "Get Q metrics failed by dnvme with error: 0x%02X", ret);
     }
     return qMetrics;
@@ -211,7 +215,7 @@ CQ::PeekCE(uint16_t indexPtr)
             return *dataPtr;
     }
 
-    throw FrmwkEx("Unable to locate index within Q");
+    throw FrmwkEx(HERE, "Unable to locate index within Q");
 }
 
 
@@ -244,7 +248,7 @@ CQ::ReapInquiry(uint32_t &isrCount, bool reportOn0)
 
     inq.q_id = GetQId();
     if ((rc = ioctl(mFd, NVME_IOCTL_REAP_INQUIRY, &inq)) < 0)
-        throw FrmwkEx("Error during reap inquiry, rc =%d", rc);
+        throw FrmwkEx(HERE, "Error during reap inquiry, rc =%d", rc);
 
     isrCount = inq.isr_count;
     if (inq.num_remaining || reportOn0) {
@@ -266,7 +270,7 @@ CQ::ReapInquiryWaitAny(uint32_t ms, uint32_t &numCE, uint32_t &isrCount)
 
     struct timeval initial;
     if (gettimeofday(&initial, NULL) != 0)
-        throw FrmwkEx("Cannot retrieve system time");
+        throw FrmwkEx(HERE, "Cannot retrieve system time");
 
     while (CalcTimeout(ms, initial, delta) == false) {
         if ((numCE = ReapInquiry(isrCount)) != 0) {
@@ -302,7 +306,7 @@ CQ::ReapInquiryWaitSpecify(uint32_t ms, uint32_t numTil, uint32_t &numCE,
 
     struct timeval initial;
     if (gettimeofday(&initial, NULL) != 0)
-        throw FrmwkEx("Cannot retrieve system time");
+        throw FrmwkEx(HERE, "Cannot retrieve system time");
 
     while (CalcTimeout(ms, initial, delta) == false) {
         if ((numCE = ReapInquiry(isrCount)) != 0) {
@@ -334,7 +338,7 @@ CQ::CalcTimeout(uint32_t ms, struct timeval &initial, uint32_t &delta)
     struct timeval current;
 
     if (gettimeofday(&current, NULL) != 0)
-        throw FrmwkEx("Cannot retrieve system time");
+        throw FrmwkEx(HERE, "Cannot retrieve system time");
 
     time_t initial_us = (((time_t)1000000 * initial.tv_sec) + initial.tv_usec);
     time_t current_us = (((time_t)1000000 * current.tv_sec) + current.tv_usec);
@@ -381,7 +385,7 @@ CQ::Reap(uint32_t &ceRemain, SharedMemBufferPtr memBuffer, uint32_t &isrCount,
     reap.size = memBuffer->GetBufSize();
     reap.buffer = memBuffer->GetBuffer();
     if ((rc = ioctl(mFd, NVME_IOCTL_REAP, &reap)) < 0)
-        throw FrmwkEx("Error during reaping CE's, rc =%d", rc);
+        throw FrmwkEx(HERE, "Error during reaping CE's, rc =%d", rc);
 
     isrCount = reap.isr_count;
     ceRemain = reap.num_remaining;
@@ -402,7 +406,7 @@ CQ::Dump(DumpFilename filename, string fileHdr)
 
     // Reopen the file and append the same data in a different format
     if ((fp = fopen(filename.c_str(), "a")) == NULL)
-        throw FrmwkEx("Failed to open file: %s", filename.c_str());
+        throw FrmwkEx(HERE, "Failed to open file: %s", filename.c_str());
 
     fprintf(fp, "\nFurther decoding details of the above raw dump follow:\n");
     for (uint32_t i = 0; i < GetNumEntries(); i++) {

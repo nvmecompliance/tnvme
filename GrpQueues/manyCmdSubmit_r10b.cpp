@@ -94,7 +94,7 @@ ManyCmdSubmit_r10b::RunCoreTest()
     uint64_t ctrlCapReg;
     if (gRegisters->Read(CTLSPC_CAP, ctrlCapReg) == false) {
         LOG_ERR("Unable to determine MQES");
-        throw FrmwkEx();
+        throw FrmwkEx(HERE);
     }
     uint32_t maxIOQEntries = (uint32_t)(ctrlCapReg & CAP_MQES);
     maxIOQEntries += 1;     // convert to 1-based.
@@ -123,12 +123,12 @@ ManyCmdSubmit_r10b::RunCoreTest()
             iocq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName,
                 "iocq.reqpinq." + writeCmd->GetName()), "Dump Entire IOCQ");
             LogCEAndCQMetrics(iocq);
-            throw FrmwkEx("Unable to see CEs for issued cmds #%d", x);
+            throw FrmwkEx(HERE, "Unable to see CEs for issued cmds #%d", x);
         } else if (numCE != x) {
             iocq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName,
                 "iocq.reqpinq." + writeCmd->GetName()), "Dump Entire IOCQ");
             LogCEAndCQMetrics(iocq);
-            throw FrmwkEx("The IOCQ should only have #%d CE's as a result "
+            throw FrmwkEx(HERE, "The IOCQ should only have #%d CE's as a result "
                 "of #%d simultaneous cmds but found #%d", x, x, numCE);
         }
 
@@ -137,7 +137,7 @@ ManyCmdSubmit_r10b::RunCoreTest()
             iocq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName,
                 "iocq.reap." + writeCmd->GetName()), "Dump Entire IOCQ");
             LogCEAndCQMetrics(iocq);
-            throw FrmwkEx("Unable to reap on IOCQ #%d. Reaped #%d of #%d",
+            throw FrmwkEx(HERE, "Unable to reap on IOCQ #%d. Reaped #%d of #%d",
                 IOQ_ID, numReaped, x);
         }
 
@@ -173,7 +173,7 @@ ManyCmdSubmit_r10b::SetWriteCmd()
     if (namspcData.type != Informative::NS_BARE) {
         LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
         if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
-            throw FrmwkEx();
+            throw FrmwkEx(HERE);
     }
 
     SharedMemBufferPtr dataPat = SharedMemBufferPtr(new MemBuffer());
@@ -190,7 +190,7 @@ ManyCmdSubmit_r10b::SetWriteCmd()
         writeCmd->AllocMetaBuffer();
         LOG_ERR("Deferring E2E namspc work to the future");
         LOG_ERR("Need to add CRC's to correlate to buf pattern");
-        throw FrmwkEx();
+        throw FrmwkEx(HERE);
     }
 
     writeCmd->SetPrpBuffer(prpBitmask, dataPat);

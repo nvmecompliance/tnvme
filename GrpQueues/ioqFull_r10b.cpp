@@ -89,7 +89,7 @@ IOQFull_r10b::RunCoreTest()
     // Determine the max IOQ entries supported
     if (gRegisters->Read(CTLSPC_CAP, ctrlCapReg) == false) {
         LOG_ERR("Unable to determine MQES");
-        throw FrmwkEx();
+        throw FrmwkEx(HERE);
     }
     uint32_t maxIOQEntries = (ctrlCapReg & CAP_MQES);
     maxIOQEntries += 1;      // convert to 1-based
@@ -179,13 +179,13 @@ IOQFull_r10b::IOQFull(uint32_t numIOSQEntries, uint32_t numIOCQEntries,
             work = str(boost::format("Dump entire CQ %d") % iocq->GetQId());
             iocq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName,
                 "iocq." + writeCmd->GetName()), work);
-            throw FrmwkEx("Unable to see CE for issued cmd #%d", nCmds + 1);
+            throw FrmwkEx(HERE, "Unable to see CE for issued cmd #%d", nCmds + 1);
 
         } else if (numCE != nCmds + 1) {
             work = str(boost::format("Dump entire CQ %d") % iocq->GetQId());
             iocq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName,
                 "iocq." + writeCmd->GetName()), work);
-            throw FrmwkEx("Missing last CE, #%d cmds of #%d received",
+            throw FrmwkEx(HERE, "Missing last CE, #%d cmds of #%d received",
                 nCmds + 1, numCE);
         }
     }
@@ -206,7 +206,7 @@ IOQFull_r10b::SetWriteCmd()
     if (namspcData.type != Informative::NS_BARE) {
         LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
         if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
-            throw FrmwkEx();
+            throw FrmwkEx(HERE);
     }
 
     LOG_NRM("Create data pattern to write to media");
@@ -224,7 +224,7 @@ IOQFull_r10b::SetWriteCmd()
         writeCmd->AllocMetaBuffer();
         LOG_ERR("Deferring E2E namspc work to the future");
         LOG_ERR("Need to add CRC's to correlate to buf pattern");
-        throw FrmwkEx();
+        throw FrmwkEx(HERE);
     }
 
     writeCmd->SetPrpBuffer(prpBitmask, dataPat);

@@ -91,9 +91,9 @@ uint64_t
 Identify::GetValue(IdCtrlrCap field) const
 {
     if (field >= IDCTRLRCAP_FENCE)
-        throw FrmwkEx("Unknown ctrlr cap field: %d", field);
+        throw FrmwkEx(HERE, "Unknown ctrlr cap field: %d", field);
     else if (GetCNS() == false)
-        throw FrmwkEx("This cmd does not contain a ctrlr data struct");
+        throw FrmwkEx(HERE, "This cmd does not contain a ctrlr data struct");
 
     return GetValue(field, mIdCtrlrCapMetrics);
 }
@@ -103,9 +103,9 @@ uint64_t
 Identify::GetValue(IdNamespc field) const
 {
     if (field >= IDNAMESPC_FENCE)
-        throw FrmwkEx("Unknown namespace field: %d", field);
+        throw FrmwkEx(HERE, "Unknown namespace field: %d", field);
     else if (GetCNS())
-        throw FrmwkEx("This cmd does not contain a namespace data struct");
+        throw FrmwkEx(HERE,"This cmd does not contain a namspc data struct");
 
     return GetValue(field, mIdNamespcType);
 }
@@ -118,12 +118,12 @@ Identify::GetValue(int field, IdentifyDataType *idData) const
     uint64_t value = 0;
 
     if (idData[field].length > sizeof(uint64_t)) {
-        throw FrmwkEx("sizeof(%s) > %ld bytes", idData[field].desc,
+        throw FrmwkEx(HERE, "sizeof(%s) > %ld bytes", idData[field].desc,
             sizeof(uint64_t));
     } else if ((idData[field].length + idData[field].offset) >=
         GetPrpBufferSize()) {
         LOG_ERR("Detected illegal def in IDxxxxx_TABLE or buffer is to small");
-        throw FrmwkEx("Reference calc (%d): %d + %d >= %ld", field,
+        throw FrmwkEx(HERE, "Reference calc (%d): %d + %d >= %ld", field,
             idData[field].length, idData[field].offset, GetPrpBufferSize());
     }
 
@@ -145,7 +145,7 @@ Identify::Dump(DumpFilename filename, string fileHdr) const
 
     // Reopen the file and append the same data in a different format
     if ((fp = fopen(filename.c_str(), "a")) == NULL)
-        throw FrmwkEx("Failed to open file: %s", filename.c_str());
+        throw FrmwkEx(HERE, "Failed to open file: %s", filename.c_str());
 
     fprintf(fp, "\n------------------------------------------------------\n");
     fprintf(fp, "----Detailed decoding of the cmd payload as follows---\n");
@@ -177,7 +177,7 @@ Identify::Dump(FILE *fp, int field, IdentifyDataType *idData) const
     data = &((GetROPrpBuffer())[idData[field].offset]);
     if ((idData[field].length + idData[field].offset) > GetPrpBufferSize()) {
         LOG_ERR("Detected illegal definition in IDxxxxx_TABLE");
-        throw FrmwkEx("Reference calc (%d): %d + %d >= %ld", field,
+        throw FrmwkEx(HERE, "Reference calc (%d): %d + %d >= %ld", field,
             idData[field].length, idData[field].offset, GetPrpBufferSize());
     }
 
@@ -240,7 +240,7 @@ Identify::GetLBAFormat() const
     LBAFormat lbaFormat;
 
     if (GetCNS())
-        throw FrmwkEx("This cmd does not contain a namespace data struct");
+        throw FrmwkEx(HERE, "This cmd does not contain a namspc data struct");
 
     uint64_t flbas = GetValue(IDNAMESPC_FLBAS);
     uint8_t formatIdx = (uint8_t)(flbas & 0x0f);
@@ -270,7 +270,7 @@ uint32_t
 Identify::GetMaxDataXferSize() const
 {
     if (GetCNS() == false)
-        throw FrmwkEx("This cmd does not contain a ctrlr data struct");
+        throw FrmwkEx(HERE, "This cmd does not contain a ctrlr data struct");
 
     uint8_t mdts = GetValue(IDCTRLRCAP_MDTS);
     if (mdts == 0)
@@ -278,7 +278,7 @@ Identify::GetMaxDataXferSize() const
 
     uint64_t ctrlCap;
     if (gRegisters->Read(CTLSPC_CAP, ctrlCap) == false)
-       throw FrmwkEx("Unable to determine CAP.MPSMIN");
+       throw FrmwkEx(HERE, "Unable to determine CAP.MPSMIN");
 
     uint32_t mpsMin = (uint32_t)(1 << (12 + ((ctrlCap & CAP_MPSMIN) >> 48)));
     uint32_t mdtsCalc = (1 << mdts) * mpsMin;

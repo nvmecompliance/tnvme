@@ -89,7 +89,7 @@ DumpGetFeatures_r10b::RunCoreTest()
         acq->Dump(
             FileSystem::PrepDumpFile(mGrpName, mTestName, "acq",
             "notEmpty"), "Test assumption have not been met");
-        throw FrmwkEx(
+        throw FrmwkEx(HERE, 
             "The ACQ should not have any CE's waiting before testing");
     }
 
@@ -131,14 +131,14 @@ DumpGetFeatures_r10b::SendGetFeaturesNumOfQueues(SharedASQPtr asq,
             FileSystem::PrepDumpFile(mGrpName, mTestName, "acq",
             "GetFeat.NumOfQueue"),
             "Unable to see any CE's in CQ0, dump entire CQ contents");
-        throw FrmwkEx("Unable to see completion of get features cmd");
+        throw FrmwkEx(HERE, "Unable to see completion of get features cmd");
     } else if (numCE != 1) {
         acq->Dump(
             FileSystem::PrepDumpFile(mGrpName, mTestName, "acq",
             "GetFeat.NumOfQueue"),
             "Unable to see any CE's in CQ0, dump entire CQ contents");
         LOG_ERR("The ACQ should only have 1 CE as a result of a cmd");
-        throw FrmwkEx();
+        throw FrmwkEx(HERE);
     }
     acq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "acq",
         "GetFeat.NumOfQueue"),
@@ -158,8 +158,8 @@ DumpGetFeatures_r10b::SendGetFeaturesNumOfQueues(SharedASQPtr asq,
         if ((numReaped = acq->Reap(ceRemain, ceMemCap, isrCount, numCE, true))
             != 1) {
 
-            throw FrmwkEx("Verified there was 1 CE, but reaping produced %d",
-                numReaped);
+            throw FrmwkEx(HERE,
+                "Verified there was 1 CE, but reaping produced %d", numReaped);
         }
         LOG_NRM("The reaped CE is...");
         acq->LogCE(acqMetrics.head_ptr);

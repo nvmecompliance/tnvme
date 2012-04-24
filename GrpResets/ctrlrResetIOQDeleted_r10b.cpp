@@ -88,11 +88,11 @@ CtrlrResetIOQDeleted_r10b::RunCoreTest()
     uint32_t numEntriesIOQ = 10;
 
     if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
-        throw FrmwkEx();
+        throw FrmwkEx(HERE);
 
     // Verify the min requirements for this test are supported by DUT
     if (gRegisters->Read(CTLSPC_CAP, work) == false)
-        throw FrmwkEx("Unable to determine MQES");
+        throw FrmwkEx(HERE, "Unable to determine MQES");
 
     work &= CAP_MQES;
     work += 1;      // convert to 1-based
@@ -101,9 +101,9 @@ CtrlrResetIOQDeleted_r10b::RunCoreTest()
             numEntriesIOQ, (unsigned long long)work);
         numEntriesIOQ = work;
     } else if (gInformative->GetFeaturesNumOfIOCQs() < IOCQ_ID) {
-        throw FrmwkEx("DUT doesn't support %d IOCQ's", IOCQ_ID);
+        throw FrmwkEx(HERE, "DUT doesn't support %d IOCQ's", IOCQ_ID);
     } else if (gInformative->GetFeaturesNumOfIOSQs() < IOSQ_ID) {
-        throw FrmwkEx("DUT doesn't support %d IOSQ's", IOSQ_ID);
+        throw FrmwkEx(HERE, "DUT doesn't support %d IOSQ's", IOSQ_ID);
     }
 
     // Create Admin Q Objects with test lifetime
@@ -129,7 +129,7 @@ CtrlrResetIOQDeleted_r10b::VerifyCtrlrResetDeletesIOQs(SharedACQPtr acq,
 
         gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
         if (gCtrlrConfig->SetState(ST_ENABLE) == false)
-            throw FrmwkEx();
+            throw FrmwkEx(HERE);
 
         gCtrlrConfig->SetIOCQES(gInformative->GetIdentifyCmdCtrlr()->
             GetValue(IDCTRLRCAP_CQES) & 0xf);
@@ -148,7 +148,7 @@ CtrlrResetIOQDeleted_r10b::VerifyCtrlrResetDeletesIOQs(SharedACQPtr acq,
         }
 
         if (gCtrlrConfig->SetState(ST_DISABLE) == false)
-            throw FrmwkEx();
+            throw FrmwkEx(HERE);
     }
 }
 

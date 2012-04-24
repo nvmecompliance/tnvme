@@ -43,7 +43,7 @@ KernelAPI::mmap(size_t bufLength, uint16_t bufID, MmapRegion region)
     int prot = PROT_READ;
 
     if (region >= MMAPREGION_FENCE)
-        throw FrmwkEx("Detected illegal region = %d", region);
+        throw FrmwkEx(HERE, "Detected illegal region = %d", region);
 
     if (region == MMR_META)
         prot |= PROT_WRITE;
@@ -74,7 +74,7 @@ KernelAPI::DumpKernelMetrics(DumpFilename filename)
     if ((rc = ioctl(gInformative->GetFD(), NVME_IOCTL_DUMP_METRICS,
         &dumpMe)) < 0) {
 
-        throw FrmwkEx("Unable to dump dnvme metrics, error code = %d", rc);
+        throw FrmwkEx(HERE, "Unable to dump dnvme metrics, err code = %d", rc);
     }
 }
 
@@ -91,7 +91,7 @@ KernelAPI::DumpCtrlrSpaceRegs(DumpFilename filename, bool verbose)
 
     LOG_NRM("Dump ctrlr regs to filename: %s", filename.c_str());
     if ((fd = open(filename.c_str(), FILENAME_FLAGS, FILENAME_MODE)) == -1)
-        throw FrmwkEx("file=%s: %s", filename.c_str(), strerror(errno));
+        throw FrmwkEx(HERE, "file=%s: %s", filename.c_str(), strerror(errno));
 
     // Read all registers in ctrlr space
     for (int i = 0; i < CTLSPC_FENCE; i++) {
@@ -130,7 +130,7 @@ KernelAPI::DumpCtrlrSpaceRegs(DumpFilename filename, bool verbose)
 
 ERROR_OUT:
     close(fd);
-    throw FrmwkEx();
+    throw FrmwkEx(HERE);
 }
 
 
@@ -146,7 +146,7 @@ KernelAPI::DumpPciSpaceRegs(DumpFilename filename, bool verbose)
 
     LOG_NRM("Dump PCI regs to filename: %s", filename.c_str());
     if ((fd = open(filename.c_str(), FILENAME_FLAGS, FILENAME_MODE)) == -1)
-        throw FrmwkEx("file=%s: %s", filename.c_str(), strerror(errno));
+        throw FrmwkEx(HERE, "file=%s: %s", filename.c_str(), strerror(errno));
 
     // Traverse the PCI header registers
     work = "PCI header registers\n";
@@ -228,7 +228,7 @@ KernelAPI::DumpPciSpaceRegs(DumpFilename filename, bool verbose)
 
 ERROR_OUT:
     close(fd);
-    throw FrmwkEx();
+    throw FrmwkEx(HERE);
 }
 
 

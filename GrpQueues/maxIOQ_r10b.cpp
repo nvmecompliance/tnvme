@@ -97,14 +97,14 @@ MaxIOQ_r10b::RunCoreTest()
         // IOSQ's than IOCQ's then this algo needs to be updated since
         // initially the assumption of 1:1 IOSQ:IOCQ was most probable.
         // In order to save time/work ignoring this reported case.
-        throw FrmwkEx("DUT supports IOSQs > IOCQ's, see source comment here");
+        throw FrmwkEx(HERE, "DUT supports IOSQs > IOCQ's, see source comment here");
     }
 
     Informative::Namspc namspcData = gInformative->Get1stBareMetaE2E();
     if (namspcData.type != Informative::NS_BARE) {
         LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
         if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
-            throw FrmwkEx();
+            throw FrmwkEx(HERE);
     }
 
     SharedMemBufferPtr writeMem = SharedMemBufferPtr(new MemBuffer());
@@ -166,7 +166,7 @@ MaxIOQ_r10b::SetWriteCmd(Informative::Namspc namspcData,
     } else if (namspcData.type == Informative::NS_E2E) {
         writeCmd->AllocMetaBuffer();
         LOG_ERR("Deferring E2E namspc work to the future");
-        throw FrmwkEx("Need to add CRC's to correlate to buf pattern");
+        throw FrmwkEx(HERE, "Need to add CRC's to correlate to buf pattern");
     }
 
     writeCmd->SetPrpBuffer(prpBitmask, dataPat);
@@ -194,7 +194,7 @@ MaxIOQ_r10b::CreateReadCmd(Informative::Namspc namspcData,
     } else if (namspcData.type == Informative::NS_E2E) {
         readCmd->AllocMetaBuffer();
         LOG_ERR("Deferring E2E namspc work to the future");
-        throw FrmwkEx("Need to add CRC's to correlate to buf pattern");
+        throw FrmwkEx(HERE, "Need to add CRC's to correlate to buf pattern");
     }
 
     readCmd->SetPrpBuffer(prpBitmask, dataPat);
@@ -219,7 +219,7 @@ MaxIOQ_r10b::VerifyDataPattern(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
             readCmd->Dump(
                 FileSystem::PrepDumpFile(mGrpName, mTestName, "ReadPayload"),
                 "Data read from media miscompared from written");
-            throw FrmwkEx("Read data mismatch for SQID #%d, pattern 0x%02X",
+            throw FrmwkEx(HERE, "Read data mismatch for SQID #%d, pattern 0x%02X",
                 iosq->GetQId(), (uint16_t)iosq->GetQId());
         }
     }

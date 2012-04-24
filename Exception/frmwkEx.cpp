@@ -29,22 +29,24 @@
 bool FrmwkEx::mPrelimProcessingInProgress = false;
 
 
-FrmwkEx::FrmwkEx()
+FrmwkEx::FrmwkEx(string filename, int lineNum)
 {
-    LOG_ERR("FAILURE:no reason supplied");
+    LOG_ERR("Exception: %s:#%d: FAILURE: no reason supplied",
+        filename.c_str(), lineNum);
     DumpStateOfTheSystem();
 }
 
 
-FrmwkEx::FrmwkEx(string &msg)
+FrmwkEx::FrmwkEx(string filename, int lineNum, string &msg)
 {
     mMsg = msg;
-    LOG_ERR("FAILURE:%s", mMsg.c_str());
+    LOG_ERR("Exception: %s:#%d: FAILURE: %s", filename.c_str(), lineNum,
+        mMsg.c_str());
     DumpStateOfTheSystem();
 }
 
 
-FrmwkEx::FrmwkEx(const char *fmt, ...)
+FrmwkEx::FrmwkEx(string filename, int lineNum, const char *fmt, ...)
 {
     char work[256];
     va_list arg;
@@ -54,7 +56,8 @@ FrmwkEx::FrmwkEx(const char *fmt, ...)
     va_end(arg);
 
     mMsg = work;
-    LOG_ERR("FAILURE:%s", mMsg.c_str());
+    LOG_ERR("Exception: %s:#%d: FAILURE: %s", filename.c_str(), lineNum,
+        mMsg.c_str());
     DumpStateOfTheSystem();
 }
 
@@ -98,7 +101,7 @@ FrmwkEx::PreliminaryProcessing()
     // the ACQ/ASQ, or even if there are any in existence; place the DUT
     // into a well known state and then interact gathering instrusive data
     if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
-        throw FrmwkEx("PreliminaryProcessing()");
+        throw FrmwkEx(HERE, "PreliminaryProcessing()");
 
     SharedACQPtr acq = SharedACQPtr(new ACQ(gInformative->GetFD()));
     acq->Init(2);
@@ -107,7 +110,7 @@ FrmwkEx::PreliminaryProcessing()
     asq->Init(2);
 
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
-        throw FrmwkEx("PreliminaryProcessing()");
+        throw FrmwkEx(HERE, "PreliminaryProcessing()");
 
     LOG_NRM("Create get log page cmd and assoc some buffer memory");
     SharedGetLogPagePtr getLogPg = SharedGetLogPagePtr(new GetLogPage());

@@ -45,7 +45,7 @@ Informative::Informative(int fd, SpecRev specRev)
 {
     mFd = fd;
     if (mFd < 0)
-        throw FrmwkEx("Object created with a bad FD=%d", fd);
+        throw FrmwkEx(HERE, "Object created with a bad FD=%d", fd);
 
     mSpecRev = specRev;
     Clear();
@@ -72,7 +72,7 @@ ConstSharedIdentifyPtr
 Informative::GetIdentifyCmdCtrlr() const
 {
     if (mIdentifyCmdCtrlr == Identify::NullIdentifyPtr)
-        throw FrmwkEx("Identify data not allowed to be NULL");
+        throw FrmwkEx(HERE, "Identify data not allowed to be NULL");
 
     return mIdentifyCmdCtrlr;
 }
@@ -91,7 +91,7 @@ Informative::GetIdentifyCmdNamspc(uint64_t namspcId) const
     }
 
     if (mIdentifyCmdNamspc[namspcId-1] == Identify::NullIdentifyPtr)
-        throw FrmwkEx("Identify data not allowed to be NULL");
+        throw FrmwkEx(HERE, "Identify data not allowed to be NULL");
 
     return mIdentifyCmdNamspc[namspcId-1];
 }
@@ -245,7 +245,7 @@ Informative::IdentifyNamespace(ConstSharedIdentifyPtr idCmdNamspc) const
         return NS_E2E;
     }
 
-    throw FrmwkEx("Namspc is unidentifiable");
+    throw FrmwkEx(HERE, "Namspc is unidentifiable");
 }
 
 
@@ -266,6 +266,6 @@ Informative::Get1stBareMetaE2E() const
     if (namspc.size())
         return (Namspc(GetIdentifyCmdNamspc(namspc[0]), namspc[0], NS_E2E));
 
-    throw FrmwkEx("DUT must have 1 of 3 namspc's");
+    throw FrmwkEx(HERE, "DUT must have 1 of 3 namspc's");
 }
 

@@ -14,6 +14,7 @@
  *  limitations under the License.
  */
 
+#include "boost/format.hpp"
 #include "invalidMSIXIRQ_r10b.h"
 #include "globals.h"
 #include "grpDefs.h"
@@ -23,14 +24,13 @@
 #include "../Utils/io.h"
 
 #define IOQ_ID                      1
+#define NUM_IOQ_ENTRY               2
 
 namespace GrpInterrupts {
 
-// todo static uint32_t NumEntriesIOQ =     2;
 
-
-InvalidMSIXIRQ_r10b::InvalidMSIXIRQ_r10b(int fd, string grpName, string testName,
-    ErrorRegs errRegs) :
+InvalidMSIXIRQ_r10b::InvalidMSIXIRQ_r10b(int fd, string grpName,
+    string testName, ErrorRegs errRegs) :
     Test(fd, grpName, testName, SPECREV_10b, errRegs)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -82,65 +82,127 @@ InvalidMSIXIRQ_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
-     * 1) This is the 1st within GrpBasicInit.
-     * 2) An individual test within this group cannot run, the entire group
-     *    must be executed every time. Each subsequent test relies on the prior.
+     * 1) Requires test createResources_r10b to execute 1st
      * \endverbatim
      */
-/* todo not quite ready yet
     bool capable;
-    char work[256];
     uint16_t numIrqSupport;
 
 
     // Only allowed to execute if DUT supports MSI-X IRQ's
     if (gCtrlrConfig->IsMSIXCapable(capable, numIrqSupport) == false)
-        throw FrmwkEx();
+        throw FrmwkEx(HERE);
     else if (capable == false) {
         LOG_NRM("DUT does not support MSI-X IRQ's; unable to execute test");
         return;
     }
 
     if (gCtrlrConfig->SetState(ST_DISABLE) == false)
-        throw FrmwkEx();
+        throw FrmwkEx(HERE);
 
-    // dnvme must be able to use the max number IRQs, however DUT will reject
-    if (gCtrlrConfig->SetIrqScheme(INT_MSIX,
-        CtrlrConfig::MAX_MSIX_IRQ_VEC + 1) == false) {
-
-        throw FrmwkEx();
+    LOG_NRM("Notify DUT we plan on using all IRQ's that it supports");
+    if (gCtrlrConfig->SetIrqScheme(INT_MSIX, numIrqSupport) == false) {
+        throw FrmwkEx(HERE,
+            "Unable to use %d IRQ's, but DUT reports it supports",
+            numIrqSupport);
     }
 
     gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
-        throw FrmwkEx();
+        throw FrmwkEx(HERE);
 
     // Lookup objs which were created in a prior test within group
     SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
     SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
 
-    LOG_NRM("Create an IOCQ object with test lifetime");
+    LOG_NRM("Set legal IOCQ element size");
     gCtrlrConfig->SetIOCQES(gInformative->GetIdentifyCmdCtrlr()->
         GetValue(IDCTRLRCAP_CQES) & 0xf);
 
-    LOG_NRM("Last suppport MSIX IRQ vec = %d", (numIrqSupport - 1));
-    for (int i = numIrqSupport; i <= CtrlrConfig::MAX_MSIX_IRQ_VEC; i++) {
-        LOG_NRM("Attempt to utilize illegal IRQ vec %d", i);
+    // This test expects the DUT to reject the usage of illegal/unsupported
+    // MSIX IRQ vectors, thus they should never be used. In order to safely fool
+    // dnvme's safeguards, thus preventing a kernel crash, we need to issue a
+    // legal cmd and allow dnvme to do it job. Then just before ringing the
+    // doorbell inject a toxic illegal MSIX IRQ vector, the guts of this test.
+    // So lets prepare that "legal" cmd here and then corrupt/toxify it later.
+    LOG_NRM("Last supported MSIX IRQ vec = %d", (numIrqSupport - 1));
+    for (uint32_t i = numIrqSupport; i <= CtrlrConfig::MAX_MSIX_IRQ_VEC; i++) {
+        // We must re-init the objects because a failed attempt at creating an
+        // IOCQ forces dnvme to deconstruct the entire thing when it is reaped.
+        LOG_NRM("Create the IOCQ and the cmd to issue to the DUT");
         SharedIOCQPtr iocq = SharedIOCQPtr(new IOCQ(mFd));
-
         LOG_NRM("Allocate contiguous memory; IOCQ has ID=%d", IOQ_ID);
-        iocq->Init(IOQ_ID, NumEntriesIOQ, true, i);
-
-        LOG_NRM("Form a Create IOCQ cmd to perform queue creation");
-        SharedCreateIOCQPtr createIOCQCmd = SharedCreateIOCQPtr(
-            new CreateIOCQ());
+        iocq->Init(IOQ_ID, NUM_IOQ_ENTRY, true, (numIrqSupport - 1));
+        SharedCreateIOCQPtr createIOCQCmd =
+            SharedCreateIOCQPtr(new CreateIOCQ());
         createIOCQCmd->Init(iocq);
-
-        snprintf(work, sizeof(work), "irq%d", i);
-        IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
-            createIOCQCmd, work, true, CESTAT_INVAL_INT_VEC);
+        SendToxicCmd(asq, acq, createIOCQCmd, i);
     }
- todo not quite ready yet */
 }
+
+
+void
+InvalidMSIXIRQ_r10b::SendToxicCmd(SharedASQPtr asq, SharedACQPtr acq,
+    SharedCmdPtr cmd, uint16_t illegalIrqVec)
+{
+    string work;
+    uint16_t uniqueId;
+    uint32_t isrCnt;
+    uint32_t numCE;
+
+    LOG_NRM("Send the cmd to hdw via ASQ with illegal IRQ vec %d",
+        illegalIrqVec);
+    asq->Send(cmd, uniqueId);
+    work = str(boost::format("pure.%d") % illegalIrqVec);
+    asq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "asq", work),
+        "Just B4 modifying, dump ASQ");
+
+    ASQCmdToxify(asq, illegalIrqVec);
+    work = str(boost::format("toxic.%d") % illegalIrqVec);
+    asq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "asq", work),
+        "Just B4 ringing doorbell, dump ASQ");
+
+    asq->Ring();
+
+    LOG_NRM("Wait for the CE to arrive in CQ %d", acq->GetQId());
+    if (acq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE, isrCnt)
+        == false) {
+        acq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "acq.fail"),
+            "Dump Entire ACQ");
+        asq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "asq.fail"),
+            "Dump Entire ASQ");
+        throw FrmwkEx(HERE, "Unable to see CEs for issued cmd");
+    }
+
+    IO::ReapCE(acq, 1, isrCnt, mGrpName, mTestName, "acq",
+        CESTAT_INVAL_INT_VEC);
+}
+
+
+void
+InvalidMSIXIRQ_r10b::ASQCmdToxify(SharedASQPtr asq, uint16_t illegalIrqVec)
+{
+    struct backdoor_inject inject;
+    struct nvme_gen_sq asqMetrics = asq->GetQMetrics();
+
+
+    LOG_NRM("Attempt to utilize illegal IRQ vec %d", illegalIrqVec);
+    if (asqMetrics.tail_ptr_virt)
+        inject.cmd_ptr = (asqMetrics.tail_ptr_virt - 1);
+    else
+        inject.cmd_ptr = (asq->GetNumEntries() - 1);
+
+    inject.q_id = asq->GetQId();
+    inject.dword = 11;
+    inject.value_mask = 0xFFFF0000;
+    inject.value = (illegalIrqVec << 16);
+
+    LOG_NRM("Inject toxic parameters: (qId, cmd_ptr, dword, mask, val) = "
+        "(%d, %d, %d, %d, %d)", inject.q_id, inject.cmd_ptr, inject.dword,
+        inject.value_mask, inject.value);
+
+    asq->SetToxicCmdValue(inject);
+}
+
 
 }   // namespace

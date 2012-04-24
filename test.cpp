@@ -25,7 +25,7 @@ Test::Test(int fd, string grpName, string testName, SpecRev specRev,
 {
     mFd = fd;
     if (mFd < 0)
-        throw FrmwkEx("Object created with a bad fd=%d", fd);
+        throw FrmwkEx(HERE, "Object created with a bad fd=%d", fd);
 
     mSpecRev = specRev;
     mGrpName = grpName;

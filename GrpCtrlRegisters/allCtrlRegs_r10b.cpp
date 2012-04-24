@@ -75,7 +75,7 @@ AllCtrlRegs_r10b::RunCoreTest()
      *  \endverbatim
      */
     if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
-        throw FrmwkEx();
+        throw FrmwkEx(HERE);
 
     ValidateDefaultValues();
     ValidateROBitsAfterWriting();
@@ -118,16 +118,16 @@ AllCtrlRegs_r10b::ValidateROBitsAfterWriting()
 
         LOG_NRM("Validate RO attribute after trying to write 1");
         if (gRegisters->Read((CtlSpc)j, origValue) == false)
-            throw FrmwkEx();
+            throw FrmwkEx(HERE);
         value = (origValue | ctlMetrics[j].maskRO);
         if (gRegisters->Write((CtlSpc)j, value) == false)
-            throw FrmwkEx();
+            throw FrmwkEx(HERE);
         ValidateCtlRegisterROAttribute((CtlSpc)j);
 
         LOG_NRM("Validate RO attribute after trying to write 0");
         value = (origValue & ~ctlMetrics[j].maskRO);
         if (gRegisters->Write((CtlSpc)j, value) == false)
-            throw FrmwkEx();
+            throw FrmwkEx(HERE);
         ValidateCtlRegisterROAttribute((CtlSpc)j);
     }
 }
@@ -161,27 +161,27 @@ AllCtrlRegs_r10b::ValidateCtlRegisterROAttribute(CtlSpc reg)
                 ctlMetrics[reg].offset + (k * sizeof(value)),
                 (uint8_t *)&value) == false) {
 
-                throw FrmwkEx();
+                throw FrmwkEx(HERE);
             } else {
                 // Ignore the implementation specific bits, and bits that the
                 // manufacturer can make a decision as to their type of access
                 value &= ~ctlMetrics[reg].impSpec;
 
                 // Verify that the RO bits are set to correct default values, no
-                // reset needed to achieve this because there's no way to change.
+                // reset needed to achieve this because there's no way to change
                 value &= ctlMetrics[reg].maskRO;
                 expectedValue =
                     (ctlMetrics[reg].dfltValue & ctlMetrics[reg].maskRO);
 
                 if (value != expectedValue) {
-                    throw FrmwkEx("%s RO bit #%d has incorrect value",
+                    throw FrmwkEx(HERE, "%s RO bit #%d has incorrect value",
                         ctlMetrics[reg].desc,
                         ReportOffendingBitPos(value, expectedValue));
                 }
             }
         }
     } else if (gRegisters->Read(reg, value) == false) {
-        throw FrmwkEx();
+        throw FrmwkEx(HERE);
     } else {
         // Ignore the implementation specific bits, and bits that the
         // manufacturer can make a decision as to their type of access RW/RO
@@ -193,7 +193,7 @@ AllCtrlRegs_r10b::ValidateCtlRegisterROAttribute(CtlSpc reg)
         expectedValue = (ctlMetrics[reg].dfltValue & ctlMetrics[reg].maskRO);
 
         if (value != expectedValue) {
-            throw FrmwkEx("%s RO bit #%d has incorrect value",
+            throw FrmwkEx(HERE, "%s RO bit #%d has incorrect value",
                 ctlMetrics[reg].desc,
                 ReportOffendingBitPos(value, expectedValue));
         }

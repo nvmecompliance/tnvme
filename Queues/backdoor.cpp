@@ -20,7 +20,7 @@
 
 Backdoor::Backdoor()
 {
-    throw FrmwkEx("Illegal constructor");
+    throw FrmwkEx(HERE, "Illegal constructor");
 }
 
 
@@ -28,7 +28,7 @@ Backdoor::Backdoor(int fd)
 {
     mFD = fd;
     if (mFD < 0)
-        throw FrmwkEx("Object created with a bad FD=%d", fd);
+        throw FrmwkEx(HERE, "Object created with a bad FD=%d", fd);
 }
 
 
@@ -44,5 +44,5 @@ Backdoor::SetToxicCmdValue(struct backdoor_inject &injectReq)
 
     // This is volatile, see class level header comment.
     if ((ret = ioctl(mFD, NVME_IOCTL_TOXIC_64B_DWORD, &injectReq)) < 0)
-        throw FrmwkEx("Backdoor toxic injection failed: 0x%02X", ret);
+        throw FrmwkEx(HERE, "Backdoor toxic injection failed: 0x%02X", ret);
 }

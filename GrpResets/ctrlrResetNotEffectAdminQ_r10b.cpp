@@ -25,8 +25,8 @@ namespace GrpResets {
 #define IOSQ_ID                     2
 
 
-CtrlrResetNotEffectAdminQ_r10b::CtrlrResetNotEffectAdminQ_r10b(int fd, string grpName,
-    string testName, ErrorRegs errRegs) :
+CtrlrResetNotEffectAdminQ_r10b::CtrlrResetNotEffectAdminQ_r10b(int fd,
+    string grpName, string testName, ErrorRegs errRegs) :
     Test(fd, grpName, testName, SPECREV_10b, errRegs)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -50,7 +50,8 @@ CtrlrResetNotEffectAdminQ_r10b::~CtrlrResetNotEffectAdminQ_r10b()
 
 
 CtrlrResetNotEffectAdminQ_r10b::
-CtrlrResetNotEffectAdminQ_r10b(const CtrlrResetNotEffectAdminQ_r10b &other) : Test(other)
+CtrlrResetNotEffectAdminQ_r10b(const CtrlrResetNotEffectAdminQ_r10b &other) :
+    Test(other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -60,7 +61,8 @@ CtrlrResetNotEffectAdminQ_r10b(const CtrlrResetNotEffectAdminQ_r10b &other) : Te
 
 
 CtrlrResetNotEffectAdminQ_r10b &
-CtrlrResetNotEffectAdminQ_r10b::operator=(const CtrlrResetNotEffectAdminQ_r10b &other)
+CtrlrResetNotEffectAdminQ_r10b::operator=(
+    const CtrlrResetNotEffectAdminQ_r10b &other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -80,7 +82,7 @@ CtrlrResetNotEffectAdminQ_r10b::RunCoreTest()
      *  \endverbatim
      */
     if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
-        throw FrmwkEx();
+        throw FrmwkEx(HERE);
 
     // Create Admin Q Objects with test lifetime
     SharedACQPtr acq = SharedACQPtr(new ACQ(mFd));
@@ -89,15 +91,15 @@ CtrlrResetNotEffectAdminQ_r10b::RunCoreTest()
     asq->Init(15);
 
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
-        throw FrmwkEx();
+        throw FrmwkEx(HERE);
 
     SendIdentifyCtrlrStruct(asq, acq);
 
     LOG_NRM("CC.EN=0, does not reset AQA/ASQ/ACQ registers");
     if (gCtrlrConfig->SetState(ST_DISABLE) == false)
-        throw FrmwkEx();
+        throw FrmwkEx(HERE);
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
-        throw FrmwkEx();
+        throw FrmwkEx(HERE);
 
     SendIdentifyCtrlrStruct(asq, acq);
 }

@@ -26,8 +26,8 @@
 namespace GrpNVMReadCmd {
 
 
-IgnoreMetaPtrBare_r10b::IgnoreMetaPtrBare_r10b(int fd, string mGrpName, string mTestName,
-    ErrorRegs errRegs) :
+IgnoreMetaPtrBare_r10b::IgnoreMetaPtrBare_r10b(int fd, string mGrpName,
+    string mTestName, ErrorRegs errRegs) :
     Test(fd, mGrpName, mTestName, SPECREV_10b, errRegs)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -93,8 +93,10 @@ IgnoreMetaPtrBare_r10b::RunCoreTest()
     for (size_t i = 0; i < bare.size(); i++) {
 
         namSpcPtr = gInformative->GetIdentifyCmdNamspc(bare[i]);
-        if (namSpcPtr == Identify::NullIdentifyPtr)
-            throw FrmwkEx("Identify namspc struct #%d doesn't exist", bare[i]);
+        if (namSpcPtr == Identify::NullIdentifyPtr) {
+            throw FrmwkEx(HERE, "Identify namspc struct #%d doesn't exist",
+                bare[i]);
+        }
 
         LOG_NRM("Setup read cmd's values that won't change per namspc");
         SharedMemBufferPtr readMem = SharedMemBufferPtr(new MemBuffer());

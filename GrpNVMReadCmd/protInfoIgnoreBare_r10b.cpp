@@ -26,8 +26,8 @@
 namespace GrpNVMReadCmd {
 
 
-ProtInfoIgnoreBare_r10b::ProtInfoIgnoreBare_r10b(int fd, string mGrpName, string mTestName,
-    ErrorRegs errRegs) :
+ProtInfoIgnoreBare_r10b::ProtInfoIgnoreBare_r10b(int fd, string mGrpName,
+    string mTestName, ErrorRegs errRegs) :
     Test(fd, mGrpName, mTestName, SPECREV_10b, errRegs)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -92,8 +92,10 @@ ProtInfoIgnoreBare_r10b::RunCoreTest()
     for (size_t i = 0; i < bare.size(); i++) {
 
         namSpcPtr = gInformative->GetIdentifyCmdNamspc(bare[i]);
-        if (namSpcPtr == Identify::NullIdentifyPtr)
-            throw FrmwkEx("Identify namspc struct #%d doesn't exist", bare[i]);
+        if (namSpcPtr == Identify::NullIdentifyPtr) {
+            throw FrmwkEx(HERE, "Identify namspc struct #%d doesn't exist",
+                bare[i]);
+        }
 
         LOG_NRM("Create memory to contain read payload");
         SharedMemBufferPtr readMem = SharedMemBufferPtr(new MemBuffer());

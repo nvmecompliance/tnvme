@@ -34,9 +34,9 @@ using namespace std;
 class FrmwkEx
 {
 public:
-    FrmwkEx();
-    FrmwkEx(string &msg);
-    FrmwkEx(const char *fmt, ...);
+    FrmwkEx(string filename, int lineNum);
+    FrmwkEx(string filename, int lineNum, string &msg);
+    FrmwkEx(string filename, int lineNum, const char *fmt, ...);
     virtual ~FrmwkEx();
 
     string GetMessage() const { return mMsg; }
@@ -51,8 +51,9 @@ protected:
 
 
 private:
-    string mMsg;
+    FrmwkEx();
 
+    string mMsg;
     static bool mPrelimProcessingInProgress;
 
     void DumpStateOfTheSystem();

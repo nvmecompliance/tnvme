@@ -90,14 +90,14 @@ AdminQRollChkDiff_r10b::RunCoreTest()
     uint16_t loopCnt = 0;
 
     if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
-        throw FrmwkEx();
+        throw FrmwkEx(HERE);
 
     while (1) {
         LOG_NRM("(ASQSize, ACQSize, Loop Cnt) = (%d, %d, %d)",
             mASQSize, mACQSize, loopCnt++);
         // Issue cntl'r disable completely for every iteration.
         if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
-            throw FrmwkEx();
+            throw FrmwkEx(HERE);
 
         // Create ACQ and ASQ objects which have test life time
         SharedACQPtr acq = CAST_TO_ACQ(SharedACQPtr(new ACQ(mFd)))
@@ -108,7 +108,7 @@ AdminQRollChkDiff_r10b::RunCoreTest()
 
         gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
         if (gCtrlrConfig->SetState(ST_ENABLE) == false)
-            throw FrmwkEx();
+            throw FrmwkEx(HERE);
 
         LOG_NRM("Create identify cmd and assoc some buffer memory");
         SharedIdentifyPtr idCmdCap = SharedIdentifyPtr(new Identify());
@@ -161,7 +161,7 @@ AdminQRollChkDiff_r10b::VerifyCESQValues(SharedACQPtr acq,
         acq->Dump(
             FileSystem::PrepDumpFile(mGrpName, mTestName, "acq", "CE.SQID"),
             "CE SQ ID Inconsistent");
-        throw FrmwkEx("Expected CE.SQID = 0 in ACQ completion entry but actual "
+        throw FrmwkEx(HERE, "Expected CE.SQID = 0 in ACQ completion entry but actual "
             "CE.SQID  = 0x%04X", ce.n.SQID);
     }
 
@@ -169,7 +169,7 @@ AdminQRollChkDiff_r10b::VerifyCESQValues(SharedACQPtr acq,
         acq->Dump(
             FileSystem::PrepDumpFile(mGrpName, mTestName, "acq", "CE.SQHD"),
             "CE SQ Head Pointer Inconsistent");
-        throw FrmwkEx(
+        throw FrmwkEx(HERE, 
             "Expected CE.SQHD = 0x%04X in ACQ completion entry but actual "
             "CE.SQHD  = 0x%04X", expectedVal, ce.n.SQHD);
     }
@@ -197,7 +197,7 @@ AdminQRollChkDiff_r10b::VerifyQPointers(SharedACQPtr acq, SharedASQPtr asq)
         acq->Dump(
             FileSystem::PrepDumpFile(mGrpName, mTestName, "acq", "head_ptr"),
             "CQ Metrics Head Pointer Inconsistent");
-        throw FrmwkEx("Expected ACQ.head_ptr = 0x%04X but actual "
+        throw FrmwkEx(HERE, "Expected ACQ.head_ptr = 0x%04X but actual "
             "ACQ.head_ptr = 0x%04X", expectedVal, acqMetrics.head_ptr);
     }
 
@@ -207,7 +207,7 @@ AdminQRollChkDiff_r10b::VerifyQPointers(SharedACQPtr acq, SharedASQPtr asq)
         asq->Dump(
             FileSystem::PrepDumpFile(mGrpName, mTestName, "asq", "tail_ptr"),
             "SQ Metrics Tail Pointer Inconsistent");
-        throw FrmwkEx("Expected  ASQ.tail_ptr = 0x%04X but actual "
+        throw FrmwkEx(HERE, "Expected  ASQ.tail_ptr = 0x%04X but actual "
             "ASQ.tail_ptr  = 0x%04X", expectedVal, asqMetrics.tail_ptr);
     }
 
@@ -215,7 +215,7 @@ AdminQRollChkDiff_r10b::VerifyQPointers(SharedACQPtr acq, SharedASQPtr asq)
         acq->Dump(
             FileSystem::PrepDumpFile(mGrpName, mTestName, "acq", "CE.SQHD"),
             "CE SQ Head Pointer Inconsistent");
-        throw FrmwkEx("Expected CE.SQHD = 0x%04X in ACQ completion entry but actual "
+        throw FrmwkEx(HERE, "Expected CE.SQHD = 0x%04X in ACQ completion entry but actual "
             "CE.SQHD  = 0x%04X", expectedVal, ce.n.SQHD);
     }
 }

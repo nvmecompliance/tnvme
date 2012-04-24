@@ -113,7 +113,7 @@ AdminQFull_r10b::AdminQFull(uint16_t numASQEntries, uint16_t numACQEntries,
     uint16_t uniqueId;
 
     if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
-        throw FrmwkEx();
+        throw FrmwkEx(HERE);
 
     // Create Admin Q Objects for test lifetime
     SharedACQPtr acq = CAST_TO_ACQ(SharedACQPtr(new ACQ(mFd)))
@@ -123,7 +123,7 @@ AdminQFull_r10b::AdminQFull(uint16_t numASQEntries, uint16_t numACQEntries,
     asq->Init(numASQEntries);
 
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
-        throw FrmwkEx();
+        throw FrmwkEx(HERE);
 
     uint32_t nCmdsToSubmit = numASQEntries - 1;
     LOG_NRM("Send #%d cmds to hdw via ASQ", nCmdsToSubmit);
@@ -147,18 +147,18 @@ AdminQFull_r10b::AdminQFull(uint16_t numASQEntries, uint16_t numACQEntries,
                     numCE, isrCount) == false) {
                     acq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName,
                         "acq." + idCmdCtrlr->GetName()), "Dump entire ACQ");
-                    throw FrmwkEx("Unable to see last CE as expected");
+                    throw FrmwkEx(HERE, "Unable to see last CE as expected");
                 }
                 break;
             }
             acq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName,
                 "acq." + idCmdCtrlr->GetName()), "Dump Entire ACQ");
-            throw FrmwkEx("Unable to see CE for issued cmd #%d", nCmds + 1);
+            throw FrmwkEx(HERE, "Unable to see CE for issued cmd #%d", nCmds + 1);
 
         } else if (numCE != nCmds + 1) {
             acq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName,
                 "acq." + idCmdCtrlr->GetName()), "Dump Entire ACQ");
-            throw FrmwkEx("Missing last CE, #%d cmds of #%d received",
+            throw FrmwkEx(HERE, "Missing last CE, #%d cmds of #%d received",
                 nCmds + 1, numCE);
         }
     }

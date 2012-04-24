@@ -38,7 +38,7 @@ IRQ::VerifyAnySchemeSpecifyNum(uint16_t numIrqsDesire, enum nvme_irq_type &irq)
 
     // Can we satisfy the request using the MSI-X IRQ scheme?
     if (gCtrlrConfig->IsMSIXCapable(capable, numIrqsSupported) == false)
-        throw FrmwkEx();
+        throw FrmwkEx(HERE);
     else if (capable) {
         if (numIrqsDesire > numIrqsSupported) {
             LOG_NRM("Desire %d IRQs, but DUT only supports %d MSI-X IRQ's",
@@ -51,7 +51,7 @@ IRQ::VerifyAnySchemeSpecifyNum(uint16_t numIrqsDesire, enum nvme_irq_type &irq)
 
     // Can we satisfy the request using the MSI IRQ scheme?
     if (gCtrlrConfig->IsMSICapable(capable, numIrqsSupported) == false)
-        throw FrmwkEx();
+        throw FrmwkEx(HERE);
     else if (capable) {
         if (numIrqsDesire > numIrqsSupported) {
             LOG_NRM("Desire %d IRQs, but DUT only supports %d MSI IRQ's",
@@ -73,8 +73,8 @@ IRQ::SetAnySchemeSpecifyNum(uint16_t numIrqsDesire)
     enum nvme_irq_type irqScheme;
 
     if (VerifyAnySchemeSpecifyNum(numIrqsDesire, irqScheme) == false)
-        throw FrmwkEx();
+        throw FrmwkEx(HERE);
 
     if (gCtrlrConfig->SetIrqScheme(irqScheme, numIrqsDesire) == false)
-        throw FrmwkEx();
+        throw FrmwkEx(HERE);
 }

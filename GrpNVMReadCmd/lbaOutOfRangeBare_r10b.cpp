@@ -28,8 +28,8 @@ namespace GrpNVMReadCmd {
 #define RD_NUM_BLKS                 2
 
 
-LBAOutOfRangeBare_r10b::LBAOutOfRangeBare_r10b(int fd, string mGrpName, string mTestName,
-    ErrorRegs errRegs) :
+LBAOutOfRangeBare_r10b::LBAOutOfRangeBare_r10b(int fd, string mGrpName,
+    string mTestName, ErrorRegs errRegs) :
     Test(fd, mGrpName, mTestName, SPECREV_10b, errRegs)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -97,8 +97,10 @@ LBAOutOfRangeBare_r10b::RunCoreTest()
     for (size_t i = 0; i < bare.size(); i++) {
 
         namSpcPtr = gInformative->GetIdentifyCmdNamspc(bare[i]);
-        if (namSpcPtr == Identify::NullIdentifyPtr)
-            throw FrmwkEx("Identify namspc struct #%d doesn't exist", bare[i]);
+        if (namSpcPtr == Identify::NullIdentifyPtr) {
+            throw FrmwkEx(HERE, "Identify namspc struct #%d doesn't exist",
+                bare[i]);
+        }
         nsze = namSpcPtr->GetValue(IDNAMESPC_NSZE);
 
         LOG_NRM("Create memory to contain read payload");
@@ -148,7 +150,7 @@ LBAOutOfRangeBare_r10b::SendCmdToHdw(SharedSQPtr sq, SharedCQPtr cq,
         cq->Dump(
             FileSystem::PrepDumpFile(mGrpName, mTestName, "cq",
             "notEmpty"), "Test assumption have not been met");
-        throw FrmwkEx("Require 0 CE's within CQ %d, not upheld, found %d",
+        throw FrmwkEx(HERE, "Require 0 CE's within CQ %d, not upheld, found %d",
             cq->GetQId(), numCE);
     }
 
@@ -168,16 +170,16 @@ LBAOutOfRangeBare_r10b::SendCmdToHdw(SharedSQPtr sq, SharedCQPtr cq,
         work = str(boost::format(
             "Unable to see any CE's in CQ %d, dump entire CQ") % cq->GetQId());
         cq->Dump(
-            FileSystem::PrepDumpFile(mGrpName, mTestName, "cq." + cmd->GetName(),
-            qualify), work);
-        throw FrmwkEx("Unable to see CE for issued cmd");
+            FileSystem::PrepDumpFile(mGrpName, mTestName, "cq." +
+            cmd->GetName(), qualify), work);
+        throw FrmwkEx(HERE, "Unable to see CE for issued cmd");
     } else if (numCE != 1) {
         work = str(boost::format(
             "Unable to see any CE's in CQ %d, dump entire CQ") % cq->GetQId());
         cq->Dump(
-            FileSystem::PrepDumpFile(mGrpName, mTestName, "cq." + cmd->GetName(),
-            qualify), work);
-        throw FrmwkEx("1 cmd caused %d CE's to arrive in CQ %d",
+            FileSystem::PrepDumpFile(mGrpName, mTestName, "cq." +
+            cmd->GetName(), qualify), work);
+        throw FrmwkEx(HERE, "1 cmd caused %d CE's to arrive in CQ %d",
             numCE, cq->GetQId());
     }
     work = str(boost::format("Just B4 reaping CQ %d, dump entire CQ") %
@@ -193,7 +195,8 @@ LBAOutOfRangeBare_r10b::SendCmdToHdw(SharedSQPtr sq, SharedCQPtr cq,
     if (gCtrlrConfig->IrqsEnabled() && cq->GetIrqEnabled() &&
         (isrCount != (isrCountB4 + 1))) {
 
-        throw FrmwkEx("CQ using IRQ's, but IRQ count not expected (%d != %d)",
+        throw FrmwkEx(HERE,
+            "CQ using IRQ's, but IRQ count not expected (%d != %d)",
             isrCount, (isrCountB4 + 1));
     }
 }

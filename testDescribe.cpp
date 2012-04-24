@@ -92,11 +92,13 @@ TestDescribe::GetLong(bool limit80Chars, size_t indent)
                 spaceIdx = (tmpLongDesc.length() - 1);
 
             work += indentation;
-            work += tmpLongDesc.substr(startSpaceIdx, (spaceIdx - startSpaceIdx));
+            work += tmpLongDesc.substr(startSpaceIdx,
+                (spaceIdx - startSpaceIdx));
             work += "\n";
 
             startSpaceIdx = spaceIdx + 1;
-            spaceIdx = (tmpLongDesc.length() > (startSpaceIdx + (80 - indent))) ?
+            spaceIdx =
+                (tmpLongDesc.length() > (startSpaceIdx + (80 - indent))) ?
                 (startSpaceIdx + (80 - indent)) : tmpLongDesc.length();
             spaceIdx -= 1;      // make up for 0-based indexing
         }

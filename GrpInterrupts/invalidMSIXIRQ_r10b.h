@@ -18,6 +18,8 @@
 #define _INVALIDMSIXIRQ_r10b_H_
 
 #include "test.h"
+#include "../Queues/acq.h"
+#include "../Queues/asq.h"
 
 namespace GrpInterrupts {
 
@@ -53,6 +55,9 @@ private:
     ///////////////////////////////////////////////////////////////////////////
     // Adding a member variable? Then edit the copy constructor and operator=().
     ///////////////////////////////////////////////////////////////////////////
+    void ASQCmdToxify(SharedASQPtr asq, uint16_t illegalIrqVec);
+    void SendToxicCmd(SharedASQPtr asq, SharedACQPtr acq,
+        SharedCmdPtr cmd, uint16_t illegalIrqVec);
 };
 
 }   // namespace

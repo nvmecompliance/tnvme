@@ -24,8 +24,8 @@
 namespace GrpNVMWriteCmd {
 
 
-UnsupportRsvdFields_r10b::UnsupportRsvdFields_r10b(int fd, string mGrpName, string mTestName,
-    ErrorRegs errRegs) :
+UnsupportRsvdFields_r10b::UnsupportRsvdFields_r10b(int fd, string mGrpName,
+    string mTestName, ErrorRegs errRegs) :
     Test(fd, mGrpName, mTestName, SPECREV_10b, errRegs)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -119,7 +119,7 @@ UnsupportRsvdFields_r10b::CreateCmd()
     if (namspcData.type != Informative::NS_BARE) {
         LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
         if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
-            throw FrmwkEx();
+            throw FrmwkEx(HERE);
     }
     LOG_NRM("Processing read cmd using namspc id %d", namspcData.id);
 
@@ -137,7 +137,7 @@ UnsupportRsvdFields_r10b::CreateCmd()
     } else if (namspcData.type == Informative::NS_E2E) {
         writeCmd->AllocMetaBuffer();
         LOG_ERR("Deferring E2E namspc work to the future");
-        throw FrmwkEx("Need to add CRC's to correlate to buf pattern");
+        throw FrmwkEx(HERE, "Need to add CRC's to correlate to buf pattern");
     }
 
     writeCmd->SetPrpBuffer(prpBitmask, dataPat);

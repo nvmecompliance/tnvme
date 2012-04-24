@@ -102,7 +102,7 @@ LimitedRetry_r10b::CreateCmd()
     if (namspcData.type != Informative::NS_BARE) {
         LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
         if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
-            throw FrmwkEx();
+            throw FrmwkEx(HERE);
     }
     LOG_NRM("Processing read cmd using namspc id %d", namspcData.id);
 
@@ -120,7 +120,7 @@ LimitedRetry_r10b::CreateCmd()
     } else if (namspcData.type == Informative::NS_E2E) {
         readCmd->AllocMetaBuffer();
         LOG_ERR("Deferring E2E namspc work to the future");
-        throw FrmwkEx("Need to add CRC's to correlate to buf pattern");
+        throw FrmwkEx(HERE, "Need to add CRC's to correlate to buf pattern");
     }
 
     readCmd->SetPrpBuffer(prpBitmask, dataPat);

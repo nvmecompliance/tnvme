@@ -46,7 +46,7 @@ IO::SendCmdToHdw(string grpName, string testName, uint16_t ms,
         cq->Dump(
             FileSystem::PrepDumpFile(grpName, testName, "cq",
             "notEmpty"), "Test assumption have not been met");
-        throw FrmwkEx("Require 0 CE's within CQ %d, not upheld, found %d",
+        throw FrmwkEx(HERE, "Require 0 CE's within CQ %d, not upheld, found %d",
             cq->GetQId(), numCE);
     }
 
@@ -68,14 +68,14 @@ IO::SendCmdToHdw(string grpName, string testName, uint16_t ms,
         cq->Dump(
             FileSystem::PrepDumpFile(grpName, testName, "cq." + cmd->GetName(),
             qualify), work);
-        throw FrmwkEx(work);
+        throw FrmwkEx(HERE, work);
     } else if (numCE != 1) {
         work = str(boost::format(
             "Unable to see any CE's in CQ %d, dump entire CQ") % cq->GetQId());
         cq->Dump(
             FileSystem::PrepDumpFile(grpName, testName, "cq." + cmd->GetName(),
             qualify), work);
-        throw FrmwkEx("1 cmd caused %d CE's to arrive in CQ %d",
+        throw FrmwkEx(HERE, "1 cmd caused %d CE's to arrive in CQ %d",
             numCE, cq->GetQId());
     }
     if (verbose) {
@@ -92,7 +92,8 @@ IO::SendCmdToHdw(string grpName, string testName, uint16_t ms,
     if (gCtrlrConfig->IrqsEnabled() && cq->GetIrqEnabled() &&
         (isrCount != (isrCountB4 + 1))) {
 
-        throw FrmwkEx("CQ using IRQ's, but IRQ count not expected (%d != %d)",
+        throw FrmwkEx(HERE,
+            "CQ using IRQ's, but IRQ count not expected (%d != %d)",
             isrCount, (isrCountB4 + 1));
     }
 
@@ -124,7 +125,7 @@ IO::ReapCE(SharedCQPtr cq, uint32_t numCE, uint32_t &isrCount,
         cq->Dump(
             FileSystem::PrepDumpFile(grpName, testName, "cq.error", qualify),
             work);
-        throw FrmwkEx(work);
+        throw FrmwkEx(HERE, work);
     }
     union CE ce = cq->PeekCE(cqMetrics.head_ptr);
     ProcessCE::Validate(ce, status);  // throws upon error

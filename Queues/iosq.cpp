@@ -56,11 +56,11 @@ IOSQ::Init(uint16_t qId, uint32_t numEntries, uint16_t cqId,
 		mPriority = priority;
 		break;
 	default:
-		throw FrmwkEx("Illegal priority value, can't fit within 2 bits");
+		throw FrmwkEx(HERE, "Illegal priority value, can't fit within 2 bits");
 	}
 
     if (gCtrlrConfig->GetIOSQES(entrySize) == false)
-        throw FrmwkEx("Unable to learn IOSQ entry size");
+        throw FrmwkEx(HERE, "Unable to learn IOSQ entry size");
 
     // Nothing to gain by specifying an element size which the DUT doesn't
     // support, the outcome is undefined, might succeed in crashing the kernel
@@ -69,13 +69,13 @@ IOSQ::Init(uint16_t qId, uint32_t numEntries, uint16_t cqId,
     uint8_t maxElemSize = (uint8_t)((value >> 4) & 0x0f);
     uint8_t minElemSize = (uint8_t)((value >> 0) & 0x0f);
     if ((entrySize < minElemSize) || (entrySize > maxElemSize)) {
-        throw FrmwkEx("Reg CC.IOSQES yields a bad element size: 0x%04X",
+        throw FrmwkEx(HERE, "Reg CC.IOSQES yields a bad element size: 0x%04X",
             (1 << entrySize));
     }
 
     // Detect if doing something that looks suspicious/incorrect/illegal
     if (gRegisters->Read(CTLSPC_CAP, work) == false)
-        throw FrmwkEx("Unable to determine MQES");
+        throw FrmwkEx(HERE, "Unable to determine MQES");
 
     work &= CAP_MQES;
     work += 1;      // convert to 1-based
@@ -99,7 +99,7 @@ IOSQ::Init(uint16_t qId, uint32_t numEntries,
     LOG_NRM("IOSQ::Init (qId,numEntry,cqId,prior) = (%d,%d,%d,%d)",
         qId, numEntries, cqId, priority);
     if (gRegisters->Read(CTLSPC_CAP, work) == false)
-        throw FrmwkEx("Unable to determine MQES");
+        throw FrmwkEx(HERE, "Unable to determine MQES");
 
     // Detect if doing something that looks suspicious/incorrect/illegal
     work &= CAP_MQES;
@@ -117,11 +117,11 @@ IOSQ::Init(uint16_t qId, uint32_t numEntries,
         mPriority = priority;
         break;
     default:
-        throw FrmwkEx("Illegal priority value, can't fit within 2 bits");
+        throw FrmwkEx(HERE, "Illegal priority value, can't fit within 2 bits");
     }
 
     if (gCtrlrConfig->GetIOSQES(entrySize) == false)
-        throw FrmwkEx("Unable to learn IOSQ entry size");
+        throw FrmwkEx(HERE, "Unable to learn IOSQ entry size");
 
     // Nothing to gain by specifying an element size which the DUT doesn't
     // support, the outcome is undefined, might succeed in crashing the kernel
@@ -130,7 +130,7 @@ IOSQ::Init(uint16_t qId, uint32_t numEntries,
     uint8_t maxElemSize = (uint8_t)((value >> 4) & 0x0f);
     uint8_t minElemSize = (uint8_t)((value >> 0) & 0x0f);
     if ((entrySize < minElemSize) || (entrySize > maxElemSize)) {
-        throw FrmwkEx("Reg CC.IOSQES yields a bad element size: 0x%04X",
+        throw FrmwkEx(HERE, "Reg CC.IOSQES yields a bad element size: 0x%04X",
             (1 << entrySize));
     }
     SQ::Init(qId, (1 << entrySize), numEntries, memBuffer, cqId);

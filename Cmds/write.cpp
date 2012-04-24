@@ -95,7 +95,7 @@ Write::SetPRINFO(uint8_t prinfo)
     LOG_NRM("Setting PRINFO = 0x%01X", prinfo);
 
     if (prinfo > 0x0f)
-        throw FrmwkEx("Value to large; must fit within 4 bits");
+        throw FrmwkEx(HERE, "Value to large; must fit within 4 bits");
 
     uint16_t work = GetWord(12, 1);
     work &= ~0x3C00;
@@ -166,7 +166,7 @@ Write::SetDSMAccessLatent(uint8_t accessLat)
     LOG_NRM("Setting DSM-Access Latency = 0x%01X", accessLat);
 
     if (accessLat > 0x03)
-        throw FrmwkEx("Value to large; must fit within 2 bits");
+        throw FrmwkEx(HERE, "Value to large; must fit within 2 bits");
 
     uint8_t work = GetByte(13, 0);
     work &= ~0x30;
@@ -190,7 +190,7 @@ Write::SetDSMAccessFreq(uint8_t accessFreq)
     LOG_NRM("Setting DSM-Access Freq = 0x%01X", accessFreq);
 
     if (accessFreq > 0x0f)
-        throw FrmwkEx("Value to large; must fit within 4 bits");
+        throw FrmwkEx(HERE, "Value to large; must fit within 4 bits");
 
     uint8_t work = GetByte(13, 0);
     work &= ~0x0f;

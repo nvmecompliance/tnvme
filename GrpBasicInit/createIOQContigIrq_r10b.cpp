@@ -100,10 +100,10 @@ CreateIOQContigIrq_r10b::RunCoreTest()
         acq->Dump(
             FileSystem::PrepDumpFile(mGrpName, mTestName, "acq",
             "notEmpty"), "Test assumption have not been met");
-        throw FrmwkEx(
+        throw FrmwkEx(HERE, 
             "The ACQ should not have any CE's waiting before testing");
     } else if (gRegisters->Read(CTLSPC_CAP, work) == false) {
-        throw FrmwkEx("Unable to determine MQES");
+        throw FrmwkEx(HERE, "Unable to determine MQES");
     }
 
     // Verify the min requirements for this test are supported by DUT
@@ -114,20 +114,20 @@ CreateIOQContigIrq_r10b::RunCoreTest()
             NumEntriesIOQ, (unsigned long long)work);
         NumEntriesIOQ = work;
     } else if (gInformative->GetFeaturesNumOfIOCQs() < IOQ_ID) {
-        throw FrmwkEx("DUT doesn't support %d IOCQ's", IOQ_ID);
+        throw FrmwkEx(HERE, "DUT doesn't support %d IOCQ's", IOQ_ID);
     } else if (gInformative->GetFeaturesNumOfIOSQs() < IOQ_ID) {
-        throw FrmwkEx("DUT doesn't support %d IOSQ's", IOQ_ID);
+        throw FrmwkEx(HERE, "DUT doesn't support %d IOSQ's", IOQ_ID);
     }
 
 
     if (gCtrlrConfig->SetState(ST_DISABLE) == false)
-        throw FrmwkEx();
+        throw FrmwkEx(HERE);
     // All queues will use identical IRQ vector
     IRQ::SetAnySchemeSpecifyNum(1);     // throws upon error
 
     gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
-        throw FrmwkEx();
+        throw FrmwkEx(HERE);
 
 
     gCtrlrConfig->SetIOCQES(gInformative->GetIdentifyCmdCtrlr()->

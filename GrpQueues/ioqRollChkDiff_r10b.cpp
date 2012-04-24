@@ -86,7 +86,7 @@ IOQRollChkDiff_r10b::RunCoreTest()
     uint64_t maxIOQEntries;
     // Determine the max IOQ entries supported
     if (gRegisters->Read(CTLSPC_CAP, maxIOQEntries) == false)
-        throw FrmwkEx("Unable to determine MQES");
+        throw FrmwkEx(HERE, "Unable to determine MQES");
     maxIOQEntries &= CAP_MQES;
     maxIOQEntries += 1;      // convert to 1-based
 
@@ -149,7 +149,7 @@ IOQRollChkDiff_r10b::SetWriteCmd()
     if (namspcData.type != Informative::NS_BARE) {
         LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
         if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
-            throw FrmwkEx();
+            throw FrmwkEx(HERE);
     }
 
     LOG_NRM("Create data pattern to write to media");
@@ -166,7 +166,7 @@ IOQRollChkDiff_r10b::SetWriteCmd()
     } else if (namspcData.type == Informative::NS_E2E) {
         writeCmd->AllocMetaBuffer();
         LOG_ERR("Deferring E2E namspc work to the future");
-        throw FrmwkEx("Need to add CRC's to correlate to buf pattern");
+        throw FrmwkEx(HERE, "Need to add CRC's to correlate to buf pattern");
     }
 
     writeCmd->SetPrpBuffer(prpBitmask, dataPat);
@@ -192,9 +192,9 @@ IOQRollChkDiff_r10b::ReapAndVerifyCE(SharedIOCQPtr iocq, uint32_t expectedVal)
         iocq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "iocq",
             "reapInq"),
             "Unable to see any CE's in IOCQ, dump entire CQ contents");
-        throw FrmwkEx("Unable to see completion of cmd");
+        throw FrmwkEx(HERE, "Unable to see completion of cmd");
     } else if (numCE != 1) {
-        throw FrmwkEx("The IOCQ should only have 1 CE as a result of a cmd");
+        throw FrmwkEx(HERE, "The IOCQ should only have 1 CE as a result of a cmd");
     }
 
     LOG_NRM("The CQ's metrics before reaping holds head_ptr");
@@ -205,7 +205,7 @@ IOQRollChkDiff_r10b::ReapAndVerifyCE(SharedIOCQPtr iocq, uint32_t expectedVal)
     if ((numReaped = iocq->Reap(ceRemain, ceMemIOCQ, isrCount, numCE, true))
         != 1) {
 
-        throw FrmwkEx(
+        throw FrmwkEx(HERE, 
             "Verified there was 1 CE, but reaping produced %d", numReaped);
     }
 
@@ -216,7 +216,7 @@ IOQRollChkDiff_r10b::ReapAndVerifyCE(SharedIOCQPtr iocq, uint32_t expectedVal)
         iocq->Dump(
             FileSystem::PrepDumpFile(mGrpName, mTestName, "iocq", "CE.SQID"),
             "CE SQ ID Inconsistent");
-        throw FrmwkEx("Expected CE.SQID = 0x%04X in IOCQ CE but actual "
+        throw FrmwkEx(HERE, "Expected CE.SQID = 0x%04X in IOCQ CE but actual "
             "CE.SQID  = 0x%04X", IOQ_ID, ce.n.SQID);
     }
 
@@ -224,7 +224,7 @@ IOQRollChkDiff_r10b::ReapAndVerifyCE(SharedIOCQPtr iocq, uint32_t expectedVal)
         iocq->Dump(
             FileSystem::PrepDumpFile(mGrpName, mTestName, "iocq", "CE.SQHD"),
             "CE SQ Head Pointer Inconsistent");
-        throw FrmwkEx("Expected CE.SQHD = 0x%04X in IOCQ CE but actual "
+        throw FrmwkEx(HERE, "Expected CE.SQHD = 0x%04X in IOCQ CE but actual "
             "CE.SQHD  = 0x%04X", expectedVal, ce.n.SQHD);
     }
 }
@@ -241,7 +241,7 @@ IOQRollChkDiff_r10b::VerifyQPointers(SharedIOSQPtr iosq, SharedIOCQPtr iocq)
     if (iocqMetrics.head_ptr != expectedVal) {
         iocq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "iocq",
             "head_ptr"), "CQ Metrics Head Pointer Inconsistent");
-        throw FrmwkEx("Expected IO CQ.head_ptr = 0x%04X but actual "
+        throw FrmwkEx(HERE, "Expected IO CQ.head_ptr = 0x%04X but actual "
             "IOCQ.head_ptr = 0x%04X", expectedVal, iocqMetrics.head_ptr);
     }
 
@@ -250,7 +250,7 @@ IOQRollChkDiff_r10b::VerifyQPointers(SharedIOSQPtr iosq, SharedIOCQPtr iocq)
     if (iosqMetrics.tail_ptr != expectedVal) {
         iosq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "iosq",
             "tail_ptr"), "SQ Metrics Tail Pointer Inconsistent");
-        throw FrmwkEx("Expected  IO SQ.tail_ptr = 0x%04X but actual "
+        throw FrmwkEx(HERE, "Expected  IO SQ.tail_ptr = 0x%04X but actual "
             "IOSQ.tail_ptr  = 0x%04X", expectedVal, iosqMetrics.tail_ptr);
     }
 }

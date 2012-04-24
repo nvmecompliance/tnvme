@@ -70,7 +70,7 @@ FormatDevice(Format &format, int fd)
     try {   // The objects to perform this work throw exceptions
         FileSystem::SetBaseDumpDir(false);   // Log into GrpPending
         if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
-            throw FrmwkEx();
+            throw FrmwkEx(HERE);
 
         LOG_NRM("Prepare the admin Q's to setup this request");
         SharedACQPtr acq = SharedACQPtr(new ACQ(fd));
@@ -79,7 +79,7 @@ FormatDevice(Format &format, int fd)
         asq->Init(2);
         gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
         if (gCtrlrConfig->SetState(ST_ENABLE) == false)
-            throw FrmwkEx();
+            throw FrmwkEx(HERE);
 
         for (size_t i = 0; i < format.cmds.size(); i++) {
             LOG_NRM("Formatting namespace: %d", format.cmds[i].nsid);
@@ -120,7 +120,7 @@ FormatDevice(Format &format, int fd)
  * change between resets, i.e. only set this value after a power up. Failure to
  * conform results in undefined behavior.
  * "<STS:PXDS:AERUCES:CSTS>".
- * @param numQueues Pass a structure to source the desired values to send to hdw
+ * @param numQueues Pass a struct to source the desired values to send to hdw
  * @param fd Pass file descriptor representing device to commune with
  * @return true upon successful parsing, otherwise false.
  */
@@ -134,7 +134,7 @@ SetFeaturesNumberOfQueues(NumQueues &numQueues, int fd)
 
         FileSystem::SetBaseDumpDir(false);   // Log into GrpPending
         if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
-            throw FrmwkEx();
+            throw FrmwkEx(HERE);
 
         LOG_NRM("Prepare the admin Q's to setup this request");
         SharedACQPtr acq = SharedACQPtr(new ACQ(fd));
@@ -143,7 +143,7 @@ SetFeaturesNumberOfQueues(NumQueues &numQueues, int fd)
         asq->Init(2);
         gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
         if (gCtrlrConfig->SetState(ST_ENABLE) == false)
-            throw FrmwkEx();
+            throw FrmwkEx(HERE);
 
         LOG_NRM("Create the cmd to carry this data to the DUT");
         SharedSetFeaturesPtr sfNumOfQ =

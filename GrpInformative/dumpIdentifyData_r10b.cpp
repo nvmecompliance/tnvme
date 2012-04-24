@@ -122,7 +122,7 @@ DumpIdentifyData_r10b::SendIdentifyNamespaceStruct(SharedASQPtr asq,
 
     ConstSharedIdentifyPtr idCmdCtrlr = gInformative->GetIdentifyCmdCtrlr();
     if ((numNamSpc = idCmdCtrlr->GetValue(IDCTRLRCAP_NN)) == 0)
-        throw FrmwkEx("Required to support >= 1 namespace");
+        throw FrmwkEx(HERE, "Required to support >= 1 namespace");
 
     LOG_NRM("Gather %lld identify namspc structs from DUT",
         (unsigned long long)numNamSpc);

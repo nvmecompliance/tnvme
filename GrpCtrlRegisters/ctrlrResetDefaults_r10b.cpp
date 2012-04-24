@@ -78,7 +78,7 @@ CtrlrResetDefaults_r10b::RunCoreTest()
      *  \endverbatim
      */
     if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
-        throw FrmwkEx();
+        throw FrmwkEx(HERE);
 
     VerifyCtrlrResetDefaults();
 }
@@ -90,7 +90,7 @@ CtrlrResetDefaults_r10b::VerifyCtrlrResetDefaults()
 
     // Issue a cntl'r reset for a clean controller state to begin with
     if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
-        throw FrmwkEx();
+        throw FrmwkEx(HERE);
 
     // Create ACQ and ASQ objects which have test life time
     SharedACQPtr acq = CAST_TO_ACQ(SharedACQPtr(new ACQ(mFd)))
@@ -101,7 +101,7 @@ CtrlrResetDefaults_r10b::VerifyCtrlrResetDefaults()
 
     gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
-        throw FrmwkEx();
+        throw FrmwkEx(HERE);
 
     // Dump Controller space registers to known file before ctrlr reset
     KernelAPI::DumpCtrlrSpaceRegs(FileSystem::
@@ -111,7 +111,7 @@ CtrlrResetDefaults_r10b::VerifyCtrlrResetDefaults()
 
     // Issue a cntl'r reset. CC.EN transitions from 1 to 0
     if (gCtrlrConfig->SetState(ST_DISABLE) == false)
-        throw FrmwkEx();
+        throw FrmwkEx(HERE);
 
     // Dump Controller space registers to known file after ctrlr reset
     KernelAPI::DumpCtrlrSpaceRegs(FileSystem::
@@ -121,7 +121,7 @@ CtrlrResetDefaults_r10b::VerifyCtrlrResetDefaults()
 }
 
 void
-CtrlrResetDefaults_r10b::ModifyRWBitsOfCtrlrRegisters(std::map <int, uint64_t>&
+CtrlrResetDefaults_r10b::ModifyRWBitsOfCtrlrRegisters(std::map <int, uint64_t> &
     ctrlRegsMap)
 {
     uint64_t value = 0;
@@ -146,7 +146,7 @@ CtrlrResetDefaults_r10b::ModifyRWBitsOfCtrlrRegisters(std::map <int, uint64_t>&
         // we can compare after a cntl'r reset is issued
         if ((j == CTLSPC_AQA) || (j == CTLSPC_ASQ) || (j == CTLSPC_ACQ)) {
             if (gRegisters->Read((CtlSpc)j, value) == false)
-                throw FrmwkEx();
+                throw FrmwkEx(HERE);
             ctrlRegsMap[j] = value;
             continue;
         }
@@ -154,7 +154,7 @@ CtrlrResetDefaults_r10b::ModifyRWBitsOfCtrlrRegisters(std::map <int, uint64_t>&
         // Modify RW bits in controller registers by writing non-default
         // values.
         if (gRegisters->Write((CtlSpc)j, ~ctlMetrics[j].dfltValue) == false)
-            throw FrmwkEx();
+            throw FrmwkEx(HERE);
     }
 }
 
@@ -178,22 +178,22 @@ CtrlrResetDefaults_r10b::ValidateCtrlrRWDefaultsAfterReset(std::map <int,
         // AQA, ASQ and ACQ register vals are checked against remembered values
         if ((j == CTLSPC_AQA) || (j == CTLSPC_ASQ) || (j == CTLSPC_ACQ)) {
             if (gRegisters->Read((CtlSpc)j, value) == false)
-                throw FrmwkEx();
+                throw FrmwkEx(HERE);
             if (value != ctrlRegsMap[j]) {
                 LOG_ERR("%s is incorrectly modified expected value is 0x%lX "
                 "but actual value 0x%lX", ctlMetrics[j].desc, ctrlRegsMap[j],
                 value);
-                throw FrmwkEx();
+                throw FrmwkEx(HERE);
             }
             continue;
         }
 
         // Validate RW bits are reset to default values
         if (gRegisters->Read((CtlSpc)j, value) == false)
-            throw FrmwkEx();
+            throw FrmwkEx(HERE);
         value &= ~ctlMetrics[j].maskRO;
         if (value != expectedVal) {
-            throw FrmwkEx(
+            throw FrmwkEx(HERE, 
                 "%s RW bit #%d has incorrect value", ctlMetrics[j].desc,
                 ReportOffendingBitPos(value, expectedVal));
         }

@@ -101,15 +101,15 @@ CreateIOQDiscontigPoll_r10b::RunCoreTest()
         acq->Dump(
             FileSystem::PrepDumpFile(mGrpName, mTestName, "acq",
             "notEmpty"), "Test assumption have not been met");
-        throw FrmwkEx(
+        throw FrmwkEx(HERE, 
             "The ACQ should not have any CE's waiting before testing");
     } else if (gRegisters->Read(CTLSPC_CAP, regVal) == false) {
-        throw FrmwkEx("Unable to determine Q memory requirements");
+        throw FrmwkEx(HERE, "Unable to determine Q memory requirements");
     } else if (regVal & CAP_CQR) {
         LOG_NRM("Unable to utilize discontig Q's, DUT requires contig");
         return;
     } if (gRegisters->Read(CTLSPC_CAP, work) == false) {
-        throw FrmwkEx("Unable to determine MQES");
+        throw FrmwkEx(HERE, "Unable to determine MQES");
     }
 
     // Verify the min requirements for this test are supported by DUT
@@ -120,9 +120,9 @@ CreateIOQDiscontigPoll_r10b::RunCoreTest()
             NumEntriesIOQ, (unsigned long long)work);
         NumEntriesIOQ = work;
     } else if (gInformative->GetFeaturesNumOfIOCQs() < IOQ_ID) {
-        throw FrmwkEx("DUT doesn't support %d IOCQ's", IOQ_ID);
+        throw FrmwkEx(HERE, "DUT doesn't support %d IOCQ's", IOQ_ID);
     } else if (gInformative->GetFeaturesNumOfIOSQs() < IOQ_ID) {
-        throw FrmwkEx("DUT doesn't support %d IOSQ's", IOQ_ID);
+        throw FrmwkEx(HERE, "DUT doesn't support %d IOSQ's", IOQ_ID);
     }
 
 

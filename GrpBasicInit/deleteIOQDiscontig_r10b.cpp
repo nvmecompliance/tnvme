@@ -91,7 +91,7 @@ DeleteIOQDiscontig_r10b::RunCoreTest()
 
     // DUT must support discontig memory backing a IOQ to run this test
     if (gRegisters->Read(CTLSPC_CAP, regVal) == false) {
-        throw FrmwkEx("Unable to determine Q memory requirements");
+        throw FrmwkEx(HERE, "Unable to determine Q memory requirements");
     } else if (regVal & CAP_CQR) {
         LOG_NRM("Unable to utilize discontig Q's, DUT requires contig");
         return;

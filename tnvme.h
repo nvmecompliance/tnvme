@@ -25,21 +25,21 @@
 
 using namespace std;
 
+// Identifies which file and line number in a compact form to save space
+#define HERE        __FILE__, __LINE__
+
 #define APPNAME         "tnvme"
 #define LEVEL           APPNAME
 #define LOG_NRM(fmt, ...)       \
-    fprintf(stderr, "%s: " fmt "\n", LEVEL, ## __VA_ARGS__);
+    fprintf(stderr, "%s:%s:%d: " fmt "\n", LEVEL, HERE, ## __VA_ARGS__);
 #define LOG_ERR(fmt, ...)       \
-    fprintf(stderr, "%s-err:%s:%d: " fmt "\n", LEVEL, __FILE__, __LINE__,   \
-        ## __VA_ARGS__);
+    fprintf(stderr, "%s-err:%s:%d: " fmt "\n", LEVEL, HERE, ## __VA_ARGS__);
 #define LOG_WARN(fmt, ...)      \
-    fprintf(stderr, "%s-warn:%s:%d: " fmt "\n", LEVEL, __FILE__, __LINE__,  \
-        ## __VA_ARGS__);
+    fprintf(stderr, "%s-warn:%s:%d: " fmt "\n", LEVEL, HERE, ## __VA_ARGS__);
 
 #ifdef DEBUG
 #define LOG_DBG(fmt, ...)       \
-    fprintf(stderr, "%s-dbg:%s:%d: " fmt "\n", LEVEL, __FILE__, __LINE__,   \
-        ## __VA_ARGS__);
+    fprintf(stderr, "%s-dbg:%s:%d: " fmt "\n", LEVEL, HERE, ## __VA_ARGS__);
 #else
 #define LOG_DBG(fmt, ...)       ;
 #endif

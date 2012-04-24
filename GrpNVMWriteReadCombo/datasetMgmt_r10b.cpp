@@ -104,7 +104,7 @@ DatasetMgmt_r10b::RunCoreTest()
     uint64_t lbaDataSize = namspcData.idCmdNamspc->GetLBADataSize();
     if (namspcData.type != Informative::NS_BARE) {
         if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
-            throw FrmwkEx();
+            throw FrmwkEx(HERE);
     }
 
     SharedWritePtr writeCmd = SharedWritePtr(new Write());
@@ -133,7 +133,7 @@ DatasetMgmt_r10b::RunCoreTest()
         writeCmd->AllocMetaBuffer();
         readCmd->AllocMetaBuffer();
         LOG_ERR("Deferring E2E namspc work to the future");
-        throw FrmwkEx("Need to add CRC's to correlate to buf pattern");
+        throw FrmwkEx(HERE, "Need to add CRC's to correlate to buf pattern");
     }
 
     DataPattern dataPat[] = {
@@ -181,7 +181,7 @@ DatasetMgmt_r10b::VerifyDataPat(SharedReadPtr readCmd, SharedWritePtr writeCmd)
         writeCmd->Dump(
             FileSystem::PrepDumpFile(mGrpName, mTestName, "WriteCmd"),
             "Write command");
-        throw FrmwkEx("Data miscompare");
+        throw FrmwkEx(HERE, "Data miscompare");
     }
 
     // If meta data is allocated then compare meta data.
@@ -195,7 +195,7 @@ DatasetMgmt_r10b::VerifyDataPat(SharedReadPtr readCmd, SharedWritePtr writeCmd)
             writeCmd->Dump(
                 FileSystem::PrepDumpFile(mGrpName, mTestName, "WriteCmdMeta"),
                 "Write command with meta data");
-            throw FrmwkEx("Meta data miscompare");
+            throw FrmwkEx(HERE, "Meta data miscompare");
         }
     }
 }

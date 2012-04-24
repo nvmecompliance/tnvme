@@ -25,7 +25,7 @@ SharedTrackablePtr Trackable::NullTrackablePtr;
 Trackable::Trackable(ObjType objBeingCreated)
 {
     if (objBeingCreated >= OBJTYPE_FENCE)
-        throw FrmwkEx("Illegal constructor");
+        throw FrmwkEx(HERE, "Illegal constructor");
 
     mObjType = objBeingCreated;
 }
@@ -62,7 +62,7 @@ Trackable::GetObjName(ObjType obj)
     case OBJ_WRITE:         name = "Write";              break;
     case OBJ_READ:          name = "Read";               break;
     default:
-        throw FrmwkEx("Forgot to label this unknown obj");
+        throw FrmwkEx(HERE, "Forgot to label this unknown obj");
     }
     return name;
 }

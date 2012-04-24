@@ -29,7 +29,7 @@ Queue::Queue(int fd, Trackable::ObjType objBeingCreated) :
 {
     mFd = fd;
     if (mFd < 0)
-        throw FrmwkEx("Object created with a bad FD=%d", fd);
+        throw FrmwkEx(HERE, "Object created with a bad FD=%d", fd);
 
     mQId = 0;
     mEntrySize = 0;
@@ -51,11 +51,11 @@ Queue::GetIsContig()
     if ((mContigBuf == NULL) &&
         (mDiscontigBuf == MemBuffer::NullMemBufferPtr)) {
 
-        throw FrmwkEx("Detected an uninitialized Q");
+        throw FrmwkEx(HERE, "Detected an uninitialized Q");
     } else if ((mContigBuf != NULL) &&
         (mDiscontigBuf != MemBuffer::NullMemBufferPtr)) {
 
-        throw FrmwkEx("Detected an illegally configured Q");
+        throw FrmwkEx(HERE, "Detected an illegally configured Q");
     }
     return (mContigBuf != NULL);
 }
@@ -75,9 +75,9 @@ void
 Queue::Init(uint16_t qId, uint16_t entrySize, uint32_t numEntries)
 {
     if (mDiscontigBuf != MemBuffer::NullMemBufferPtr) {
-        throw FrmwkEx("Obj already init'd for discontiguous parameters");
+        throw FrmwkEx(HERE, "Obj already init'd for discontiguous parameters");
     } else if (mContigBuf != NULL) {
-        throw FrmwkEx(
+        throw FrmwkEx(HERE, 
             "Obj does not support re-allocations, create a new obj");
     }
 

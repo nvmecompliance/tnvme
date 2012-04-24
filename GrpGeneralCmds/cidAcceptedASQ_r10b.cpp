@@ -93,7 +93,7 @@ CIDAcceptedASQ_r10b::RunCoreTest()
         acq->Dump(
             FileSystem::PrepDumpFile(mGrpName, mTestName, "acq",
             "notEmpty"), "Test assumption have not been met");
-        throw FrmwkEx(
+        throw FrmwkEx(HERE, 
             "The ACQ should not have any CE's waiting before testing");
     }
 
@@ -123,7 +123,8 @@ CIDAcceptedASQ_r10b::RunCoreTest()
                 "Dump Entire ASQ");
             acq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "acq.fail"),
                 "Dump Entire ACQ");
-            throw FrmwkEx("Current CID(%d) != prev + 1(%d)", currCID, prevCID);
+            throw FrmwkEx(HERE, "Current CID(%d) != prev + 1(%d)", currCID,
+                prevCID);
         }
 
         prevCID = currCID;
@@ -144,14 +145,14 @@ CIDAcceptedASQ_r10b::ReapVerifyCID(SharedASQPtr asq, SharedACQPtr acq,
         == false) {
         acq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "acq.fail"),
             "Dump Entire ACQ");
-        throw FrmwkEx("Unable to see CEs for issued cmd");
+        throw FrmwkEx(HERE, "Unable to see CEs for issued cmd");
     }
 
     SharedMemBufferPtr ceMem = SharedMemBufferPtr(new MemBuffer());
     if ((numReaped = acq->Reap(ceRemain, ceMem, isrCount, numCE, true)) != 1) {
         acq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "acq.fail"),
             "Dump Entire ACQ");
-        throw FrmwkEx("Unable to reap on ACQ");
+        throw FrmwkEx(HERE, "Unable to reap on ACQ");
     }
 
     union CE *ce = (union CE *)ceMem->GetBuffer();
@@ -161,7 +162,8 @@ CIDAcceptedASQ_r10b::ReapVerifyCID(SharedASQPtr asq, SharedACQPtr acq,
             "Dump Entire ASQ");
         acq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "acq.fail"),
             "Dump Entire ACQ");
-        throw FrmwkEx("Received CID %d but expected %d", ce->n.CID, currCID);
+        throw FrmwkEx(HERE, "Received CID %d but expected %d", ce->n.CID,
+            currCID);
     }
 }
 

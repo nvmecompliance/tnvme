@@ -102,7 +102,7 @@ FileSystem::PrepDumpFile(string grpName, string className, string objName,
     string file;
 
     if (grpName.empty() || className.empty() || objName.empty())
-        throw FrmwkEx("Mandatory params are empty");
+        throw FrmwkEx(HERE, "Mandatory params are empty");
 
     file += (mUseGrpInfo) ? mDumpDirGrpInfo : mDumpDirPending;
     file += grpName + ".";

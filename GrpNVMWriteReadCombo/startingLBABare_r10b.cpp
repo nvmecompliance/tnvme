@@ -121,8 +121,10 @@ StartingLBABare_r10b::RunCoreTest()
     vector<uint32_t> bare = gInformative->GetBareNamespaces();
     for (size_t i = 0; i < bare.size(); i++) {
         namSpcPtr = gInformative->GetIdentifyCmdNamspc(bare[i]);
-        if (namSpcPtr == Identify::NullIdentifyPtr)
-            throw FrmwkEx("Identify namspc struct #%d doesn't exist", bare[i]);
+        if (namSpcPtr == Identify::NullIdentifyPtr) {
+            throw FrmwkEx(HERE, "Identify namspc struct #%d doesn't exist",
+                bare[i]);
+        }
 
         uint64_t ncap = namSpcPtr->GetValue(IDNAMESPC_NCAP);
         uint64_t lbaDataSize = namSpcPtr->GetLBADataSize();
@@ -180,7 +182,7 @@ StartingLBABare_r10b::VerifyDataPat(SharedReadPtr readCmd,
         wrPayload->Dump(
             FileSystem::PrepDumpFile(mGrpName, mTestName, "WrittenPayload"),
             "Data read from media miscompared from written");
-        throw FrmwkEx("Data miscompare");
+        throw FrmwkEx(HERE, "Data miscompare");
     }
 }
 

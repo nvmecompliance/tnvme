@@ -95,7 +95,7 @@ SQCQSizeMismatch_r10b::RunCoreTest()
     uint64_t maxIOQEntries;
     // Determine the max IOQ entries supported
     if (gRegisters->Read(CTLSPC_CAP, maxIOQEntries) == false)
-        throw FrmwkEx("Unable to determine MQES");
+        throw FrmwkEx(HERE, "Unable to determine MQES");
     maxIOQEntries &= CAP_MQES;
     maxIOQEntries += 1;      // convert to 1-based
 
@@ -164,7 +164,7 @@ SQCQSizeMismatch_r10b::SetWriteCmd()
     if (namspcData.type != Informative::NS_BARE) {
         LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
         if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
-            throw FrmwkEx();
+            throw FrmwkEx(HERE);
     }
 
     LOG_NRM("Create data pattern to write to media");
@@ -181,7 +181,7 @@ SQCQSizeMismatch_r10b::SetWriteCmd()
     } else if (namspcData.type == Informative::NS_E2E) {
         writeCmd->AllocMetaBuffer();
         LOG_ERR("Deferring E2E namspc work to the future");
-        throw FrmwkEx("Need to add CRC's to correlate to buf pattern");
+        throw FrmwkEx(HERE, "Need to add CRC's to correlate to buf pattern");
     }
 
     writeCmd->SetPrpBuffer(prpBitmask, dataPat);
@@ -208,7 +208,7 @@ SQCQSizeMismatch_r10b::ReapVerifyOnCQ(SharedIOCQPtr iocq, SharedIOSQPtr iosq)
             iocq->Dump(
                 FileSystem::PrepDumpFile(mGrpName, mTestName, "iocq", "reapInq"),
                 "Unable to see any CE's in IOCQ, dump entire CQ contents");
-            throw FrmwkEx("Unable to see completion of cmd");
+            throw FrmwkEx(HERE, "Unable to see completion of cmd");
         }
 
         LOG_NRM("The CQ's metrics B4 reaping holds head_ptr needed");
@@ -220,7 +220,7 @@ SQCQSizeMismatch_r10b::ReapVerifyOnCQ(SharedIOCQPtr iocq, SharedIOSQPtr iosq)
             iocq->Dump(
                 FileSystem::PrepDumpFile(mGrpName, mTestName, "iocq", "reap"),
                 "Unable to see any CE's in IOCQ, dump entire CQ contents");
-            throw FrmwkEx("Verified there was 1 CE, but reaping failed");
+            throw FrmwkEx(HERE, "Verified there was 1 CE, but reaping failed");
         }
 
         LOG_NRM("The reaped CE is...");
@@ -233,7 +233,7 @@ SQCQSizeMismatch_r10b::ReapVerifyOnCQ(SharedIOCQPtr iocq, SharedIOSQPtr iosq)
             iocq->Dump(
                 FileSystem::PrepDumpFile(mGrpName, mTestName, "iocq", "sqId"),
                 "Wrong SQID in the CE of IOCQ, dump entire CQ contents");
-            throw FrmwkEx("Invalid SQID %d in CE, expected SQID", ce.n.SQID,
+            throw FrmwkEx(HERE, "Invalid SQID %d in CE, expected SQID", ce.n.SQID,
                 iosq->GetQId());
         }
     }

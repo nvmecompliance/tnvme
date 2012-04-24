@@ -107,13 +107,13 @@ PRPOffsetSinglePgSingleBlk_r10b::RunCoreTest()
     if (namspcData.type != Informative::NS_BARE) {
         LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
         if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
-            throw FrmwkEx();
+            throw FrmwkEx(HERE);
     }
     uint64_t lbaDataSize = namspcData.idCmdNamspc->GetLBADataSize();
 
     uint8_t mpsRegVal;
     if (gCtrlrConfig->GetMPS(mpsRegVal) == false)
-        throw FrmwkEx("Unable to get MPS value from CC.");
+        throw FrmwkEx(HERE, "Unable to get MPS value from CC.");
     uint64_t X =  (uint64_t)(1 << (mpsRegVal + 12)) - lbaDataSize;
 
     SharedWritePtr writeCmd = CreateWriteCmd(namspcData);
@@ -180,7 +180,7 @@ PRPOffsetSinglePgSingleBlk_r10b::CreateWriteCmd(Informative::Namspc namspcData)
     } else if (namspcData.type == Informative::NS_E2E) {
         writeCmd->AllocMetaBuffer();
         LOG_ERR("Deferring E2E namspc work to the future");
-        throw FrmwkEx("Need to add CRC's to correlate to buf pattern");
+        throw FrmwkEx(HERE, "Need to add CRC's to correlate to buf pattern");
     }
 
     writeCmd->SetNSID(namspcData.id);
@@ -199,7 +199,7 @@ PRPOffsetSinglePgSingleBlk_r10b::CreateReadCmd(Informative::Namspc namspcData)
     } else if (namspcData.type == Informative::NS_E2E) {
         readCmd->AllocMetaBuffer();
         LOG_ERR("Deferring E2E namspc work to the future");
-        throw FrmwkEx("Need to add CRC's to correlate to buf pattern");
+        throw FrmwkEx(HERE, "Need to add CRC's to correlate to buf pattern");
     }
 
     readCmd->SetNSID(namspcData.id);
@@ -220,9 +220,10 @@ PRPOffsetSinglePgSingleBlk_r10b::VerifyDataPattern(SharedReadPtr readCmd,
             (readCmd->GetPrpBufferSize() / sizeof(uint16_t)); i++) {
             if (*rdBuffPtr++ != mWrVal++) {
                 readCmd->Dump(
-                    FileSystem::PrepDumpFile(mGrpName, mTestName, "ReadPayload"),
+                    FileSystem::PrepDumpFile(mGrpName, mTestName,
+                    "ReadPayload"),
                     "Data read from media miscompared from written");
-                throw FrmwkEx("Read data mismatch for 16bit inc prp data "
+                throw FrmwkEx(HERE, "Read data mismatch for 16bit inc prp data "
                     "read ptr: 0x%08X, read value: 0x%02X, write value: 0x%02X",
                     rdBuffPtr, *rdBuffPtr, mWrVal);
             }
@@ -239,7 +240,8 @@ PRPOffsetSinglePgSingleBlk_r10b::VerifyDataPattern(SharedReadPtr readCmd,
                         FileSystem::PrepDumpFile(mGrpName, mTestName,
                         "MetaPayload"),
                         "Meta Data read from media miscompared from written");
-                    throw FrmwkEx("Read data mismatch for 16bit inc meta data "
+                    throw FrmwkEx(HERE,
+                        "Read data mismatch for 16bit inc meta data "
                         "read ptr: 0x%08X, read val: 0x%02X, write val: 0x%02X",
                         rdBuffPtr, *rdBuffPtr, mWrVal);
                 }
@@ -251,9 +253,10 @@ PRPOffsetSinglePgSingleBlk_r10b::VerifyDataPattern(SharedReadPtr readCmd,
             (readCmd->GetPrpBufferSize() / sizeof(uint8_t)); i++) {
             if (*rdBuffPtr++ != (uint8_t)wrVal) {
                 readCmd->Dump(
-                    FileSystem::PrepDumpFile(mGrpName, mTestName, "ReadPayload"),
+                    FileSystem::PrepDumpFile(mGrpName, mTestName,
+                    "ReadPayload"),
                     "Data read from media miscompared from written");
-                throw FrmwkEx("Read data mismatch for 8bit const data "
+                throw FrmwkEx(HERE, "Read data mismatch for 8bit const data "
                     "read ptr: 0x%08X, read value: 0x%02X, write value: 0x%02X",
                     rdBuffPtr, *rdBuffPtr, wrVal);
             }
@@ -269,7 +272,8 @@ PRPOffsetSinglePgSingleBlk_r10b::VerifyDataPattern(SharedReadPtr readCmd,
                         FileSystem::PrepDumpFile(mGrpName, mTestName,
                         "MetaPayload"),
                         "Meta Data read from media miscompared from written");
-                    throw FrmwkEx("Read data mismatch for 8bit const meta data "
+                    throw FrmwkEx(HERE,
+                        "Read data mismatch for 8bit const meta data "
                         "read ptr: 0x%08X, read val: 0x%02X, write val: 0x%02X",
                         rdBuffPtr, *rdBuffPtr, wrVal);
                 }

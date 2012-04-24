@@ -97,7 +97,7 @@ VerifyDataPat_r10b::VerifyDataPattern()
         WRITE_DATA_PAT_NUM_BLKS);
     ConstSharedIdentifyPtr namSpcPtr = gInformative->GetIdentifyCmdNamspc(1);
     if (namSpcPtr == Identify::NullIdentifyPtr)
-        throw FrmwkEx("Namespace #1 must exist");
+        throw FrmwkEx(HERE, "Namespace #1 must exist");
     uint64_t lbaDataSize = namSpcPtr->GetLBADataSize();
 
 
@@ -135,7 +135,7 @@ VerifyDataPat_r10b::VerifyDataPattern()
 
     // To run the discontig part of this test, the hdw must support that feature
     if (gRegisters->Read(CTLSPC_CAP, regVal) == false) {
-        throw FrmwkEx("Unable to determine Q memory requirements");
+        throw FrmwkEx(HERE, "Unable to determine Q memory requirements");
     } else if (regVal & CAP_CQR) {
         LOG_NRM("Unable to utilize discontig Q's, DUT requires contig");
         return;
@@ -163,7 +163,7 @@ VerifyDataPat_r10b::SendToIOSQ(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
         writtenPayload->Dump(
             FileSystem::PrepDumpFile(mGrpName, mTestName, "WrittenPayload"),
             "Data read from media miscompared from written");
-        throw FrmwkEx("Data miscompare");
+        throw FrmwkEx(HERE, "Data miscompare");
     }
 }
 

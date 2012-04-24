@@ -30,7 +30,7 @@ MetaRsrc::MetaRsrc(int fd)
 {
     mFd = fd;
     if (mFd < 0)
-        throw FrmwkEx("Object created with a bad FD=%d", fd);
+        throw FrmwkEx(HERE, "Object created with a bad FD=%d", fd);
 
     mMetaAllocSize = 0;
 }
@@ -115,7 +115,7 @@ MetaRsrc::ReserveMetaBuf(MetaDataBuf &metaBuf)
 
             // Request dnvme to reserve us some contiguous memory
             if ((rc = ioctl(mFd, NVME_IOCTL_METABUF_ALLOC, metaBuf.ID)) < 0) {
-                throw FrmwkEx(
+                throw FrmwkEx(HERE,
                     "Meta data alloc request denied with error: %d", rc);
             }
 
@@ -127,7 +127,7 @@ MetaRsrc::ReserveMetaBuf(MetaDataBuf &metaBuf)
                 // Have to free the memory, not useful if we can't access it
                 if ((rc =ioctl(mFd, NVME_IOCTL_METABUF_DELETE, metaBuf.ID)) < 0)
                     LOG_ERR("Meta data free request denied with error: %d", rc);
-                throw FrmwkEx();
+                throw FrmwkEx(HERE);
             }
 
             mMetaReserved.insert(resIter, metaBuf);
