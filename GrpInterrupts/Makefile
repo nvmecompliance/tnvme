@@ -19,7 +19,8 @@ INCLUDES = -I. -I../ -I../../ -I/usr/local/include
 SRC =						\
 	grpInterrupts.cpp			\
 	createResources_r10b.cpp		\
-	invalidMSIXIRQ_r10b.cpp
+	invalidMSIXIRQ_r10b.cpp			\
+	maxIOQMSIX1To1_r10b.cpp
 
 .SUFFIXES: .cpp
 

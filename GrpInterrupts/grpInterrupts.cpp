@@ -18,6 +18,7 @@
 #include "../Exception/frmwkEx.h"
 #include "createResources_r10b.h"
 #include "invalidMSIXIRQ_r10b.h"
+#include "maxIOQMSIX1To1_r10b.h"
 
 namespace GrpInterrupts {
 
@@ -36,6 +37,7 @@ GrpInterrupts::GrpInterrupts(size_t grpNum, SpecRev specRev, ErrorRegs errRegs,
     case SPECREV_10b:
         APPEND_TEST_AT_XLEVEL(CreateResources_r10b, fd, GrpInterrupts, errRegs)
         APPEND_TEST_AT_YLEVEL(InvalidMSIXIRQ_r10b, fd, GrpInterrupts, errRegs)
+        APPEND_TEST_AT_YLEVEL(MaxIOQMSIX1To1_r10b, fd, GrpInterrupts, errRegs)
         break;
 
     default:

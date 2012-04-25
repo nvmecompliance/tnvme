@@ -75,9 +75,7 @@ CreateResources_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
-     * 1) This is the 1st within GrpBasicInit.
-     * 2) An individual test within this group cannot run, the entire group
-     *    must be executed every time. Each subsequent test relies on the prior.
+     * None.
      * \endverbatim
      */
     SharedACQPtr acq = CAST_TO_ACQ(
