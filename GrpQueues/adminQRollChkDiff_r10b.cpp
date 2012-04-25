@@ -125,7 +125,7 @@ AdminQRollChkDiff_r10b::RunCoreTest()
         for (uint16_t nsubmitTimes = 0; nsubmitTimes <
             MAX(asq->GetNumEntries(), acq->GetNumEntries()) + 2;
             nsubmitTimes++) {
-            IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+            IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
                 asq, acq, idCmdCap, "AdminQRollChkDiff", false);
             VerifyCESQValues(acq, (nsubmitTimes + 1) % asq->GetNumEntries());
         }

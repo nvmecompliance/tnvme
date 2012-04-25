@@ -151,7 +151,7 @@ PRPOffsetSinglePgSingleBlk_r10b::RunCoreTest()
         if ((pgOff <= 8) || (pgOff >= (X - 8)))
             enableLog = true;
 
-        IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
+        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
             writeCmd, work, enableLog);
 
         SharedMemBufferPtr readMem = SharedMemBufferPtr(new MemBuffer());
@@ -162,7 +162,7 @@ PRPOffsetSinglePgSingleBlk_r10b::RunCoreTest()
         readCmd->SetDword(prp2RandVal[0], 8);
         readCmd->SetDword(prp2RandVal[1], 9);
 
-        IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
+        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
             readCmd, work, enableLog);
 
         VerifyDataPattern(readCmd, dataPattern, wrVal);

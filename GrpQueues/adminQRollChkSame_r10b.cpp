@@ -119,7 +119,7 @@ AdminQRollChkSame_r10b::RunCoreTest()
         // Sumbit Identify cmds to fill and roll over the Q (Q_SIZE plus 2).
         for (uint16_t nsubmitTimes = 0;  nsubmitTimes < (asq->GetNumEntries()
             + 2); nsubmitTimes++) {
-            IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+            IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
                 asq, acq, idCmdCap, "AdminQRollChkSame", false);
             VerifyCESQValues(acq, (nsubmitTimes + 1) % acq->GetNumEntries());
         }

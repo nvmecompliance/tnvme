@@ -131,7 +131,7 @@ MaxIOQ_r10b::RunCoreTest()
         iosq != IOSQVec.end(); iosq++, iocq++) {
         writeMem->SetDataPattern(DATAPAT_CONST_16BIT, (*iosq)->GetQId());
         work = str(boost::format("dataPattern.0x%04X") % (*iosq)->GetQId());
-        IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, *iosq, *iocq,
+        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, *iosq, *iocq,
             writeCmd, work, true);
 
         VerifyDataPattern(*iosq, *iocq, readCmd, work);
@@ -208,7 +208,7 @@ void
 MaxIOQ_r10b::VerifyDataPattern(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
     SharedReadPtr readCmd, string qualifier)
 {
-    IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
+    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
         readCmd, qualifier, true);
 
     LOG_NRM("Compare read vs written data to verify");

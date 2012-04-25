@@ -153,10 +153,10 @@ StartingLBABare_r10b::RunCoreTest()
                 enableLog = true;
             work = str(boost::format("NSID.%d.SLBA.%ld") % bare[i] % nWrBlks);
 
-            IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+            IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
                 iocq, writeCmd, work, enableLog);
 
-            IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+            IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
                 iocq, readCmd, work, enableLog);
 
             VerifyDataPat(readCmd, writeMem);

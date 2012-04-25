@@ -127,7 +127,7 @@ InitialStateAdmin_r10b::SubmitIdentifyCmd(SharedACQPtr acq, SharedASQPtr asq)
     idCmdCap->SetPrpBuffer(idPrpCap, idMemCap);
 
     LOG_NRM("Send identify cmds to hdw");
-    IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
         asq, acq, idCmdCap, "InitStateAdmin", true);
 }
 

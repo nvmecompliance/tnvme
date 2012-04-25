@@ -193,14 +193,14 @@ PRPOffsetDualPgMultiBlk_r10b::RunCoreTest()
             if ((pgOff <= 8) || (pgOff >= (X - 8)))
                 enableLog = true;
 
-            IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+            IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
                 iocq, writeCmd, work, enableLog);
 
             readMem->InitOffset1stPage((lbaDataSize * nLBAs), pgOff, false);
             readCmd->SetPrpBuffer(prpBitmask, readMem);
             readCmd->SetNLB(nLBAs - 1); // convert to 0 based.
 
-            IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+            IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
                 iocq, readCmd, work, enableLog);
 
             VerifyDataPat(readCmd, dataPat, wrVal, metabufSz);

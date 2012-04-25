@@ -86,11 +86,11 @@ LimitedRetry_r10b::RunCoreTest()
     SharedIOCQPtr iocq = CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_GROUP_ID));
 
     SharedWritePtr writeCmd = CreateCmd();
-    IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
+    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
         writeCmd, "none.set", true);
 
     writeCmd->SetLR(true);
-    IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
+    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
         writeCmd, "all.set", true);
 }
 

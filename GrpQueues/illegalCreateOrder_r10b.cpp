@@ -100,7 +100,7 @@ IllegalCreateOrder_r10b::RunCoreTest()
     SharedCreateIOSQPtr createIOSQCmd = SharedCreateIOSQPtr(new CreateIOSQ());
     createIOSQCmd->Init(iosq);
 
-    IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
+    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
     createIOSQCmd, "Invalid.CQId", true, CESTAT_CQ_INVALID);
 
 }

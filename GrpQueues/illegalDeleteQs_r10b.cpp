@@ -84,12 +84,12 @@ IllegalDeleteQs_r10b::RunCoreTest()
 
     SharedDeleteIOSQPtr deleteIOSQCmd = SharedDeleteIOSQPtr(new DeleteIOSQ());
     deleteIOSQCmd->SetWord(0x0, 10, 0); // Set illegal QID to Cmd DW10
-    IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
+    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
     deleteIOSQCmd, "illegalDeleteIOSQ.invalidQId", true, CESTAT_INVALID_QID);
 
     SharedDeleteIOCQPtr deleteIOCQCmd = SharedDeleteIOCQPtr(new DeleteIOCQ());
     deleteIOSQCmd->SetWord(0x0, 10, 0); // Set illegal QID to Cmd DW10
-    IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
+    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
     deleteIOCQCmd, "illegalDeleteIOCQ.invalidQId", true, CESTAT_INVALID_QID);
 }
 

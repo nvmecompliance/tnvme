@@ -115,7 +115,7 @@ IgnoreMetaPtrBare_r10b::RunCoreTest()
 
         writeCmd->SetNSID(bare[i]);
         work = str(boost::format("namspc%d") % bare[i]);
-        IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
+        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
             writeCmd, work, true);
     }
 }
