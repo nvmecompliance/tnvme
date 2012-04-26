@@ -187,7 +187,7 @@ PartialReapMSIX_r10b::RunCoreTest()
     // There is an active IRQ outstanding and another to arrive due to the
     // PBA pending bit being set. The pending bit makes the 4th IRQ arrive
     // after reaping a single cmd.
-    LOG_NRM("Start reaping and validate IRQ's");
+    LOG_NRM("Start reaping and validate %d IRQ's", anticipated_IRQs);
     for (int i = 0; i < NUM_CMDS_ISSUE; i++) {
         snprintf(work, sizeof(work), "cmd.%d", i);
         IO::ReapCE(iocq, 1, isrCount, mGrpName, mTestName, work);
@@ -196,13 +196,18 @@ PartialReapMSIX_r10b::RunCoreTest()
                 FileSystem::PrepDumpFile(mGrpName, mTestName, "acq",
                 work), "Number of IRQ's changed while reaping");
             throw FrmwkEx(HERE,
-                "The initial %d IRQ's suddenly changed to %d",
-                anticipated_IRQs, isrCount);
+                "Anticipated %d IRQ's; but only see %d",
+                    anticipated_IRQs, isrCount);
         }
 
-        // Now account for a new IRQ due to the pending bit being handled
-        if (i == 0)
-          anticipated_IRQs++;
+        // Now account for a new IRQ fired due to the pending bit being handled
+        // by the DUT, but delay processing so that latency in handling this
+        // extra IRQ is not the cause of a test failure. Rather make the
+        // absence of the IRQ be the failure, thus delaying is OK.
+        if (i == 0) {
+            anticipated_IRQs++;
+            sleep(1);
+        }
     }
 }
 
