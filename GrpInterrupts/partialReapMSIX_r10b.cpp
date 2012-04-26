@@ -151,7 +151,7 @@ PartialReapMSIX_r10b::RunCoreTest()
     // NOTE: We are overloading IRQ 0, it is being used by ACQ and we have
     //       created 1 IOQ's, thus to start out the ACQ will already have 2
     //       IRQs. The following algo must add this usage.
-    uint32_t anticipated_IRQs = (2 + 1);
+    uint32_t anticipatedIrqs = (2 + 1);
 
     SharedWritePtr writeCmd = CreateCmd();
     for (unsigned i = 1; i <= NUM_CMDS_ISSUE; i++) {
@@ -173,13 +173,13 @@ PartialReapMSIX_r10b::RunCoreTest()
                 "notEnough"), "Test requires seeing all CE's");
             throw FrmwkEx(HERE,
                 "The anticipated %d CE's have not arrived", i);
-        } else if (isrCount != anticipated_IRQs) {
+        } else if (isrCount != anticipatedIrqs) {
             // 1 IRQ per cmd did not occur
             iocq->Dump(
                 FileSystem::PrepDumpFile(mGrpName, mTestName, "acq",
                 "irqBad"), "Test requires seeing all correct num of IRQ's");
             throw FrmwkEx(HERE,
-                "The anticipated %d IRQ', but detected %d", anticipated_IRQs,
+                "The anticipated %d IRQ', but detected %d", anticipatedIrqs,
                 isrCount);
         }
     }
@@ -187,17 +187,17 @@ PartialReapMSIX_r10b::RunCoreTest()
     // There is an active IRQ outstanding and another to arrive due to the
     // PBA pending bit being set. The pending bit makes the 4th IRQ arrive
     // after reaping a single cmd.
-    LOG_NRM("Start reaping and validate %d IRQ's", anticipated_IRQs);
+    LOG_NRM("Start reaping and validate %d IRQ's", anticipatedIrqs);
     for (int i = 0; i < NUM_CMDS_ISSUE; i++) {
         snprintf(work, sizeof(work), "cmd.%d", i);
         IO::ReapCE(iocq, 1, isrCount, mGrpName, mTestName, work);
-        if (isrCount != anticipated_IRQs) {
+        if (isrCount != anticipatedIrqs) {
             iocq->Dump(
                 FileSystem::PrepDumpFile(mGrpName, mTestName, "acq",
                 work), "Number of IRQ's changed while reaping");
             throw FrmwkEx(HERE,
                 "Anticipated %d IRQ's; but only see %d",
-                    anticipated_IRQs, isrCount);
+                    anticipatedIrqs, isrCount);
         }
 
         // Now account for a new IRQ fired due to the pending bit being handled
@@ -205,7 +205,7 @@ PartialReapMSIX_r10b::RunCoreTest()
         // extra IRQ is not the cause of a test failure. Rather make the
         // absence of the IRQ be the failure, thus delaying is OK.
         if (i == 0) {
-            anticipated_IRQs++;
+            anticipatedIrqs++;
             sleep(1);
         }
     }

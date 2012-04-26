@@ -21,7 +21,8 @@ SRC =					\
 	createResources_r10b.cpp	\
 	invalidMSIXIRQ_r10b.cpp		\
 	partialReapMSIX_r10b.cpp	\
-	maxIOQMSIX1To1_r10b.cpp
+	maxIOQMSIX1To1_r10b.cpp		\
+	maxIOQMSIXManyTo1_r10b.cpp
 
 .SUFFIXES: .cpp
 

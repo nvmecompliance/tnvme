@@ -16,43 +16,39 @@
 
 #include <string.h>
 #include "boost/format.hpp"
-#include "maxIOQMSIX1To1_r10b.h"
+#include "maxIOQMSIXManyTo1_r10b.h"
 #include "globals.h"
 #include "grpDefs.h"
 #include "../Utils/irq.h"
 #include "../Utils/io.h"
 
-
 namespace GrpInterrupts {
 
 
-MaxIOQMSIX1To1_r10b::MaxIOQMSIX1To1_r10b(int fd, string grpName, string testName,
-    ErrorRegs errRegs) :
+MaxIOQMSIXManyTo1_r10b::MaxIOQMSIXManyTo1_r10b(int fd, string grpName,
+    string testName, ErrorRegs errRegs) :
     Test(fd, grpName, testName, SPECREV_10b, errRegs)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 4,7");
-    mTestDesc.SetShort(     "Create and use the max allowed IOCQ/IOSQ's under MSI-X (1:1)");
+    mTestDesc.SetShort(     "Create and use the max allowed IOCQ/IOSQ's under MSI-X (many:1)");
     // No string size limit for the long description
     mTestDesc.SetLong(
         "Only allowed to execute test if the DUT supports MSI-X IRQ's by "
         "reporting the MSIXCAP PCI structures. Search for 1 of the following "
         "namspcs to run test. Find 1st bare namspc, or find 1st meta namspc, "
-        "or find 1st E2E namspc. Issue identical write cmd starting at LBA 0. "
-        "Determine X, where X is the lesser of MSIXCAP.MXC.TS + 1, or the max "
-        "number of IOQ's the DUT supports. Create 1 IOSQ:IOCQ pair mappings, "
-        "and allocate X number of queue pairs. Alternate IOCQ's indicating "
-        "usage of polling verses IRQ's. Issue a write of 1 block, "
-        "data pattern byteK, and then verify by reading back for all queues. "
-        "For each IOCQ using IRQ's verify that each one has exactly 2 IRQ's "
-        "fired. Redo identical test but this time delete only the IOQ's using "
-        "polling scheme and recreate them again using a unique IRQ, i.e. the "
-        "vectors which were skipping in 1st run of test should be used so that "
-        "all queues are contiguously consuming all IRQ vectors.");
+        "or find 1st E2E namspc. Issue identical write cmds starting at "
+        "LBA 0. Create a single IOSQ/IOCQ pair using IRQ 0. Allocate the "
+        "max number of IOQ's the DUT supports. All IOCQ's will use the same "
+        "IRQ. Issue a write of 1 block, data pattern wordK, and then verify "
+        "by reading back for all queues. Use a unique wordK pattern for "
+        "each write/read pair for all IOQ pairs. Verify the number of IRQ's "
+        "fired equals the total number of cmds issued to all IOSQ's because "
+        "each cmd is immediately reaped.");
 }
 
 
-MaxIOQMSIX1To1_r10b::~MaxIOQMSIX1To1_r10b()
+MaxIOQMSIXManyTo1_r10b::~MaxIOQMSIXManyTo1_r10b()
 {
     ///////////////////////////////////////////////////////////////////////////
     // Allocations taken from the heap and not under the control of the
@@ -61,8 +57,8 @@ MaxIOQMSIX1To1_r10b::~MaxIOQMSIX1To1_r10b()
 }
 
 
-MaxIOQMSIX1To1_r10b::
-MaxIOQMSIX1To1_r10b(const MaxIOQMSIX1To1_r10b &other) : Test(other)
+MaxIOQMSIXManyTo1_r10b::
+MaxIOQMSIXManyTo1_r10b(const MaxIOQMSIXManyTo1_r10b &other) : Test(other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -71,8 +67,8 @@ MaxIOQMSIX1To1_r10b(const MaxIOQMSIX1To1_r10b &other) : Test(other)
 }
 
 
-MaxIOQMSIX1To1_r10b &
-MaxIOQMSIX1To1_r10b::operator=(const MaxIOQMSIX1To1_r10b &other)
+MaxIOQMSIXManyTo1_r10b &
+MaxIOQMSIXManyTo1_r10b::operator=(const MaxIOQMSIXManyTo1_r10b &other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -84,7 +80,7 @@ MaxIOQMSIX1To1_r10b::operator=(const MaxIOQMSIX1To1_r10b &other)
 
 
 void
-MaxIOQMSIX1To1_r10b::RunCoreTest()
+MaxIOQMSIXManyTo1_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
@@ -93,7 +89,9 @@ MaxIOQMSIX1To1_r10b::RunCoreTest()
      */
     bool capable;
     uint16_t numIrqSupport;
-    uint32_t isrCount;
+    const uint16_t numIrqs = 1;
+    const uint32_t numEntries = 2;
+    uint32_t anticipatedIrqs = 0;
 
     // Only allowed to execute if DUT supports MSI-X IRQ's
     if (gCtrlrConfig->IsMSIXCapable(capable, numIrqSupport) == false)
@@ -103,19 +101,13 @@ MaxIOQMSIX1To1_r10b::RunCoreTest()
         return;
     }
 
+    LOG_NRM("Setup the necessary IRQ's");
     if (gCtrlrConfig->SetState(ST_DISABLE) == false)
         throw FrmwkEx(HERE);
-
-    uint16_t X =
-        MIN(numIrqSupport, MIN((gInformative->GetFeaturesNumOfIOSQs() + 1),
-        (gInformative->GetFeaturesNumOfIOCQs() + 1)));
-
-    LOG_NRM("Setting MSI-X with #%d irq vectors", X);
-    if (gCtrlrConfig->SetIrqScheme(INT_MSIX, X) == false) {
-        LOG_NRM("Unable to set MSI-X scheme with num irqs #%d", X);
-        throw FrmwkEx(HERE);
+    if (gCtrlrConfig->SetIrqScheme(INT_MSIX, numIrqs) == false) {
+        throw FrmwkEx(HERE,
+            "Unable to use %d IRQ's, but DUT reports it supports", numIrqs);
     }
-
     gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
         throw FrmwkEx(HERE);
@@ -164,111 +156,43 @@ MaxIOQMSIX1To1_r10b::RunCoreTest()
     gCtrlrConfig->SetIOSQES((gInformative->GetIdentifyCmdCtrlr()->
         GetValue(IDCTRLRCAP_SQES) & 0xf));
 
-    SharedIOCQPtr iocq;
-    SharedIOSQPtr iosq;
     vector<SharedIOSQPtr> iosqs;
     vector<SharedIOCQPtr> iocqs;
-    bool enableIrq;
 
-    // Create ioqs with polling and isr set alternatively.
-    for (uint16_t ioqId = 1; ioqId < X; ioqId++) {
-        enableIrq = (ioqId % 2 == 0) ? true : false;
-        CreateIOQs(asq, acq, ioqId, enableIrq, iosq, iocq);
-        iosqs.push_back(iosq);
-        iocqs.push_back(iocq);
-    }
+    uint32_t numIOQPairs = MIN(gInformative->GetFeaturesNumOfIOCQs(),
+        gInformative->GetFeaturesNumOfIOSQs());
 
-    // Send two commands and verify isr count.
-    for(uint16_t i = 0; i < iosqs.size(); i++) {
-        writeMem->SetDataPattern(DATAPAT_CONST_8BIT, (iosqs[i])->GetQId());
-        writeCmd->SetMetaDataPattern(DATAPAT_CONST_8BIT, (iosqs[i])->GetQId());
-
-        SendCmd(iosqs[i], iocqs[i], writeCmd, isrCount);
-        SendCmd(iosqs[i], iocqs[i], readCmd, isrCount);
-
-        if ((iocqs[i])->GetIrqEnabled() == true) {
-            if (isrCount != 2)
-                throw FrmwkEx(HERE, "Invalid isrCount %d expected 2", isrCount);
-        } else if (isrCount != 0) {
-            throw FrmwkEx(HERE, "Invalid isrCount %d expected 0", isrCount);
-        }
-        VerifyData(readCmd, writeCmd);
-    }
-
-    // Replace polling IOQs with interrupt IOQs.
-    for(uint16_t i = 0; i < iosqs.size(); i++) {
-        if ((iocqs[i])->GetIrqEnabled() == false) {
-            uint16_t ioqId = (iosqs[i])->GetQId();
-            Queues::DeleteIOSQToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
-                iosqs[i], asq, acq);
-            Queues::DeleteIOCQToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
-                iocqs[i], asq, acq);
-
-            CreateIOQs(asq, acq, ioqId, true, iosq, iocq);
-            iosqs[i] = iosq;
-            iocqs[i] = iocq;
-        }
-    }
-
-    // Resends two commands and verify isr count.
-    for(uint16_t i = 0; i < iosqs.size(); i++) {
-        writeMem->SetDataPattern(DATAPAT_CONST_8BIT, (iosqs[i])->GetQId());
-        writeCmd->SetMetaDataPattern(DATAPAT_CONST_8BIT, (iosqs[i])->GetQId());
-
-        SendCmd(iosqs[i], iocqs[i], writeCmd, isrCount);
-        SendCmd(iosqs[i], iocqs[i], readCmd, isrCount);
-
-        if (((iocqs[i])->GetQId() % 2) == 0) {
-            if (isrCount != 4)
-                throw FrmwkEx(HERE, "Invalid isrCount %d expected 4", isrCount);
-        } else if (isrCount != 2) {
-            throw FrmwkEx(HERE, "Invalid isrCount %d expected 2", isrCount);
-        }
-        VerifyData(readCmd, writeCmd);
-    }
-}
-
-
-void
-MaxIOQMSIX1To1_r10b::CreateIOQs(SharedASQPtr asq, SharedACQPtr acq,
-    uint32_t ioqId, bool enableIrq, SharedIOSQPtr &iosq, SharedIOCQPtr &iocq)
-{
-    uint32_t numEntries = 2;
-
-    if (Queues::SupportDiscontigIOQ() == true) {
-        uint8_t iocqes = (gInformative->GetIdentifyCmdCtrlr()->
-            GetValue(IDCTRLRCAP_CQES) & 0xf);
-        uint8_t iosqes = (gInformative->GetIdentifyCmdCtrlr()->
-            GetValue(IDCTRLRCAP_SQES) & 0xf);
-        SharedMemBufferPtr iocqBackedMem = SharedMemBufferPtr(new MemBuffer());
-        iocqBackedMem->InitOffset1stPage((numEntries * (1 << iocqes)), 0, true);
-        iocq = Queues::CreateIOCQDiscontigToHdw(mGrpName, mTestName,
-            DEFAULT_CMD_WAIT_ms, asq, acq, ioqId, numEntries,
-            false, IOCQ_GROUP_ID, enableIrq, ioqId, iocqBackedMem);
-
-        SharedMemBufferPtr iosqBackedMem = SharedMemBufferPtr(new MemBuffer());
-        iosqBackedMem->InitOffset1stPage((numEntries * (1 << iosqes)), 0,true);
-        iosq = Queues::CreateIOSQDiscontigToHdw(mGrpName, mTestName,
+    for (uint32_t ioqId = 1; ioqId <= numIOQPairs; ioqId++) {
+        SharedIOCQPtr iocq = Queues::CreateIOCQContigToHdw(mGrpName, mTestName,
             DEFAULT_CMD_WAIT_ms, asq, acq, ioqId, numEntries, false,
-            IOSQ_GROUP_ID, ioqId, 0, iosqBackedMem);
-    } else {
-        iocq = Queues::CreateIOCQContigToHdw(mGrpName, mTestName,
-            DEFAULT_CMD_WAIT_ms, asq, acq, ioqId, numEntries, false,
-            IOCQ_GROUP_ID, enableIrq, ioqId);
-        iosq = Queues::CreateIOSQContigToHdw(mGrpName, mTestName,
+            IOCQ_GROUP_ID, true, 0);
+        SharedIOSQPtr iosq = Queues::CreateIOSQContigToHdw(mGrpName, mTestName,
             DEFAULT_CMD_WAIT_ms, asq, acq, ioqId, numEntries, false,
             IOSQ_GROUP_ID, ioqId, 0);
+        iosqs.push_back(iosq);
+        iocqs.push_back(iocq);
+        anticipatedIrqs += 2;
+    }
+
+    for(uint16_t i = 0; i < iosqs.size(); i++) {
+        writeMem->SetDataPattern(DATAPAT_CONST_16BIT, (iosqs[i])->GetQId());
+        writeCmd->SetMetaDataPattern(DATAPAT_CONST_16BIT, (iosqs[i])->GetQId());
+
+        SendCmdAndReap(iosqs[i], iocqs[i], writeCmd, ++anticipatedIrqs);
+        SendCmdAndReap(iosqs[i], iocqs[i], readCmd, ++anticipatedIrqs);
+        VerifyData(readCmd, writeCmd);
     }
 }
 
 
 void
-MaxIOQMSIX1To1_r10b::SendCmd(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
-    SharedCmdPtr cmd, uint32_t &isrCount)
+MaxIOQMSIXManyTo1_r10b::SendCmdAndReap(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
+    SharedCmdPtr cmd, uint32_t anticipatedIrqs)
 {
     uint16_t uniqueId;
     uint32_t numCE;
     string work;
+    uint32_t isrCount;
 
     LOG_NRM("Send the cmd to hdw via IOSQ #%d", iosq->GetQId());
     iosq->Send(cmd, uniqueId);
@@ -281,31 +205,38 @@ MaxIOQMSIX1To1_r10b::SendCmd(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
     LOG_NRM("Wait for the CE to arrive in CQ %d", iocq->GetQId());
     if (iocq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE, isrCount)
         == false) {
-        iocq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "iocq.fail"),
-            "Dump Entire IOCQ");
-        iosq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "iosq.fail"),
-            "Dump Entire IOSQ");
+        iocq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "iocq.fail",
+            work), "Dump Entire IOCQ");
+        iosq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "iosq.fail",
+            work), "Dump Entire IOSQ");
         throw FrmwkEx(HERE, "Unable to see CEs for issued cmd");
     }
 
     work = str(boost::format("iocq.%d") % uniqueId);
     IO::ReapCE(iocq, 1, isrCount, mGrpName, mTestName, work);
+
+    if (isrCount != anticipatedIrqs) {
+        iocq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "iocq.fail",
+            work), "Dump Entire IOCQ");
+        iosq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "iosq.fail",
+            work), "Dump Entire IOSQ");
+        throw FrmwkEx(HERE, "Anticipated ISRs #%d but fired #%d",
+            anticipatedIrqs, isrCount);
+    }
 }
 
 
 void
-MaxIOQMSIX1To1_r10b::VerifyData(SharedReadPtr readCmd,
+MaxIOQMSIXManyTo1_r10b::VerifyData(SharedReadPtr readCmd,
     SharedWritePtr writeCmd)
 {
     LOG_NRM("Compare read vs written data to verify");
     SharedMemBufferPtr rdPayload = readCmd->GetRWPrpBuffer();
     SharedMemBufferPtr wrPayload = writeCmd->GetRWPrpBuffer();
     if (rdPayload->Compare(wrPayload) == false) {
-        readCmd->Dump(
-            FileSystem::PrepDumpFile(mGrpName, mTestName, "ReadCmd"),
+        readCmd->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "RdCmd"),
             "Read command");
-        writeCmd->Dump(
-            FileSystem::PrepDumpFile(mGrpName, mTestName, "WriteCmd"),
+        writeCmd->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "WrCmd"),
             "Write command");
         throw FrmwkEx(HERE, "Data miscompare");
     }
@@ -316,10 +247,10 @@ MaxIOQMSIX1To1_r10b::VerifyData(SharedReadPtr readCmd,
         const uint8_t *metaWrBuff = writeCmd->GetMetaBuffer();
         if (memcmp(metaRdBuff, metaWrBuff, writeCmd->GetMetaBufferSize())) {
             readCmd->Dump(
-                FileSystem::PrepDumpFile(mGrpName, mTestName, "ReadCmdMeta"),
+                FileSystem::PrepDumpFile(mGrpName, mTestName, "RdCmdMeta"),
                 "Read command with meta data");
             writeCmd->Dump(
-                FileSystem::PrepDumpFile(mGrpName, mTestName, "WriteCmdMeta"),
+                FileSystem::PrepDumpFile(mGrpName, mTestName, "WrCmdMeta"),
                 "Write command with meta data");
             throw FrmwkEx(HERE, "Meta data miscompare");
         }

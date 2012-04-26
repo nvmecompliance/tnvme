@@ -20,6 +20,7 @@
 #include "invalidMSIXIRQ_r10b.h"
 #include "partialReapMSIX_r10b.h"
 #include "maxIOQMSIX1To1_r10b.h"
+#include "maxIOQMSIXManyTo1_r10b.h"
 
 namespace GrpInterrupts {
 
@@ -40,6 +41,7 @@ GrpInterrupts::GrpInterrupts(size_t grpNum, SpecRev specRev, ErrorRegs errRegs,
         APPEND_TEST_AT_YLEVEL(InvalidMSIXIRQ_r10b, fd, GrpInterrupts, errRegs)
         APPEND_TEST_AT_YLEVEL(PartialReapMSIX_r10b, fd, GrpInterrupts, errRegs)
         APPEND_TEST_AT_YLEVEL(MaxIOQMSIX1To1_r10b, fd, GrpInterrupts, errRegs)
+        APPEND_TEST_AT_YLEVEL(MaxIOQMSIXManyTo1_r10b, fd, GrpInterrupts, errRegs)
         break;
 
     default:
