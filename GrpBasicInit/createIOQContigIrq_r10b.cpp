@@ -103,7 +103,7 @@ CreateIOQContigIrq_r10b::RunCoreTest()
         throw FrmwkEx(HERE, 
             "The ACQ should not have any CE's waiting before testing");
     } else if (gRegisters->Read(CTLSPC_CAP, work) == false) {
-        throw FrmwkEx(HERE, "Unable to determine MQES");
+        throw FrmwkEx(HERE, "Unable to determine CAP.MQES");
     }
 
     // Verify the min requirements for this test are supported by DUT

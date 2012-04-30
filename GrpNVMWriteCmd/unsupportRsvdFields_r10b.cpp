@@ -88,7 +88,7 @@ UnsupportRsvdFields_r10b::RunCoreTest()
     SharedIOCQPtr iocq = CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_GROUP_ID));
 
     SharedWritePtr writeCmd = CreateCmd();
-    IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
+    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
         writeCmd, "none.set", true);
 
     LOG_NRM("Set all cmd's rsvd bits");
@@ -107,7 +107,7 @@ UnsupportRsvdFields_r10b::RunCoreTest()
     work |= 0xffffff00;     // Set DW13_b31:8 bits
     writeCmd->SetDword(work, 13);
 
-    IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
+    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
         writeCmd, "all.set", true);
 }
 

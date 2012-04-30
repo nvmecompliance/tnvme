@@ -99,7 +99,7 @@ FormatDevice(Format &format, int fd)
             formatNVM->SetMS(format.cmds[i].ms);
             formatNVM->SetLBAF(format.cmds[i].lbaf);
 
-            IO::SendCmdToHdw("tnvme", "format", SYSTEMWIDE_CMD_WAIT_ms,
+            IO::SendAndReapCmd("tnvme", "format", SYSTEMWIDE_CMD_WAIT_ms,
                 asq, acq, formatNVM, "", true);
         }
         LOG_NRM("The operation succeeded to format device");
@@ -151,7 +151,7 @@ SetFeaturesNumberOfQueues(NumQueues &numQueues, int fd)
         sfNumOfQ->SetFID(BaseFeatures::FID_NUM_QUEUES);
         sfNumOfQ->SetNumberOfQueues(numQueues.ncqr, numQueues.nsqr);
 
-        IO::SendCmdToHdw("tnvme", "queues", SYSTEMWIDE_CMD_WAIT_ms,
+        IO::SendAndReapCmd("tnvme", "queues", SYSTEMWIDE_CMD_WAIT_ms,
             asq, acq, sfNumOfQ, "", true);
         LOG_NRM("The operation succeeded to set number of queues");
     } catch (...) {

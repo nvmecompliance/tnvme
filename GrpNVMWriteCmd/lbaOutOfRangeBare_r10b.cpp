@@ -118,7 +118,7 @@ LBAOutOfRangeBare_r10b::RunCoreTest()
         LOG_NRM("Issue cmd where 1st block starts at LBA (Identify.NSZE-2)");
         snprintf(work, sizeof(work), "nsze-2.%01d", (uint32_t)i);
         writeCmd->SetSLBA(nsze - 2);
-        IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
             iocq, writeCmd, work, true);
 
         LOG_NRM("Issue cmd where 1st block starts at LBA (Identify.NSZE-1)");

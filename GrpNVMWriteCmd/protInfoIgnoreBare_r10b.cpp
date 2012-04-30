@@ -118,7 +118,7 @@ ProtInfoIgnoreBare_r10b::RunCoreTest()
 
             snprintf(context, sizeof(context), "ns%d.protInfo0x%02X",
                 (uint32_t)i, protInfo);
-            IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+            IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
                 iocq, writeCmd, context, true);
         }
     }

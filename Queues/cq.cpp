@@ -300,9 +300,9 @@ CQ::ReapInquiryWaitSpecify(uint32_t ms, uint32_t numTil, uint32_t &numCE,
 {
     uint32_t delta;
 
-    // Avoid a common mistake, waiting longer than a day?
+    // Avoid a common mistake
     if (ms > 86400000)
-        LOG_WARN("Waiting > 1 day, is this reasonable?");
+        throw FrmwkEx(HERE, "Waiting > 1 day, is this reasonable?");
 
     struct timeval initial;
     if (gettimeofday(&initial, NULL) != 0)

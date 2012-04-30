@@ -31,7 +31,7 @@ IO::~IO()
 
 
 void
-IO::SendCmdToHdw(string grpName, string testName, uint16_t ms,
+IO::SendAndReapCmd(string grpName, string testName, uint16_t ms,
     SharedSQPtr sq, SharedCQPtr cq, SharedCmdPtr cmd, string qualify,
     bool verbose, CEStat status)
 {

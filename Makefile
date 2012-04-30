@@ -13,10 +13,8 @@
 #   limitations under the License.
 #
 
-# Compiling tnvme requires the boost libraries to be installed
-# Also see: https://github.com/nvmecompliance/tnvme/wiki/Compiling
-# Example Ubuntu: sudo apt-get install libboost1.42-all-dev
-# Example Ubuntu: sudo apt-get install libxml++2.6-dev libxml++2.6-doc
+# Compiling tnvme requires boost, XML, doxygen, etc libraries
+# See: https://github.com/nvmecompliance/tnvme/wiki/Compiling
 
 APP_NAME = tnvme
 export CC = g++				# Mods here affect all sub-makes

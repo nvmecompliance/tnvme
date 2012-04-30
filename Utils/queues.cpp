@@ -64,7 +64,7 @@ Queues::CreateIOCQContigToHdw(string grpName, string testName,
     SharedCreateIOCQPtr createIOCQCmd = SharedCreateIOCQPtr(new CreateIOCQ());
     createIOCQCmd->Init(iocq);
 
-    IO::SendCmdToHdw(grpName, testName, ms, asq, acq, createIOCQCmd, workStr,
+    IO::SendAndReapCmd(grpName, testName, ms, asq, acq, createIOCQCmd, workStr,
         verbose);
     return iocq;
 }
@@ -101,7 +101,7 @@ Queues::CreateIOSQContigToHdw(string grpName, string testName,
     SharedCreateIOSQPtr createIOSQCmd = SharedCreateIOSQPtr(new CreateIOSQ());
     createIOSQCmd->Init(iosq);
 
-    IO::SendCmdToHdw(grpName, testName, ms, asq, acq, createIOSQCmd, workStr,
+    IO::SendAndReapCmd(grpName, testName, ms, asq, acq, createIOSQCmd, workStr,
         verbose);
     return iosq;
 }
@@ -150,7 +150,7 @@ Queues::CreateIOCQDiscontigToHdw(string grpName, string testName,
     SharedCreateIOCQPtr createIOCQCmd = SharedCreateIOCQPtr(new CreateIOCQ());
     createIOCQCmd->Init(iocq);
 
-    IO::SendCmdToHdw(grpName, testName, ms, asq, acq, createIOCQCmd, workStr,
+    IO::SendAndReapCmd(grpName, testName, ms, asq, acq, createIOCQCmd, workStr,
         verbose);
     return iocq;
 }
@@ -198,7 +198,7 @@ Queues::CreateIOSQDiscontigToHdw(string grpName, string testName,
     SharedCreateIOSQPtr createIOSQCmd = SharedCreateIOSQPtr(new CreateIOSQ());
     createIOSQCmd->Init(iosq);
 
-    IO::SendCmdToHdw(grpName, testName, ms, asq, acq, createIOSQCmd, workStr,
+    IO::SendAndReapCmd(grpName, testName, ms, asq, acq, createIOSQCmd, workStr,
         verbose);
     return iosq;
 }
@@ -226,7 +226,7 @@ Queues::DeleteIOCQToHdw(string grpName, string testName, uint16_t ms,
     SharedDeleteIOCQPtr deleteIOCQCmd = SharedDeleteIOCQPtr(new DeleteIOCQ());
     deleteIOCQCmd->Init(iocq);
 
-    IO::SendCmdToHdw(grpName, testName, ms, asq, acq, deleteIOCQCmd, workStr,
+    IO::SendAndReapCmd(grpName, testName, ms, asq, acq, deleteIOCQCmd, workStr,
         verbose);
 }
 
@@ -253,7 +253,7 @@ Queues::DeleteIOSQToHdw(string grpName, string testName, uint16_t ms,
     SharedDeleteIOSQPtr deleteIOSQCmd = SharedDeleteIOSQPtr(new DeleteIOSQ());
     deleteIOSQCmd->Init(iosq);
 
-    IO::SendCmdToHdw(grpName, testName, ms, asq, acq, deleteIOSQCmd, workStr,
+    IO::SendAndReapCmd(grpName, testName, ms, asq, acq, deleteIOSQCmd, workStr,
         verbose);
 }
 

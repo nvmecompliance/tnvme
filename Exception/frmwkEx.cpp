@@ -128,7 +128,7 @@ FrmwkEx::PreliminaryProcessing()
         (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE);
     getLogPg->SetPrpBuffer(prpReq, cmdMem);
 
-    IO::SendCmdToHdw(GRP_NAME, TEST_NAME, SYSTEMWIDE_CMD_WAIT_ms, asq, acq,
+    IO::SendAndReapCmd(GRP_NAME, TEST_NAME, SYSTEMWIDE_CMD_WAIT_ms, asq, acq,
         getLogPg, "", false);
     getLogPg->Dump(FileSystem::PrepDumpFile(GRP_NAME, TEST_NAME,
         "LogPageErr"), "Failed test post dump of error log page:");

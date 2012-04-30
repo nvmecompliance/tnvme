@@ -19,6 +19,7 @@
 
 #include "test.h"
 #include "../Utils/queues.h"
+#include "../Utils/io.h"
 
 namespace GrpQueues {
 
@@ -54,8 +55,10 @@ private:
     ///////////////////////////////////////////////////////////////////////////
     // Adding a member variable? Then edit the copy constructor and operator=().
     ///////////////////////////////////////////////////////////////////////////
-    void ASQCmdToxify(SharedASQPtr asq);
-    void SendToxicCmd(SharedASQPtr asq, SharedACQPtr acq, SharedCmdPtr cmd);
+    void ASQCmdToxify(SharedASQPtr asq, uint8_t dw, uint32_t mask,
+        uint32_t val);
+    void SendToxicCmd(SharedASQPtr asq, SharedACQPtr acq, SharedCmdPtr cmd,
+        uint8_t dw, uint32_t mask, uint32_t val, CEStat status);
 };
 
 }   // namespace

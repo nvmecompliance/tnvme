@@ -1,3 +1,28 @@
+2012-4-30:
+nvmecompliance_release=1.4.0 New tests, bug fixes, quality.
+    1) We are consistently looping this framework hundreds of times with 0
+       failures, crashes, anomalies, etc. Nothing adverse being observed.
+    2) The previously known issue with DMA corruption has disappeared. It was
+       always suspect it was due to flaky hardware, but no concrete conclusions
+       can be made. For full details read file dnvme/Doc/readme.dma.corrupt
+    3) Enhanced dnmve to allow a dangerous backdoor to manipulate cmds.
+       Reference header file describing NVME_IOCTL_TOXIC_64B_DWORD.
+    4) dnvme bugfix; IRQ's were not cleaned upon driver loading.
+    5) dnvme bugfix; DMA data direction understanding between user space and
+       kernel space was misaligned.
+    6) Added new tests, view tnmve's git log for details.
+    7) Added dependancy to dnvme to use common XML library. Please read
+       https://github.com/nvmecompliance/tnvme/wiki/Compiling
+    8) tnvme bugfix; framework didn't properly report the number of queues
+       supported by a device.
+    9) Made an explicit distinction bewteen dumping data and logging data.
+       see git log commit 8e41603fbf52d4f8f294f22e8b7740e67085fcc8.
+    10) Added the ability to format a device vai tnvme's cmd line. See
+        description of --format option on
+        https://github.com/nvmecompliance/tnvme/wiki/Command-Line-Options
+    11) Known Issues:
+        a) none.
+
 2012-4-10:
 nvmecompliance_release=1.3.0 New tests, bug fixes in dnvme.
     1) Added numerous new tests, see git log for details.

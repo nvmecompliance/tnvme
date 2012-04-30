@@ -207,7 +207,7 @@ PRPOffsetSinglePgMultiBlk_r10b::RunCoreTest()
             // Set 64 bits of PRP2 in CDW 8 & 9 with random or zero.
             writeCmd->SetDword(prp2RandVal[0], 8);
             writeCmd->SetDword(prp2RandVal[1], 9);
-            IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+            IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
                 iocq, writeCmd, work, enableLog);
 
             readMem->InitOffset1stPage((lbaDataSize * nLBAs), pgOff, false);
@@ -217,7 +217,7 @@ PRPOffsetSinglePgMultiBlk_r10b::RunCoreTest()
             // Set 64 bits of PRP2 in CDW 8 & 9 with random or zero.
             readCmd->SetDword(prp2RandVal[0], 8);
             readCmd->SetDword(prp2RandVal[1], 9);
-            IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+            IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
                 iocq, readCmd, work, enableLog);
 
             VerifyDataPat(readCmd, dataPat, wrVal, metabufSz);

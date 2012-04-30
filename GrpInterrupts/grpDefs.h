@@ -19,7 +19,13 @@
 
 #define ACQ_GROUP_ID                "ACQ"
 #define ASQ_GROUP_ID                "ASQ"
+#define IOCQ_GROUP_ID               "IOCQ"
+#define IOSQ_GROUP_ID               "IOSQ"
 
 #define DEFAULT_CMD_WAIT_ms         SYSTEMWIDE_CMD_WAIT_ms
+
+#define MAX(a,b)                    (((a) > (b)) ? (a) : (b))
+
+#define MIN(a,b)                    (((a) < (b)) ? (a) : (b))
 
 #endif

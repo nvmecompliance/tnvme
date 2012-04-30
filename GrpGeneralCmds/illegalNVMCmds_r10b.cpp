@@ -107,7 +107,7 @@ IllegalNVMCmds_r10b::RunCoreTest()
         genericNVMCmd->Init(*opCode);
 
         work = str(boost::format("IllegalOpcode.%d") % (uint)*opCode);
-        IO::SendCmdToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
             iocq, genericNVMCmd, work, true, CESTAT_INVAL_OPCODE);
     }
 }
