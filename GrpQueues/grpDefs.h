@@ -29,10 +29,6 @@ namespace GrpQueues {
 
 #define DEFAULT_CMD_WAIT_ms         SYSTEMWIDE_CMD_WAIT_ms
 
-#define MAX(a,b)                    (((a) > (b)) ? (a) : (b))
-
-#define MIN(a,b)                    (((a) < (b)) ? (a) : (b))
-
 }   // namespace
 
 #endif

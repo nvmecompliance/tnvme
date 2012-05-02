@@ -17,6 +17,8 @@
 #ifndef _GRPDEFS_H_
 #define _GRPDEFS_H_
 
+namespace GrpInterrupts {
+
 #define ACQ_GROUP_ID                "ACQ"
 #define ASQ_GROUP_ID                "ASQ"
 #define IOCQ_GROUP_ID               "IOCQ"
@@ -24,8 +26,6 @@
 
 #define DEFAULT_CMD_WAIT_ms         SYSTEMWIDE_CMD_WAIT_ms
 
-#define MAX(a,b)                    (((a) > (b)) ? (a) : (b))
-
-#define MIN(a,b)                    (((a) < (b)) ? (a) : (b))
+}
 
 #endif

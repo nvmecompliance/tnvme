@@ -48,7 +48,10 @@ using namespace std;
 #define MAX_CHAR_PER_LINE_DESCRIPTION       63
 #define SYSTEMWIDE_CMD_WAIT_ms              4000
 
-#define UINT32_MAX  ((uint32_t)-1)
+#define UINT32_MAX                          ((uint32_t)-1)
+
+#define MAX(a,b)                            (((a) > (b)) ? (a) : (b))
+#define MIN(a,b)                            (((a) < (b)) ? (a) : (b))
 
 
 typedef enum {
