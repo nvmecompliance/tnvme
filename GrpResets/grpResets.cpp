@@ -23,7 +23,7 @@ namespace GrpResets {
 
 GrpResets::GrpResets(size_t grpNum, SpecRev specRev, ErrorRegs errRegs,
     int fd) :
-    Group(grpNum, specRev, "All Ctrl'r reset related tests")
+    Group(grpNum, specRev, "GrpResets", "All Ctrl'r reset related tests")
 {
     // ------------------------CHANGE NOTICE: (3-2-2012)------------------------
     // The rule to keep groups and tests at a well known constant reference

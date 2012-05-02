@@ -37,7 +37,7 @@ namespace GrpQueues {
 
 GrpQueues::GrpQueues(size_t grpNum, SpecRev specRev, ErrorRegs errRegs,
     int fd) :
-    Group(grpNum, specRev, "Validates general queue functionality")
+    Group(grpNum, specRev, "GrpQueues", "Validates general queue functionality")
 {
     // ------------------------CHANGE NOTICE: (3-2-2012)------------------------
     // The rule to keep groups and tests at a well known constant reference

@@ -35,7 +35,7 @@ ManySQtoCQAssoc_r10b::ManySQtoCQAssoc_r10b(int fd, string grpName,
     mTestDesc.SetLong(
         "Search for 1 of the following namspcs to run test. Find 1st bare "
         "namspc, or find 1st meta namspc, or find 1st E2E namspc. Loop and "
-        "create IOSQ's  from 1 to GetFeatures.NumberOfQueues ID (NSQA) and "
+        "create IOSQ's from 1 to GetFeatures.NumberOfQueues ID (NSQA) and "
         "assoc all with a single IOCQ for each iteration. Issue a single "
         "NVM write cmd sending 1 block and approp supporting meta/E2E if "
         "necessary to the selected namspc at LBA 0, to every IOSQ each "
@@ -131,7 +131,7 @@ ManySQtoCQAssoc_r10b::RunCoreTest()
             (*iosq)->Ring();
             mSQIDToSQHDVector[(*iosq)->GetQId()] =
                 ++mSQIDToSQHDVector[(*iosq)->GetQId()] %
-                    (*iosq)->GetNumEntries();
+                (*iosq)->GetNumEntries();
         }
         ReapIOCQAndVerifyCE(iocq, j, mSQIDToSQHDVector);
     }

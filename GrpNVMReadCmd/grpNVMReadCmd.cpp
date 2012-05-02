@@ -29,7 +29,7 @@ namespace GrpNVMReadCmd {
 
 GrpNVMReadCmd::GrpNVMReadCmd(size_t grpNum, SpecRev specRev, ErrorRegs errRegs,
     int fd) :
-    Group(grpNum, specRev, "NVM cmd set read cmd tests")
+    Group(grpNum, specRev, "GrpNVMReadCmd", "NVM cmd set read cmd tests")
 {
     // ------------------------CHANGE NOTICE: (3-2-2012)------------------------
     // The rule to keep groups and tests at a well known constant reference

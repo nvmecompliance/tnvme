@@ -176,7 +176,13 @@ MetaRsrc::FreeAllMetaBuf()
 
         // Undo all which was done to create/reserve kernel meta data buffers
         KernelAPI::munmap(tmp.buf, tmp.size);
-        if ((rc = ioctl(mFd, NVME_IOCTL_METABUF_DELETE, tmp.ID)) < 0)
-            LOG_ERR("Meta data free request denied with error: %d", rc);
+
+        // Specifically ignoring the error code because the memory may have
+        // been deleted by a prior NVME_IOCTL_DEVICE_STATE call to dnvme. The
+        // act of not freeing causes memory leak, the act of freeing to many
+        // times is of no harm.
+        rc = ioctl(mFd, NVME_IOCTL_METABUF_DELETE, tmp.ID);
     }
+
+    mMetaAllocSize = 0;
 }

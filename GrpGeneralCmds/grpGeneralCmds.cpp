@@ -26,7 +26,7 @@ namespace GrpGeneralCmds {
 
 GrpGeneralCmds::GrpGeneralCmds(size_t grpNum, SpecRev specRev,
     ErrorRegs errRegs, int fd) :
-    Group(grpNum, specRev, "General command tests.")
+    Group(grpNum, specRev, "GrpGeneralCmds", "General command tests.")
 {
     // ------------------------CHANGE NOTICE: (3-2-2012)------------------------
     // The rule to keep groups and tests at a well known constant reference

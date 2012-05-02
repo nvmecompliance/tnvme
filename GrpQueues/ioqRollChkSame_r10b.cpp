@@ -122,6 +122,9 @@ IOQRollChkSame_r10b::IOQRollChkSame(uint32_t numEntriesIOQ)
         iocq->GetNumEntries() + 2, iosq->GetQId());
     for (uint32_t numEntries = 0; numEntries <
         (uint32_t)(iosq->GetNumEntries() + 2); numEntries++) {
+
+        LOG_NRM("Issuing write cmd %d of %d", numEntries,
+            (uint32_t)(iosq->GetNumEntries() + 2));
         iosq->Send(writeCmd, uniqueId);
         iosq->Ring();
         ReapAndVerifyCE(iocq, (numEntries + 1) % iosq->GetNumEntries());

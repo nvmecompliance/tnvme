@@ -123,15 +123,18 @@ PRPOffsetMultiPgMultiBlk_r10b::RunCoreTest()
         (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE | MASK_PRP2_LIST);
     LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
     uint64_t lbaDataSize = (1 << lbaFormat.LBADS);
-    if (namspcData.type != Informative::NS_BARE) {
-        if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS * (ccMPS / lbaDataSize))
-            == false) {
-            throw FrmwkEx(HERE, "Unable to allocate Meta buffers.");
-        }
-    }
 
     ConstSharedIdentifyPtr idCmdCtrlr = gInformative->GetIdentifyCmdCtrlr();
     uint32_t maxDtXferSz = idCmdCtrlr->GetMaxDataXferSize();
+    if (maxDtXferSz == 0)
+        maxDtXferSz = (1024 * 1024);
+
+    if (namspcData.type != Informative::NS_BARE) {
+        if (gRsrcMngr->SetMetaAllocSize(
+            lbaFormat.MS * (maxDtXferSz / lbaDataSize)) == false) {
+            throw FrmwkEx(HERE, "Unable to allocate Meta buffers.");
+        }
+    }
 
     SharedWritePtr writeCmd = SharedWritePtr(new Write());
     writeCmd->SetNSID(namspcData.id);
@@ -164,10 +167,7 @@ PRPOffsetMultiPgMultiBlk_r10b::RunCoreTest()
 
     uint64_t altPattern = 0;
     for (int64_t pgOff = 0; pgOff <= X; pgOff += 4) {
-        if (maxDtXferSz != 0)
-            Y = (maxDtXferSz - pgOff) / lbaDataSize;
-        else
-            Y = (1024 * 1024) / lbaDataSize;
+        Y = (maxDtXferSz - pgOff) / lbaDataSize;
 
         // lbaPow2 = {2, 4, 8, 16, 32, 64, ...}
         for (uint64_t lbaPow2 = 2; lbaPow2 <= Y; lbaPow2 <<= 1) {

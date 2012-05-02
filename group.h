@@ -81,10 +81,11 @@ public:
     /**
      * @param grpNum Pass the assigned group number, globally unique ID
      * @param specRev Pass which compliance is needed to target
+     * @param grpName Pass the name assigned to this group
      * @param desc Pass a 1-line comment describing group purpose, maximum
      *      number of characters allowed: MAX_CHAR_PER_LINE_DESCRIPTION
      */
-    Group(size_t grpNum, SpecRev specRev, string desc);
+    Group(size_t grpNum, SpecRev specRev, string grpName, string desc);
     virtual ~Group();
 
     /**
@@ -181,9 +182,10 @@ t
 
 
 protected:
-    size_t      mGrpNum;
-    string      mGrpDesc;
-    SpecRev     mSpecRev;
+    size_t  mGrpNum;
+    string  mGrpName;
+    string  mGrpDesc;
+    SpecRev mSpecRev;
 
     /// array[xLevel][yLevel][zLevel];
     /// Refer to: https://github.com/nvmecompliance/tnvme/wiki/Test-Numbering

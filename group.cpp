@@ -23,9 +23,10 @@
 #define NEWLINE                 "\n"
 
 
-Group::Group(size_t grpNum, SpecRev specRev, string desc)
+Group::Group(size_t grpNum, SpecRev specRev, string grpName, string desc)
 {
     mGrpNum = grpNum;
+    mGrpName = grpName;
     mSpecRev = specRev;
 
     if (desc.length() > MAX_CHAR_PER_LINE_DESCRIPTION) {
@@ -211,10 +212,20 @@ Group::RunTest(TestRef &tr, vector<TestRef> &skipTest)
     LOG_NRM("%s", (*myTest)->GetLongDescription(false, 0).c_str());
 
     TestResult result;
-    if (SkippingTest(tr, skipTest))
+    if (SkippingTest(tr, skipTest)) {
         result = TR_SKIPPING;
-    else
+    } else {
         result = (*myTest)->Run() ? TR_SUCCESS: TR_FAIL;
+        if (result == TR_FAIL) {
+            FORMAT_GROUP_DESCRIPTION(work, this)
+            LOG_NRM("  %s", work.c_str());
+            FORMAT_TEST_NUM(work, "", tr.xLev, tr.yLev, tr.zLev)
+            work += (*myTest)->GetShortDescription();
+            LOG_NRM("  %s", work.c_str());
+            LOG_NRM("  Compliance: %s", (*myTest)->GetComplianceDescription().c_str());
+            LOG_NRM("  %s", (*myTest)->GetLongDescription(false, 0).c_str());
+        }
+    }
     LOG_NRM("------------------END TEST------------------");
 
     // Guarantee nothing residual or unintended is left around. Enforce this

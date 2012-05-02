@@ -24,7 +24,7 @@ namespace GrpCtrlRegisters {
 
 GrpCtrlRegisters::GrpCtrlRegisters(size_t grpNum, SpecRev specRev,
     ErrorRegs errRegs, int fd) :
-    Group(grpNum, specRev, "Controller registers syntactic")
+    Group(grpNum, specRev, "GrpCtrlRegisters", "Controller registers syntactic")
 {
     // ------------------------CHANGE NOTICE: (3-2-2012)------------------------
     // The rule to keep groups and tests at a well known constant reference

@@ -86,13 +86,11 @@ Test::Run()
 
         // What do the PCI registers say about errors that may have occurred?
         if (GetStatusRegErrors() == false) {
-            LOG_NRM("Failed group name: %s", mGrpName.c_str());
-            LOG_NRM("Failed test name:  %s", mTestName.c_str());
+            LOG_NRM("Failed test: %s", mTestName.c_str());
             return false;
         }
     } catch (FrmwkEx &ex) {
-        LOG_NRM("Failed group name: %s", mGrpName.c_str());
-        LOG_NRM("Failed test name:  %s", mTestName.c_str());
+        LOG_NRM("Failed test: %s", mTestName.c_str());
         return false;
     } catch (...) {
         // If this exception is thrown from some library which tnvme links
@@ -105,8 +103,7 @@ Test::Run()
         LOG_ERR("*     see class note in file Exception/frmwkEx.h     *");
         LOG_ERR("******************************************************");
         LOG_ERR("******************************************************");
-        LOG_NRM("Failed group name: %s", mGrpName.c_str());
-        LOG_NRM("Failed test name:  %s", mTestName.c_str());
+        LOG_NRM("Failed test: %s", mTestName.c_str());
         return false;
     }
 

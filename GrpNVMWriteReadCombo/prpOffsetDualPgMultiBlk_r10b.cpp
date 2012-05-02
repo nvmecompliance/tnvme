@@ -124,8 +124,9 @@ PRPOffsetDualPgMultiBlk_r10b::RunCoreTest()
     LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
     uint64_t lbaDataSize = (1 << lbaFormat.LBADS);
     if (namspcData.type != Informative::NS_BARE) {
-        if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS * (ccMPS / lbaDataSize))
-            == false) {
+        if (gRsrcMngr->SetMetaAllocSize(
+            lbaFormat.MS * ((2 * ccMPS) / lbaDataSize)) == false) {
+
             throw FrmwkEx(HERE, "Unable to allocate Meta buffers.");
         }
     }

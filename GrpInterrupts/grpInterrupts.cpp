@@ -27,7 +27,8 @@ namespace GrpInterrupts {
 
 GrpInterrupts::GrpInterrupts(size_t grpNum, SpecRev specRev, ErrorRegs errRegs,
     int fd) :
-    Group(grpNum, specRev, "MSI-single, MSI-multi, MSI-X test cases")
+    Group(grpNum, specRev, "GrpInterrupts",
+        "MSI-single, MSI-multi, MSI-X test cases")
 {
     // ------------------------CHANGE NOTICE: (3-2-2012)------------------------
     // The rule to keep groups and tests at a well known constant reference

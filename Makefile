@@ -37,6 +37,7 @@ SUBDIRS:=			\
 	GrpBasicInit		\
 	GrpResets		\
 	GrpQueues		\
+	GrpNVMFlushCmd		\
 	GrpNVMReadCmd		\
 	GrpNVMWriteCmd		\
 	GrpNVMWriteReadCombo	\

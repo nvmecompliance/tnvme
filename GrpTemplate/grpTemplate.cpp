@@ -22,7 +22,7 @@ namespace GrpTemplate {
 
 GrpTemplate::GrpTemplate(size_t grpNum, SpecRev specRev, ErrorRegs errRegs,
     int fd) :
-    Group(grpNum, specRev, "Template Group")
+    Group(grpNum, specRev, "GrpTemplate", "Template group description")
 {
     // ------------------------CHANGE NOTICE: (3-2-2012)------------------------
     // The rule to keep groups and tests at a well known constant reference

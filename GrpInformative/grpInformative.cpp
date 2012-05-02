@@ -25,7 +25,7 @@ namespace GrpInformative {
 
 GrpInformative::GrpInformative(size_t grpNum, SpecRev specRev,
     ErrorRegs errRegs, int fd) :
-    Group(grpNum, specRev, "Informative")
+    Group(grpNum, specRev, "GrpInformative", "Informative")
 {
     // ------------------------CHANGE NOTICE: (3-2-2012)------------------------
     // The rule to keep groups and tests at a well known constant reference
