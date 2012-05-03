@@ -206,6 +206,8 @@ Group::RunTest(TestRef &tr, vector<TestRef> &skipTest)
     FORMAT_GROUP_DESCRIPTION(work, this)
     LOG_NRM("%s", work.c_str());
     FORMAT_TEST_NUM(work, "", tr.xLev, tr.yLev, tr.zLev)
+    work += (*myTest)->GetClassName();
+    work += ": ";
     work += (*myTest)->GetShortDescription();
     LOG_NRM("%s", work.c_str());
     LOG_NRM("Compliance: %s", (*myTest)->GetComplianceDescription().c_str());
@@ -220,10 +222,12 @@ Group::RunTest(TestRef &tr, vector<TestRef> &skipTest)
             FORMAT_GROUP_DESCRIPTION(work, this)
             LOG_NRM("  %s", work.c_str());
             FORMAT_TEST_NUM(work, "", tr.xLev, tr.yLev, tr.zLev)
+            work += (*myTest)->GetClassName();
+            work += ": ";
             work += (*myTest)->GetShortDescription();
             LOG_NRM("  %s", work.c_str());
-            LOG_NRM("  Compliance: %s", (*myTest)->GetComplianceDescription().c_str());
-            LOG_NRM("  %s", (*myTest)->GetLongDescription(false, 0).c_str());
+        } else {
+            LOG_NRM("SUCCESSFUL test case run");
         }
     }
     LOG_NRM("------------------END TEST------------------");

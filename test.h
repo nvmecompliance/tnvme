@@ -68,6 +68,13 @@ public:
     virtual ~Test();
 
     /**
+     * Get the C++ object name assigned to this object. This can be used to
+     * locate the source code of a failed test case.
+     * @return The C++ assigned name of this test object
+     */
+    string GetClassName() { return mTestName; }
+
+    /**
      * Get test information
      * @return Test description, short form.
      */

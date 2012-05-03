@@ -145,14 +145,18 @@ PRPOffsetMultiPgMultiBlk_r10b::RunCoreTest()
     SharedMemBufferPtr writeMem = SharedMemBufferPtr(new MemBuffer());
     SharedMemBufferPtr readMem = SharedMemBufferPtr(new MemBuffer());
 
-    if (namspcData.type == Informative::NS_META) {
+    switch (namspcData.type) {
+    case Informative::NS_BARE:
+        break;
+    case Informative::NS_METAS:
         writeCmd->AllocMetaBuffer();
         readCmd->AllocMetaBuffer();
-    } else if (namspcData.type == Informative::NS_E2E) {
-        writeCmd->AllocMetaBuffer();
-        readCmd->AllocMetaBuffer();
-        LOG_ERR("Deferring E2E namspc work to the future");
-        throw FrmwkEx(HERE, "Need to add CRC's to correlate to buf pattern");
+        break;
+    case Informative::NS_METAI:
+    case Informative::NS_E2ES:
+    case Informative::NS_E2EI:
+        throw FrmwkEx(HERE, "Deferring work to handle this case in future");
+        break;
     }
 
     DataPattern dataPat;
@@ -188,15 +192,29 @@ PRPOffsetMultiPgMultiBlk_r10b::RunCoreTest()
                     LOG_WARN("Data xfer sz exceeds max allowed, continuing..");
                     break;
                 }
+
+                uint64_t metabufSz = nLBA * lbaFormat.MS;
+                switch (namspcData.type) {
+                case Informative::NS_BARE:
+                    writeMem->InitOffset1stPage(dtPayloadSz, pgOff, false);
+                    readMem->InitOffset1stPage(dtPayloadSz, pgOff, false);
+                    break;
+                case Informative::NS_METAS:
+                    writeMem->InitOffset1stPage(dtPayloadSz, pgOff, false);
+                    readMem->InitOffset1stPage(dtPayloadSz, pgOff, false);
+                    writeCmd->SetMetaDataPattern(dataPat, wrVal, 0, metabufSz);
+                    break;
+                case Informative::NS_METAI:
+                case Informative::NS_E2ES:
+                case Informative::NS_E2EI:
+                    throw FrmwkEx(HERE,
+                        "Deferring work to handle this case in future");
+                    break;
+                }
                 work = str(boost::format("pgOff.%d.nlba.%d") % pgOff % nLBA);
-                writeMem->InitOffset1stPage(dtPayloadSz, pgOff, false);
                 writeCmd->SetPrpBuffer(prpBitmask, writeMem);
                 writeMem->SetDataPattern(dataPat, wrVal);
                 writeCmd->SetNLB(nLBA - 1); // convert to 0 based.
-
-                uint64_t metabufSz = nLBA * lbaFormat.MS;
-                if (namspcData.type != Informative::NS_BARE)
-                    writeCmd->SetMetaDataPattern(dataPat, wrVal, 0, metabufSz);
 
                 enableLog = false;
                 if ((pgOff <= 8) || (pgOff >= (X - 8)))
@@ -205,7 +223,6 @@ PRPOffsetMultiPgMultiBlk_r10b::RunCoreTest()
                 IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
                     iocq, writeCmd, work, enableLog);
 
-                readMem->InitOffset1stPage(dtPayloadSz, pgOff, false);
                 readCmd->SetPrpBuffer(prpBitmask, readMem);
                 readCmd->SetNLB(nLBA - 1); // convert to 0 based.
 

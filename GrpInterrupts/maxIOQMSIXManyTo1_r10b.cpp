@@ -133,23 +133,28 @@ MaxIOQMSIXManyTo1_r10b::RunCoreTest()
     send_64b_bitmask prpBitmask = (send_64b_bitmask)(MASK_PRP1_PAGE
         | MASK_PRP2_PAGE | MASK_PRP2_LIST);
 
-    writeMem->Init(lbaDataSize);
+    switch (namspcData.type) {
+    case Informative::NS_BARE:
+        writeMem->Init(lbaDataSize);
+        readMem->Init(lbaDataSize);
+        break;
+    case Informative::NS_METAS:
+        writeMem->Init(lbaDataSize);
+        readMem->Init(lbaDataSize);
+        writeCmd->AllocMetaBuffer();
+        readCmd->AllocMetaBuffer();
+        break;
+    case Informative::NS_METAI:
+    case Informative::NS_E2ES:
+    case Informative::NS_E2EI:
+        throw FrmwkEx(HERE, "Deferring work to handle this case in future");
+        break;
+    }
     writeCmd->SetPrpBuffer(prpBitmask, writeMem);
     writeCmd->SetNSID(namspcData.id);
 
-    readMem->Init(lbaDataSize);
     readCmd->SetPrpBuffer(prpBitmask, readMem);
     readCmd->SetNSID(namspcData.id);
-
-    if (namspcData.type == Informative::NS_META) {
-        writeCmd->AllocMetaBuffer();
-        readCmd->AllocMetaBuffer();
-    } else if (namspcData.type == Informative::NS_E2E) {
-        writeCmd->AllocMetaBuffer();
-        readCmd->AllocMetaBuffer();
-        LOG_ERR("Deferring E2E namspc work to the future");
-        throw FrmwkEx(HERE, "Need to add CRC's to correlate to buf pattern");
-    }
 
     gCtrlrConfig->SetIOCQES((gInformative->GetIdentifyCmdCtrlr()->
         GetValue(IDCTRLRCAP_CQES) & 0xf));

@@ -48,6 +48,8 @@ PrpData::SetPrpBuffer(send_64b_bitmask prpFields, SharedMemBufferPtr memBuffer)
     } else if (mBufRO != NULL) {
         throw FrmwkEx(HERE, 
             "Buffer already setup as RO, cannot also setup RW buffer");
+    } else if (memBuffer->GetBufSize() == 0) {
+        throw FrmwkEx(HERE, "Setting zero length PRP buffer not allowed");
     }
 
     // Do allow associating a new buffer with an existing cmd, free the old 1st.
@@ -75,6 +77,8 @@ PrpData::SetPrpBuffer(send_64b_bitmask prpFields, uint8_t const *memBuffer,
     } else if (mBufRW != MemBuffer::NullMemBufferPtr) {
         throw FrmwkEx(HERE, 
             "Buffer already setup as RW, cannot also setup RO buffer");
+    } else if (bufSize == 0) {
+        throw FrmwkEx(HERE, "Setting zero length PRP buffer not allowed");
     } else if (((bufSize == 0) && (memBuffer != NULL)) ||
                ((bufSize != 0) && (memBuffer == NULL))) {
         throw FrmwkEx(HERE, "Ambiguous; memBuffer = %p, size = %llu", memBuffer,

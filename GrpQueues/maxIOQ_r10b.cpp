@@ -155,18 +155,24 @@ MaxIOQ_r10b::SetWriteCmd(Informative::Namspc namspcData,
 {
     LOG_NRM("Processing write cmd using namspc id %d", namspcData.id);
     uint64_t lbaDataSize = namspcData.idCmdNamspc->GetLBADataSize();
-    dataPat->Init(lbaDataSize);
 
     SharedWritePtr writeCmd = SharedWritePtr(new Write());
     send_64b_bitmask prpBitmask = (send_64b_bitmask)(MASK_PRP1_PAGE
         | MASK_PRP2_PAGE | MASK_PRP2_LIST);
 
-    if (namspcData.type == Informative::NS_META) {
+    switch (namspcData.type) {
+    case Informative::NS_BARE:
+        dataPat->Init(lbaDataSize);
+        break;
+    case Informative::NS_METAS:
+        dataPat->Init(lbaDataSize);
         writeCmd->AllocMetaBuffer();
-    } else if (namspcData.type == Informative::NS_E2E) {
-        writeCmd->AllocMetaBuffer();
-        LOG_ERR("Deferring E2E namspc work to the future");
-        throw FrmwkEx(HERE, "Need to add CRC's to correlate to buf pattern");
+        break;
+    case Informative::NS_METAI:
+    case Informative::NS_E2ES:
+    case Informative::NS_E2EI:
+        throw FrmwkEx(HERE, "Deferring work to handle this case in future");
+        break;
     }
 
     writeCmd->SetPrpBuffer(prpBitmask, dataPat);
@@ -183,18 +189,24 @@ MaxIOQ_r10b::CreateReadCmd(Informative::Namspc namspcData,
 {
     LOG_NRM("Processing read cmd using namspc id %d", namspcData.id);
     uint64_t lbaDataSize = namspcData.idCmdNamspc->GetLBADataSize();
-    dataPat->Init(lbaDataSize);
 
     SharedReadPtr readCmd = SharedReadPtr(new Read());
     send_64b_bitmask prpBitmask = (send_64b_bitmask)(MASK_PRP1_PAGE
         | MASK_PRP2_PAGE | MASK_PRP2_LIST);
 
-    if (namspcData.type == Informative::NS_META) {
+    switch (namspcData.type) {
+    case Informative::NS_BARE:
+        dataPat->Init(lbaDataSize);
+        break;
+    case Informative::NS_METAS:
+        dataPat->Init(lbaDataSize);
         readCmd->AllocMetaBuffer();
-    } else if (namspcData.type == Informative::NS_E2E) {
-        readCmd->AllocMetaBuffer();
-        LOG_ERR("Deferring E2E namspc work to the future");
-        throw FrmwkEx(HERE, "Need to add CRC's to correlate to buf pattern");
+        break;
+    case Informative::NS_METAI:
+    case Informative::NS_E2ES:
+    case Informative::NS_E2EI:
+        throw FrmwkEx(HERE, "Deferring work to handle this case in future");
+        break;
     }
 
     readCmd->SetPrpBuffer(prpBitmask, dataPat);

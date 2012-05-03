@@ -212,19 +212,24 @@ IOQFull_r10b::SetWriteCmd()
     LOG_NRM("Create data pattern to write to media");
     SharedMemBufferPtr dataPat = SharedMemBufferPtr(new MemBuffer());
     uint64_t lbaDataSize = namspcData.idCmdNamspc->GetLBADataSize();
-    dataPat->Init(lbaDataSize);
 
     SharedWritePtr writeCmd = SharedWritePtr(new Write());
     send_64b_bitmask prpBitmask = (send_64b_bitmask)(MASK_PRP1_PAGE
         | MASK_PRP2_PAGE | MASK_PRP2_LIST);
 
-    if (namspcData.type == Informative::NS_META) {
+    switch (namspcData.type) {
+    case Informative::NS_BARE:
+        dataPat->Init(lbaDataSize);
+        break;
+    case Informative::NS_METAS:
+        dataPat->Init(lbaDataSize);
         writeCmd->AllocMetaBuffer();
-    } else if (namspcData.type == Informative::NS_E2E) {
-        writeCmd->AllocMetaBuffer();
-        LOG_ERR("Deferring E2E namspc work to the future");
-        LOG_ERR("Need to add CRC's to correlate to buf pattern");
-        throw FrmwkEx(HERE);
+        break;
+    case Informative::NS_METAI:
+    case Informative::NS_E2ES:
+    case Informative::NS_E2EI:
+        throw FrmwkEx(HERE, "Deferring work to handle this case in future");
+        break;
     }
 
     writeCmd->SetPrpBuffer(prpBitmask, dataPat);

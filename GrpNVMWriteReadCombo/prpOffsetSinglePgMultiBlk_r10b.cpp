@@ -148,14 +148,18 @@ PRPOffsetSinglePgMultiBlk_r10b::RunCoreTest()
     SharedMemBufferPtr writeMem = SharedMemBufferPtr(new MemBuffer());
     SharedMemBufferPtr readMem = SharedMemBufferPtr(new MemBuffer());
 
-    if (namspcData.type == Informative::NS_META) {
+    switch (namspcData.type) {
+    case Informative::NS_BARE:
+        break;
+    case Informative::NS_METAS:
         writeCmd->AllocMetaBuffer();
         readCmd->AllocMetaBuffer();
-    } else if (namspcData.type == Informative::NS_E2E) {
-        writeCmd->AllocMetaBuffer();
-        readCmd->AllocMetaBuffer();
-        LOG_ERR("Deferring E2E namspc work to the future");
-        throw FrmwkEx(HERE, "Need to add CRC's to correlate to buf pattern");
+        break;
+    case Informative::NS_METAI:
+    case Informative::NS_E2ES:
+    case Informative::NS_E2EI:
+        throw FrmwkEx(HERE, "Deferring work to handle this case in future");
+        break;
     }
 
     DataPattern dataPat;
@@ -190,15 +194,34 @@ PRPOffsetSinglePgMultiBlk_r10b::RunCoreTest()
                 prp2RandVal[0] = 0;
                 prp2RandVal[1] = 0;
             }
+
+            uint64_t metabufSz = nLBAs * lbaFormat.MS;
+            switch (namspcData.type) {
+            case Informative::NS_BARE:
+                writeMem->InitOffset1stPage((lbaDataSize * nLBAs), pgOff,
+                    false);
+                readMem->InitOffset1stPage((lbaDataSize * nLBAs), pgOff, false);
+                break;
+            case Informative::NS_METAS:
+                writeMem->InitOffset1stPage((lbaDataSize * nLBAs), pgOff,
+                    false);
+                readMem->InitOffset1stPage((lbaDataSize * nLBAs), pgOff, false);
+                writeCmd->SetMetaDataPattern(dataPat, wrVal, 0, metabufSz);
+                break;
+            case Informative::NS_METAI:
+            case Informative::NS_E2ES:
+            case Informative::NS_E2EI:
+                throw FrmwkEx(HERE,
+                    "Deferring work to handle this case in future");
+                break;
+            }
             work = str(boost::format("pgOff.%d.nlba.%d") % pgOff % nLBAs);
-            writeMem->InitOffset1stPage((lbaDataSize * nLBAs), pgOff, false);
             writeCmd->SetPrpBuffer(prpBitmask, writeMem);
             writeMem->SetDataPattern(dataPat, wrVal);
             writeCmd->SetNLB(nLBAs - 1); // convert to 0 based.
 
-            uint64_t metabufSz = nLBAs * lbaFormat.MS;
-            if (namspcData.type != Informative::NS_BARE)
-                writeCmd->SetMetaDataPattern(dataPat, wrVal, 0, metabufSz);
+            readCmd->SetPrpBuffer(prpBitmask, readMem);
+            readCmd->SetNLB(nLBAs - 1); // convert to 0 based.
 
             enableLog = false;
             if ((pgOff <= 8) || (pgOff >= (X - 8)))
@@ -209,10 +232,6 @@ PRPOffsetSinglePgMultiBlk_r10b::RunCoreTest()
             writeCmd->SetDword(prp2RandVal[1], 9);
             IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
                 iocq, writeCmd, work, enableLog);
-
-            readMem->InitOffset1stPage((lbaDataSize * nLBAs), pgOff, false);
-            readCmd->SetPrpBuffer(prpBitmask, readMem);
-            readCmd->SetNLB(nLBAs - 1); // convert to 0 based.
 
             // Set 64 bits of PRP2 in CDW 8 & 9 with random or zero.
             readCmd->SetDword(prp2RandVal[0], 8);

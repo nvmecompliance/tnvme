@@ -52,8 +52,9 @@
 #define FORMAT_GROUP_DESCRIPTION(stdStr, grpObjPtr)                           \
     {                                                                         \
         char charray[80];                                                     \
-        snprintf(charray, 80, "%ld: Group:%s",                                \
+        snprintf(charray, 80, "%ld: %s: %s",                                  \
                 grpObjPtr->GetGroupNumber(),                                  \
+                grpObjPtr->GetClassName().c_str(),                            \
                 grpObjPtr->GetGroupDescription().c_str());                    \
         stdStr = charray;                                                     \
     }
@@ -62,7 +63,7 @@
 #define FORMAT_TEST_NUM(stdStr, padStr, x, y, z)                              \
     {                                                                         \
         char num[40];                                                         \
-        snprintf(num, 40, "%s%ld.%ld.%ld: Test:", padStr, x, y, z);           \
+        snprintf(num, 40, "%s%ld.%ld.%ld: Test: ", padStr, x, y, z);          \
         stdStr = num;                                                         \
     }
 
@@ -87,6 +88,13 @@ public:
      */
     Group(size_t grpNum, SpecRev specRev, string grpName, string desc);
     virtual ~Group();
+
+    /**
+     * Get the C++ object name assigned to this object. This can be used to
+     * locate the source code of a failed test case.
+     * @return The C++ assigned name of this test object
+     */
+    string GetClassName() { return mGrpName; }
 
     /**
      * @return The externally assigned group number of this instance

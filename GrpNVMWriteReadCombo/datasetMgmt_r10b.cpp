@@ -116,25 +116,31 @@ DatasetMgmt_r10b::RunCoreTest()
     send_64b_bitmask prpBitmask = (send_64b_bitmask)(MASK_PRP1_PAGE
         | MASK_PRP2_PAGE | MASK_PRP2_LIST);
 
-    writeMem->Init(lbaDataSize);
+    switch (namspcData.type) {
+    case Informative::NS_BARE:
+        writeMem->Init(lbaDataSize);
+        readMem->Init(lbaDataSize);
+        break;
+    case Informative::NS_METAS:
+        writeMem->Init(lbaDataSize);
+        readMem->Init(lbaDataSize);
+        writeCmd->AllocMetaBuffer();
+        readCmd->AllocMetaBuffer();
+        break;
+    case Informative::NS_METAI:
+    case Informative::NS_E2ES:
+    case Informative::NS_E2EI:
+        throw FrmwkEx(HERE, "Deferring work to handle this case in future");
+        break;
+    }
+
     writeCmd->SetPrpBuffer(prpBitmask, writeMem);
     writeCmd->SetNSID(namspcData.id);
     writeCmd->SetNLB(0);
 
-    readMem->Init(lbaDataSize);
     readCmd->SetPrpBuffer(prpBitmask, readMem);
     readCmd->SetNSID(namspcData.id);
     readCmd->SetNLB(0);
-
-    if (namspcData.type == Informative::NS_META) {
-        writeCmd->AllocMetaBuffer();
-        readCmd->AllocMetaBuffer();
-    } else if (namspcData.type == Informative::NS_E2E) {
-        writeCmd->AllocMetaBuffer();
-        readCmd->AllocMetaBuffer();
-        LOG_ERR("Deferring E2E namspc work to the future");
-        throw FrmwkEx(HERE, "Need to add CRC's to correlate to buf pattern");
-    }
 
     DataPattern dataPat[] = {
         DATAPAT_INC_32BIT,
@@ -147,9 +153,20 @@ DatasetMgmt_r10b::RunCoreTest()
         if ((dsmAtr & 0xF) >= 0x09)
             continue;
 
-        writeMem->SetDataPattern(dataPat[dsmAtr % dpArrSize], dsmAtr);
-        if (namspcData.type != Informative::NS_BARE)
+        switch (namspcData.type) {
+        case Informative::NS_BARE:
+            writeMem->SetDataPattern(dataPat[dsmAtr % dpArrSize], dsmAtr);
+            break;
+        case Informative::NS_METAS:
+            writeMem->SetDataPattern(dataPat[dsmAtr % dpArrSize], dsmAtr);
             writeCmd->SetMetaDataPattern(dataPat[dsmAtr % dpArrSize], dsmAtr);
+            break;
+        case Informative::NS_METAI:
+        case Informative::NS_E2ES:
+        case Informative::NS_E2EI:
+            throw FrmwkEx(HERE, "Deferring work to handle this case in future");
+            break;
+        }
 
         // Set CDW13.DSM field to different values.
         writeCmd->SetByte((uint8_t)dsmAtr, 13, 0);

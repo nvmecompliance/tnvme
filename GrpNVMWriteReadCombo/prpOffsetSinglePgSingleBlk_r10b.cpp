@@ -137,11 +137,23 @@ PRPOffsetSinglePgSingleBlk_r10b::RunCoreTest()
             work = str(boost::format("dataPat.incw.memOff.%d") % pgOff);
         }
         SharedMemBufferPtr writeMem = SharedMemBufferPtr(new MemBuffer());
-        writeMem->InitOffset1stPage(lbaDataSize, pgOff, false);
+
+        switch (namspcData.type) {
+        case Informative::NS_BARE:
+            writeMem->InitOffset1stPage(lbaDataSize, pgOff, false);
+            break;
+        case Informative::NS_METAS:
+            writeMem->InitOffset1stPage(lbaDataSize, pgOff, false);
+            writeCmd->SetMetaDataPattern(dataPattern, wrVal);
+            break;
+        case Informative::NS_METAI:
+        case Informative::NS_E2ES:
+        case Informative::NS_E2EI:
+            throw FrmwkEx(HERE, "Deferring work to handle this case in future");
+            break;
+        }
         writeCmd->SetPrpBuffer(prpBitmask, writeMem);
         writeMem->SetDataPattern(dataPattern, wrVal);
-        if (namspcData.type != Informative::NS_BARE)
-            writeCmd->SetMetaDataPattern(dataPattern, wrVal);
 
         // Set 64 bits of PRP2 in CDW 8 & 9 with random or zero for write cmd.
         writeCmd->SetDword(prp2RandVal[0], 8);
@@ -155,7 +167,19 @@ PRPOffsetSinglePgSingleBlk_r10b::RunCoreTest()
             writeCmd, work, enableLog);
 
         SharedMemBufferPtr readMem = SharedMemBufferPtr(new MemBuffer());
-        readMem->InitOffset1stPage(lbaDataSize, pgOff, false);
+        switch (namspcData.type) {
+        case Informative::NS_BARE:
+            readMem->InitOffset1stPage(lbaDataSize, pgOff, false);
+            break;
+        case Informative::NS_METAS:
+            readMem->InitOffset1stPage(lbaDataSize, pgOff, false);
+            break;
+        case Informative::NS_METAI:
+        case Informative::NS_E2ES:
+        case Informative::NS_E2EI:
+            throw FrmwkEx(HERE, "Deferring work to handle this case in future");
+            break;
+        }
         readCmd->SetPrpBuffer(prpBitmask, readMem);
 
         // Set 64 bits of PRP2 in CDW 8 & 9 with random or zero for read cmd.
@@ -175,12 +199,17 @@ PRPOffsetSinglePgSingleBlk_r10b::CreateWriteCmd(Informative::Namspc namspcData)
 {
     SharedWritePtr writeCmd = SharedWritePtr(new Write());
 
-    if (namspcData.type == Informative::NS_META) {
+    switch (namspcData.type) {
+    case Informative::NS_BARE:
+        break;
+    case Informative::NS_METAS:
         writeCmd->AllocMetaBuffer();
-    } else if (namspcData.type == Informative::NS_E2E) {
-        writeCmd->AllocMetaBuffer();
-        LOG_ERR("Deferring E2E namspc work to the future");
-        throw FrmwkEx(HERE, "Need to add CRC's to correlate to buf pattern");
+        break;
+    case Informative::NS_METAI:
+    case Informative::NS_E2ES:
+    case Informative::NS_E2EI:
+        throw FrmwkEx(HERE, "Deferring work to handle this case in future");
+        break;
     }
 
     writeCmd->SetNSID(namspcData.id);
@@ -194,12 +223,17 @@ PRPOffsetSinglePgSingleBlk_r10b::CreateReadCmd(Informative::Namspc namspcData)
 {
     SharedReadPtr readCmd = SharedReadPtr(new Read());
 
-    if (namspcData.type == Informative::NS_META) {
+    switch (namspcData.type) {
+    case Informative::NS_BARE:
+        break;
+    case Informative::NS_METAS:
         readCmd->AllocMetaBuffer();
-    } else if (namspcData.type == Informative::NS_E2E) {
-        readCmd->AllocMetaBuffer();
-        LOG_ERR("Deferring E2E namspc work to the future");
-        throw FrmwkEx(HERE, "Need to add CRC's to correlate to buf pattern");
+        break;
+    case Informative::NS_METAI:
+    case Informative::NS_E2ES:
+    case Informative::NS_E2EI:
+        throw FrmwkEx(HERE, "Deferring work to handle this case in future");
+        break;
     }
 
     readCmd->SetNSID(namspcData.id);

@@ -85,10 +85,11 @@ public:
     uint32_t GetFeaturesNumOfIOSQs() const;
 
     typedef enum {
-        NS_BARE,
-        NS_META,
-        NS_E2E,
-        NS_FENCE    // always must be the last element
+        NS_BARE,    // no meta data, nor E2E data
+        NS_METAI,   // META data Interleaved (METAI) in LBA payload
+        NS_METAS,   // META data Separate (METAS) buffer
+        NS_E2EI,    // E2E data Interleaved (E2EI) in LBA payload
+        NS_E2ES,    // E2E data Separate (E2ES) buffer
     } NamspcType;
 
     /**
@@ -112,21 +113,28 @@ public:
      *       throws if anything prevents detecting the requested data.
      */
     vector<uint32_t> GetBareNamespaces() const;
-    vector<uint32_t> GetMetaNamespaces() const;
-    vector<uint32_t> GetE2ENamespaces() const;
+    vector<uint32_t> GetMetaINamespaces() const;    // meta data interleaved
+    vector<uint32_t> GetMetaSNamespaces() const;    // meta data separate
+    vector<uint32_t> GetMetaNamespaces() const;     // interleaved and separate
+    vector<uint32_t> GetE2eINamespaces() const;     // E2E interleaved
+    vector<uint32_t> GetE2eSNamespaces() const;     // E2E separate
+    vector<uint32_t> GetE2eNamespaces() const;      // interleaved and separate
 
     struct Namspc {
-        ConstSharedIdentifyPtr idCmdNamspc; // namspc data struct
-        uint32_t id;    // namspc identifier of the namspc data struct
+        ConstSharedIdentifyPtr idCmdNamspc; // Namespace data struct
+        uint32_t id;                        // Namespace ID (1-based)
         NamspcType type;
         Namspc(ConstSharedIdentifyPtr n, uint32_t i, NamspcType t) {
             idCmdNamspc = n; id = i; type = t; }
     };
 
     /**
-     * Seek for the 1st bare namespace, and if not found, seek for the 1st
-     * meta namespace, and if not found, seek for the first E2E namespace, and
-     * if not found, throw.
+     * Seek for the 1st bare namespace, and if not found then
+     * seek for the 1st meta separate namespace, and if not found then
+     * seek for the 1st meta interleaved namespace, and if not found then
+     * seek for the 1st E2E separate namespace, and if not found then
+     * seek for the 1st E2E interleaved namespace, and if not found then
+     * throw an exception.
      * @return Namespace data if successful, otherwise throws
      */
     Namspc Get1stBareMetaE2E() const;

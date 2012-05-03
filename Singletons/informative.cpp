@@ -162,7 +162,7 @@ Informative::GetBareNamespaces() const
     for (uint64_t i = 1; i <= nn; i++) {
         nsPtr =  GetIdentifyCmdNamspc(i);
         if (IdentifyNamespace(nsPtr) == NS_BARE) {
-            LOG_NRM("Identified bare namspc #%lld", (unsigned long long)i);
+            LOG_NRM("Identified bare namspc #%ld", i);
             ns.push_back(i);
         }
     }
@@ -173,6 +173,7 @@ Informative::GetBareNamespaces() const
 vector<uint32_t>
 Informative::GetMetaNamespaces() const
 {
+    NamspcType nsType;
     vector<uint32_t> ns;
     ConstSharedIdentifyPtr nsPtr;
 
@@ -180,13 +181,13 @@ Informative::GetMetaNamespaces() const
     ConstSharedIdentifyPtr idCmdCtrlr = GetIdentifyCmdCtrlr();
     uint32_t nn = (uint32_t)idCmdCtrlr->GetValue(IDCTRLRCAP_NN);
 
-    // Meta namespaces supporting meta data, and E2E is disabled;
-    // Implies: Identify.LBAF[Identify.FLBAS].MS=!0, Identify.DPS_b2:0=0
     LOG_NRM("Seeking all meta namspc's");
     for (uint64_t i = 1; i <= nn; i++) {
         nsPtr =  GetIdentifyCmdNamspc(i);
-        if (IdentifyNamespace(nsPtr) == NS_META) {
-            LOG_NRM("Identified meta namspc #%lld", (unsigned long long)i);
+        nsType = IdentifyNamespace(nsPtr);
+        if ((nsType == NS_METAI) || (nsType == NS_METAS)) {
+            LOG_NRM("Identified meta namspc with %s buffer (ID = %ld)",
+                (nsType == NS_METAI) ? "interleaved" : "separate", i);
             ns.push_back(i);
         }
     }
@@ -195,8 +196,9 @@ Informative::GetMetaNamespaces() const
 
 
 vector<uint32_t>
-Informative::GetE2ENamespaces() const
+Informative::GetMetaINamespaces() const
 {
+    NamspcType nsType;
     vector<uint32_t> ns;
     ConstSharedIdentifyPtr nsPtr;
 
@@ -204,13 +206,13 @@ Informative::GetE2ENamespaces() const
     ConstSharedIdentifyPtr idCmdCtrlr = GetIdentifyCmdCtrlr();
     uint32_t nn = (uint32_t)idCmdCtrlr->GetValue(IDCTRLRCAP_NN);
 
-    // Meta namespaces supporting meta data, and E2E is disabled;
-    // Implies: Identify.LBAF[Identify.FLBAS].MS=!0, Identify.DPS_b2:0=0
-    LOG_NRM("Seeking all E2E namspc's");
+    LOG_NRM("Seeking all interleaved meta namspc's");
     for (uint64_t i = 1; i <= nn; i++) {
         nsPtr =  GetIdentifyCmdNamspc(i);
-        if (IdentifyNamespace(nsPtr) == NS_E2E) {
-            LOG_NRM("Identified E2E namspc #%lld", (unsigned long long)i);
+        nsType = IdentifyNamespace(nsPtr);
+        if (nsType == NS_METAI) {
+            LOG_NRM(
+                "Identified meta namspc with interleaved buffer (ID = %ld)", i);
             ns.push_back(i);
         }
     }
@@ -218,34 +220,102 @@ Informative::GetE2ENamespaces() const
 }
 
 
-Informative::NamspcType
-Informative::IdentifyNamespace(ConstSharedIdentifyPtr idCmdNamspc) const
+vector<uint32_t>
+Informative::GetMetaSNamespaces() const
 {
-    LBAFormat lbaFmt;
-    uint8_t dps;
+    NamspcType nsType;
+    vector<uint32_t> ns;
+    ConstSharedIdentifyPtr nsPtr;
 
-    // Bare Namespaces: Namspc's supporting no meta data, and E2E is disabled;
-    // Implies: Identify.LBAF[Identify.FLBAS].MS=0
-    lbaFmt = idCmdNamspc->GetLBAFormat();
-    if (lbaFmt.MS == 0) {
-        return NS_BARE;
+    // Determine the Number of Namespaces (NN)
+    ConstSharedIdentifyPtr idCmdCtrlr = GetIdentifyCmdCtrlr();
+    uint32_t nn = (uint32_t)idCmdCtrlr->GetValue(IDCTRLRCAP_NN);
+
+    LOG_NRM("Seeking all separate meta namspc's");
+    for (uint64_t i = 1; i <= nn; i++) {
+        nsPtr =  GetIdentifyCmdNamspc(i);
+        nsType = IdentifyNamespace(nsPtr);
+        if (nsType == NS_METAS) {
+            LOG_NRM(
+                "Identified meta namspc with separate buffer (ID = %ld)", i);
+            ns.push_back(i);
+        }
     }
+    return ns;
+}
 
-    // Meta namespaces supporting meta data, and E2E is disabled;
-    // Implies: Identify.LBAF[Identify.FLBAS].MS=!0, Identify.DPS_b2:0=0
-    dps = (uint8_t)idCmdNamspc->GetValue(IDNAMESPC_DPS);
-    if ((lbaFmt.MS != 0) && ((dps & 0x07) == 0)) {
-        return NS_META;
+
+vector<uint32_t>
+Informative::GetE2eNamespaces() const
+{
+    NamspcType nsType;
+    vector<uint32_t> ns;
+    ConstSharedIdentifyPtr nsPtr;
+
+    // Determine the Number of Namespaces (NN)
+    ConstSharedIdentifyPtr idCmdCtrlr = GetIdentifyCmdCtrlr();
+    uint32_t nn = (uint32_t)idCmdCtrlr->GetValue(IDCTRLRCAP_NN);
+
+    LOG_NRM("Seeking all E2E namspc's");
+    for (uint64_t i = 1; i <= nn; i++) {
+        nsPtr =  GetIdentifyCmdNamspc(i);
+        nsType = IdentifyNamespace(nsPtr);
+        if ((nsType == NS_E2EI) || (nsType == NS_E2ES)) {
+            LOG_NRM("Identified E2E namspc with %s buffer (ID = %ld)",
+                (nsType == NS_E2EI) ? "interleaved" : "separate", i);
+            ns.push_back(i);
+        }
     }
+    return ns;
+}
 
-    // Meta namespaces supporting meta data, and E2E is disabled;
-    // Implies: Identify.LBAF[Identify.FLBAS].MS=!0, Identify.DPS_b2:0=0
-    dps = (uint8_t)idCmdNamspc->GetValue(IDNAMESPC_DPS);
-    if ((lbaFmt.MS != 0) && ((dps & 0x07) != 0)) {
-        return NS_E2E;
+
+vector<uint32_t>
+Informative::GetE2eINamespaces() const
+{
+    NamspcType nsType;
+    vector<uint32_t> ns;
+    ConstSharedIdentifyPtr nsPtr;
+
+    // Determine the Number of Namespaces (NN)
+    ConstSharedIdentifyPtr idCmdCtrlr = GetIdentifyCmdCtrlr();
+    uint32_t nn = (uint32_t)idCmdCtrlr->GetValue(IDCTRLRCAP_NN);
+
+    LOG_NRM("Seeking all interleaved E2E namspc's");
+    for (uint64_t i = 1; i <= nn; i++) {
+        nsPtr =  GetIdentifyCmdNamspc(i);
+        nsType = IdentifyNamespace(nsPtr);
+        if (nsType == NS_E2EI) {
+            LOG_NRM(
+                "Identified E2E namspc with interleaved buffer (ID = %ld)", i);
+            ns.push_back(i);
+        }
     }
+    return ns;
+}
 
-    throw FrmwkEx(HERE, "Namspc is unidentifiable");
+
+vector<uint32_t>
+Informative::GetE2eSNamespaces() const
+{
+    NamspcType nsType;
+    vector<uint32_t> ns;
+    ConstSharedIdentifyPtr nsPtr;
+
+    // Determine the Number of Namespaces (NN)
+    ConstSharedIdentifyPtr idCmdCtrlr = GetIdentifyCmdCtrlr();
+    uint32_t nn = (uint32_t)idCmdCtrlr->GetValue(IDCTRLRCAP_NN);
+
+    LOG_NRM("Seeking all separate E2E namspc's");
+    for (uint64_t i = 1; i <= nn; i++) {
+        nsPtr =  GetIdentifyCmdNamspc(i);
+        nsType = IdentifyNamespace(nsPtr);
+        if (nsType == NS_E2ES) {
+            LOG_NRM("Identified E2E namspc with separate buffer (ID = %ld)", i);
+            ns.push_back(i);
+        }
+    }
+    return ns;
 }
 
 
@@ -258,14 +328,59 @@ Informative::Get1stBareMetaE2E() const
     if (namspc.size())
         return (Namspc(GetIdentifyCmdNamspc(namspc[0]), namspc[0], NS_BARE));
 
-    namspc = GetMetaNamespaces();
+    namspc = GetMetaSNamespaces();
     if (namspc.size())
-        return (Namspc(GetIdentifyCmdNamspc(namspc[0]), namspc[0], NS_META));
+        return (Namspc(GetIdentifyCmdNamspc(namspc[0]), namspc[0], NS_METAS));
 
-    namspc = GetE2ENamespaces();
+    namspc = GetMetaINamespaces();
     if (namspc.size())
-        return (Namspc(GetIdentifyCmdNamspc(namspc[0]), namspc[0], NS_E2E));
+        return (Namspc(GetIdentifyCmdNamspc(namspc[0]), namspc[0], NS_METAI));
+
+    namspc = GetE2eSNamespaces();
+    if (namspc.size())
+        return (Namspc(GetIdentifyCmdNamspc(namspc[0]), namspc[0], NS_E2ES));
+
+    namspc = GetE2eINamespaces();
+    if (namspc.size())
+        return (Namspc(GetIdentifyCmdNamspc(namspc[0]), namspc[0], NS_E2EI));
 
     throw FrmwkEx(HERE, "DUT must have 1 of 3 namspc's");
+}
+
+
+Informative::NamspcType
+Informative::IdentifyNamespace(ConstSharedIdentifyPtr idCmdNamspc) const
+{
+    LBAFormat lbaFmt;
+    uint8_t dps;
+    uint8_t flbas;
+
+    // Bare namespaces: Namspc's supporting no meta data, and E2E is disabled;
+    // Implies: Identify.LBAF[Identify.FLBAS].MS=0
+    lbaFmt = idCmdNamspc->GetLBAFormat();
+    if (lbaFmt.MS == 0) {
+        return NS_BARE;
+    }
+
+    // Learn more about this namespace to decipher its classification/type
+    dps = (uint8_t)idCmdNamspc->GetValue(IDNAMESPC_DPS);
+    flbas = (uint8_t)idCmdNamspc->GetValue(IDNAMESPC_DPS);
+
+    if ((dps & 0x07) == 0) {
+        // Meta namespaces supporting meta data, and E2E is disabled;
+        // Implies: Identify.LBAF[Identify.FLBAS].MS=!0, Identify.DPS_b2:0=0
+        if (flbas & (1 << 4))
+            return NS_METAI;
+        else
+            return NS_METAS;
+    } else {
+        // Meta namespaces supporting meta data, and E2E is disabled;
+        // Implies: Identify.LBAF[Identify.FLBAS].MS=!0, Identify.DPS_b2:0=0
+        if (flbas & (1 << 4))
+            return NS_E2EI;
+        else
+            return NS_E2ES;
+    }
+    throw FrmwkEx(HERE, "Namspc is unidentifiable");
 }
 
