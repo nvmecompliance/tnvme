@@ -18,6 +18,7 @@
 #include "../Exception/frmwkEx.h"
 #include "createResources_r10b.h"
 #include "invalidNamspc_r10b.h"
+#include "unsupportRsvdFields_r10b.h"
 
 namespace GrpNVMFlushCmd {
 
@@ -37,6 +38,7 @@ GrpNVMFlushCmd::GrpNVMFlushCmd(size_t grpNum, SpecRev specRev,
     case SPECREV_10b:
         APPEND_TEST_AT_XLEVEL(CreateResources_r10b, fd, GrpNVMFlushCmd, errRegs)
         APPEND_TEST_AT_YLEVEL(InvalidNamspc_r10b, fd, GrpNVMFlushCmd, errRegs)
+        APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r10b, fd, GrpNVMFlushCmd, errRegs)
         break;
 
     default:
