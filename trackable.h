@@ -58,6 +58,7 @@ public:
         OBJ_NVMCMD,             // NVM cmd set; non descriptive general cmd
         OBJ_WRITE,              // NVM cmd set; write cmd
         OBJ_READ,               // NVM cmd set; write cmd
+        OBJ_FLUSH,              // NVM cmd set; flush cmd
 
         OBJTYPE_FENCE           // always must be last element
     } ObjType;

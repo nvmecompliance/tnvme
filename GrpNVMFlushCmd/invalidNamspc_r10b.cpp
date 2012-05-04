@@ -15,42 +15,32 @@
  */
 
 #include "boost/format.hpp"
-#include "illegalNVMCmds_r10b.h"
+#include "invalidNamspc_r10b.h"
 #include "globals.h"
 #include "grpDefs.h"
 #include "../Queues/iocq.h"
 #include "../Queues/iosq.h"
 #include "../Utils/io.h"
-#include "../Cmds/nvmCmd.h"
+#include "../Cmds/flush.h"
+
+namespace GrpNVMFlushCmd {
 
 
-namespace GrpGeneralCmds {
-
-
-#define VENDOR_SPEC_OPC             0x80
-
-
-const uint8_t IllegalNVMCmds_r10b::WRITE_UNCORR_OPCODE  = 0x04;
-const uint8_t IllegalNVMCmds_r10b::COMPARE_OPCODE       = 0x05;
-const uint8_t IllegalNVMCmds_r10b::DSM_OPCODE           = 0x09;
-
-
-IllegalNVMCmds_r10b::IllegalNVMCmds_r10b(int fd,
-    string mGrpName, string mTestName, ErrorRegs errRegs) :
+InvalidNamspc_r10b::InvalidNamspc_r10b(int fd, string mGrpName,
+    string mTestName, ErrorRegs errRegs) :
     Test(fd, mGrpName, mTestName, SPECREV_10b, errRegs)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-    mTestDesc.SetCompliance("revision 1.0b, section 6");
-    mTestDesc.SetShort(     "Issue illegal nvm cmd set opcodes.");
+    mTestDesc.SetCompliance("revision 1.0b, section 4,6");
+    mTestDesc.SetShort(     "Issue flush and cause SC=Invalid Namspc or Format");
     // No string size limit for the long description
     mTestDesc.SetLong(
-        "Don't test vendor specific opcodes, then determine all supported NVM "
-        "cmds and issue all other illegal opcodes.  Verify status code in the "
-        "CE of IOCQ is 1h.");
+        "Determine Identify.NN and issue flush cmd to all namspcs not "
+        "supported by DUT, expect failure.");
 }
 
 
-IllegalNVMCmds_r10b::~IllegalNVMCmds_r10b()
+InvalidNamspc_r10b::~InvalidNamspc_r10b()
 {
     ///////////////////////////////////////////////////////////////////////////
     // Allocations taken from the heap and not under the control of the
@@ -59,9 +49,8 @@ IllegalNVMCmds_r10b::~IllegalNVMCmds_r10b()
 }
 
 
-IllegalNVMCmds_r10b::
-IllegalNVMCmds_r10b(const IllegalNVMCmds_r10b &other) :
-    Test(other)
+InvalidNamspc_r10b::
+InvalidNamspc_r10b(const InvalidNamspc_r10b &other) : Test(other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -70,9 +59,8 @@ IllegalNVMCmds_r10b(const IllegalNVMCmds_r10b &other) :
 }
 
 
-IllegalNVMCmds_r10b &
-IllegalNVMCmds_r10b::operator=(const IllegalNVMCmds_r10b
-    &other)
+InvalidNamspc_r10b &
+InvalidNamspc_r10b::operator=(const InvalidNamspc_r10b &other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -84,59 +72,41 @@ IllegalNVMCmds_r10b::operator=(const IllegalNVMCmds_r10b
 
 
 void
-IllegalNVMCmds_r10b::RunCoreTest()
+InvalidNamspc_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
      * 1) Test CreateResources_r10b has run prior.
      * \endverbatim
      */
+    uint64_t inc, i;
     string work;
-    list<uint8_t> illegalOpCodes = GetIllegalOpcodes();
+    ConstSharedIdentifyPtr namSpcPtr;
 
     // Lookup objs which were created in a prior test within group
     SharedIOSQPtr iosq = CAST_TO_IOSQ(gRsrcMngr->GetObj(IOSQ_GROUP_ID));
     SharedIOCQPtr iocq = CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_GROUP_ID));
 
-    LOG_NRM("Form a Generic NVM cmd to send to an IOSQ.");
-    SharedNVMCmdPtr genericNVMCmd = SharedNVMCmdPtr(new NVMCmd());
+    SharedFlushPtr flushCmd = SharedFlushPtr(new Flush());
 
-    for (list<uint8_t>::iterator opCode = illegalOpCodes.begin();
-        opCode != illegalOpCodes.end(); opCode++) {
+    // For all namspc's issue cmd to an illegal namspc
+    ConstSharedIdentifyPtr idCtrlrStruct = gInformative->GetIdentifyCmdCtrlr();
+    uint32_t nn = (uint32_t)idCtrlrStruct->GetValue(IDCTRLRCAP_NN);
+    if (nn == 0 ) {
+        throw FrmwkEx(HERE, "Required to support >= 1 namespace");
+    }
 
-        genericNVMCmd->Init(*opCode);
-        genericNVMCmd->SetNSID(1);
+    for (i = (nn + 1), inc = 1; i <= 0xffffffff; i += (2 * inc), inc += 1327) {
 
-        work = str(boost::format("IllegalOpcode.%d") % (uint)*opCode);
+        LOG_NRM("Issue flush cmd with illegal namspc ID=%llu",
+            (unsigned long long)i);
+        flushCmd->SetNSID(i);
+        work = str(boost::format("namspc%d") % i);
         IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
-            iocq, genericNVMCmd, work, true, CESTAT_INVAL_OPCODE);
+            iocq, flushCmd, work, true, CESTAT_INVAL_NAMSPC);
     }
 }
 
 
-list<uint8_t>
-IllegalNVMCmds_r10b::GetIllegalOpcodes()
-{
-    list<uint8_t> illegalOpCodes;
-
-    for (uint8_t opCode = 0x3; opCode < VENDOR_SPEC_OPC; opCode++)
-        illegalOpCodes.push_back(opCode);
-
-    uint8_t optNVMCmds = (gInformative->GetIdentifyCmdCtrlr()->
-        GetValue(IDCTRLRCAP_ONCS) & 0x7);
-
-    if ((optNVMCmds & ONCS_SUP_COMP_CMD) != 0)
-        illegalOpCodes.remove(COMPARE_OPCODE);
-
-    if ((optNVMCmds & ONCS_SUP_WR_UNC_CMD) != 0)
-        illegalOpCodes.remove(WRITE_UNCORR_OPCODE);
-
-    if ((optNVMCmds & ONCS_SUP_DSM_CMD) != 0)
-        illegalOpCodes.remove(DSM_OPCODE);
-
-    return illegalOpCodes;
-}
-
-
-
 }   // namespace
+

@@ -27,8 +27,6 @@
 
 namespace GrpNVMWriteCmd {
 
-static uint32_t NumEntriesIOQ =     2;
-
 
 CreateResources_r10b::CreateResources_r10b(int fd, string grpName,
     string testName, ErrorRegs errRegs) :
@@ -83,6 +81,9 @@ CreateResources_r10b::RunCoreTest()
      * 1) This is the 1st within GrpBasicInit.
      * \endverbatim
      */
+    static uint32_t NumEntriesIOQ = 2;
+
+
     SharedACQPtr acq = CAST_TO_ACQ(
         gRsrcMngr->AllocObj(Trackable::OBJ_ACQ, ACQ_GROUP_ID))
     acq->Init(5);

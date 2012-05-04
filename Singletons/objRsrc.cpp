@@ -31,6 +31,7 @@
 #include "../Cmds/formatNVM.h"
 #include "../Cmds/write.h"
 #include "../Cmds/read.h"
+#include "../Cmds/flush.h"
 
 /**
  * Instantiate a class.
@@ -105,6 +106,7 @@ ObjRsrc::AllocWorker(Trackable::ObjType type)
 
     INSTANTIATE_OBJ(WRITE, Write)
     INSTANTIATE_OBJ(READ, Read)
+    INSTANTIATE_OBJ(FLUSH, Flush)
 
     default:
         throw FrmwkEx("Unknown obj type specified: 0x%02X", type);

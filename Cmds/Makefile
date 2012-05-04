@@ -32,6 +32,7 @@ SRC =				\
 	setFeatures.cpp		\
 	write.cpp		\
 	read.cpp		\
+	flush.cpp		\
 	getLogPage.cpp		\
 	formatNVM.cpp
 

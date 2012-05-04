@@ -61,6 +61,7 @@ Trackable::GetObjName(ObjType obj)
     case OBJ_NVMCMD:        name = "NVMCmd";             break;
     case OBJ_WRITE:         name = "Write";              break;
     case OBJ_READ:          name = "Read";               break;
+    case OBJ_FLUSH:         name = "Flush";              break;
     default:
         throw FrmwkEx(HERE, "Forgot to label this unknown obj");
     }

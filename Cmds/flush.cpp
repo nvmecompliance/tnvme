@@ -14,19 +14,22 @@
  *  limitations under the License.
  */
 
-#ifndef _GRPDEFS_H_
-#define _GRPDEFS_H_
+#include "flush.h"
 
-namespace GrpNVMFlushCmd {
 
-#define ACQ_GROUP_ID                "ACQ"
-#define ASQ_GROUP_ID                "ASQ"
-#define IOCQ_GROUP_ID               "IOCQ"
-#define IOSQ_GROUP_ID               "IOSQ"
-#define IOQ_ID                      1
+SharedFlushPtr Flush::NullFlushPtr;
+const uint8_t Flush::Opcode = 0x00;
 
-#define DEFAULT_CMD_WAIT_ms         SYSTEMWIDE_CMD_WAIT_ms
 
-}   // namespace
+Flush::Flush() : NVMCmd(Trackable::OBJ_FLUSH)
+{
+    Init(Opcode, DATADIR_NONE);
+}
 
-#endif
+
+Flush::~Flush()
+{
+}
+
+
+

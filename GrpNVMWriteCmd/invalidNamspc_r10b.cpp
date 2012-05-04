@@ -80,6 +80,7 @@ InvalidNamspc_r10b::RunCoreTest()
      * 1) Test CreateResources_r10b has run prior.
      * \endverbatim
      */
+    uint64_t inc, i;
     string work;
     uint32_t numCE;
     uint32_t isrCountB4;
@@ -111,8 +112,14 @@ InvalidNamspc_r10b::RunCoreTest()
     // For all namspc's issue cmd to an illegal namspc
     ConstSharedIdentifyPtr idCtrlrStruct = gInformative->GetIdentifyCmdCtrlr();
     uint32_t nn = (uint32_t)idCtrlrStruct->GetValue(IDCTRLRCAP_NN);
-    for (uint64_t i = (nn + 1); i <= 0xffff; i++) {
+    if (nn == 0 ) {
+        throw FrmwkEx(HERE, "Required to support >= 1 namespace");
+    }
 
+    for (i = (nn + 1), inc = 1; i <= 0xffffffff; i += (2 * inc), inc += 1327) {
+
+        LOG_NRM("Issue flush cmd with illegal namspc ID=%llu",
+            (unsigned long long)i);
         writeCmd->SetNSID(i);
         work = str(boost::format("namspc%d") % i);
         SendCmdToHdw(iosq, iocq, writeCmd, work);
