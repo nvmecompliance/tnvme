@@ -14,6 +14,8 @@
  *  limitations under the License.
  */
 
+#include "tnvme.h"
+#include "../Exception/frmwkEx.h"
 #include "grpResets.h"
 #include "ctrlrResetIOQDeleted_r10b.h"
 #include "ctrlrResetNotEffectAdminQ_r10b.h"
@@ -39,7 +41,7 @@ GrpResets::GrpResets(size_t grpNum, SpecRev specRev, ErrorRegs errRegs,
 
     default:
     case SPECREVTYPE_FENCE:
-        throw FrmwkEx(HERE, "Object created with an unknown SpecRev=%d", specRev);
+        throw FrmwkEx(HERE, "Object created with unknown SpecRev=%d", specRev);
     }
 }
 

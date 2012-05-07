@@ -14,6 +14,7 @@
  *  limitations under the License.
  */
 
+#include "tnvme.h"
 #include "../Exception/frmwkEx.h"
 #include "grpPciRegisters.h"
 #include "allPciRegs_r10b.h"
@@ -38,7 +39,7 @@ GrpPciRegisters::GrpPciRegisters(size_t grpNum, SpecRev specRev,
 
     default:
     case SPECREVTYPE_FENCE:
-        throw FrmwkEx(HERE, "Object created with an unknown SpecRev=%d", specRev);
+        throw FrmwkEx(HERE, "Object created with unknown SpecRev=%d", specRev);
     }
 }
 

@@ -75,7 +75,7 @@ CreateResources_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
-     * None.
+     * 1) This is the 1st within GrpInterrupts.
      * \endverbatim
      */
     SharedACQPtr acq = CAST_TO_ACQ(

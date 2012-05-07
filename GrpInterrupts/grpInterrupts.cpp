@@ -14,8 +14,9 @@
  *  limitations under the License.
  */
 
-#include "grpInterrupts.h"
+#include "tnvme.h"
 #include "../Exception/frmwkEx.h"
+#include "grpInterrupts.h"
 #include "createResources_r10b.h"
 #include "invalidMSIXIRQ_r10b.h"
 #include "partialReapMSIX_r10b.h"
@@ -47,7 +48,7 @@ GrpInterrupts::GrpInterrupts(size_t grpNum, SpecRev specRev, ErrorRegs errRegs,
 
     default:
     case SPECREVTYPE_FENCE:
-        throw FrmwkEx(HERE, "Object created with an unknown SpecRev=%d", specRev);
+        throw FrmwkEx(HERE, "Object created with unknown SpecRev=%d", specRev);
     }
 }
 

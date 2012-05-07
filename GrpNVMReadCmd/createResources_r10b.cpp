@@ -80,7 +80,7 @@ CreateResources_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
-     * 1) This is the 1st within GrpBasicInit.
+     * 1) This is the 1st within GrpNVMReadCmd.
      * \endverbatim
      */
     SharedACQPtr acq = CAST_TO_ACQ(

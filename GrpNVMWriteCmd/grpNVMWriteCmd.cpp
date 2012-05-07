@@ -14,6 +14,8 @@
  *  limitations under the License.
  */
 
+#include "tnvme.h"
+#include "../Exception/frmwkEx.h"
 #include "grpNVMWriteCmd.h"
 #include "createResources_r10b.h"
 #include "lbaOutOfRangeBare_r10b.h"
@@ -51,7 +53,7 @@ GrpNVMWriteCmd::GrpNVMWriteCmd(size_t grpNum, SpecRev specRev,
 
     default:
     case SPECREVTYPE_FENCE:
-        throw FrmwkEx(HERE, "Object created with an unknown SpecRev=%d", specRev);
+        throw FrmwkEx(HERE, "Object created with unknown SpecRev=%d", specRev);
     }
 }
 
