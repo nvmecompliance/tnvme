@@ -43,7 +43,6 @@
 #include "GrpNVMWriteCmd/grpNVMWriteCmd.h"
 #include "GrpNVMWriteReadCombo/grpNVMWriteReadCombo.h"
 #include "GrpNVMFlushCmd/grpNVMFlushCmd.h"
-#include "GrpNVMCompareCmd/grpNVMCompareCmd.h"
 #include "GrpInterrupts/grpInterrupts.h"
 #include "GrpGeneralCmds/grpGeneralCmds.h"
 
@@ -61,18 +60,17 @@ InstantiateGroups(vector<Group *> &groups, int &fd, struct CmdLine &cl)
     // that strategy. For complete details refer to:
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Numbering" and
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Strategy"
-    groups.push_back(new GrpPciRegisters::GrpPciRegisters           (groups.size(), cl.rev, cl.errRegs, fd));
-    groups.push_back(new GrpCtrlRegisters::GrpCtrlRegisters         (groups.size(), cl.rev, cl.errRegs, fd));
-    groups.push_back(new GrpBasicInit::GrpBasicInit                 (groups.size(), cl.rev, cl.errRegs, fd));
-    groups.push_back(new GrpResets::GrpResets                       (groups.size(), cl.rev, cl.errRegs, fd));
-    groups.push_back(new GrpGeneralCmds::GrpGeneralCmds             (groups.size(), cl.rev, cl.errRegs, fd));
-    groups.push_back(new GrpQueues::GrpQueues                       (groups.size(), cl.rev, cl.errRegs, fd));
-    groups.push_back(new GrpNVMReadCmd::GrpNVMReadCmd               (groups.size(), cl.rev, cl.errRegs, fd));
-    groups.push_back(new GrpNVMWriteCmd::GrpNVMWriteCmd             (groups.size(), cl.rev, cl.errRegs, fd));
-    groups.push_back(new GrpNVMWriteReadCombo::GrpNVMWriteReadCombo (groups.size(), cl.rev, cl.errRegs, fd));
-    groups.push_back(new GrpNVMFlushCmd::GrpNVMFlushCmd             (groups.size(), cl.rev, cl.errRegs, fd));
-    groups.push_back(new GrpNVMCompareCmd::GrpNVMCompareCmd         (groups.size(), cl.rev, cl.errRegs, fd));
-    groups.push_back(new GrpInterrupts::GrpInterrupts               (groups.size(), cl.rev, cl.errRegs, fd));
+    groups.push_back(new GrpPciRegisters::GrpPciRegisters(groups.size(), cl.rev, cl.errRegs, fd));
+    groups.push_back(new GrpCtrlRegisters::GrpCtrlRegisters(groups.size(), cl.rev, cl.errRegs, fd));
+    groups.push_back(new GrpBasicInit::GrpBasicInit(groups.size(), cl.rev, cl.errRegs, fd));
+    groups.push_back(new GrpResets::GrpResets(groups.size(), cl.rev, cl.errRegs, fd));
+    groups.push_back(new GrpGeneralCmds::GrpGeneralCmds(groups.size(), cl.rev, cl.errRegs, fd));
+    groups.push_back(new GrpQueues::GrpQueues(groups.size(), cl.rev, cl.errRegs, fd));
+    groups.push_back(new GrpNVMReadCmd::GrpNVMReadCmd(groups.size(), cl.rev, cl.errRegs, fd));
+    groups.push_back(new GrpNVMWriteCmd::GrpNVMWriteCmd(groups.size(), cl.rev, cl.errRegs, fd));
+    groups.push_back(new GrpNVMWriteReadCombo::GrpNVMWriteReadCombo(groups.size(), cl.rev, cl.errRegs, fd));
+    groups.push_back(new GrpNVMFlushCmd::GrpNVMFlushCmd(groups.size(), cl.rev, cl.errRegs, fd));
+    groups.push_back(new GrpInterrupts::GrpInterrupts(groups.size(), cl.rev, cl.errRegs, fd));
 }
 // ------------------------------EDIT HERE---------------------------------
 

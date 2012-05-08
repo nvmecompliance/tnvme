@@ -78,7 +78,7 @@ CreateResources_r10b::RunCoreTest()
 {
    /** \verbatim
      * Assumptions:
-     * 1) This is the 1st within GrpNVMFlushCmd
+     * 1) This is the 1st within GrpBasicInit.
      * \endverbatim
      */
     static uint32_t NumEntriesIOQ = 2;

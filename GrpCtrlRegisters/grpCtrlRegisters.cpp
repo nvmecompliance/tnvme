@@ -14,7 +14,6 @@
  *  limitations under the License.
  */
 
-#include "tnvme.h"
 #include "../Exception/frmwkEx.h"
 #include "grpCtrlRegisters.h"
 #include "allCtrlRegs_r10b.h"
@@ -41,7 +40,7 @@ GrpCtrlRegisters::GrpCtrlRegisters(size_t grpNum, SpecRev specRev,
 
     default:
     case SPECREVTYPE_FENCE:
-        throw FrmwkEx(HERE, "Object created with unknown SpecRev=%d", specRev);
+        throw FrmwkEx(HERE, "Object created with an unknown SpecRev=%d", specRev);
     }
 }
 

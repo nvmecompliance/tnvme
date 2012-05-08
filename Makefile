@@ -30,7 +30,6 @@ CFLAGS += $(shell pkg-config libxml++-2.6 --cflags --libs)
 
 SUBDIRS:=			\
 	Singletons		\
-	GrpTemplate		\
 	GrpInformative		\
 	GrpInterrupts		\
 	GrpPciRegisters		\
@@ -38,7 +37,6 @@ SUBDIRS:=			\
 	GrpBasicInit		\
 	GrpResets		\
 	GrpQueues		\
-	GrpNVMCompareCmd	\
 	GrpNVMFlushCmd		\
 	GrpNVMReadCmd		\
 	GrpNVMWriteCmd		\
