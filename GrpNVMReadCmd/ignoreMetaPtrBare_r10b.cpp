@@ -121,6 +121,5 @@ IgnoreMetaPtrBare_r10b::RunCoreTest()
     }
 }
 
-
 }   // namespace
 

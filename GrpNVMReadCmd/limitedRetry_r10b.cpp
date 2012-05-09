@@ -99,11 +99,7 @@ SharedReadPtr
 LimitedRetry_r10b::CreateCmd()
 {
     Informative::Namspc namspcData = gInformative->Get1stBareMetaE2E();
-    if (namspcData.type != Informative::NS_BARE) {
-        LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
-        if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
-            throw FrmwkEx(HERE);
-    }
+    LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
     LOG_NRM("Processing read cmd using namspc id %d", namspcData.id);
 
     ConstSharedIdentifyPtr namSpcPtr = namspcData.idCmdNamspc;
@@ -120,9 +116,13 @@ LimitedRetry_r10b::CreateCmd()
         break;
     case Informative::NS_METAS:
         dataPat->Init(lbaDataSize);
+        if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
+            throw FrmwkEx(HERE);
         readCmd->AllocMetaBuffer();
         break;
     case Informative::NS_METAI:
+        dataPat->Init(lbaDataSize + lbaFormat.MS);
+        break;
     case Informative::NS_E2ES:
     case Informative::NS_E2EI:
         throw FrmwkEx(HERE, "Deferring work to handle this case in future");

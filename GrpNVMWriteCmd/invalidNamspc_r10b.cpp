@@ -85,7 +85,7 @@ InvalidNamspc_r10b::RunCoreTest()
     uint32_t numCE;
     uint32_t isrCountB4;
 
-    // Lookup objs which were created in a prior test within group
+    LOG_NRM("Lookup objs which were created in a prior test within group");
     SharedIOSQPtr iosq = CAST_TO_IOSQ(gRsrcMngr->GetObj(IOSQ_GROUP_ID));
     SharedIOCQPtr iocq = CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_GROUP_ID));
 
@@ -97,7 +97,7 @@ InvalidNamspc_r10b::RunCoreTest()
             iocq->GetQId(), numCE);
     }
 
-    LOG_NRM("Setup read cmd's values that won't change per namspc");
+    LOG_NRM("Setup write cmd's values that won't change per namspc");
     SharedMemBufferPtr writeMem = SharedMemBufferPtr(new MemBuffer());
     uint64_t lbaDataSize = 512;
     writeMem->Init(lbaDataSize);
@@ -109,7 +109,7 @@ InvalidNamspc_r10b::RunCoreTest()
     writeCmd->SetNLB(0);    // convert to 0-based value
     writeCmd->SetSLBA(0);
 
-    // For all namspc's issue cmd to an illegal namspc
+    LOG_NRM("For all namspc's issue cmd to an illegal namspc");
     ConstSharedIdentifyPtr idCtrlrStruct = gInformative->GetIdentifyCmdCtrlr();
     uint32_t nn = (uint32_t)idCtrlrStruct->GetValue(IDCTRLRCAP_NN);
     if (nn == 0 ) {

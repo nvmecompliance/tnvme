@@ -116,9 +116,11 @@ AdminQRollChkSame_r10b::RunCoreTest()
             (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE);
         idCmdCap->SetPrpBuffer(idPrpCap, idMemCap);
 
-        // Sumbit Identify cmds to fill and roll over the Q (Q_SIZE plus 2).
+        LOG_NRM("Submit Idtfy cmds to fill & roll over the Q (Q_SIZE plus 2)");
         for (uint16_t nsubmitTimes = 0;  nsubmitTimes < (asq->GetNumEntries()
             + 2); nsubmitTimes++) {
+            LOG_NRM("Sending #%d of %d", (nsubmitTimes + 1),
+                (asq->GetNumEntries() + 2));
             IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
                 asq, acq, idCmdCap, "AdminQRollChkSame", false);
             VerifyCESQValues(acq, (nsubmitTimes + 1) % acq->GetNumEntries());

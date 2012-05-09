@@ -68,7 +68,7 @@ public:
      *      data buffer is in use/allocated.
      */
     uint8_t *GetMetaBuffer() { return mMetaData.buf; }
-    uint16_t GetMetaBufferSize() const { return mMetaData.size; }
+    uint32_t GetMetaBufferSize() const { return mMetaData.size; }
     uint32_t GetMetaBufferID() const { return mMetaData.ID; }
 
     /// Solely used to notify dnvme how to issue a PRP data buffer

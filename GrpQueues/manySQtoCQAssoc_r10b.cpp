@@ -106,7 +106,7 @@ ManySQtoCQAssoc_r10b::RunCoreTest()
 
     SharedWritePtr writeCmd = SetWriteCmd();
 
-    // Create one IOCQ for test lifetime.
+    LOG_NRM("Create one IOCQ for test lifetime.");
     SharedIOCQPtr iocq = Queues::CreateIOCQContigToHdw(mGrpName,
         mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, NumEntriesIOQ,
         false, IOCQ_CONTIG_GROUP_ID, false, 0, "iocq", true);
@@ -115,9 +115,9 @@ ManySQtoCQAssoc_r10b::RunCoreTest()
     vector<uint32_t> mSQIDToSQHDVector;
     mSQIDToSQHDVector.push_back(USHRT_MAX); // vector position 0 is not used.
 
-    // Create Maximum allowed IOSQs and associate with same IOCQ.
+    LOG_NRM("Create Maximum allowed IOSQs and associate with same IOCQ.");
     for (uint32_t j = 1; j <= gInformative->GetFeaturesNumOfIOSQs(); j++) {
-        LOG_NRM("Creating contig IOSQ#%d", j);
+        LOG_NRM("Creating contig IOSQ #%d", j);
         SharedIOSQPtr iosq = Queues::CreateIOSQContigToHdw(mGrpName,
             mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, j, NumEntriesIOQ, false,
             IOSQ_CONTIG_GROUP_ID, IOQ_ID, 0, "iosq", true);
@@ -136,7 +136,7 @@ ManySQtoCQAssoc_r10b::RunCoreTest()
         ReapIOCQAndVerifyCE(iocq, j, mSQIDToSQHDVector);
     }
 
-    // Delete all IOSQs before the IOCQ to comply with spec.
+    LOG_NRM("Delete all IOSQs before the IOCQ to comply with spec.");
     for (vector <SharedIOSQPtr>::iterator iosq = iosqVector.begin();
         iosq != iosqVector.end(); iosq++) {
         Queues::DeleteIOSQToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
@@ -152,11 +152,7 @@ ManySQtoCQAssoc_r10b::SetWriteCmd()
 {
     Informative::Namspc namspcData = gInformative->Get1stBareMetaE2E();
     LOG_NRM("Processing write cmd using namspc id %d", namspcData.id);
-    if (namspcData.type != Informative::NS_BARE) {
-        LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
-        if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
-            throw FrmwkEx(HERE);
-    }
+    LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
 
     LOG_NRM("Create data pattern to write to media");
     SharedMemBufferPtr dataPat = SharedMemBufferPtr(new MemBuffer());
@@ -172,9 +168,13 @@ ManySQtoCQAssoc_r10b::SetWriteCmd()
         break;
     case Informative::NS_METAS:
         dataPat->Init(lbaDataSize);
+        if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
+            throw FrmwkEx(HERE);
         writeCmd->AllocMetaBuffer();
         break;
     case Informative::NS_METAI:
+        dataPat->Init(lbaDataSize + lbaFormat.MS);
+        break;
     case Informative::NS_E2ES:
     case Informative::NS_E2EI:
         throw FrmwkEx(HERE, "Deferring work to handle this case in future");
@@ -198,7 +198,7 @@ ManySQtoCQAssoc_r10b::ReapIOCQAndVerifyCE(SharedIOCQPtr iocq, uint32_t numTil,
     uint32_t numReaped;
     uint32_t isrCount;
 
-    // Reap one CE and verify and do for all the CE's in CQ.
+    LOG_NRM("Reap one CE and verify and do for all the CE's in CQ.");
     for (uint32_t i = 0; i < numTil; i++) {
         LOG_NRM("Wait for the CE to arrive in IOCQ");
         if (iocq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE,
@@ -238,7 +238,7 @@ ManySQtoCQAssoc_r10b::ReapIOCQAndVerifyCE(SharedIOCQPtr iocq, uint32_t numTil,
         mSQIDToSQHDVector[ce.n.SQID] = USHRT_MAX; // strike off this sq id
     }
 
-    // Validate all SQIDs submitted have arrived.
+    LOG_NRM("Validate all SQIDs submitted have arrived.");
     for (uint32_t it = 0; it < mSQIDToSQHDVector.size(); it++) {
         if (mSQIDToSQHDVector[it] != USHRT_MAX) {
             throw FrmwkEx(HERE, "Never received CE for SQID %d", it);

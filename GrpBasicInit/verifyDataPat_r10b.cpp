@@ -35,8 +35,11 @@ VerifyDataPat_r10b::VerifyDataPat_r10b(int fd, string grpName, string testName,
     mTestDesc.SetShort(     "Verify a well known data pattern from media");
     // No string size limit for the long description
     mTestDesc.SetLong(
-        "Issue an NVM cmd set read command and compare the data payload with a "
-        "previsouly written and well known data pattern from namespace #1. The "
+        "Search for 1 of the following namspcs to run test. Find 1st bare "
+        "namspc, or find 1st meta namspc, or find 1st E2E namspc. Issue an "
+        "NVM cmd set read command with approp meta/E2E requirements if "
+        "necessary and compare the data payload with a previsouly written "
+        "and well known data pattern to the same namespace id. The "
         "read command shall be completely generic.");
 }
 
@@ -95,29 +98,50 @@ VerifyDataPat_r10b::VerifyDataPattern()
 
     LOG_NRM("Calc buffer size to read %d log blks from media",
         WRITE_DATA_PAT_NUM_BLKS);
-    ConstSharedIdentifyPtr namSpcPtr = gInformative->GetIdentifyCmdNamspc(1);
+    Informative::Namspc namspcData = gInformative->Get1stBareMetaE2E();
+    ConstSharedIdentifyPtr namSpcPtr = namspcData.idCmdNamspc;
     if (namSpcPtr == Identify::NullIdentifyPtr)
-        throw FrmwkEx(HERE, "Namespace #1 must exist");
+        throw FrmwkEx(HERE, "Namespace #%d must exist", namspcData.id);
     uint64_t lbaDataSize = namSpcPtr->GetLBADataSize();
-
+    LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
 
     LOG_NRM("Create data pattern to compare against");
     SharedMemBufferPtr dataPat = SharedMemBufferPtr(new MemBuffer());
-    dataPat->Init(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize);
+
+    LOG_NRM("Create memory to contain read payload");
+    SharedMemBufferPtr readMem = SharedMemBufferPtr(new MemBuffer());
+    LOG_NRM("Create a generic read cmd to read data from namspc #%d",
+        namspcData.id);
+    SharedReadPtr readCmd = SharedReadPtr(new Read());
+
+    switch (namspcData.type) {
+    case Informative::NS_BARE:
+        dataPat->Init(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize);
+        readMem->Init(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize);
+        break;
+    case Informative::NS_METAS:
+        dataPat->Init(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize);
+        readMem->Init(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize);
+        readCmd->AllocMetaBuffer();
+        break;
+    case Informative::NS_METAI:
+        dataPat->Init(WRITE_DATA_PAT_NUM_BLKS * (lbaDataSize + lbaFormat.MS));
+        readMem->Init(WRITE_DATA_PAT_NUM_BLKS * (lbaDataSize + lbaFormat.MS));
+        break;
+    case Informative::NS_E2ES:
+    case Informative::NS_E2EI:
+        throw FrmwkEx(HERE, "Deferring work to handle this case in future");
+        break;
+    }
+
     dataPat->SetDataPattern(DATAPAT_INC_16BIT);
     dataPat->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "DataPat"),
         "Verify buffer's data pattern");
-    
-    LOG_NRM("Create memory to contain read payload");
-    SharedMemBufferPtr readMem = SharedMemBufferPtr(new MemBuffer());
-    readMem->Init(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize);
 
-    LOG_NRM("Create a generic read cmd to read data from namspc 1");
-    SharedReadPtr readCmd = SharedReadPtr(new Read());
     send_64b_bitmask prpBitmask = (send_64b_bitmask)
         (MASK_PRP1_PAGE | MASK_PRP2_PAGE | MASK_PRP2_LIST);
     readCmd->SetPrpBuffer(prpBitmask, readMem);
-    readCmd->SetNSID(1);
+    readCmd->SetNSID(namspcData.id);
     readCmd->SetNLB(WRITE_DATA_PAT_NUM_BLKS - 1);    // convert to 0-based value
 
     // Lookup objs which were created in a prior test within group

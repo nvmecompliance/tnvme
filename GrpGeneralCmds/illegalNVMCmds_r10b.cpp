@@ -94,7 +94,7 @@ IllegalNVMCmds_r10b::RunCoreTest()
     string work;
     list<uint8_t> illegalOpCodes = GetIllegalOpcodes();
 
-    // Lookup objs which were created in a prior test within group
+    LOG_NRM("Lookup objs which were created in a prior test within group");
     SharedIOSQPtr iosq = CAST_TO_IOSQ(gRsrcMngr->GetObj(IOSQ_GROUP_ID));
     SharedIOCQPtr iocq = CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_GROUP_ID));
 

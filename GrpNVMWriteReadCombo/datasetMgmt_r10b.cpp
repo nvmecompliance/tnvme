@@ -102,10 +102,6 @@ DatasetMgmt_r10b::RunCoreTest()
     Informative::Namspc namspcData = gInformative->Get1stBareMetaE2E();
     LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
     uint64_t lbaDataSize = namspcData.idCmdNamspc->GetLBADataSize();
-    if (namspcData.type != Informative::NS_BARE) {
-        if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
-            throw FrmwkEx(HERE);
-    }
 
     SharedWritePtr writeCmd = SharedWritePtr(new Write());
     SharedMemBufferPtr writeMem = SharedMemBufferPtr(new MemBuffer());
@@ -124,10 +120,15 @@ DatasetMgmt_r10b::RunCoreTest()
     case Informative::NS_METAS:
         writeMem->Init(lbaDataSize);
         readMem->Init(lbaDataSize);
+        if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
+            throw FrmwkEx(HERE);
         writeCmd->AllocMetaBuffer();
         readCmd->AllocMetaBuffer();
         break;
     case Informative::NS_METAI:
+        writeMem->Init(lbaDataSize + lbaFormat.MS);
+        readMem->Init(lbaDataSize + lbaFormat.MS);
+        break;
     case Informative::NS_E2ES:
     case Informative::NS_E2EI:
         throw FrmwkEx(HERE, "Deferring work to handle this case in future");
@@ -162,6 +163,8 @@ DatasetMgmt_r10b::RunCoreTest()
             writeCmd->SetMetaDataPattern(dataPat[dsmAtr % dpArrSize], dsmAtr);
             break;
         case Informative::NS_METAI:
+            writeMem->SetDataPattern(dataPat[dsmAtr % dpArrSize], dsmAtr);
+            break;
         case Informative::NS_E2ES:
         case Informative::NS_E2EI:
             throw FrmwkEx(HERE, "Deferring work to handle this case in future");

@@ -98,8 +98,9 @@ StartingLBABare_r10b::RunCoreTest()
     ConstSharedIdentifyPtr idCmdCtrlr = gInformative->GetIdentifyCmdCtrlr();
     uint32_t maxDtXferSz = idCmdCtrlr->GetMaxDataXferSize();
     if (maxDtXferSz == 0)
-        maxDtXferSz = 1024 * 1024; // 1 MB data xfer size for unlimited.
+        maxDtXferSz = MAX_DATA_TX_SIZE;
 
+    LOG_NRM("Prepare cmds to be send through Q's.");
     SharedWritePtr writeCmd = SharedWritePtr(new Write());
     SharedMemBufferPtr writeMem = SharedMemBufferPtr(new MemBuffer());
     send_64b_bitmask prpBitmask = (send_64b_bitmask)
@@ -118,8 +119,10 @@ StartingLBABare_r10b::RunCoreTest()
     };
     uint64_t dpArrSize = sizeof(dataPat) / sizeof(dataPat[0]);
 
+    LOG_NRM("Seeking all bare namspc's.");
     vector<uint32_t> bare = gInformative->GetBareNamespaces();
     for (size_t i = 0; i < bare.size(); i++) {
+        LOG_NRM("Processing for BARE name space id #%d", bare[i]);
         namSpcPtr = gInformative->GetIdentifyCmdNamspc(bare[i]);
         if (namSpcPtr == Identify::NullIdentifyPtr) {
             throw FrmwkEx(HERE, "Identify namspc struct #%d doesn't exist",
@@ -141,6 +144,7 @@ StartingLBABare_r10b::RunCoreTest()
         readCmd->SetNLB(maxWrBlks - 1);  // 0 based value.
 
         for (uint64_t nWrBlks = 0; nWrBlks < (ncap - 1); nWrBlks += maxWrBlks) {
+            LOG_NRM("Sending #%ld blks of #%ld", nWrBlks, (ncap -1));
             for (uint64_t nLBA = 0; nLBA < maxWrBlks; nLBA++) {
                 writeMem->SetDataPattern(dataPat[nLBA % dpArrSize],
                     (nWrBlks + nLBA + 1), (nLBA * lbaDataSize), lbaDataSize);
@@ -162,7 +166,6 @@ StartingLBABare_r10b::RunCoreTest()
             VerifyDataPat(readCmd, writeMem);
         }
     }
-
 }
 
 

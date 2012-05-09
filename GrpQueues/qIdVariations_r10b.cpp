@@ -94,7 +94,7 @@ QIDVariations_r10b::RunCoreTest()
     SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
 
     uint64_t maxIOQEntries;
-    // Determine the max IOQ entries supported
+    LOG_NRM("Determine the max IOQ entries supported");
     if (gRegisters->Read(CTLSPC_CAP, maxIOQEntries) == false)
         throw FrmwkEx(HERE, "Unable to determine MQES");
     maxIOQEntries &= CAP_MQES;
@@ -119,6 +119,8 @@ QIDVariations_r10b::RunCoreTest()
     for (uint32_t ioqId = 1; ioqId <= maxIOQSupport; ioqId++) {
         SharedIOCQPtr iocq;
         SharedIOSQPtr iosq;
+        LOG_NRM("Create IOSQ and IOCQ with IDs #%d of maximum IDs %d",
+            ioqId, maxIOQSupport);
         if (Queues::SupportDiscontigIOQ() == true) {
             SharedMemBufferPtr iocqBackedMem =
                 SharedMemBufferPtr(new MemBuffer());
@@ -157,7 +159,7 @@ QIDVariations_r10b::RunCoreTest()
 
     vector <SharedIOSQPtr>::iterator iosq;
     vector <SharedIOCQPtr>::iterator iocq;
-    // Send cmds until all SQs fill up.
+    LOG_NRM("Send cmds until all SQs fill up.");
     for (iosq = IOSQVec.begin(); iosq != IOSQVec.end(); iosq++) {
         for (uint32_t numCmds = 1; numCmds < ((*iosq)->GetNumEntries());
             numCmds++) {
@@ -166,7 +168,7 @@ QIDVariations_r10b::RunCoreTest()
         (*iosq)->Ring();
     }
 
-    // Reap and verify all cmds submitted.
+    LOG_NRM("Reap and verify all cmds submitted.");
     iosq = IOSQVec.begin();
     for (iocq = IOCQVec.begin(); iocq != IOCQVec.end(); iocq++, iosq++)
         ReapVerifyOnCQ(*iocq, *iosq);
@@ -189,11 +191,7 @@ QIDVariations_r10b::SetWriteCmd()
 {
     Informative::Namspc namspcData = gInformative->Get1stBareMetaE2E();
     LOG_NRM("Processing write cmd using namspc id %d", namspcData.id);
-    if (namspcData.type != Informative::NS_BARE) {
-        LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
-        if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
-            throw FrmwkEx(HERE);
-    }
+    LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
 
     LOG_NRM("Create data pattern to write to media");
     SharedMemBufferPtr dataPat = SharedMemBufferPtr(new MemBuffer());
@@ -209,9 +207,13 @@ QIDVariations_r10b::SetWriteCmd()
         break;
     case Informative::NS_METAS:
         dataPat->Init(lbaDataSize);
+        if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
+            throw FrmwkEx(HERE);
         writeCmd->AllocMetaBuffer();
         break;
     case Informative::NS_METAI:
+        dataPat->Init(lbaDataSize + lbaFormat.MS);
+        break;
     case Informative::NS_E2ES:
     case Informative::NS_E2EI:
         throw FrmwkEx(HERE, "Deferring work to handle this case in future");
@@ -234,6 +236,7 @@ QIDVariations_r10b::ReapVerifyOnCQ(SharedIOCQPtr iocq, SharedIOSQPtr iosq)
     uint32_t numReaped;
     uint32_t isrCount;
 
+    LOG_NRM("Reap and verify CE.");
     SharedMemBufferPtr ceMemIOCQ = SharedMemBufferPtr(new MemBuffer());
     for (uint32_t nCmds = 1; nCmds < iosq->GetNumEntries(); nCmds++) {
         LOG_NRM("Wait for the CE to arrive in IOCQ");

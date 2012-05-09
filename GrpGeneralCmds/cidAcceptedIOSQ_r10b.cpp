@@ -91,7 +91,7 @@ CIDAcceptedIOSQ_r10b::RunCoreTest()
     if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
         throw FrmwkEx(HERE);
 
-    // Create ACQ and ASQ objects which have test life time
+    LOG_NRM("Create ACQ and ASQ objects which have test life time");
     SharedACQPtr acq = CAST_TO_ACQ(SharedACQPtr(new ACQ(mFd)))
     acq->Init(5);
     SharedASQPtr asq = CAST_TO_ASQ(SharedASQPtr(new ASQ(mFd)))
@@ -106,10 +106,9 @@ CIDAcceptedIOSQ_r10b::RunCoreTest()
     vector<SharedIOSQPtr> iosqs;
     SharedIOCQPtr iocq;
     InitTstRsrcs(asq, acq, iosqs, iocq);
-
     SharedWritePtr writeCmd = CreateWriteCmd();
 
-    // Learn initial unique command id assigned by dnvme.
+    LOG_NRM("Learn initial unique command id assigned by dnvme");
     uint16_t curCID;
     vector <SharedIOSQPtr>::iterator iosq;
     for (iosq = iosqs.begin(); iosq != iosqs.end(); iosq++)
@@ -153,6 +152,7 @@ CIDAcceptedIOSQ_r10b::InitTstRsrcs(SharedASQPtr asq, SharedACQPtr acq,
     uint32_t numIOSQs = (NUM_IO_SQS <= gInformative->GetFeaturesNumOfIOSQs()) ?
         NUM_IO_SQS : gInformative->GetFeaturesNumOfIOSQs();
 
+    LOG_NRM("Initialize test resources.");
     const uint32_t nEntriesIOQ = 2; // minimum Q entries always supported.
     SharedIOSQPtr iosq;
     if (Queues::SupportDiscontigIOQ() == true) {
@@ -190,11 +190,7 @@ SharedWritePtr
 CIDAcceptedIOSQ_r10b::CreateWriteCmd()
 {
     Informative::Namspc namspcData = gInformative->Get1stBareMetaE2E();
-    if (namspcData.type != Informative::NS_BARE) {
-        LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
-        if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
-            throw FrmwkEx(HERE);
-    }
+    LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
 
     SharedMemBufferPtr wrMemBuf = SharedMemBufferPtr(new MemBuffer());
     uint64_t lbaDataSize = namspcData.idCmdNamspc->GetLBADataSize();
@@ -209,9 +205,13 @@ CIDAcceptedIOSQ_r10b::CreateWriteCmd()
         break;
     case Informative::NS_METAS:
         wrMemBuf->Init(lbaDataSize);
+        if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
+            throw FrmwkEx(HERE);
         writeCmd->AllocMetaBuffer();
         break;
     case Informative::NS_METAI:
+        wrMemBuf->Init(lbaDataSize + lbaFormat.MS);
+        break;
     case Informative::NS_E2ES:
     case Informative::NS_E2EI:
         throw FrmwkEx(HERE, "Deferring work to handle this case in future");

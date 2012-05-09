@@ -99,11 +99,7 @@ SharedWritePtr
 FUA_r10b::CreateCmd()
 {
     Informative::Namspc namspcData = gInformative->Get1stBareMetaE2E();
-    if (namspcData.type != Informative::NS_BARE) {
-        LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
-        if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
-            throw FrmwkEx(HERE);
-    }
+    LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
     LOG_NRM("Processing write cmd using namspc id %d", namspcData.id);
 
     ConstSharedIdentifyPtr namSpcPtr = namspcData.idCmdNamspc;
@@ -116,13 +112,17 @@ FUA_r10b::CreateCmd()
 
     switch (namspcData.type) {
     case Informative::NS_BARE:
-         dataPat->Init(lbaDataSize);
+        dataPat->Init(lbaDataSize);
         break;
     case Informative::NS_METAS:
-         dataPat->Init(lbaDataSize);
+        dataPat->Init(lbaDataSize);
+        if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
+            throw FrmwkEx(HERE);
         writeCmd->AllocMetaBuffer();
         break;
     case Informative::NS_METAI:
+        dataPat->Init(lbaDataSize + lbaFormat.MS);
+        break;
     case Informative::NS_E2ES:
     case Informative::NS_E2EI:
         throw FrmwkEx(HERE, "Deferring work to handle this case in future");

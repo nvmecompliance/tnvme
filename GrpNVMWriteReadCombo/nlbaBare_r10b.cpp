@@ -95,13 +95,14 @@ NLBABare_r10b::RunCoreTest()
     bool enableLog;
     ConstSharedIdentifyPtr namSpcPtr;
 
-    // Lookup objs which were created in a prior test within group
+    LOG_NRM("Lookup objs which were created in a prior test within group");
     SharedIOSQPtr iosq = CAST_TO_IOSQ(gRsrcMngr->GetObj(IOSQ_GROUP_ID));
     SharedIOCQPtr iocq = CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_GROUP_ID));
 
     ConstSharedIdentifyPtr idCmdCtrlr = gInformative->GetIdentifyCmdCtrlr();
     uint32_t maxDtXferSz = idCmdCtrlr->GetMaxDataXferSize();
 
+    LOG_NRM("Prepare cmds to utilize");
     SharedWritePtr writeCmd = SharedWritePtr(new Write());
     SharedMemBufferPtr writeMem = SharedMemBufferPtr(new MemBuffer());
 
@@ -132,7 +133,7 @@ NLBABare_r10b::RunCoreTest()
         uint64_t lbaDataSize = namSpcPtr->GetLBADataSize();
         uint64_t maxWrBlks = (1 << CDW12_NLB_BITS); // 1-based value.
         if (maxDtXferSz != 0)
-            maxWrBlks = MIN(maxWrBlks, (maxDtXferSz / lbaDataSize) + 1);
+            maxWrBlks = MIN(maxWrBlks, (maxDtXferSz / lbaDataSize));
 
         writeCmd->SetNSID(bare[i]);
         readCmd->SetNSID(bare[i]);
@@ -144,6 +145,7 @@ NLBABare_r10b::RunCoreTest()
         for (uint64_t lbaPow2 = 2; lbaPow2 <= maxWrBlks; lbaPow2 <<= 1) {
             // nLBA = {(1, 2, 3), (3, 4, 5), ..., (0xFFFF, 0x10000, 0x10001)}
             for (uint64_t nLBA = (lbaPow2 - 1); nLBA <= (lbaPow2 + 1); nLBA++) {
+                LOG_NRM("Processing LBA #%ld of %ld", nLBA, maxWrBlks);
                 if (nLBA > maxWrBlks)
                     break;
                 writeMem->Init(nLBA * lbaDataSize);

@@ -93,7 +93,7 @@ SQCQSizeMismatch_r10b::RunCoreTest()
     SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
 
     uint64_t maxIOQEntries;
-    // Determine the max IOQ entries supported
+    LOG_NRM("Determine the max IOQ entries supported");
     if (gRegisters->Read(CTLSPC_CAP, maxIOQEntries) == false)
         throw FrmwkEx(HERE, "Unable to determine MQES");
     maxIOQEntries &= CAP_MQES;
@@ -112,6 +112,8 @@ SQCQSizeMismatch_r10b::RunCoreTest()
 
     // Create all supported  queues.
     for (uint32_t ioqId = 1; ioqId <= maxIOQSupport; ioqId++) {
+        LOG_NRM("Creating IOQs with IDs #%d of maximum IDs %d",
+            ioqId, maxIOQSupport);
         SharedIOCQPtr iocq = Queues::CreateIOCQContigToHdw(mGrpName,
             mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, ioqId, NumEntriesIOCQ,
             false, IOCQ_CONTIG_GROUP_ID, false, 0);
@@ -129,7 +131,7 @@ SQCQSizeMismatch_r10b::RunCoreTest()
 
     vector <SharedIOSQPtr>::iterator iosq;
     vector <SharedIOCQPtr>::iterator iocq;
-    // Send cmds until all SQs fill up.
+    LOG_NRM("Send cmds until all SQs fill up.");
     for (iosq = IOSQVec.begin(); iosq != IOSQVec.end(); iosq++) {
         for (uint32_t numCmds = 1; numCmds < ((*iosq)->GetNumEntries());
             numCmds++) {
@@ -138,7 +140,7 @@ SQCQSizeMismatch_r10b::RunCoreTest()
         (*iosq)->Ring();
     }
 
-    // Reap and verify all cmds submitted.
+    LOG_NRM("Reap and verify all cmds submitted.");
     iosq = IOSQVec.begin();
     for (iocq = IOCQVec.begin(); iocq != IOCQVec.end(); iocq++, iosq++)
         ReapVerifyOnCQ(*iocq, *iosq);
@@ -161,11 +163,7 @@ SQCQSizeMismatch_r10b::SetWriteCmd()
 {
     Informative::Namspc namspcData = gInformative->Get1stBareMetaE2E();
     LOG_NRM("Processing write cmd using namspc id %d", namspcData.id);
-    if (namspcData.type != Informative::NS_BARE) {
-        LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
-        if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
-            throw FrmwkEx(HERE);
-    }
+    LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
 
     LOG_NRM("Create data pattern to write to media");
     SharedMemBufferPtr dataPat = SharedMemBufferPtr(new MemBuffer());
@@ -181,9 +179,13 @@ SQCQSizeMismatch_r10b::SetWriteCmd()
         break;
     case Informative::NS_METAS:
         dataPat->Init(lbaDataSize);
+        if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
+            throw FrmwkEx(HERE);
         writeCmd->AllocMetaBuffer();
         break;
     case Informative::NS_METAI:
+        dataPat->Init(lbaDataSize + lbaFormat.MS);
+        break;
     case Informative::NS_E2ES:
     case Informative::NS_E2EI:
         throw FrmwkEx(HERE, "Deferring work to handle this case in future");

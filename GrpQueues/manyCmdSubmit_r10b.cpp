@@ -90,7 +90,7 @@ ManyCmdSubmit_r10b::RunCoreTest()
     SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
     SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
 
-    // Determine the max IOQ entries supported
+    LOG_NRM("Determine the max IOQ entries supported");
     uint64_t ctrlCapReg;
     if (gRegisters->Read(CTLSPC_CAP, ctrlCapReg) == false) {
         LOG_ERR("Unable to determine MQES");
@@ -99,6 +99,7 @@ ManyCmdSubmit_r10b::RunCoreTest()
     uint32_t maxIOQEntries = (uint32_t)(ctrlCapReg & CAP_MQES);
     maxIOQEntries += 1;     // convert to 1-based.
 
+    LOG_NRM("Create contig IOQ's");
     SharedIOCQPtr iocq = Queues::CreateIOCQContigToHdw(mGrpName,
         mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, maxIOQEntries,
         false, IOCQ_CONTIG_GROUP_ID, true, 0);
@@ -170,11 +171,7 @@ ManyCmdSubmit_r10b::SetWriteCmd()
 {
     Informative::Namspc namspcData = gInformative->Get1stBareMetaE2E();
     LOG_NRM("Processing write cmd using namspc id %d", namspcData.id);
-    if (namspcData.type != Informative::NS_BARE) {
-        LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
-        if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
-            throw FrmwkEx(HERE);
-    }
+    LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
 
     SharedMemBufferPtr dataPat = SharedMemBufferPtr(new MemBuffer());
     uint64_t lbaDataSize = namspcData.idCmdNamspc->GetLBADataSize();
@@ -189,9 +186,13 @@ ManyCmdSubmit_r10b::SetWriteCmd()
         break;
     case Informative::NS_METAS:
         dataPat->Init(lbaDataSize);
+        if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
+            throw FrmwkEx(HERE);
         writeCmd->AllocMetaBuffer();
         break;
     case Informative::NS_METAI:
+        dataPat->Init(lbaDataSize + lbaFormat.MS);
+        break;
     case Informative::NS_E2ES:
     case Informative::NS_E2EI:
         throw FrmwkEx(HERE, "Deferring work to handle this case in future");

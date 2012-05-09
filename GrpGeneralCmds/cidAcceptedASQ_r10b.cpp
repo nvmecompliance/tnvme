@@ -88,7 +88,7 @@ CIDAcceptedASQ_r10b::RunCoreTest()
     SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
     SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
 
-    // Verifying that the ACQ is empty.
+    LOG_NRM("Verifying that the ACQ is empty");
     if (acq->ReapInquiry(isrCount, true) != 0) {
         acq->Dump(
             FileSystem::PrepDumpFile(mGrpName, mTestName, "acq",
@@ -108,7 +108,7 @@ CIDAcceptedASQ_r10b::RunCoreTest()
         (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE);
     idCmdCap->SetPrpBuffer(idPrpCap, idMemCap);
 
-    // Learn initial unique command id assigned by dnvme.
+    LOG_NRM("Learn initial unique command id assigned by dnvme.");
     uint16_t currCID;
     asq->Send(idCmdCap, currCID);
     uint16_t prevCID = currCID;

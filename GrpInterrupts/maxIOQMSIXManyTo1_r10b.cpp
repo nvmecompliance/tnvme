@@ -93,7 +93,7 @@ MaxIOQMSIXManyTo1_r10b::RunCoreTest()
     const uint32_t numEntries = 2;
     uint32_t anticipatedIrqs = 0;
 
-    // Only allowed to execute if DUT supports MSI-X IRQ's
+    LOG_NRM("Only allowed to execute if DUT supports MSI-X IRQ's");
     if (gCtrlrConfig->IsMSIXCapable(capable, numIrqSupport) == false)
         throw FrmwkEx(HERE);
     else if (capable == false) {
@@ -112,17 +112,13 @@ MaxIOQMSIXManyTo1_r10b::RunCoreTest()
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
         throw FrmwkEx(HERE);
 
-    // Lookup objs which were created in a prior test within group
+    LOG_NRM("Lookup objs which were created in a prior test within group");
     SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
     SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
 
     Informative::Namspc namspcData = gInformative->Get1stBareMetaE2E();
     LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
     uint64_t lbaDataSize = namspcData.idCmdNamspc->GetLBADataSize();
-    if (namspcData.type != Informative::NS_BARE) {
-        if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
-            throw FrmwkEx(HERE);
-    }
 
     SharedWritePtr writeCmd = SharedWritePtr(new Write());
     SharedMemBufferPtr writeMem = SharedMemBufferPtr(new MemBuffer());
@@ -141,10 +137,15 @@ MaxIOQMSIXManyTo1_r10b::RunCoreTest()
     case Informative::NS_METAS:
         writeMem->Init(lbaDataSize);
         readMem->Init(lbaDataSize);
+        if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
+            throw FrmwkEx(HERE);
         writeCmd->AllocMetaBuffer();
         readCmd->AllocMetaBuffer();
         break;
     case Informative::NS_METAI:
+        writeMem->Init(lbaDataSize + lbaFormat.MS);
+        readMem->Init(lbaDataSize  + lbaFormat.MS);
+        break;
     case Informative::NS_E2ES:
     case Informative::NS_E2EI:
         throw FrmwkEx(HERE, "Deferring work to handle this case in future");
@@ -167,6 +168,7 @@ MaxIOQMSIXManyTo1_r10b::RunCoreTest()
     uint32_t numIOQPairs = MIN(gInformative->GetFeaturesNumOfIOCQs(),
         gInformative->GetFeaturesNumOfIOSQs());
 
+    LOG_NRM("Created IOQ's and increment anticipated IRQs.");
     for (uint32_t ioqId = 1; ioqId <= numIOQPairs; ioqId++) {
         SharedIOCQPtr iocq = Queues::CreateIOCQContigToHdw(mGrpName, mTestName,
             DEFAULT_CMD_WAIT_ms, asq, acq, ioqId, numEntries, false,
@@ -180,6 +182,7 @@ MaxIOQMSIXManyTo1_r10b::RunCoreTest()
     }
 
     for(uint16_t i = 0; i < iosqs.size(); i++) {
+        LOG_NRM("Processing for iosq size %d", i);
         writeMem->SetDataPattern(DATAPAT_CONST_16BIT, (iosqs[i])->GetQId());
         writeCmd->SetMetaDataPattern(DATAPAT_CONST_16BIT, (iosqs[i])->GetQId());
 

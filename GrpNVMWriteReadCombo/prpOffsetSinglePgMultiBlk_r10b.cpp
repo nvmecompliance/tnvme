@@ -96,6 +96,7 @@ PRPOffsetSinglePgMultiBlk_r10b::RunCoreTest()
      * \endverbatim
      */
     string work;
+    int64_t X;
     bool enableLog;
     unsigned int seed = 51;
     srand (seed);
@@ -119,23 +120,19 @@ PRPOffsetSinglePgMultiBlk_r10b::RunCoreTest()
     SharedIOSQPtr iosq;
     InitTstRsrcs(asq, acq, iosq, iocq);
 
-    // Compute memory page size from CC.MPS.
+    LOG_NRM("Compute memory page size from CC.MPS");
     uint8_t mpsRegVal;
     if (gCtrlrConfig->GetMPS(mpsRegVal) == false)
         throw FrmwkEx(HERE, "Unable to get MPS value from CC.");
     uint64_t ccMPS = (uint64_t)(1 << (mpsRegVal + 12));
 
+    LOG_NRM("Get namspc and determine LBA size");
     Informative::Namspc namspcData = gInformative->Get1stBareMetaE2E();
     send_64b_bitmask prpBitmask = (send_64b_bitmask)(MASK_PRP1_PAGE);
     LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
     uint64_t lbaDataSize = (1 << lbaFormat.LBADS);
-    if (namspcData.type != Informative::NS_BARE) {
-        if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS * (ccMPS / lbaDataSize))
-            == false) {
-            throw FrmwkEx(HERE, "Unable to allocate Meta buffers.");
-        }
-    }
 
+    LOG_NRM("Seeking max data xfer size for chosen namspc");
     ConstSharedIdentifyPtr idCmdCtrlr = gInformative->GetIdentifyCmdCtrlr();
     uint32_t maxDtXferSz = idCmdCtrlr->GetMaxDataXferSize();
 
@@ -150,32 +147,51 @@ PRPOffsetSinglePgMultiBlk_r10b::RunCoreTest()
 
     switch (namspcData.type) {
     case Informative::NS_BARE:
+        X =  ccMPS - lbaDataSize;
         break;
     case Informative::NS_METAS:
+        X =  ccMPS - lbaDataSize;
+        if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS * (ccMPS / lbaDataSize))
+            == false) {
+            throw FrmwkEx(HERE, "Unable to allocate Meta buffers.");
+        }
         writeCmd->AllocMetaBuffer();
         readCmd->AllocMetaBuffer();
         break;
     case Informative::NS_METAI:
+        X =  ccMPS - (lbaDataSize + lbaFormat.MS);
+        break;
     case Informative::NS_E2ES:
     case Informative::NS_E2EI:
         throw FrmwkEx(HERE, "Deferring work to handle this case in future");
         break;
+    }
+    if (X < 0) {
+        LOG_WARN("CC.MPS < lba data size(LBADS); Can't run test.");
+        return;
     }
 
     DataPattern dataPat;
     uint64_t wrVal;
     uint32_t prp2RandVal[2];
     uint64_t Y;
-
-    int64_t X =  ccMPS - lbaDataSize;
-    if (X < 0) {
-        LOG_WARN("CC.MPS < lba data size(LBADS); Can't run test.");
-        return;
-    }
-
     for (int64_t pgOff = 0; pgOff <= X; pgOff += 4) {
-        Y = (ccMPS - pgOff) / lbaDataSize;
+        LOG_NRM("Processing at page offset #%ld", pgOff);
+        switch (namspcData.type) {
+        case Informative::NS_BARE:
+        case Informative::NS_METAS:
+            Y = (ccMPS - pgOff) / lbaDataSize;
+            break;
+        case Informative::NS_METAI:
+            Y = (ccMPS - pgOff) / (lbaDataSize + lbaFormat.MS);
+            break;
+        case Informative::NS_E2ES:
+        case Informative::NS_E2EI:
+            throw FrmwkEx(HERE, "Deferring work to handle this case in future");
+            break;
+        }
         for (uint64_t nLBAs = 1; nLBAs <= Y; nLBAs++) {
+            LOG_NRM("Processing LBA #%ld of %ld", nLBAs, Y);
             if ((maxDtXferSz != 0) && (maxDtXferSz < (lbaDataSize * nLBAs))) {
                 // If the total data xfer exceeds the maximum data xfer
                 // allowed then we break from the inner loop and continue
@@ -209,6 +225,11 @@ PRPOffsetSinglePgMultiBlk_r10b::RunCoreTest()
                 writeCmd->SetMetaDataPattern(dataPat, wrVal, 0, metabufSz);
                 break;
             case Informative::NS_METAI:
+                writeMem->InitOffset1stPage(
+                    ((lbaDataSize + lbaFormat.MS ) * nLBAs), pgOff, false);
+                readMem->InitOffset1stPage(
+                    ((lbaDataSize + lbaFormat.MS ) * nLBAs), pgOff, false);
+                break;
             case Informative::NS_E2ES:
             case Informative::NS_E2EI:
                 throw FrmwkEx(HERE,

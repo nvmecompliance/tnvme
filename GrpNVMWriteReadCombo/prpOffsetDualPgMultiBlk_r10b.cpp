@@ -91,12 +91,13 @@ PRPOffsetDualPgMultiBlk_r10b::RunCoreTest()
      * \endverbatim
      */
     string work;
+    int64_t X;
     bool enableLog;
 
     if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
         throw FrmwkEx(HERE);
 
-    // Create ACQ and ASQ objects which have test life time
+    LOG_NRM("Create ACQ and ASQ objects which have test life time");
     SharedACQPtr acq = CAST_TO_ACQ(SharedACQPtr(new ACQ(mFd)))
     acq->Init(5);
     SharedASQPtr asq = CAST_TO_ASQ(SharedASQPtr(new ASQ(mFd)))
@@ -112,25 +113,21 @@ PRPOffsetDualPgMultiBlk_r10b::RunCoreTest()
     SharedIOSQPtr iosq;
     InitTstRsrcs(asq, acq, iosq, iocq);
 
-    // Compute memory page size from CC.MPS.
+    LOG_NRM("Compute memory page size from CC.MPS.");
     uint8_t mpsRegVal;
     if (gCtrlrConfig->GetMPS(mpsRegVal) == false)
         throw FrmwkEx(HERE, "Unable to get MPS value from CC.");
     uint64_t ccMPS = (uint64_t)(1 << (mpsRegVal + 12));
 
+    LOG_NRM("Get namspc and determine LBA size");
     Informative::Namspc namspcData = gInformative->Get1stBareMetaE2E();
     send_64b_bitmask prpBitmask =
         (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE);
     LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
     uint64_t lbaDataSize = (1 << lbaFormat.LBADS);
-    if (namspcData.type != Informative::NS_BARE) {
-        if (gRsrcMngr->SetMetaAllocSize(
-            lbaFormat.MS * ((2 * ccMPS) / lbaDataSize)) == false) {
+    LOG_NRM("LBA data size is %ld.", lbaDataSize);
 
-            throw FrmwkEx(HERE, "Unable to allocate Meta buffers.");
-        }
-    }
-
+    LOG_NRM("Seeking max data xfer size for chosen namspc");
     ConstSharedIdentifyPtr idCmdCtrlr = gInformative->GetIdentifyCmdCtrlr();
     uint32_t maxDtXferSz = idCmdCtrlr->GetMaxDataXferSize();
 
@@ -145,31 +142,51 @@ PRPOffsetDualPgMultiBlk_r10b::RunCoreTest()
 
     switch (namspcData.type) {
     case Informative::NS_BARE:
+        X =  ccMPS - lbaDataSize;
         break;
     case Informative::NS_METAS:
+        X =  ccMPS - lbaDataSize;
+        LOG_NRM("Allocating separate meta data buffer.");
+        if (gRsrcMngr->SetMetaAllocSize(
+            lbaFormat.MS * ((2 * ccMPS) / lbaDataSize)) == false) {
+            throw FrmwkEx(HERE, "Unable to allocate Meta buffers.");
+        }
         writeCmd->AllocMetaBuffer();
         readCmd->AllocMetaBuffer();
         break;
     case Informative::NS_METAI:
+        X =  ccMPS - (lbaDataSize + lbaFormat.MS);
+        break;
     case Informative::NS_E2ES:
     case Informative::NS_E2EI:
         throw FrmwkEx(HERE, "Deferring work to handle this case in future");
         break;
+    }
+    if (X < 0) {
+        LOG_WARN("CC.MPS < lba data size(LBADS); Can't run test.");
+        return;
     }
 
     DataPattern dataPat;
     uint64_t wrVal;
     uint64_t Y;
 
-    int64_t X =  ccMPS - lbaDataSize;
-    if (X < 0) {
-        LOG_WARN("CC.MPS < lba data size(LBADS); Can't run test.");
-        return;
-    }
-
     for (int64_t pgOff = 0; pgOff <= X; pgOff += 4) {
-        Y = ((2 * ccMPS) - pgOff) / lbaDataSize;
+        switch (namspcData.type) {
+        case Informative::NS_BARE:
+        case Informative::NS_METAS:
+            Y = ((2 * ccMPS) - pgOff) / lbaDataSize;
+            break;
+        case Informative::NS_METAI:
+            Y = ((2 * ccMPS) - pgOff) / (lbaDataSize + lbaFormat.MS);
+            break;
+        case Informative::NS_E2ES:
+        case Informative::NS_E2EI:
+            throw FrmwkEx(HERE, "Deferring work to handle this case in future");
+            break;
+        }
         for (uint64_t nLBAs = 1; nLBAs <= Y; nLBAs++) {
+            LOG_NRM("Sending LBA #%ld of #%ld", nLBAs, Y);
             if ((maxDtXferSz != 0) && (maxDtXferSz < (lbaDataSize * nLBAs))) {
                 // If the total data xfer exceeds the maximum data xfer
                 // allowed then we break from the inner loop and continue
@@ -199,6 +216,11 @@ PRPOffsetDualPgMultiBlk_r10b::RunCoreTest()
                 writeCmd->SetMetaDataPattern(dataPat, wrVal, 0, metabufSz);
                 break;
             case Informative::NS_METAI:
+                writeMem->InitOffset1stPage(
+                    ((lbaDataSize + lbaFormat.MS) * nLBAs), pgOff, false);
+                readMem->InitOffset1stPage(
+                    ((lbaDataSize + lbaFormat.MS) * nLBAs), pgOff, false);
+                break;
             case Informative::NS_E2ES:
             case Informative::NS_E2EI:
                 throw FrmwkEx(HERE,

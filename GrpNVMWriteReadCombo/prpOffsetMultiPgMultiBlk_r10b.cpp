@@ -112,30 +112,26 @@ PRPOffsetMultiPgMultiBlk_r10b::RunCoreTest()
     SharedIOSQPtr iosq;
     InitTstRsrcs(asq, acq, iosq, iocq);
 
-    // Compute memory page size from CC.MPS.
+    LOG_NRM("Compute memory page size from CC.MPS");
     uint8_t mpsRegVal;
     if (gCtrlrConfig->GetMPS(mpsRegVal) == false)
         throw FrmwkEx(HERE, "Unable to get MPS value from CC.");
     uint64_t ccMPS = (uint64_t)(1 << (mpsRegVal + 12));
 
+    LOG_NRM("Get namspc and determine LBA size");
     Informative::Namspc namspcData = gInformative->Get1stBareMetaE2E();
     send_64b_bitmask prpBitmask =
         (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE | MASK_PRP2_LIST);
     LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
     uint64_t lbaDataSize = (1 << lbaFormat.LBADS);
 
+    LOG_NRM("Seeking max data xfer size for chosen namspc");
     ConstSharedIdentifyPtr idCmdCtrlr = gInformative->GetIdentifyCmdCtrlr();
     uint32_t maxDtXferSz = idCmdCtrlr->GetMaxDataXferSize();
     if (maxDtXferSz == 0)
-        maxDtXferSz = (1024 * 1024);
+        maxDtXferSz = MAX_DATA_TX_SIZE;
 
-    if (namspcData.type != Informative::NS_BARE) {
-        if (gRsrcMngr->SetMetaAllocSize(
-            lbaFormat.MS * (maxDtXferSz / lbaDataSize)) == false) {
-            throw FrmwkEx(HERE, "Unable to allocate Meta buffers.");
-        }
-    }
-
+    LOG_NRM("Prepare cmds to utilize");
     SharedWritePtr writeCmd = SharedWritePtr(new Write());
     writeCmd->SetNSID(namspcData.id);
 
@@ -149,10 +145,17 @@ PRPOffsetMultiPgMultiBlk_r10b::RunCoreTest()
     case Informative::NS_BARE:
         break;
     case Informative::NS_METAS:
+        LOG_NRM("Allocating meta data size %ld",
+            (lbaFormat.MS * (maxDtXferSz / lbaDataSize)));
+        if (gRsrcMngr->SetMetaAllocSize(
+            lbaFormat.MS * (maxDtXferSz / lbaDataSize)) == false) {
+            throw FrmwkEx(HERE, "Unable to allocate Meta buffers.");
+        }
         writeCmd->AllocMetaBuffer();
         readCmd->AllocMetaBuffer();
         break;
     case Informative::NS_METAI:
+        break;
     case Informative::NS_E2ES:
     case Informative::NS_E2EI:
         throw FrmwkEx(HERE, "Deferring work to handle this case in future");
@@ -172,7 +175,7 @@ PRPOffsetMultiPgMultiBlk_r10b::RunCoreTest()
     uint64_t altPattern = 0;
     for (int64_t pgOff = 0; pgOff <= X; pgOff += 4) {
         Y = (maxDtXferSz - pgOff) / lbaDataSize;
-
+        LOG_NRM("Processing at page offset #%ld", pgOff);
         // lbaPow2 = {2, 4, 8, 16, 32, 64, ...}
         for (uint64_t lbaPow2 = 2; lbaPow2 <= Y; lbaPow2 <<= 1) {
             // nLBA = {(0, 1, 2), (3, 4, 5), (7, 8, 9), (15, 16, 17), ...}
@@ -205,6 +208,11 @@ PRPOffsetMultiPgMultiBlk_r10b::RunCoreTest()
                     writeCmd->SetMetaDataPattern(dataPat, wrVal, 0, metabufSz);
                     break;
                 case Informative::NS_METAI:
+                    writeMem->InitOffset1stPage(
+                        (dtPayloadSz + metabufSz), pgOff, false);
+                    readMem->InitOffset1stPage(
+                        (dtPayloadSz + metabufSz), pgOff, false);
+                    break;
                 case Informative::NS_E2ES:
                 case Informative::NS_E2EI:
                     throw FrmwkEx(HERE,

@@ -82,7 +82,7 @@ InitialStateAdmin_r10b::RunCoreTest()
     if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
         throw FrmwkEx(HERE);
 
-    // Create ACQ and ASQ objects which have test life time
+    LOG_NRM("Create ACQ and ASQ objects which have test life time");
     SharedACQPtr acq = CAST_TO_ACQ(SharedACQPtr(new ACQ(mFd)))
     acq->Init(5);
 
@@ -100,6 +100,7 @@ InitialStateAdmin_r10b::ValidateInitialStateAdmin(SharedACQPtr acq,
     // tail pointers and verify SQ head pointer in completion entry of ACQ.
     // Repeat procedure after disabling and re-enabling ctlr.
     for (uint16_t i = 0; i < 2; i++) {
+        LOG_NRM("Validateing initial state admin for #%d times", i);
         gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
         if (gCtrlrConfig->SetState(ST_ENABLE) == false)
             throw FrmwkEx(HERE);
@@ -140,7 +141,7 @@ InitialStateAdmin_r10b::VerifyHeadAndTailDoorBells(SharedACQPtr acq,
     struct nvme_gen_sq asqMetrics = asq->GetQMetrics();
     KernelAPI::LogSQMetrics(asqMetrics);
 
-    // Verify ASQ tail_ptr, ACQ head_ptr and CE.SQHD position values equal to 1.
+    LOG_NRM("Verify ASQ tail_ptr, head_ptr & CE.SQHD position vals equal to 1");
     if (asqMetrics.tail_ptr != 1) {
         asq->Dump(
             FileSystem::PrepDumpFile(mGrpName, mTestName, "asq", "tail_ptr"),

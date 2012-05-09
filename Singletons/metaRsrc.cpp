@@ -105,6 +105,7 @@ MetaRsrc::ReserveMetaBuf(MetaDataBuf &metaBuf)
             resIter++;
         }
 
+        // Is the found ID within dnvme's max allowed range?
         if (metaBuf.ID < (1 << METADATA_UNIQUE_ID_BITS)) {
             LOG_NRM("Alloc meta data buf: size: 0x%08X, ID: 0x%06X",
                 metaBuf.size, metaBuf.ID);

@@ -92,30 +92,44 @@ PRPOffsetSinglePgSingleBlk_r10b::RunCoreTest()
      * \endverbatim
      */
     string work;
+    uint64_t X;
     bool enableLog;
     unsigned int seed = 17;
 
-    /* Initialize random seed to 17 */
+    LOG_NRM("Initialize random seed to 17");
     srand (seed);
 
     // Lookup objs which were created in a prior test within group
     SharedIOSQPtr iosq = CAST_TO_IOSQ(gRsrcMngr->GetObj(IOSQ_GROUP_ID));
     SharedIOCQPtr iocq = CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_GROUP_ID));
 
+    LOG_NRM("Get namspc and determine LBA size");
     Informative::Namspc namspcData = gInformative->Get1stBareMetaE2E();
     send_64b_bitmask prpBitmask = (send_64b_bitmask)(MASK_PRP1_PAGE);
-    if (namspcData.type != Informative::NS_BARE) {
-        LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
-        if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
-            throw FrmwkEx(HERE);
-    }
+    LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
     uint64_t lbaDataSize = namspcData.idCmdNamspc->GetLBADataSize();
 
     uint8_t mpsRegVal;
     if (gCtrlrConfig->GetMPS(mpsRegVal) == false)
         throw FrmwkEx(HERE, "Unable to get MPS value from CC.");
-    uint64_t X =  (uint64_t)(1 << (mpsRegVal + 12)) - lbaDataSize;
 
+    switch (namspcData.type) {
+    case Informative::NS_BARE:
+    case Informative::NS_METAS:
+        if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
+            throw FrmwkEx(HERE);
+        X =  (uint64_t)(1 << (mpsRegVal + 12)) - lbaDataSize;
+        break;
+    case Informative::NS_METAI:
+        X =  (uint64_t)(1 << (mpsRegVal + 12)) - (lbaDataSize + lbaFormat.MS);
+        break;
+    case Informative::NS_E2ES:
+    case Informative::NS_E2EI:
+        throw FrmwkEx(HERE, "Deferring work to handle this case in future");
+        break;
+    }
+
+    LOG_NRM("Prepare cmds to send to the queues.");
     SharedWritePtr writeCmd = CreateWriteCmd(namspcData);
     SharedReadPtr readCmd = CreateReadCmd(namspcData);
 
@@ -123,6 +137,7 @@ PRPOffsetSinglePgSingleBlk_r10b::RunCoreTest()
     uint64_t wrVal;
     uint32_t prp2RandVal[2];
     for (uint64_t pgOff = 0; pgOff <= X; pgOff += 4) {
+        LOG_NRM("Processing at page offset #%ld", pgOff);
         if ((pgOff % 8) != 0) {
             dataPattern = DATAPAT_CONST_8BIT;
             wrVal = pgOff;
@@ -147,6 +162,9 @@ PRPOffsetSinglePgSingleBlk_r10b::RunCoreTest()
             writeCmd->SetMetaDataPattern(dataPattern, wrVal);
             break;
         case Informative::NS_METAI:
+            writeMem->InitOffset1stPage
+                (lbaDataSize + lbaFormat.MS, pgOff, false);
+            break;
         case Informative::NS_E2ES:
         case Informative::NS_E2EI:
             throw FrmwkEx(HERE, "Deferring work to handle this case in future");
@@ -155,7 +173,7 @@ PRPOffsetSinglePgSingleBlk_r10b::RunCoreTest()
         writeCmd->SetPrpBuffer(prpBitmask, writeMem);
         writeMem->SetDataPattern(dataPattern, wrVal);
 
-        // Set 64 bits of PRP2 in CDW 8 & 9 with random or zero for write cmd.
+        LOG_NRM("Set 64 bits of PRP2 CDW 8 & 9 with random or 0 for wr cmd.");
         writeCmd->SetDword(prp2RandVal[0], 8);
         writeCmd->SetDword(prp2RandVal[1], 9);
 
@@ -175,6 +193,9 @@ PRPOffsetSinglePgSingleBlk_r10b::RunCoreTest()
             readMem->InitOffset1stPage(lbaDataSize, pgOff, false);
             break;
         case Informative::NS_METAI:
+            readMem->InitOffset1stPage
+                (lbaDataSize + lbaFormat.MS, pgOff, false);
+            break;
         case Informative::NS_E2ES:
         case Informative::NS_E2EI:
             throw FrmwkEx(HERE, "Deferring work to handle this case in future");
@@ -182,7 +203,7 @@ PRPOffsetSinglePgSingleBlk_r10b::RunCoreTest()
         }
         readCmd->SetPrpBuffer(prpBitmask, readMem);
 
-        // Set 64 bits of PRP2 in CDW 8 & 9 with random or zero for read cmd.
+        LOG_NRM("Set 64 bits of PRP2 CDW 8 & 9 with random or 0 for rd cmd.");
         readCmd->SetDword(prp2RandVal[0], 8);
         readCmd->SetDword(prp2RandVal[1], 9);
 
@@ -206,6 +227,7 @@ PRPOffsetSinglePgSingleBlk_r10b::CreateWriteCmd(Informative::Namspc namspcData)
         writeCmd->AllocMetaBuffer();
         break;
     case Informative::NS_METAI:
+        break;
     case Informative::NS_E2ES:
     case Informative::NS_E2EI:
         throw FrmwkEx(HERE, "Deferring work to handle this case in future");
@@ -230,6 +252,7 @@ PRPOffsetSinglePgSingleBlk_r10b::CreateReadCmd(Informative::Namspc namspcData)
         readCmd->AllocMetaBuffer();
         break;
     case Informative::NS_METAI:
+        break;
     case Informative::NS_E2ES:
     case Informative::NS_E2EI:
         throw FrmwkEx(HERE, "Deferring work to handle this case in future");

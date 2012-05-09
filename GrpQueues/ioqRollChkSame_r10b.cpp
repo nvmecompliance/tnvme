@@ -90,9 +90,9 @@ IOQRollChkSame_r10b::RunCoreTest()
     maxIOQEntries &= CAP_MQES;
     maxIOQEntries += 1;      // convert to 1-based
 
-    // IO Q Min Sizes
+    LOG_NRM("IO Q Min Sizes");
     IOQRollChkSame(2);
-    // IO Q Max Sizes
+    LOG_NRM("IO Q Max Sizes");
     IOQRollChkSame((uint32_t)maxIOQEntries);
 }
 
@@ -122,7 +122,6 @@ IOQRollChkSame_r10b::IOQRollChkSame(uint32_t numEntriesIOQ)
         iocq->GetNumEntries() + 2, iosq->GetQId());
     for (uint32_t numEntries = 0; numEntries <
         (uint32_t)(iosq->GetNumEntries() + 2); numEntries++) {
-
         LOG_NRM("Issuing write cmd %d of %d", numEntries,
             (uint32_t)(iosq->GetNumEntries() + 2));
         iosq->Send(writeCmd, uniqueId);
@@ -131,7 +130,7 @@ IOQRollChkSame_r10b::IOQRollChkSame(uint32_t numEntriesIOQ)
     }
     VerifyQPointers(iosq, iocq);
 
-    // Delete IOSQ before the IOCQ to comply with spec.
+    LOG_NRM("Delete IOSQ before the IOCQ to comply with spec.");
     Queues::DeleteIOSQToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
         iosq, asq, acq);
     Queues::DeleteIOCQToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
@@ -144,11 +143,7 @@ IOQRollChkSame_r10b::SetWriteCmd()
 {
     Informative::Namspc namspcData = gInformative->Get1stBareMetaE2E();
     LOG_NRM("Processing write cmd using namspc id %d", namspcData.id);
-    if (namspcData.type != Informative::NS_BARE) {
-        LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
-        if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
-            throw FrmwkEx(HERE);
-    }
+    LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
 
     LOG_NRM("Create data pattern to write to media");
     SharedMemBufferPtr dataPat = SharedMemBufferPtr(new MemBuffer());
@@ -164,9 +159,13 @@ IOQRollChkSame_r10b::SetWriteCmd()
         break;
     case Informative::NS_METAS:
         dataPat->Init(lbaDataSize);
+        if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
+            throw FrmwkEx(HERE);
         writeCmd->AllocMetaBuffer();
         break;
     case Informative::NS_METAI:
+        dataPat->Init(lbaDataSize + lbaFormat.MS);
+        break;
     case Informative::NS_E2ES:
     case Informative::NS_E2EI:
         throw FrmwkEx(HERE, "Deferring work to handle this case in future");

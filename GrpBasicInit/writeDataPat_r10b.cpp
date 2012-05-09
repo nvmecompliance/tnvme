@@ -34,8 +34,13 @@ WriteDataPat_r10b::WriteDataPat_r10b(int fd, string grpName, string testName,
     mTestDesc.SetShort(     "Write a well known data pattern to media");
     // No string size limit for the long description
     mTestDesc.SetLong(
-        "Issue an NVM cmd set write command with a well known data pattern "
-        "to namespace #1. The write command shall be completely generic.");
+        "Search for 1 of the following namspcs to run test. Find 1st bare "
+        "namspc, or find 1st meta namspc, or find 1st E2E namspc. Issue "
+        "identical write cmd to the selected namspc starting at LBA 0, "
+        "sending a single block with approp meta/E2E requirements if "
+        "necessary. Issue an NVM cmd set write command with a well known "
+        "data pattern to namespace found. The write command shall be "
+        "completely generic.");
 }
 
 
@@ -92,30 +97,56 @@ WriteDataPat_r10b::WriteDataPattern()
 {
     uint64_t regVal;
 
-
     LOG_NRM("Calc buffer size to write %d logical blks to media",
         WRITE_DATA_PAT_NUM_BLKS);
-    ConstSharedIdentifyPtr namSpcPtr = gInformative->GetIdentifyCmdNamspc(1);
+    Informative::Namspc namspcData = gInformative->Get1stBareMetaE2E();
+    ConstSharedIdentifyPtr namSpcPtr = namspcData.idCmdNamspc;
     if (namSpcPtr == Identify::NullIdentifyPtr)
-        throw FrmwkEx(HERE, "Namespace #1 must exist");
+        throw FrmwkEx(HERE, "Namespace #%d must exist", namspcData.id);
+
+    LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
+    if (namspcData.type == Informative::NS_METAS) {
+        if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS * WRITE_DATA_PAT_NUM_BLKS)
+            == false) {
+            throw FrmwkEx(HERE);
+        }
+    }
     uint64_t lbaDataSize = namSpcPtr->GetLBADataSize();
 
+    LOG_NRM("Create a generic write cmd to send data pattern to namspc #%d",
+        namspcData.id);
+    SharedWritePtr writeCmd = SharedWritePtr(new Write());
+    send_64b_bitmask prpBitmask = (send_64b_bitmask)
+        (MASK_PRP1_PAGE | MASK_PRP2_PAGE | MASK_PRP2_LIST);
 
     LOG_NRM("Create data pattern to write to media");
     SharedMemBufferPtr dataPat = SharedMemBufferPtr(new MemBuffer());
-    dataPat->Init(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize);
+
+    switch (namspcData.type) {
+    case Informative::NS_BARE:
+        dataPat->Init(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize);
+        break;
+    case Informative::NS_METAS:
+        dataPat->Init(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize);
+        writeCmd->AllocMetaBuffer();
+        writeCmd->SetMetaDataPattern(DATAPAT_INC_16BIT);
+        break;
+    case Informative::NS_METAI:
+        dataPat->Init(WRITE_DATA_PAT_NUM_BLKS * (lbaDataSize + lbaFormat.MS));
+        break;
+    case Informative::NS_E2ES:
+    case Informative::NS_E2EI:
+        throw FrmwkEx(HERE, "Deferring work to handle this case in future");
+        break;
+    }
+
     dataPat->SetDataPattern(DATAPAT_INC_16BIT);
     dataPat->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "DataPat"),
         "Write buffer's data pattern");
 
-
-    LOG_NRM("Create a generic write cmd to send data pattern to namspc 1");
-    SharedWritePtr writeCmd = SharedWritePtr(new Write());
-    send_64b_bitmask prpBitmask = (send_64b_bitmask)
-        (MASK_PRP1_PAGE | MASK_PRP2_PAGE | MASK_PRP2_LIST);
     writeCmd->SetPrpBuffer(prpBitmask, dataPat);
-    writeCmd->SetNSID(1);
-    writeCmd->SetNLB(WRITE_DATA_PAT_NUM_BLKS-1);    // convert to 0-based value
+    writeCmd->SetNSID(namspcData.id);
+    writeCmd->SetNLB(WRITE_DATA_PAT_NUM_BLKS - 1);  // convert to 0-based value
 
     // Lookup objs which were created in a prior test within group
     SharedIOSQPtr iosqContig = CAST_TO_IOSQ(

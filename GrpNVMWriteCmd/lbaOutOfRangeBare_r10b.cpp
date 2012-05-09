@@ -102,12 +102,12 @@ LBAOutOfRangeBare_r10b::RunCoreTest()
         }
         nsze = namSpcPtr->GetValue(IDNAMESPC_NSZE);
 
-        LOG_NRM("Create memory to contain read payload");
+        LOG_NRM("Create memory to contain write payload");
         SharedMemBufferPtr writeMem = SharedMemBufferPtr(new MemBuffer());
         uint64_t lbaDataSize = namSpcPtr->GetLBADataSize();
         writeMem->Init(WR_NUM_BLKS * lbaDataSize);
 
-        LOG_NRM("Create a read cmd to read data from namspc %d", bare[i]);
+        LOG_NRM("Create a write cmd to write data to namspc %d", bare[i]);
         SharedWritePtr writeCmd = SharedWritePtr(new Write());
         send_64b_bitmask prpBitmask = (send_64b_bitmask)
             (MASK_PRP1_PAGE | MASK_PRP2_PAGE | MASK_PRP2_LIST);

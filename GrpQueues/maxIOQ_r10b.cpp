@@ -101,12 +101,6 @@ MaxIOQ_r10b::RunCoreTest()
     }
 
     Informative::Namspc namspcData = gInformative->Get1stBareMetaE2E();
-    if (namspcData.type != Informative::NS_BARE) {
-        LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
-        if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
-            throw FrmwkEx(HERE);
-    }
-
     SharedMemBufferPtr writeMem = SharedMemBufferPtr(new MemBuffer());
     SharedMemBufferPtr readMem = SharedMemBufferPtr(new MemBuffer());
     SharedReadPtr readCmd = CreateReadCmd(namspcData, readMem);
@@ -155,6 +149,7 @@ MaxIOQ_r10b::SetWriteCmd(Informative::Namspc namspcData,
 {
     LOG_NRM("Processing write cmd using namspc id %d", namspcData.id);
     uint64_t lbaDataSize = namspcData.idCmdNamspc->GetLBADataSize();
+    LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
 
     SharedWritePtr writeCmd = SharedWritePtr(new Write());
     send_64b_bitmask prpBitmask = (send_64b_bitmask)(MASK_PRP1_PAGE
@@ -166,9 +161,13 @@ MaxIOQ_r10b::SetWriteCmd(Informative::Namspc namspcData,
         break;
     case Informative::NS_METAS:
         dataPat->Init(lbaDataSize);
+        if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
+            throw FrmwkEx(HERE);
         writeCmd->AllocMetaBuffer();
         break;
     case Informative::NS_METAI:
+        dataPat->Init(lbaDataSize + lbaFormat.MS);
+        break;
     case Informative::NS_E2ES:
     case Informative::NS_E2EI:
         throw FrmwkEx(HERE, "Deferring work to handle this case in future");
@@ -189,6 +188,7 @@ MaxIOQ_r10b::CreateReadCmd(Informative::Namspc namspcData,
 {
     LOG_NRM("Processing read cmd using namspc id %d", namspcData.id);
     uint64_t lbaDataSize = namspcData.idCmdNamspc->GetLBADataSize();
+    LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
 
     SharedReadPtr readCmd = SharedReadPtr(new Read());
     send_64b_bitmask prpBitmask = (send_64b_bitmask)(MASK_PRP1_PAGE
@@ -200,9 +200,13 @@ MaxIOQ_r10b::CreateReadCmd(Informative::Namspc namspcData,
         break;
     case Informative::NS_METAS:
         dataPat->Init(lbaDataSize);
+        if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
+            throw FrmwkEx(HERE);
         readCmd->AllocMetaBuffer();
         break;
     case Informative::NS_METAI:
+        dataPat->Init(lbaDataSize + lbaFormat.MS);
+        break;
     case Informative::NS_E2ES:
     case Informative::NS_E2EI:
         throw FrmwkEx(HERE, "Deferring work to handle this case in future");

@@ -365,7 +365,7 @@ Informative::IdentifyNamespace(ConstSharedIdentifyPtr idCmdNamspc) const
 
     // Learn more about this namespace to decipher its classification/type
     dps = (uint8_t)idCmdNamspc->GetValue(IDNAMESPC_DPS);
-    flbas = (uint8_t)idCmdNamspc->GetValue(IDNAMESPC_DPS);
+    flbas = (uint8_t)idCmdNamspc->GetValue(IDNAMESPC_FLBAS);
 
     if ((dps & 0x07) == 0) {
         // Meta namespaces supporting meta data, and E2E is disabled;
@@ -384,4 +384,3 @@ Informative::IdentifyNamespace(ConstSharedIdentifyPtr idCmdNamspc) const
     }
     throw FrmwkEx(HERE, "Namspc is unidentifiable");
 }
-

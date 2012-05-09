@@ -86,7 +86,7 @@ IOQFull_r10b::RunCoreTest()
      */
 
     uint64_t ctrlCapReg;
-    // Determine the max IOQ entries supported
+    LOG_NRM("Determine the max IOQ entries supported");
     if (gRegisters->Read(CTLSPC_CAP, ctrlCapReg) == false) {
         LOG_ERR("Unable to determine MQES");
         throw FrmwkEx(HERE);
@@ -100,12 +100,12 @@ IOQFull_r10b::RunCoreTest()
 
     SharedWritePtr writeCmd = SetWriteCmd();
 
-    // Case 1 - IOSQ = IOCQ (min, middle and max)
+    LOG_NRM("Case 1 - IOSQ = IOCQ (min, middle and max)");
     IOQFull(2, 2, asq, acq, writeCmd);
     IOQFull((maxIOQEntries/2), (maxIOQEntries/2), asq, acq, writeCmd);
     IOQFull(maxIOQEntries, maxIOQEntries, asq, acq, writeCmd);
 
-    // Case 2 - IOSQ =  IOCQ + 1 (min , middle and max)
+    LOG_NRM("Case 2 - IOSQ =  IOCQ + 1 (min , middle and max)");
     IOQFull(3, 2, asq, acq, writeCmd);
     IOQFull((maxIOQEntries/2), ((maxIOQEntries/2) - 1), asq, acq, writeCmd);
     IOQFull(maxIOQEntries, (maxIOQEntries - 1), asq, acq, writeCmd);
@@ -167,7 +167,7 @@ IOQFull_r10b::IOQFull(uint32_t numIOSQEntries, uint32_t numIOCQEntries,
             if ((numIOSQEntries == (numIOCQEntries + 1)) &&
                 (nCmds == (nCmdsToSubmit - 1))) {
 
-                // Reap one element from IOCQ to make room for last CE.
+                LOG_NRM("Reap one element from IOCQ to make room for last CE.");
                 IO::ReapCE(iocq, 1, isrCount, mGrpName, mTestName, "IOCQCE",
                     CESTAT_SUCCESS);
 
@@ -190,7 +190,7 @@ IOQFull_r10b::IOQFull(uint32_t numIOSQEntries, uint32_t numIOCQEntries,
         }
     }
 
-    // Delete IOSQ before the IOCQ to comply with spec.
+    LOG_NRM(" Delete IOSQ before the IOCQ to comply with spec.");
     Queues::DeleteIOSQToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
         iosq, asq, acq);
     Queues::DeleteIOCQToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
@@ -203,11 +203,7 @@ IOQFull_r10b::SetWriteCmd()
 {
     Informative::Namspc namspcData = gInformative->Get1stBareMetaE2E();
     LOG_NRM("Processing write cmd using namspc id %d", namspcData.id);
-    if (namspcData.type != Informative::NS_BARE) {
-        LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
-        if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
-            throw FrmwkEx(HERE);
-    }
+    LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
 
     LOG_NRM("Create data pattern to write to media");
     SharedMemBufferPtr dataPat = SharedMemBufferPtr(new MemBuffer());
@@ -223,9 +219,13 @@ IOQFull_r10b::SetWriteCmd()
         break;
     case Informative::NS_METAS:
         dataPat->Init(lbaDataSize);
+        if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
+            throw FrmwkEx(HERE);
         writeCmd->AllocMetaBuffer();
         break;
     case Informative::NS_METAI:
+        dataPat->Init(lbaDataSize + lbaFormat.MS);
+        break;
     case Informative::NS_E2ES:
     case Informative::NS_E2EI:
         throw FrmwkEx(HERE, "Deferring work to handle this case in future");
