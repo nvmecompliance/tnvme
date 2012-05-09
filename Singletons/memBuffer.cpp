@@ -30,6 +30,17 @@ MemBuffer::MemBuffer() : Trackable(Trackable::OBJ_MEMBUFFER)
 }
 
 
+MemBuffer::MemBuffer(const vector<uint8_t> &initData) :
+     Trackable(Trackable::OBJ_MEMBUFFER)
+{
+    InitMemberVariables();
+    Init(initData.size(), false);
+    uint8_t *bufPtr = GetBuffer();
+    for (size_t i = 0; i < initData.size(); i++, bufPtr++)
+        *bufPtr = initData[i];
+}
+
+
 MemBuffer::~MemBuffer()
 {
     DeallocateResources();
@@ -258,7 +269,7 @@ MemBuffer::SetDataPattern(DataPattern dataPat, uint64_t initVal,
 
 
 bool
-MemBuffer::Compare(SharedMemBufferPtr compTo)
+MemBuffer::Compare(const SharedMemBufferPtr compTo)
 {
     if (compTo->GetBufSize() != GetBufSize()) {
         throw FrmwkEx(HERE, "Compare buffers not same size: %d != %d",
@@ -268,6 +279,26 @@ MemBuffer::Compare(SharedMemBufferPtr compTo)
     if (memcmp(compTo->GetBuffer(), GetBuffer(), GetBufSize()) != 0) {
         LOG_ERR("Detected data miscompare");
         return false;
+    }
+    return true;
+}
+
+
+bool
+MemBuffer::Compare(const vector<uint8_t> &compTo)
+{
+    if (compTo.size() != GetBufSize()) {
+        throw FrmwkEx(HERE, "Compare buffers not same size: %d != %d",
+            compTo.size(), GetBufSize());
+    }
+
+    vector<uint8_t>::const_iterator iterCompTo = compTo.begin();
+    uint8_t *iterThis = GetBuffer();
+    for (size_t i = 0; i < GetBufSize(); i++, iterCompTo++, iterThis++) {
+        if (*iterCompTo != *iterThis) {
+            LOG_ERR("Detected data miscompare @ index = %ld(0x%08lX)", i, i);
+            return false;
+        }
     }
     return true;
 }

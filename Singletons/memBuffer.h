@@ -43,6 +43,11 @@ class MemBuffer : public Trackable
 {
 public:
     MemBuffer();
+    /**
+     * @note Uses member Init() to perform the alignment of the buffer
+     * @param initData Pass the data to perform initialization of contents.
+     */
+    MemBuffer(const vector<uint8_t> &initData);
     virtual ~MemBuffer();
 
     /// Used to compare for NULL pointers being returned by allocations
@@ -120,7 +125,8 @@ public:
      *      throws when buffers are not of same size or other serious error
      *      which causes the inability to compare data.
      */
-    bool Compare(SharedMemBufferPtr compTo);
+    bool Compare(const SharedMemBufferPtr compTo);
+    bool Compare(const vector<uint8_t> &compTo);
 
     /**
      * Send the entire contents of this buffer to the logging endpoint

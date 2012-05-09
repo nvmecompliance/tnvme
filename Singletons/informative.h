@@ -47,8 +47,9 @@ public:
      * Enforce singleton design pattern.
      * @param fd Pass the opened file descriptor for the device under test
      * @param specRev Pass which compliance is needed to target
+     * @param golden Pass any golden identify data spec'd on cmd line
      */
-    static Informative* GetInstance(int fd, SpecRev specRev);
+    static Informative* GetInstance(int fd, SpecRev specRev, Golden &golden);
     static void KillInstance();
     ~Informative();
 
@@ -59,13 +60,13 @@ public:
     int GetFD() { return mFd; }
 
     /**
-     * Retrieve a previously fetched identify command's controller struct.
+     * Get a previously fetched identify command's controller struct.
      * @return The requested data
      */
     ConstSharedIdentifyPtr GetIdentifyCmdCtrlr() const;
 
     /**
-     * Retrieve a previously fetched identify command's namspc struct.
+     * Get a previously fetched identify command's namspc struct.
      * @param namspcId Pass the ID of the namspc of interest
      * @return Identify::NullIdentifyPtr if the requested namspcId is larger
      *      than the total number of namspc structures available.
@@ -73,7 +74,15 @@ public:
     ConstSharedIdentifyPtr GetIdentifyCmdNamspc(uint64_t namspcId) const;
 
     /**
-     * Retrieve a previously fetched get features's number of queues feature ID.
+     * Get previously set golden identify data via the cmd line. This data is
+     * useful to GrpInformative::CompareGolden test case if and only if the data
+     * had been supplied. If (Golden.req == false) then the data is absent and
+     * CompareGolden will not be able to run, otherwise the test runs.
+     */
+    const Golden &GetGoldenIdentify() const {return mGolden; }
+
+    /**
+     * Get a previously fetched get features's number of queues feature ID.
      * This is DW0 of the CE which results from a Get FEatures. The spec
      * states this is a 0-based value, thus 1 IOQ will always be supported
      * @return The last known DW0 of the CE returned by the DUT.
@@ -143,7 +152,7 @@ public:
 private:
     // Implement singleton design pattern
     Informative();
-    Informative(int fd, SpecRev specRev);
+    Informative(int fd, SpecRev specRev, Golden &golden);
     static bool mInstanceFlag;
     static Informative *mSingleton;
 
@@ -151,6 +160,8 @@ private:
     SpecRev mSpecRev;
     /// file descriptor to the device under test
     int mFd;
+    /// Contains any cmd line supplied golden identify payloads
+    Golden mGolden;
 
     /**
      * These are the only tests within group GrpInformative which can initialize

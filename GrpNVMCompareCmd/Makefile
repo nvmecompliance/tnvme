@@ -1,4 +1,4 @@
-# Copyright (c) 2011, Intel Corporation.
+# Copyright (c 2011, Intel Corporation.
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,22 +17,18 @@ LIBS = -L../ -L/usr/local/lib -lm
 INCLUDES = -I. -I../ -I../../ -I/usr/local/include
 
 SRC =					\
-	grpInformative.cpp		\
-	dumpRegisters_r10b.cpp		\
-	createResources_r10b.cpp	\
-	dumpGetFeatures_r10b.cpp	\
-	dumpIdentifyData_r10b.cpp	\
-	compareGolden_r10b.cpp
+	grpNVMCompareCmd.cpp		\
+	identify_r10b.cpp
 
 .SUFFIXES: .cpp
 
 OBJ = $(SRC:.cpp=.o)
-OUT = libGrpInformative.a
+OUT = libGrpNVMCompareCmd.a
 
 all: $(OUT)
 
 .cpp.o:
-	$(CC) $(INCLUDES) $(CFLAGS) $(DFLAGS)-c $< -o $@ $(LDFLAGS)
+	$(CC) $(INCLUDES) $(CFLAGS) $(DFLAGS) -c $< -o $@ $(LDFLAGS)
 
 $(OUT): $(OBJ)
 	ar rcs $(OUT) $(OBJ)

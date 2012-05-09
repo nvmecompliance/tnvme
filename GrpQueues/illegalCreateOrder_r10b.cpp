@@ -87,6 +87,7 @@ IllegalCreateOrder_r10b::RunCoreTest()
     SharedASQPtr asq = SharedASQPtr(new ASQ(mFd));
     asq->Init(5);
 
+    gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
         throw FrmwkEx(HERE);
 

@@ -24,6 +24,7 @@
 
 bool ParseTargetCmdLine(TestTarget &target, const char *optarg);
 bool ParseSkipTestCmdLine(vector<TestRef> &skipTest, const char *optarg);
+bool ParseGoldenCmdLine(Golden &golden, const char *optarg);
 bool ParseFormatCmdLine(Format &format, const char *optarg);
 bool ParseRmmapCmdLine(RmmapIo &rmmap, const char *optarg);
 bool ParseWmmapCmdLine(WmmapIo &wmmap, const char *optarg);
@@ -31,7 +32,9 @@ bool ParseQueuesCmdLine(NumQueues &numQueues, const char *optarg);
 bool ParseErrorCmdLine(ErrorRegs &errRegs, const char *optarg);
 bool SeekSpecificXMLNode(xmlpp::TextReader &xmlFile, string nodeName,
     int nodeDepth, string &nodeVal, vector<string> &nodeAttrib);
-bool ExtractXMLValue(xmlpp::TextReader &xmlFile, FormatDUT &cmd,
+bool ExtractFormatXMLValue(xmlpp::TextReader &xmlFile, FormatDUT &cmd,
+    string nodeName);
+bool ExtractIdentifyXMLValue(xmlpp::TextReader &xmlFile, IdentifyDUT &cmd,
     string nodeName);
 
 

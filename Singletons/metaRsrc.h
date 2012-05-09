@@ -24,11 +24,11 @@
 
 struct MetaDataBuf {
     uint8_t *buf;
-    uint16_t size;
+    uint32_t size;
     uint32_t ID;
 
     MetaDataBuf() : buf(NULL), size(0), ID(0) {}
-    MetaDataBuf(uint8_t *b, uint16_t s, uint32_t i) : buf(b), size(s), ID(i) {}
+    MetaDataBuf(uint8_t *b, uint32_t s, uint32_t i) : buf(b), size(s), ID(i) {}
     bool operator==(const MetaDataBuf &other) const {
         if ((other.buf == buf) && (other.size == size) && (other.ID == ID))
             return true;
@@ -80,11 +80,11 @@ public:
      * gCtrlrConfig->SetState(DISABLE_XXX) occurs, at which time this method
      * can be called again to setup a new allocation size.
      * @param allocSize Pass the requested size of meta data buffers; The
-     *      value must be modulo sizeof(uint32_t). The max allowed size = 16KB.
+     *      value must be modulo sizeof(uint32_t).
      * @return true upon success, otherwise false
      */
-    bool     SetMetaAllocSize(uint16_t allocSize);
-    uint16_t GetMetaAllocSize() { return mMetaAllocSize; }
+    bool     SetMetaAllocSize(uint32_t allocSize);
+    uint32_t GetMetaAllocSize() { return mMetaAllocSize; }
 
     /**
      * Meta data buffer's are tracked within the kernel by a unique reference
@@ -112,7 +112,7 @@ private:
     int mFd;
 
     /// Stores the size of each meta data allocation
-    uint16_t mMetaAllocSize;
+    uint32_t mMetaAllocSize;
 
     /// Track all outstanding/reserved meta data unique IDs
     deque<MetaDataBuf> mMetaReserved;

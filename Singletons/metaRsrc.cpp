@@ -43,7 +43,7 @@ MetaRsrc::~MetaRsrc()
 
 
 bool
-MetaRsrc::SetMetaAllocSize(uint16_t allocSize)
+MetaRsrc::SetMetaAllocSize(uint32_t allocSize)
 {
     int rc;
 
@@ -56,16 +56,12 @@ MetaRsrc::SetMetaAllocSize(uint16_t allocSize)
         LOG_ERR("Requested meta data alloc size is not modulo %ld",
             sizeof(uint32_t));
         return false;
-    } else if (allocSize > (1 << 15)) {
-        LOG_ERR("Meta data alloc size exceeds max, 0x%04X > 0x%04X",
-            allocSize, (1 << 15));
-        return false;
     } else if ((rc = ioctl(mFd, NVME_IOCTL_METABUF_CREATE, allocSize)) < 0) {
         LOG_ERR("Meta data size request denied with error: %d", rc);
         return false;
     }
 
-    LOG_NRM("Meta data alloc size set to: 0x%04X", allocSize);
+    LOG_NRM("Meta data alloc size set to: 0x%08X", allocSize);
     mMetaAllocSize = allocSize;
     return true;
 }

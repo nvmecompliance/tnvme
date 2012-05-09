@@ -195,6 +195,43 @@ SeekSpecificXMLNode(xmlpp::TextReader &xmlFile, string nodeName, int nodeDepth,
 
 
 /**
+ * A function to extract the expected nodes for a --golden type file
+ * @param xmlFile Pass the file to seek within
+ * @param cmd Returns the filled in part of the structure
+ * @param nodeName Pass the name of the node being parsed.
+ * @return true upon successful parsing, otherwise false.
+ */
+bool ExtractIdentifyXMLValue(xmlpp::TextReader &xmlFile, IdentifyDUT &cmd,
+    string nodeName)
+{
+    if (strcmp(nodeName.c_str(), "nsid") == 0) {
+        if (xmlFile.get_node_type() == xmlpp::TextReader::Element) {
+            LOG_DBG("Found <%s>: processing", nodeName.c_str());
+            xmlFile.read();
+            if (xmlFile.get_node_type() == xmlpp::TextReader::Text) {
+                cmd.nsid = strtoul(xmlFile.get_value().c_str(), NULL, 10);
+                LOG_DBG("Identify.nsid = 0x%02X", cmd.nsid);
+                return true;
+            }
+        }
+    } else if (strcmp(nodeName.c_str(), "cns") == 0) {
+        if (xmlFile.get_node_type() == xmlpp::TextReader::Element) {
+            LOG_DBG("Found <%s>: processing", nodeName.c_str());
+            xmlFile.read();
+            if (xmlFile.get_node_type() == xmlpp::TextReader::Text) {
+                cmd.cns = strtoul(xmlFile.get_value().c_str(), NULL, 10);
+                LOG_DBG("Identify.cns = 0x%02X", cmd.cns);
+                return true;
+            }
+        }
+    }
+
+    LOG_DBG("Found unsupported node type: %d", xmlFile.get_node_type());
+    return false;
+}
+
+
+/**
  * A function to extract the expected nodes for a --format type file
  * @param xmlFile Pass the file to seek within
  * @param cmd Returns the filled in part of the structure
@@ -202,7 +239,7 @@ SeekSpecificXMLNode(xmlpp::TextReader &xmlFile, string nodeName, int nodeDepth,
  * @return true upon successful parsing, otherwise false.
  */
 bool
-ExtractXMLValue(xmlpp::TextReader &xmlFile, FormatDUT &cmd, string nodeName)
+ExtractFormatXMLValue(xmlpp::TextReader &xmlFile, FormatDUT &cmd, string nodeName)
 {
     if (strcmp(nodeName.c_str(), "ses") == 0) {
         if (xmlFile.get_node_type() == xmlpp::TextReader::Element) {
@@ -263,6 +300,202 @@ ExtractXMLValue(xmlpp::TextReader &xmlFile, FormatDUT &cmd, string nodeName)
 
 /**
  * A function to specifically handle parsing cmd lines of the form
+ * "--golden <filename>".
+ * @param golden Pass a structure to populate with parsing results
+ * @param optarg Pass the 'optarg' argument from the getopt_long() API.
+ * @return true upon successful parsing, otherwise false.
+ */
+bool
+ParseGoldenCmdLine(Golden &golden, const char *optarg)
+{
+    bool allOK = false;
+    string nodeVal, nodeName;
+    vector<AttribXML> attr;
+    IdentifyDUT cmd;
+
+    try
+    {
+        golden.req = false;
+        golden.cmds.clear();
+        xmlpp::TextReader xmlFile(optarg);
+
+        if (SeekSpecificXMLNode(xmlFile, "identify", 0, nodeVal, attr) == false)
+            return false;
+
+        while (SeekSpecificXMLNode(xmlFile, "cmd", 1, nodeVal, attr)) {
+            memset(&cmd, 0, sizeof(cmd));
+
+            if (SeekSpecificXMLNode(xmlFile, "dw1", 2, nodeVal, attr)) {
+                // Seek for value elements defining the cmd's params
+                while(xmlFile.read()) {
+                    nodeName = xmlFile.get_name();
+                    LOG_DBG("XML parser found: \"%s\" of type %d",
+                        nodeName.c_str(), xmlFile.get_node_type());
+
+                    switch (xmlFile.get_node_type()) {
+                    case xmlpp::TextReader::Comment:
+                        LOG_DBG("Node is a comment, continuing");
+                        continue;
+
+                    case xmlpp::TextReader::SignificantWhitespace:
+                        LOG_DBG("Node is a whitespace, continuing");
+                        continue;
+
+                    case xmlpp::TextReader::Element:
+                        if (ExtractIdentifyXMLValue(xmlFile, cmd, nodeName)
+                            == false) {
+                            return false;
+                        }
+                        break;
+
+                    case xmlpp::TextReader::EndElement:
+                        if (strcmp("dw1", nodeName.c_str()) == 0) {
+                            goto EXIT_DW1_SEARCH;
+                        } else {
+                            LOG_DBG(
+                                "</%s> decoded as end element: skipping",
+                                nodeName.c_str());
+                            continue;
+                        }
+                        break;
+
+                    default:
+                        LOG_ERR("Found unsupported node type");
+                        return false;
+                    }
+                }
+            }
+EXIT_DW1_SEARCH:
+
+            if (SeekSpecificXMLNode(xmlFile, "dw10", 2, nodeVal, attr)) {
+                // Seek for value elements defining the cmd's params
+                while(xmlFile.read()) {
+                    nodeName = xmlFile.get_name();
+                    LOG_DBG("XML parser found: \"%s\" of type %d",
+                        nodeName.c_str(), xmlFile.get_node_type());
+
+                    switch (xmlFile.get_node_type()) {
+                    case xmlpp::TextReader::Comment:
+                        LOG_DBG("Node is a comment, continuing");
+                        continue;
+
+                    case xmlpp::TextReader::SignificantWhitespace:
+                        LOG_DBG("Node is a whitespace, continuing");
+                        continue;
+
+                    case xmlpp::TextReader::Element:
+                        if (ExtractIdentifyXMLValue(xmlFile, cmd, nodeName)
+                            == false) {
+                            return false;
+                        }
+                        break;
+
+                    case xmlpp::TextReader::EndElement:
+                        if (strcmp("dw10", nodeName.c_str()) == 0) {
+                            goto EXIT_DW10_SEARCH;
+                        } else {
+                            LOG_DBG(
+                                "</%s> decoded as end element: skipping",
+                                nodeName.c_str());
+                            continue;
+                        }
+                        break;
+
+                    default:
+                        LOG_ERR("Found unsupported node type");
+                        return false;
+                    }
+                }
+            }
+EXIT_DW10_SEARCH:
+
+
+            if (SeekSpecificXMLNode(xmlFile, "prp", 2, nodeVal, attr)) {
+                // Seek for value elements defining the cmd's params
+                while(xmlFile.read()) {
+                    nodeName = xmlFile.get_name();
+                    LOG_DBG("XML parser found: \"%s\" of type %d",
+                        nodeName.c_str(), xmlFile.get_node_type());
+
+                    switch (xmlFile.get_node_type()) {
+                    case xmlpp::TextReader::Comment:
+                        LOG_DBG("Node is a comment, continuing");
+                        continue;
+
+                    case xmlpp::TextReader::SignificantWhitespace:
+                        LOG_DBG("Node is a whitespace, continuing");
+                        continue;
+
+                    case xmlpp::TextReader::Element:
+                        LOG_ERR("Node is a element, unexpected");
+                        return false;
+
+                    case xmlpp::TextReader::EndElement:
+                        if (strcmp("prp", nodeName.c_str()) == 0) {
+                            goto EXIT_PRP_SEARCH;
+                        } else {
+                            LOG_DBG(
+                                "</%s> decoded as end element: skipping",
+                                nodeName.c_str());
+                            continue;
+                        }
+                        break;
+
+                    case xmlpp::TextReader::Text:
+                        {
+                            uint8_t work;
+                            char *endPtr = NULL;
+                            char *startPtr = NULL;
+                            work = (uint8_t)strtoul(xmlFile.get_value().c_str(), &endPtr, 16);
+                            while ((*endPtr != '\0') && (startPtr != endPtr)) {
+                                cmd.raw.push_back(work);
+                                startPtr = endPtr;
+                                work = (uint8_t)strtoul(startPtr, &endPtr, 16);
+                            }
+                            if (cmd.raw.size() != 4096) {
+                                LOG_ERR("Identify payload must be 4KB");
+                                return false;
+                            }
+                        }
+                        break;
+
+                    default:
+                        LOG_ERR("Found unsupported node type");
+                        return false;
+                    }
+                }
+EXIT_PRP_SEARCH:
+                golden.cmds.push_back(cmd);
+                allOK = true;
+            }
+        }
+    }
+    catch(const std::exception& e)
+    {
+        LOG_ERR("While processing file %s: %s", optarg, e.what());
+        return false;
+    }
+
+    if (allOK == false) {
+        LOG_ERR("Unable to completely process file %s", optarg);
+        return false;
+    }
+
+#ifdef DEBUG
+    for (size_t i = 0; i < golden.cmds.size(); i++) {
+        LOG_DBG("Identify cmd #%ld", i);
+        LOG_DBG("  Identify:DW1.nsid = 0x%02x", golden.cmds[i].nsid);
+        LOG_DBG("  Identify.DW10.cns = %c", golden.cmds[i].cns ? 'T' : 'F');
+        LOG_DBG("  sizeof(Identify.raw) = %ld", golden.cmds[i].raw.size());
+    }
+#endif
+    golden.req = true;
+    return true;
+}
+
+
+/**
+ * A function to specifically handle parsing cmd lines of the form
  * "--format <filename>".
  * @param format Pass a structure to populate with parsing results
  * @param optarg Pass the 'optarg' argument from the getopt_long() API.
@@ -318,8 +551,8 @@ ParseFormatCmdLine(Format &format, const char *optarg)
                             continue;
 
                         case xmlpp::TextReader::Element:
-                            if (ExtractXMLValue(xmlFile, cmd, nodeName) ==
-                                false) {
+                            if (ExtractFormatXMLValue(xmlFile, cmd, nodeName)
+                                == false) {
                                 return false;
                             }
                             break;
@@ -336,8 +569,8 @@ ParseFormatCmdLine(Format &format, const char *optarg)
                             break;
 
                         default:
-                            LOG_DBG("Found unsupported node type");
-                            break;
+                            LOG_ERR("Found unsupported node type");
+                            return false;
                         }
                     }
 EXIT_VALUE_SEARCH:
@@ -360,7 +593,7 @@ EXIT_VALUE_SEARCH:
 
 #ifdef DEBUG
     for (size_t i = 0; i < format.cmds.size(); i++) {
-        LOG_DBG("Namespace: %d", format.cmds[i].namspc);
+        LOG_DBG("Namespace: %d", format.cmds[i].nsid);
         LOG_DBG("  FormatNVM:DW10.ses = 0x%02x", format.cmds[i].ses);
         LOG_DBG("  FormatNVM:DW10.pil = %c", format.cmds[i].pil ? 'T' : 'F');
         LOG_DBG("  FormatNVM:DW10.pi = 0x%02x", format.cmds[i].pi);

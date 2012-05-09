@@ -122,6 +122,7 @@ AdminQFull_r10b::AdminQFull(uint16_t numASQEntries, uint16_t numACQEntries,
     SharedASQPtr asq = CAST_TO_ASQ(SharedASQPtr(new ASQ(mFd)))
     asq->Init(numASQEntries);
 
+    gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
         throw FrmwkEx(HERE);
 

@@ -118,6 +118,9 @@ Usage(void) {
     printf("                                      state after each test completes.\n");
     printf("                                      Value=0 indicates ignore all errors.\n");
     printf("                                      Require base 16 values.\n");
+    printf("  -g(--golden) <filename>             A file contains the golden identify data\n");
+    printf("                                      to which the DUT's reported identify data\n");
+    printf("                                      is compared; GrpInformative::CompareGolden\n");
     printf("                      --- Advanced/Debug Options Follow ---\n");
     printf("  -q(--queues) <ncqr:nsqr>            Write <ncqr> and <nsqr> as values by the\n");
     printf("                                      Set Features, ID=7. Must be only option.\n");
@@ -158,7 +161,7 @@ main(int argc, char *argv[])
     bool deviceFound = false;
     bool accessingHdw = true;
     uint64_t regVal = 0;
-    const char *short_opt = "hslzia::t::v:p:d:k:f:r:w:q:e:u:";
+    const char *short_opt = "hslzia::t::v:p:d:k:f:r:w:q:e:u:g:";
     static struct option long_opt[] = {
         // {name,           has_arg,            flag,   val}
         {   "help",         no_argument,        NULL,   'h'},
@@ -178,6 +181,7 @@ main(int argc, char *argv[])
         {   "queues",       required_argument,  NULL,   'q'},
         {   "error",        required_argument,  NULL,   'e'},
         {   "dump",         required_argument,  NULL,   'u'},
+        {   "golden",       required_argument,  NULL,   'g'},
         {   NULL,           no_argument,        NULL,    0}
     };
 
@@ -197,6 +201,8 @@ main(int argc, char *argv[])
     cmdLine.numQueues.nsqr = 0;
     cmdLine.format.req = false;
     cmdLine.format.cmds.empty();
+    cmdLine.golden.req = false;
+    cmdLine.golden.cmds.empty();
     cmdLine.errRegs.sts = (STS_SSE | STS_STA | STS_RMA | STS_RTA);
     cmdLine.errRegs.pxds = (PXDS_TP | PXDS_FED);
     cmdLine.errRegs.aeruces = 0;
@@ -261,6 +267,13 @@ main(int argc, char *argv[])
         case 'k':
             if (ParseSkipTestCmdLine(cmdLine.skiptest, optarg) == false) {
                 printf("Unable to parse --skiptest cmd line\n");
+                exit(1);
+            }
+            break;
+
+        case 'g':
+            if (ParseGoldenCmdLine(cmdLine.golden, optarg) == false) {
+                printf("Unable to parse --golden cmd line\n");
                 exit(1);
             }
             break;
@@ -509,7 +522,7 @@ void BuildSingletons(int &fd, struct CmdLine &cl)
     gRsrcMngr = RsrcMngr::GetInstance(fd, cl.rev);
     gCtrlrConfig->Attach(*gRsrcMngr);
 
-    gInformative = Informative::GetInstance(fd, cl.rev);
+    gInformative = Informative::GetInstance(fd, cl.rev, cl.golden);
 }
 
 
@@ -688,17 +701,10 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
     // After GrpInformative runs, loop over the cmd line's requested test cases
     LOG_NRM("Attempting to satisfy target test: %ld:%ld.%ld.%ld",
         cl.test.t.group, cl.test.t.xLev, cl.test.t.yLev, cl.test.t.zLev);
-    if (cl.test.t.group == INFORM_GRPNUM) {
-        LOG_NRM("GrpInformative(%d) runs by dflt, ignoring request",
-            INFORM_GRPNUM);
-        goto EARLY_OUT;
-    }
 
     for ( ; iLoop < cl.loop; iLoop++) {
         LOG_NRM("Start loop execution #%ld", iLoop);
-
-        // GrpInformative handle above, loop thru all but GrpInformative
-        for (size_t iGrp = (INFORM_GRPNUM + 1); iGrp < groups.size(); iGrp++) {
+        for (size_t iGrp = 0; iGrp < groups.size(); iGrp++) {
             allHaveRun = false;
 
             // Clean out any garbage in the dump directory

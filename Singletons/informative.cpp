@@ -21,10 +21,10 @@
 
 bool Informative::mInstanceFlag = false;
 Informative* Informative::mSingleton = NULL;
-Informative* Informative::GetInstance(int fd, SpecRev specRev)
+Informative* Informative::GetInstance(int fd, SpecRev specRev, Golden &golden)
 {
     if(mInstanceFlag == false) {
-        mSingleton = new Informative(fd, specRev);
+        mSingleton = new Informative(fd, specRev, golden);
         mInstanceFlag = true;
         return mSingleton;
     } else {
@@ -41,13 +41,14 @@ void Informative::KillInstance()
 }
 
 
-Informative::Informative(int fd, SpecRev specRev)
+Informative::Informative(int fd, SpecRev specRev, Golden &golden)
 {
     mFd = fd;
     if (mFd < 0)
         throw FrmwkEx(HERE, "Object created with a bad FD=%d", fd);
 
     mSpecRev = specRev;
+    mGolden = golden;
     Clear();
 }
 

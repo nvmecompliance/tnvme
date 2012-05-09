@@ -51,7 +51,7 @@ CtrlrConfig::CtrlrConfig(int fd, SpecRev specRev) :
 {
     mFd = fd;
     if (mFd < 0)
-        throw FrmwkEx("Object created with a bad FD=%d", fd);
+        throw FrmwkEx(HERE, "Object created with a bad FD=%d", fd);
 
     mSpecRev = specRev;
 
@@ -229,7 +229,7 @@ CtrlrConfig::SetState(enum nvme_state state)
         toState = "Disabling completely";
         break;
     default:
-        throw FrmwkEx("Illegal state detected = %d", state);
+        throw FrmwkEx(HERE, "Illegal state detected = %d", state);
     }
 
     LOG_NRM("%s the NVME device", toState.c_str());

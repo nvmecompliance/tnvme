@@ -90,6 +90,7 @@ CtrlrResetNotEffectAdminQ_r10b::RunCoreTest()
     SharedASQPtr asq = SharedASQPtr(new ASQ(mFd));
     asq->Init(15);
 
+    gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
         throw FrmwkEx(HERE);
 
@@ -98,6 +99,7 @@ CtrlrResetNotEffectAdminQ_r10b::RunCoreTest()
     LOG_NRM("CC.EN=0, does not reset AQA/ASQ/ACQ registers");
     if (gCtrlrConfig->SetState(ST_DISABLE) == false)
         throw FrmwkEx(HERE);
+    gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
         throw FrmwkEx(HERE);
 

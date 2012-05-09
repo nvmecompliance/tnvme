@@ -79,7 +79,7 @@ typedef enum PciCapabilities {
     ZZ(PCISPC_MLAT,      PCICAP_FENCE,   0x3f,      1,    SPECREV_10b, 0x00000000000000ff, 0x0000000000000000, 0x0000000000000000, "PCI hdr max latency register (MLAT)")              \
     ZZ(PCISPC_PID,       PCICAP_PMCAP,   USHRT_MAX, 2,    SPECREV_10b, 0x000000000000ffff, 0x000000000000fffe, 0x0000000000000001, "PCI power mgmt ID register (PID)")                 \
     ZZ(PCISPC_PC,        PCICAP_PMCAP,   USHRT_MAX, 2,    SPECREV_10b, 0x000000000000ffff, 0x0000000000000027, 0x0000000000000000, "PCI power mgmt CAP register (PC)")                 \
-    ZZ(PCISPC_PMCS,      PCICAP_PMCAP,   USHRT_MAX, 2,    SPECREV_10b, 0x000000000000fffc, 0x0000000000000000, 0x0000000000000008, "PCI power mgmt ctrl & status reg (PMCS)")          \
+    ZZ(PCISPC_PMCS,      PCICAP_PMCAP,   USHRT_MAX, 2,    SPECREV_10b, 0x000000000000fffc, 0x0000000000000000, 0x0000000000000008, "PCI pwr mgmt ctrl & status reg (PMCS)")          \
     ZZ(PCISPC_MID,       PCICAP_MSICAP,  USHRT_MAX, 2,    SPECREV_10b, 0x000000000000ffff, 0x000000000000ff00, 0x0000000000000005, "PCI MSI ID register (MID)")                        \
     ZZ(PCISPC_MC,        PCICAP_MSICAP,  USHRT_MAX, 2,    SPECREV_10b, 0x000000000000ff8e, 0x000000000000000e, 0x0000000000000080, "PCI MSI msg ctrl register (MC)")                   \
     ZZ(PCISPC_MA,        PCICAP_MSICAP,  USHRT_MAX, 4,    SPECREV_10b, 0x0000000000000003, 0x0000000000000000, 0x0000000000000000, "PCI MSI msg addr  register (MA)")                  \
@@ -288,7 +288,7 @@ typedef enum CCBits {
     CC_IOSQES      = 0x000f0000,
     CC_SHN         = 0x0000C000,
     CC_AMS         = 0x00003800,
-    CC_MPS         = 0x00000710,
+    CC_MPS         = 0x00000780,
     CC_CSS         = 0x00000070,
     CC_RES1        = 0x0000000e,
     CC_EN          = 0000000001

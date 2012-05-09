@@ -109,6 +109,7 @@ FrmwkEx::PreliminaryProcessing()
     SharedASQPtr asq = SharedASQPtr(new ASQ(gInformative->GetFD()));
     asq->Init(2);
 
+    gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
         throw FrmwkEx(HERE, "PreliminaryProcessing()");
 

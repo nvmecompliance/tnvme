@@ -121,7 +121,7 @@ struct ErrorRegs {
 };
 
 struct FormatDUT {
-    uint32_t        nsid;    // The namespace ID to which Format NVM cmd is sent
+    uint32_t        nsid;    // The Format.DW1.NSID field to send cmd
     uint8_t         ses;     // Format NVM cmd; DW10.ses value
     uint8_t         pi;      // Format NVM cmd; DW10.pi value
     uint8_t         lbaf;    // Format NVM cmd; DW10.lbaf value
@@ -131,7 +131,18 @@ struct FormatDUT {
 
 struct Format {
     bool                req;    // requested by cmd line
-    vector<FormatDUT>   cmds;   // Array of Admin cmd set; format NVM cmds to issue
+    vector<FormatDUT>   cmds;   // Array of format NVM cmds to issue
+};
+
+struct IdentifyDUT {
+    uint32_t            nsid;   // The Identify.DW1.NSID field
+    bool                cns;    // The Identify.DW10.CNS field
+    vector<uint8_t>     raw;    // Raw identify data payload to compare against
+};
+
+struct Golden {
+    bool                req;    // Requested by cmd line
+    vector<IdentifyDUT> cmds;   // Array of identify cmd data to validate
 };
 
 
@@ -146,6 +157,7 @@ struct CmdLine {
     string          device;
     vector<TestRef> skiptest;
     Format          format;
+    Golden          golden;
     RmmapIo         rmmap;
     WmmapIo         wmmap;
     NumQueues       numQueues;

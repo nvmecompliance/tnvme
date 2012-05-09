@@ -16,19 +16,15 @@
 
 #include "tnvme.h"
 #include "../Exception/frmwkEx.h"
-#include "grpInformative.h"
-#include "dumpRegisters_r10b.h"
-#include "createResources_r10b.h"
-#include "dumpGetFeatures_r10b.h"
-#include "dumpIdentifyData_r10b.h"
-#include "compareGolden_r10b.h"
+#include "grpNVMCompareCmd.h"
+#include "identify_r10b.h"
 
-namespace GrpInformative {
+namespace GrpNVMCompareCmd {
 
 
-GrpInformative::GrpInformative(size_t grpNum, SpecRev specRev,
+GrpNVMCompareCmd::GrpNVMCompareCmd(size_t grpNum, SpecRev specRev,
     ErrorRegs errRegs, int fd) :
-    Group(grpNum, specRev, "GrpInformative", "Informative")
+    Group(grpNum, specRev, "GrpNVMCompareCmd", "NVM cmd set compare test cases")
 {
     // ------------------------CHANGE NOTICE: (3-2-2012)------------------------
     // The rule to keep groups and tests at a well known constant reference
@@ -38,11 +34,7 @@ GrpInformative::GrpInformative(size_t grpNum, SpecRev specRev,
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Strategy
     switch (mSpecRev) {
     case SPECREV_10b:
-        APPEND_TEST_AT_XLEVEL(DumpRegisters_r10b, fd, GrpInformative, errRegs)
-        APPEND_TEST_AT_XLEVEL(CreateResources_r10b, fd, GrpInformative, errRegs)
-        APPEND_TEST_AT_YLEVEL(DumpGetFeatures_r10b, fd, GrpInformative, errRegs)
-        APPEND_TEST_AT_YLEVEL(DumpIdentifyData_r10b, fd, GrpInformative, errRegs)
-        APPEND_TEST_AT_ZLEVEL(CompareGolden_r10b, fd, GrpInformative, errRegs)
+        APPEND_TEST_AT_XLEVEL(Identify_r10b, fd, GrpNVMCompareCmd, errRegs)
         break;
 
     default:
@@ -52,7 +44,7 @@ GrpInformative::GrpInformative(size_t grpNum, SpecRev specRev,
 }
 
 
-GrpInformative::~GrpInformative()
+GrpNVMCompareCmd::~GrpNVMCompareCmd()
 {
     // mTests deallocated in parent
 }
