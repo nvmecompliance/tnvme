@@ -14,9 +14,8 @@
  *  limitations under the License.
  */
 
-#include "tnvme.h"
-#include "../Exception/frmwkEx.h"
 #include "grpNVMFlushCmd.h"
+#include "../Exception/frmwkEx.h"
 #include "createResources_r10b.h"
 #include "invalidNamspc_r10b.h"
 #include "unsupportRsvdFields_r10b.h"
@@ -44,7 +43,7 @@ GrpNVMFlushCmd::GrpNVMFlushCmd(size_t grpNum, SpecRev specRev,
 
     default:
     case SPECREVTYPE_FENCE:
-        throw FrmwkEx(HERE, "Object created with unknown SpecRev=%d", specRev);
+        throw FrmwkEx(HERE, "Object created with an unknown SpecRev=%d", specRev);
     }
 }
 

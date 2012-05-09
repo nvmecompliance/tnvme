@@ -14,8 +14,6 @@
  *  limitations under the License.
  */
 
-#include "tnvme.h"
-#include "../Exception/frmwkEx.h"
 #include "grpTemplate.h"
 #include "testCase_r10b.h"
 
@@ -39,7 +37,7 @@ GrpTemplate::GrpTemplate(size_t grpNum, SpecRev specRev, ErrorRegs errRegs,
 
     default:
     case SPECREVTYPE_FENCE:
-       throw FrmwkEx(HERE, "Object created with unknown SpecRev=%d", specRev);
+        throw FrmwkEx("Object created with an unknown SpecRev=%d", specRev);
     }
 }
 
