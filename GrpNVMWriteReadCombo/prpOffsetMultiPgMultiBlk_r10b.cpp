@@ -91,6 +91,7 @@ PRPOffsetMultiPgMultiBlk_r10b::RunCoreTest()
      * \endverbatim
      */
     string work;
+    int64_t X;
     bool enableLog;
 
     if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
@@ -143,8 +144,10 @@ PRPOffsetMultiPgMultiBlk_r10b::RunCoreTest()
 
     switch (namspcData.type) {
     case Informative::NS_BARE:
+        X =  ccMPS - lbaDataSize;
         break;
     case Informative::NS_METAS:
+        X =  ccMPS - lbaDataSize;
         LOG_NRM("Allocating meta data size %ld",
             (lbaFormat.MS * (maxDtXferSz / lbaDataSize)));
         if (gRsrcMngr->SetMetaAllocSize(
@@ -155,26 +158,37 @@ PRPOffsetMultiPgMultiBlk_r10b::RunCoreTest()
         readCmd->AllocMetaBuffer();
         break;
     case Informative::NS_METAI:
+        X =  ccMPS - (lbaDataSize + lbaFormat.MS);
         break;
     case Informative::NS_E2ES:
     case Informative::NS_E2EI:
         throw FrmwkEx(HERE, "Deferring work to handle this case in future");
         break;
     }
-
-    DataPattern dataPat;
-    uint64_t wrVal;
-    uint64_t Y;
-
-    int64_t X =  ccMPS - lbaDataSize;
     if (X < 0) {
         LOG_WARN("CC.MPS < lba data size(LBADS); Can't run test.");
         return;
     }
 
+    DataPattern dataPat;
+    uint64_t wrVal;
+    uint64_t Y;
+
     uint64_t altPattern = 0;
     for (int64_t pgOff = 0; pgOff <= X; pgOff += 4) {
-        Y = (maxDtXferSz - pgOff) / lbaDataSize;
+        switch (namspcData.type) {
+        case Informative::NS_BARE:
+        case Informative::NS_METAS:
+            Y = ((2 * ccMPS) - pgOff) / lbaDataSize;
+            break;
+        case Informative::NS_METAI:
+            Y = ((2 * ccMPS) - pgOff) / (lbaDataSize + lbaFormat.MS);
+            break;
+        case Informative::NS_E2ES:
+        case Informative::NS_E2EI:
+            throw FrmwkEx(HERE, "Deferring work to handle this case in future");
+            break;
+        }
         LOG_NRM("Processing at page offset #%ld", pgOff);
         // lbaPow2 = {2, 4, 8, 16, 32, 64, ...}
         for (uint64_t lbaPow2 = 2; lbaPow2 <= Y; lbaPow2 <<= 1) {

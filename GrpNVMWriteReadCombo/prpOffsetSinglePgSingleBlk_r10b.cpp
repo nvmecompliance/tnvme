@@ -115,6 +115,8 @@ PRPOffsetSinglePgSingleBlk_r10b::RunCoreTest()
 
     switch (namspcData.type) {
     case Informative::NS_BARE:
+        X =  (uint64_t)(1 << (mpsRegVal + 12)) - lbaDataSize;
+        break;
     case Informative::NS_METAS:
         if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
             throw FrmwkEx(HERE);

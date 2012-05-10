@@ -117,7 +117,6 @@ UnsupportRsvdFields_r10b::CreateCmd()
 {
     Informative::Namspc namspcData = gInformative->Get1stBareMetaE2E();
     LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
-
     LOG_NRM("Processing read cmd using namspc id %d", namspcData.id);
 
     ConstSharedIdentifyPtr namSpcPtr = namspcData.idCmdNamspc;
