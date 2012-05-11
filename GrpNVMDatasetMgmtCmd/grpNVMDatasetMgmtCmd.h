@@ -14,22 +14,22 @@
  *  limitations under the License.
  */
 
-#ifndef _GRPNVMCOMPARECMD_H_
-#define _GRPNVMCOMPARECMD_H_
+#ifndef _GRPNVMDATASETMGMTCMD_H_
+#define _GRPNVMDATASETMGMTCMD_H_
 
 #include "../group.h"
 
-namespace GrpNVMCompareCmd {
+namespace GrpNVMDatasetMgmtCmd {
 
 
 /**
-* This class implements NVM cmd set compare test cases.
+* This class implements NVM cmd set data set management test cases.
 */
-class GrpNVMCompareCmd : public Group
+class GrpNVMDatasetMgmtCmd : public Group
 {
 public:
-    GrpNVMCompareCmd(size_t grpNum, SpecRev specRev, ErrorRegs errRegs, int fd);
-    virtual ~GrpNVMCompareCmd();
+    GrpNVMDatasetMgmtCmd(size_t grpNum, SpecRev specRev, ErrorRegs errRegs, int fd);
+    virtual ~GrpNVMDatasetMgmtCmd();
 };
 
 }   // namespace

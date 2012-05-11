@@ -14,23 +14,18 @@
  *  limitations under the License.
  */
 
-#ifndef _GRPNVMCOMPARECMD_H_
-#define _GRPNVMCOMPARECMD_H_
+#ifndef _GRPDEFS_H_
+#define _GRPDEFS_H_
 
-#include "../group.h"
+namespace GrpNVMDatasetMgmtCmd {
 
-namespace GrpNVMCompareCmd {
+#define ACQ_GROUP_ID                "ACQ"
+#define ASQ_GROUP_ID                "ASQ"
+#define IOCQ_GROUP_ID               "IOCQ"
+#define IOSQ_GROUP_ID               "IOSQ"
+#define IOQ_ID                      1
 
-
-/**
-* This class implements NVM cmd set compare test cases.
-*/
-class GrpNVMCompareCmd : public Group
-{
-public:
-    GrpNVMCompareCmd(size_t grpNum, SpecRev specRev, ErrorRegs errRegs, int fd);
-    virtual ~GrpNVMCompareCmd();
-};
+#define DEFAULT_CMD_WAIT_ms         SYSTEMWIDE_CMD_WAIT_ms
 
 }   // namespace
 

@@ -23,7 +23,7 @@ namespace GrpNVMWriteUncorrectCmd {
 
 
 /**
-* This class implements a template for all groups to come.
+* This class implements NVM cmd write uncorrectable test cases.
 */
 class GrpNVMWriteUncorrectCmd : public Group
 {

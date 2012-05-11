@@ -23,8 +23,7 @@ namespace GrpNVMFlushCmd {
 
 
 /**
-* This class implements a logical grouping of test for NVM cmd set flush test
-* cases.
+* This class implements NVM cmd flush test cases.
 */
 class GrpNVMFlushCmd : public Group
 {

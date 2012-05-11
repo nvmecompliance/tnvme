@@ -42,6 +42,7 @@ SUBDIRS:=			\
 	GrpNVMWriteCmd		\
 	GrpNVMWriteReadCombo	\
 	GrpNVMWriteUncorrectCmd	\
+	GrpNVMDatasetMgmtCmd	\
 	GrpGeneralCmds		\
 	Queues			\
 	Cmds			\

@@ -46,6 +46,8 @@
 #include "GrpInterrupts/grpInterrupts.h"
 #include "GrpGeneralCmds/grpGeneralCmds.h"
 #include "GrpNVMWriteUncorrectCmd/grpNVMWriteUncorrectCmd.h"
+#include "GrpNVMDatasetMgmtCmd/grpNVMDatasetMgmtCmd.h"
+
 
 void
 InstantiateGroups(vector<Group *> &groups, int &fd, struct CmdLine &cl)
@@ -73,6 +75,7 @@ InstantiateGroups(vector<Group *> &groups, int &fd, struct CmdLine &cl)
     groups.push_back(new GrpNVMFlushCmd::GrpNVMFlushCmd(groups.size(), cl.rev, cl.errRegs, fd));
     groups.push_back(new GrpInterrupts::GrpInterrupts(groups.size(), cl.rev, cl.errRegs, fd));
     groups.push_back(new GrpNVMWriteUncorrectCmd::GrpNVMWriteUncorrectCmd(groups.size(), cl.rev, cl.errRegs, fd));
+    groups.push_back(new GrpNVMDatasetMgmtCmd::GrpNVMDatasetMgmtCmd(groups.size(), cl.rev, cl.errRegs, fd));
 }
 // ------------------------------EDIT HERE---------------------------------
 
