@@ -71,20 +71,6 @@ GetLogPage::~GetLogPage()
 void
 GetLogPage::SetNUMD(uint16_t numDW)
 {
-    uint64_t errLogPgEntries;
-    uint64_t numDWAvail;
-
-    LOG_NRM("Setting NUMD 0x%04X", numDW);
-    ConstSharedIdentifyPtr idCmdCtrlr = gInformative->GetIdentifyCmdCtrlr();
-    errLogPgEntries = idCmdCtrlr->GetValue(IDCTRLRCAP_ELPE);
-    numDWAvail = ((errLogPgEntries * ERRINFO_DATA_SIZE) / sizeof(uint32_t));
-    if (numDWAvail > numDW) {
-        // per the spec this action is undef'd, so don't allow it
-        throw FrmwkEx(HERE, 
-            "Request %d DWORDS > %lld available yields undef'd results",
-            numDW, (unsigned long long)numDWAvail);
-    }
-
     uint16_t curVal = GetWord(10, 1);
     curVal &= ~NUMD_BITMASK;
     curVal |= (numDW & NUMD_BITMASK);
