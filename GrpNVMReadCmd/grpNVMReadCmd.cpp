@@ -23,6 +23,7 @@
 #include "protInfoIgnoreBare_r10b.h"
 #include "FUA_r10b.h"
 #include "limitedRetry_r10b.h"
+#include "lbaOutOfRangeMeta_r10b.h"
 
 namespace GrpNVMReadCmd {
 
@@ -46,6 +47,7 @@ GrpNVMReadCmd::GrpNVMReadCmd(size_t grpNum, SpecRev specRev, ErrorRegs errRegs,
         APPEND_TEST_AT_YLEVEL(IgnoreMetaPtrBare_r10b, fd, GrpNVMReadCmd, errRegs)
         APPEND_TEST_AT_YLEVEL(FUA_r10b, fd, GrpNVMReadCmd, errRegs)
         APPEND_TEST_AT_YLEVEL(LimitedRetry_r10b, fd, GrpNVMReadCmd, errRegs)
+        APPEND_TEST_AT_YLEVEL(LBAOutOfRangeMeta_r10b, fd, GrpNVMReadCmd, errRegs)
         break;
 
     default:

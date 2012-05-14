@@ -92,7 +92,7 @@ PRPOffsetSinglePgSingleBlk_r10b::RunCoreTest()
      * \endverbatim
      */
     string work;
-    uint64_t X;
+    int64_t X;
     bool enableLog;
     unsigned int seed = 17;
 
@@ -115,20 +115,26 @@ PRPOffsetSinglePgSingleBlk_r10b::RunCoreTest()
 
     switch (namspcData.type) {
     case Informative::NS_BARE:
-        X =  (uint64_t)(1 << (mpsRegVal + 12)) - lbaDataSize;
+        X =  (int64_t)(1 << (mpsRegVal + 12)) - lbaDataSize;
         break;
     case Informative::NS_METAS:
         if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
             throw FrmwkEx(HERE);
-        X =  (uint64_t)(1 << (mpsRegVal + 12)) - lbaDataSize;
+        X =  (int64_t)(1 << (mpsRegVal + 12)) - lbaDataSize;
         break;
     case Informative::NS_METAI:
-        X =  (uint64_t)(1 << (mpsRegVal + 12)) - (lbaDataSize + lbaFormat.MS);
+        X =  (int64_t)(1 << (mpsRegVal + 12)) - (lbaDataSize + lbaFormat.MS);
         break;
     case Informative::NS_E2ES:
     case Informative::NS_E2EI:
         throw FrmwkEx(HERE, "Deferring work to handle this case in future");
         break;
+    }
+    if (X <= 0) {
+        LOG_WARN("CC.MPS (0x%04X) < lba data size(LBADS) + MS "
+            "(0x08%lX + 0x04%X) ; Can't run test.", (1 << (mpsRegVal + 12)),
+            lbaDataSize, lbaFormat.MS);
+        return;
     }
 
     LOG_NRM("Prepare cmds to send to the queues.");
@@ -138,7 +144,7 @@ PRPOffsetSinglePgSingleBlk_r10b::RunCoreTest()
     DataPattern dataPattern;
     uint64_t wrVal;
     uint32_t prp2RandVal[2];
-    for (uint64_t pgOff = 0; pgOff <= X; pgOff += 4) {
+    for (int64_t pgOff = 0; pgOff <= X; pgOff += 4) {
         LOG_NRM("Processing at page offset #%ld", pgOff);
         if ((pgOff % 8) != 0) {
             dataPattern = DATAPAT_CONST_8BIT;

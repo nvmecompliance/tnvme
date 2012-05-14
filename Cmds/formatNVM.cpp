@@ -40,6 +40,10 @@ FormatNVM::SetSES(uint8_t ses)
 {
     uint8_t work;
 
+    const uint8_t MAX_VALUE = 0x07;
+    if (ses > MAX_VALUE)
+        throw FrmwkEx(HERE, "Illegal ses %d > %d(max)", MAX_VALUE);
+
     LOG_NRM("Setting SES = 0x%02X", ses);
     work = GetByte(10, 1);
     work &= ~BYTE_BITMASK_SES;
@@ -79,6 +83,10 @@ FormatNVM::SetPI(uint8_t pi)
 {
     uint8_t work;
 
+    const uint8_t MAX_VALUE = 0x07;
+    if (pi > MAX_VALUE)
+        throw FrmwkEx(HERE, "Illegal pi %d > %d(max)", MAX_VALUE);
+
     LOG_NRM("Setting PI = 0x%02X", pi);
     work = GetByte(10, 0);
     work &= ~BYTE_BITMASK_PI;
@@ -117,6 +125,10 @@ void
 FormatNVM::SetLBAF(uint8_t lbaf)
 {
     uint8_t work;
+
+    const uint8_t MAX_VALUE = 0x0F;
+    if (lbaf > MAX_VALUE)
+        throw FrmwkEx(HERE, "Illegal lbaf %d > %d(max)", MAX_VALUE);
 
     LOG_NRM("Setting LBAF = 0x%02X", lbaf);
     work = GetByte(10, 0);
