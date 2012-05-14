@@ -45,9 +45,9 @@ IdentifyDataType Identify::mIdNamespcType[] =
 #undef ZZ
 
 
-Identify::Identify() : AdminCmd(Trackable::OBJ_IDENTIFY)
+Identify::Identify() : Cmd(Trackable::OBJ_IDENTIFY)
 {
-    Init(Opcode, DATADIR_FROM_DEVICE);
+    Init(Opcode, DATADIR_FROM_DEVICE, 64);
 
     // No cmd should ever be created which violates these masking possibilities
     send_64b_bitmask allowPrpMask = (send_64b_bitmask)

@@ -17,7 +17,7 @@
 #ifndef _GETLOGPAGE_H_
 #define _GETLOGPAGE_H_
 
-#include "adminCmd.h"
+#include "cmd.h"
 #include "getLogPageDefs.h"
 
 
@@ -33,7 +33,7 @@ typedef boost::shared_ptr<const GetLogPage>         ConstSharedGetLogPagePtr;
 *
 * @note This class may throw exceptions.
 */
-class GetLogPage : public AdminCmd
+class GetLogPage : public Cmd
 {
 public:
     GetLogPage();

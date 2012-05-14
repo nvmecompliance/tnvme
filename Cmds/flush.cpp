@@ -21,9 +21,9 @@ SharedFlushPtr Flush::NullFlushPtr;
 const uint8_t Flush::Opcode = 0x00;
 
 
-Flush::Flush() : NVMCmd(Trackable::OBJ_FLUSH)
+Flush::Flush() : Cmd(Trackable::OBJ_FLUSH)
 {
-    Init(Opcode, DATADIR_NONE);
+    Init(Opcode, DATADIR_NONE, 64);
 }
 
 

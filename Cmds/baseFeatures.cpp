@@ -31,15 +31,14 @@ const uint8_t BaseFeatures::FID_ASYNC_EVENT_CONFIG   = 0x0b;
 const uint8_t BaseFeatures::FID_SW_PROGRESS          = 0x80;
 
 
-BaseFeatures::BaseFeatures() :
-    AdminCmd(Trackable::OBJTYPE_FENCE)
+BaseFeatures::BaseFeatures() : Cmd(Trackable::OBJTYPE_FENCE)
 {
     // This constructor will throw
 }
 
 
 BaseFeatures::BaseFeatures(Trackable::ObjType objBeingCreated) :
-    AdminCmd(objBeingCreated)
+    Cmd(objBeingCreated)
 {
 }
 

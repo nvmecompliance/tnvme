@@ -21,9 +21,9 @@ SharedReadPtr Read::NullReadPtr;
 const uint8_t Read::Opcode = 0x02;
 
 
-Read::Read() : NVMCmd(Trackable::OBJ_READ)
+Read::Read() : Cmd(Trackable::OBJ_READ)
 {
-    Init(Opcode, DATADIR_FROM_DEVICE);
+    Init(Opcode, DATADIR_FROM_DEVICE, 64);
 
     // No cmd should ever be created which violates these masking possibilities
     send_64b_bitmask allowPrpMask = (send_64b_bitmask)

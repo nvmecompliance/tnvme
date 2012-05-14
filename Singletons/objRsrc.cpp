@@ -20,6 +20,8 @@
 #include "../Queues/asq.h"
 #include "../Queues/iocq.h"
 #include "../Queues/iosq.h"
+#include "../Cmds/adminCmd.h"
+#include "../Cmds/nvmCmd.h"
 #include "../Cmds/identify.h"
 #include "../Cmds/createIOCQ.h"
 #include "../Cmds/createIOSQ.h"

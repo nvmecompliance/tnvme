@@ -22,7 +22,7 @@
 #include "../Queues/iocq.h"
 #include "../Queues/iosq.h"
 #include "../Utils/io.h"
-#include "../Cmds/nvmCmd.h"
+#include "../Cmds/adminCmd.h"
 
 
 namespace GrpGeneralCmds {

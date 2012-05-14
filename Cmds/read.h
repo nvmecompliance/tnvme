@@ -17,7 +17,7 @@
 #ifndef _READ_H_
 #define _READ_H_
 
-#include "nvmCmd.h"
+#include "cmd.h"
 
 
 class Read;    // forward definition
@@ -32,7 +32,7 @@ typedef boost::shared_ptr<const Read>       ConstSharedReadPtr;
 *
 * @note This class may throw exceptions.
 */
-class Read : public NVMCmd
+class Read : public Cmd
 {
 public:
     Read();

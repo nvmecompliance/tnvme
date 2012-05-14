@@ -17,7 +17,7 @@
 #ifndef _WRITE_H_
 #define _WRITE_H_
 
-#include "nvmCmd.h"
+#include "cmd.h"
 
 
 class Write;    // forward definition
@@ -32,7 +32,7 @@ typedef boost::shared_ptr<const Write>       ConstSharedWritePtr;
 *
 * @note This class may throw exceptions.
 */
-class Write : public NVMCmd
+class Write : public Cmd
 {
 public:
     Write();

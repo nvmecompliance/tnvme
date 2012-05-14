@@ -257,7 +257,6 @@ void
 SQ::Send(SharedCmdPtr cmd, uint16_t &uniqueId)
 {
     int rc;
-    string cmdSet;
     struct nvme_64b_send io;
 
 
@@ -272,17 +271,10 @@ SQ::Send(SharedCmdPtr cmd, uint16_t &uniqueId)
     io.data_buf_size = cmd->GetPrpBufferSize();
     io.data_buf_ptr = cmd->GetROPrpBuffer();
     io.cmd_buf_ptr = cmd->GetCmd()->GetBuffer();
-    io.cmd_set = cmd->GetCmdSet();
     io.data_dir = cmd->GetDataDir();
 
-    switch (io.cmd_set) {
-    case CMD_ADMIN: cmdSet = "admin";           break;
-    case CMD_NVM:   cmdSet = "NVM";             break;
-    default:        cmdSet = "illegal/unknown"; break;
-    };
-    LOG_NRM(
-        "Send %s cmd set, opcode 0x%02X, payload size 0x%04X, to SQ id 0x%02X",
-        cmdSet.c_str(), cmd->GetOpcode(), io.data_buf_size, io.q_id);
+    LOG_NRM("Send cmd opcode 0x%02X, payload size 0x%04X, to SQ id 0x%02X",
+        cmd->GetOpcode(), io.data_buf_size, io.q_id);
 
     if ((rc = ioctl(mFd, NVME_IOCTL_SEND_64B_CMD, &io)) < 0)
         throw FrmwkEx(HERE, "Error sending cmd, rc =%d", rc);

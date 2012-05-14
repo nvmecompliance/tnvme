@@ -17,7 +17,7 @@
 #ifndef _CREATEIOCQ_H_
 #define _CREATEIOCQ_H_
 
-#include "adminCmd.h"
+#include "cmd.h"
 #include "../Queues/iocq.h"
 
 
@@ -34,7 +34,7 @@ typedef boost::shared_ptr<const CreateIOCQ>       ConstSharedCreateIOCQPtr;
 *
 * @note This class may throw exceptions.
 */
-class CreateIOCQ : public AdminCmd
+class CreateIOCQ : public Cmd
 {
 public:
     CreateIOCQ();

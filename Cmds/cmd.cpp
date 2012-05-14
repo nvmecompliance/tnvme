@@ -37,7 +37,6 @@ Cmd::Cmd(Trackable::ObjType objBeingCreated) :
     Trackable(objBeingCreated),
     mCmdBuf(new MemBuffer())
 {
-    mCmdSet = CMD_ADMIN;
     mDataDir = DATADIR_NONE;
     mCmdName = GetObjName(objBeingCreated);
 }
@@ -49,17 +48,8 @@ Cmd::~Cmd()
 
 
 void
-Cmd::Init(nvme_cmds cmdSet, uint8_t opcode, DataDir dataDir, uint16_t cmdSize)
+Cmd::Init(uint8_t opcode, DataDir dataDir, uint16_t cmdSize)
 {
-    switch (cmdSet) {
-    case CMD_ADMIN:
-    case CMD_NVM:
-        mCmdSet = cmdSet;
-        break;
-    default:
-        throw FrmwkEx(HERE, "Illegal cmd set specified: %d", cmdSet);
-    }
-
     switch (dataDir) {
     case DATADIR_NONE:
     case DATADIR_TO_DEVICE:

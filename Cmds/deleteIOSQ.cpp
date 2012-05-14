@@ -21,9 +21,9 @@ SharedDeleteIOSQPtr DeleteIOSQ::NullDeleteIOSQPtr;
 const uint8_t DeleteIOSQ::Opcode = 0x00;
 
 
-DeleteIOSQ::DeleteIOSQ() : AdminCmd(Trackable::OBJ_DELETEIOSQ)
+DeleteIOSQ::DeleteIOSQ() : Cmd(Trackable::OBJ_DELETEIOSQ)
 {
-    AdminCmd::Init(Opcode, DATADIR_NONE);
+    Cmd::Init(Opcode, DATADIR_NONE, 64);
 }
 
 

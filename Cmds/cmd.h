@@ -55,7 +55,6 @@ public:
     uint16_t  GetCmdSizeB() const { return mCmdBuf->GetBufSize(); }
     uint16_t  GetCmdSizeW() const { return (mCmdBuf->GetBufSize() / 2); }
     uint8_t   GetCmdSizeDW() const { return (mCmdBuf->GetBufSize() / 4); }
-    nvme_cmds GetCmdSet() const { return mCmdSet; }
     uint8_t   GetOpcode() const { return GetByte(0, 0); }
     string    GetName() const { return mCmdName; }
 
@@ -129,7 +128,6 @@ public:
 protected:
     /**
      * Initialize this object.
-     * @param cmdSet Pass which cmd set this cmd belongs
      * @param opcode Pass the opcode defining this cmd, per NVME spec.
      * @param dataDir Pass the direction of data for this cmd. This is used
      *      to notify dnvme which way to send base classes PrpData. The kernel
@@ -137,14 +135,12 @@ protected:
      *      is not correct, unknown outcomes will be observed.
      * @param cmdSize Pass the number of bytes consisting of a single cmd.
      */
-    void Init(nvme_cmds cmdSet, uint8_t opcode, DataDir dataDir,
-        uint16_t cmdSize);
+    void Init(uint8_t opcode, DataDir dataDir, uint16_t cmdSize);
 
 
 private:
     Cmd();
 
-    nvme_cmds mCmdSet;
     SharedMemBufferPtr mCmdBuf;
     DataDir mDataDir;
     string mCmdName;

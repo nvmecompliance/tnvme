@@ -17,7 +17,7 @@
 #ifndef _FORMATNVM_H_
 #define _FORMATNVM_H_
 
-#include "adminCmd.h"
+#include "cmd.h"
 
 
 class FormatNVM;    // forward definition
@@ -32,7 +32,7 @@ typedef boost::shared_ptr<const FormatNVM>       ConstSharedFormatNVMPtr;
 *
 * @note This class may throw exceptions.
 */
-class FormatNVM : public AdminCmd
+class FormatNVM : public Cmd
 {
 public:
     FormatNVM();

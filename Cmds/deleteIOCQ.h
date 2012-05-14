@@ -17,7 +17,7 @@
 #ifndef _DELETEIOCQ_H_
 #define _DELETEIOCQ_H_
 
-#include "adminCmd.h"
+#include "cmd.h"
 #include "../Queues/iocq.h"
 
 
@@ -34,7 +34,7 @@ typedef boost::shared_ptr<const DeleteIOCQ>       ConstSharedDeleteIOCQPtr;
 *
 * @note This class may throw exceptions.
 */
-class DeleteIOCQ : public AdminCmd
+class DeleteIOCQ : public Cmd
 {
 public:
     DeleteIOCQ();

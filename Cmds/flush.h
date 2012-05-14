@@ -17,7 +17,7 @@
 #ifndef _FLUSH_H_
 #define _FLUSH_H_
 
-#include "nvmCmd.h"
+#include "cmd.h"
 
 
 class Flush;    // forward definition
@@ -32,7 +32,7 @@ typedef boost::shared_ptr<const Flush>       ConstSharedFlushPtr;
 *
 * @note This class may throw exceptions.
 */
-class Flush : public NVMCmd
+class Flush : public Cmd
 {
 public:
     Flush();

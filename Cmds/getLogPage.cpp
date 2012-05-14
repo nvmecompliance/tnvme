@@ -51,9 +51,9 @@ GetLogPageDataType GetLogPage::mFwLogMetrics[] =
 #undef ZZ
 
 
-GetLogPage::GetLogPage() : AdminCmd(Trackable::OBJ_GETLOGPAGE)
+GetLogPage::GetLogPage() : Cmd(Trackable::OBJ_GETLOGPAGE)
 {
-    Init(Opcode, DATADIR_FROM_DEVICE);
+    Init(Opcode, DATADIR_FROM_DEVICE, 64);
 
 
     // No cmd should ever be created which violates these masking possibilities

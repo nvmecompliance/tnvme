@@ -17,7 +17,7 @@
 #ifndef _BASEFEATURES_H_
 #define _BASEFEATURES_H_
 
-#include "adminCmd.h"
+#include "cmd.h"
 
 
 /**
@@ -25,7 +25,7 @@
 *
 * @note This class may throw exceptions.
 */
-class BaseFeatures : public AdminCmd
+class BaseFeatures : public Cmd
 {
 public:
     /**

@@ -24,9 +24,9 @@ SharedFormatNVMPtr FormatNVM::NullFormatNVMPtr;
 const uint8_t FormatNVM::Opcode = 0x80;
 
 
-FormatNVM::FormatNVM() : AdminCmd(Trackable::OBJ_FORMATNVM)
+FormatNVM::FormatNVM() : Cmd(Trackable::OBJ_FORMATNVM)
 {
-    AdminCmd::Init(Opcode, DATADIR_NONE);
+    Cmd::Init(Opcode, DATADIR_NONE, 64);
 }
 
 

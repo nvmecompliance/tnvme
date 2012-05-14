@@ -23,7 +23,7 @@ const uint8_t GetFeatures::Opcode = 0x0a;
 
 GetFeatures::GetFeatures() : BaseFeatures(Trackable::OBJ_GETFEATURES)
 {
-    Init(Opcode, DATADIR_FROM_DEVICE);
+    Init(Opcode, DATADIR_FROM_DEVICE, 64);
 
     // No cmd should ever be created which violates these masking possibilities
     send_64b_bitmask allowPrpMask = (send_64b_bitmask)

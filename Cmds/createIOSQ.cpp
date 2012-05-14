@@ -21,9 +21,9 @@ SharedCreateIOSQPtr CreateIOSQ::NullCreateIOSQPtr;
 const uint8_t CreateIOSQ::Opcode = 0x01;
 
 
-CreateIOSQ::CreateIOSQ() : AdminCmd(Trackable::OBJ_CREATEIOSQ)
+CreateIOSQ::CreateIOSQ() : Cmd(Trackable::OBJ_CREATEIOSQ)
 {
-    AdminCmd::Init(Opcode, DATADIR_TO_DEVICE);
+    Cmd::Init(Opcode, DATADIR_TO_DEVICE, 64);
 
     // No cmd should ever be created which violates these masking possibilities
     send_64b_bitmask allowPrpMask = (send_64b_bitmask)

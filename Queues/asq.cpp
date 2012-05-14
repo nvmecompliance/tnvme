@@ -49,7 +49,7 @@ void
 ASQ::Send(SharedCmdPtr cmd, uint16_t &uniqueId)
 {
     // Detect if doing something that looks suspicious/incorrect/illegal
-    if ((cmd->GetCmdSet() == CMD_ADMIN) &&
+    if ((GetQId() == 0) &&                        // if it's admin cmd
         (cmd->GetOpcode() == CreateIOCQ::Opcode) &&
         cmd->GetBit(11, 1) &&                     // if IOCQ is using IRQ's, but
         (gCtrlrConfig->IrqsEnabled() == false)) { // dnvme is NOT using IRQ's

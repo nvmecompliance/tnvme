@@ -21,9 +21,9 @@ SharedWritePtr Write::NullWritePtr;
 const uint8_t Write::Opcode = 0x01;
 
 
-Write::Write() : NVMCmd(Trackable::OBJ_WRITE)
+Write::Write() : Cmd(Trackable::OBJ_WRITE)
 {
-    Init(Opcode, DATADIR_TO_DEVICE);
+    Init(Opcode, DATADIR_TO_DEVICE, 64);
 
     // No cmd should ever be created which violates these masking possibilities
     send_64b_bitmask allowPrpMask = (send_64b_bitmask)
