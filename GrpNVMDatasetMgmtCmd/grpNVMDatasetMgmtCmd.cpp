@@ -16,7 +16,11 @@
 
 #include "grpNVMDatasetMgmtCmd.h"
 #include "../Exception/frmwkEx.h"
+#include "identify_r10b.h"
 #include "createResources_r10b.h"
+#include "invalidNamspc_r10b.h"
+#include "unsupportRsvdFields_r10b.h"
+#include "prp1PRP2NR_r10b.h"
 
 namespace GrpNVMDatasetMgmtCmd {
 
@@ -26,15 +30,16 @@ GrpNVMDatasetMgmtCmd::GrpNVMDatasetMgmtCmd(size_t grpNum, SpecRev specRev,
     Group(grpNum, specRev, "GrpNVMDatasetMgmtCmd",
         "NVM cmd set data set mgmt tests")
 {
-    // ------------------------CHANGE NOTICE: (3-2-2012)------------------------
-    // The rule to keep groups and tests at a well known constant reference
-    // number for all of time is to restrictive. A new scheme has replaced
-    // that strategy. For complete details refer to:
+    // For complete details about the APPEND_TEST_AT_?LEVEL() macros:
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Numbering" and
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Strategy
     switch (mSpecRev) {
     case SPECREV_10b:
+        APPEND_TEST_AT_XLEVEL(Identify_r10b, fd, GrpNVMDatasetMgmtCmd, errRegs)
         APPEND_TEST_AT_XLEVEL(CreateResources_r10b, fd, GrpNVMDatasetMgmtCmd, errRegs)
+        APPEND_TEST_AT_YLEVEL(InvalidNamspc_r10b, fd, GrpNVMDatasetMgmtCmd, errRegs)
+        APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r10b, fd, GrpNVMDatasetMgmtCmd, errRegs)
+        APPEND_TEST_AT_YLEVEL(PRP1PRP2NR_r10b, fd, GrpNVMDatasetMgmtCmd, errRegs)
         break;
 
     default:

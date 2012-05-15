@@ -62,6 +62,7 @@ Trackable::GetObjName(ObjType obj)
     case OBJ_WRITE:         name = "Write";              break;
     case OBJ_READ:          name = "Read";               break;
     case OBJ_FLUSH:         name = "Flush";              break;
+    case OBJ_DATASETMGMT:   name = "DatasetMgmt";        break;
     default:
         throw FrmwkEx(HERE, "Forgot to label this unknown obj");
     }

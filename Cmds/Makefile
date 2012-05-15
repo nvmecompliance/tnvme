@@ -34,7 +34,8 @@ SRC =				\
 	read.cpp		\
 	flush.cpp		\
 	getLogPage.cpp		\
-	formatNVM.cpp
+	formatNVM.cpp		\
+	datasetMgmt.cpp
 
 .SUFFIXES: .cpp
 

@@ -192,7 +192,7 @@ PRPOffsetMultiPgMultiBlk_r10b::RunCoreTest()
         LOG_NRM("Processing at page offset #%ld", pgOff);
         // lbaPow2 = {2, 4, 8, 16, 32, 64, ...}
         for (uint64_t lbaPow2 = 2; lbaPow2 <= Y; lbaPow2 <<= 1) {
-            // nLBA = {(0, 1, 2), (3, 4, 5), (7, 8, 9), (15, 16, 17), ...}
+            // nLBA = {(1, 2, 3), (3, 4, 5), (7, 8, 9), (15, 16, 17), ...}
             for (uint64_t nLBA = (lbaPow2 - 1); nLBA <= (lbaPow2 + 1); nLBA++) {
                 if ((++altPattern % 2) != 0) {
                     dataPat = DATAPAT_INC_32BIT;

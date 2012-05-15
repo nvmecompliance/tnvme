@@ -94,10 +94,9 @@ PRPOffsetSinglePgSingleBlk_r10b::RunCoreTest()
     string work;
     int64_t X;
     bool enableLog;
-    unsigned int seed = 17;
 
-    LOG_NRM("Initialize random seed to 17");
-    srand (seed);
+    LOG_NRM("Initialize random seed");
+    srand (17);
 
     // Lookup objs which were created in a prior test within group
     SharedIOSQPtr iosq = CAST_TO_IOSQ(gRsrcMngr->GetObj(IOSQ_GROUP_ID));
@@ -149,8 +148,8 @@ PRPOffsetSinglePgSingleBlk_r10b::RunCoreTest()
         if ((pgOff % 8) != 0) {
             dataPattern = DATAPAT_CONST_8BIT;
             wrVal = pgOff;
-            prp2RandVal[0] = rand_r(&seed);
-            prp2RandVal[1] = rand_r(&seed);
+            prp2RandVal[0] = rand();
+            prp2RandVal[1] = rand();
             work = str(boost::format("dataPat.constb.memOff.%d") % pgOff);
         } else {
             dataPattern = DATAPAT_INC_16BIT;

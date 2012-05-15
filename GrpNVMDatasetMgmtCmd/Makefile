@@ -18,7 +18,11 @@ INCLUDES = -I. -I../ -I../../ -I/usr/local/include
 
 SRC =					\
 	grpNVMDatasetMgmtCmd.cpp	\
-	createResources_r10b.cpp
+	identify_r10b.cpp		\
+	createResources_r10b.cpp	\
+	invalidNamspc_r10b.cpp		\
+	unsupportRsvdFields_r10b.cpp	\
+	prp1PRP2NR_r10b.cpp
 
 .SUFFIXES: .cpp
 

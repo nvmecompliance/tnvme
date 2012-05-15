@@ -21,9 +21,9 @@
 #include "../Queues/iocq.h"
 #include "../Queues/iosq.h"
 #include "../Utils/io.h"
-#include "../Cmds/flush.h"
+#include "../Cmds/datasetMgmt.h"
 
-namespace GrpNVMFlushCmd {
+namespace GrpNVMDatasetMgmtCmd {
 
 
 InvalidNamspc_r10b::InvalidNamspc_r10b(int fd, string mGrpName,
@@ -32,10 +32,10 @@ InvalidNamspc_r10b::InvalidNamspc_r10b(int fd, string mGrpName,
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 4,6");
-    mTestDesc.SetShort(     "Issue flush and cause SC=Invalid Namspc or Format");
+    mTestDesc.SetShort(     "Issue dataset mgmt and cause SC=Invalid Namspc or Format");
     // No string size limit for the long description
     mTestDesc.SetLong(
-        "Determine Identify.NN and issue flush cmd to all namspcs not "
+        "Determine Identify.NN and issue dataset mgmt cmd to all namspcs not "
         "supported by DUT, expect failure.");
 }
 
@@ -87,7 +87,19 @@ InvalidNamspc_r10b::RunCoreTest()
     SharedIOSQPtr iosq = CAST_TO_IOSQ(gRsrcMngr->GetObj(IOSQ_GROUP_ID));
     SharedIOCQPtr iocq = CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_GROUP_ID));
 
-    SharedFlushPtr flushCmd = SharedFlushPtr(new Flush());
+    SharedDatasetMgmtPtr datasetMgmtCmd =
+        SharedDatasetMgmtPtr(new DatasetMgmt());
+
+    LOG_NRM("Create memory to contain 1 dataset range def");
+    SharedMemBufferPtr rangeMem = SharedMemBufferPtr(new MemBuffer());
+    rangeMem->Init(sizeof(RangeDef), true);
+    send_64b_bitmask prpReq =
+        (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE);
+    datasetMgmtCmd->SetPrpBuffer(prpReq, rangeMem);
+
+    LOG_NRM("Setup generic range def guidelines");
+    RangeDef *rangeDef = (RangeDef *)rangeMem->GetBuffer();
+    rangeDef->length = 1;
 
     // For all namspc's issue cmd to an illegal namspc
     ConstSharedIdentifyPtr idCtrlrStruct = gInformative->GetIdentifyCmdCtrlr();
@@ -98,12 +110,12 @@ InvalidNamspc_r10b::RunCoreTest()
 
     for (i = (nn + 1), inc = 1; i <= 0xffffffff; i += (2 * inc), inc += 1327) {
 
-        LOG_NRM("Issue flush cmd with illegal namspc ID=%llu",
+        LOG_NRM("Issue dataset mgmt cmd with illegal namspc ID=%llu",
             (unsigned long long)i);
-        flushCmd->SetNSID(i);
+        datasetMgmtCmd->SetNSID(i);
         work = str(boost::format("namspc%d") % i);
         IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
-            iocq, flushCmd, work, true, CESTAT_INVAL_NAMSPC);
+            iocq, datasetMgmtCmd, work, true, CESTAT_INVAL_NAMSPC);
     }
 }
 

@@ -34,6 +34,7 @@
 #include "../Cmds/write.h"
 #include "../Cmds/read.h"
 #include "../Cmds/flush.h"
+#include "../Cmds/datasetMgmt.h"
 
 /**
  * Instantiate a class.
@@ -109,6 +110,7 @@ ObjRsrc::AllocWorker(Trackable::ObjType type)
     INSTANTIATE_OBJ(WRITE, Write)
     INSTANTIATE_OBJ(READ, Read)
     INSTANTIATE_OBJ(FLUSH, Flush)
+    INSTANTIATE_OBJ(DATASETMGMT, DatasetMgmt)
 
     default:
         throw FrmwkEx("Unknown obj type specified: 0x%02X", type);

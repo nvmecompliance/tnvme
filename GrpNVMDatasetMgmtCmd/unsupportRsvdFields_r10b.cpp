@@ -20,8 +20,9 @@
 #include "../Queues/iocq.h"
 #include "../Queues/iosq.h"
 #include "../Utils/io.h"
+#include "../Cmds/datasetMgmt.h"
 
-namespace GrpNVMReadCmd {
+namespace GrpNVMDatasetMgmtCmd {
 
 
 UnsupportRsvdFields_r10b::UnsupportRsvdFields_r10b(int fd, string mGrpName,
@@ -33,13 +34,11 @@ UnsupportRsvdFields_r10b::UnsupportRsvdFields_r10b(int fd, string mGrpName,
     mTestDesc.SetShort(     "Set unsupported/rsvd fields in cmd");
     // No string size limit for the long description
     mTestDesc.SetLong(
-        "Search for 1 of the following namspcs to run test. Find 1st bare "
-        "namspc, or find 1st meta namspc, or find 1st E2E namspc. Unsupported "
-        "DW's and rsvd fields are treated identical, the recipient shall not "
-        "check their value. Issue a read cmd requesting 1 block and approp "
-        "supporting meta/E2E if necessary from the selected namspc at LBA 0, "
-        "expect success. Issue same cmd setting all unsupported/rsvd fields, "
-        "expect success. Set: DW0_b15:10, DW2, DW3, DW12_b25:16, DW13_b31:8");
+        "Unsupported DW's and rsvd fields are treated identical, the recipient "
+        "shall not check their value. Determine Identify.NN and issue flush "
+        "cmd to all namspc, expect success. Then issue same cmd setting all "
+        "unsupported/rsvd fields, expect success. Set: DW0_b15:10, DW2, DW3, "
+        "DW4, DW5, DW8, DW9, DW10_b31:8, DW11_b31:3, DW12, DW13, DW14, DW15.");
 }
 
 
@@ -87,69 +86,57 @@ UnsupportRsvdFields_r10b::RunCoreTest()
     SharedIOSQPtr iosq = CAST_TO_IOSQ(gRsrcMngr->GetObj(IOSQ_GROUP_ID));
     SharedIOCQPtr iocq = CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_GROUP_ID));
 
-    SharedReadPtr readCmd = CreateCmd();
-    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
-        readCmd, "none.set", true);
+    SharedDatasetMgmtPtr datasetMgmtCmd =
+        SharedDatasetMgmtPtr(new DatasetMgmt());
 
-    LOG_NRM("Set all cmd's rsvd bits");
-    uint32_t work = readCmd->GetDword(0);
-    work |= 0x0000fc00;      // Set DW0_b15:10 bits
-    readCmd->SetDword(work, 0);
+    ConstSharedIdentifyPtr idCtrlr = gInformative->GetIdentifyCmdCtrlr();
+    for (uint64_t i = 1; i <= idCtrlr->GetValue(IDCTRLRCAP_NN); i++) {
+        LOG_NRM("Processing namspc %ld", i);
+        datasetMgmtCmd->SetNSID(i);
 
-    readCmd->SetDword(0xffffffff, 2);
-    readCmd->SetDword(0xffffffff, 3);
+        LOG_NRM("Create memory to contain 1 dataset range def");
+        SharedMemBufferPtr rangeMem = SharedMemBufferPtr(new MemBuffer());
+        rangeMem->Init(sizeof(RangeDef), true);
+        send_64b_bitmask prpReq =
+            (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE);
+        datasetMgmtCmd->SetPrpBuffer(prpReq, rangeMem);
 
-    work = readCmd->GetDword(12);
-    work |= 0x03ff0000;      // Set DW12_b25:16 bits
-    readCmd->SetDword(work, 12);
+        LOG_NRM("Setup generic range def guidelines");
+        RangeDef *rangeDef = (RangeDef *)rangeMem->GetBuffer();
+        rangeDef->length = 1;
 
-    work = readCmd->GetDword(13);
-    work |= 0xffffff00;     // Set DW13_b31:8 bits
-    readCmd->SetDword(work, 13);
+        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
+            datasetMgmtCmd, "none.set", true);
 
-    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
-        readCmd, "all.set", true);
-}
+        LOG_NRM("Set all cmd's rsvd bits");
+        uint32_t work = datasetMgmtCmd->GetDword(0);
+        work |= 0x0000fc00;      // Set DW0_b15:10 bits
+        datasetMgmtCmd->SetDword(work, 0);
+
+        datasetMgmtCmd->SetDword(0xffffffff, 2);
+        datasetMgmtCmd->SetDword(0xffffffff, 3);
+        datasetMgmtCmd->SetDword(0xffffffff, 4);
+        datasetMgmtCmd->SetDword(0xffffffff, 5);
+        datasetMgmtCmd->SetDword(0xffffffff, 8);
+        datasetMgmtCmd->SetDword(0xffffffff, 9);
+
+        work = datasetMgmtCmd->GetDword(10);
+        work |= 0xffffff00;     // Set DW10_b31:8 bits
+        datasetMgmtCmd->SetDword(work, 10);
 
 
-SharedReadPtr
-UnsupportRsvdFields_r10b::CreateCmd()
-{
-    Informative::Namspc namspcData = gInformative->Get1stBareMetaE2E();
-    LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
-    LOG_NRM("Processing read cmd using namspc id %d", namspcData.id);
+        work = datasetMgmtCmd->GetDword(11);
+        work |= 0xfffffff8;     // Set DW11_b31:3 bits
+        datasetMgmtCmd->SetDword(work, 11);
 
-    ConstSharedIdentifyPtr namSpcPtr = namspcData.idCmdNamspc;
-    uint64_t lbaDataSize = namSpcPtr->GetLBADataSize();;
-    SharedMemBufferPtr dataPat = SharedMemBufferPtr(new MemBuffer());
+        datasetMgmtCmd->SetDword(0xffffffff, 12);
+        datasetMgmtCmd->SetDword(0xffffffff, 13);
+        datasetMgmtCmd->SetDword(0xffffffff, 14);
+        datasetMgmtCmd->SetDword(0xffffffff, 15);
 
-    SharedReadPtr readCmd = SharedReadPtr(new Read());
-    send_64b_bitmask prpBitmask = (send_64b_bitmask)(MASK_PRP1_PAGE
-        | MASK_PRP2_PAGE | MASK_PRP2_LIST);
-
-    switch (namspcData.type) {
-    case Informative::NS_BARE:
-        dataPat->Init(lbaDataSize);
-        break;
-    case Informative::NS_METAS:
-        dataPat->Init(lbaDataSize);
-        if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
-            throw FrmwkEx(HERE);
-        readCmd->AllocMetaBuffer();
-        break;
-    case Informative::NS_METAI:
-        dataPat->Init(lbaDataSize + lbaFormat.MS);
-        break;
-    case Informative::NS_E2ES:
-    case Informative::NS_E2EI:
-        throw FrmwkEx(HERE, "Deferring work to handle this case in future");
-        break;
+        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
+            datasetMgmtCmd, "all.set", true);
     }
-
-    readCmd->SetPrpBuffer(prpBitmask, dataPat);
-    readCmd->SetNSID(namspcData.id);
-    readCmd->SetNLB(0);
-    return readCmd;
 }
 
 

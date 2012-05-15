@@ -87,33 +87,37 @@ UnsupportRsvdFields_r10b::RunCoreTest()
     SharedIOCQPtr iocq = CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_GROUP_ID));
 
     SharedFlushPtr flushCmd = SharedFlushPtr(new Flush());
-    flushCmd->SetNSID(1);
+    ConstSharedIdentifyPtr idCtrlr = gInformative->GetIdentifyCmdCtrlr();
+    for (uint64_t i = 1; i <= idCtrlr->GetValue(IDCTRLRCAP_NN); i++) {
+        LOG_NRM("Processing namspc %ld", i);
+        flushCmd->SetNSID(i);
 
-    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
-        flushCmd, "none.set", true);
+        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
+            flushCmd, "none.set", true);
 
-    LOG_NRM("Set all cmd's rsvd bits");
-    uint32_t work = flushCmd->GetDword(0);
-    work |= 0x0000fc00;      // Set DW0_b15:10 bits
-    flushCmd->SetDword(work, 0);
+        LOG_NRM("Set all cmd's rsvd bits");
+        uint32_t work = flushCmd->GetDword(0);
+        work |= 0x0000fc00;      // Set DW0_b15:10 bits
+        flushCmd->SetDword(work, 0);
 
-    flushCmd->SetDword(0xffff, 2);
-    flushCmd->SetDword(0xffff, 3);
-    flushCmd->SetDword(0xffff, 4);
-    flushCmd->SetDword(0xffff, 5);
-    flushCmd->SetDword(0xffff, 6);
-    flushCmd->SetDword(0xffff, 7);
-    flushCmd->SetDword(0xffff, 8);
-    flushCmd->SetDword(0xffff, 9);
-    flushCmd->SetDword(0xffff, 10);
-    flushCmd->SetDword(0xffff, 11);
-    flushCmd->SetDword(0xffff, 12);
-    flushCmd->SetDword(0xffff, 13);
-    flushCmd->SetDword(0xffff, 14);
-    flushCmd->SetDword(0xffff, 15);
+        flushCmd->SetDword(0xffffffff, 2);
+        flushCmd->SetDword(0xffffffff, 3);
+        flushCmd->SetDword(0xffffffff, 4);
+        flushCmd->SetDword(0xffffffff, 5);
+        flushCmd->SetDword(0xffffffff, 6);
+        flushCmd->SetDword(0xffffffff, 7);
+        flushCmd->SetDword(0xffffffff, 8);
+        flushCmd->SetDword(0xffffffff, 9);
+        flushCmd->SetDword(0xffffffff, 10);
+        flushCmd->SetDword(0xffffffff, 11);
+        flushCmd->SetDword(0xffffffff, 12);
+        flushCmd->SetDword(0xffffffff, 13);
+        flushCmd->SetDword(0xffffffff, 14);
+        flushCmd->SetDword(0xffffffff, 15);
 
-    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
-        flushCmd, "all.set", true);
+        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
+            flushCmd, "all.set", true);
+    }
 }
 
 

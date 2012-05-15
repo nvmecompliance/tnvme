@@ -28,7 +28,7 @@ typedef boost::shared_ptr<const Write>       ConstSharedWritePtr;
 
 
 /**
-* This class implements the write admin cmd
+* This class implements the write nvm cmd
 *
 * @note This class may throw exceptions.
 */

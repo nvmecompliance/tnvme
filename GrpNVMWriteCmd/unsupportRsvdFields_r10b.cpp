@@ -96,8 +96,8 @@ UnsupportRsvdFields_r10b::RunCoreTest()
     work |= 0x0000fc00;      // Set DW0_b15:10 bits
     writeCmd->SetDword(work, 0);
 
-    writeCmd->SetDword(0xffff, 2);
-    writeCmd->SetDword(0xffff, 3);
+    writeCmd->SetDword(0xffffffff, 2);
+    writeCmd->SetDword(0xffffffff, 3);
 
     work = writeCmd->GetDword(12);
     work |= 0x03ff0000;      // Set DW12_b25:16 bits

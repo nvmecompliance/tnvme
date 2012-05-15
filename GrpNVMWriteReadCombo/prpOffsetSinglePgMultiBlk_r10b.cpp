@@ -98,8 +98,9 @@ PRPOffsetSinglePgMultiBlk_r10b::RunCoreTest()
     string work;
     int64_t X;
     bool enableLog;
-    unsigned int seed = 51;
-    srand (seed);
+
+    LOG_NRM("Initialize random seed");
+    srand (51);
 
     if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
         throw FrmwkEx(HERE);
@@ -202,8 +203,8 @@ PRPOffsetSinglePgMultiBlk_r10b::RunCoreTest()
             if ((nLBAs % 2) != 0) {
                 dataPat = DATAPAT_INC_8BIT;
                 wrVal = pgOff + nLBAs;
-                prp2RandVal[0] = rand_r(&seed);
-                prp2RandVal[1] = rand_r(&seed);
+                prp2RandVal[0] = rand();
+                prp2RandVal[1] = rand();
             } else {
                 dataPat = DATAPAT_CONST_16BIT;
                 wrVal = pgOff + nLBAs;
