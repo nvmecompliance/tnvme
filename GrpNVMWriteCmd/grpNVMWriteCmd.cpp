@@ -24,6 +24,7 @@
 #include "FUA_r10b.h"
 #include "limitedRetry_r10b.h"
 #include "lbaOutOfRangeMeta_r10b.h"
+#include "ignoreMetaPtrMeta_r10b.h"
 
 namespace GrpNVMWriteCmd {
 
@@ -49,6 +50,7 @@ GrpNVMWriteCmd::GrpNVMWriteCmd(size_t grpNum, SpecRev specRev,
         APPEND_TEST_AT_YLEVEL(FUA_r10b, fd, GrpNVMWriteCmd, errRegs)
         APPEND_TEST_AT_YLEVEL(LimitedRetry_r10b, fd, GrpNVMWriteCmd, errRegs)
         APPEND_TEST_AT_YLEVEL(LBAOutOfRangeMeta_r10b, fd, GrpNVMWriteCmd, errRegs)
+        APPEND_TEST_AT_YLEVEL(IgnoreMetaPtrMeta_r10b, fd, GrpNVMWriteCmd, errRegs)
         break;
 
     default:
