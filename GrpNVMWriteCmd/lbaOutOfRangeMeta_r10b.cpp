@@ -18,6 +18,8 @@
 #include "lbaOutOfRangeMeta_r10b.h"
 #include "globals.h"
 #include "grpDefs.h"
+#include "../Queues/acq.h"
+#include "../Queues/asq.h"
 #include "../Utils/io.h"
 #include "../Utils/irq.h"
 #include "../Cmds/write.h"
@@ -91,9 +93,15 @@ LBAOutOfRangeMeta_r10b::RunCoreTest()
     SharedIOSQPtr iosq;
     SharedIOCQPtr iocq;
 
-    // Lookup objs which were created in a prior test within group
-    SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
-    SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
+
+    if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
+        throw FrmwkEx(HERE);
+
+    SharedACQPtr acq = SharedACQPtr(new ACQ(mFd));
+    acq->Init(5);
+
+    SharedASQPtr asq = SharedASQPtr(new ASQ(mFd));
+    asq->Init(5);
 
     vector<uint32_t> meta = gInformative->GetMetaNamespaces();
     for (size_t i = 0; i < meta.size(); i++) {

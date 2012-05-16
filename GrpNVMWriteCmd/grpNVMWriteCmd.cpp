@@ -49,8 +49,8 @@ GrpNVMWriteCmd::GrpNVMWriteCmd(size_t grpNum, SpecRev specRev,
         APPEND_TEST_AT_YLEVEL(ProtInfoIgnoreBare_r10b, fd, GrpNVMWriteCmd, errRegs)
         APPEND_TEST_AT_YLEVEL(FUA_r10b, fd, GrpNVMWriteCmd, errRegs)
         APPEND_TEST_AT_YLEVEL(LimitedRetry_r10b, fd, GrpNVMWriteCmd, errRegs)
-        APPEND_TEST_AT_YLEVEL(LBAOutOfRangeMeta_r10b, fd, GrpNVMWriteCmd, errRegs)
         APPEND_TEST_AT_YLEVEL(IgnoreMetaPtrMeta_r10b, fd, GrpNVMWriteCmd, errRegs)
+        APPEND_TEST_AT_XLEVEL(LBAOutOfRangeMeta_r10b, fd, GrpNVMWriteCmd, errRegs)
         break;
 
     default:
