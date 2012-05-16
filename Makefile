@@ -29,25 +29,28 @@ CFLAGS += -lboost_filesystem
 CFLAGS += $(shell pkg-config libxml++-2.6 --cflags --libs) 
 
 SUBDIRS:=			\
-	Singletons		\
+	GrpAdminDeleteIOCQCmd	\
+	GrpAdminDeleteIOSQCmd	\
+	GrpBasicInit		\
+	GrpCtrlRegisters	\
+	GrpGeneralCmds		\
 	GrpInformative		\
 	GrpInterrupts		\
-	GrpPciRegisters		\
-	GrpCtrlRegisters	\
-	GrpBasicInit		\
-	GrpResets		\
-	GrpQueues		\
+	GrpNVMCompareCmd	\
+	GrpNVMDatasetMgmtCmd	\
 	GrpNVMFlushCmd		\
 	GrpNVMReadCmd		\
 	GrpNVMWriteCmd		\
 	GrpNVMWriteReadCombo	\
 	GrpNVMWriteUncorrectCmd	\
-	GrpNVMDatasetMgmtCmd	\
-	GrpGeneralCmds		\
-	Queues			\
+	GrpPciRegisters		\
+	GrpQueues		\
+	GrpResets		\
+	Exception		\
 	Cmds			\
 	Utils			\
-	Exception
+	Queues			\
+	Singletons
 
 SOURCES:=			\
 	globals.cpp		\

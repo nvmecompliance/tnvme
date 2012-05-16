@@ -112,8 +112,6 @@ KernelAPI::DumpCtrlrSpaceRegs(DumpFilename filename, bool verbose)
                 write(fd, work.c_str(), work.size());
             }
             delete [] buffer;
-        } else if (pciMetrics[i].size > MAX_SUPPORTED_REG_SIZE) {
-            continue;   // Don't care about really large areas, their reserved
         } else if (gRegisters->Read((CtlSpc)i, value, verbose) == false) {
             break;
         } else {
