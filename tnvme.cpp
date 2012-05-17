@@ -53,12 +53,12 @@
 
 
 void
-InstantiateGroups(vector<Group *> &groups, int &fd, struct CmdLine &cl)
+InstantiateGroups(vector<Group *> &groups, struct CmdLine &cl)
 {
     // GrpInformative must always be located at index=0, it must always be
     // forced to run 1st otherwise singleton gInformative won't be init'd. Most
     // every test relies on gInformative being init'd.
-    groups.push_back(new GrpInformative::GrpInformative(groups.size(), cl.rev, cl.errRegs, fd));
+    groups.push_back(new GrpInformative::GrpInformative(groups.size(), cl.rev, cl.errRegs, gDutFd));
 
     // ------------------------CHANGE NOTICE: (3-2-2012)------------------------
     // The rule to keep groups and tests at a well known constant reference
@@ -66,22 +66,22 @@ InstantiateGroups(vector<Group *> &groups, int &fd, struct CmdLine &cl)
     // that strategy. For complete details refer to:
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Numbering" and
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Strategy"
-    groups.push_back(new GrpPciRegisters::GrpPciRegisters(groups.size(), cl.rev, cl.errRegs, fd));
-    groups.push_back(new GrpCtrlRegisters::GrpCtrlRegisters(groups.size(), cl.rev, cl.errRegs, fd));
-    groups.push_back(new GrpBasicInit::GrpBasicInit(groups.size(), cl.rev, cl.errRegs, fd));
-    groups.push_back(new GrpResets::GrpResets(groups.size(), cl.rev, cl.errRegs, fd));
-    groups.push_back(new GrpGeneralCmds::GrpGeneralCmds(groups.size(), cl.rev, cl.errRegs, fd));
-    groups.push_back(new GrpQueues::GrpQueues(groups.size(), cl.rev, cl.errRegs, fd));
-    groups.push_back(new GrpNVMReadCmd::GrpNVMReadCmd(groups.size(), cl.rev, cl.errRegs, fd));
-    groups.push_back(new GrpNVMWriteCmd::GrpNVMWriteCmd(groups.size(), cl.rev, cl.errRegs, fd));
-    groups.push_back(new GrpNVMWriteReadCombo::GrpNVMWriteReadCombo(groups.size(), cl.rev, cl.errRegs, fd));
-    groups.push_back(new GrpNVMFlushCmd::GrpNVMFlushCmd(groups.size(), cl.rev, cl.errRegs, fd));
-    groups.push_back(new GrpInterrupts::GrpInterrupts(groups.size(), cl.rev, cl.errRegs, fd));
-    groups.push_back(new GrpNVMWriteUncorrectCmd::GrpNVMWriteUncorrectCmd(groups.size(), cl.rev, cl.errRegs, fd));
-    groups.push_back(new GrpNVMDatasetMgmtCmd::GrpNVMDatasetMgmtCmd(groups.size(), cl.rev, cl.errRegs, fd));
-    groups.push_back(new GrpNVMCompareCmd::GrpNVMCompareCmd(groups.size(), cl.rev, cl.errRegs, fd));
-    groups.push_back(new GrpAdminDeleteIOCQCmd::GrpAdminDeleteIOCQCmd(groups.size(), cl.rev, cl.errRegs, fd));
-    groups.push_back(new GrpAdminDeleteIOSQCmd::GrpAdminDeleteIOSQCmd(groups.size(), cl.rev, cl.errRegs, fd));
+    groups.push_back(new GrpPciRegisters::GrpPciRegisters(groups.size(), cl.rev, cl.errRegs, gDutFd));
+    groups.push_back(new GrpCtrlRegisters::GrpCtrlRegisters(groups.size(), cl.rev, cl.errRegs, gDutFd));
+    groups.push_back(new GrpBasicInit::GrpBasicInit(groups.size(), cl.rev, cl.errRegs, gDutFd));
+    groups.push_back(new GrpResets::GrpResets(groups.size(), cl.rev, cl.errRegs, gDutFd));
+    groups.push_back(new GrpGeneralCmds::GrpGeneralCmds(groups.size(), cl.rev, cl.errRegs, gDutFd));
+    groups.push_back(new GrpQueues::GrpQueues(groups.size(), cl.rev, cl.errRegs, gDutFd));
+    groups.push_back(new GrpNVMReadCmd::GrpNVMReadCmd(groups.size(), cl.rev, cl.errRegs, gDutFd));
+    groups.push_back(new GrpNVMWriteCmd::GrpNVMWriteCmd(groups.size(), cl.rev, cl.errRegs, gDutFd));
+    groups.push_back(new GrpNVMWriteReadCombo::GrpNVMWriteReadCombo(groups.size(), cl.rev, cl.errRegs, gDutFd));
+    groups.push_back(new GrpNVMFlushCmd::GrpNVMFlushCmd(groups.size(), cl.rev, cl.errRegs, gDutFd));
+    groups.push_back(new GrpInterrupts::GrpInterrupts(groups.size(), cl.rev, cl.errRegs, gDutFd));
+    groups.push_back(new GrpNVMWriteUncorrectCmd::GrpNVMWriteUncorrectCmd(groups.size(), cl.rev, cl.errRegs, gDutFd));
+    groups.push_back(new GrpNVMDatasetMgmtCmd::GrpNVMDatasetMgmtCmd(groups.size(), cl.rev, cl.errRegs, gDutFd));
+    groups.push_back(new GrpNVMCompareCmd::GrpNVMCompareCmd(groups.size(), cl.rev, cl.errRegs, gDutFd));
+    groups.push_back(new GrpAdminDeleteIOCQCmd::GrpAdminDeleteIOCQCmd(groups.size(), cl.rev, cl.errRegs, gDutFd));
+    groups.push_back(new GrpAdminDeleteIOSQCmd::GrpAdminDeleteIOSQCmd(groups.size(), cl.rev, cl.errRegs, gDutFd));
 }
 // ------------------------------EDIT HERE---------------------------------
 
@@ -94,9 +94,9 @@ InstantiateGroups(vector<Group *> &groups, int &fd, struct CmdLine &cl)
 void Usage(void);
 void DestroySingletons();
 bool ExecuteTests(struct CmdLine &cl, vector<Group *> &groups);
-void BuildSingletons(int &fd, struct CmdLine &cl);
-void DestroyTestFoundation(vector<Group *> &groups, int &fd);
-bool BuildTestFoundation(vector<Group *> &groups, int &fd, struct CmdLine &cl);
+void BuildSingletons(struct CmdLine &cl);
+void DestroyTestFoundation(vector<Group *> &groups);
+bool BuildTestFoundation(vector<Group *> &groups, struct CmdLine &cl);
 void ReportTestResults(size_t numIters, int numPass, int numFail, int numSkip);
 
 
@@ -129,7 +129,7 @@ Usage(void) {
     printf("                                      Require base 16 values.\n");
     printf("  -g(--golden) <filename>             A file contains the golden identify data\n");
     printf("                                      to which the DUT's reported identify data\n");
-    printf("                                      is compared; GrpInformative::CompareGolden\n");
+    printf("                                      is compared; Must be only option.\n");
     printf("                      --- Advanced/Debug Options Follow ---\n");
     printf("  -q(--queues) <ncqr:nsqr>            Write <ncqr> and <nsqr> as values by the\n");
     printf("                                      Set Features, ID=7. Must be only option.\n");
@@ -157,7 +157,6 @@ int
 main(int argc, char *argv[])
 {
     int c;
-    int fd = -1;
     int idx = 0;
     int exitCode = 0;   // assume success
     char *endptr;
@@ -388,15 +387,15 @@ main(int argc, char *argv[])
         exit(1);
     }
 
-    // Execute cmd line options which require the test infrastructure
-    if (BuildTestFoundation(groups, fd, cmdLine) == false) {
+    // Instantiates and initializes all globals defined within globals.h
+    if (BuildTestFoundation(groups, cmdLine) == false) {
         printf("Unable to build the test foundation\n");
         exit(1);
     }
 
     // Accessing hardware requires specific checks and inquiries before running
     if (accessingHdw) {
-        BuildSingletons(fd, cmdLine);
+        BuildSingletons(cmdLine);
 
         printf("Checking for unintended device under low powered states\n");
         if (gRegisters->Read(PCISPC_PMCS, regVal) == false) {
@@ -425,15 +424,21 @@ main(int argc, char *argv[])
         }
     }
 
-
-    if (cmdLine.format.req) {
-        if ((exitCode = !FormatDevice(cmdLine.format, fd))) {
+    // Process the user's cmd line parameters
+    if (cmdLine.golden.req) {
+        if ((exitCode = !CompareGolden(cmdLine.golden))) {
+            printf("FAILURE: Comparing golden data\n");
+        } else {
+            printf("SUCCESS: Comparing golden data\n");
+        }
+    } else if (cmdLine.format.req) {
+        if ((exitCode = !FormatDevice(cmdLine.format))) {
             printf("FAILURE: Formatting device\n");
         } else {
             printf("SUCCESS: Formatting device\n");
         }
     } else if (cmdLine.numQueues.req) {
-        if ((exitCode = !SetFeaturesNumberOfQueues(cmdLine.numQueues, fd))) {
+        if ((exitCode = !SetFeaturesNumberOfQueues(cmdLine.numQueues))) {
             printf("FAILURE: Setting number of queues\n");
         } else {
             printf("SUCCESS: Setting number of queues\n");
@@ -504,7 +509,7 @@ main(int argc, char *argv[])
     }
 
     // cleanup duties
-    DestroyTestFoundation(groups, fd);
+    DestroyTestFoundation(groups);
     DestroySingletons();
 
     cmdLine.skiptest.clear();
@@ -513,25 +518,25 @@ main(int argc, char *argv[])
 }
 
 
-void BuildSingletons(int &fd, struct CmdLine &cl)
+void BuildSingletons(struct CmdLine &cl)
 {
     // Create globals/singletons here, which all tests objects will need
 
     // The Register singleton should be created 1st because all other Singletons
     // use it directly to become init'd or they rely on it heavily soon after.
-    gRegisters = Registers::GetInstance(fd, cl.rev);
+    gRegisters = Registers::GetInstance(gDutFd, cl.rev);
 
     // The CtrlrConfig singleton should be created 2nd because it's subject base
     // class is used by just about every other object in the framework to learn
     // of state changes within the ctrlr. Disabling the ctrlr is extremely
     // destructive of all resources in user space and in kernel space.
-    gCtrlrConfig = CtrlrConfig::GetInstance(fd, cl.rev);
+    gCtrlrConfig = CtrlrConfig::GetInstance(gDutFd, cl.rev);
 
     // Create the remainder at will...
-    gRsrcMngr = RsrcMngr::GetInstance(fd, cl.rev);
+    gRsrcMngr = RsrcMngr::GetInstance(gDutFd, cl.rev);
     gCtrlrConfig->Attach(*gRsrcMngr);
 
-    gInformative = Informative::GetInstance(fd, cl.rev, cl.golden);
+    gInformative = Informative::GetInstance(gDutFd, cl.rev);
 }
 
 
@@ -549,18 +554,17 @@ void DestroySingletons()
  * with the OS which will allow testing to commence according to the cmd line
  * options presented to this app.
  * @param groups Pass the structure to contain the test objects
- * @param fd Pass the file descriptor to associate with the device
  * @param cl Pass the cmd line args
  * @return true upon success, otherwise false
  */
 bool
-BuildTestFoundation(vector<Group *> &groups, int &fd, struct CmdLine &cl)
+BuildTestFoundation(vector<Group *> &groups, struct CmdLine &cl)
 {
     int ret;
     struct flock fdlock = {F_WRLCK, SEEK_SET, 0, 0, 0};
 
 
-    DestroyTestFoundation(groups, fd);
+    DestroyTestFoundation(groups);
 
     // Open and lock access to the device requested for testing. The mutually
     // exclusive write lock is expected to warrant off other instances of this
@@ -573,7 +577,7 @@ BuildTestFoundation(vector<Group *> &groups, int &fd, struct CmdLine &cl)
         LOG_ERR("There are no devices present");
         return false;
     }
-    if ((fd = open(cl.device.c_str(), O_RDWR)) == -1) {
+    if ((gDutFd = open(cl.device.c_str(), O_RDWR)) == -1) {
         if ((errno == EACCES) || (errno == EAGAIN)) {
             LOG_ERR("%s may need permission set for current user",
                 cl.device.c_str());
@@ -581,7 +585,7 @@ BuildTestFoundation(vector<Group *> &groups, int &fd, struct CmdLine &cl)
         LOG_ERR("device=%s: %s", cl.device.c_str(), strerror(errno));
         return false;
     }
-    if (fcntl(fd, F_SETLK, &fdlock) == -1) {
+    if (fcntl(gDutFd, F_SETLK, &fdlock) == -1) {
         if ((errno == EACCES) || (errno == EAGAIN)) {
             LOG_ERR("%s has been locked by another process",
                 cl.device.c_str());
@@ -590,7 +594,8 @@ BuildTestFoundation(vector<Group *> &groups, int &fd, struct CmdLine &cl)
     }
 
     // Validate the dnvme was compiled with the same version of API as tnvme
-    if ((ret = ioctl(fd, NVME_IOCTL_GET_DRIVER_METRICS, &gDriverMetrics)) < 0) {
+    ret = ioctl(gDutFd, NVME_IOCTL_GET_DRIVER_METRICS, &gDriverMetrics);
+    if (ret < 0) {
         LOG_ERR("Unable to extract driver version information");
         return false;
     }
@@ -607,7 +612,7 @@ BuildTestFoundation(vector<Group *> &groups, int &fd, struct CmdLine &cl)
         return false;
     }
 
-    InstantiateGroups(groups, fd, cl);
+    InstantiateGroups(groups, cl);
     return true;
 }
 
@@ -616,10 +621,9 @@ BuildTestFoundation(vector<Group *> &groups, int &fd, struct CmdLine &cl)
  * Tear down that which has been created by BuildTestFoundation()
  * @param groups Pass the structure to contain the test objects, if the
  *               structure is not empty the function will abort.
- * @param fd Pass the file descriptor to free from the allocated resource pool
  */
 void
-DestroyTestFoundation(vector<Group *> &groups, int &fd)
+DestroyTestFoundation(vector<Group *> &groups)
 {
     // Deallocate heap usage
     for (size_t i = 0; i < groups.size(); i++) {
@@ -628,9 +632,10 @@ DestroyTestFoundation(vector<Group *> &groups, int &fd)
     }
 
     // If it fails what do we do? ignore it for now
-    if (fd != -1) {
-        if (close(fd) == -1)
+    if (gDutFd != -1) {
+        if (close(gDutFd) == -1)
             LOG_ERR("%s", strerror(errno));
+        gDutFd = -1;
     }
 }
 

@@ -55,7 +55,7 @@ Queues::CreateIOCQContigToHdw(string grpName, string testName,
         iocq = CAST_TO_IOCQ(gRsrcMngr->AllocObj(Trackable::OBJ_IOCQ, grpID));
     } else {
         LOG_NRM("Create an IOCQ object with test lifetime");
-        iocq = SharedIOCQPtr(new IOCQ(gInformative->GetFD()));
+        iocq = SharedIOCQPtr(new IOCQ(gDutFd));
     }
     LOG_NRM("Allocate contiguous memory; IOCQ has ID=%d", qId);
     iocq->Init(qId, numEntries, irqEnabled, irqVec);
@@ -92,7 +92,7 @@ Queues::CreateIOSQContigToHdw(string grpName, string testName,
         iosq = CAST_TO_IOSQ(gRsrcMngr->AllocObj(Trackable::OBJ_IOSQ, grpID));
     } else {
         LOG_NRM("Create an IOSQ object with test lifetime");
-        iosq = SharedIOSQPtr(new IOSQ(gInformative->GetFD()));
+        iosq = SharedIOSQPtr(new IOSQ(gDutFd));
     }
     LOG_NRM("Allocate contiguous memory; IOSQ has ID=%d", qId);
     iosq->Init(qId, numEntries, cqId, priority);
@@ -140,7 +140,7 @@ Queues::CreateIOCQDiscontigToHdw(string grpName, string testName,
         iocq = CAST_TO_IOCQ(gRsrcMngr->AllocObj(Trackable::OBJ_IOCQ, grpID));
     } else {
         LOG_NRM("Create an IOCQ object with test lifetime");
-        iocq = SharedIOCQPtr(new IOCQ(gInformative->GetFD()));
+        iocq = SharedIOCQPtr(new IOCQ(gDutFd));
     }
 
     LOG_NRM("Assoc discontiguous memory; IOCQ has ID=%d", qId);
@@ -189,7 +189,7 @@ Queues::CreateIOSQDiscontigToHdw(string grpName, string testName,
         iosq = CAST_TO_IOSQ(gRsrcMngr->AllocObj(Trackable::OBJ_IOSQ, grpID));
     } else {
         LOG_NRM("Create an IOSQ object with test lifetime");
-        iosq = SharedIOSQPtr(new IOSQ(gInformative->GetFD()));
+        iosq = SharedIOSQPtr(new IOSQ(gDutFd));
     }
     LOG_NRM("Assoc discontiguous memory; IOSQ has ID=%d", qId);
     iosq->Init(qId, numEntries, qBackedMem, cqId, priority);

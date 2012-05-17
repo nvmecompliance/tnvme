@@ -47,17 +47,10 @@ public:
      * Enforce singleton design pattern.
      * @param fd Pass the opened file descriptor for the device under test
      * @param specRev Pass which compliance is needed to target
-     * @param golden Pass any golden identify data spec'd on cmd line
      */
-    static Informative* GetInstance(int fd, SpecRev specRev, Golden &golden);
+    static Informative* GetInstance(int fd, SpecRev specRev);
     static void KillInstance();
     ~Informative();
-
-    /**
-     * No reason to protect the file descriptor, each instance of tnvme can
-     * only ever have access to a single DUT.
-     */
-    int GetFD() { return mFd; }
 
     /**
      * Get a previously fetched identify command's controller struct.
@@ -72,14 +65,6 @@ public:
      *      than the total number of namspc structures available.
      */
     ConstSharedIdentifyPtr GetIdentifyCmdNamspc(uint64_t namspcId) const;
-
-    /**
-     * Get previously set golden identify data via the cmd line. This data is
-     * useful to GrpInformative::CompareGolden test case if and only if the data
-     * had been supplied. If (Golden.req == false) then the data is absent and
-     * CompareGolden will not be able to run, otherwise the test runs.
-     */
-    const Golden &GetGoldenIdentify() const {return mGolden; }
 
     /**
      * Get a previously fetched get features's number of queues feature ID.
@@ -152,7 +137,7 @@ public:
 private:
     // Implement singleton design pattern
     Informative();
-    Informative(int fd, SpecRev specRev, Golden &golden);
+    Informative(int fd, SpecRev specRev);
     static bool mInstanceFlag;
     static Informative *mSingleton;
 
@@ -160,8 +145,6 @@ private:
     SpecRev mSpecRev;
     /// file descriptor to the device under test
     int mFd;
-    /// Contains any cmd line supplied golden identify payloads
-    Golden mGolden;
 
     /**
      * These are the only tests within group GrpInformative which can initialize

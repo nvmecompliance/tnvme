@@ -19,7 +19,6 @@
 #include "createResources_r10b.h"
 #include "dumpGetFeatures_r10b.h"
 #include "dumpIdentifyData_r10b.h"
-#include "compareGolden_r10b.h"
 
 namespace GrpInformative {
 
@@ -40,7 +39,6 @@ GrpInformative::GrpInformative(size_t grpNum, SpecRev specRev,
         APPEND_TEST_AT_XLEVEL(CreateResources_r10b, fd, GrpInformative, errRegs)
         APPEND_TEST_AT_YLEVEL(DumpGetFeatures_r10b, fd, GrpInformative, errRegs)
         APPEND_TEST_AT_YLEVEL(DumpIdentifyData_r10b, fd, GrpInformative, errRegs)
-        APPEND_TEST_AT_ZLEVEL(CompareGolden_r10b, fd, GrpInformative, errRegs)
         break;
 
     default:

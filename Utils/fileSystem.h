@@ -22,7 +22,7 @@
 
 
 /**
- * Enforce type checking to ensure logs end up the proper location. Use
+ * Enforce type checking to ensure dumps end up the proper location. Use
  * method FileSystem::PrepDumpFile() to create this name
  */
 typedef string                      DumpFilename;
@@ -44,25 +44,25 @@ public:
     virtual ~FileSystem();
 
     /**
-     * Initializes the file system to use the specific root logging directory by
+     * Initializes the file system to use the specific root dump directory by
      * verifying it exists. It must exists and will not be created. Under the
-     * root log directory 2 base logging directories are setup and cleaned. The
-     * default base log directory will be SetBaseDumpDir(true). The logging
+     * root dump directory 2 base dump directories are setup and cleaned. The
+     * default base dump directory will be SetBaseDumpDir(true). The dump
      * directory structure is as follows:
-     *     1) root_log_dir/GrpInformative or
-     *     2) root_log_dir/GrpPending
+     *     1) root_dump_dir/GrpInformative or
+     *     2) root_dump_dir/GrpPending
      * @note This method will not throw
-     * @param dir Pass the name of the root log directory to certify
+     * @param dir Pass the name of the root dump directory to certify
      * @return true if successful, otherwise false;
      */
     static bool SetRootDumpDir(string dir);
 
     /**
-     * Sets 1 of 2 possible base logging directories. GrpInformative gets its
-     * own logging directory to remember the constant data which is always
+     * Sets 1 of 2 possible base dump directories. GrpInformative gets its
+     * own dump directory to remember the constant data which is always
      * extracted before all test(s) execute. Selects one of:
-     *     1) root_log_dir/GrpInformative or
-     *     2) root_log_dir/GrpPending
+     *     1) root_dump_dir/GrpInformative or
+     *     2) root_dump_dir/GrpPending
      * @note This method will not throw
      * @param useGrpInfo Pass true for mDumpDirPending, false for
      *        mDumpDirPending
@@ -70,9 +70,9 @@ public:
     static void SetBaseDumpDir(bool useGrpInfo) { mUseGrpInfo = useGrpInfo; }
 
     /**
-     * Cleans all files from the base logging directory. Each new group which
-     * executes should start logging to an empty directory. This approach keeps
-     * only the last group's logs and attempts to prevent the file system from
+     * Cleans all files from the base dump directory. Each new group which
+     * executes should start dumping to an empty directory. This approach keeps
+     * only the last group's dumps and attempts to prevent the file system from
      * breaching a maximum limit.
      * @note This method will not throw
      * @return true if successful, otherwise false;
@@ -80,13 +80,13 @@ public:
     static bool PrepDumpDir();
 
     /**
-     * Creates a filename from the parameters within the base logging directory.
+     * Creates a filename from the parameters within the base dump directory.
      * @note This method may throw
      * @param grpName Pass the name of the group, i.e. Test::mGrpName, required
      * @param className Pass the test cast class name, required
      * @param objName Pass the name of the object being dumped, required
      * @param qualifier (optional) Pass any extra qualifications
-     * @return A properly formated filename for logging purposes
+     * @return A properly formated filename for dumping purposes
      */
     static DumpFilename PrepDumpFile(string grpName, string className,
         string objName, string qualifier = "");

@@ -103,10 +103,10 @@ FrmwkEx::PreliminaryProcessing()
     if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
         throw FrmwkEx(HERE, "PreliminaryProcessing()");
 
-    SharedACQPtr acq = SharedACQPtr(new ACQ(gInformative->GetFD()));
+    SharedACQPtr acq = SharedACQPtr(new ACQ(gDutFd));
     acq->Init(2);
 
-    SharedASQPtr asq = SharedASQPtr(new ASQ(gInformative->GetFD()));
+    SharedASQPtr asq = SharedASQPtr(new ASQ(gDutFd));
     asq->Init(2);
 
     gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);

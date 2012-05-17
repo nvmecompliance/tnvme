@@ -21,8 +21,7 @@ SRC =					\
 	dumpRegisters_r10b.cpp		\
 	createResources_r10b.cpp	\
 	dumpGetFeatures_r10b.cpp	\
-	dumpIdentifyData_r10b.cpp	\
-	compareGolden_r10b.cpp
+	dumpIdentifyData_r10b.cpp
 
 .SUFFIXES: .cpp
 

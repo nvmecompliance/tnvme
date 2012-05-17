@@ -14,6 +14,7 @@
  *  limitations under the License.
  */
 
+#include "boost/format.hpp"
 #include "tnvmeHelpers.h"
 #include "globals.h"
 #include "Utils/kernelAPI.h"
@@ -58,14 +59,79 @@ VerifySpecCompatibility(SpecRev specRev)
 }
 
 
+bool
+CompareGolden(Golden &golden)
+{
+    string work;
+
+    try {   // The objects to perform this work throw exceptions
+        FileSystem::SetBaseDumpDir(false);   // Log into GrpPending
+        if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
+            throw FrmwkEx(HERE);
+
+        LOG_NRM("Prepare the admin Q's to setup this request");
+        SharedACQPtr acq = SharedACQPtr(new ACQ(gDutFd));
+        acq->Init(2);
+        SharedASQPtr asq = SharedASQPtr(new ASQ(gDutFd));
+        asq->Init(2);
+        gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
+        if (gCtrlrConfig->SetState(ST_ENABLE) == false)
+            throw FrmwkEx(HERE);
+
+        SharedIdentifyPtr idCmd = SharedIdentifyPtr(new Identify());
+        SharedMemBufferPtr idMem = SharedMemBufferPtr(new MemBuffer());
+        idMem->InitAlignment(Identify::IDEAL_DATA_SIZE, sizeof(uint64_t), true, 0);
+        send_64b_bitmask prpReq =
+            (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE);
+        idCmd->SetPrpBuffer(prpReq, idMem);
+
+        for (size_t i = 0; i < golden.cmds.size(); i++) {
+            LOG_NRM("Identify cmd #%ld", i);
+            LOG_NRM("  Identify:DW1.nsid = 0x%02x", golden.cmds[i].nsid);
+            LOG_NRM("  Identify.DW10.cns = %c", golden.cmds[i].cns ? 'T' : 'F');
+            LOG_NRM("  sizeof(Identify.raw) = %ld", golden.cmds[i].raw.size());
+
+            LOG_NRM("Formulate an identical idenitfy cmd to issue");
+            idCmd->SetCNS(golden.cmds[i].cns);
+            idCmd->SetNSID(golden.cmds[i].nsid);
+
+            idMem->InitAlignment(Identify::IDEAL_DATA_SIZE, sizeof(uint64_t),
+                true, 0);
+            work = str(boost::format("IdCmd%d") % i);
+            IO::SendAndReapCmd("tnvme", "golden", SYSTEMWIDE_CMD_WAIT_ms, asq,
+                acq, idCmd, work, false);
+
+            if (idMem->Compare(golden.cmds[i].raw) == false) {
+                idMem->Dump(FileSystem::PrepDumpFile("tnvme", "golden",
+                    "identify", "dut.miscompare"), "DUT data miscompare");
+                SharedMemBufferPtr userMem = SharedMemBufferPtr(
+                    new MemBuffer(golden.cmds[i].raw));
+                userMem->Dump(FileSystem::PrepDumpFile("tnvme", "golden",
+                    "identify", "cmdline.miscompare"),
+                    "Golden user data miscompare");
+                throw FrmwkEx(HERE, "Golden identify data miscompare");
+            }
+        }
+
+        LOG_NRM("The operation succeeded to compare golden data");
+    } catch (...) {
+        LOG_ERR("Operation failed to compare golden data");
+        gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY);
+        return false;
+    }
+
+    gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY);
+    return true;
+}
+
+
 /**
  * A function to issue consecutive admin cmd set format NVM cmds to a DUT.
  * @param format Pass formating instructions
- * @param fd Pass file descriptor representing device to commune with
  * @return true upon successful parsing, otherwise false.
  */
 bool
-FormatDevice(Format &format, int fd)
+FormatDevice(Format &format)
 {
     try {   // The objects to perform this work throw exceptions
         FileSystem::SetBaseDumpDir(false);   // Log into GrpPending
@@ -73,9 +139,9 @@ FormatDevice(Format &format, int fd)
             throw FrmwkEx(HERE);
 
         LOG_NRM("Prepare the admin Q's to setup this request");
-        SharedACQPtr acq = SharedACQPtr(new ACQ(fd));
+        SharedACQPtr acq = SharedACQPtr(new ACQ(gDutFd));
         acq->Init(2);
-        SharedASQPtr asq = SharedASQPtr(new ASQ(fd));
+        SharedASQPtr asq = SharedASQPtr(new ASQ(gDutFd));
         asq->Init(2);
         gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
         if (gCtrlrConfig->SetState(ST_ENABLE) == false)
@@ -121,11 +187,10 @@ FormatDevice(Format &format, int fd)
  * conform results in undefined behavior.
  * "<STS:PXDS:AERUCES:CSTS>".
  * @param numQueues Pass a struct to source the desired values to send to hdw
- * @param fd Pass file descriptor representing device to commune with
  * @return true upon successful parsing, otherwise false.
  */
 bool
-SetFeaturesNumberOfQueues(NumQueues &numQueues, int fd)
+SetFeaturesNumberOfQueues(NumQueues &numQueues)
 {
     try {   // The objects to perform this work throw exceptions
 
@@ -137,9 +202,9 @@ SetFeaturesNumberOfQueues(NumQueues &numQueues, int fd)
             throw FrmwkEx(HERE);
 
         LOG_NRM("Prepare the admin Q's to setup this request");
-        SharedACQPtr acq = SharedACQPtr(new ACQ(fd));
+        SharedACQPtr acq = SharedACQPtr(new ACQ(gDutFd));
         acq->Init(2);
-        SharedASQPtr asq = SharedASQPtr(new ASQ(fd));
+        SharedASQPtr asq = SharedASQPtr(new ASQ(gDutFd));
         asq->Init(2);
         gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
         if (gCtrlrConfig->SetState(ST_ENABLE) == false)

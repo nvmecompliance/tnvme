@@ -51,8 +51,8 @@ KernelAPI::mmap(size_t bufLength, uint16_t bufID, MmapRegion region)
     off_t encodeOffset = bufID;
     encodeOffset |= ((off_t)region << METADATA_UNIQUE_ID_BITS);
     encodeOffset *= sysconf(_SC_PAGESIZE);
-    return (uint8_t *)::mmap(0, bufLength, prot, MAP_SHARED,
-        gInformative->GetFD(), encodeOffset);
+    return (uint8_t *)::mmap(0, bufLength, prot, MAP_SHARED, gDutFd,
+        encodeOffset);
 }
 
 
@@ -67,15 +67,11 @@ void
 KernelAPI::DumpKernelMetrics(DumpFilename filename)
 {
     int rc;
-
     struct nvme_file dumpMe = { filename.length(), filename.c_str() };
 
     LOG_NRM("Dump dnvme metrics to filename: %s", filename.c_str());
-    if ((rc = ioctl(gInformative->GetFD(), NVME_IOCTL_DUMP_METRICS,
-        &dumpMe)) < 0) {
-
+    if ((rc = ioctl(gDutFd, NVME_IOCTL_DUMP_METRICS, &dumpMe)) < 0)
         throw FrmwkEx(HERE, "Unable to dump dnvme metrics, err code = %d", rc);
-    }
 }
 
 

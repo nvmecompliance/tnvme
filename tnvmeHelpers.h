@@ -21,8 +21,9 @@
 
 
 bool VerifySpecCompatibility(SpecRev specRev);
-bool SetFeaturesNumberOfQueues(NumQueues &numQueues, int fd);
-bool FormatDevice(Format &format, int fd);
+bool SetFeaturesNumberOfQueues(NumQueues &numQueues);
+bool FormatDevice(Format &format);
+bool CompareGolden(Golden &golden);
 
 
 #endif
