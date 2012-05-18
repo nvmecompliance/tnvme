@@ -15,40 +15,33 @@
  */
 
 #include "boost/format.hpp"
-#include "lbaOutOfRangeMeta_r10b.h"
+#include "protInfoIgnoreMeta_r10b.h"
 #include "globals.h"
 #include "grpDefs.h"
-#include "../Queues/acq.h"
-#include "../Queues/asq.h"
 #include "../Utils/io.h"
 #include "../Utils/irq.h"
 #include "../Cmds/write.h"
 
 namespace GrpNVMWriteCmd {
 
-#define WR_NUM_BLKS                 2
 
-
-LBAOutOfRangeMeta_r10b::LBAOutOfRangeMeta_r10b(int fd, string mGrpName,
+ProtInfoIgnoreMeta_r10b::ProtInfoIgnoreMeta_r10b(int fd, string mGrpName,
     string mTestName, ErrorRegs errRegs) :
     Test(fd, mGrpName, mTestName, SPECREV_10b, errRegs)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-    mTestDesc.SetCompliance("revision 1.0b, section 4,6");
-    mTestDesc.SetShort(     "Issue write and cause SC=LBA Out of Range on meta namspcs");
+    mTestDesc.SetCompliance("revision 1.0b, section 6");
+    mTestDesc.SetShort(     "Verify protection info (PRINFO) is ignored for meta namspc");
     // No string size limit for the long description
     mTestDesc.SetLong(
-        "For all meta namspcs from Identify.NN, determine Identify.NSZE; "
-        "For each namspc cause many scenarios by issuing a single write cmd "
-        "sending 2 data blocks, and conforming to approp metadata "
-        "requirements. 1) Issue cmd where 1st block starts at LBA "
-        "(Identify.NSZE - 1), expect failure. 2) Issue cmd where 1st block "
-        "starts at LBA Identify.NSZE, expect failure. 3) Issue cmd where 1st "
-        "block starts at 2nd to last max LBA value, expect success.");
+        "For all meta namspcs from Identify.NN; For each namspc issue multiple "
+        "write cmds where each is sending 1 data block at LBA 0 and approp "
+        "metadata requirements, and vary the values of DW12.PRINFO "
+        "from 0x0 to 0x0f, expect success for all.");
 }
 
 
-LBAOutOfRangeMeta_r10b::~LBAOutOfRangeMeta_r10b()
+ProtInfoIgnoreMeta_r10b::~ProtInfoIgnoreMeta_r10b()
 {
     ///////////////////////////////////////////////////////////////////////////
     // Allocations taken from the heap and not under the control of the
@@ -57,8 +50,8 @@ LBAOutOfRangeMeta_r10b::~LBAOutOfRangeMeta_r10b()
 }
 
 
-LBAOutOfRangeMeta_r10b::
-LBAOutOfRangeMeta_r10b(const LBAOutOfRangeMeta_r10b &other) : Test(other)
+ProtInfoIgnoreMeta_r10b::
+ProtInfoIgnoreMeta_r10b(const ProtInfoIgnoreMeta_r10b &other) : Test(other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -67,8 +60,8 @@ LBAOutOfRangeMeta_r10b(const LBAOutOfRangeMeta_r10b &other) : Test(other)
 }
 
 
-LBAOutOfRangeMeta_r10b &
-LBAOutOfRangeMeta_r10b::operator=(const LBAOutOfRangeMeta_r10b &other)
+ProtInfoIgnoreMeta_r10b &
+ProtInfoIgnoreMeta_r10b::operator=(const ProtInfoIgnoreMeta_r10b &other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -80,19 +73,19 @@ LBAOutOfRangeMeta_r10b::operator=(const LBAOutOfRangeMeta_r10b &other)
 
 
 void
-LBAOutOfRangeMeta_r10b::RunCoreTest()
+ProtInfoIgnoreMeta_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
      * None.
      * \endverbatim
      */
-    uint64_t nsze;
-    string work;
+    string context;
     ConstSharedIdentifyPtr namSpcPtr;
     SharedIOSQPtr iosq;
     SharedIOCQPtr iocq;
-
+    send_64b_bitmask prpBitmask = (send_64b_bitmask)
+        (MASK_PRP1_PAGE | MASK_PRP2_PAGE | MASK_PRP2_LIST);
 
     if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
         throw FrmwkEx(HERE);
@@ -103,18 +96,11 @@ LBAOutOfRangeMeta_r10b::RunCoreTest()
     SharedASQPtr asq = SharedASQPtr(new ASQ(mFd));
     asq->Init(5);
 
+    LOG_NRM("Get all the supoorted meta namespaces");
     vector<uint32_t> meta = gInformative->GetMetaNamespaces();
     for (size_t i = 0; i < meta.size(); i++) {
         if (gCtrlrConfig->SetState(ST_DISABLE) == false)
             throw FrmwkEx(HERE);
-
-        namSpcPtr = gInformative->GetIdentifyCmdNamspc(meta[i]);
-        if (namSpcPtr == Identify::NullIdentifyPtr) {
-            throw FrmwkEx(HERE, "Identify namspc struct #%d doesn't exist",
-                meta[i]);
-        }
-        nsze = namSpcPtr->GetValue(IDNAMESPC_NSZE);
-        LBAFormat lbaFormat = namSpcPtr->GetLBAFormat();
 
         // All queues will use identical IRQ vector
         IRQ::SetAnySchemeSpecifyNum(1);
@@ -126,122 +112,61 @@ LBAOutOfRangeMeta_r10b::RunCoreTest()
         LOG_NRM("Create IOSQ and IOCQ with ID #%d", IOQ_ID);
         CreateIOQs(asq, acq, IOQ_ID, iosq, iocq);
 
-        LOG_NRM("Create memory to contain write payload");
-        SharedMemBufferPtr writeMem = SharedMemBufferPtr(new MemBuffer());
+        namSpcPtr = gInformative->GetIdentifyCmdNamspc(meta[i]);
+        if (namSpcPtr == Identify::NullIdentifyPtr)
+            throw FrmwkEx(HERE, "Idtfy namspc str #%d doesn't exist", meta[i]);
+
+        LOG_NRM("Get LBA format and lba data size for namespc #%d", meta[i]);
+        LBAFormat lbaFormat = namSpcPtr->GetLBAFormat();
         uint64_t lbaDataSize = (1 << lbaFormat.LBADS);
 
         LOG_NRM("Create a write cmd to write data to namspc %d", meta[i]);
         SharedWritePtr writeCmd = SharedWritePtr(new Write());
-        send_64b_bitmask prpBitmask = (send_64b_bitmask)
-            (MASK_PRP1_PAGE | MASK_PRP2_PAGE | MASK_PRP2_LIST);
 
-        Informative::NamspcType nsType =
-            gInformative->IdentifyNamespace(namSpcPtr);;
+        LOG_NRM("Create memory to contain write payload");
+        SharedMemBufferPtr writeMem = SharedMemBufferPtr(new MemBuffer());
+
+        Informative::NamspcType
+            nsType = gInformative->IdentifyNamespace(namSpcPtr);
         switch (nsType) {
         case Informative::NS_BARE:
             throw FrmwkEx(HERE, "Namspc type cannot be BARE.");
         case Informative::NS_METAS:
-            writeMem->Init(WR_NUM_BLKS * lbaDataSize);
-            if (gRsrcMngr->SetMetaAllocSize(WR_NUM_BLKS * lbaFormat.MS)
-                == false) {
+            writeMem->Init(lbaDataSize);
+            if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
                 throw FrmwkEx(HERE);
-            }
             writeCmd->AllocMetaBuffer();
             break;
         case Informative::NS_METAI:
-            writeMem->Init(WR_NUM_BLKS * (lbaDataSize + lbaFormat.MS));
+            writeMem->Init(lbaDataSize + lbaFormat.MS);
             break;
         case Informative::NS_E2ES:
         case Informative::NS_E2EI:
             throw FrmwkEx(HERE, "Deferring work to handle this case in future");
             break;
         }
+
         writeCmd->SetPrpBuffer(prpBitmask, writeMem);
         writeCmd->SetNSID(meta[i]);
-        writeCmd->SetNLB(WR_NUM_BLKS - 1);    // convert to 0-based value
+        writeCmd->SetNLB(0);    // convert to 0-based value
 
-        LOG_NRM("Issue cmd where 1st block starts at LBA (Identify.NSZE - 1)");
-        work = str(boost::format("nsze-1.meta.%d") % (uint32_t)i);
-        writeCmd->SetSLBA(nsze - 1);
-        SendCmdToHdw(iosq, iocq, writeCmd, work);
+        for (uint16_t protInfo = 0; protInfo <= 0x0f; protInfo++) {
+            uint8_t work = writeCmd->GetByte(12, 3);
+            work &= ~0x3c;  // PRINFO specific bits
+            work |= (protInfo << 2);
+            writeCmd->SetByte(work, 12, 3);
 
-        LOG_NRM("Issue cmd where 1st block starts at LBA (Identify.NSZE)");
-        work = str(boost::format("nsze.meta.%d") % (uint32_t)i);
-        writeCmd->SetSLBA(nsze);
-        SendCmdToHdw(iosq, iocq, writeCmd, work);
-
-        LOG_NRM("Issue cmd where 1st block starts at LBA (Identify.NSZE - 2)");
-        work = str(boost::format("nsze-2.meta.%d") % (uint32_t)i);
-        writeCmd->SetSLBA(nsze - 2);
-        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
-            iocq, writeCmd, work, true);
+            context = str(boost::format("ns%d.protInfo0x%02X") %
+                (uint32_t)i % protInfo);
+            IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+                iocq, writeCmd, context, true);
+        }
     }
 }
 
 
 void
-LBAOutOfRangeMeta_r10b::SendCmdToHdw(SharedSQPtr sq, SharedCQPtr cq,
-    SharedCmdPtr cmd, string qualify)
-{
-    uint32_t numCE;
-    uint32_t isrCount;
-    uint32_t isrCountB4;
-    string work;
-    uint16_t uniqueId;
-
-    if ((numCE = cq->ReapInquiry(isrCountB4, true)) != 0) {
-        cq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "cq",
-            "notEmpty"), "Test assumption have not been met");
-        throw FrmwkEx(HERE, "Require 0 CE's within CQ %d, not upheld, found %d",
-            cq->GetQId(), numCE);
-    }
-
-    LOG_NRM("Send the cmd to hdw via SQ %d", sq->GetQId());
-    sq->Send(cmd, uniqueId);
-    work = str(boost::format(
-        "Just B4 ringing SQ %d doorbell, dump entire SQ") % sq->GetQId());
-    sq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName,
-        "sq." + cmd->GetName(), qualify), work);
-    sq->Ring();
-
-    LOG_NRM("Wait for the CE to arrive in CQ %d", cq->GetQId());
-    if (cq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE, isrCount)
-        == false) {
-        work = str(boost::format(
-            "Unable to see any CE's in CQ %d, dump entire CQ") % cq->GetQId());
-        cq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName,
-            "cq." + cmd->GetName(), qualify), work);
-        throw FrmwkEx(HERE, "Unable to see CE for issued cmd");
-    } else if (numCE != 1) {
-        work = str(boost::format(
-            "Unable to see any CE's in CQ %d, dump entire CQ") % cq->GetQId());
-        cq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName,
-            "cq." + cmd->GetName(), qualify), work);
-        throw FrmwkEx(HERE, "1 cmd caused %d CE's to arrive in CQ %d",
-            numCE, cq->GetQId());
-    }
-    work = str(boost::format("Just B4 reaping CQ %d, dump entire CQ") %
-        cq->GetQId());
-    cq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName,
-        "cq." + cmd->GetName(), qualify), work);
-
-    // throws if an error occurs
-    IO::ReapCE(cq, numCE, isrCount, mGrpName, mTestName, qualify,
-        CESTAT_LBA_OUT_RANGE);
-
-    // Single cmd submitted on empty ASQ should always yield 1 IRQ on ACQ
-    if (gCtrlrConfig->IrqsEnabled() && cq->GetIrqEnabled() &&
-        (isrCount != (isrCountB4 + 1))) {
-        throw FrmwkEx(HERE,
-            "CQ using IRQ's, but IRQ count not expected (%d != %d)",
-            isrCount, (isrCountB4 + 1));
-    }
-}
-
-
-
-void
-LBAOutOfRangeMeta_r10b::CreateIOQs(SharedASQPtr asq, SharedACQPtr acq,
+ProtInfoIgnoreMeta_r10b::CreateIOQs(SharedASQPtr asq, SharedACQPtr acq,
     uint32_t ioqId, SharedIOSQPtr &iosq, SharedIOCQPtr &iocq)
 {
     uint32_t numEntries = 2;
@@ -277,5 +202,5 @@ LBAOutOfRangeMeta_r10b::CreateIOQs(SharedASQPtr asq, SharedACQPtr acq,
     }
 }
 
-}   // namespace
 
+}   // namespace

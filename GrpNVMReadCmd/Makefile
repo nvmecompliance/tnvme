@@ -27,7 +27,8 @@ SRC =						\
 	FUA_r10b.cpp				\
 	limitedRetry_r10b.cpp			\
 	lbaOutOfRangeMeta_r10b.cpp		\
-	ignoreMetaPtrMeta_r10b.cpp
+	ignoreMetaPtrMeta_r10b.cpp		\
+	protInfoIgnoreMeta_r10b.cpp
 
 .SUFFIXES: .cpp
 

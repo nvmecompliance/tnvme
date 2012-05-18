@@ -84,7 +84,7 @@ LBAOutOfRangeMeta_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
-     * 1) Test CreateResources_r10b has run prior.
+     * None.
      * \endverbatim
      */
     uint64_t nsze;
