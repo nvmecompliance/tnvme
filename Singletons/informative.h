@@ -20,8 +20,8 @@
 #include <vector>
 #include "tnvme.h"
 #include "../Cmds/identify.h"
-#include "../GrpInformative/dumpIdentifyData_r10b.h"
-#include "../GrpInformative/dumpGetFeatures_r10b.h"
+#include "../Queues/acq.h"
+#include "../Queues/asq.h"
 
 using namespace std;
 
@@ -47,10 +47,29 @@ public:
      * Enforce singleton design pattern.
      * @param fd Pass the opened file descriptor for the device under test
      * @param specRev Pass which compliance is needed to target
+     * @return NULL upon error, otherwise a pointer to the singleton
      */
-    static Informative* GetInstance(int fd, SpecRev specRev);
+    static Informative *GetInstance(int fd, SpecRev specRev);
     static void KillInstance();
     ~Informative();
+
+    /**
+     * Issue appropriate cmds to the DUT to obtain an up-to-date snapshot of
+     * the viscous data contained within. After execution the state of the DUT
+     * will be known, and all members of this class will yield correct results.
+     * The most common reason for calling this method is when a test or action
+     * targets the DUT to cause its Identify or Get Features data to change.
+     * The entire framework, and almost every test case, relies upon this data
+     * to make dynamic adjustments and to understand the limits of the DUT. The
+     * framework has no idea that some object caused its config to change.
+     * @note The assumption here is that both the asq and acq's must be empty,
+     *       and the DUT must be currently enabled.
+     * @param asq Pass pre-existing ASQ in which to issue admin cmds
+     * @param acq Pass pre-existing ACQ to reap any correlating CE's
+     * @param ms Pass the max number of ms to wait until numTil CE's arrive.
+     * @return true upon success, otherwise false.
+     */
+    bool Reinit(SharedASQPtr &asq, SharedACQPtr &acq, uint16_t ms);
 
     /**
      * Get a previously fetched identify command's controller struct.
@@ -146,50 +165,25 @@ private:
     /// file descriptor to the device under test
     int mFd;
 
-    /**
-     * These are the only tests within group GrpInformative which can initialize
-     * this singleton; if GrpInformative does not get executed this singleton
-     * won't get init'd correctly. Thus GrpInformative must run always, and
-     * it should only run once at power-up.
-     *
-     * The "setting" of data is privatized because this data must be guaranteed
-     * coherent, not modifiable for all tests for all groups to retrieve and
-     * count upon. This data should be data that never changes even after
-     * interaction with a DUT's various registers, Set Features attempts.
-     */
-    friend class GrpInformative::DumpIdentifyData_r10b;
-    friend class GrpInformative::DumpGetFeatures_r10b;
-
-    /**
-     * GrpInformative must set this data.
-     * @param idCmdCtrlr Pass the identify cmd after it retrieved the
-     *          controller data structure .
-     */
-    SharedIdentifyPtr mIdentifyCmdCtrlr;
-    void SetIdentifyCmdCtrlr(SharedIdentifyPtr idCmdCtrlr)
-        { mIdentifyCmdCtrlr = idCmdCtrlr; }
-
-    /**
-     * GrpInformative must set this data. This method must be called in order
-     * of namespace retrieval, starting from ID=1 to max possible.
-     * @param idCmdNamspc Pass the identify cmd after it retrieved the
-     *          namespace data structure for a given namespace ID.
-     */
-    vector<SharedIdentifyPtr> mIdentifyCmdNamspc;
-    void SetIdentifyCmdNamespace(SharedIdentifyPtr idCmdNamspc)
-        { mIdentifyCmdNamspc.push_back(idCmdNamspc); }
-
-    /**
-     * GrpInformative must set this data.
-     * @param ceDword0 Pass DWORD0 of the CE resulting from sending the get
-     *      features which requested the "number of queues" feature ID.
-     */
-    uint32_t mGetFeaturesNumOfQ;
-    void SetGetFeaturesNumberOfQueues(uint32_t ceDword0)
-        { mGetFeaturesNumOfQ =  ceDword0; }
-
     /// Force this object to remove/delete all that has been previously set.
     void Clear();
+
+    /**
+     * This method should be called once during construction to init this
+     * this object. Thereafter the Reinit() must be called.
+     * @return true upon success, otherwise false.
+     */
+    bool Init();
+
+    uint32_t mGetFeaturesNumOfQ;
+    SharedIdentifyPtr mIdentifyCmdCtrlr;
+    vector<SharedIdentifyPtr> mIdentifyCmdNamspc;
+    void SendGetFeaturesNumOfQueues(SharedASQPtr asq, SharedACQPtr acq,
+        uint16_t ms);
+    void SendIdentifyCtrlrStruct(SharedASQPtr asq, SharedACQPtr acq,
+        uint16_t ms);
+    void SendIdentifyNamespaceStruct(SharedASQPtr asq, SharedACQPtr acq,
+        uint16_t ms);
 };
 
 

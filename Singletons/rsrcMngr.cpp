@@ -19,16 +19,14 @@
 
 
 bool RsrcMngr::mInstanceFlag = false;
-RsrcMngr* RsrcMngr::mSingleton = NULL;
-RsrcMngr* RsrcMngr::GetInstance(int fd, SpecRev specRev)
+RsrcMngr *RsrcMngr::mSingleton = NULL;
+RsrcMngr *RsrcMngr::GetInstance(int fd, SpecRev specRev)
 {
     if(mInstanceFlag == false) {
         mSingleton = new RsrcMngr(fd, specRev);
         mInstanceFlag = true;
-        return mSingleton;
-    } else {
-        return mSingleton;
     }
+    return mSingleton;
 }
 void RsrcMngr::KillInstance()
 {

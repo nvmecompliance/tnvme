@@ -17,7 +17,6 @@
 #include "globals.h"
 
 
-struct metrics_driver gDriverMetrics;
 int gDutFd = -1;
 Registers *gRegisters;
 RsrcMngr *gRsrcMngr;

@@ -28,20 +28,16 @@ GrpGeneralCmds::GrpGeneralCmds(size_t grpNum, SpecRev specRev,
     ErrorRegs errRegs, int fd) :
     Group(grpNum, specRev, "GrpGeneralCmds", "General command tests.")
 {
-    // ------------------------CHANGE NOTICE: (3-2-2012)------------------------
-    // The rule to keep groups and tests at a well known constant reference
-    // number for all of time is too restrictive. A new scheme has replaced
-    // that strategy. For complete details refer to:
+    // For complete details about the APPEND_TEST_AT_?LEVEL() macros:
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Numbering" and
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Strategy
     switch (mSpecRev) {
     case SPECREV_10b:
-        APPEND_TEST_AT_XLEVEL(CIDAcceptedIOSQ_r10b, fd, GrpGeneralCmds, errRegs)
         APPEND_TEST_AT_XLEVEL(CreateResources_r10b, fd, GrpGeneralCmds, errRegs)
         APPEND_TEST_AT_YLEVEL(IllegalNVMCmds_r10b, fd, GrpGeneralCmds, errRegs)
         APPEND_TEST_AT_YLEVEL(IllegalAdminCmds_r10b, fd, GrpGeneralCmds, errRegs)
         APPEND_TEST_AT_YLEVEL(CIDAcceptedASQ_r10b, fd, GrpGeneralCmds, errRegs)
-
+        APPEND_TEST_AT_XLEVEL(CIDAcceptedIOSQ_r10b, fd, GrpGeneralCmds, errRegs)
         break;
 
     default:

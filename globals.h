@@ -25,8 +25,6 @@
 
 // NOTE: To make it easier to decipher objects which are global, prepend 'g'
 
-/// Unchanging data related to dnvme as a whole, not device specific
-extern struct metrics_driver gDriverMetrics;
 /// The sole targeted DUT's file descriptor
 extern int gDutFd;
 /// Tests are encouraged to use this instance for all register access
