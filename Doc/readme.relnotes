@@ -1,3 +1,44 @@
+2012-5-21:
+nvmecompliance_release=1.5.0 New tests, bug fixes, high confidence.
+    1) Using QEMU and the file manage/regression.sh the entire compliance
+       suite is run against 28 different formatted namespaces. Estimates are
+       that this script alone tests 96%-tnvme, 98%-dnvme, and 95%-qemu of the 
+       logic developed under this project. Depending upon the power of the host
+       environment this regression sequence consumes between 17 and 24 hours.
+    2) dnvme: increased the max size of meta data buffer support from 16KB to
+       2GB.
+    3) dnvme-bugfix: BAR0 was assumed to point to the MSIX tables at all times,
+       but now all BARs are generally mapped and later interpreted correctly.
+    4) tnvme: Introduced a new --golden cmd line option, read 
+       https://github.com/nvmecompliance/tnvme/wiki/Command-Line-Options
+    5) tnvme: Remove unnecessary tracking of a cmd's classification; either
+       admin or NVM, wasn't needed since the Q to which a cmd is placed 
+       determines the cmd set.
+    6) tnvme-bugfix: To test case
+       GrpNVMWriteReadCombo::PRPOffsetSinglePgSingleBlk_r10b
+    7) tnvme: All existing test cases now support meta data coverage as both a 
+       separate buffer and as interleaved with the LBA data.
+    8) tnvme-bugfix: MetaData::GetMetaBufferSize() use to return 16 bits, now
+       uses uint32_t for full coverage of buffer sizes.
+    9) tnvme-bugfix: Test case GrpBasicInit/VerifyDataPat and
+       GrpBasicInit/WriteDataPat
+    10) tnvme-bugfix: The CC.MPS bitmask was inadvertently affecting the CC.CSS
+        field when it was being set.
+    11) tnvme-bugfix: Tests
+         a) GrpNVMWriteReadCombo/prpOffsetDualPgMultiBlk_r10b.cpp
+         b) GrpNVMWriteReadCombo/prpOffsetMultiPgMultiBlk_r10b.cpp
+        Didn't allocate enough meta data for meta type namespaces.
+    12) Introduced more resolution to identify namespace types. The test cases
+        needed to consider all permutations of meta data and E2E namespaces.
+        The additional considerations were whether or not the meta data is
+        supplied as a separate buffer or whether it is interleaved within the
+        PRP payload.
+    13) Rearchitected GrpInformative and gInformative so that they are not 
+        linked. In fact there is no special group GrpInformative any longer.
+        GrpInformative's logic has been relocated to the singleton gInformative.
+    14) tnvme-bugfix: The managemennt of meta data buffers caused an infinite
+        loop to be entered when those buffers were finally deallocated.
+
 2012-4-30:
 nvmecompliance_release=1.4.0 New tests, bug fixes, quality.
     1) We are consistently looping this framework hundreds of times with 0
