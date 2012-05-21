@@ -163,10 +163,12 @@ MetaRsrc::FreeAllMetaBuf()
     deque<MetaDataBuf>::iterator resIter = mMetaReserved.begin();
 
     // Search the ordered elements, moves every reserved item into released
-    while (resIter != mMetaReserved.end())
+    while (resIter != mMetaReserved.end()) {
         ReleaseMetaBuf(*resIter);
+        resIter = mMetaReserved.begin();
+    }
 
-    // Now we have to free all the elements in the reserved list
+    // Now we have to free all the elements in the released list
     while (mMetaReleased.size()) {
         MetaDataBuf tmp = mMetaReleased.back();
         mMetaReleased.pop_back();
@@ -182,4 +184,7 @@ MetaRsrc::FreeAllMetaBuf()
     }
 
     mMetaAllocSize = 0;
+
+    if ((mMetaReserved.empty() == false) || (mMetaReleased.empty() == false))
+        throw FrmwkEx(HERE, "Internal program error: meta list not empty");
 }

@@ -34,7 +34,6 @@ SUBDIRS:=			\
 	GrpBasicInit		\
 	GrpCtrlRegisters	\
 	GrpGeneralCmds		\
-	GrpInformative		\
 	GrpInterrupts		\
 	GrpNVMCompareCmd	\
 	GrpNVMDatasetMgmtCmd	\
@@ -47,10 +46,10 @@ SUBDIRS:=			\
 	GrpQueues		\
 	GrpResets		\
 	Exception		\
+	Singletons		\
 	Cmds			\
 	Utils			\
-	Queues			\
-	Singletons
+	Queues
 
 SOURCES:=			\
 	globals.cpp		\

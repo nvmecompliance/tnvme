@@ -49,8 +49,8 @@ public:
      * root dump directory 2 base dump directories are setup and cleaned. The
      * default base dump directory will be SetBaseDumpDir(true). The dump
      * directory structure is as follows:
-     *     1) root_dump_dir/GrpInformative or
-     *     2) root_dump_dir/GrpPending
+     *     1) <root_dump>/Informative or
+     *     2) <root_dump>/GrpPending
      * @note This method will not throw
      * @param dir Pass the name of the root dump directory to certify
      * @return true if successful, otherwise false;
@@ -61,13 +61,12 @@ public:
      * Sets 1 of 2 possible base dump directories. GrpInformative gets its
      * own dump directory to remember the constant data which is always
      * extracted before all test(s) execute. Selects one of:
-     *     1) root_dump_dir/GrpInformative or
-     *     2) root_dump_dir/GrpPending
+     *     1) <root_dump>/Informative or
+     *     2) <root_dump>/GrpPending
      * @note This method will not throw
-     * @param useGrpInfo Pass true for mDumpDirPending, false for
-     *        mDumpDirPending
+     * @param useDirInfo Pass true for mDumpDirInfo, false for mDumpDirPending
      */
-    static void SetBaseDumpDir(bool useGrpInfo) { mUseGrpInfo = useGrpInfo; }
+    static void SetBaseDumpDir(bool useDirInfo) { mUseDirInfo = useDirInfo; }
 
     /**
      * Cleans all files from the base dump directory. Each new group which
@@ -77,7 +76,16 @@ public:
      * @note This method will not throw
      * @return true if successful, otherwise false;
      */
-    static bool PrepDumpDir();
+    static bool CleanDumpDir();
+
+    /**
+     * All the files from the base dump directory will be rotated such that
+     * filenames of the format "*.prev" will be deleted, and all other files
+     * currently within will be renamed to "*.prev".
+     * @note This method will not throw
+     * @return true if successful, otherwise false;
+     */
+    static bool RotateDumpDir();
 
     /**
      * Creates a filename from the parameters within the base dump directory.
@@ -94,9 +102,9 @@ public:
 
 private:
     /// true uses mDumpDirGrpInfo; false uses mDumpDirPending
-    static bool mUseGrpInfo;
+    static bool mUseDirInfo;
+    static string mDumpDirInfo;
     static string mDumpDirPending;
-    static string mDumpDirGrpInfo;
 };
 
 

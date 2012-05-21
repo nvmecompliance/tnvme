@@ -27,10 +27,7 @@ GrpNVMWriteUncorrectCmd::GrpNVMWriteUncorrectCmd(size_t grpNum, SpecRev specRev,
     Group(grpNum, specRev, "GrpNVMWriteUncorrectCmd",
         "NVM cmd set compare test cases")
 {
-    // ------------------------CHANGE NOTICE: (3-2-2012)------------------------
-    // The rule to keep groups and tests at a well known constant reference
-    // number for all of time is to restrictive. A new scheme has replaced
-    // that strategy. For complete details refer to:
+    // For complete details about the APPEND_TEST_AT_?LEVEL() macros:
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Numbering" and
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Strategy
     switch (mSpecRev) {

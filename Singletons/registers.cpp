@@ -36,16 +36,14 @@ CtlSpcType Registers::mCtlSpcMetrics[] =
 
 
 bool Registers::mInstanceFlag = false;
-Registers* Registers::mSingleton = NULL;
-Registers* Registers::GetInstance(int fd, SpecRev specRev)
+Registers *Registers::mSingleton = NULL;
+Registers *Registers::GetInstance(int fd, SpecRev specRev)
 {
     if(mInstanceFlag == false) {
         mSingleton = new Registers(fd, specRev);
         mInstanceFlag = true;
-        return mSingleton;
-    } else {
-        return mSingleton;
     }
+    return mSingleton;
 }
 void Registers::KillInstance()
 {

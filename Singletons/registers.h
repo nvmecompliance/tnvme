@@ -32,8 +32,6 @@
 
 /**
 * This class is meant to interface with PCI and/or ctrl'r registers.
-*
-* @note Singleton's are not allowed to throw exceptions.
 */
 class Registers
 {
@@ -42,8 +40,9 @@ public:
      * Enforce singleton design pattern.
      * @param fd Pass the opened file descriptor for the device under test
      * @param specRev Pass which compliance is needed to target
+     * @return NULL upon error, otherwise a pointer to the singleton
      */
-    static Registers* GetInstance(int fd, SpecRev specRev);
+    static Registers *GetInstance(int fd, SpecRev specRev);
     static void KillInstance();
     ~Registers();
 

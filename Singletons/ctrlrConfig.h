@@ -34,8 +34,6 @@ typedef StateSubject<enum nvme_state>  SubjectCtrlrState;
 * features of this class which envelope value added concepts. This class wraps
 * the CC register to aid in providing the high layer logic needed by test case
 * integration into the testing framework.
-*
-* @note Singleton's are not allowed to throw exceptions.
 */
 class CtrlrConfig : public SubjectCtrlrState
 {
@@ -44,8 +42,9 @@ public:
      * Enforce singleton design pattern.
      * @param fd Pass the opened file descriptor for the device under test
      * @param specRev Pass which compliance is needed to target
+     * @return NULL upon error, otherwise a pointer to the singleton
      */
-    static CtrlrConfig* GetInstance(int fd, SpecRev specRev);
+    static CtrlrConfig *GetInstance(int fd, SpecRev specRev);
     static void KillInstance();
     ~CtrlrConfig();
 

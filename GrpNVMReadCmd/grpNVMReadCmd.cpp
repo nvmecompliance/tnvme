@@ -25,6 +25,7 @@
 #include "limitedRetry_r10b.h"
 #include "lbaOutOfRangeMeta_r10b.h"
 #include "ignoreMetaPtrMeta_r10b.h"
+#include "protInfoIgnoreMeta_r10b.h"
 
 namespace GrpNVMReadCmd {
 
@@ -33,10 +34,7 @@ GrpNVMReadCmd::GrpNVMReadCmd(size_t grpNum, SpecRev specRev, ErrorRegs errRegs,
     int fd) :
     Group(grpNum, specRev, "GrpNVMReadCmd", "NVM cmd set read cmd tests")
 {
-    // ------------------------CHANGE NOTICE: (3-2-2012)------------------------
-    // The rule to keep groups and tests at a well known constant reference
-    // number for all of time is to restrictive. A new scheme has replaced
-    // that strategy. For complete details refer to:
+    // For complete details about the APPEND_TEST_AT_?LEVEL() macros:
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Numbering" and
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Strategy
     switch (mSpecRev) {
@@ -51,6 +49,7 @@ GrpNVMReadCmd::GrpNVMReadCmd(size_t grpNum, SpecRev specRev, ErrorRegs errRegs,
         APPEND_TEST_AT_YLEVEL(LimitedRetry_r10b, fd, GrpNVMReadCmd, errRegs)
         APPEND_TEST_AT_YLEVEL(IgnoreMetaPtrMeta_r10b, fd, GrpNVMReadCmd, errRegs)
         APPEND_TEST_AT_XLEVEL(LBAOutOfRangeMeta_r10b, fd, GrpNVMReadCmd, errRegs)
+        APPEND_TEST_AT_XLEVEL(ProtInfoIgnoreMeta_r10b, fd, GrpNVMReadCmd, errRegs)
         break;
 
     default:

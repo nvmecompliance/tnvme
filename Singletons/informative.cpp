@@ -17,19 +17,30 @@
 #include "informative.h"
 #include "globals.h"
 #include "../Exception/frmwkEx.h"
+#include "../Cmds/getFeatures.h"
+#include "../Utils/kernelAPI.h"
+#include "../Utils/io.h"
+
+#define GRP_NAME        "singleton"
+#define TEST_NAME       "informative"
 
 
 bool Informative::mInstanceFlag = false;
-Informative* Informative::mSingleton = NULL;
-Informative* Informative::GetInstance(int fd, SpecRev specRev)
+Informative *Informative::mSingleton = NULL;
+Informative *Informative::GetInstance(int fd, SpecRev specRev)
 {
     if(mInstanceFlag == false) {
         mSingleton = new Informative(fd, specRev);
         mInstanceFlag = true;
-        return mSingleton;
-    } else {
-        return mSingleton;
+
+        if (mSingleton->Init() == false) {
+            mSingleton->Clear();
+            delete mSingleton;
+            mSingleton = NULL;
+            mInstanceFlag = false;
+        }
     }
+    return mSingleton;
 }
 void Informative::KillInstance()
 {
@@ -382,4 +393,215 @@ Informative::IdentifyNamespace(ConstSharedIdentifyPtr idCmdNamspc) const
             return NS_E2ES;
     }
     throw FrmwkEx(HERE, "Namspc is unidentifiable");
+}
+
+
+bool
+Informative::Init()
+{
+    bool status = true;
+
+    try {   // The objects to perform this work throw exceptions
+
+        // Clean out any garbage in the dump directories
+        FileSystem::SetBaseDumpDir(false);
+        if (FileSystem::CleanDumpDir() == false) {
+            LOG_ERR("Unable to clean dump dir\n");
+            throw FrmwkEx(HERE);
+        }
+        FileSystem::SetBaseDumpDir(true);
+        if (FileSystem::CleanDumpDir() == false) {
+            LOG_ERR("Unable to clean dump dir\n");
+            throw FrmwkEx(HERE);
+        }
+
+        if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
+            throw FrmwkEx(HERE);
+
+        LOG_NRM("Prepare the admin Q's to setup this request");
+        SharedACQPtr acq = SharedACQPtr(new ACQ(gDutFd));
+        acq->Init(2);
+        SharedASQPtr asq = SharedASQPtr(new ASQ(gDutFd));
+        asq->Init(2);
+        gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
+        if (gCtrlrConfig->SetState(ST_ENABLE) == false)
+            throw FrmwkEx(HERE);
+
+        status = Reinit(asq, acq, SYSTEMWIDE_CMD_WAIT_ms);
+    } catch (...) {
+        LOG_ERR("Failed to init Informative singleton");
+        status = false;
+    }
+
+    gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY);
+    return status;
+}
+
+
+bool
+Informative::Reinit(SharedASQPtr &asq, SharedACQPtr &acq, uint16_t ms)
+{
+    // Change dump dir to be compatible for info extraction
+    FileSystem::SetBaseDumpDir(true);
+    if (FileSystem::RotateDumpDir() == false) {
+        LOG_ERR("Unable to rotate dump dir\n");
+        throw FrmwkEx(HERE);
+    }
+
+    Clear();    // Clear out the old, in with the new
+
+    SendGetFeaturesNumOfQueues(asq, acq, ms);
+    SendIdentifyCtrlrStruct(asq, acq, ms);
+    SendIdentifyNamespaceStruct(asq, acq, ms);
+
+    KernelAPI::DumpPciSpaceRegs(
+        FileSystem::PrepDumpFile(GRP_NAME, TEST_NAME, "pci", "regs"), false);
+    KernelAPI::DumpCtrlrSpaceRegs(
+        FileSystem::PrepDumpFile(GRP_NAME, TEST_NAME, "ctrl", "regs"), false);
+
+    // Change dump dir to be compatible for test execution
+    FileSystem::SetBaseDumpDir(false);
+    return true;
+}
+
+
+void
+Informative::SendGetFeaturesNumOfQueues(SharedASQPtr asq, SharedACQPtr acq,
+    uint16_t ms)
+{
+    uint32_t numCE;
+    uint32_t isrCount;
+    uint16_t uniqueId;
+
+
+    LOG_NRM("Create get features");
+    SharedGetFeaturesPtr gfNumQ = SharedGetFeaturesPtr(new GetFeatures());
+    LOG_NRM("Force get features to request number of queues");
+    gfNumQ->SetFID(GetFeatures::FID_NUM_QUEUES);
+    gfNumQ->Dump(
+        FileSystem::PrepDumpFile(GRP_NAME, TEST_NAME, "GetFeat", "NumOfQueue"),
+        "The get features number of queues cmd");
+
+
+    LOG_NRM("Send the get features cmd to hdw");
+    asq->Send(gfNumQ, uniqueId);
+    asq->Dump(FileSystem::PrepDumpFile(GRP_NAME, TEST_NAME, "asq",
+        "GetFeat.NumOfQueue"),
+        "Just B4 ringing SQ0 doorbell, dump entire SQ contents");
+    asq->Ring();
+
+
+    LOG_NRM("Wait for the CE to arrive in ACQ");
+    if (acq->ReapInquiryWaitSpecify(ms, 1, numCE, isrCount) == false) {
+
+        acq->Dump(
+            FileSystem::PrepDumpFile(GRP_NAME, TEST_NAME, "acq",
+            "GetFeat.NumOfQueue"),
+            "Unable to see any CE's in CQ0, dump entire CQ contents");
+        throw FrmwkEx(HERE, "Unable to see completion of get features cmd");
+    } else if (numCE != 1) {
+        acq->Dump(
+            FileSystem::PrepDumpFile(GRP_NAME, TEST_NAME, "acq",
+            "GetFeat.NumOfQueue"),
+            "Unable to see any CE's in CQ0, dump entire CQ contents");
+        LOG_ERR("The ACQ should only have 1 CE as a result of a cmd");
+        throw FrmwkEx(HERE);
+    }
+    acq->Dump(FileSystem::PrepDumpFile(GRP_NAME, TEST_NAME, "acq",
+        "GetFeat.NumOfQueue"),
+        "Just B4 reaping CQ0, dump entire CQ contents");
+
+    {
+        uint32_t ceRemain;
+        uint32_t numReaped;
+
+
+        LOG_NRM("The CQ's metrics before reaping holds head_ptr needed");
+        struct nvme_gen_cq acqMetrics = acq->GetQMetrics();
+        KernelAPI::LogCQMetrics(acqMetrics);
+
+        LOG_NRM("Reaping CE from ACQ, requires memory to hold reaped CE");
+        SharedMemBufferPtr ceMemCap = SharedMemBufferPtr(new MemBuffer());
+        if ((numReaped = acq->Reap(ceRemain, ceMemCap, isrCount, numCE, true))
+            != 1) {
+
+            throw FrmwkEx(HERE,
+                "Verified there was 1 CE, but reaping produced %d", numReaped);
+        }
+        LOG_NRM("The reaped CE is...");
+        acq->LogCE(acqMetrics.head_ptr);
+        acq->DumpCE(acqMetrics.head_ptr, FileSystem::PrepDumpFile
+            (GRP_NAME, TEST_NAME, "CE", "GetFeat.NumOfQueue"),
+            "The CE of the Get Features cmd; Number of Q's feature ID:");
+
+        union CE ce = acq->PeekCE(acqMetrics.head_ptr);
+        ProcessCE::Validate(ce);  // throws upon error
+
+        // This data is static; allows all tests to extract from common point
+        mGetFeaturesNumOfQ = ce.t.dw0;
+    }
+}
+
+
+void
+Informative::SendIdentifyCtrlrStruct(SharedASQPtr asq, SharedACQPtr acq,
+    uint16_t ms)
+{
+    LOG_NRM("Create 1st identify cmd and assoc some buffer memory");
+    SharedIdentifyPtr idCmdCtrlr = SharedIdentifyPtr(new Identify());
+    LOG_NRM("Force identify to request ctrlr capabilities struct");
+    idCmdCtrlr->SetCNS(true);
+    SharedMemBufferPtr idMemCap = SharedMemBufferPtr(new MemBuffer());
+    idMemCap->InitAlignment(Identify::IDEAL_DATA_SIZE, sizeof(uint64_t),
+        true, 0);
+    send_64b_bitmask prpReq =
+        (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE);
+    idCmdCtrlr->SetPrpBuffer(prpReq, idMemCap);
+
+    IO::SendAndReapCmd(GRP_NAME, TEST_NAME, ms, asq, acq,
+        idCmdCtrlr, "IdCtrlStruct", true);
+
+    // This data is static; allows all tests to extract from common point
+    mIdentifyCmdCtrlr = idCmdCtrlr;
+}
+
+
+void
+Informative::SendIdentifyNamespaceStruct(SharedASQPtr asq, SharedACQPtr acq,
+    uint16_t ms)
+{
+    uint64_t numNamSpc;
+    char qualifier[20];
+
+
+    ConstSharedIdentifyPtr idCmdCtrlr = GetIdentifyCmdCtrlr();
+    if ((numNamSpc = idCmdCtrlr->GetValue(IDCTRLRCAP_NN)) == 0)
+        throw FrmwkEx(HERE, "Required to support >= 1 namespace");
+
+    LOG_NRM("Gather %lld identify namspc structs from DUT",
+        (unsigned long long)numNamSpc);
+    for (uint64_t namSpc = 1; namSpc <= numNamSpc; namSpc++) {
+        snprintf(qualifier, sizeof(qualifier), "idCmdNamSpc-%llu",
+            (long long unsigned int)namSpc);
+
+        LOG_NRM("Create identify cmd #%llu & assoc some buffer memory",
+            (long long unsigned int)namSpc);
+        SharedIdentifyPtr idCmdNamSpc = SharedIdentifyPtr(new Identify());
+        LOG_NRM("Force identify to request namespace struct #%llu",
+            (long long unsigned int)namSpc);
+        idCmdNamSpc->SetCNS(false);
+        idCmdNamSpc->SetNSID(namSpc);
+        SharedMemBufferPtr idMemNamSpc = SharedMemBufferPtr(new MemBuffer());
+        idMemNamSpc->InitAlignment(Identify::IDEAL_DATA_SIZE, sizeof(uint64_t),
+            true, 0);
+        send_64b_bitmask idPrpNamSpc =
+            (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE);
+        idCmdNamSpc->SetPrpBuffer(idPrpNamSpc, idMemNamSpc);
+
+        IO::SendAndReapCmd(GRP_NAME, TEST_NAME, ms, asq, acq,
+            idCmdNamSpc, qualifier, true);
+
+        // This data is static; allows all tests to extract from common point
+        mIdentifyCmdNamspc.push_back(idCmdNamSpc);
+    }
 }

@@ -44,8 +44,9 @@ public:
      * Enforce singleton design pattern.
      * @param fd Pass the opened file descriptor for the device under test
      * @param specRev Pass which compliance is needed to target
+     * @return NULL upon error, otherwise a pointer to the singleton
      */
-    static RsrcMngr* GetInstance(int fd, SpecRev specRev);
+    static RsrcMngr *GetInstance(int fd, SpecRev specRev);
     static void KillInstance();
     ~RsrcMngr();
 

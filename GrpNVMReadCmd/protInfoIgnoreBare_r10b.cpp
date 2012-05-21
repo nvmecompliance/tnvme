@@ -37,7 +37,7 @@ ProtInfoIgnoreBare_r10b::ProtInfoIgnoreBare_r10b(int fd, string mGrpName,
     mTestDesc.SetLong(
         "For all bare namspcs from Identify.NN; For each namspc issue multiple "
         "read cmds where each is reading 1 data block at LBA 0 and vary the "
-        "values of DW12.PRINFO.PRACT from 0x0 to 0x0f, expect success for "
+        "values of DW12.PRINFO from 0x0 to 0x0f, expect success for "
         "all.");
 }
 
@@ -110,10 +110,10 @@ ProtInfoIgnoreBare_r10b::RunCoreTest()
         readCmd->SetNSID(bare[i]);
         readCmd->SetNLB(0);    // convert to 0-based value
 
-        for (uint16_t protInfo = 0; protInfo < 0x0f; protInfo++) {
+        for (uint16_t protInfo = 0; protInfo <= 0x0f; protInfo++) {
             uint8_t work = readCmd->GetByte(12, 3);
             work &= ~0x3c;  // PRINFO specific bits
-            work |= (protInfo << 3);
+            work |= (protInfo << 2);
             readCmd->SetByte(work, 12, 3);
 
             snprintf(context, sizeof(context), "ns%d.protInfo0x%02X",

@@ -78,7 +78,7 @@ ProtInfoIgnoreBare_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
-     * 1) Test CreateResources_r10b has run prior.
+     * None.
      * \endverbatim
      */
     char context[256];
@@ -110,10 +110,10 @@ ProtInfoIgnoreBare_r10b::RunCoreTest()
         writeCmd->SetNSID(bare[i]);
         writeCmd->SetNLB(0);    // convert to 0-based value
 
-        for (uint16_t protInfo = 0; protInfo < 0x0f; protInfo++) {
+        for (uint16_t protInfo = 0; protInfo <= 0x0f; protInfo++) {
             uint8_t work = writeCmd->GetByte(12, 3);
             work &= ~0x3c;  // PRINFO specific bits
-            work |= (protInfo << 3);
+            work |= (protInfo << 2);
             writeCmd->SetByte(work, 12, 3);
 
             snprintf(context, sizeof(context), "ns%d.protInfo0x%02X",

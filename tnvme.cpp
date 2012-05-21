@@ -33,7 +33,6 @@
 
 
 // ------------------------------EDIT HERE---------------------------------
-#include "GrpInformative/grpInformative.h"
 #include "GrpPciRegisters/grpPciRegisters.h"
 #include "GrpCtrlRegisters/grpCtrlRegisters.h"
 #include "GrpBasicInit/grpBasicInit.h"
@@ -51,21 +50,10 @@
 #include "GrpAdminDeleteIOCQCmd/grpAdminDeleteIOCQCmd.h"
 #include "GrpAdminDeleteIOSQCmd/grpAdminDeleteIOSQCmd.h"
 
-
 void
 InstantiateGroups(vector<Group *> &groups, struct CmdLine &cl)
 {
-    // GrpInformative must always be located at index=0, it must always be
-    // forced to run 1st otherwise singleton gInformative won't be init'd. Most
-    // every test relies on gInformative being init'd.
-    groups.push_back(new GrpInformative::GrpInformative(groups.size(), cl.rev, cl.errRegs, gDutFd));
-
-    // ------------------------CHANGE NOTICE: (3-2-2012)------------------------
-    // The rule to keep groups and tests at a well known constant reference
-    // number for all of time is to restrictive. A new scheme has replaced
-    // that strategy. For complete details refer to:
-    // "https://github.com/nvmecompliance/tnvme/wiki/Test-Numbering" and
-    // "https://github.com/nvmecompliance/tnvme/wiki/Test-Strategy"
+    // Appending new groups is the most favorable action here
     groups.push_back(new GrpPciRegisters::GrpPciRegisters(groups.size(), cl.rev, cl.errRegs, gDutFd));
     groups.push_back(new GrpCtrlRegisters::GrpCtrlRegisters(groups.size(), cl.rev, cl.errRegs, gDutFd));
     groups.push_back(new GrpBasicInit::GrpBasicInit(groups.size(), cl.rev, cl.errRegs, gDutFd));
@@ -94,7 +82,7 @@ InstantiateGroups(vector<Group *> &groups, struct CmdLine &cl)
 void Usage(void);
 void DestroySingletons();
 bool ExecuteTests(struct CmdLine &cl, vector<Group *> &groups);
-void BuildSingletons(struct CmdLine &cl);
+bool BuildSingletons(struct CmdLine &cl);
 void DestroyTestFoundation(vector<Group *> &groups);
 bool BuildTestFoundation(vector<Group *> &groups, struct CmdLine &cl);
 void ReportTestResults(size_t numIters, int numPass, int numFail, int numSkip);
@@ -387,165 +375,179 @@ main(int argc, char *argv[])
         exit(1);
     }
 
-    // Instantiates and initializes all globals defined within globals.h
-    if (BuildTestFoundation(groups, cmdLine) == false) {
-        printf("Unable to build the test foundation\n");
-        exit(1);
-    }
+    try {   // Everything below has the ability to throw exceptions
 
-    // Accessing hardware requires specific checks and inquiries before running
-    if (accessingHdw) {
-        BuildSingletons(cmdLine);
-
-        printf("Checking for unintended device under low powered states\n");
-        if (gRegisters->Read(PCISPC_PMCS, regVal) == false) {
-            printf("Mandatory PMCAP PCI capabilities is missing\n");
-            exit(1);
-        } else if (regVal & 0x03) {
-            printf("PCI power state not fully operational\n");
-        }
-
-        if (FileSystem::SetRootDumpDir(cmdLine.dump) == false) {
-            printf("Unable to establish \"%s\" dump directory\n",
-                cmdLine.dump.c_str());
+        // Instantiates and initializes all globals defined within globals.h
+        if (BuildTestFoundation(groups, cmdLine) == false) {
+            printf("Unable to build the test foundation\n");
             exit(1);
         }
 
-        // Clean out any garbage in the dump directories
-        FileSystem::SetBaseDumpDir(false);   // prep GrpPending
-        if (FileSystem::PrepDumpDir() == false) {
-            printf("Unable to establish GrpPending dump directory\n");
-            exit(1);
-        }
-        FileSystem::SetBaseDumpDir(true);    // prep GrpInformative
-        if (FileSystem::PrepDumpDir() == false) {
-            printf("Unable to establish GrpInformative dump directory\n");
-            exit(1);
-        }
-    }
+        // Accessing hdw requires specific checks and inquiries before running
+        if (accessingHdw) {
+            if (FileSystem::SetRootDumpDir(cmdLine.dump) == false) {
+                printf("Unable to establish \"%s\" dump directory\n",
+                    cmdLine.dump.c_str());
+                exit(1);
+            }
 
-    // Process the user's cmd line parameters
-    if (cmdLine.golden.req) {
-        if ((exitCode = !CompareGolden(cmdLine.golden))) {
-            printf("FAILURE: Comparing golden data\n");
-        } else {
-            printf("SUCCESS: Comparing golden data\n");
-        }
-    } else if (cmdLine.format.req) {
-        if ((exitCode = !FormatDevice(cmdLine.format))) {
-            printf("FAILURE: Formatting device\n");
-        } else {
-            printf("SUCCESS: Formatting device\n");
-        }
-    } else if (cmdLine.numQueues.req) {
-        if ((exitCode = !SetFeaturesNumberOfQueues(cmdLine.numQueues))) {
-            printf("FAILURE: Setting number of queues\n");
-        } else {
-            printf("SUCCESS: Setting number of queues\n");
-        }
-    } else if (cmdLine.summary) {
-        for (size_t i = 0; i < groups.size(); i++) {
-            FORMAT_GROUP_DESCRIPTION(work, groups[i])
-            printf("%s\n", work.c_str());
-            printf("%s", groups[i]->GetGroupSummary(false).c_str());
+            if (BuildSingletons(cmdLine) == false) {
+                printf("Unable to instantiate mandatory framework objects\n");
+                exit(1);
+            }
+
+            printf("Checking for unintended device under low powered states\n");
+            if (gRegisters->Read(PCISPC_PMCS, regVal) == false) {
+                printf("Mandatory PMCAP PCI capabilities is missing\n");
+                exit(1);
+            } else if (regVal & 0x03) {
+                printf("PCI power state not fully operational\n");
+            }
         }
 
-    } else if (cmdLine.detail.req) {
-        if (cmdLine.detail.t.group == UINT_MAX) {
+        // Process the user's cmd line parameters
+        if (cmdLine.golden.req) {
+            if ((exitCode = !CompareGolden(cmdLine.golden))) {
+                printf("FAILURE: Comparing golden data\n");
+            } else {
+                printf("SUCCESS: Comparing golden data\n");
+            }
+        } else if (cmdLine.format.req) {
+            if ((exitCode = !FormatDevice(cmdLine.format))) {
+                printf("FAILURE: Formatting device\n");
+            } else {
+                printf("SUCCESS: Formatting device\n");
+            }
+        } else if (cmdLine.numQueues.req) {
+            if ((exitCode = !SetFeaturesNumberOfQueues(cmdLine.numQueues))) {
+                printf("FAILURE: Setting number of queues\n");
+            } else {
+                printf("SUCCESS: Setting number of queues\n");
+            }
+        } else if (cmdLine.summary) {
             for (size_t i = 0; i < groups.size(); i++) {
                 FORMAT_GROUP_DESCRIPTION(work, groups[i])
                 printf("%s\n", work.c_str());
-                printf("%s", groups[i]->GetGroupSummary(true).c_str());
+                printf("%s", groups[i]->GetGroupSummary(false).c_str());
             }
 
-        } else {    // user spec'd a group they are interested in
-            if (cmdLine.detail.t.group >= groups.size()) {
-                printf("Specified test group %ld does not exist\n",
-                    cmdLine.detail.t.group);
-            } else {
+        } else if (cmdLine.detail.req) {
+            if (cmdLine.detail.t.group == UINT_MAX) {
                 for (size_t i = 0; i < groups.size(); i++) {
-                    if (i == cmdLine.detail.t.group) {
-                        FORMAT_GROUP_DESCRIPTION(work, groups[i])
-                        printf("%s\n", work.c_str());
+                    FORMAT_GROUP_DESCRIPTION(work, groups[i])
+                    printf("%s\n", work.c_str());
+                    printf("%s", groups[i]->GetGroupSummary(true).c_str());
+                }
 
-                        if ((cmdLine.detail.t.xLev == UINT_MAX) ||
-                            (cmdLine.detail.t.yLev == UINT_MAX) ||
-                            (cmdLine.detail.t.zLev == UINT_MAX)) {
-                            // Want info on all tests within group
-                            printf("%s",
-                                groups[i]->GetGroupSummary(true).c_str());
-                        } else {
-                            // Want info on spec'd test within group
-                            printf("%s", groups[i]->GetTestDescription(true,
-                                cmdLine.detail.t).c_str());
-                            break;
+            } else {    // user spec'd a group they are interested in
+                if (cmdLine.detail.t.group >= groups.size()) {
+                    printf("Specified test group %ld does not exist\n",
+                        cmdLine.detail.t.group);
+                } else {
+                    for (size_t i = 0; i < groups.size(); i++) {
+                        if (i == cmdLine.detail.t.group) {
+                            FORMAT_GROUP_DESCRIPTION(work, groups[i])
+                            printf("%s\n", work.c_str());
+
+                            if ((cmdLine.detail.t.xLev == UINT_MAX) ||
+                                (cmdLine.detail.t.yLev == UINT_MAX) ||
+                                (cmdLine.detail.t.zLev == UINT_MAX)) {
+                                // Want info on all tests within group
+                                printf("%s",
+                                    groups[i]->GetGroupSummary(true).c_str());
+                            } else {
+                                // Want info on spec'd test within group
+                                printf("%s", groups[i]->GetTestDescription(true,
+                                    cmdLine.detail.t).c_str());
+                                break;
+                            }
                         }
                     }
                 }
             }
+        } else if (cmdLine.rmmap.req) {
+            uint8_t *value = new uint8_t[cmdLine.rmmap.size];
+            gRegisters->Read(cmdLine.rmmap.space, cmdLine.rmmap.size,
+                cmdLine.rmmap.offset, cmdLine.rmmap.acc, value);
+        } else if (cmdLine.wmmap.req) {
+            gRegisters->Write(cmdLine.wmmap.space, cmdLine.wmmap.size,
+                cmdLine.wmmap.offset, cmdLine.wmmap.acc,
+                (uint8_t *)(&cmdLine.wmmap.value));
+        } else if (cmdLine.reset) {
+            if ((exitCode = !gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY))) {
+                printf("FAILURE: reset\n");
+            } else {
+                printf("SUCCESS: reset\n");
+            }
+            // At this point we cannot enable the ctrlr because that requires
+            // ACQ/ASQ's to be created, ctrlr simply won't become ready w/o them
+        } else if (cmdLine.test.req) {
+            if ((exitCode = !ExecuteTests(cmdLine, groups))) {
+                printf("FAILURE: testing\n");
+            } else {
+                printf("SUCCESS: testing\n");
+            }
         }
-    } else if (cmdLine.rmmap.req) {
-        uint8_t *value = new uint8_t[cmdLine.rmmap.size];
-        gRegisters->Read(cmdLine.rmmap.space, cmdLine.rmmap.size,
-            cmdLine.rmmap.offset, cmdLine.rmmap.acc, value);
-    } else if (cmdLine.wmmap.req) {
-        gRegisters->Write(cmdLine.wmmap.space, cmdLine.wmmap.size,
-            cmdLine.wmmap.offset, cmdLine.wmmap.acc,
-            (uint8_t *)(&cmdLine.wmmap.value));
-    } else if (cmdLine.reset) {
-        if ((exitCode = !gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY))) {
-            printf("FAILURE: reset\n");
-        } else {
-            printf("SUCCESS: reset\n");
-        }
-        // At this point we cannot enable the ctrlr because that requires
-        // ACQ/ASQ's to be created, ctrlr simply won't become ready w/o these.
-    } else if (cmdLine.test.req) {
-        if ((exitCode = !ExecuteTests(cmdLine, groups))) {
-            printf("FAILURE: testing\n");
-        } else {
-            printf("SUCCESS: testing\n");
-        }
+    } catch (...) {
+        LOG_ERR("An unforeseen exception has been caught");
     }
 
     // cleanup duties
     DestroyTestFoundation(groups);
     DestroySingletons();
-
     cmdLine.skiptest.clear();
     devices.clear();
     exit(exitCode);
 }
 
 
-void BuildSingletons(struct CmdLine &cl)
+bool BuildSingletons(struct CmdLine &cl)
 {
     // Create globals/singletons here, which all tests objects will need
 
     // The Register singleton should be created 1st because all other Singletons
     // use it directly to become init'd or they rely on it heavily soon after.
     gRegisters = Registers::GetInstance(gDutFd, cl.rev);
+    if (gRegisters == NULL) {
+        LOG_ERR("Unable to create framework obj: gRegisters");
+        return false;
+    }
 
     // The CtrlrConfig singleton should be created 2nd because it's subject base
     // class is used by just about every other object in the framework to learn
     // of state changes within the ctrlr. Disabling the ctrlr is extremely
     // destructive of all resources in user space and in kernel space.
     gCtrlrConfig = CtrlrConfig::GetInstance(gDutFd, cl.rev);
+    if (gCtrlrConfig == NULL) {
+        LOG_ERR("Unable to create framework obj: gCtrlrConfig");
+        return false;
+    }
 
-    // Create the remainder at will...
+    // Create the remaining objects at random...
     gRsrcMngr = RsrcMngr::GetInstance(gDutFd, cl.rev);
+    if (gRsrcMngr == NULL) {
+        LOG_ERR("Unable to create framework obj: gRsrcMngr");
+        return false;
+    }
     gCtrlrConfig->Attach(*gRsrcMngr);
 
     gInformative = Informative::GetInstance(gDutFd, cl.rev);
+    if (gInformative == NULL) {
+        LOG_ERR("Unable to create framework obj: gInformative");
+        return false;
+    }
+
+    return true;
 }
 
 
 void DestroySingletons()
 {
-    Registers::KillInstance();
+    // Destroy in reverse order as was created
     RsrcMngr::KillInstance();
-    CtrlrConfig::KillInstance();
     Informative::KillInstance();
+    CtrlrConfig::KillInstance();
+    Registers::KillInstance();
 }
 
 
@@ -561,6 +563,7 @@ bool
 BuildTestFoundation(vector<Group *> &groups, struct CmdLine &cl)
 {
     int ret;
+    struct metrics_driver driverMetrics;
     struct flock fdlock = {F_WRLCK, SEEK_SET, 0, 0, 0};
 
 
@@ -586,15 +589,13 @@ BuildTestFoundation(vector<Group *> &groups, struct CmdLine &cl)
         return false;
     }
     if (fcntl(gDutFd, F_SETLK, &fdlock) == -1) {
-        if ((errno == EACCES) || (errno == EAGAIN)) {
-            LOG_ERR("%s has been locked by another process",
-                cl.device.c_str());
-        }
+        if ((errno == EACCES) || (errno == EAGAIN))
+            LOG_ERR("%s has been locked by another process", cl.device.c_str());
         LOG_ERR("%s", strerror(errno));
     }
 
     // Validate the dnvme was compiled with the same version of API as tnvme
-    ret = ioctl(gDutFd, NVME_IOCTL_GET_DRIVER_METRICS, &gDriverMetrics);
+    ret = ioctl(gDutFd, NVME_IOCTL_GET_DRIVER_METRICS, &driverMetrics);
     if (ret < 0) {
         LOG_ERR("Unable to extract driver version information");
         return false;
@@ -602,12 +603,13 @@ BuildTestFoundation(vector<Group *> &groups, struct CmdLine &cl)
     LOG_NRM("tnvme binary: v/%d.%d", VER_MAJOR, VER_MINOR);
     LOG_NRM("tnvme compiled against dnvme API: v/%d.%d.%d",
         ((API_VERSION >> 16) & 0xFF),
-        ((API_VERSION >> 8) & 0xFF), ((API_VERSION >> 0) & 0xFF));
+        ((API_VERSION >> 8) & 0xFF),
+        ((API_VERSION >> 0) & 0xFF));
     LOG_NRM("dnvme API residing within kernel: v/%d.%d.%d",
-        ((gDriverMetrics.api_version >> 16) & 0xFF),
-        ((gDriverMetrics.api_version >> 8) & 0xFF),
-        ((gDriverMetrics.api_version >> 0) & 0xFF));
-    if (gDriverMetrics.api_version != API_VERSION) {
+        ((driverMetrics.api_version >> 16) & 0xFF),
+        ((driverMetrics.api_version >> 8) & 0xFF),
+        ((driverMetrics.api_version >> 0) & 0xFF));
+    if (driverMetrics.api_version != API_VERSION) {
         LOG_ERR("dnvme vs tnvme version mismatch, refusing to execute");
         return false;
     }
@@ -654,7 +656,7 @@ DestroyTestFoundation(vector<Group *> &groups)
 bool
 ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
 {
-    size_t iLoop = 0;
+    size_t iLoop;
     int numPassed = 0;
     int numFailed = 0;
     int numSkipped = 0;
@@ -673,57 +675,15 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
         goto ABORT_OUT;
     }
 
-
-    {
-        // Always run the Informative group to populate gInformative singleton.
-        // This group is mandated to be non-intrusive in that is will only read
-        // from the DUT to gather non-volatile data to learn its operating param
-        LOG_NRM("Executing GrpInformative, start from known point");
-        if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
-            goto ABORT_OUT;
-
-        // Run all tests within GrpInformative
-        testIter = groups[INFORM_GRPNUM]->GetTestIterator();
-        while (allHaveRun == false) {
-            thisTestPass = true;
-
-            // Don't allow skipping GrpInformative; send empty skip instructions
-            switch (groups[INFORM_GRPNUM]->RunTest(testIter, skipNothing)) {
-            case Group::TR_SUCCESS:
-                numPassed++;
-                break;
-            case Group::TR_FAIL:
-                allTestsPass = false;
-                thisTestPass = false;
-                numFailed++;
-                break;
-            case Group::TR_SKIPPING:
-                // Causes gInformative singleton to be uninitialized
-                LOG_ERR("Not allowed to skip GrpInformative");
-                thisTestPass = false;
-                break;
-            case Group::TR_NOTFOUND:
-                allHaveRun = true;
-                break;
-            }
-            if (thisTestPass == false)
-                goto EARLY_OUT;
-        }
-    }
-
-
-    // After GrpInformative runs, loop over the cmd line's requested test cases
     LOG_NRM("Attempting to satisfy target test: %ld:%ld.%ld.%ld",
         cl.test.t.group, cl.test.t.xLev, cl.test.t.yLev, cl.test.t.zLev);
 
-    for ( ; iLoop < cl.loop; iLoop++) {
+    for (iLoop = 0; iLoop < cl.loop; iLoop++) {
         LOG_NRM("Start loop execution #%ld", iLoop);
         for (size_t iGrp = 0; iGrp < groups.size(); iGrp++) {
             allHaveRun = false;
 
-            // Clean out any garbage in the dump directory
-            FileSystem::SetBaseDumpDir(false);
-            if (FileSystem::PrepDumpDir() == false)
+            if (FileSystem::CleanDumpDir() == false)
                 LOG_WARN("Unable to cleanup dump between group runs");
 
             // Now handle anything spec'd in the --test <cmd line option>

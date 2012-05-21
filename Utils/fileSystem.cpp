@@ -18,15 +18,18 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <errno.h>
-#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem.hpp>
 #include "fileSystem.h"
 #include "../Exception/frmwkEx.h"
 
+#define BASE_NAME_DIR_INFO      "/Informative/"
+#define BASE_NAME_PENDING       "/GrpPending/"
+
 using namespace std;
 
-bool FileSystem::mUseGrpInfo = true;
+bool FileSystem::mUseDirInfo = true;
+string FileSystem::mDumpDirInfo;
 string FileSystem::mDumpDirPending;
-string FileSystem::mDumpDirGrpInfo;
 
 
 FileSystem::FileSystem()
@@ -44,22 +47,23 @@ FileSystem::SetRootDumpDir(string dir)
 {
     char work[256];
 
-    mDumpDirPending = (dir + "/GrpPending/");
-    mDumpDirGrpInfo = (dir + "/GrpInformative/");
+    mDumpDirPending = (dir + BASE_NAME_PENDING);
+    mDumpDirInfo = (dir + BASE_NAME_DIR_INFO);
+
     try {
         if (boost::filesystem::exists(dir.c_str())) {
             SetBaseDumpDir(false);
             snprintf(work, sizeof(work), "mkdir -p -m 777 %s",
                 mDumpDirPending.c_str());
             system(work);
-            if (PrepDumpDir() == false)
+            if (CleanDumpDir() == false)
                 return false;
 
             SetBaseDumpDir(true);    // this is the default
             snprintf(work, sizeof(work), "mkdir -p -m 777 %s",
-                mDumpDirGrpInfo.c_str());
+                mDumpDirInfo.c_str());
             system(work);
-            if (PrepDumpDir() == false)
+            if (CleanDumpDir() == false)
                 return false;
 
             return true;
@@ -75,21 +79,53 @@ FileSystem::SetRootDumpDir(string dir)
 
 
 bool
-FileSystem::PrepDumpDir()
+FileSystem::CleanDumpDir()
 {
     char work[256];
-    string dumpDir = (mUseGrpInfo) ? mDumpDirGrpInfo : mDumpDirPending;
-
+    string dumpDir = (mUseDirInfo) ? mDumpDirInfo : mDumpDirPending;
 
     if (dumpDir.empty()) {
-        LOG_ERR("cmd line option --dump=<empty> is dangerous, not allowing");
+        LOG_ERR("cmd line option --dump=<empty> is destructive, not allowing");
         return false;
     }
+
+    // Remove everything in the dir, not the dir itself
     snprintf(work, sizeof(work), "rm -rf %s*", dumpDir.c_str());
     system(work);
     if (boost::filesystem::exists(work)) {
         LOG_ERR("Unable to remove files within: %s", dumpDir.c_str());
         return false;
+    }
+    return true;
+}
+
+
+bool
+FileSystem::RotateDumpDir()
+{
+    char work[256];
+    string dumpDir = (mUseDirInfo) ? mDumpDirInfo : mDumpDirPending;
+
+    if (dumpDir.empty())
+        return true;
+
+    // Remove everything in the dir of the form "*.prev"
+    snprintf(work, sizeof(work), "rm %s*.prev", dumpDir.c_str());
+    system(work);
+
+    // Get a vector of filenames of all other files within dir
+    boost::filesystem::path targDir(dumpDir);
+    vector<boost::filesystem::path> allFiles;
+    copy(boost::filesystem::directory_iterator(targDir),
+        boost::filesystem::directory_iterator(), back_inserter(allFiles));
+
+    // Rename all files to "*.prev"
+    for (size_t i = 0; i < allFiles.size(); i++) {
+        string newName = (allFiles[i].filename() + ".prev");
+        snprintf(work, sizeof(work), "mv %s%s %s%s.prev",
+            dumpDir.c_str(), allFiles[i].filename().c_str(),
+            dumpDir.c_str(), allFiles[i].filename().c_str());
+        system(work);
     }
     return true;
 }
@@ -104,7 +140,7 @@ FileSystem::PrepDumpFile(string grpName, string className, string objName,
     if (grpName.empty() || className.empty() || objName.empty())
         throw FrmwkEx(HERE, "Mandatory params are empty");
 
-    file += (mUseGrpInfo) ? mDumpDirGrpInfo : mDumpDirPending;
+    file += (mUseDirInfo) ? mDumpDirInfo : mDumpDirPending;
     file += grpName + ".";
     file += className + ".";
     file += objName;
