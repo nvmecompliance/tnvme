@@ -32,8 +32,6 @@
 
 /**
 * This class is meant to interface with PCI and/or ctrl'r registers.
-*
-* @note Singleton's are not allowed to throw exceptions.
 */
 class Registers
 {

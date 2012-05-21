@@ -375,116 +375,121 @@ main(int argc, char *argv[])
         exit(1);
     }
 
-    // Instantiates and initializes all globals defined within globals.h
-    if (BuildTestFoundation(groups, cmdLine) == false) {
-        printf("Unable to build the test foundation\n");
-        exit(1);
-    }
+    try {   // Everything below has the ability to throw exceptions
 
-    // Accessing hardware requires specific checks and inquiries before running
-    if (accessingHdw) {
-        if (FileSystem::SetRootDumpDir(cmdLine.dump) == false) {
-            printf("Unable to establish \"%s\" dump directory\n",
-                cmdLine.dump.c_str());
+        // Instantiates and initializes all globals defined within globals.h
+        if (BuildTestFoundation(groups, cmdLine) == false) {
+            printf("Unable to build the test foundation\n");
             exit(1);
         }
 
-        if (BuildSingletons(cmdLine) == false) {
-            printf("Unable to instantiate mandatory framework objects\n");
-            exit(1);
+        // Accessing hdw requires specific checks and inquiries before running
+        if (accessingHdw) {
+            if (FileSystem::SetRootDumpDir(cmdLine.dump) == false) {
+                printf("Unable to establish \"%s\" dump directory\n",
+                    cmdLine.dump.c_str());
+                exit(1);
+            }
+
+            if (BuildSingletons(cmdLine) == false) {
+                printf("Unable to instantiate mandatory framework objects\n");
+                exit(1);
+            }
+
+            printf("Checking for unintended device under low powered states\n");
+            if (gRegisters->Read(PCISPC_PMCS, regVal) == false) {
+                printf("Mandatory PMCAP PCI capabilities is missing\n");
+                exit(1);
+            } else if (regVal & 0x03) {
+                printf("PCI power state not fully operational\n");
+            }
         }
 
-        printf("Checking for unintended device under low powered states\n");
-        if (gRegisters->Read(PCISPC_PMCS, regVal) == false) {
-            printf("Mandatory PMCAP PCI capabilities is missing\n");
-            exit(1);
-        } else if (regVal & 0x03) {
-            printf("PCI power state not fully operational\n");
-        }
-    }
-
-    // Process the user's cmd line parameters
-    if (cmdLine.golden.req) {
-        if ((exitCode = !CompareGolden(cmdLine.golden))) {
-            printf("FAILURE: Comparing golden data\n");
-        } else {
-            printf("SUCCESS: Comparing golden data\n");
-        }
-    } else if (cmdLine.format.req) {
-        if ((exitCode = !FormatDevice(cmdLine.format))) {
-            printf("FAILURE: Formatting device\n");
-        } else {
-            printf("SUCCESS: Formatting device\n");
-        }
-    } else if (cmdLine.numQueues.req) {
-        if ((exitCode = !SetFeaturesNumberOfQueues(cmdLine.numQueues))) {
-            printf("FAILURE: Setting number of queues\n");
-        } else {
-            printf("SUCCESS: Setting number of queues\n");
-        }
-    } else if (cmdLine.summary) {
-        for (size_t i = 0; i < groups.size(); i++) {
-            FORMAT_GROUP_DESCRIPTION(work, groups[i])
-            printf("%s\n", work.c_str());
-            printf("%s", groups[i]->GetGroupSummary(false).c_str());
-        }
-
-    } else if (cmdLine.detail.req) {
-        if (cmdLine.detail.t.group == UINT_MAX) {
+        // Process the user's cmd line parameters
+        if (cmdLine.golden.req) {
+            if ((exitCode = !CompareGolden(cmdLine.golden))) {
+                printf("FAILURE: Comparing golden data\n");
+            } else {
+                printf("SUCCESS: Comparing golden data\n");
+            }
+        } else if (cmdLine.format.req) {
+            if ((exitCode = !FormatDevice(cmdLine.format))) {
+                printf("FAILURE: Formatting device\n");
+            } else {
+                printf("SUCCESS: Formatting device\n");
+            }
+        } else if (cmdLine.numQueues.req) {
+            if ((exitCode = !SetFeaturesNumberOfQueues(cmdLine.numQueues))) {
+                printf("FAILURE: Setting number of queues\n");
+            } else {
+                printf("SUCCESS: Setting number of queues\n");
+            }
+        } else if (cmdLine.summary) {
             for (size_t i = 0; i < groups.size(); i++) {
                 FORMAT_GROUP_DESCRIPTION(work, groups[i])
                 printf("%s\n", work.c_str());
-                printf("%s", groups[i]->GetGroupSummary(true).c_str());
+                printf("%s", groups[i]->GetGroupSummary(false).c_str());
             }
 
-        } else {    // user spec'd a group they are interested in
-            if (cmdLine.detail.t.group >= groups.size()) {
-                printf("Specified test group %ld does not exist\n",
-                    cmdLine.detail.t.group);
-            } else {
+        } else if (cmdLine.detail.req) {
+            if (cmdLine.detail.t.group == UINT_MAX) {
                 for (size_t i = 0; i < groups.size(); i++) {
-                    if (i == cmdLine.detail.t.group) {
-                        FORMAT_GROUP_DESCRIPTION(work, groups[i])
-                        printf("%s\n", work.c_str());
+                    FORMAT_GROUP_DESCRIPTION(work, groups[i])
+                    printf("%s\n", work.c_str());
+                    printf("%s", groups[i]->GetGroupSummary(true).c_str());
+                }
 
-                        if ((cmdLine.detail.t.xLev == UINT_MAX) ||
-                            (cmdLine.detail.t.yLev == UINT_MAX) ||
-                            (cmdLine.detail.t.zLev == UINT_MAX)) {
-                            // Want info on all tests within group
-                            printf("%s",
-                                groups[i]->GetGroupSummary(true).c_str());
-                        } else {
-                            // Want info on spec'd test within group
-                            printf("%s", groups[i]->GetTestDescription(true,
-                                cmdLine.detail.t).c_str());
-                            break;
+            } else {    // user spec'd a group they are interested in
+                if (cmdLine.detail.t.group >= groups.size()) {
+                    printf("Specified test group %ld does not exist\n",
+                        cmdLine.detail.t.group);
+                } else {
+                    for (size_t i = 0; i < groups.size(); i++) {
+                        if (i == cmdLine.detail.t.group) {
+                            FORMAT_GROUP_DESCRIPTION(work, groups[i])
+                            printf("%s\n", work.c_str());
+
+                            if ((cmdLine.detail.t.xLev == UINT_MAX) ||
+                                (cmdLine.detail.t.yLev == UINT_MAX) ||
+                                (cmdLine.detail.t.zLev == UINT_MAX)) {
+                                // Want info on all tests within group
+                                printf("%s",
+                                    groups[i]->GetGroupSummary(true).c_str());
+                            } else {
+                                // Want info on spec'd test within group
+                                printf("%s", groups[i]->GetTestDescription(true,
+                                    cmdLine.detail.t).c_str());
+                                break;
+                            }
                         }
                     }
                 }
             }
+        } else if (cmdLine.rmmap.req) {
+            uint8_t *value = new uint8_t[cmdLine.rmmap.size];
+            gRegisters->Read(cmdLine.rmmap.space, cmdLine.rmmap.size,
+                cmdLine.rmmap.offset, cmdLine.rmmap.acc, value);
+        } else if (cmdLine.wmmap.req) {
+            gRegisters->Write(cmdLine.wmmap.space, cmdLine.wmmap.size,
+                cmdLine.wmmap.offset, cmdLine.wmmap.acc,
+                (uint8_t *)(&cmdLine.wmmap.value));
+        } else if (cmdLine.reset) {
+            if ((exitCode = !gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY))) {
+                printf("FAILURE: reset\n");
+            } else {
+                printf("SUCCESS: reset\n");
+            }
+            // At this point we cannot enable the ctrlr because that requires
+            // ACQ/ASQ's to be created, ctrlr simply won't become ready w/o them
+        } else if (cmdLine.test.req) {
+            if ((exitCode = !ExecuteTests(cmdLine, groups))) {
+                printf("FAILURE: testing\n");
+            } else {
+                printf("SUCCESS: testing\n");
+            }
         }
-    } else if (cmdLine.rmmap.req) {
-        uint8_t *value = new uint8_t[cmdLine.rmmap.size];
-        gRegisters->Read(cmdLine.rmmap.space, cmdLine.rmmap.size,
-            cmdLine.rmmap.offset, cmdLine.rmmap.acc, value);
-    } else if (cmdLine.wmmap.req) {
-        gRegisters->Write(cmdLine.wmmap.space, cmdLine.wmmap.size,
-            cmdLine.wmmap.offset, cmdLine.wmmap.acc,
-            (uint8_t *)(&cmdLine.wmmap.value));
-    } else if (cmdLine.reset) {
-        if ((exitCode = !gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY))) {
-            printf("FAILURE: reset\n");
-        } else {
-            printf("SUCCESS: reset\n");
-        }
-        // At this point we cannot enable the ctrlr because that requires
-        // ACQ/ASQ's to be created, ctrlr simply won't become ready w/o these.
-    } else if (cmdLine.test.req) {
-        if ((exitCode = !ExecuteTests(cmdLine, groups))) {
-            printf("FAILURE: testing\n");
-        } else {
-            printf("SUCCESS: testing\n");
-        }
+    } catch (...) {
+        LOG_ERR("An unforeseen exception has been caught");
     }
 
     // cleanup duties

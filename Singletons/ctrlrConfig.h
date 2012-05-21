@@ -34,8 +34,6 @@ typedef StateSubject<enum nvme_state>  SubjectCtrlrState;
 * features of this class which envelope value added concepts. This class wraps
 * the CC register to aid in providing the high layer logic needed by test case
 * integration into the testing framework.
-*
-* @note Singleton's are not allowed to throw exceptions.
 */
 class CtrlrConfig : public SubjectCtrlrState
 {

@@ -25,8 +25,6 @@
 
 /**
 * This base class will handle object resources.
-*
-* @note This class does not throw exceptions.
 */
 class ObjRsrc
 {

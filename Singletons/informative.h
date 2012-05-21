@@ -37,8 +37,6 @@ using namespace std;
 * common convenient DUT operational parameters. Rather than force every class
 * to go through the hassle of retrieving this necessary data, do it once
 * globally for all to enjoy.
-*
-* @note Singleton's are not allowed to throw exceptions.
 */
 class Informative
 {
