@@ -91,12 +91,7 @@ IgnoreMetaPtrBare_r10b::RunCoreTest()
     LOG_NRM("For all bare namspc's issue cmd with non-zero meta ptr");
     vector<uint32_t> bare = gInformative->GetBareNamespaces();
     for (size_t i = 0; i < bare.size(); i++) {
-
         namSpcPtr = gInformative->GetIdentifyCmdNamspc(bare[i]);
-        if (namSpcPtr == Identify::NullIdentifyPtr) {
-            throw FrmwkEx(HERE, "Identify namspc struct #%d doesn't exist",
-                bare[i]);
-        }
 
         LOG_NRM("Setup read cmd's values that won't change per namspc");
         SharedMemBufferPtr readMem = SharedMemBufferPtr(new MemBuffer());

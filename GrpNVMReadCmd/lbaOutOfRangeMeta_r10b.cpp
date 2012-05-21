@@ -109,10 +109,6 @@ LBAOutOfRangeMeta_r10b::RunCoreTest()
             throw FrmwkEx(HERE);
 
         namSpcPtr = gInformative->GetIdentifyCmdNamspc(meta[i]);
-        if (namSpcPtr == Identify::NullIdentifyPtr) {
-            throw FrmwkEx(HERE, "Identify namspc struct #%d doesn't exist",
-                meta[i]);
-        }
         nsze = namSpcPtr->GetValue(IDNAMESPC_NSZE);
         LBAFormat lbaFormat = namSpcPtr->GetLBAFormat();
 

@@ -112,11 +112,8 @@ ProtInfoIgnoreMeta_r10b::RunCoreTest()
         LOG_NRM("Create IOSQ and IOCQ with ID #%d", IOQ_ID);
         CreateIOQs(asq, acq, IOQ_ID, iosq, iocq);
 
-        namSpcPtr = gInformative->GetIdentifyCmdNamspc(meta[i]);
-        if (namSpcPtr == Identify::NullIdentifyPtr)
-            throw FrmwkEx(HERE, "Idtfy namspc str #%d doesn't exist", meta[i]);
-
         LOG_NRM("Get LBA format and lba data size for namespc #%d", meta[i]);
+        namSpcPtr = gInformative->GetIdentifyCmdNamspc(meta[i]);
         LBAFormat lbaFormat = namSpcPtr->GetLBAFormat();
         uint64_t lbaDataSize = (1 << lbaFormat.LBADS);
 

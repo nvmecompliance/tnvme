@@ -92,10 +92,6 @@ IgnoreMetaPtrMeta_r10b::RunCoreTest()
     vector<uint32_t> imeta = gInformative->GetMetaINamespaces();
     for (size_t i = 0; i < imeta.size(); i++) {
         namSpcPtr = gInformative->GetIdentifyCmdNamspc(imeta[i]);
-        if (namSpcPtr == Identify::NullIdentifyPtr) {
-            throw FrmwkEx(HERE, "Identify namspc struct #%d doesn't exist",
-                imeta[i]);
-        }
 
         LOG_NRM("Setup read cmd's values that won't change per namspc");
         SharedMemBufferPtr readMem = SharedMemBufferPtr(new MemBuffer());

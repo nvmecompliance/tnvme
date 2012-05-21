@@ -38,7 +38,7 @@ StartingLBABare_r10b::StartingLBABare_r10b(int fd,
     mTestDesc.SetLong(
         "For all bare namspcs from Identify.NN, determine Identify.NCAP; For "
         "each namspc issue multiple write cmds each sending Identify.MDTS, or "
-        "1MB if unlimited, amount of data starting from LBA 0 to "
+        "256 KB if unlimited, amount of data starting from LBA 0 to "
         "(Identify.NCAP - 1). Each block of data should use a new data pattern "
         "by rolling through {byte++, byteK, word++, wordK, dword++, dwordK}. "
         "After all writing completes issue correlating read cmds through the "
@@ -124,11 +124,6 @@ StartingLBABare_r10b::RunCoreTest()
     for (size_t i = 0; i < bare.size(); i++) {
         LOG_NRM("Processing for BARE name space id #%d", bare[i]);
         namSpcPtr = gInformative->GetIdentifyCmdNamspc(bare[i]);
-        if (namSpcPtr == Identify::NullIdentifyPtr) {
-            throw FrmwkEx(HERE, "Identify namspc struct #%d doesn't exist",
-                bare[i]);
-        }
-
         uint64_t ncap = namSpcPtr->GetValue(IDNAMESPC_NCAP);
         uint64_t lbaDataSize = namSpcPtr->GetLBADataSize();
         uint64_t maxWrBlks = maxDtXferSz / lbaDataSize;

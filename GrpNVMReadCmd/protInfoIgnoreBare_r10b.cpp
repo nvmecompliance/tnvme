@@ -90,12 +90,7 @@ ProtInfoIgnoreBare_r10b::RunCoreTest()
 
     vector<uint32_t> bare = gInformative->GetBareNamespaces();
     for (size_t i = 0; i < bare.size(); i++) {
-
         namSpcPtr = gInformative->GetIdentifyCmdNamspc(bare[i]);
-        if (namSpcPtr == Identify::NullIdentifyPtr) {
-            throw FrmwkEx(HERE, "Identify namspc struct #%d doesn't exist",
-                bare[i]);
-        }
 
         LOG_NRM("Create memory to contain read payload");
         SharedMemBufferPtr readMem = SharedMemBufferPtr(new MemBuffer());

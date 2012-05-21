@@ -21,12 +21,12 @@ export CC = g++				# Mods here affect all sub-makes
 #export DFLAGS = -g -DDEBUG		# comment here affects all sub-makes
 export CFLAGS = -O0 -W -Wall -Werror	# mods here affect all sub-makes
 LDFLAGS = $(foreach stem, $(SUBDIRS),./$(stem)/lib$(stem).a)
-INCLUDES = -I./ -I../ 
+INCLUDES = -I./ -I../
 
 # Notify the compiler/linker where the Boost library and hdr files are located
 CFLAGS += -lboost_filesystem
 # Notify the compiler/linker where the XML library and hdr files are located
-CFLAGS += $(shell pkg-config libxml++-2.6 --cflags --libs) 
+CFLAGS += $(shell pkg-config libxml++-2.6 --cflags --libs)
 
 SUBDIRS:=			\
 	GrpAdminDeleteIOCQCmd	\

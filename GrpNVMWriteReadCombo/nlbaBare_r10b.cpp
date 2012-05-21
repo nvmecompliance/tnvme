@@ -125,11 +125,6 @@ NLBABare_r10b::RunCoreTest()
     vector<uint32_t> bare = gInformative->GetBareNamespaces();
     for (size_t i = 0; i < bare.size(); i++) {
         namSpcPtr = gInformative->GetIdentifyCmdNamspc(bare[i]);
-        if (namSpcPtr == Identify::NullIdentifyPtr) {
-            throw FrmwkEx(HERE, "Identify namspc struct #%d doesn't exist",
-                bare[i]);
-        }
-
         uint64_t lbaDataSize = namSpcPtr->GetLBADataSize();
         uint64_t maxWrBlks = (1 << CDW12_NLB_BITS); // 1-based value.
         if (maxDtXferSz != 0)

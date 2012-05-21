@@ -47,6 +47,11 @@ using namespace std;
 
 #define MAX_CHAR_PER_LINE_DESCRIPTION       63
 #define SYSTEMWIDE_CMD_WAIT_ms              4000
+
+/**
+ * When the namespace reports unlimited transfer size, this define artificially
+ * caps it to allow reasonable coverage vs runtime target.
+ */
 #define MAX_DATA_TX_SIZE                    (256 * 1024)
 
 #define UINT32_MAX                          ((uint32_t)-1)

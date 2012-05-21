@@ -44,7 +44,7 @@ PRPOffsetMultiPgMultiBlk_r10b::PRPOffsetMultiPgMultiBlk_r10b(int fd,
         "X = (CC.MPS - Identify.LBAF[Identify.FLBAS].LBADS) in steps of 4B, "
         "in inner loop vary the number of blocks sent from 1 to Y, where "
         "Y = ((Identify.MDTS - X) / Identify.LBAF[Identify.FLBAS].LBADS) or "
-        "Y~1MB if Identify.MDTS is unlimited; alternate the data pattern "
+        "Y~256 KB if Identify.MDTS is unlimited; alternate the data pattern "
         "between dword++, dwordK for each write.");
 }
 
