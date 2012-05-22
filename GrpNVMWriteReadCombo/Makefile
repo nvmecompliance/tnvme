@@ -26,7 +26,8 @@ SRC =						\
 	startingLBABare_r10b.cpp		\
 	nlbaBare_r10b.cpp			\
 	datasetMgmt_r10b.cpp			\
-	startingLBAMeta_r10b.cpp
+	startingLBAMeta_r10b.cpp		\
+	nlbaMeta_r10b.cpp
 
 .SUFFIXES: .cpp
 

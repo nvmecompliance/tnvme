@@ -36,13 +36,13 @@ NLBABare_r10b::NLBABare_r10b(int fd,
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 6");
-    mTestDesc.SetShort(     "Verify all values of Number of Log Blk (NLB) for bare namspcs.");
+    mTestDesc.SetShort(     "Verify all values of Number of Log Blk (NLB) for bare namspcs");
     // No string size limit for the long description
     mTestDesc.SetLong(
         "For all bare namspcs from Identify.NN; For each namspc issue "
         "consecutive write cmds each staring at LBA 0 by looping thru all "
-        "values for DW12.NLB from 0 to "
-        "{0xffff | (Identify.MDTS / Identify.LBAF[Identify.FLBAS].LBADS)} "
+        "values for DW12.NLB from 0 to {0xffff | (Identify.MDTS / "
+        "Identify.LBAF[Identify.FLBAS].LBADS) | NCAP} "
         "which ever is less. Each write cmd should use a new data pattern by "
         "rolling through {byte++, byteK, word++, wordK, dword++, dwordK}. "
         "After each write cmd completes issue a correlating read cmd through "
@@ -127,6 +127,8 @@ NLBABare_r10b::RunCoreTest()
         namSpcPtr = gInformative->GetIdentifyCmdNamspc(bare[i]);
         uint64_t lbaDataSize = namSpcPtr->GetLBADataSize();
         uint64_t maxWrBlks = (1 << CDW12_NLB_BITS); // 1-based value.
+        uint64_t ncap = namSpcPtr->GetValue(IDNAMESPC_NCAP);
+        maxWrBlks = (maxWrBlks < ncap) ? maxWrBlks : ncap; // limit by ncap.
         if (maxDtXferSz != 0)
             maxWrBlks = MIN(maxWrBlks, (maxDtXferSz / lbaDataSize));
 
