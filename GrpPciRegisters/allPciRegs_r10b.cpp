@@ -188,8 +188,10 @@ AllPciRegs_r10b::ReportOffendingBitPos(uint64_t val, uint64_t expectedVal)
 
     for (int i = 0; i < (int)(sizeof(uint64_t)*8); i++) {
         bitMask = (1 << i);
-        if ((val & bitMask) != (expectedVal & bitMask))
+        if ((val & bitMask) != (expectedVal & bitMask)) {
+            LOG_NRM("Reg val(0x%016lX) expect val(0x%016lX)", val, expectedVal);
             return i;
+        }
     }
     return INT_MAX; // there is no mismatch
 }
@@ -267,7 +269,7 @@ AllPciRegs_r10b::ValidatePciHdrRegisterROAttribute(PciSpc reg)
 
             if (gRegisters->Read(NVMEIO_PCI_HDR, sizeof(value),
                 pciMetrics[reg].offset + (k * sizeof(value)),
-                (uint8_t *)&value) == false) {
+                (uint8_t *)&value, true) == false) {
 
                 throw FrmwkEx(HERE);
             } else {
