@@ -19,7 +19,8 @@ INCLUDES = -I. -I../ -I../../ -I/usr/local/include
 SRC =					\
 	grpAdminDeleteIOSQCmd.cpp	\
 	createResources_r10b.cpp	\
-	unsupportRsvdFields_r10b.cpp
+	unsupportRsvdFields_r10b.cpp	\
+	invalidQID_r10b.cpp
 
 .SUFFIXES: .cpp
 
