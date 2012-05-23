@@ -15,44 +15,37 @@
  */
 
 #include <string.h>
-#include "boost/format.hpp"
-#include "datasetMgmt_r10b.h"
+#include "unsupportRsvdFields_r10b.h"
 #include "globals.h"
 #include "grpDefs.h"
-#include "../Queues/iocq.h"
-#include "../Queues/iosq.h"
+#include "../Utils/queues.h"
 #include "../Utils/io.h"
 
+namespace GrpAdminCreateIOCQCmd {
 
-namespace GrpNVMWriteReadCombo {
 
-#define CDW13_DSM_BITS          8
-
-DatasetMgmt_r10b::DatasetMgmt_r10b(int fd,
-    string mGrpName, string mTestName, ErrorRegs errRegs) :
+UnsupportRsvdFields_r10b::UnsupportRsvdFields_r10b(int fd, string mGrpName,
+    string mTestName, ErrorRegs errRegs) :
     Test(fd, mGrpName, mTestName, SPECREV_10b, errRegs)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 6");
-    mTestDesc.SetShort(     "Verify dataset mgmt operations.");
+    mTestDesc.SetShort(     "Set unsupported/rsvd fields in cmd");
     // No string size limit for the long description
     mTestDesc.SetLong(
-        "Search for 1 of the following namspcs to run test. Find 1st bare "
-        "namspc, or find 1st meta namspc, or find 1st E2E namspc. Issue "
-        "identical write cmd at LBA 0, sending 1 block with approp meta/E2E "
-        "requirements if necessary, where write executes the ALGO listed "
-        "below; subsequently after each write a read must verify the data "
-        "pattern for success, where by the read cmd must be created with the "
-        "identical parameters that the write occurred. Each write cmd must "
-        "alternate the data pattern between dword++ and dwordK. "
-        "ALGO) Vary the cmd's DW13.DSM field for all possible permutations"
-        "of values except any reserved values. Testing to verify these "
-        "attributes don't affect the integrity of data written and then "
-        "read to/from media.");
+        "Find 1st bare namspc, or find 1st meta namspc, or find 1st E2E "
+        "namspc. Unsupported DW's and rsvd fields are treated identical, the "
+        "recipient shall not check their value.  Issue a CreateIOCQ cmd "
+        "with QID=1, num elements=2, but set all unsupported/rsvd fields, "
+        "expect success. Set: DW0_b15:10, DW2, DW3, DW4, DW5, DW6, DW7, "
+        "DW11_b15:2, DW12, DW13, DW14, DW15. Then issue a CreateIOSQ cmd to "
+        "assoc, QID=1, num elements = 2. Issue a write cmd sending 1 block and "
+        "approp supporting meta/E2E if necessary to the selected namspc at "
+        "LBA 0, data pattern of word++, read back, verify pattern.");
 }
 
 
-DatasetMgmt_r10b::~DatasetMgmt_r10b()
+UnsupportRsvdFields_r10b::~UnsupportRsvdFields_r10b()
 {
     ///////////////////////////////////////////////////////////////////////////
     // Allocations taken from the heap and not under the control of the
@@ -61,9 +54,8 @@ DatasetMgmt_r10b::~DatasetMgmt_r10b()
 }
 
 
-DatasetMgmt_r10b::
-DatasetMgmt_r10b(const DatasetMgmt_r10b &other) :
-    Test(other)
+UnsupportRsvdFields_r10b::
+UnsupportRsvdFields_r10b(const UnsupportRsvdFields_r10b &other) : Test(other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -72,9 +64,8 @@ DatasetMgmt_r10b(const DatasetMgmt_r10b &other) :
 }
 
 
-DatasetMgmt_r10b &
-DatasetMgmt_r10b::operator=(const DatasetMgmt_r10b
-    &other)
+UnsupportRsvdFields_r10b &
+UnsupportRsvdFields_r10b::operator=(const UnsupportRsvdFields_r10b &other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -86,19 +77,75 @@ DatasetMgmt_r10b::operator=(const DatasetMgmt_r10b
 
 
 void
-DatasetMgmt_r10b::RunCoreTest()
+UnsupportRsvdFields_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
      * 1) Test CreateResources_r10b has run prior.
      * \endverbatim
      */
-    string work;
+    uint64_t maxIOQEntries = 2;
 
     // Lookup objs which were created in a prior test within group
-    SharedIOSQPtr iosq = CAST_TO_IOSQ(gRsrcMngr->GetObj(IOSQ_GROUP_ID));
-    SharedIOCQPtr iocq = CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_GROUP_ID));
+    SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
+    SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
 
+    LOG_NRM("Setup element sizes for the IOQ's");
+    uint8_t iocqes = (gInformative->GetIdentifyCmdCtrlr()->
+        GetValue(IDCTRLRCAP_CQES) & 0xf);
+    uint8_t iosqes = (gInformative->GetIdentifyCmdCtrlr()->
+        GetValue(IDCTRLRCAP_SQES) & 0xf);
+    gCtrlrConfig->SetIOCQES(iocqes);
+    gCtrlrConfig->SetIOSQES(iosqes);
+
+    LOG_NRM("Create IOCQ");
+    SharedIOCQPtr iocq = SharedIOCQPtr(new IOCQ(gDutFd));
+
+    LOG_NRM("Allocate contiguous memory; IOCQ has ID=%d", IOQ_ID);
+    iocq->Init(IOQ_ID, maxIOQEntries, true, 0);
+
+    LOG_NRM("Form a Create IOCQ cmd to perform queue creation");
+    SharedCreateIOCQPtr createIOCQCmd = SharedCreateIOCQPtr(new CreateIOCQ());
+    createIOCQCmd->Init(iocq);
+
+    LOG_NRM("Set all cmd's rsvd bits");
+    uint32_t work = createIOCQCmd->GetDword(0);
+    work |= 0x0000fc00;      // Set DW0_b15:10 bits
+    createIOCQCmd->SetDword(work, 0);
+
+    createIOCQCmd->SetDword(0xffffffff, 2);
+    createIOCQCmd->SetDword(0xffffffff, 3);
+    createIOCQCmd->SetDword(0xffffffff, 4);
+    createIOCQCmd->SetDword(0xffffffff, 5);
+    createIOCQCmd->SetDword(0xffffffff, 6);
+    createIOCQCmd->SetDword(0xffffffff, 7);
+
+    // DW11_b15:2
+    work = createIOCQCmd->GetDword(11);
+    work |= 0x0000fffc;
+    createIOCQCmd->SetDword(work, 11);
+
+    createIOCQCmd->SetDword(0xffffffff, 12);
+    createIOCQCmd->SetDword(0xffffffff, 13);
+    createIOCQCmd->SetDword(0xffffffff, 14);
+    createIOCQCmd->SetDword(0xffffffff, 15);
+
+    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
+        createIOCQCmd, "", true);
+
+    LOG_NRM("Create the assoc IOSQ");
+    SharedIOSQPtr iosq = Queues::CreateIOSQContigToHdw(mGrpName, mTestName,
+        DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, maxIOQEntries, false,
+        IOCQ_GROUP_ID, IOQ_ID, 0);
+
+    WriteReadVerify(iosq, iocq);
+}
+
+
+void
+UnsupportRsvdFields_r10b::WriteReadVerify(SharedIOSQPtr iosq,
+    SharedIOCQPtr iocq)
+{
     Informative::Namspc namspcData = gInformative->Get1stBareMetaE2E();
     LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
     uint64_t lbaDataSize = namspcData.idCmdNamspc->GetLBADataSize();
@@ -109,8 +156,8 @@ DatasetMgmt_r10b::RunCoreTest()
     SharedReadPtr readCmd = SharedReadPtr(new Read());
     SharedMemBufferPtr readMem = SharedMemBufferPtr(new MemBuffer());
 
-    send_64b_bitmask prpBitmask = (send_64b_bitmask)(MASK_PRP1_PAGE
-        | MASK_PRP2_PAGE | MASK_PRP2_LIST);
+    send_64b_bitmask prpBitmask = (send_64b_bitmask)
+        (MASK_PRP1_PAGE | MASK_PRP2_PAGE | MASK_PRP2_LIST);
 
     switch (namspcData.type) {
     case Informative::NS_BARE:
@@ -143,52 +190,36 @@ DatasetMgmt_r10b::RunCoreTest()
     readCmd->SetNSID(namspcData.id);
     readCmd->SetNLB(0);
 
-    DataPattern dataPat[] = {
-        DATAPAT_INC_32BIT,
-        DATAPAT_CONST_32BIT
-    };
-    uint64_t dpArrSize = sizeof(dataPat) / sizeof(dataPat[0]);
-
-    for (uint64_t dsmAtr = 0; dsmAtr < (1 << CDW13_DSM_BITS); dsmAtr++) {
-        // skip reserved bits in dataset management attributes.
-        if ((dsmAtr & 0xF) >= 0x09)
-            continue;
-
-        switch (namspcData.type) {
-        case Informative::NS_BARE:
-            writeMem->SetDataPattern(dataPat[dsmAtr % dpArrSize], dsmAtr);
-            break;
-        case Informative::NS_METAS:
-            writeMem->SetDataPattern(dataPat[dsmAtr % dpArrSize], dsmAtr);
-            writeCmd->SetMetaDataPattern(dataPat[dsmAtr % dpArrSize], dsmAtr);
-            break;
-        case Informative::NS_METAI:
-            writeMem->SetDataPattern(dataPat[dsmAtr % dpArrSize], dsmAtr);
-            break;
-        case Informative::NS_E2ES:
-        case Informative::NS_E2EI:
-            throw FrmwkEx(HERE, "Deferring work to handle this case in future");
-            break;
-        }
-
-        // Set CDW13.DSM field to different values.
-        writeCmd->SetByte((uint8_t)dsmAtr, 13, 0);
-        readCmd->SetByte((uint8_t)dsmAtr, 13, 0);
-
-        work = str(boost::format("dsm.%Xh") % dsmAtr);
-        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
-            iocq, writeCmd, work, true);
-
-        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
-            iocq, readCmd, work, true);
-
-        VerifyDataPat(readCmd, writeCmd);
+    switch (namspcData.type) {
+    case Informative::NS_BARE:
+        writeMem->SetDataPattern(DATAPAT_INC_32BIT);
+        break;
+    case Informative::NS_METAS:
+        writeMem->SetDataPattern(DATAPAT_INC_32BIT);
+        writeCmd->SetMetaDataPattern(DATAPAT_INC_32BIT);
+        break;
+    case Informative::NS_METAI:
+        writeMem->SetDataPattern(DATAPAT_INC_32BIT);
+        break;
+    case Informative::NS_E2ES:
+    case Informative::NS_E2EI:
+        throw FrmwkEx(HERE, "Deferring work to handle this case in future");
+        break;
     }
+
+    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+        iocq, writeCmd, "", true);
+
+    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+        iocq, readCmd, "", true);
+
+    VerifyDataPat(readCmd, writeCmd);
 }
 
 
 void
-DatasetMgmt_r10b::VerifyDataPat(SharedReadPtr readCmd, SharedWritePtr writeCmd)
+UnsupportRsvdFields_r10b::VerifyDataPat(SharedReadPtr readCmd,
+    SharedWritePtr writeCmd)
 {
     LOG_NRM("Compare read vs written data to verify");
     SharedMemBufferPtr rdPayload = readCmd->GetRWPrpBuffer();
@@ -219,4 +250,6 @@ DatasetMgmt_r10b::VerifyDataPat(SharedReadPtr readCmd, SharedWritePtr writeCmd)
     }
 }
 
+
 }   // namespace
+

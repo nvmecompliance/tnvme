@@ -14,26 +14,26 @@
  *  limitations under the License.
  */
 
-#include "grpAdminDeleteIOCQCmd.h"
+#include "grpAdminCreateIOCQCmd.h"
 #include "../Exception/frmwkEx.h"
 #include "createResources_r10b.h"
 #include "unsupportRsvdFields_r10b.h"
 
-namespace GrpAdminDeleteIOCQCmd {
+namespace GrpAdminCreateIOCQCmd {
 
 
-GrpAdminDeleteIOCQCmd::GrpAdminDeleteIOCQCmd(size_t grpNum, SpecRev specRev,
+GrpAdminCreateIOCQCmd::GrpAdminCreateIOCQCmd(size_t grpNum, SpecRev specRev,
     ErrorRegs errRegs, int fd) :
-    Group(grpNum, specRev, "GrpAdminDeleteIOCQCmd",
-        "Admin cmd set delete IOCQ test cases")
+    Group(grpNum, specRev, "GrpAdminCreateIOCQCmd",
+        "Admin cmd set create IOCQ test cases")
 {
     // For complete details about the APPEND_TEST_AT_?LEVEL() macros:
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Numbering" and
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Strategy
     switch (mSpecRev) {
     case SPECREV_10b:
-        APPEND_TEST_AT_XLEVEL(CreateResources_r10b, fd, GrpAdminDeleteIOCQCmd, errRegs)
-        APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r10b, fd, GrpAdminDeleteIOCQCmd, errRegs)
+        APPEND_TEST_AT_XLEVEL(CreateResources_r10b, fd, GrpAdminCreateIOCQCmd, errRegs)
+        APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r10b, fd, GrpAdminCreateIOCQCmd, errRegs)
         break;
 
     default:
@@ -43,7 +43,7 @@ GrpAdminDeleteIOCQCmd::GrpAdminDeleteIOCQCmd(size_t grpNum, SpecRev specRev,
 }
 
 
-GrpAdminDeleteIOCQCmd::~GrpAdminDeleteIOCQCmd()
+GrpAdminCreateIOCQCmd::~GrpAdminCreateIOCQCmd()
 {
     // mTests deallocated in parent
 }

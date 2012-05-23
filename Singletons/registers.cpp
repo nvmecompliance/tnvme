@@ -39,6 +39,7 @@ bool Registers::mInstanceFlag = false;
 Registers *Registers::mSingleton = NULL;
 Registers *Registers::GetInstance(int fd, SpecRev specRev)
 {
+    LOG_NRM("Instantiating global Registers object");
     if(mInstanceFlag == false) {
         mSingleton = new Registers(fd, specRev);
         mInstanceFlag = true;

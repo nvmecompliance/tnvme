@@ -14,25 +14,19 @@
  *  limitations under the License.
  */
 
-#ifndef _GRPADMINDELETEIOSQCMD_H_
-#define _GRPADMINDELETEIOSQCMD_H_
+#ifndef _GRPDEFS_H_
+#define _GRPDEFS_H_
 
-#include "../group.h"
+namespace GrpAdminCreateIOCQCmd {
 
-namespace GrpAdminDeleteIOSQCmd {
+#define ACQ_GROUP_ID                "ACQ"
+#define ASQ_GROUP_ID                "ASQ"
+#define IOCQ_GROUP_ID               "IOCQ"
+#define IOSQ_GROUP_ID               "IOSQ"
+#define IOQ_ID                      1
 
+#define DEFAULT_CMD_WAIT_ms         SYSTEMWIDE_CMD_WAIT_ms
 
-/**
- * This class implements admin cmd set delete IOSQ test cases.
- */
-class GrpAdminDeleteIOSQCmd : public Group
-{
-public:
-    GrpAdminDeleteIOSQCmd(size_t grpNum, SpecRev specRev, ErrorRegs errRegs,
-        int fd);
-    virtual ~GrpAdminDeleteIOSQCmd();
-};
-
-}   // namespace
+}
 
 #endif

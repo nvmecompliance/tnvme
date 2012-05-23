@@ -14,12 +14,16 @@
  *  limitations under the License.
  */
 
-#ifndef _CREATERESOURCES_r10b_H_
-#define _CREATERESOURCES_r10b_H_
+#ifndef _UNSUPPORTRSVDFIELDS_r10b_H_
+#define _UNSUPPORTRSVDFIELDS_r10b_H_
 
 #include "test.h"
+#include "../Queues/iocq.h"
+#include "../Queues/iosq.h"
+#include "../Cmds/read.h"
+#include "../Cmds/write.h"
 
-namespace GrpAdminDeleteIOCQCmd {
+namespace GrpAdminCreateIOSQCmd {
 
 
 /** \verbatim
@@ -29,20 +33,20 @@ namespace GrpAdminDeleteIOCQCmd {
  * 1) See notes in the header file of the Test base class
  * \endverbatim
  */
-class CreateResources_r10b : public Test
+class UnsupportRsvdFields_r10b : public Test
 {
 public:
-    CreateResources_r10b(int fd, string grpName, string testName,
+    UnsupportRsvdFields_r10b(int fd, string grpName, string testName,
         ErrorRegs errRegs);
-    virtual ~CreateResources_r10b();
+    virtual ~UnsupportRsvdFields_r10b();
 
     /**
      * IMPORTANT: Read Test::Clone() header comment.
      */
-    virtual CreateResources_r10b *Clone() const
-        { return new CreateResources_r10b(*this); }
-    CreateResources_r10b &operator=(const CreateResources_r10b &other);
-    CreateResources_r10b(const CreateResources_r10b &other);
+    virtual UnsupportRsvdFields_r10b *Clone() const
+        { return new UnsupportRsvdFields_r10b(*this); }
+    UnsupportRsvdFields_r10b &operator=(const UnsupportRsvdFields_r10b &other);
+    UnsupportRsvdFields_r10b(const UnsupportRsvdFields_r10b &other);
 
 
 protected:
@@ -53,6 +57,8 @@ private:
     ///////////////////////////////////////////////////////////////////////////
     // Adding a member variable? Then edit the copy constructor and operator=().
     ///////////////////////////////////////////////////////////////////////////
+    void WriteReadVerify(SharedIOSQPtr iosq, SharedIOCQPtr iocq);
+    void VerifyDataPat(SharedReadPtr readCmd, SharedWritePtr writeCmd);
 };
 
 }   // namespace

@@ -17,13 +17,13 @@
 #include "createResources_r10b.h"
 #include "globals.h"
 #include "grpDefs.h"
-#include "../Queues/acq.h"
+#include "../Queues/acq.h" 
 #include "../Queues/asq.h"
 #include "../Utils/kernelAPI.h"
 #include "../Utils/irq.h"
 #include "../Singletons/informative.h"
 
-namespace GrpAdminDeleteIOSQCmd {
+namespace GrpAdminCreateIOSQCmd {
 
 
 CreateResources_r10b::CreateResources_r10b(int fd, string grpName,

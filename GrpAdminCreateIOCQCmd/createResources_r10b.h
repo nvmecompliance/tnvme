@@ -19,7 +19,7 @@
 
 #include "test.h"
 
-namespace GrpAdminDeleteIOCQCmd {
+namespace GrpAdminCreateIOCQCmd {
 
 
 /** \verbatim

@@ -17,14 +17,14 @@ LIBS = -L../ -L/usr/local/lib -lm
 INCLUDES = -I. -I../ -I../../ -I/usr/local/include
 
 SRC =					\
-	grpAdminDeleteIOCQCmd.cpp	\
+	grpAdminCreateIOSQCmd.cpp	\
 	createResources_r10b.cpp	\
 	unsupportRsvdFields_r10b.cpp
 
 .SUFFIXES: .cpp
 
 OBJ = $(SRC:.cpp=.o)
-OUT = libGrpAdminDeleteIOCQCmd.a
+OUT = libGrpAdminCreateIOSQCmd.a
 
 all: $(OUT)
 

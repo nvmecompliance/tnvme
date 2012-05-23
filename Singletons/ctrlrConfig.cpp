@@ -28,6 +28,7 @@ bool CtrlrConfig::mInstanceFlag = false;
 CtrlrConfig *CtrlrConfig::mSingleton = NULL;
 CtrlrConfig *CtrlrConfig::GetInstance(int fd, SpecRev specRev)
 {
+    LOG_NRM("Instantiating global CtrlrConfig object");
     if(mInstanceFlag == false) {
         mSingleton = new CtrlrConfig(fd, specRev);
         mInstanceFlag = true;

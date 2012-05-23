@@ -49,6 +49,8 @@
 #include "GrpNVMCompareCmd/grpNVMCompareCmd.h"
 #include "GrpAdminDeleteIOCQCmd/grpAdminDeleteIOCQCmd.h"
 #include "GrpAdminDeleteIOSQCmd/grpAdminDeleteIOSQCmd.h"
+#include "GrpAdminCreateIOCQCmd/grpAdminCreateIOCQCmd.h"
+#include "GrpAdminCreateIOSQCmd/grpAdminCreateIOSQCmd.h"
 
 void
 InstantiateGroups(vector<Group *> &groups, struct CmdLine &cl)
@@ -70,6 +72,8 @@ InstantiateGroups(vector<Group *> &groups, struct CmdLine &cl)
     groups.push_back(new GrpNVMCompareCmd::GrpNVMCompareCmd(groups.size(), cl.rev, cl.errRegs, gDutFd));
     groups.push_back(new GrpAdminDeleteIOCQCmd::GrpAdminDeleteIOCQCmd(groups.size(), cl.rev, cl.errRegs, gDutFd));
     groups.push_back(new GrpAdminDeleteIOSQCmd::GrpAdminDeleteIOSQCmd(groups.size(), cl.rev, cl.errRegs, gDutFd));
+    groups.push_back(new GrpAdminCreateIOCQCmd::GrpAdminCreateIOCQCmd(groups.size(), cl.rev, cl.errRegs, gDutFd));
+    groups.push_back(new GrpAdminCreateIOSQCmd::GrpAdminCreateIOSQCmd(groups.size(), cl.rev, cl.errRegs, gDutFd));
 }
 // ------------------------------EDIT HERE---------------------------------
 

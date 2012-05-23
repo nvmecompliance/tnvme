@@ -23,14 +23,13 @@ namespace GrpAdminDeleteIOCQCmd {
 
 
 /**
-* This class implements a logical grouping of test cases for basic
-* initialization of NVME hardware. This mainly consists of the operations
-* one needs during a system power up to get the hardware operational.
-*/
+ * This class implements admin cmd set delete IOCQ test cases.
+ */
 class GrpAdminDeleteIOCQCmd : public Group
 {
 public:
-    GrpAdminDeleteIOCQCmd(size_t grpNum, SpecRev specRev, ErrorRegs errRegs, int fd);
+    GrpAdminDeleteIOCQCmd(size_t grpNum, SpecRev specRev, ErrorRegs errRegs,
+        int fd);
     virtual ~GrpAdminDeleteIOCQCmd();
 };
 

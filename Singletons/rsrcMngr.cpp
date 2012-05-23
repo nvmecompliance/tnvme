@@ -22,6 +22,7 @@ bool RsrcMngr::mInstanceFlag = false;
 RsrcMngr *RsrcMngr::mSingleton = NULL;
 RsrcMngr *RsrcMngr::GetInstance(int fd, SpecRev specRev)
 {
+    LOG_NRM("Instantiating global RsrcMngr object");
     if(mInstanceFlag == false) {
         mSingleton = new RsrcMngr(fd, specRev);
         mInstanceFlag = true;

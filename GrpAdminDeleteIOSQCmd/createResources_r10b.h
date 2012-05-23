@@ -14,8 +14,8 @@
  *  limitations under the License.
  */
 
-#ifndef _CREATEACQASQ_r10b_H_
-#define _CREATEACQASQ_r10b_H_
+#ifndef _CREATERESOURCES_r10b_H_
+#define _CREATERESOURCES_r10b_H_
 
 #include "test.h"
 

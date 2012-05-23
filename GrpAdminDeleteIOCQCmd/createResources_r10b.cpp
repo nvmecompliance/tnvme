@@ -20,6 +20,7 @@
 #include "../Queues/acq.h" 
 #include "../Queues/asq.h"
 #include "../Utils/kernelAPI.h"
+#include "../Utils/irq.h"
 #include "../Singletons/informative.h"
 
 namespace GrpAdminDeleteIOCQCmd {
@@ -85,6 +86,9 @@ CreateResources_r10b::RunCoreTest()
     SharedASQPtr asq = CAST_TO_ASQ(
         gRsrcMngr->AllocObj(Trackable::OBJ_ASQ, ASQ_GROUP_ID))
     asq->Init(5);
+
+    // All queues will use identical IRQ vector
+    IRQ::SetAnySchemeSpecifyNum(1);     // throws upon error
 
     gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
