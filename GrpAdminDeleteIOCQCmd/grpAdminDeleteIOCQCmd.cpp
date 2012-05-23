@@ -18,6 +18,7 @@
 #include "../Exception/frmwkEx.h"
 #include "createResources_r10b.h"
 #include "unsupportRsvdFields_r10b.h"
+#include "invalidQID_r10b.h"
 
 namespace GrpAdminDeleteIOCQCmd {
 
@@ -34,6 +35,7 @@ GrpAdminDeleteIOCQCmd::GrpAdminDeleteIOCQCmd(size_t grpNum, SpecRev specRev,
     case SPECREV_10b:
         APPEND_TEST_AT_XLEVEL(CreateResources_r10b, fd, GrpAdminDeleteIOCQCmd, errRegs)
         APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r10b, fd, GrpAdminDeleteIOCQCmd, errRegs)
+        APPEND_TEST_AT_XLEVEL(InvalidQID_r10b, fd, GrpAdminDeleteIOCQCmd, errRegs)
         break;
 
     default:

@@ -18,12 +18,12 @@
 #include "invalidQID_r10b.h"
 #include "globals.h"
 #include "grpDefs.h"
-#include "../Cmds/deleteIOSQ.h"
+#include "../Cmds/deleteIOCQ.h"
 #include "../Utils/queues.h"
 #include "../Utils/io.h"
 #include "../Utils/irq.h"
 
-namespace GrpAdminDeleteIOSQCmd {
+namespace GrpAdminDeleteIOCQCmd {
 
 
 InvalidQID_r10b::InvalidQID_r10b(int fd, string mGrpName,
@@ -32,15 +32,14 @@ InvalidQID_r10b::InvalidQID_r10b(int fd, string mGrpName,
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 5");
-    mTestDesc.SetShort(     "Issue DeleteIOSQ and cause SC = Invalid queue identifier");
+    mTestDesc.SetShort(     "Issue DeleteIOCQ and cause SC = Invalid queue identifier");
     // No string size limit for the long description
     mTestDesc.SetLong(
-        "Have no IOQ's in existence, issue the DeleteIOSQ cmd traversing "
+        "Have no IOQ's in existence, issue the DeleteIOCQ cmd traversing "
         "through all possible combinations for DW10.QID, expect failure. "
-        "Issue a CreateIOCQ cmd, with QID = 1, num elements = 2. Assoc a "
-        "CreateIOSQ cmd, with QID = 1, num elements = 2, traversing through "
-        "all possible combinations for DW10.QID but this time expect "
-        "success for QID = 1.");
+        "Issue a CreateIOCQ cmd, with QID = 1, num elements = 2, traversing "
+        "through all possible combinations for DW10.QID but this time "
+        "expect success for QID = 1.");
 }
 
 
@@ -104,51 +103,47 @@ InvalidQID_r10b::RunCoreTest()
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
         throw FrmwkEx(HERE);
 
-    LOG_NRM("Issue DeleteIOSQ traversing through all combinations of DW10.QID");
-    SharedDeleteIOSQPtr deleteIOSQCmd = SharedDeleteIOSQPtr(new DeleteIOSQ());
+    LOG_NRM("Issue DeleteIOCQ traversing through all combinations of DW10.QID");
+    SharedDeleteIOCQPtr deleteIOCQCmd = SharedDeleteIOCQPtr(new DeleteIOCQ());
     for (uint32_t qId = 1; qId < MAX_IOQ_ID; qId++) {
-        LOG_NRM("Sending 1st deleteIOSQ cmd for QId #%d", qId);
-        work = str(boost::format("1st.IOQID.%d") % qId);
+        LOG_NRM("Sending 1st deleteIOCQ cmd for QId #%d", qId);
+        work = str(boost::format("1st.IOCQID.%d") % qId);
         enableLog = false;
         if ((qId <= 8) || (qId >= (MAX_IOQ_ID - 8)))
             enableLog = true;
 
-        deleteIOSQCmd->SetWord(qId, 10, 0); // Set IO QID using Cmd DW10
+        deleteIOCQCmd->SetWord(qId, 10, 0); // Set IO QID using Cmd DW10
         IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
-            deleteIOSQCmd, work, enableLog, CESTAT_INVALID_QID);
+            deleteIOCQCmd, work, enableLog, CESTAT_INVALID_QID);
     }
 
-    LOG_NRM("Setup element sizes for the IOQ's");
+    LOG_NRM("Setup element size for the IOCQ");
     gCtrlrConfig->SetIOCQES(gInformative->GetIdentifyCmdCtrlr()->
         GetValue(IDCTRLRCAP_CQES) & 0xf);
-    gCtrlrConfig->SetIOSQES(gInformative->GetIdentifyCmdCtrlr()->
-        GetValue(IDCTRLRCAP_SQES) & 0xf);
 
-    LOG_NRM("Create IOCQ/IOSQ pair with QID = %d", IOQ_ID);
+    LOG_NRM("Create IOCQ with QID = %d", IOQ_ID);
     SharedIOCQPtr iocq = Queues::CreateIOCQContigToHdw(mGrpName, mTestName,
         DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, maxIOQEntries, false,
         IOCQ_GROUP_ID, true, 0);
-    SharedIOSQPtr iosq = Queues::CreateIOSQContigToHdw(mGrpName, mTestName,
-        DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, maxIOQEntries, false,
-        IOCQ_GROUP_ID, IOQ_ID, 0);
 
-    LOG_NRM("Send DeleteIOSQ and expect success for QID = 1");
-    work = str(boost::format("2nd.IOQID.1"));
-    deleteIOSQCmd->SetWord(1, 10, 0); // Set IO QID = 1 using Cmd DW10
+    LOG_NRM("Send DeleteIOCQ and expect success for QID = 1");
+    work = str(boost::format("2nd.IOCQID.1"));
+    deleteIOCQCmd->SetWord(1, 10, 0); // Set IO QID = 1 using Cmd DW10
     IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
-        deleteIOSQCmd, work, true);
+        deleteIOCQCmd, work, true);
 
-    LOG_NRM("Again issue DeleteIOSQ through all combinations of DW10.QID");
+    LOG_NRM("Again issue DeleteIOCQ through all combinations of DW10.QID "
+        "except for QID = 1");
     for (uint32_t qId = 2; qId < MAX_IOQ_ID; qId++) {
-        LOG_NRM("Sending 2nd deleteIOSQ cmd for QId #%d", qId);
-        work = str(boost::format("2nd.IOQID.%d") % qId);
+        LOG_NRM("Sending 2nd deleteIOCQ cmd for QId #%d", qId);
+        work = str(boost::format("2nd.IOCQID.%d") % qId);
         enableLog = false;
         if ((qId <= 8) || (qId >= (MAX_IOQ_ID - 8)))
             enableLog = true;
 
-        deleteIOSQCmd->SetWord(qId, 10, 0); // Set IO QID using Cmd DW10
+        deleteIOCQCmd->SetWord(qId, 10, 0); // Set IO QID using Cmd DW10
         IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
-            deleteIOSQCmd, work, enableLog, CESTAT_INVALID_QID);
+            deleteIOCQCmd, work, enableLog, CESTAT_INVALID_QID);
     }
 }
 
