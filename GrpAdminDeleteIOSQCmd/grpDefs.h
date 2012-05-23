@@ -27,6 +27,7 @@ namespace GrpAdminDeleteIOSQCmd {
 
 #define DEFAULT_CMD_WAIT_ms         SYSTEMWIDE_CMD_WAIT_ms
 
+#define MAX_IOQ_ID                  0x10000
 }
 
 #endif
