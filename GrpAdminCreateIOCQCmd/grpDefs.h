@@ -17,6 +17,8 @@
 #ifndef _GRPDEFS_H_
 #define _GRPDEFS_H_
 
+#include "dutDefs.h"
+
 namespace GrpAdminCreateIOCQCmd {
 
 #define ACQ_GROUP_ID                "ACQ"
@@ -26,7 +28,6 @@ namespace GrpAdminCreateIOCQCmd {
 #define IOQ_ID                      1
 
 #define DEFAULT_CMD_WAIT_ms         SYSTEMWIDE_CMD_WAIT_ms
-
 }
 
 #endif

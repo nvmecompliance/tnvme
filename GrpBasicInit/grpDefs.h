@@ -17,6 +17,8 @@
 #ifndef _GRPDEFS_H_
 #define _GRPDEFS_H_
 
+#include "dutDefs.h"
+
 namespace GrpBasicInit {
 
 #define ACQ_GROUP_ID                "ACQ"
@@ -27,7 +29,6 @@ namespace GrpBasicInit {
 #define IOSQ_DISCONTIG_GROUP_ID     "IOSQDiscontig"
 
 #define DEFAULT_CMD_WAIT_ms         SYSTEMWIDE_CMD_WAIT_ms
-
 }   // namespace
 
 #endif

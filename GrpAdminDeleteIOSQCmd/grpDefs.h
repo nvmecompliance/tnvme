@@ -17,6 +17,8 @@
 #ifndef _GRPDEFS_H_
 #define _GRPDEFS_H_
 
+#include "dutDefs.h"
+
 namespace GrpAdminDeleteIOSQCmd {
 
 #define ACQ_GROUP_ID                "ACQ"
@@ -26,8 +28,6 @@ namespace GrpAdminDeleteIOSQCmd {
 #define IOQ_ID                      1
 
 #define DEFAULT_CMD_WAIT_ms         SYSTEMWIDE_CMD_WAIT_ms
-
-#define MAX_IOQ_ID                  0x10000
 }
 
 #endif

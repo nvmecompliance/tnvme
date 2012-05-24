@@ -106,7 +106,7 @@ InvalidQID_r10b::RunCoreTest()
 
     LOG_NRM("Issue DeleteIOSQ traversing through all combinations of DW10.QID");
     SharedDeleteIOSQPtr deleteIOSQCmd = SharedDeleteIOSQPtr(new DeleteIOSQ());
-    for (uint32_t qId = 1; qId < MAX_IOQ_ID; qId++) {
+    for (uint32_t qId = 1; qId <= MAX_IOQ_ID; qId++) {
         LOG_NRM("Sending 1st deleteIOSQ cmd for QId #%d", qId);
         work = str(boost::format("1st.IOQID.%d") % qId);
         enableLog = false;
@@ -139,7 +139,7 @@ InvalidQID_r10b::RunCoreTest()
         deleteIOSQCmd, work, true);
 
     LOG_NRM("Again issue DeleteIOSQ through all combinations of DW10.QID");
-    for (uint32_t qId = 2; qId < MAX_IOQ_ID; qId++) {
+    for (uint32_t qId = 2; qId <= MAX_IOQ_ID; qId++) {
         LOG_NRM("Sending 2nd deleteIOSQ cmd for QId #%d", qId);
         work = str(boost::format("2nd.IOQID.%d") % qId);
         enableLog = false;

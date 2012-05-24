@@ -18,12 +18,11 @@
 #include "invalidQID_r10b.h"
 #include "globals.h"
 #include "grpDefs.h"
-#include "../Cmds/deleteIOCQ.h"
 #include "../Utils/queues.h"
 #include "../Utils/io.h"
 #include "../Utils/irq.h"
 
-namespace GrpAdminDeleteIOCQCmd {
+namespace GrpAdminCreateIOCQCmd {
 
 
 InvalidQID_r10b::InvalidQID_r10b(int fd, string mGrpName,
@@ -32,14 +31,11 @@ InvalidQID_r10b::InvalidQID_r10b(int fd, string mGrpName,
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 5");
-    mTestDesc.SetShort(     "Issue DeleteIOCQ and cause SC = Invalid queue identifier");
+    mTestDesc.SetShort(     "Issue CreateIOCQ cause SC = Invalid queue identifier");
     // No string size limit for the long description
     mTestDesc.SetLong(
-        "Have no IOQ's in existence, issue the DeleteIOCQ cmd traversing "
-        "through all possible combinations for DW10.QID, expect failure. "
-        "Issue a CreateIOCQ cmd, with QID = 1, num elements = 2, traversing "
-        "through all possible combinations for DW10.QID but this time "
-        "expect success for QID = 1.");
+        "Calc X, where X = max num IOCQ's DUT will support. Issue CreateIOCQ "
+        "cmds specifying QID's ranging from (X+1) to 0xffff, expect failure.");
 }
 
 
@@ -103,47 +99,32 @@ InvalidQID_r10b::RunCoreTest()
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
         throw FrmwkEx(HERE);
 
-    LOG_NRM("Issue DeleteIOCQ traversing through all combinations of DW10.QID");
-    SharedDeleteIOCQPtr deleteIOCQCmd = SharedDeleteIOCQPtr(new DeleteIOCQ());
-    for (uint32_t qId = 1; qId <= MAX_IOQ_ID; qId++) {
-        LOG_NRM("Sending 1st deleteIOCQ cmd for QId #%d", qId);
-        work = str(boost::format("1st.IOCQID.%d") % qId);
-        enableLog = false;
-        if ((qId <= 8) || (qId >= (MAX_IOQ_ID - 8)))
-            enableLog = true;
-
-        deleteIOCQCmd->SetWord(qId, 10, 0); // Set IO QID using Cmd DW10
-        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
-            deleteIOCQCmd, work, enableLog, CESTAT_INVALID_QID);
-    }
+    // Calc X, max no. of IOCQ's DUT supports.
+    uint32_t X = gInformative->GetFeaturesNumOfIOCQs();
+    LOG_NRM("Maximum num of IOCQ's DUT will support = %d", X);
 
     LOG_NRM("Setup element size for the IOCQ");
     gCtrlrConfig->SetIOCQES(gInformative->GetIdentifyCmdCtrlr()->
         GetValue(IDCTRLRCAP_CQES) & 0xf);
 
-    LOG_NRM("Create IOCQ with QID = %d", IOQ_ID);
-    SharedIOCQPtr iocq = Queues::CreateIOCQContigToHdw(mGrpName, mTestName,
-        DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, maxIOQEntries, false,
-        IOCQ_GROUP_ID, true, 0);
+    LOG_NRM("Issue CreateIOCQ cmds with QID's ranging from %d to %d",
+        (X + 1), MAX_IOQ_ID);
+    for (uint32_t qId = (X + 1); qId <= MAX_IOQ_ID; qId++) {
+        LOG_NRM("Process each CreateIOCQCmd with iocq id #%d", qId);
+        SharedIOCQPtr iocq = SharedIOCQPtr(new IOCQ(mFd));
+        iocq->Init(qId, maxIOQEntries, true, 0);
+        SharedCreateIOCQPtr createIOCQCmd =
+            SharedCreateIOCQPtr(new CreateIOCQ());
+        createIOCQCmd->Init(iocq);
 
-    LOG_NRM("Send DeleteIOCQ and expect success for QID = 1");
-    work = str(boost::format("2nd.IOCQID.1"));
-    deleteIOCQCmd->SetWord(1, 10, 0); // Set IO QID = 1 using Cmd DW10
-    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
-        deleteIOCQCmd, work, true);
-
-    LOG_NRM("Again issue DeleteIOCQ through all combinations of DW10.QID "
-        "except for QID = 1");
-    for (uint32_t qId = 2; qId <= MAX_IOQ_ID; qId++) {
-        LOG_NRM("Sending 2nd deleteIOCQ cmd for QId #%d", qId);
-        work = str(boost::format("2nd.IOCQID.%d") % qId);
+        work = str(boost::format("iocqId.%d") % qId);
         enableLog = false;
-        if ((qId <= 8) || (qId >= (MAX_IOQ_ID - 8)))
+        if ((qId <= (X + 8)) || (qId >= (MAX_IOQ_ID - 8)))
             enableLog = true;
 
-        deleteIOCQCmd->SetWord(qId, 10, 0); // Set IO QID using Cmd DW10
+        LOG_NRM("Send and reap cmd with CQ ID #%d", qId);
         IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
-            deleteIOCQCmd, work, enableLog, CESTAT_INVALID_QID);
+            createIOCQCmd, work, enableLog, CESTAT_INVALID_QID);
     }
 }
 

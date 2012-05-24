@@ -17,7 +17,9 @@
 #ifndef _GRPDEFS_H_
 #define _GRPDEFS_H_
 
-namespace GrpTemplate {
+#include "dutDefs.h"
+
+namespace GrpNVMCompareCmd {
 
 #define ACQ_GROUP_ID                "ACQ"
 #define ASQ_GROUP_ID                "ASQ"
