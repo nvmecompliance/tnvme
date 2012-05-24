@@ -108,8 +108,8 @@ InvalidQID_r10b::RunCoreTest()
         GetValue(IDCTRLRCAP_CQES) & 0xf);
 
     LOG_NRM("Issue CreateIOCQ cmds with QID's ranging from %d to %d",
-        (X + 1), (MAX_IOQ_ID - 1));
-    for (uint32_t qId = (X + 1); qId < MAX_IOQ_ID; qId++) {
+        (X + 1), MAX_IOQ_ID);
+    for (uint32_t qId = (X + 1); qId <= MAX_IOQ_ID; qId++) {
         LOG_NRM("Process each CreateIOCQCmd with iocq id #%d", qId);
         SharedIOCQPtr iocq = SharedIOCQPtr(new IOCQ(mFd));
         iocq->Init(qId, maxIOQEntries, true, 0);

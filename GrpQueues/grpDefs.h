@@ -17,6 +17,8 @@
 #ifndef _GRPDEFS_H_
 #define _GRPDEFS_H_
 
+#include "dutDefs.h"
+
 namespace GrpQueues {
 
 #define ACQ_GROUP_ID                "ACQ"

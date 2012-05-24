@@ -17,6 +17,8 @@
 #ifndef _GRPDEFS_H_
 #define _GRPDEFS_H_
 
+#include "dutDefs.h"
+
 namespace GrpNVMWriteUncorrectCmd {
 
 #define ACQ_GROUP_ID                "ACQ"

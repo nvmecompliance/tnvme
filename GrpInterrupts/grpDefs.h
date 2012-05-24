@@ -17,6 +17,8 @@
 #ifndef _GRPDEFS_H_
 #define _GRPDEFS_H_
 
+#include "dutDefs.h"
+
 namespace GrpInterrupts {
 
 #define ACQ_GROUP_ID                "ACQ"
@@ -25,7 +27,6 @@ namespace GrpInterrupts {
 #define IOSQ_GROUP_ID               "IOSQ"
 
 #define DEFAULT_CMD_WAIT_ms         SYSTEMWIDE_CMD_WAIT_ms
-
 }
 
 #endif

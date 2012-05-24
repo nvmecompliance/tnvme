@@ -14,21 +14,16 @@
  *  limitations under the License.
  */
 
-#ifndef _GRPDEFS_H_
-#define _GRPDEFS_H_
+#ifndef _DUTDEFS_H_
+#define _DUTDEFS_H_
 
-#include "dutDefs.h"
+/**
+ * When the namespace reports unlimited transfer size, this define artificially
+ * caps it to allow reasonable coverage vs runtime target.
+ */
+#define MAX_DATA_TX_SIZE        (256 * 1024)
 
-namespace GrpNVMWriteCmd {
+#define MAX_IOQ_ID              0xFFFF
 
-#define ACQ_GROUP_ID                "ACQ"
-#define ASQ_GROUP_ID                "ASQ"
-#define IOCQ_GROUP_ID               "IOCQ"
-#define IOSQ_GROUP_ID               "IOSQ"
-#define IOQ_ID                      1
-
-#define DEFAULT_CMD_WAIT_ms         SYSTEMWIDE_CMD_WAIT_ms
-
-}   // namespace
 
 #endif
