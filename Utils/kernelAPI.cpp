@@ -261,3 +261,16 @@ KernelAPI::LogSQMetrics(struct nvme_gen_sq &sqMetrics)
     LOG_NRM("CQMetrics.elements       = 0x%04X", sqMetrics.elements);
 }
 
+
+void
+KernelAPI::WriteToDnvmeLog(string log)
+{
+    int rc;
+    struct nvme_logstr logMe = { log.length(), log.c_str() };
+
+    LOG_NRM("Write custom string to dnvme's log output: \"%s\"", log.c_str());
+    if ((rc = ioctl(gDutFd, NVME_IOCTL_MARK_SYSLOG, &logMe)) < 0) {
+        throw FrmwkEx(HERE, "Unable to log custom string to dnvme, err = %d",
+            rc);
+    }
+}

@@ -82,6 +82,13 @@ public:
     /// Log the contents of the specified SQ metrics struct
     static void LogSQMetrics(struct nvme_gen_sq &sqMetrics);
 
+    /**
+     * Write a custom string into the system log via dnvme to mark a point
+     * in time possibly for debug.
+     * @param log Pass the logging statement to write
+     */
+    static void WriteToDnvmeLog(string log);
+
 
 private:
     static void RegToFile(int fd, const PciSpcType regMetrics, uint64_t value);

@@ -69,6 +69,9 @@ FrmwkEx::~FrmwkEx()
 void
 FrmwkEx::DumpStateOfTheSystem()
 {
+    // Mark this point in /var/log/messages from dnvme's logging output
+    KernelAPI::WriteToDnvmeLog("-------START POST FAILURE STATE DUMP-------");
+
     LOG_NRM("-------------------------------------------");
     LOG_NRM("-------START POST FAILURE STATE DUMP-------");
     PreliminaryProcessing();    // Override in children provides custom logic
