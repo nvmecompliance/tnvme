@@ -57,17 +57,13 @@ public:
     SharedTrackablePtr
     GetObj(string lookupName);
 
+
+protected:
     /// Free all objects which were allocated.
     void FreeAllObj();
 
     /// Free all objects which were allocated, except ACQ/ASQ
     void FreeAllObjNotASQACQ();
-
-    /**
-     * Free specified object which was allocated for group lifetime
-     * @param lookupName Pass the associated ID of the object to free
-     */
-    void FreeObj(string lookupName);
 
 
 private:

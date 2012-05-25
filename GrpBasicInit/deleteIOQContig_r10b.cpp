@@ -98,16 +98,12 @@ DeleteIOQContig_r10b::RunCoreTest()
     SharedIOSQPtr iosq = CAST_TO_IOSQ(gRsrcMngr->GetObj(IOSQ_CONTIG_GROUP_ID))
     Queues::DeleteIOSQToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
         iosq, asq, acq);
-    // Not explicitly necessary, but is more clean to free what is not needed
-    gRsrcMngr->FreeObj(IOSQ_CONTIG_GROUP_ID);
 
 
     LOG_NRM("Lookup IOCQ which was created in a prior test within group");
     SharedIOCQPtr iocq = CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_CONTIG_GROUP_ID))
     Queues::DeleteIOCQToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
         iocq, asq, acq);
-    // Not explicitly necessary, but is more clean to free what is not needed
-    gRsrcMngr->FreeObj(IOCQ_CONTIG_GROUP_ID);
 }
 
 }   // namespace

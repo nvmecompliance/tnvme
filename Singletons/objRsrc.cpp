@@ -203,17 +203,3 @@ ObjRsrc::FreeAllObjNotASQACQ()
         (numB4 - mObjGrpLife.size()));
     LOG_NRM("Group level resources remaining: %ld", mObjGrpLife.size());
 }
-
-
-void
-ObjRsrc::FreeObj(string lookupName)
-{
-    TrackableMap::iterator item;
-
-    item = mObjGrpLife.find(lookupName);
-    if (item == mObjGrpLife.end()) {
-        LOG_DBG("Cannot free obj, name %s was not found", lookupName.c_str());
-        return;
-    }
-    mObjGrpLife.erase(item);
-}
