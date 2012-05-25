@@ -139,6 +139,11 @@ UnsupportRsvdFields_r10b::RunCoreTest()
         createIOSQCmd, "", true);
 
     WriteReadVerify(iosq, iocq);
+
+    Queues::DeleteIOSQToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+        asq, acq, "", false);
+    Queues::DeleteIOCQToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iocq,
+        asq, acq, "", false);
 }
 
 

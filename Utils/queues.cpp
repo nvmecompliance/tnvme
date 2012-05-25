@@ -262,10 +262,8 @@ bool
 Queues::SupportDiscontigIOQ()
 {
     uint64_t regVal;
-    if (gRegisters->Read(CTLSPC_CAP, regVal) == false) {
-        throw FrmwkEx(HERE,
-            "Failed reading controller capabilities (CAP) register.");
-    }
+    if (gRegisters->Read(CTLSPC_CAP, regVal) == false)
+        throw FrmwkEx(HERE, "Failed reading ctrlr capabilities (CAP) register");
 
     if (regVal & CAP_CQR)
         return false;

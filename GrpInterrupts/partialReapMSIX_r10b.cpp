@@ -109,9 +109,8 @@ PartialReapMSIX_r10b::RunCoreTest()
     }
 
     // This requirement must be met, if not then DUT is most likely at fault
-    if (gRegisters->Read(CTLSPC_CAP, reg) == false) {
+    if (gRegisters->Read(CTLSPC_CAP, reg) == false)
         throw FrmwkEx(HERE, "Unable to determine CAP.MQES");
-    }
     reg &= CAP_MQES;
     reg += 1;      // convert to 1-based
     if (reg < (uint64_t)NUM_IOQ_ENTRY) {

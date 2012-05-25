@@ -50,6 +50,7 @@ Buffers::Log(const uint8_t *buf, uint32_t bufOffset, unsigned long length,
         dumpLen = (totalBufSize - bufOffset);
     else if ((length + bufOffset) >= totalBufSize)
         dumpLen = (totalBufSize - bufOffset);
+    LOG_DBG("dumpLen = 0x%016lX", dumpLen);
 
     for (unsigned long i = 0; i < dumpLen; i++) {
         if ((i % 16) == 15) {
@@ -102,6 +103,7 @@ Buffers::Dump(DumpFilename filename, const uint8_t *buf, uint32_t bufOffset,
         dumpLen = (totalBufSize - bufOffset);
     else if ((length + bufOffset) >= totalBufSize)
         dumpLen = (totalBufSize - bufOffset);
+    LOG_DBG("dumpLen = 0x%016lX", dumpLen);
 
     for (unsigned long i = 0; i < dumpLen; i++) {
         if ((i % 16) == 15) {

@@ -87,10 +87,8 @@ IOQFull_r10b::RunCoreTest()
 
     uint64_t ctrlCapReg;
     LOG_NRM("Determine the max IOQ entries supported");
-    if (gRegisters->Read(CTLSPC_CAP, ctrlCapReg) == false) {
-        LOG_ERR("Unable to determine MQES");
-        throw FrmwkEx(HERE);
-    }
+    if (gRegisters->Read(CTLSPC_CAP, ctrlCapReg) == false)
+        throw FrmwkEx(HERE, "Unable to determine MQES");
     uint32_t maxIOQEntries = (ctrlCapReg & CAP_MQES);
     maxIOQEntries += 1;      // convert to 1-based
 

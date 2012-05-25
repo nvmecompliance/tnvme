@@ -450,14 +450,14 @@ Informative::Reinit(SharedASQPtr &asq, SharedACQPtr &acq, uint16_t ms)
 
     Clear();    // Clear out the old, in with the new
 
-    LOG_NRM("----------------START-------------------");
+    LOG_NRM("----------------start-------------------");
     LOG_NRM("---Re-init Informative dump registers---");
     KernelAPI::DumpPciSpaceRegs(
         FileSystem::PrepDumpFile(GRP_NAME, TEST_NAME, "pci", "regs"), false);
     KernelAPI::DumpCtrlrSpaceRegs(
         FileSystem::PrepDumpFile(GRP_NAME, TEST_NAME, "ctrl", "regs"), false);
     LOG_NRM("---Re-init Informative dump registers---");
-    LOG_NRM("-----------------END--------------------");
+    LOG_NRM("-----------------end--------------------");
 
     SendGetFeaturesNumOfQueues(asq, acq, ms);
     SendIdentifyCtrlrStruct(asq, acq, ms);
@@ -478,7 +478,7 @@ Informative::SendGetFeaturesNumOfQueues(SharedASQPtr asq, SharedACQPtr acq,
     uint16_t uniqueId;
 
 
-    LOG_NRM("----------------START-----------------");
+    LOG_NRM("----------------start-----------------");
     LOG_NRM("---Re-init Informative get features---");
 
     LOG_NRM("Create get features");
@@ -549,7 +549,7 @@ Informative::SendGetFeaturesNumOfQueues(SharedASQPtr asq, SharedACQPtr acq,
     }
 
     LOG_NRM("---Re-init Informative get features---");
-    LOG_NRM("-----------------END------------------");
+    LOG_NRM("-----------------end------------------");
 }
 
 
@@ -557,7 +557,7 @@ void
 Informative::SendIdentifyCtrlrStruct(SharedASQPtr asq, SharedACQPtr acq,
     uint16_t ms)
 {
-    LOG_NRM("----------------START-------------------");
+    LOG_NRM("----------------start-------------------");
     LOG_NRM("---Re-init Informative identify ctrlr---");
 
     LOG_NRM("Create 1st identify cmd and assoc some buffer memory");
@@ -578,7 +578,7 @@ Informative::SendIdentifyCtrlrStruct(SharedASQPtr asq, SharedACQPtr acq,
     mIdentifyCmdCtrlr = idCmdCtrlr;
 
     LOG_NRM("---Re-init Informative identify ctrlr---");
-    LOG_NRM("-----------------END--------------------");
+    LOG_NRM("-----------------end--------------------");
 }
 
 
@@ -597,7 +597,7 @@ Informative::SendIdentifyNamespaceStruct(SharedASQPtr asq, SharedACQPtr acq,
     LOG_NRM("Gather %lld identify namspc structs from DUT",
         (unsigned long long)numNamSpc);
     for (uint64_t namSpc = 1; namSpc <= numNamSpc; namSpc++) {
-        LOG_NRM("-------------------START-------------------");
+        LOG_NRM("-------------------start-------------------");
         LOG_NRM("---Re-init Informative identify namspc %ld---", namSpc);
 
         snprintf(qualifier, sizeof(qualifier), "idCmdNamSpc-%llu",
@@ -624,6 +624,6 @@ Informative::SendIdentifyNamespaceStruct(SharedASQPtr asq, SharedACQPtr acq,
         mIdentifyCmdNamspc.push_back(idCmdNamSpc);
 
         LOG_NRM("---Re-init Informative identify namspc %ld---", namSpc);
-        LOG_NRM("------------------END----------------------");
+        LOG_NRM("------------------end----------------------");
     }
 }
