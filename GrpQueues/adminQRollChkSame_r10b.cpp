@@ -22,8 +22,6 @@
 
 namespace GrpQueues {
 
-#define MAX_ADMIN_Q_SIZE            4096
-
 
 AdminQRollChkSame_r10b::AdminQRollChkSame_r10b(int fd, string grpName,
     string testName, ErrorRegs errRegs) :

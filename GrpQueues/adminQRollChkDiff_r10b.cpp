@@ -22,9 +22,6 @@
 
 namespace GrpQueues {
 
-#define MAX_ADMIN_Q_SIZE            4096
-#define MIN_ADMIN_Q_SIZE            2
-
 
 AdminQRollChkDiff_r10b::AdminQRollChkDiff_r10b(int fd, string grpName,
     string testName, ErrorRegs errRegs) :

@@ -41,8 +41,8 @@ CIDAcceptedIOSQ_r10b::CIDAcceptedIOSQ_r10b(int fd,
         "identical write cmd starting at LBA 0, sending a single block with "
         "approp meta/E2E requirements if necessary. Create 2 IOSQ's assoc to "
         "single IOCQ. Issue dual write cmds (65536 + 1) times into each IOSQ, "
-        "alteranting IOSQ's, and verify that the dnvme assigned CID values "
-        "are unique each time for each IOSQ. Each command  must completed "
+        "alternating IOSQ's, and verify that the dnvme assigned CID values "
+        "are unique each time for each IOSQ. Each command must completed "
         "in success and be reaped from the IOCQ.");
 }
 

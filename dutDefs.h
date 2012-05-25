@@ -25,5 +25,8 @@
 
 #define MAX_IOQ_ID              0xFFFF
 
+#define MAX_ADMIN_Q_SIZE        4096
+#define MIN_ADMIN_Q_SIZE        2
+
 
 #endif

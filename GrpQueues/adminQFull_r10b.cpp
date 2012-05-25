@@ -22,7 +22,6 @@
 
 namespace GrpQueues {
 
-#define MAX_ADMIN_Q_SIZE            4096
 
 AdminQFull_r10b::AdminQFull_r10b(int fd, string grpName,
     string testName, ErrorRegs errRegs) :
