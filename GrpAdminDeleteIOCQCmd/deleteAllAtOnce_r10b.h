@@ -18,8 +18,9 @@
 #define _DELETEALLATONCE_r10b_H_
 
 #include "test.h"
+#include "../Utils/queues.h"
 
-namespace GrpAdminDeleteIOSQCmd {
+namespace GrpAdminDeleteIOCQCmd {
 
 
 /** \verbatim
@@ -53,6 +54,10 @@ private:
     ///////////////////////////////////////////////////////////////////////////
     // Adding a member variable? Then edit the copy constructor and operator=().
     ///////////////////////////////////////////////////////////////////////////
+    void DelAllIOSQsAndVerify(SharedACQPtr acq, SharedASQPtr asq,
+        vector<SharedIOSQPtr> iosqs, uint16_t &expectedCIDR1);
+    void DelAllIOCQsAndVerify(SharedACQPtr acq, SharedASQPtr asq,
+        vector<SharedIOCQPtr> iocqs, uint16_t &expectedCIDR1);
 };
 
 }   // namespace
