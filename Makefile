@@ -29,6 +29,7 @@ CFLAGS += -lboost_filesystem
 CFLAGS += $(shell pkg-config libxml++-2.6 --cflags --libs)
 
 SUBDIRS:=			\
+	GrpAdminCreateIOQCmd	\
 	GrpAdminCreateIOCQCmd	\
 	GrpAdminCreateIOSQCmd	\
 	GrpAdminDeleteIOCQCmd	\
