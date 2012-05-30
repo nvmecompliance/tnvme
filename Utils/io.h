@@ -42,9 +42,8 @@ public:
      * Send and Reap an existing, user defined cmd to/from hdw using the spec'd
      * SQ/CQ pairs. This method requires 0 elements to reside in the CQ and
      * also assume no other cmd will complete into that CQ while this operation
-     * is occurring. In the end the number of IRQ's and number of CE's will be
-     * verified to guarantee that only 1 CE arrived as a result of sending this
-     * 1 cmd.
+     * is occurring. In the end the number of CE's will be verified to
+     * guarantee that only 1 CE arrived as a result of sending this 1 cmd.
      * @note Throws upon errors
      * @note Method uses pre-existing values of CC.IOCQES
      * @param grpName Pass the name of the group to which this test belongs
@@ -63,6 +62,7 @@ public:
 
     /**
      * Reap a specified number of CE's from the specified CQ.
+     * @note Throws upon errors
      * @param cq Pass the CQ to reap from
      * @param numCE Pass the number of CE's to reap from the CQ
      * @param isrCount Return the ISR count as a result of reaping

@@ -37,12 +37,11 @@ IO::SendAndReapCmd(string grpName, string testName, uint16_t ms,
 {
     uint32_t numCE;
     uint32_t isrCount;
-    uint32_t isrCountB4;
     string work;
     uint16_t uniqueId;
 
 
-    if ((numCE = cq->ReapInquiry(isrCountB4, true)) != 0) {
+    if ((numCE = cq->ReapInquiry(isrCount, true)) != 0) {
         cq->Dump(
             FileSystem::PrepDumpFile(grpName, testName, "cq",
             "notEmpty"), "Test assumption have not been met");
@@ -87,16 +86,6 @@ IO::SendAndReapCmd(string grpName, string testName, uint16_t ms,
 
     // throws if an error occurs
     ReapCE(cq, numCE, isrCount, grpName, testName, qualify, status);
-
-    // Single cmd submitted on empty ASQ should always yield 1 IRQ on ACQ
-    if (gCtrlrConfig->IrqsEnabled() && cq->GetIrqEnabled() &&
-        (isrCount != (isrCountB4 + 1))) {
-
-        throw FrmwkEx(HERE,
-            "CQ using IRQ's, but IRQ count not expected (%d != %d)",
-            isrCount, (isrCountB4 + 1));
-    }
-
     if (verbose) {
         cmd->Dump(FileSystem::PrepDumpFile(grpName, testName,
             cmd->GetName(), qualify), "A cmd's contents dumped");
