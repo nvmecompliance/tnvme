@@ -17,6 +17,7 @@
 #include "grpAdminCreateIOQCmd.h"
 #include "../Exception/frmwkEx.h"
 #include "createResources_r10b.h"
+#include "prpLessPageContig_r10b.h"
 
 namespace GrpAdminCreateIOQCmd {
 
@@ -32,6 +33,7 @@ GrpAdminCreateIOQCmd::GrpAdminCreateIOQCmd(size_t grpNum, SpecRev specRev,
     switch (mSpecRev) {
     case SPECREV_10b:
         APPEND_TEST_AT_XLEVEL(CreateResources_r10b, fd, GrpAdminCreateIOQCmd, errRegs)
+        APPEND_TEST_AT_XLEVEL(PRPLessPageContig_r10b, fd, GrpAdminCreateIOQCmd, errRegs)
         break;
 
     default:

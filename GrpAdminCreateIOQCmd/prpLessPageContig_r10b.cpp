@@ -16,43 +16,44 @@
 
 #include <string.h>
 #include <boost/format.hpp>
-#include "datasetMgmt_r10b.h"
+#include "prpLessPageContig_r10b.h"
 #include "globals.h"
 #include "grpDefs.h"
+#include "../Utils/irq.h"
+#include "../Utils/io.h"
+#include "../Utils/queues.h"
+#include "../Queues/acq.h"
+#include "../Queues/asq.h"
 #include "../Queues/iocq.h"
 #include "../Queues/iosq.h"
-#include "../Utils/io.h"
+#include "../Utils/kernelAPI.h"
 
 
-namespace GrpNVMWriteReadCombo {
+namespace GrpAdminCreateIOQCmd {
 
-#define CDW13_DSM_BITS          8
 
-DatasetMgmt_r10b::DatasetMgmt_r10b(int fd,
+PRPLessPageContig_r10b::PRPLessPageContig_r10b(int fd,
     string mGrpName, string mTestName, ErrorRegs errRegs) :
     Test(fd, mGrpName, mTestName, SPECREV_10b, errRegs)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-    mTestDesc.SetCompliance("revision 1.0b, section 6");
-    mTestDesc.SetShort(     "Verify dataset mgmt operations.");
+    mTestDesc.SetCompliance("revision 1.0b, section 5");
+    mTestDesc.SetShort(     "Create IOQ's backed by contiguous memory < 1 page");
     // No string size limit for the long description
     mTestDesc.SetLong(
         "Search for 1 of the following namspcs to run test. Find 1st bare "
-        "namspc, or find 1st meta namspc, or find 1st E2E namspc. Issue "
-        "identical write cmd at LBA 0, sending 1 block with approp meta/E2E "
-        "requirements if necessary, where write executes the ALGO listed "
-        "below; subsequently after each write a read must verify the data "
-        "pattern for success, where by the read cmd must be created with the "
-        "identical parameters that the write occurred. Each write cmd must "
-        "alternate the data pattern between dword++ and dwordK. "
-        "ALGO) Vary the cmd's DW13.DSM field for all possible permutations"
-        "of values except any reserved values. Testing to verify these "
-        "attributes don't affect the integrity of data written and then "
-        "read to/from media.");
+        "namspc, or find 1st meta namspc, or find 1st E2E namspc. Issue a "
+        "CreateIOCQ cmd, with QID=1, num elements=Y, where "
+        "Y <= ((CAP.MPS / CC.IOSQES) - 1), where CC.IOSQES=Identify.SQES_b3:0; "
+        "backed by contiguous memory; and then issue a corresponding "
+        "CreateIOSQ, same parameters, same memory allocation. Issue X write "
+        "cmds, where X=num elements in IOCQ, sending 1 block and approp "
+        "supporting meta/E2E if necessary to the selected namspc at LBA 0, "
+        "data pattern of word++, read back, verify pattern.");
 }
 
 
-DatasetMgmt_r10b::~DatasetMgmt_r10b()
+PRPLessPageContig_r10b::~PRPLessPageContig_r10b()
 {
     ///////////////////////////////////////////////////////////////////////////
     // Allocations taken from the heap and not under the control of the
@@ -61,8 +62,8 @@ DatasetMgmt_r10b::~DatasetMgmt_r10b()
 }
 
 
-DatasetMgmt_r10b::
-DatasetMgmt_r10b(const DatasetMgmt_r10b &other) :
+PRPLessPageContig_r10b::
+PRPLessPageContig_r10b(const PRPLessPageContig_r10b &other) :
     Test(other)
 {
     ///////////////////////////////////////////////////////////////////////////
@@ -72,8 +73,8 @@ DatasetMgmt_r10b(const DatasetMgmt_r10b &other) :
 }
 
 
-DatasetMgmt_r10b &
-DatasetMgmt_r10b::operator=(const DatasetMgmt_r10b
+PRPLessPageContig_r10b &
+PRPLessPageContig_r10b::operator=(const PRPLessPageContig_r10b
     &other)
 {
     ///////////////////////////////////////////////////////////////////////////
@@ -86,22 +87,62 @@ DatasetMgmt_r10b::operator=(const DatasetMgmt_r10b
 
 
 void
-DatasetMgmt_r10b::RunCoreTest()
+PRPLessPageContig_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
-     * 1) Test CreateResources_r10b has run prior.
+     * 1) None
      * \endverbatim
      */
     string work;
+    bool enableLog;
 
-    // Lookup objs which were created in a prior test within group
-    SharedIOSQPtr iosq = CAST_TO_IOSQ(gRsrcMngr->GetObj(IOSQ_GROUP_ID));
-    SharedIOCQPtr iocq = CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_GROUP_ID));
+    if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
+        throw FrmwkEx(HERE);
+
+    SharedACQPtr acq = CAST_TO_ACQ(
+        gRsrcMngr->AllocObj(Trackable::OBJ_ACQ, ACQ_GROUP_ID))
+    acq->Init(5);
+
+    SharedASQPtr asq = CAST_TO_ASQ(
+        gRsrcMngr->AllocObj(Trackable::OBJ_ASQ, ASQ_GROUP_ID))
+    asq->Init(5);
+
+    // All queues will use identical IRQ vector
+    IRQ::SetAnySchemeSpecifyNum(1);     // throws upon error
+
+    gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
+    if (gCtrlrConfig->SetState(ST_ENABLE) == false)
+        throw FrmwkEx(HERE);
+
+    LOG_NRM("Compute memory page size from CC.MPS.");
+    uint8_t mps;
+    if (gCtrlrConfig->GetMPS(mps) == false)
+        throw FrmwkEx(HERE, "Unable to get MPS value from CC.");
+    uint64_t capMPS = (uint64_t)(1 << (mps + 12));
+
+    LOG_NRM("Setup element sizes for the IOQ's");
+    uint8_t iocqes = (gInformative->GetIdentifyCmdCtrlr()->
+        GetValue(IDCTRLRCAP_CQES) & 0xf);
+    uint8_t iosqes = (gInformative->GetIdentifyCmdCtrlr()->
+        GetValue(IDCTRLRCAP_SQES) & 0xf);
+    gCtrlrConfig->SetIOCQES(iocqes);
+    gCtrlrConfig->SetIOSQES(iosqes);
+
+    uint32_t Y = ((capMPS / iosqes) - 1);
+    LOG_NRM("Number of IOQ (elements < 1 page) = %d", Y);
 
     Informative::Namspc namspcData = gInformative->Get1stBareMetaE2E();
     LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
     uint64_t lbaDataSize = namspcData.idCmdNamspc->GetLBADataSize();
+
+    SharedIOCQPtr iocq = Queues::CreateIOCQContigToHdw(mGrpName, mTestName,
+        DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, Y, true,
+        IOCQ_GROUP_ID, true, 0);
+
+    SharedIOSQPtr iosq = Queues::CreateIOSQContigToHdw(mGrpName, mTestName,
+        DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, Y, true,
+        IOSQ_GROUP_ID, IOQ_ID, 0);
 
     SharedWritePtr writeCmd = SharedWritePtr(new Write());
     SharedMemBufferPtr writeMem = SharedMemBufferPtr(new MemBuffer());
@@ -109,8 +150,8 @@ DatasetMgmt_r10b::RunCoreTest()
     SharedReadPtr readCmd = SharedReadPtr(new Read());
     SharedMemBufferPtr readMem = SharedMemBufferPtr(new MemBuffer());
 
-    send_64b_bitmask prpBitmask = (send_64b_bitmask)(MASK_PRP1_PAGE
-        | MASK_PRP2_PAGE | MASK_PRP2_LIST);
+    send_64b_bitmask prpBitmask = (send_64b_bitmask)(MASK_PRP1_PAGE |
+        MASK_PRP2_PAGE | MASK_PRP2_LIST);
 
     switch (namspcData.type) {
     case Informative::NS_BARE:
@@ -143,27 +184,18 @@ DatasetMgmt_r10b::RunCoreTest()
     readCmd->SetNSID(namspcData.id);
     readCmd->SetNLB(0);
 
-    DataPattern dataPat[] = {
-        DATAPAT_INC_32BIT,
-        DATAPAT_CONST_32BIT
-    };
-    uint64_t dpArrSize = sizeof(dataPat) / sizeof(dataPat[0]);
 
-    for (uint64_t dsmAtr = 0; dsmAtr < (1 << CDW13_DSM_BITS); dsmAtr++) {
-        // skip reserved bits in dataset management attributes.
-        if ((dsmAtr & 0xF) >= 0x09)
-            continue;
-
+    for (int64_t X = 0; X < Y; X++) {
         switch (namspcData.type) {
         case Informative::NS_BARE:
-            writeMem->SetDataPattern(dataPat[dsmAtr % dpArrSize], dsmAtr);
+            writeMem->SetDataPattern(DATAPAT_INC_32BIT, X);
             break;
         case Informative::NS_METAS:
-            writeMem->SetDataPattern(dataPat[dsmAtr % dpArrSize], dsmAtr);
-            writeCmd->SetMetaDataPattern(dataPat[dsmAtr % dpArrSize], dsmAtr);
+            writeMem->SetDataPattern(DATAPAT_INC_32BIT, X);
+            writeCmd->SetMetaDataPattern(DATAPAT_INC_32BIT, X);
             break;
         case Informative::NS_METAI:
-            writeMem->SetDataPattern(dataPat[dsmAtr % dpArrSize], dsmAtr);
+            writeMem->SetDataPattern(DATAPAT_INC_32BIT, X);
             break;
         case Informative::NS_E2ES:
         case Informative::NS_E2EI:
@@ -171,16 +203,16 @@ DatasetMgmt_r10b::RunCoreTest()
             break;
         }
 
-        // Set CDW13.DSM field to different values.
-        writeCmd->SetByte((uint8_t)dsmAtr, 13, 0);
-        readCmd->SetByte((uint8_t)dsmAtr, 13, 0);
+        enableLog = false;
+        if ((X <= 8) || (X >= (X - 8)))
+            enableLog = true;
 
-        work = str(boost::format("dsm.%Xh") % dsmAtr);
+        work = str(boost::format("X.%d") % X);
         IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
-            iocq, writeCmd, work, true);
+            iocq, writeCmd, work, enableLog);
 
         IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
-            iocq, readCmd, work, true);
+            iocq, readCmd, work, enableLog);
 
         VerifyDataPat(readCmd, writeCmd);
     }
@@ -188,7 +220,8 @@ DatasetMgmt_r10b::RunCoreTest()
 
 
 void
-DatasetMgmt_r10b::VerifyDataPat(SharedReadPtr readCmd, SharedWritePtr writeCmd)
+PRPLessPageContig_r10b::VerifyDataPat(SharedReadPtr readCmd,
+    SharedWritePtr writeCmd)
 {
     LOG_NRM("Compare read vs written data to verify");
     SharedMemBufferPtr rdPayload = readCmd->GetRWPrpBuffer();
@@ -218,5 +251,6 @@ DatasetMgmt_r10b::VerifyDataPat(SharedReadPtr readCmd, SharedWritePtr writeCmd)
         }
     }
 }
+
 
 }   // namespace
