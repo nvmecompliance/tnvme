@@ -343,8 +343,9 @@ CQ::CalcTimeout(uint32_t ms, struct timeval &initial, uint32_t &delta)
     time_t initial_us = (((time_t)1000000 * initial.tv_sec) + initial.tv_usec);
     time_t current_us = (((time_t)1000000 * current.tv_sec) + current.tv_usec);
     time_t timeout_us = ((time_t)ms * (time_t)1000);
-    delta = (current_us - initial_us);
-    if (delta >= timeout_us) {
+    time_t delta_us = (current_us - initial_us);
+    delta = (delta_us / 1000UL);
+    if (delta_us >= timeout_us) {
         LOG_NRM("Timeout: (cur - init) >= TO: (%ld - %ld) >= %ld",
             current_us, initial_us, timeout_us);
         return true;
