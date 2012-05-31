@@ -104,7 +104,7 @@ PartialReapMSIX_r10b::RunCoreTest()
     if (gCtrlrConfig->IsMSIXCapable(capable, numIrqSupport) == false)
         throw FrmwkEx(HERE);
     else if (capable == false) {
-        LOG_NRM("DUT does not support MSI-X IRQ's; unable to execute test");
+        LOG_WARN("DUT does not support MSI-X IRQ's; unable to execute test");
         return;
     }
 
@@ -114,8 +114,9 @@ PartialReapMSIX_r10b::RunCoreTest()
     reg &= CAP_MQES;
     reg += 1;      // convert to 1-based
     if (reg < (uint64_t)NUM_IOQ_ENTRY) {
-        throw FrmwkEx(HERE, "Must support >= %d elements in IOQ's for test",
+        LOG_WARN("Desired to support >= %d elements in IOQ's for test",
             NUM_IOQ_ENTRY);
+        return;
     }
 
     LOG_NRM("Setup the necessary IRQ's");

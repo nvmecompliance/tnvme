@@ -20,6 +20,7 @@
 #include "unsupportRsvdFields_r10b.h"
 #include "invalidQID_r10b.h"
 #include "deleteAllAtOnce_r10b.h"
+#include "deleteFullQ_r10b.h"
 
 namespace GrpAdminDeleteIOCQCmd {
 
@@ -38,6 +39,7 @@ GrpAdminDeleteIOCQCmd::GrpAdminDeleteIOCQCmd(size_t grpNum, SpecRev specRev,
         APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r10b, fd, GrpAdminDeleteIOCQCmd, errRegs)
         APPEND_TEST_AT_XLEVEL(InvalidQID_r10b, fd, GrpAdminDeleteIOCQCmd, errRegs)
         APPEND_TEST_AT_XLEVEL(DeleteAllAtOnce_r10b, fd, GrpAdminDeleteIOCQCmd, errRegs)
+        APPEND_TEST_AT_XLEVEL(DeleteFullQ_r10b, fd, GrpAdminDeleteIOCQCmd, errRegs)
         break;
 
     default:

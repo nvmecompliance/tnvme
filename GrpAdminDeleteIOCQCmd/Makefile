@@ -21,7 +21,8 @@ SRC =					\
 	createResources_r10b.cpp	\
 	unsupportRsvdFields_r10b.cpp	\
 	invalidQID_r10b.cpp		\
-	deleteAllAtOnce_r10b.cpp
+	deleteAllAtOnce_r10b.cpp	\
+	deleteFullQ_r10b.cpp
 
 .SUFFIXES: .cpp
 
