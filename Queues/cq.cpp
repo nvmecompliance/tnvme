@@ -277,6 +277,7 @@ CQ::ReapInquiryWaitAny(uint32_t ms, uint32_t &numCE, uint32_t &isrCount)
             LOG_NRM("Waited for CE(s) approx: %d ms", delta);
             return true;
         }
+        usleep(10);
     }
 
     LOG_ERR("Timed out waiting %d ms for any CE in CQ %d, found %d",
@@ -315,6 +316,7 @@ CQ::ReapInquiryWaitSpecify(uint32_t ms, uint32_t numTil, uint32_t &numCE,
                 return true;
             }
         }
+        usleep(10);
     }
 
     LOG_ERR("Timed out waiting %d ms for %d CE's in CQ %d, found %d",
