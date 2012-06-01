@@ -20,7 +20,8 @@ SRC =					\
 	grpAdminCreateIOCQCmd.cpp	\
 	createResources_r10b.cpp	\
 	unsupportRsvdFields_r10b.cpp	\
-	invalidQID_r10b.cpp
+	invalidQID_r10b.cpp		\
+	maxQSizeExceed_r10b.cpp
 
 .SUFFIXES: .cpp
 
