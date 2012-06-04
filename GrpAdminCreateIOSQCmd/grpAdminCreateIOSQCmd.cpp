@@ -21,6 +21,7 @@
 #include "invalidQID_r10b.h"
 #include "maxQSizeExceed_r10b.h"
 #include "completionQInvalid_r10b.h"
+#include "acceptQPriority_r10b.h"
 
 namespace GrpAdminCreateIOSQCmd {
 
@@ -40,6 +41,7 @@ GrpAdminCreateIOSQCmd::GrpAdminCreateIOSQCmd(size_t grpNum, SpecRev specRev,
         APPEND_TEST_AT_YLEVEL(MaxQSizeExceed_r10b, fd, GrpAdminCreateIOSQCmd, errRegs)
         APPEND_TEST_AT_YLEVEL(CompletionQInvalid_r10b, fd, GrpAdminCreateIOSQCmd, errRegs)
         APPEND_TEST_AT_XLEVEL(InvalidQID_r10b, fd, GrpAdminCreateIOSQCmd, errRegs)
+        APPEND_TEST_AT_XLEVEL(AcceptQPriority_r10b, fd, GrpAdminCreateIOSQCmd, errRegs)
         break;
 
     default:
