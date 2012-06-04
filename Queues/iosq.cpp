@@ -49,10 +49,10 @@ IOSQ::Init(uint16_t qId, uint32_t numEntries, uint16_t cqId,
         qId, numEntries, cqId, priority);
 
     switch (priority) {
-	case 0x00:
-	case 0x01:
-	case 0x10:
-	case 0x11:
+	case 0:
+	case 1:
+	case 2:
+	case 3:
 		mPriority = priority;
 		break;
 	default:
@@ -110,10 +110,10 @@ IOSQ::Init(uint16_t qId, uint32_t numEntries,
     }
 
     switch (priority) {
-    case 0x00:
-    case 0x01:
-    case 0x10:
-    case 0x11:
+    case 0:
+    case 1:
+    case 2:
+    case 3:
         mPriority = priority;
         break;
     default:
