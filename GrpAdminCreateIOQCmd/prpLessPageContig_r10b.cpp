@@ -41,15 +41,17 @@ PRPLessPageContig_r10b::PRPLessPageContig_r10b(int fd,
     mTestDesc.SetShort(     "Create IOQ's backed by contiguous memory < 1 page");
     // No string size limit for the long description
     mTestDesc.SetLong(
-        "Search for 1 of the following namspcs to run test. Find 1st bare "
-        "namspc, or find 1st meta namspc, or find 1st E2E namspc. Issue a "
-        "CreateIOCQ cmd, with QID=1, num elements=Y, where "
-        "Y <= ((CAP.MPS / CC.IOSQES) - 1), where CC.IOSQES=Identify.SQES_b3:0; "
-        "backed by contiguous memory; and then issue a corresponding "
-        "CreateIOSQ, same parameters, same memory allocation. Issue X write "
-        "cmds, where X=num elements in IOCQ, sending 1 block and approp "
-        "supporting meta/E2E if necessary to the selected namspc at LBA 0, "
-        "data pattern of word++, read back, verify pattern.");
+        "May only run this test if ((CAP.MQES + 1) >= Y. Search for 1 of the "
+        "following namspcs to run test. Find 1st bare namspc, or find 1st "
+        "meta namspc, or find 1st E2E namspc. Issue a CreateIOCQ cmd, with "
+        "QID = 1, num elements = Y, where Y = ((CC.MPS / CC.IOCQES) - 1), "
+        "where CC.IOCQES=Identify.CQES_b3:0; backed by contig memory. "
+        "Issue a CreateIOSQ cmd, with QID = 1, num elements = Z, where "
+        "Z = ((CC.MPS / CC.IOSQES) - 1), where CC.IOSQES = Identify.SQES_b3:0; "
+        "backed by contig memory. Issue X write cmds, where X = "
+        "(num elements in IOSQ + 1), sending 1 block and approp supporting "
+        "meta/E2E if necessary to the selected namspc at LBA 0, data pattern "
+        "of word++, read back, verify pattern.");
 }
 
 
@@ -97,15 +99,46 @@ PRPLessPageContig_r10b::RunCoreTest()
     string work;
     bool enableLog;
 
+    uint64_t ctrlCapReg;
+    LOG_NRM("Determine the max IOQ entries supported");
+    if (gRegisters->Read(CTLSPC_CAP, ctrlCapReg) == false)
+        throw FrmwkEx(HERE, "Unable to determine MQES");
+    uint32_t maxIOQEntries = (ctrlCapReg & CAP_MQES);
+    maxIOQEntries += 1;      // convert to 1-based
+
+    LOG_NRM("Compute memory page size from CC.MPS.");
+    uint8_t mps;
+    if (gCtrlrConfig->GetMPS(mps) == false)
+        throw FrmwkEx(HERE, "Unable to get MPS value from CC.");
+    uint64_t capMPS = (uint64_t)(1 << (mps + 12));
+
+    LOG_NRM("Determine element sizes for the IOCQ's");
+    uint8_t iocqes = (gInformative->GetIdentifyCmdCtrlr()->
+        GetValue(IDCTRLRCAP_CQES) & 0xf);
+    uint32_t Y = ((capMPS / (1 << iocqes)) - 1);
+    if (maxIOQEntries < Y) {
+        LOG_WARN("Desired to support >= %d elements in IOCQ for this test", Y);
+        return;
+    }
+
+    LOG_NRM("Determine element sizes for the IOSQ's");
+    uint8_t iosqes = (gInformative->GetIdentifyCmdCtrlr()->
+        GetValue(IDCTRLRCAP_SQES) & 0xf);
+    uint32_t Z = ((capMPS / (1 << iosqes)) - 1);
+
+    LOG_NRM("Computed memory page size from CC.MPS = %ld", capMPS);
+    LOG_NRM("Max IOQ entries supported CAP.MQES = %d", maxIOQEntries);
+    LOG_NRM("Number of IOCQ (elements < 1 page) = %d", Y);
+    LOG_NRM("Number of IOSQ (elements < 1 page) = %d", Z);
+
     if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
         throw FrmwkEx(HERE);
 
-    SharedACQPtr acq = CAST_TO_ACQ(
-        gRsrcMngr->AllocObj(Trackable::OBJ_ACQ, ACQ_GROUP_ID))
+    LOG_NRM("Create admin queues ACQ and ASQ");
+    SharedACQPtr acq = SharedACQPtr(new ACQ(mFd));
     acq->Init(5);
 
-    SharedASQPtr asq = CAST_TO_ASQ(
-        gRsrcMngr->AllocObj(Trackable::OBJ_ASQ, ASQ_GROUP_ID))
+    SharedASQPtr asq = SharedASQPtr(new ASQ(mFd));
     asq->Init(5);
 
     // All queues will use identical IRQ vector
@@ -115,33 +148,20 @@ PRPLessPageContig_r10b::RunCoreTest()
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
         throw FrmwkEx(HERE);
 
-    LOG_NRM("Compute memory page size from CC.MPS.");
-    uint8_t mps;
-    if (gCtrlrConfig->GetMPS(mps) == false)
-        throw FrmwkEx(HERE, "Unable to get MPS value from CC.");
-    uint64_t capMPS = (uint64_t)(1 << (mps + 12));
-
-    LOG_NRM("Setup element sizes for the IOQ's");
-    uint8_t iocqes = (gInformative->GetIdentifyCmdCtrlr()->
-        GetValue(IDCTRLRCAP_CQES) & 0xf);
-    uint8_t iosqes = (gInformative->GetIdentifyCmdCtrlr()->
-        GetValue(IDCTRLRCAP_SQES) & 0xf);
-    gCtrlrConfig->SetIOCQES(iocqes);
-    gCtrlrConfig->SetIOSQES(iosqes);
-
-    uint32_t Y = ((capMPS / iosqes) - 1);
-    LOG_NRM("Number of IOQ (elements < 1 page) = %d", Y);
-
     Informative::Namspc namspcData = gInformative->Get1stBareMetaE2E();
     LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
     uint64_t lbaDataSize = namspcData.idCmdNamspc->GetLBADataSize();
+
+    LOG_NRM("Setup element sizes for the IOQ's");
+    gCtrlrConfig->SetIOCQES(iocqes);
+    gCtrlrConfig->SetIOSQES(iosqes);
 
     SharedIOCQPtr iocq = Queues::CreateIOCQContigToHdw(mGrpName, mTestName,
         DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, Y, true,
         IOCQ_GROUP_ID, true, 0);
 
     SharedIOSQPtr iosq = Queues::CreateIOSQContigToHdw(mGrpName, mTestName,
-        DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, Y, true,
+        DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, Z, true,
         IOSQ_GROUP_ID, IOQ_ID, 0);
 
     SharedWritePtr writeCmd = SharedWritePtr(new Write());
@@ -184,8 +204,9 @@ PRPLessPageContig_r10b::RunCoreTest()
     readCmd->SetNSID(namspcData.id);
     readCmd->SetNLB(0);
 
-
-    for (int64_t X = 0; X < Y; X++) {
+    // Fill the IOSQ and roll over
+    for (int64_t X = 1; X <= (iosq->GetNumEntries() + 1); X++) {
+        LOG_NRM("Processing #%ld of %d cmds", X, (iosq->GetNumEntries() + 1));
         switch (namspcData.type) {
         case Informative::NS_BARE:
             writeMem->SetDataPattern(DATAPAT_INC_32BIT, X);
