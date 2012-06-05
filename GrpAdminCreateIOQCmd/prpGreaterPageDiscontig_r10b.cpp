@@ -16,7 +16,7 @@
 
 #include <string.h>
 #include <boost/format.hpp>
-#include "prpLessPageContig_r10b.h"
+#include "prpGreaterPageDiscontig_r10b.h"
 #include "globals.h"
 #include "grpDefs.h"
 #include "../Utils/irq.h"
@@ -32,30 +32,30 @@
 namespace GrpAdminCreateIOQCmd {
 
 
-PRPLessPageContig_r10b::PRPLessPageContig_r10b(int fd,
+PRPGreaterPageDiscontig_r10b::PRPGreaterPageDiscontig_r10b(int fd,
     string mGrpName, string mTestName, ErrorRegs errRegs) :
     Test(fd, mGrpName, mTestName, SPECREV_10b, errRegs)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 5");
-    mTestDesc.SetShort(     "Create IOQ's backed by contiguous memory < 1 page");
+    mTestDesc.SetShort(     "Create IOQ's backed by discontigous memory > 1 page");
     // No string size limit for the long description
     mTestDesc.SetLong(
         "May only run this test if ((CAP.MQES + 1) >= Y. Search for 1 of the "
         "following namspcs to run test. Find 1st bare namspc, or find 1st "
         "meta namspc, or find 1st E2E namspc. Issue a CreateIOCQ cmd, with "
-        "QID = 1, num elements = Y, where Y = ((CC.MPS / CC.IOCQES) - 1), "
-        "where CC.IOCQES = Identify.CQES_b3:0; backed by contig memory. "
+        "QID = 1, num elements = Y, where Y = ((CC.MPS / CC.IOCQES) + 1), "
+        "where CC.IOCQES = Identify.CQES_b3:0; backed by discontig memory. "
         "Issue a CreateIOSQ cmd, with QID = 1, num elements = Z, where "
-        "Z = ((CC.MPS / CC.IOSQES) - 1), where CC.IOSQES = Identify.SQES_b3:0; "
-        "backed by contig memory. Issue X write cmds, where X = "
+        "Z = ((CC.MPS / CC.IOSQES) + 1), where CC.IOSQES = Identify.SQES_b3:0; "
+        "backed by discontig memory. Issue X write cmds, where X = "
         "(num elements in IOSQ + 1), sending 1 block and approp supporting "
         "meta/E2E if necessary to the selected namspc at LBA 0, data pattern "
         "of word++, read back, verify pattern.");
 }
 
 
-PRPLessPageContig_r10b::~PRPLessPageContig_r10b()
+PRPGreaterPageDiscontig_r10b::~PRPGreaterPageDiscontig_r10b()
 {
     ///////////////////////////////////////////////////////////////////////////
     // Allocations taken from the heap and not under the control of the
@@ -64,8 +64,8 @@ PRPLessPageContig_r10b::~PRPLessPageContig_r10b()
 }
 
 
-PRPLessPageContig_r10b::
-PRPLessPageContig_r10b(const PRPLessPageContig_r10b &other) :
+PRPGreaterPageDiscontig_r10b::
+PRPGreaterPageDiscontig_r10b(const PRPGreaterPageDiscontig_r10b &other) :
     Test(other)
 {
     ///////////////////////////////////////////////////////////////////////////
@@ -75,8 +75,8 @@ PRPLessPageContig_r10b(const PRPLessPageContig_r10b &other) :
 }
 
 
-PRPLessPageContig_r10b &
-PRPLessPageContig_r10b::operator=(const PRPLessPageContig_r10b
+PRPGreaterPageDiscontig_r10b &
+PRPGreaterPageDiscontig_r10b::operator=(const PRPGreaterPageDiscontig_r10b
     &other)
 {
     ///////////////////////////////////////////////////////////////////////////
@@ -89,7 +89,7 @@ PRPLessPageContig_r10b::operator=(const PRPLessPageContig_r10b
 
 
 void
-PRPLessPageContig_r10b::RunCoreTest()
+PRPGreaterPageDiscontig_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
@@ -98,6 +98,11 @@ PRPLessPageContig_r10b::RunCoreTest()
      */
     string work;
     bool enableLog;
+
+    if (Queues::SupportDiscontigIOQ() == false) {
+        LOG_WARN("DUT must support discontig Q's for this test.");
+        return;
+    }
 
     uint64_t ctrlCapReg;
     LOG_NRM("Determine the max IOQ entries supported");
@@ -115,7 +120,7 @@ PRPLessPageContig_r10b::RunCoreTest()
     LOG_NRM("Determine element sizes for the IOCQ's");
     uint8_t iocqes = (gInformative->GetIdentifyCmdCtrlr()->
         GetValue(IDCTRLRCAP_CQES) & 0xf);
-    uint32_t Y = ((capMPS / (1 << iocqes)) - 1);
+    uint32_t Y = ((capMPS / (1 << iocqes)) + 1);
     if (maxIOQEntries < Y) {
         LOG_WARN("Desired to support >= %d elements in IOCQ for this test", Y);
         return;
@@ -124,7 +129,7 @@ PRPLessPageContig_r10b::RunCoreTest()
     LOG_NRM("Determine element sizes for the IOSQ's");
     uint8_t iosqes = (gInformative->GetIdentifyCmdCtrlr()->
         GetValue(IDCTRLRCAP_SQES) & 0xf);
-    uint32_t Z = ((capMPS / (1 << iosqes)) - 1);
+    uint32_t Z = ((capMPS / (1 << iosqes)) + 1);
 
     LOG_NRM("Computed memory page size from CC.MPS = %ld", capMPS);
     LOG_NRM("Max IOQ entries supported CAP.MQES = %d", maxIOQEntries);
@@ -156,13 +161,18 @@ PRPLessPageContig_r10b::RunCoreTest()
     gCtrlrConfig->SetIOCQES(iocqes);
     gCtrlrConfig->SetIOSQES(iosqes);
 
-    SharedIOCQPtr iocq = Queues::CreateIOCQContigToHdw(mGrpName, mTestName,
-        DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, Y, true,
-        IOCQ_GROUP_ID, true, 0);
+    LOG_NRM("Create discontig IOSQ and IOCQ with IDs 1");
+    SharedMemBufferPtr iocqBackedMem = SharedMemBufferPtr(new MemBuffer());
+    iocqBackedMem->InitOffset1stPage((Y * (1 << iocqes)), 0, true);
+    SharedIOCQPtr iocq = Queues::CreateIOCQDiscontigToHdw(mGrpName, mTestName,
+        DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, Y, false, IOCQ_GROUP_ID,
+        true, 0, iocqBackedMem);
 
-    SharedIOSQPtr iosq = Queues::CreateIOSQContigToHdw(mGrpName, mTestName,
-        DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, Z, true,
-        IOSQ_GROUP_ID, IOQ_ID, 0);
+    SharedMemBufferPtr iosqBackedMem = SharedMemBufferPtr(new MemBuffer());
+    iosqBackedMem->InitOffset1stPage((Z * (1 << iosqes)), 0,true);
+    SharedIOSQPtr iosq = Queues::CreateIOSQDiscontigToHdw(mGrpName, mTestName,
+        DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, Z, false, IOSQ_GROUP_ID,
+        IOQ_ID, 0, iosqBackedMem);
 
     SharedWritePtr writeCmd = SharedWritePtr(new Write());
     SharedMemBufferPtr writeMem = SharedMemBufferPtr(new MemBuffer());
@@ -241,7 +251,7 @@ PRPLessPageContig_r10b::RunCoreTest()
 
 
 void
-PRPLessPageContig_r10b::VerifyDataPat(SharedReadPtr readCmd,
+PRPGreaterPageDiscontig_r10b::VerifyDataPat(SharedReadPtr readCmd,
     SharedWritePtr writeCmd)
 {
     LOG_NRM("Compare read vs written data to verify");

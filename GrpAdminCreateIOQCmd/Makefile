@@ -16,10 +16,14 @@ LDFLAGS=-lm
 LIBS = -L../ -L/usr/local/lib -lm
 INCLUDES = -I. -I../ -I../../ -I/usr/local/include
 
-SRC =					\
-	grpAdminCreateIOQCmd.cpp	\
-	createResources_r10b.cpp	\
-	prpLessPageContig_r10b.cpp
+SRC =						\
+	grpAdminCreateIOQCmd.cpp		\
+	prpLessPageContig_r10b.cpp		\
+	prpLessPageDiscontig_r10b.cpp		\
+	prpSinglePageContig_r10b.cpp		\
+	prpSinglePageDiscontig_r10b.cpp		\
+	prpGreaterPageContig_r10b.cpp		\
+	prpGreaterPageDiscontig_r10b.cpp
 
 .SUFFIXES: .cpp
 

@@ -16,8 +16,12 @@
 
 #include "grpAdminCreateIOQCmd.h"
 #include "../Exception/frmwkEx.h"
-#include "createResources_r10b.h"
 #include "prpLessPageContig_r10b.h"
+#include "prpLessPageDiscontig_r10b.h"
+#include "prpSinglePageContig_r10b.h"
+#include "prpSinglePageDiscontig_r10b.h"
+#include "prpGreaterPageContig_r10b.h"
+#include "prpGreaterPageDiscontig_r10b.h"
 
 namespace GrpAdminCreateIOQCmd {
 
@@ -32,8 +36,12 @@ GrpAdminCreateIOQCmd::GrpAdminCreateIOQCmd(size_t grpNum, SpecRev specRev,
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Strategy
     switch (mSpecRev) {
     case SPECREV_10b:
-        APPEND_TEST_AT_XLEVEL(CreateResources_r10b, fd, GrpAdminCreateIOQCmd, errRegs)
         APPEND_TEST_AT_XLEVEL(PRPLessPageContig_r10b, fd, GrpAdminCreateIOQCmd, errRegs)
+        APPEND_TEST_AT_XLEVEL(PRPLessPageDiscontig_r10b, fd, GrpAdminCreateIOQCmd, errRegs)
+        APPEND_TEST_AT_XLEVEL(PRPSinglePageContig_r10b, fd, GrpAdminCreateIOQCmd, errRegs)
+        APPEND_TEST_AT_XLEVEL(PRPSinglePageDiscontig_r10b, fd, GrpAdminCreateIOQCmd, errRegs)
+        APPEND_TEST_AT_XLEVEL(PRPGreaterPageContig_r10b, fd, GrpAdminCreateIOQCmd, errRegs)
+        APPEND_TEST_AT_XLEVEL(PRPGreaterPageDiscontig_r10b, fd, GrpAdminCreateIOQCmd, errRegs)
         break;
 
     default:

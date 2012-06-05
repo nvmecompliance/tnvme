@@ -16,7 +16,7 @@
 
 #include <string.h>
 #include <boost/format.hpp>
-#include "prpLessPageContig_r10b.h"
+#include "prpGreaterPageContig_r10b.h"
 #include "globals.h"
 #include "grpDefs.h"
 #include "../Utils/irq.h"
@@ -32,22 +32,22 @@
 namespace GrpAdminCreateIOQCmd {
 
 
-PRPLessPageContig_r10b::PRPLessPageContig_r10b(int fd,
+PRPGreaterPageContig_r10b::PRPGreaterPageContig_r10b(int fd,
     string mGrpName, string mTestName, ErrorRegs errRegs) :
     Test(fd, mGrpName, mTestName, SPECREV_10b, errRegs)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 5");
-    mTestDesc.SetShort(     "Create IOQ's backed by contiguous memory < 1 page");
+    mTestDesc.SetShort(     "Create IOQ's backed by contiguous memory > 1 page");
     // No string size limit for the long description
     mTestDesc.SetLong(
         "May only run this test if ((CAP.MQES + 1) >= Y. Search for 1 of the "
         "following namspcs to run test. Find 1st bare namspc, or find 1st "
         "meta namspc, or find 1st E2E namspc. Issue a CreateIOCQ cmd, with "
-        "QID = 1, num elements = Y, where Y = ((CC.MPS / CC.IOCQES) - 1), "
+        "QID = 1, num elements = Y, where Y = ((CC.MPS / CC.IOCQES) + 1), "
         "where CC.IOCQES = Identify.CQES_b3:0; backed by contig memory. "
         "Issue a CreateIOSQ cmd, with QID = 1, num elements = Z, where "
-        "Z = ((CC.MPS / CC.IOSQES) - 1), where CC.IOSQES = Identify.SQES_b3:0; "
+        "Z = ((CC.MPS / CC.IOSQES) + 1), where CC.IOSQES = Identify.SQES_b3:0; "
         "backed by contig memory. Issue X write cmds, where X = "
         "(num elements in IOSQ + 1), sending 1 block and approp supporting "
         "meta/E2E if necessary to the selected namspc at LBA 0, data pattern "
@@ -55,7 +55,7 @@ PRPLessPageContig_r10b::PRPLessPageContig_r10b(int fd,
 }
 
 
-PRPLessPageContig_r10b::~PRPLessPageContig_r10b()
+PRPGreaterPageContig_r10b::~PRPGreaterPageContig_r10b()
 {
     ///////////////////////////////////////////////////////////////////////////
     // Allocations taken from the heap and not under the control of the
@@ -64,8 +64,8 @@ PRPLessPageContig_r10b::~PRPLessPageContig_r10b()
 }
 
 
-PRPLessPageContig_r10b::
-PRPLessPageContig_r10b(const PRPLessPageContig_r10b &other) :
+PRPGreaterPageContig_r10b::
+PRPGreaterPageContig_r10b(const PRPGreaterPageContig_r10b &other) :
     Test(other)
 {
     ///////////////////////////////////////////////////////////////////////////
@@ -75,8 +75,8 @@ PRPLessPageContig_r10b(const PRPLessPageContig_r10b &other) :
 }
 
 
-PRPLessPageContig_r10b &
-PRPLessPageContig_r10b::operator=(const PRPLessPageContig_r10b
+PRPGreaterPageContig_r10b &
+PRPGreaterPageContig_r10b::operator=(const PRPGreaterPageContig_r10b
     &other)
 {
     ///////////////////////////////////////////////////////////////////////////
@@ -89,7 +89,7 @@ PRPLessPageContig_r10b::operator=(const PRPLessPageContig_r10b
 
 
 void
-PRPLessPageContig_r10b::RunCoreTest()
+PRPGreaterPageContig_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
@@ -115,7 +115,7 @@ PRPLessPageContig_r10b::RunCoreTest()
     LOG_NRM("Determine element sizes for the IOCQ's");
     uint8_t iocqes = (gInformative->GetIdentifyCmdCtrlr()->
         GetValue(IDCTRLRCAP_CQES) & 0xf);
-    uint32_t Y = ((capMPS / (1 << iocqes)) - 1);
+    uint32_t Y = ((capMPS / (1 << iocqes)) + 1);
     if (maxIOQEntries < Y) {
         LOG_WARN("Desired to support >= %d elements in IOCQ for this test", Y);
         return;
@@ -124,7 +124,7 @@ PRPLessPageContig_r10b::RunCoreTest()
     LOG_NRM("Determine element sizes for the IOSQ's");
     uint8_t iosqes = (gInformative->GetIdentifyCmdCtrlr()->
         GetValue(IDCTRLRCAP_SQES) & 0xf);
-    uint32_t Z = ((capMPS / (1 << iosqes)) - 1);
+    uint32_t Z = ((capMPS / (1 << iosqes)) + 1);
 
     LOG_NRM("Computed memory page size from CC.MPS = %ld", capMPS);
     LOG_NRM("Max IOQ entries supported CAP.MQES = %d", maxIOQEntries);
@@ -241,7 +241,7 @@ PRPLessPageContig_r10b::RunCoreTest()
 
 
 void
-PRPLessPageContig_r10b::VerifyDataPat(SharedReadPtr readCmd,
+PRPGreaterPageContig_r10b::VerifyDataPat(SharedReadPtr readCmd,
     SharedWritePtr writeCmd)
 {
     LOG_NRM("Compare read vs written data to verify");
