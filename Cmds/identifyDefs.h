@@ -107,6 +107,7 @@ struct IdPowerStateDesc {
     uint8_t     RRL;
     uint8_t     RWT;
     uint8_t     RWL;
+    uint64_t    RES_7D[2];
 } __attribute__((__packed__));
 
 struct IdCtrlrCapStruct {
