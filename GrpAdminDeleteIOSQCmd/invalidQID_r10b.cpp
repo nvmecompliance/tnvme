@@ -106,14 +106,17 @@ InvalidQID_r10b::RunCoreTest()
 
     LOG_NRM("Issue DeleteIOSQ traversing through all combinations of DW10.QID");
     SharedDeleteIOSQPtr deleteIOSQCmd = SharedDeleteIOSQPtr(new DeleteIOSQ());
-    for (uint32_t qId = 1; qId <= MAX_IOQ_ID; qId++) {
-        LOG_NRM("Sending 1st deleteIOSQ cmd for QId #%d", qId);
-        work = str(boost::format("1st.IOQID.%d") % qId);
+
+    list<uint32_t> illegalQIDs = GetIllegalQIDs(1);
+    for (list<uint32_t>::iterator qId = illegalQIDs.begin();
+        qId != illegalQIDs.end(); qId++) {
+        LOG_NRM("Sending 1st deleteIOSQ cmd for QId #%d", *qId);
+        work = str(boost::format("1st.IOQID.%d") % *qId);
         enableLog = false;
-        if ((qId <= 8) || (qId >= (MAX_IOQ_ID - 8)))
+        if ((*qId <= 8) || (*qId >= (MAX_IOQ_ID - 8)))
             enableLog = true;
 
-        deleteIOSQCmd->SetWord(qId, 10, 0); // Set IO QID using Cmd DW10
+        deleteIOSQCmd->SetWord(*qId, 10, 0); // Set IO QID using Cmd DW10
         IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
             deleteIOSQCmd, work, enableLog, CESTAT_INVALID_QID);
     }
@@ -139,19 +142,42 @@ InvalidQID_r10b::RunCoreTest()
         deleteIOSQCmd, work, true);
 
     LOG_NRM("Again issue DeleteIOSQ through all combinations of DW10.QID");
-    for (uint32_t qId = 2; qId <= MAX_IOQ_ID; qId++) {
-        LOG_NRM("Sending 2nd deleteIOSQ cmd for QId #%d", qId);
-        work = str(boost::format("2nd.IOQID.%d") % qId);
+    illegalQIDs = GetIllegalQIDs(2);
+    for (list<uint32_t>::iterator qId = illegalQIDs.begin();
+        qId != illegalQIDs.end(); qId++) {
+        LOG_NRM("Sending 2nd deleteIOSQ cmd for QId #%d", *qId);
+        work = str(boost::format("2nd.IOQID.%d") % *qId);
         enableLog = false;
-        if ((qId <= 8) || (qId >= (MAX_IOQ_ID - 8)))
+        if ((*qId <= 8) || (*qId >= (MAX_IOQ_ID - 8)))
             enableLog = true;
 
-        deleteIOSQCmd->SetWord(qId, 10, 0); // Set IO QID using Cmd DW10
+        deleteIOSQCmd->SetWord(*qId, 10, 0); // Set IO QID using Cmd DW10
         IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
             deleteIOSQCmd, work, enableLog, CESTAT_INVALID_QID);
     }
 }
 
+
+list<uint32_t>
+InvalidQID_r10b::GetIllegalQIDs(uint32_t maxQIdsSupported)
+{
+    list<uint32_t> illegalQIDs;
+    for (uint32_t qId = (maxQIdsSupported + 1); qId <= (MAX_IOQ_ID + 1);
+        qId <<= 1) {
+        if (qId < MAX_IOQ_ID) {
+            illegalQIDs.push_back(qId - 1);
+            illegalQIDs.push_back(qId);
+            illegalQIDs.push_back(qId + 1);
+        }
+    }
+    if (maxQIdsSupported < MAX_IOQ_ID) {
+        illegalQIDs.remove(MAX_IOQ_ID - 1);
+        illegalQIDs.remove(MAX_IOQ_ID);
+        illegalQIDs.push_back(MAX_IOQ_ID - 1);
+        illegalQIDs.push_back(MAX_IOQ_ID);
+    }
+    return illegalQIDs;
+}
 
 }   // namespace
 

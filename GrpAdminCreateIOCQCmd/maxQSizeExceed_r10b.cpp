@@ -152,7 +152,6 @@ MaxQSizeExceed_r10b::GetIllegalQSizes(uint32_t maxIOQEntries)
         illegalQSizes.remove(MAX_Q_ENTRIES);
         illegalQSizes.push_back(MAX_Q_ENTRIES);
     }
-
     return illegalQSizes;
 }
 

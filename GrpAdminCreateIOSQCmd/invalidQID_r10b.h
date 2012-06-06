@@ -17,6 +17,7 @@
 #ifndef _INVALIDQID_r10b_H_
 #define _INVALIDQID_r10b_H_
 
+#include <list>
 #include "test.h"
 
 namespace GrpAdminCreateIOSQCmd {
@@ -53,6 +54,7 @@ private:
     ///////////////////////////////////////////////////////////////////////////
     // Adding a member variable? Then edit the copy constructor and operator=().
     ///////////////////////////////////////////////////////////////////////////
+    list<uint32_t> GetIllegalQIDs(uint32_t maxQIdsSupported);
 };
 
 }   // namespace

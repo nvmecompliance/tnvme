@@ -118,24 +118,49 @@ InvalidQID_r10b::RunCoreTest()
 
     LOG_NRM("Issue CreateIOSQ cmds with QID's ranging from %d to %d",
         (X + 1), MAX_IOQ_ID);
-    for (uint32_t qId = (X + 1); qId <= MAX_IOQ_ID; qId++) {
+
+    list<uint32_t> illegalQIDs = GetIllegalQIDs(X + 1);
+    for (list<uint32_t>::iterator qId = illegalQIDs.begin();
+        qId != illegalQIDs.end(); qId++) {
         LOG_NRM("Process CreateIOSQCmd with iosq id #%d and assoc iocq id #%d",
-            qId, IOQ_ID);
+            *qId, IOQ_ID);
         SharedIOSQPtr iosq = SharedIOSQPtr(new IOSQ(mFd));
-        iosq->Init(qId, maxIOQEntries, IOQ_ID, 0);
+        iosq->Init(*qId, maxIOQEntries, IOQ_ID, 0);
         SharedCreateIOSQPtr createIOSQCmd =
             SharedCreateIOSQPtr(new CreateIOSQ());
         createIOSQCmd->Init(iosq);
 
-        work = str(boost::format("iosqId.%d") % qId);
+        work = str(boost::format("iosqId.%d") % *qId);
         enableLog = false;
-        if ((qId <= (X + 8)) || (qId >= (MAX_IOQ_ID - 8)))
+        if ((*qId <= (X + 8)) || (*qId >= (MAX_IOQ_ID - 8)))
             enableLog = true;
 
-        LOG_NRM("Send and reap cmd with SQ ID #%d", qId);
+        LOG_NRM("Send and reap cmd with SQ ID #%d", *qId);
         IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
             createIOSQCmd, work, enableLog, CESTAT_INVALID_QID);
     }
+}
+
+
+list<uint32_t>
+InvalidQID_r10b::GetIllegalQIDs(uint32_t maxQIdsSupported)
+{
+    list<uint32_t> illegalQIDs;
+    for (uint32_t qId = (maxQIdsSupported + 1); qId <= (MAX_IOQ_ID + 1);
+        qId <<= 1) {
+        if (qId < MAX_IOQ_ID) {
+            illegalQIDs.push_back(qId - 1);
+            illegalQIDs.push_back(qId);
+            illegalQIDs.push_back(qId + 1);
+        }
+    }
+    if (maxQIdsSupported < MAX_IOQ_ID) {
+        illegalQIDs.remove(MAX_IOQ_ID - 1);
+        illegalQIDs.remove(MAX_IOQ_ID);
+        illegalQIDs.push_back(MAX_IOQ_ID - 1);
+        illegalQIDs.push_back(MAX_IOQ_ID);
+    }
+    return illegalQIDs;
 }
 
 
