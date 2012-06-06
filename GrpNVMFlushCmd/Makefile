@@ -20,7 +20,9 @@ SRC =					\
 	grpNVMFlushCmd.cpp		\
 	createResources_r10b.cpp	\
 	invalidNamspc_r10b.cpp		\
-	unsupportRsvdFields_r10b.cpp
+	unsupportRsvdFields_r10b.cpp	\
+	functionalityBare_r10b.cpp	\
+	functionalityMeta_r10b.cpp
 
 .SUFFIXES: .cpp
 
