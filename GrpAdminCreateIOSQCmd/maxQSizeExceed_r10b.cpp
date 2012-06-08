@@ -21,6 +21,8 @@
 #include "../Utils/queues.h"
 #include "../Utils/io.h"
 
+#define     MAX_Q_ENTRIES       0x10000  // 1- based value.
+
 namespace GrpAdminCreateIOSQCmd {
 
 
@@ -102,41 +104,42 @@ MaxQSizeExceed_r10b::RunCoreTest()
     if (gRegisters->Read(CTLSPC_CAP, mqes) == false)
         throw FrmwkEx(HERE, "Unable to determine CAP.MQES");
     mqes &= CAP_MQES;
-    LOG_NRM("DUT's largest supported IOSQ size = 0x%05lX", (mqes + 1));
+    mqes = mqes + 1; // convert to 1 - based
+    LOG_NRM("DUT's largest supported IOSQ size = 0x%05lX", mqes);
 
-    for (uint32_t i = (mqes + 2); i <= 0xffff; i++) {
+    list<uint32_t> illegalQSizes = GetIllegalQSizes(mqes);
+    for (list<uint32_t>::iterator qSize = illegalQSizes.begin();
+        qSize != illegalQSizes.end(); qSize++) {
         LOG_NRM("Create an IOSQ object with test lifetime");
         SharedIOSQPtr iosq = SharedIOSQPtr(new IOSQ(gDutFd));
 
-        LOG_NRM("Issue CreateIOSQ with illegal Q size = 0x%08X", i);
-        iosq->Init(IOQ_ID, i, IOQ_ID, 0);
+        LOG_NRM("Issue CreateIOSQ with illegal Q size = 0x%08X", *qSize);
+        iosq->Init(IOQ_ID, *qSize, IOQ_ID, 0);
 
         LOG_NRM("Form a Create IOSQ cmd to perform queue creation");
         SharedCreateIOSQPtr createIOSQCmd =
             SharedCreateIOSQPtr(new CreateIOSQ());
         createIOSQCmd->Init(iosq);
 
-        qualify = str(boost::format("qsize.0x%04X") % i);
+        qualify = str(boost::format("qsize.0x%04X") % *qSize);
         IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
             createIOSQCmd, qualify, false, CESTAT_MAX_Q_SIZE_EXCEED);
     }
 
-
-    uint32_t i = (mqes + 1);
-    LOG_NRM("Issue largest legal sized IOSQ  0x%05X, should succeed", i);
+    LOG_NRM("Issue largest legal sized IOSQ  0x%05lX, should succeed", mqes);
 
     LOG_NRM("Create an IOSQ object with test lifetime");
     SharedIOSQPtr iosq = SharedIOSQPtr(new IOSQ(gDutFd));
 
-    LOG_NRM("Issue CreateIOSQ with legal Q size = 0x%08X", i);
-    iosq->Init(IOQ_ID, i, IOQ_ID, 0);
+    LOG_NRM("Issue CreateIOSQ with legal Q size = 0x%08lX", mqes);
+    iosq->Init(IOQ_ID, mqes, IOQ_ID, 0);
 
     LOG_NRM("Form a Create IOSQ cmd to perform queue creation");
     SharedCreateIOSQPtr createIOSQCmd =
         SharedCreateIOSQPtr(new CreateIOSQ());
     createIOSQCmd->Init(iosq);
 
-    qualify = str(boost::format("qsize.0x%04X") % i);
+    qualify = str(boost::format("qsize.0x%04lX") % mqes);
     IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
         createIOSQCmd, qualify, false);
 
@@ -144,6 +147,26 @@ MaxQSizeExceed_r10b::RunCoreTest()
         asq, acq, "", false);
     Queues::DeleteIOCQToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iocq,
         asq, acq, "", false);
+}
+
+
+list<uint32_t>
+MaxQSizeExceed_r10b::GetIllegalQSizes(uint32_t maxIOQEntries)
+{
+    list<uint32_t> illegalQSizes;
+    for (uint32_t qSize = (maxIOQEntries + 2); qSize <= (MAX_Q_ENTRIES + 1);
+        qSize <<= 1) {
+        if (qSize < MAX_Q_ENTRIES) {
+            illegalQSizes.push_back(qSize - 1);
+            illegalQSizes.push_back(qSize);
+            illegalQSizes.push_back(qSize + 1);
+        }
+    }
+    if (maxIOQEntries < MAX_Q_ENTRIES) {
+        illegalQSizes.remove(MAX_Q_ENTRIES);
+        illegalQSizes.push_back(MAX_Q_ENTRIES);
+    }
+    return illegalQSizes;
 }
 
 
