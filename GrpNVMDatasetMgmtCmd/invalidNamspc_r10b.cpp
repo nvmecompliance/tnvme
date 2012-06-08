@@ -105,7 +105,8 @@ InvalidNamspc_r10b::RunCoreTest()
     ConstSharedIdentifyPtr idCtrlrStruct = gInformative->GetIdentifyCmdCtrlr();
     uint32_t nn = (uint32_t)idCtrlrStruct->GetValue(IDCTRLRCAP_NN);
     if (nn == 0 ) {
-        throw FrmwkEx(HERE, "Required to support >= 1 namspc");
+        LOG_WARN("Required to support >= 1 namspc");
+        return;
     }
 
     for (i = (nn + 1), inc = 1; i <= 0xffffffff; i += (2 * inc), inc += 1327) {
