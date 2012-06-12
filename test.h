@@ -97,12 +97,35 @@ public:
     string GetComplianceDescription() { return mTestDesc.GetCompliance(); }
 
     /**
-     * Run the test case. This will catch all exceptions and convert them into
-     * a return value, thus children implementing RunCoreTest() are allowed to
-     * throw exceptions and they are treated as errors.
+     * Run the test case. This method will catch all exceptions and convert
+     * them into a return value, thus children implementing RunCoreTest() are
+     * allowed to throw exceptions and they are treated as errors.
      * @return true upon success, otherwise false.
      */
     bool Run();
+
+    typedef enum {
+        RUN_TRUE,       // Test is runnable and should be run
+        RUN_FALSE,      // Test is not runnable, this is not an error
+        RUN_FAIL        // Test is not runnable, this is an error, stop testing
+    } RunType;
+
+    /**
+     * Is this test runnable? This method will catch all exceptions and convert
+     * them into a return value, thus children implementing RunnableCoreTest()
+     * are allowed to throw exceptions and are treated as returning false.
+     * @note A test may not be runnable if the test is inherently destructive
+     * and the preserve param forces non-destructive testing. A test may not be
+     * runnable if say there are not enough resources on the device to perform
+     * the tests and to make more resources that will require to be destructive
+     * to the device and the preserve param forces non-destructive testing. y
+     * @param preserve Pass true if the DUT's state must be preserved, false
+     *        indicates the test is allowed to be destructive and change the
+     *        permanent state/configuration of the DUT.
+     * @return The appropriate value as determined dynamically during
+     *         runtime evaluation.
+     */
+    virtual RunType Runnable(bool preserve);
 
     /**
      * Cloning objects are necessary to support automated resource cleanup
@@ -128,7 +151,6 @@ protected:
     ///////////////////////////////////////////////////////////////////////////
     // Adding a member variable? Then edit the copy constructor and operator().
     ///////////////////////////////////////////////////////////////////////////
-
     /// file descriptor to the device under test
     int mFd;
     /// NVME spec rev being targeted
@@ -148,6 +170,17 @@ protected:
      *         class FrmwkEx() when a test failure occurs.
      */
     virtual void RunCoreTest();
+
+    /**
+     * Forcing children to implement the core logic of whether or not a test
+     * is runnable.
+     * @param preserve Pass true if the DUT's state must be preserved, false
+     *        indicates the test is allowed to be destructive and change the
+     *        state/config of the DUT.
+     * @return The appropriate value as determined dynamically during
+     *         runtime evaluation.
+     */
+    virtual RunType RunnableCoreTest(bool preserve);
 
     /**
      * Resets the sticky error bits of the PCI address space. Prior errors

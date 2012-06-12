@@ -71,6 +71,14 @@ AdminQRollChkSame_r10b::operator=(const AdminQRollChkSame_r10b &other)
 }
 
 
+Test::RunType
+AdminQRollChkSame_r10b::RunnableCoreTest(bool preserve)
+{
+    preserve = preserve;    // Suppress compiler error/warning
+    return RUN_TRUE;        // This test is never destructive
+}
+
+
 void
 AdminQRollChkSame_r10b::RunCoreTest()
 {

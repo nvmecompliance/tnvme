@@ -79,6 +79,13 @@ StartingLBAMeta_r10b::operator=(const StartingLBAMeta_r10b
 }
 
 
+Test::RunType
+StartingLBAMeta_r10b::RunnableCoreTest(bool preserve)
+{
+    return ((preserve == true) ? RUN_FALSE : RUN_TRUE);   // Test is destructive
+}
+
+
 void
 StartingLBAMeta_r10b::RunCoreTest()
 {

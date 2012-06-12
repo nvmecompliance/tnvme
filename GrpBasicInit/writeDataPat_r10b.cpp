@@ -75,6 +75,13 @@ WriteDataPat_r10b::operator=(const WriteDataPat_r10b &other)
 }
 
 
+Test::RunType
+WriteDataPat_r10b::RunnableCoreTest(bool preserve)
+{
+    return ((preserve == true) ? RUN_FALSE : RUN_TRUE);   // Test is destructive
+}
+
+
 void
 WriteDataPat_r10b::RunCoreTest()
 {

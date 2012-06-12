@@ -66,6 +66,14 @@ AllPciRegs_r10b::operator=(const AllPciRegs_r10b &other)
 }
 
 
+Test::RunType
+AllPciRegs_r10b::RunnableCoreTest(bool preserve)
+{
+    preserve = preserve;    // Suppress compiler error/warning
+    return RUN_TRUE;        // This test is never destructive
+}
+
+
 void
 AllPciRegs_r10b::RunCoreTest()
 {
@@ -181,22 +189,6 @@ AllPciRegs_r10b::ValidateROBitsAfterWriting()
 }
 
 
-int
-AllPciRegs_r10b::ReportOffendingBitPos(uint64_t val, uint64_t expectedVal)
-{
-    uint64_t bitMask;
-
-    for (int i = 0; i < (int)(sizeof(uint64_t)*8); i++) {
-        bitMask = (1 << i);
-        if ((val & bitMask) != (expectedVal & bitMask)) {
-            LOG_NRM("Reg val(0x%016lX) expect val(0x%016lX)", val, expectedVal);
-            return i;
-        }
-    }
-    return INT_MAX; // there is no mismatch
-}
-
-
 void
 AllPciRegs_r10b::ValidatePciCapRegisterROAttribute(PciSpc reg)
 {
@@ -229,7 +221,7 @@ AllPciRegs_r10b::ValidatePciCapRegisterROAttribute(PciSpc reg)
                 if (value != expectedValue) {
                     throw FrmwkEx(HERE, "%s RO bit #%d has incorrect value",
                         pciMetrics[reg].desc,
-                        ReportOffendingBitPos(value, expectedValue));\
+                        ReportOffendingBitPos(value, expectedValue));
                 }
             }
         }

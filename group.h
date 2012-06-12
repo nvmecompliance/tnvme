@@ -68,6 +68,7 @@
     }
 
 typedef size_t TestIteratorType;
+typedef vector<TestRef> TestSetType;
 
 
 /**
@@ -122,16 +123,17 @@ public:
      */
     string GetTestDescription(bool verbose, TestRef &tr);
 
-    /// Used to allow iterating through all the tests contained within a group.
-    TestIteratorType GetTestIterator() { return 0; }
-
     /**
-     * Convert a user supplied test reference into a iterator.
-     * @param tr Pass the test reference to convert
-     * @param testIter Returns the converted equivalent if successful
-     * @return true upon success, otherwise false.
+     * Returns a set of tests which must be run in order to satisfy any test
+     * dependencies of the targeted test case.
+     * @param target Pass the target test case to execute; could be a
+     *        reference to entire an group or a single test case
+     * @param dependencies Returns an order set of tests to execute
+     * @param tstIdx Returns an index to the 1st test within dependencies
+     * @return true upon success, otherwise false
      */
-    bool TestRefToIterator(TestRef tr, TestIteratorType &testIter);
+    bool GetTestSet(TestRef &target, TestSetType &dependencies,
+        int64_t &tstIdx);
 
     typedef enum {
         TR_SUCCESS,
@@ -141,52 +143,29 @@ public:
     } TestResult;
 
     /**
-     * Run a spec'd test case and report back. The iterator is incremented to
-     * the next possible test when returning, thus it will allow to iterate over
-     * all tests contained within this group if this method is called repeatedly
-     * @param testIter Pass the test case iterator
+     * Run a spec'd test case within the provided dependencies using tstIdx
+     * which references the test to execute. Upon exit the tstIdx will
+     * point to the next test within the provided dependencies for future
+     * execution. This method should called within a loop until an undesired
+     * TestResult is returned or the returned (tstIdx == -1), thus indicating
+     * there are no more tests to execute within the dependencies.
+     * @note The dependencies & tstIdx should be provided by GetTestSet()
+     * @param dependencies Pass the ordered list of tests which are desired to
+     *        be executed in sequence, one-at-a time. This set should not
+     *        be modified between consecutive calls to this method.
+     * @param tstIdx Pass the index which points to the next test to
+     *        execute, returns the next test in the dependencies to execute upon
+     *        a subsequent call to RunTest(), returns -1 when the last test
+     *        within the dependencies has been executed.
      * @param skipTest Pass the complete list of test which should be skipped
-     * @return A TestResult
+     * @param numSkipped Returns the number of tests which were skipped as a
+     *        result of a failed test or a test reporting it cannot be executed.
+     * @preserve Pass true if the DUT must be preserve, false if it can be
+     *           permanently changed. See cmd line option --preserve
+     * @return The result from executing a single test case.
      */
-    TestResult RunTest(TestIteratorType &testIter, vector<TestRef> &skipTest);
-
-    /**
-     * Run a spec'd test case and report back. This method does NOT allow
-     * iterating over tests wihtin this group.
-     * @param tr Pass the test case number to execute
-     * @param skipTest Pass the complete list of test which should be skipped
-     * @return A TestResult
-     */
-    TestResult RunTest(TestRef &tr, vector<TestRef> &skipTest);
-
-    typedef enum {
-        TD_ZERO,            // zero dependency (xLevel)
-        TD_CONFIG,          // configuration dependency (yLevel)
-        TD_SEQUENCE,        // sequence dependency (zLevel)
-
-        TD_FENCE            // always must be last element
-    } TestDepends;
-
-    /**
-     * Get the dependency requirements for an individual test. For full details:
-     * https://github.com/nvmecompliance/tnvme/wiki/Test-Numbering.
-     * *
-     *      retVal          seqDepend                    cfgDepend
-     *      --------------------------------------------------------------------
-     *      TD_FENCE       ignore(==-1)         ignore(cfgDepend == test)
-     *      TD_ZERO        ignore(==-1)         ignore(cfgDepend == test)
-     *      TD_CONFIG      ignore(==-1)          valid(cfgDepend != test)
-     *      TD_SEQUENCE     valid(!=-1)          valid(cfgDepend != test)
-     * @param test Pass test reference to decipher its dependency requirements
-     * @param cfgDepend Returns the corresponding configuration dependency;
-     *        (cfgDepend == test) when it should be ignored
-     * @param seqDepend Returns the corresponding sequence dependency;
-     *        (seqDepend == -1) when it should be ignored
-     * @return true upon success, otherwise failed to locate or decode something
-t
-     */
-    bool GetTestDependency(TestRef test, TestRef &cfgDepend,
-        TestIteratorType &seqDepend);
+    TestResult RunTest(TestSetType &dependencies, int64_t &tstIdx,
+        vector<TestRef> &skipTest, int64_t &numSkipped, bool preserve);
 
 
 protected:
@@ -199,6 +178,9 @@ protected:
     /// Refer to: https://github.com/nvmecompliance/tnvme/wiki/Test-Numbering
     deque<deque<deque<Test *> > > mTests;
 
+
+private:
+    Group() {}
     /**
      * Validate whether or not the spec'd test case exists.
      * @param tr Pass the test case number to consider
@@ -218,7 +200,15 @@ protected:
     bool IteraterToTestRef(TestIteratorType testIter, TestRef &tr);
 
     /**
-     * Deterines if the test under consideration is one of the ones which
+     * Convert a user supplied test reference into a iterator.
+     * @param tr Pass the test reference to convert
+     * @param testIter Returns the converted equivalent if successful
+     * @return true upon success, otherwise false.
+     */
+    bool TestRefToIterator(TestRef tr, TestIteratorType &testIter);
+
+    /**
+     * Determines if the test under consideration is one of the ones which
      * must be skipped.
      * @param tr Pass in the present test to consider
      * @param skipTest Pass the complete list of tests to skip execution
@@ -226,9 +216,22 @@ protected:
      */
     bool SkippingTest(TestRef &tr, vector<TestRef> &skipTest);
 
-
-private:
-    Group() {}
+    /**
+     * Advance tstIdx so that the tests dependent upon the test case referenced
+     * by dependencies[tstIdx] are skipped, the new returned value of tstIdx
+     * will point to the next test to execute without dependencies upon the
+     * one being reference when the method is called.
+     * @param dependencies Pass the ordered list of tests which are desired to
+     *        be executed in sequence.
+     * @param tstIdx Pass the index which points to the test which all other
+     *        tests might depend, returns -1 when there is no next test within
+     *        dependencies to execute.
+     * @param failed Pass whether or not the dependencies[tstIdx] failed
+     *        and is the reason for advancing past dependencies
+     * @ returns Returns the number of tests dependent upon the tstIdx iterator.
+     */
+    int64_t  AdvanceDependencies(TestSetType &dependencies, int64_t &tstIdx,
+        bool failed);
 };
 
 

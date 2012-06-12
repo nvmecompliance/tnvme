@@ -79,6 +79,13 @@ SQCQSizeMismatch_r10b::operator=(const SQCQSizeMismatch_r10b &other)
 }
 
 
+Test::RunType
+SQCQSizeMismatch_r10b::RunnableCoreTest(bool preserve)
+{
+    return ((preserve == true) ? RUN_FALSE : RUN_TRUE);   // Test is destructive
+}
+
+
 void
 SQCQSizeMismatch_r10b::RunCoreTest()
 {

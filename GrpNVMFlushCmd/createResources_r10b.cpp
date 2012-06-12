@@ -73,6 +73,14 @@ CreateResources_r10b::operator=(const CreateResources_r10b &other)
 }
 
 
+Test::RunType
+CreateResources_r10b::RunnableCoreTest(bool preserve)
+{
+    preserve = preserve;    // Suppress compiler error/warning
+    return RUN_TRUE;        // This test is never destructive
+}
+
+
 void
 CreateResources_r10b::RunCoreTest()
 {
@@ -83,6 +91,8 @@ CreateResources_r10b::RunCoreTest()
      */
     static uint32_t NumEntriesIOQ = 2;
 
+    if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
+        throw FrmwkEx(HERE);
 
     SharedACQPtr acq = CAST_TO_ACQ(
         gRsrcMngr->AllocObj(Trackable::OBJ_ACQ, ACQ_GROUP_ID))

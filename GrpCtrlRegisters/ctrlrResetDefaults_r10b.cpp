@@ -69,6 +69,14 @@ CtrlrResetDefaults_r10b::operator=(const CtrlrResetDefaults_r10b &other)
 }
 
 
+Test::RunType
+CtrlrResetDefaults_r10b::RunnableCoreTest(bool preserve)
+{
+    preserve = preserve;    // Suppress compiler error/warning
+    return RUN_TRUE;        // This test is never destructive
+}
+
+
 void
 CtrlrResetDefaults_r10b::RunCoreTest()
 {
@@ -200,18 +208,5 @@ CtrlrResetDefaults_r10b::ValidateCtrlrRWDefaultsAfterReset(std::map <int,
     }
 }
 
-int
-CtrlrResetDefaults_r10b::ReportOffendingBitPos(uint64_t val,
-    uint64_t expectedVal)
-{
-    uint64_t bitMask;
-
-    for (int i = 0; i < (int)(sizeof(uint64_t)*8); i++) {
-        bitMask = (1 << i);
-        if ((val & bitMask) != (expectedVal & bitMask))
-            return i;
-    }
-    return INT_MAX; // there is no mismatch
-}
 
 }   // namespace

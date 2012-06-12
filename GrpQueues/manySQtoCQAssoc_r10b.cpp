@@ -75,6 +75,13 @@ ManySQtoCQAssoc_r10b::operator=(const ManySQtoCQAssoc_r10b &other)
 }
 
 
+Test::RunType
+ManySQtoCQAssoc_r10b::RunnableCoreTest(bool preserve)
+{
+    return ((preserve == true) ? RUN_FALSE : RUN_TRUE);   // Test is destructive
+}
+
+
 void
 ManySQtoCQAssoc_r10b::RunCoreTest()
 {
@@ -83,7 +90,6 @@ ManySQtoCQAssoc_r10b::RunCoreTest()
      * 1) Test CreateResources_r10b has run prior.
      *  \endverbatim
      */
-
     uint16_t uniqueId;
 
     // Lookup objs which were created in a prior test within group

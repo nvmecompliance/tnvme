@@ -73,6 +73,14 @@ DeleteIOQContig_r10b::operator=(const DeleteIOQContig_r10b &other)
 }
 
 
+Test::RunType
+DeleteIOQContig_r10b::RunnableCoreTest(bool preserve)
+{
+    preserve = preserve;    // Suppress compiler error/warning
+    return RUN_TRUE;        // This test is never destructive
+}
+
+
 void
 DeleteIOQContig_r10b::RunCoreTest()
 {

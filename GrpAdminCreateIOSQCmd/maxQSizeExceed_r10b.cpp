@@ -38,7 +38,7 @@ MaxQSizeExceed_r10b::MaxQSizeExceed_r10b(int fd, string mGrpName,
         "Issue a CreateIOCQ cmd, with QID=1, num elements=2, expect success. "
         "Then issue a correlating CreateIOSQ cmds specifying DW10.QSIZE "
         "ranging from (CAP.MQES+2) to 0xffff, expect failure. Then issue "
-        " CreateIOSQ with the last legal Q size, expect success");
+        "CreateIOSQ with the last legal Q size, expect success");
 }
 
 
@@ -70,6 +70,14 @@ MaxQSizeExceed_r10b::operator=(const MaxQSizeExceed_r10b &other)
     ///////////////////////////////////////////////////////////////////////////
     Test::operator=(other);
     return *this;
+}
+
+
+Test::RunType
+MaxQSizeExceed_r10b::RunnableCoreTest(bool preserve)
+{
+    preserve = preserve;    // Suppress compiler error/warning
+    return RUN_TRUE;        // This test is never destructive
 }
 
 

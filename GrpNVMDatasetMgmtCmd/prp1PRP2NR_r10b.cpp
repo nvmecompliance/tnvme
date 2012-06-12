@@ -89,6 +89,14 @@ PRP1PRP2NR_r10b::operator=(const PRP1PRP2NR_r10b &other)
 }
 
 
+Test::RunType
+PRP1PRP2NR_r10b::RunnableCoreTest(bool preserve)
+{
+    preserve = preserve;    // Suppress compiler error/warning
+    return RUN_TRUE;        // This test is never destructive
+}
+
+
 void
 PRP1PRP2NR_r10b::RunCoreTest()
 {

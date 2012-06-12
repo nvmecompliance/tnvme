@@ -45,14 +45,13 @@ public:
      */
     virtual StartingLBAMeta_r10b *Clone() const
         { return new StartingLBAMeta_r10b(*this); }
-    StartingLBAMeta_r10b &operator=
-        (const StartingLBAMeta_r10b &other);
-    StartingLBAMeta_r10b
-        (const StartingLBAMeta_r10b &other);
+    StartingLBAMeta_r10b &operator=(const StartingLBAMeta_r10b &other);
+    StartingLBAMeta_r10b(const StartingLBAMeta_r10b &other);
 
 
 protected:
     virtual void RunCoreTest();
+    virtual RunType RunnableCoreTest(bool preserve);
 
 
 private:

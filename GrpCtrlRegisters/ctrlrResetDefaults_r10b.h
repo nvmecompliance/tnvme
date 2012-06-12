@@ -48,6 +48,7 @@ public:
 
 protected:
     virtual void RunCoreTest();
+    virtual RunType RunnableCoreTest(bool preserve);
 
 
 private:
@@ -78,14 +79,6 @@ private:
      */
     void ValidateCtrlrRWDefaultsAfterReset(std::map <int, uint64_t>&
         ctrlRegsMap);
-
-    /**
-     * Report bit positions of val which is not like expectedVal
-     * @param val Pass value to search against for inequality
-     * @param expectedVal Pass the value to compare against for correctness
-     * @return INT_MAX if they are equal, otherwise the bit position that isn't
-     */
-    int ReportOffendingBitPos(uint64_t val, uint64_t expectedVal);
 };
 
 }   // namespace

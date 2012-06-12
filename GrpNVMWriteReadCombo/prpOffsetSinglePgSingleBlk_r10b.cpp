@@ -83,6 +83,13 @@ PRPOffsetSinglePgSingleBlk_r10b::operator=(const PRPOffsetSinglePgSingleBlk_r10b
 }
 
 
+Test::RunType
+PRPOffsetSinglePgSingleBlk_r10b::RunnableCoreTest(bool preserve)
+{
+    return ((preserve == true) ? RUN_FALSE : RUN_TRUE);   // Test is destructive
+}
+
+
 void
 PRPOffsetSinglePgSingleBlk_r10b::RunCoreTest()
 {

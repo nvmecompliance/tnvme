@@ -109,11 +109,276 @@ Group::TestExists(TestRef tr)
         (tr.xLev >= mTests.size()) ||
         (tr.yLev >= mTests[tr.xLev].size()) ||
         (tr.zLev >= mTests[tr.xLev][tr.yLev].size())) {
+
         LOG_DBG("Test case %ld:%ld.%ld.%ld does not exist within group",
             tr.group, tr.xLev, tr.yLev, tr.zLev);
         return false;
     }
     return true;
+}
+
+
+bool
+Group::GetTestSet(TestRef &target, TestSetType &dependencies, int64_t &tstIdx)
+{
+    TestRef thisTest;
+
+    dependencies.clear();
+    tstIdx = -1;
+
+    if (target.group != mGrpNum) {
+        LOG_ERR("Targeted test does not belong to this group: %ld", mGrpNum);
+        return false;
+    } else if ((target.xLev != UINT_MAX) &&
+               (target.yLev != UINT_MAX) &&
+               (target.zLev != UINT_MAX)) {
+
+        LOG_DBG("Requesting dependency test set for test %ld:%ld.%ld.%ld",
+            target.group, target.xLev, target.yLev, target.zLev);
+        if ((target.yLev == 0) && (target.zLev == 0)) {
+            LOG_NRM("Targeted test has zero dependencies");
+
+        } else if (target.zLev == 0) {
+            // There is a configuration dependency for the targeted test
+            thisTest.Init(target.group, target.xLev, 0, 0);
+            if (TestExists(thisTest)) {
+                LOG_NRM("Targeted test has a configuration dependency");
+                LOG_DBG("Adding test: %s", thisTest.ToString().c_str());
+                dependencies.push_back(thisTest);
+            } else {
+                LOG_ERR("Unable to locate configuration dependency");
+                return false;
+            }
+
+        } else {
+            // There is a sequence dependency for the targeted test
+            if (target.yLev != 0) {
+                // There is a config dependency in addition to a seq dependency
+                thisTest.Init(target.group, target.xLev, 0, 0);
+                if (TestExists(thisTest)) {
+                    LOG_NRM("Targeted test has a configuration dependency");
+                    LOG_DBG("Adding test: %s", thisTest.ToString().c_str());
+                    dependencies.push_back(thisTest);
+                } else {
+                    LOG_ERR("Unable to locate configuration dependency");
+                    return false;
+                }
+            }
+
+            // Now add in all the sequence test dependencies; find the root
+            // sequence test case first and traverse to the targeted test
+            TestIteratorType seqIter;
+            TestIteratorType targetIter;
+            TestRef rootSeq(target.group, target.xLev, target.yLev, 0);
+            if (TestRefToIterator(rootSeq, seqIter)) {
+                LOG_NRM("Targeted test has a sequence dependency");
+                if (TestRefToIterator(target, targetIter)) {
+                    for (TestIteratorType i = seqIter; i < targetIter; i++) {
+                        if (IteraterToTestRef(i, thisTest) == false) {
+                            LOG_ERR("Unable to locate sequence dependency");
+                            return false;
+                        }
+                        LOG_DBG("Adding test: %s", thisTest.ToString().c_str());
+                        dependencies.push_back(thisTest);
+                    }
+                } else {
+                    LOG_ERR("Unable to locate targeted test");
+                    return false;
+                }
+            } else {
+                LOG_ERR("Unable to locate sequence test dependency");
+                return false;
+            }
+        }
+
+        LOG_DBG("Adding test: %s", thisTest.ToString().c_str());
+        dependencies.push_back(target);
+    } else {
+        LOG_DBG("Requesting dependency set for group %ld", mGrpNum);
+        TestIteratorType tstIter = 0;
+        while (IteraterToTestRef(tstIter++, thisTest)) {
+            LOG_DBG("Adding test: %s", thisTest.ToString().c_str());
+            dependencies.push_back(thisTest);
+        }
+    }
+
+    tstIdx = 0;
+    LOG_DBG("dependencies(size)=%ld, tstIdx=%ld", dependencies.size(), tstIdx);
+    return true;
+}
+
+
+Group::TestResult
+Group::RunTest(TestSetType &dependencies, int64_t &tstIdx,
+    vector<TestRef> &skipTest, int64_t &numSkipped, bool preserve)
+{
+    string work;
+    numSkipped = 0;
+
+    // Preliminary error checking
+    if ((tstIdx >= (int64_t)dependencies.size()) || (tstIdx == -1)) {
+        tstIdx = -1;
+        return TR_NOTFOUND;
+    }
+
+    // Get a pointer to the test to execute
+    TestRef tr = dependencies[tstIdx];
+    if (TestExists(tr) == false) {
+        tstIdx = -1;
+        return TR_NOTFOUND;
+    }
+    deque<Test *>::iterator myTest = mTests[tr.xLev][tr.yLev].begin();
+    advance(myTest, tr.zLev);
+
+    LOG_NRM("-----------------START TEST-----------------");
+    FORMAT_GROUP_DESCRIPTION(work, this)
+    LOG_NRM("%s", work.c_str());
+    FORMAT_TEST_NUM(work, "", tr.xLev, tr.yLev, tr.zLev)
+    work += (*myTest)->GetClassName();
+    work += ": ";
+    work += (*myTest)->GetShortDescription();
+    LOG_NRM("%s", work.c_str());
+    LOG_NRM("Compliance: %s", (*myTest)->GetComplianceDescription().c_str());
+    LOG_NRM("%s", (*myTest)->GetLongDescription(false, 0).c_str());
+
+    TestResult result;
+    switch ((*myTest)->Runnable(preserve)) {
+
+    case Test::RUN_TRUE:
+        if (SkippingTest(tr, skipTest)) {
+            result = TR_SKIPPING;
+            numSkipped = (AdvanceDependencies(dependencies, tstIdx, false) + 1);
+        } else {
+            result = (*myTest)->Run() ? TR_SUCCESS: TR_FAIL;
+            if (result == TR_FAIL) {
+                numSkipped = AdvanceDependencies(dependencies, tstIdx, true);
+            } else {
+                tstIdx++;   // Reference next test to execute
+                LOG_NRM("SUCCESSFUL test case run");
+            }
+        }
+        break;
+
+    case Test::RUN_FALSE:
+        result = TR_SKIPPING;
+        numSkipped = (AdvanceDependencies(dependencies, tstIdx, false) + 1);
+        LOG_WARN("Reporting not runnable, skipping test: %ld:%ld.%ld.%ld",
+            tr.group, tr.xLev, tr.yLev, tr.zLev);
+        break;
+
+    default:
+    case Test::RUN_FAIL:
+        result = TR_FAIL;
+        numSkipped = AdvanceDependencies(dependencies, tstIdx, true);
+        break;
+    }
+
+    FORMAT_GROUP_DESCRIPTION(work, this)
+    LOG_NRM("%s", work.c_str());
+    FORMAT_TEST_NUM(work, "", tr.xLev, tr.yLev, tr.zLev)
+    work += (*myTest)->GetClassName();
+    work += ": ";
+    work += (*myTest)->GetShortDescription();
+    LOG_NRM("%s", work.c_str());
+    LOG_NRM("------------------END TEST------------------");
+
+    // Guarantee nothing residing or unintended is left around. Enforce this
+    // by destroying the existing test obj and replace it with a clone of
+    // itself so looping tests over can still be supported.
+    LOG_DBG("Enforcing test obj cleanup, cloning & destroying");
+    Test *cleanMeUp = (*myTest);  // Refer to test obj
+    deque<Test *>::iterator insertPos = mTests[tr.xLev][tr.yLev].erase(myTest);
+    mTests[tr.xLev][tr.yLev].insert(insertPos, cleanMeUp->Clone());
+    delete cleanMeUp;
+    return result;
+}
+
+
+int64_t
+Group::AdvanceDependencies(TestSetType &dependencies, int64_t &tstIdx,
+    bool failed)
+{
+    int64_t origTstIdx = tstIdx;
+    int64_t work;
+
+    // Preliminary error checking
+    if ((tstIdx >= (int64_t)dependencies.size()) || (tstIdx == -1)) {
+        tstIdx = -1;
+        return 0;
+    }
+    TestRef dt = dependencies[tstIdx];      // DependentTest  (dt)
+
+    if (++tstIdx >= (int64_t)dependencies.size()) {
+        tstIdx = -1;
+        return 0;
+    }
+    TestRef st = dependencies[tstIdx];      // SubsequentTest (st)
+
+    if (failed) {
+        // When a test fails, a FrmwkEx() is thrown and performs a
+        // DISABLE_COMPLETELY. This is the most destructive action in the
+        // framework, and thus everything subsequent of the xLev must be
+        // considered dependents since no resource remains in the DUT
+        while (dt.xLev == st.xLev) {
+            if (++tstIdx >= (int64_t)dependencies.size()) {
+                work = ((tstIdx - origTstIdx) - 1);
+                tstIdx = -1;
+                return work;
+            }
+            st = dependencies[tstIdx];
+        }
+    } else {
+        // A failure didn't occur, something was skipped rather and thus
+        // a complete destruction of resource did not occur. Considering
+        // only those dependents which rely upon the now missing logic.
+        if ((dt.yLev == 0) && (dt.zLev == 0)) {
+            // All the following are dependents
+            while (dt.xLev == st.xLev) {
+                if (++tstIdx >= (int64_t)dependencies.size()) {
+                    work = ((tstIdx - origTstIdx) - 1);
+                    tstIdx = -1;
+                    return work;
+                }
+                st = dependencies[tstIdx];
+            }
+        } else {
+            // All the following are dependents
+            while ((dt.xLev == st.xLev)  && (dt.yLev == st.yLev)){
+                if (++tstIdx >= (int64_t)dependencies.size()) {
+                    work = ((tstIdx - origTstIdx) - 1);
+                    tstIdx = -1;
+                    return work;
+                }
+                st = dependencies[tstIdx];
+            }
+        }
+    }
+
+    return (tstIdx - origTstIdx);
+}
+
+
+bool
+Group::SkippingTest(TestRef &tr, vector<TestRef> &skipTest)
+{
+    for (size_t i = 0; i < skipTest.size(); i++) {
+         if ((tr.group == skipTest[i].group) && (tr.xLev == skipTest[i].xLev) &&
+             (tr.yLev == skipTest[i].yLev) && (tr.zLev == skipTest[i].zLev)) {
+
+            LOG_WARN("Instructed to skip specific test: %ld:%ld.%ld.%ld",
+                tr.group, tr.xLev, tr.yLev, tr.zLev);
+            return true;
+
+         } else if ((tr.group == skipTest[i].group) &&
+             ((UINT_MAX == skipTest[i].xLev) ||
+              (UINT_MAX == skipTest[i].yLev) ||
+              (UINT_MAX == skipTest[i].zLev))) {
+
+            LOG_WARN("Instructed to skip entire group: %ld", tr.group);
+            return true;
+         }
+    }
+    return false;
 }
 
 
@@ -163,7 +428,7 @@ bool
 Group::TestRefToIterator(TestRef tr, TestIteratorType &testIter)
 {
     TestRef proposedTr;
-    testIter = GetTestIterator();
+    testIter = 0;
 
     LOG_DBG("Parse mTest matrix %ld seeking test @ %ld:%ld.%ld",
         mGrpNum, tr.xLev, tr.yLev, tr.zLev);
@@ -174,145 +439,5 @@ Group::TestRefToIterator(TestRef tr, TestIteratorType &testIter)
     }
 
     LOG_ERR("Unable to locate targeted test");
-    return false;
-}
-
-
-Group::TestResult
-Group::RunTest(TestIteratorType &testIter, vector<TestRef> &skipTest)
-{
-    TestRef tr;
-
-    if (IteraterToTestRef(testIter, tr) == false)
-        return TR_NOTFOUND;
-    testIter++;     // next test to consider for execution in the future
-    return RunTest(tr, skipTest);
-}
-
-
-Group::TestResult
-Group::RunTest(TestRef &tr, vector<TestRef> &skipTest)
-{
-    string work;
-
-    if (TestExists(tr) == false)
-        return TR_NOTFOUND;
-
-    // Take out a valid deque<>::iterator to the test under execution
-    deque<Test *>::iterator myTest = mTests[tr.xLev][tr.yLev].begin();
-    advance(myTest, tr.zLev);
-
-    LOG_NRM("-----------------START TEST-----------------");
-    FORMAT_GROUP_DESCRIPTION(work, this)
-    LOG_NRM("%s", work.c_str());
-    FORMAT_TEST_NUM(work, "", tr.xLev, tr.yLev, tr.zLev)
-    work += (*myTest)->GetClassName();
-    work += ": ";
-    work += (*myTest)->GetShortDescription();
-    LOG_NRM("%s", work.c_str());
-    LOG_NRM("Compliance: %s", (*myTest)->GetComplianceDescription().c_str());
-    LOG_NRM("%s", (*myTest)->GetLongDescription(false, 0).c_str());
-
-    TestResult result;
-    if (SkippingTest(tr, skipTest)) {
-        result = TR_SKIPPING;
-    } else {
-        result = (*myTest)->Run() ? TR_SUCCESS: TR_FAIL;
-        if (result == TR_FAIL) {
-            FORMAT_GROUP_DESCRIPTION(work, this)
-            LOG_NRM("  %s", work.c_str());
-            FORMAT_TEST_NUM(work, "", tr.xLev, tr.yLev, tr.zLev)
-            work += (*myTest)->GetClassName();
-            work += ": ";
-            work += (*myTest)->GetShortDescription();
-            LOG_NRM("  %s", work.c_str());
-        } else {
-            LOG_NRM("SUCCESSFUL test case run");
-        }
-    }
-    LOG_NRM("------------------END TEST------------------");
-
-    // Guarantee nothing residual or unintended is left around. Enforce this
-    // by destroying the existing test obj and replace it with a clone of
-    // itself so looping tests over can still be supported.
-    LOG_DBG("Enforcing test obj cleanup, cloning & destroying");
-    Test *cleanMeUp = (*myTest);  // Refer to test obj
-    deque<Test *>::iterator insertPos = mTests[tr.xLev][tr.yLev].erase(myTest);
-    mTests[tr.xLev][tr.yLev].insert(insertPos, cleanMeUp->Clone());
-    delete cleanMeUp;
-
-    return result;
-}
-
-
-bool
-Group::SkippingTest(TestRef &tr, vector<TestRef> &skipTest)
-{
-    for (size_t i = 0; i < skipTest.size(); i++) {
-         if ((tr.group == skipTest[i].group) && (tr.xLev == skipTest[i].xLev) &&
-             (tr.yLev == skipTest[i].yLev) && (tr.zLev == skipTest[i].zLev)) {
-
-            LOG_NRM("Instructed to skip specific test: %ld:%ld.%ld.%ld",
-                tr.group, tr.xLev, tr.yLev, tr.zLev);
-            return true;
-
-         } else if ((tr.group == skipTest[i].group) &&
-             ((UINT_MAX == skipTest[i].xLev) ||
-              (UINT_MAX == skipTest[i].yLev) ||
-              (UINT_MAX == skipTest[i].zLev))) {
-
-            LOG_NRM("Instructed to skip entire group: %ld", tr.group);
-            return true;
-         }
-    }
-    return false;
-}
-
-
-bool
-Group::GetTestDependency(TestRef test, TestRef &cfgDepend,
-    TestIteratorType &seqDepend)
-{
-    // Assume failure, ignore cfgDepend & seqDepend
-    cfgDepend = test;
-    seqDepend = -1;
-
-    if (test.group == mGrpNum) {
-        if ((test.yLev == 0) && (test.zLev == 0)) {
-            LOG_NRM("Targeted test has zero dependencies");
-            return true;
-        } else if (test.zLev == 0) {
-            cfgDepend.Init(test.group, test.xLev, 0, 0);
-            if (TestExists(cfgDepend)) {
-                LOG_NRM("Targeted test has a configuration dependency");
-                return true;
-            } else {
-                LOG_ERR("Unable to locate configuration dependency");
-                return false;
-            }
-        } else {
-            TestRef seqTest(test.group, test.xLev, test.yLev, 0);
-            if (TestRefToIterator(seqTest, seqDepend)) {
-                LOG_NRM("Targeted test has a sequence dependency");
-            } else {
-                LOG_ERR("Unable to locate sequence test dependency");
-                return false;
-            }
-
-            // There may or may not be a configuration dependency
-            if (test.yLev != 0) {
-                cfgDepend.Init(test.group, test.xLev, 0, 0);
-                if (TestExists(cfgDepend)) {
-                    LOG_NRM("Targeted test has a configuration dependency");
-                    return true;
-                } else {
-                    LOG_ERR("Unable to locate configuration dependency");
-                    return false;
-                }
-            }
-            return true;
-        }
-    }
-    LOG_ERR("Targeted test does not belong to this group: %ld", mGrpNum);
     return false;
 }

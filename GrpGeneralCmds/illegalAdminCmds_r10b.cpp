@@ -47,7 +47,7 @@ IllegalAdminCmds_r10b::IllegalAdminCmds_r10b(int fd,
     mTestDesc.SetLong(
         "Don't test vendor specific opcodes, then determine all supported "
         "admin cmds based upon the admin cmd set and issue all other illegal "
-        "opcodes.  Verify status code in the CE of ACQ is 1h.");
+        "opcodes. Verify status code in the CE of ACQ is 1h.");
 }
 
 
@@ -81,6 +81,14 @@ IllegalAdminCmds_r10b::operator=(const IllegalAdminCmds_r10b
     ///////////////////////////////////////////////////////////////////////////
     Test::operator=(other);
     return *this;
+}
+
+
+Test::RunType
+IllegalAdminCmds_r10b::RunnableCoreTest(bool preserve)
+{
+    preserve = preserve;    // Suppress compiler error/warning
+    return RUN_TRUE;        // This test is never destructive
 }
 
 

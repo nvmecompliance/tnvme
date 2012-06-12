@@ -88,6 +88,13 @@ PRPSinglePageContig_r10b::operator=(const PRPSinglePageContig_r10b
 }
 
 
+Test::RunType
+PRPSinglePageContig_r10b::RunnableCoreTest(bool preserve)
+{
+    return ((preserve == true) ? RUN_FALSE : RUN_TRUE);   // Test is destructive
+}
+
+
 void
 PRPSinglePageContig_r10b::RunCoreTest()
 {

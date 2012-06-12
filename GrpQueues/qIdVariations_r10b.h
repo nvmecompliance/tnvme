@@ -54,6 +54,8 @@ public:
 
 protected:
     virtual void RunCoreTest();
+    virtual RunType RunnableCoreTest(bool preserve);
+
 
 private:
     ///////////////////////////////////////////////////////////////////////////
@@ -61,7 +63,6 @@ private:
     ///////////////////////////////////////////////////////////////////////////
     SharedWritePtr SetWriteCmd();
     void ReapVerifyOnCQ(SharedIOCQPtr iocq, SharedIOSQPtr iosq);
-
 };
 
 }   // namespace

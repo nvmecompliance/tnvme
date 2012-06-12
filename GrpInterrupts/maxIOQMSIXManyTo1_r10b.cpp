@@ -79,6 +79,13 @@ MaxIOQMSIXManyTo1_r10b::operator=(const MaxIOQMSIXManyTo1_r10b &other)
 }
 
 
+Test::RunType
+MaxIOQMSIXManyTo1_r10b::RunnableCoreTest(bool preserve)
+{
+    return ((preserve == true) ? RUN_FALSE : RUN_TRUE);   // Test is destructive
+}
+
+
 void
 MaxIOQMSIXManyTo1_r10b::RunCoreTest()
 {

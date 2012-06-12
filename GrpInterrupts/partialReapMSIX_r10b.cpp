@@ -82,6 +82,13 @@ PartialReapMSIX_r10b::operator=(const PartialReapMSIX_r10b &other)
 }
 
 
+Test::RunType
+PartialReapMSIX_r10b::RunnableCoreTest(bool preserve)
+{
+    return ((preserve == true) ? RUN_FALSE : RUN_TRUE);   // Test is destructive
+}
+
+
 void
 PartialReapMSIX_r10b::RunCoreTest()
 {

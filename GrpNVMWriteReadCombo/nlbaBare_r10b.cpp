@@ -83,6 +83,13 @@ NLBABare_r10b::operator=(const NLBABare_r10b
 }
 
 
+Test::RunType
+NLBABare_r10b::RunnableCoreTest(bool preserve)
+{
+    return ((preserve == true) ? RUN_FALSE : RUN_TRUE);   // Test is destructive
+}
+
+
 void
 NLBABare_r10b::RunCoreTest()
 {

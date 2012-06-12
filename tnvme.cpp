@@ -62,16 +62,19 @@ InstantiateGroups(vector<Group *> &groups, struct CmdLine &cl)
     groups.push_back(new GrpBasicInit::GrpBasicInit(groups.size(), cl.rev, cl.errRegs, gDutFd));
     groups.push_back(new GrpResets::GrpResets(groups.size(), cl.rev, cl.errRegs, gDutFd));
     groups.push_back(new GrpGeneralCmds::GrpGeneralCmds(groups.size(), cl.rev, cl.errRegs, gDutFd));
+    // Following is assigned grp ID=5
     groups.push_back(new GrpQueues::GrpQueues(groups.size(), cl.rev, cl.errRegs, gDutFd));
     groups.push_back(new GrpNVMReadCmd::GrpNVMReadCmd(groups.size(), cl.rev, cl.errRegs, gDutFd));
     groups.push_back(new GrpNVMWriteCmd::GrpNVMWriteCmd(groups.size(), cl.rev, cl.errRegs, gDutFd));
     groups.push_back(new GrpNVMWriteReadCombo::GrpNVMWriteReadCombo(groups.size(), cl.rev, cl.errRegs, gDutFd));
     groups.push_back(new GrpNVMFlushCmd::GrpNVMFlushCmd(groups.size(), cl.rev, cl.errRegs, gDutFd));
+    // Following is assigned grp ID=10
     groups.push_back(new GrpInterrupts::GrpInterrupts(groups.size(), cl.rev, cl.errRegs, gDutFd));
     groups.push_back(new GrpNVMWriteUncorrectCmd::GrpNVMWriteUncorrectCmd(groups.size(), cl.rev, cl.errRegs, gDutFd));
     groups.push_back(new GrpNVMDatasetMgmtCmd::GrpNVMDatasetMgmtCmd(groups.size(), cl.rev, cl.errRegs, gDutFd));
     groups.push_back(new GrpNVMCompareCmd::GrpNVMCompareCmd(groups.size(), cl.rev, cl.errRegs, gDutFd));
     groups.push_back(new GrpAdminDeleteIOCQCmd::GrpAdminDeleteIOCQCmd(groups.size(), cl.rev, cl.errRegs, gDutFd));
+    // Following is assigned grp ID=15
     groups.push_back(new GrpAdminDeleteIOSQCmd::GrpAdminDeleteIOSQCmd(groups.size(), cl.rev, cl.errRegs, gDutFd));
     groups.push_back(new GrpAdminCreateIOCQCmd::GrpAdminCreateIOCQCmd(groups.size(), cl.rev, cl.errRegs, gDutFd));
     groups.push_back(new GrpAdminCreateIOSQCmd::GrpAdminCreateIOSQCmd(groups.size(), cl.rev, cl.errRegs, gDutFd));
@@ -91,7 +94,8 @@ bool ExecuteTests(struct CmdLine &cl, vector<Group *> &groups);
 bool BuildSingletons(struct CmdLine &cl);
 void DestroyTestFoundation(vector<Group *> &groups);
 bool BuildTestFoundation(vector<Group *> &groups, struct CmdLine &cl);
-void ReportTestResults(size_t numIters, int numPass, int numFail, int numSkip);
+void ReportTestResults(size_t numIters, int numPass, int numFail, int numSkip,
+    int numGrps);
 
 
 void
@@ -110,21 +114,24 @@ Usage(void) {
     printf("  -d(--device) <name>                 Device to open for testing: /dev/node\n");
     printf("                                      dflt=(1st device listed in --list)\n");
     printf("  -z(--reset)                         Ctrl'r level reset via CC.EN\n");
-    printf("  -p(--loop) <count>                  Loop test execution <count> times; dflt=1\n");
+    printf("  -o(--loop) <count>                  Loop test execution <count> times; dflt=1\n");
     printf("  -k(--skiptest) <filename>           A file contains a list of tests to skip\n");
     printf("  -u(--dump) <dirname>                Pass the base dump directory path.\n");
     printf("                                      dflt=\"%s\"\n", BASE_DUMP_DIR);
     printf("  -i(--ignore)                        Ignore detected errors; An error causes\n");
     printf("                                      the next test within the next group to\n");
     printf("                                      execute, not next test within same group.\n");
-    printf("  -e(--error) <STS:PXDS:AERUCES:CSTS> Set reg bitmask for bits indicating error\n");
-    printf("                                      state after each test completes.\n");
-    printf("                                      Value=0 indicates ignore all errors.\n");
-    printf("                                      Require base 16 values.\n");
+    printf("  -p(--preserve)                      Preserve the current state of the DUT. Do\n");
+    printf("                                      not write data on the media, nor modify\n");
+    printf("                                      the configuration. Not all tests will run\n");
     printf("  -g(--golden) <filename>             A file contains the golden identify data\n");
     printf("                                      to which the DUT's reported identify data\n");
     printf("                                      is compared; Must be only option.\n");
     printf("                      --- Advanced/Debug Options Follow ---\n");
+    printf("  -e(--error) <STS:PXDS:AERUCES:CSTS> Set reg bitmask for bits indicating error\n");
+    printf("                                      state after each test completes.\n");
+    printf("                                      Value=0 indicates ignore all errors.\n");
+    printf("                                      Require base 16 values.\n");
     printf("  -q(--queues) <ncqr:nsqr>            Write <ncqr> and <nsqr> as values by the\n");
     printf("                                      Set Features, ID=7. Must be only option.\n");
     printf("                                      Option missing indicates tnvme to read\n");
@@ -163,11 +170,12 @@ main(int argc, char *argv[])
     bool deviceFound = false;
     bool accessingHdw = true;
     uint64_t regVal = 0;
-    const char *short_opt = "hslzia::t::v:p:d:k:f:r:w:q:e:u:g:";
+    const char *short_opt = "hslpzia::t::v:o:d:k:f:r:w:q:e:u:g:";
     static struct option long_opt[] = {
         // {name,           has_arg,            flag,   val}
         {   "help",         no_argument,        NULL,   'h'},
         {   "summary",      no_argument,        NULL,   's'},
+        {   "preserve",     no_argument,        NULL,   'p'},
         {   "rev",          required_argument,  NULL,   'v'},
         {   "detail",       optional_argument,  NULL,   'a'},
         {   "test",         optional_argument,  NULL,   't'},
@@ -176,7 +184,7 @@ main(int argc, char *argv[])
         {   "wmmap" ,       required_argument,  NULL,   'w'},
         {   "reset",        no_argument,        NULL,   'z'},
         {   "ignore",       no_argument,        NULL,   'i'},
-        {   "loop",         required_argument,  NULL,   'p'},
+        {   "loop",         required_argument,  NULL,   'o'},
         {   "skiptest",     required_argument,  NULL,   'k'},
         {   "format",       required_argument,  NULL,   'f'},
         {   "list",         no_argument,        NULL,   'l'},
@@ -192,6 +200,7 @@ main(int argc, char *argv[])
     cmdLine.detail.req = false;
     cmdLine.test.req = false;
     cmdLine.reset = false;
+    cmdLine.preserve = false;
     cmdLine.summary = false;
     cmdLine.ignore = false;
     cmdLine.loop = 1;
@@ -324,7 +333,7 @@ main(int argc, char *argv[])
             }
             break;
 
-        case 'p':
+        case 'o':
             tmp = strtol(optarg, &endptr, 10);
             if (*endptr != '\0') {
                 printf("Unrecognized --loop <count>=%s\n", optarg);
@@ -368,6 +377,7 @@ main(int argc, char *argv[])
         case '?':   Usage();                            exit(1);
         case 'z':   cmdLine.reset = true;               break;
         case 'i':   cmdLine.ignore = true;              break;
+        case 'p':   cmdLine.preserve = true;            break;
         }
     }
 
@@ -662,15 +672,19 @@ DestroyTestFoundation(vector<Group *> &groups)
 bool
 ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
 {
+    int64_t tstIdx = 0;
+    int64_t skipped = 0;
     size_t iLoop;
     int numPassed = 0;
     int numFailed = 0;
     int numSkipped = 0;
+    int numGrps = 0;
     bool allTestsPass = true;    // assuming success until we find otherwise
     bool allHaveRun = false;
     bool thisTestPass;
-    TestIteratorType testIter;
-    vector<TestRef> skipNothing;
+    TestRef targetTst;
+    TestSetType testsToRun;
+    bool tstSetOK;
 
 
     if ((cl.test.t.group != UINT_MAX) && (cl.test.t.group >= groups.size())) {
@@ -681,230 +695,86 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
         goto ABORT_OUT;
     }
 
-    LOG_NRM("Attempting to satisfy target test: %ld:%ld.%ld.%ld",
-        cl.test.t.group, cl.test.t.xLev, cl.test.t.yLev, cl.test.t.zLev);
+    if ((cl.test.t.group == UINT_MAX) || (cl.test.t.xLev == UINT_MAX) ||
+        (cl.test.t.yLev == UINT_MAX) || (cl.test.t.zLev == UINT_MAX)) {
+
+        LOG_NRM("Attempting to satisfy target test: ALL:ALL.ALL.ALL");
+    } else if ((cl.test.t.xLev == UINT_MAX) ||
+               (cl.test.t.yLev == UINT_MAX) ||
+               (cl.test.t.zLev == UINT_MAX)) {
+
+        LOG_NRM("Attempting to satisfy target test: %ld:ALL.ALL.ALL",
+            cl.test.t.group);
+    } else {
+        LOG_NRM("Attempting to satisfy target test: %ld:%ld.%ld.%ld",
+            cl.test.t.group, cl.test.t.xLev, cl.test.t.yLev, cl.test.t.zLev);
+    }
 
     for (iLoop = 0; iLoop < cl.loop; iLoop++) {
         LOG_NRM("Start loop execution #%ld", iLoop);
+
         for (size_t iGrp = 0; iGrp < groups.size(); iGrp++) {
             allHaveRun = false;
 
+            LOG_DBG("Processing test(s) for group %ld", iGrp);
+            if (cl.test.t.group == UINT_MAX) {
+                targetTst.Init(iGrp, UINT_MAX, UINT_MAX, UINT_MAX);
+            } else if (iGrp == cl.test.t.group) {
+                targetTst.Init(iGrp, cl.test.t.xLev, cl.test.t.yLev,
+                    cl.test.t.zLev);
+            } else {
+                continue;
+            }
+
+            LOG_NRM("Executing a new group, start from known point");
             if (FileSystem::CleanDumpDir() == false)
                 LOG_WARN("Unable to cleanup dump between group runs");
+            if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
+                goto ABORT_OUT;
 
-            // Now handle anything spec'd in the --test <cmd line option>
-            if (cl.test.t.group == UINT_MAX) {
-                // Run all tests within all groups
+            tstSetOK = groups[iGrp]->GetTestSet(targetTst, testsToRun, tstIdx);
+            if (tstSetOK == false) {
+                LOG_ERR("Unable to get execution test set");
+                goto ABORT_OUT;
+            }
 
-                LOG_NRM("Executing a new group, start from known point");
-                if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
-                    goto ABORT_OUT;
+            numGrps++;
+            while (allHaveRun == false) {
+                thisTestPass = true;
 
-                testIter = groups[iGrp]->GetTestIterator();
-                while (allHaveRun == false) {
-                    thisTestPass = true;
+                switch (groups[iGrp]->RunTest(testsToRun, tstIdx,
+                    cl.skiptest, skipped, cl.preserve)) {
+                case Group::TR_SUCCESS:
+                    numPassed++;
+                    break;
+                case Group::TR_FAIL:
+                    allTestsPass = false;
+                    thisTestPass = false;
+                    numFailed++;
 
-                    switch (groups[iGrp]->RunTest(testIter, cl.skiptest)) {
-                    case Group::TR_SUCCESS:
-                        numPassed++;
-                        break;
-                    case Group::TR_FAIL:
-                        allTestsPass = false;
-                        thisTestPass = false;
-                        numFailed++;
-                        break;
-                    case Group::TR_SKIPPING:
-                        numSkipped++;
-                        break;
-                    case Group::TR_NOTFOUND:
-                        allHaveRun = true;
-                        break;
-                    }
-                    if ((cl.ignore == false) && (allTestsPass == false)) {
+                    if (cl.ignore) {
+                        LOG_WARN("Detected error, but forced to ignore");
+                    } else {
                         goto EARLY_OUT;
-                    } else if (cl.ignore && (thisTestPass == false)) {
-                        LOG_NRM("Detected error, but forced to ignore");
-                        break;  // continue with next test in next group
                     }
-                }
-
-            } else if ((cl.test.t.xLev == UINT_MAX) ||
-                       (cl.test.t.yLev == UINT_MAX) ||
-                       (cl.test.t.zLev == UINT_MAX)) {
-                // Run all tests within spec'd group
-
-                if (iGrp == cl.test.t.group) {
-                    LOG_NRM("Executing a new group, start from known point");
-                    if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
-                        goto ABORT_OUT;
-
-                    testIter = groups[iGrp]->GetTestIterator();
-                    while (allHaveRun == false) {
-                        thisTestPass = true;
-
-                        switch (groups[iGrp]->RunTest(testIter, cl.skiptest)) {
-                        case Group::TR_SUCCESS:
-                            numPassed++;
-                            break;
-                        case Group::TR_FAIL:
-                            allTestsPass = false;
-                            thisTestPass = false;
-                            numFailed++;
-                            break;
-                        case Group::TR_SKIPPING:
-                            numSkipped++;
-                            break;
-                        case Group::TR_NOTFOUND:
-                            allHaveRun = true;
-                            break;
-                        }
-                        if ((cl.ignore == false) && (allTestsPass == false)) {
-                            goto EARLY_OUT;
-                        } else if (cl.ignore && (thisTestPass == false)) {
-                            LOG_NRM("Detected error, but forced to ignore");
-                            break;  // continue with next test in next group
-                        }
-                    }
-                    break;  // check if more loops must occur
-                }
-
-            } else {
-                // Run spec'd test within spec'd group
-                if (iGrp == cl.test.t.group) {
-                    LOG_NRM("Executing a new group, start from known point");
-                    if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
-                        goto ABORT_OUT;
-
-                    // Individual tests may have dependencies to automate.
-                    TestRef cfgDepend;
-                    TestIteratorType seqDepend;
-                    bool runTargetTest = groups[iGrp]->GetTestDependency(
-                        cl.test.t, cfgDepend, seqDepend);
-                    if (runTargetTest == false)
-                        goto ABORT_OUT;
-
-                    // Does this test have a configuration dependency?
-                    if (runTargetTest && !(cfgDepend == cl.test.t)) {
-                        thisTestPass = true;
-
-                        switch (groups[iGrp]->RunTest(cfgDepend, cl.skiptest)) {
-                        case Group::TR_SUCCESS:
-                            numPassed++;
-                            break;
-                        case Group::TR_FAIL:
-                            LOG_NRM(
-                                "Unable to run targeted test due to failure");
-                            runTargetTest = false;
-                            allTestsPass = false;
-                            thisTestPass = false;
-                            numFailed++;
-                            break;
-                        case Group::TR_SKIPPING:
-                            LOG_NRM(
-                                "Unable to run targ'd test due to skipping");
-                            runTargetTest = false;
-                            numSkipped++;
-                            break;
-                        case Group::TR_NOTFOUND:
-                            LOG_ERR("Internal programming error, ambiguous");
-                            goto ABORT_OUT;
-                        }
-                        if ((cl.ignore == false) && (allTestsPass == false)) {
-                            goto EARLY_OUT;
-                        } else if (cl.ignore && (thisTestPass == false)) {
-                            LOG_NRM("Detected error, but forced to ignore");
-                            LOG_NRM("Error forces skipping of targ'd test");
-                        }
-                    }
-
-                    // Sequences dependency may only run after config dependency
-                    if (runTargetTest && (seqDepend != (TestIteratorType)-1)) {
-
-                        // Iterate sequence up to but not including targeted tst
-                        TestIteratorType targetedTestIter;
-                        if (groups[iGrp]->TestRefToIterator(cl.test.t,
-                            targetedTestIter) == false) {
-                            goto ABORT_OUT;
-                        }
-
-                        // Loop through all of the the sequence dependencies
-                        while (seqDepend < targetedTestIter) {
-                            thisTestPass = true;
-
-                            switch (groups[iGrp]->RunTest(seqDepend,
-                                cl.skiptest)) {
-
-                            case Group::TR_SUCCESS:
-                                numPassed++;
-                                break;
-                            case Group::TR_FAIL:
-                                LOG_NRM(
-                                    "Unable to run targ'd test due to failure");
-                                runTargetTest = false;
-                                allTestsPass = false;
-                                thisTestPass = false;
-                                numFailed++;
-                                break;
-                            case Group::TR_SKIPPING:
-                                LOG_NRM("Unable to run targ'd test due to "
-                                    "skipping");
-                                runTargetTest = false;
-                                numSkipped++;
-                                break;
-                            case Group::TR_NOTFOUND:
-                                LOG_ERR("Internal program error, ambiguous");
-                                goto ABORT_OUT;
-                            }
-                            if ((cl.ignore == false) &&
-                                (allTestsPass == false)) {
-                                goto EARLY_OUT;
-                            } else if (cl.ignore && (thisTestPass == false)) {
-                                LOG_NRM("Detected error, but forced to ignore");
-                                LOG_NRM("Error forces skipping of targ'd test");
-                                break;  // check if more loops must occur
-                            }
-                        }
-                    }
-
-                    // Finally OK to run targeted test requested on the cmd line
-                    if (runTargetTest) {
-                        thisTestPass = true;
-
-                        switch (groups[iGrp]->RunTest(cl.test.t, cl.skiptest)) {
-                        case Group::TR_SUCCESS:
-                            numPassed++;
-                            break;
-                        case Group::TR_FAIL:
-                            allTestsPass = false;
-                            thisTestPass = false;
-                            numFailed++;
-                            break;
-                        case Group::TR_SKIPPING:
-                            numSkipped++;
-                            break;
-                        case Group::TR_NOTFOUND:
-                            LOG_NRM("Requested test was not found");
-                            goto ABORT_OUT;
-                            break;
-                        }
-                        if ((cl.ignore == false) && (allTestsPass == false)) {
-                            goto EARLY_OUT;
-                        } else if (cl.ignore && (thisTestPass == false)) {
-                            LOG_NRM("Detected error, but forced to ignore");
-                        }
-                    }
-                    break;  // check if more loops must occur
+                    break;
+                case Group::TR_SKIPPING:
+                    numSkipped += skipped;
+                    break;
+                case Group::TR_NOTFOUND:
+                    allHaveRun = true;
+                    break;
                 }
             }
         }
 
         // Report each iteration results
-        ReportTestResults(iLoop, numPassed, numFailed, numSkipped);
+        ReportTestResults(iLoop, numPassed, numFailed, numSkipped, numGrps);
     }
     return allTestsPass;
 
 EARLY_OUT:
-    ReportTestResults(iLoop, numPassed, numFailed, numSkipped);
+    ReportTestResults(iLoop, numPassed, numFailed, numSkipped, numGrps);
     return allTestsPass;
 
 ABORT_OUT:
@@ -914,16 +784,19 @@ ABORT_OUT:
 
 
 void
-ReportTestResults(size_t numIters, int numPass, int numFail, int numSkip)
+ReportTestResults(size_t numIters, int numPass, int numFail, int numSkip,
+    int numGrps)
 {
-    LOG_NRM("Iteration SUMMARY passed : %d", numPass);
+    LOG_NRM("Iteration SUMMARY");
+    LOG_NRM("  passed       : %d", numPass);
     if (numFail) {
-        LOG_NRM("                  failed : %d  <----------", numFail);
+        LOG_NRM("  failed       : %d  <---", numFail);
     } else {
-        LOG_NRM("                  failed : 0");
+        LOG_NRM("  failed       : %d", numFail);
     }
-    LOG_NRM("                  skipped: %d", numSkip);
-    LOG_NRM("                  total  : %d", numPass+numFail+numSkip);
+    LOG_NRM("  skipped      : %d", numSkip);
+    LOG_NRM("  total tests  : %d", numPass+numFail+numSkip);
+    LOG_NRM("  total groups : %d", numGrps);
     LOG_NRM("Stop loop execution #%ld", numIters);
 }
 

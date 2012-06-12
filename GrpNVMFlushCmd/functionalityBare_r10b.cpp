@@ -78,6 +78,13 @@ FunctionalityBare_r10b::operator=(const FunctionalityBare_r10b &other)
 }
 
 
+Test::RunType
+FunctionalityBare_r10b::RunnableCoreTest(bool preserve)
+{
+    return ((preserve == true) ? RUN_FALSE : RUN_TRUE);   // Test is destructive
+}
+
+
 void
 FunctionalityBare_r10b::RunCoreTest()
 {

@@ -17,6 +17,7 @@
 #ifndef _TESTREF_H_
 #define _TESTREF_H_
 
+#include <string>
 
 
 /**
@@ -30,19 +31,12 @@ struct TestRef {
     size_t  yLev;
     size_t  zLev;
 
-    TestRef() { group = 0; xLev = 0; yLev = 0; zLev = 0; }
-    TestRef(size_t g, size_t x, size_t y, size_t z) { Init(g, x, y, z); }
+    TestRef();
+    TestRef(size_t g, size_t x, size_t y, size_t z);
 
-    void Init(size_t g, size_t x, size_t y, size_t z) {
-        group = g; xLev = x; yLev = y; zLev = z; }
-
-    bool operator==(const TestRef &other) {
-        if ((other.group == group) && (other.xLev == xLev) &&
-            (other.yLev == yLev) && (other.zLev == zLev)) {
-            return true;
-        }
-        return false;
-    }
+    void Init(size_t g, size_t x, size_t y, size_t z);
+    bool operator==(const TestRef &other);
+    std::string ToString();
 };
 
 

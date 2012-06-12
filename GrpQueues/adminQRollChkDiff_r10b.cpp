@@ -74,6 +74,14 @@ AdminQRollChkDiff_r10b::operator=(const AdminQRollChkDiff_r10b &other)
 }
 
 
+Test::RunType
+AdminQRollChkDiff_r10b::RunnableCoreTest(bool preserve)
+{
+    preserve = preserve;    // Suppress compiler error/warning
+    return RUN_TRUE;        // This test is never destructive
+}
+
+
 void
 AdminQRollChkDiff_r10b::RunCoreTest()
 {

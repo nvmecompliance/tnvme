@@ -51,6 +51,7 @@ public:
 
 protected:
     virtual void RunCoreTest();
+    virtual RunType RunnableCoreTest(bool preserve);
 
 
 private:

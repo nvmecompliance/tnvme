@@ -88,6 +88,13 @@ PRPGreaterPageDiscontig_r10b::operator=(const PRPGreaterPageDiscontig_r10b
 }
 
 
+Test::RunType
+PRPGreaterPageDiscontig_r10b::RunnableCoreTest(bool preserve)
+{
+    return ((preserve == true) ? RUN_FALSE : RUN_TRUE);   // Test is destructive
+}
+
+
 void
 PRPGreaterPageDiscontig_r10b::RunCoreTest()
 {

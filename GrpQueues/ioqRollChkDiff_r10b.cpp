@@ -75,6 +75,13 @@ IOQRollChkDiff_r10b::operator=(const IOQRollChkDiff_r10b &other)
 }
 
 
+Test::RunType
+IOQRollChkDiff_r10b::RunnableCoreTest(bool preserve)
+{
+    return ((preserve == true) ? RUN_FALSE : RUN_TRUE);   // Test is destructive
+}
+
+
 void
 IOQRollChkDiff_r10b::RunCoreTest()
 {

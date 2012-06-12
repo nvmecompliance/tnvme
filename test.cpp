@@ -82,7 +82,7 @@ Test::Run()
         KernelAPI::DumpKernelMetrics(FileSystem::PrepDumpFile(mGrpName,
             mTestName, "kmetrics", "preTestRun"));
 
-        RunCoreTest();  // Forced to throw upon errors, returns upon success
+        RunCoreTest();  // Throws upon errors, returns upon success
 
         // What do the PCI registers say about errors that may have occurred?
         if (GetStatusRegErrors() == false)
@@ -103,6 +103,29 @@ Test::Run()
         return false;
     }
     return true;
+}
+
+
+Test::RunType
+Test::Runnable(bool preserve)
+{
+    try {
+        return RunnableCoreTest(preserve);  // Throws upon errors
+    } catch (FrmwkEx &ex) {
+        return RUN_FAIL;
+    } catch (...) {
+        // If this exception is thrown from some library which tnvme links
+        // with then there is nothing that can be done about this. However,
+        // If the source of this exception is source within the compliance
+        // suite, then remove it, see class note in file Exception/frmwkEx.h
+        LOG_ERR("******************************************************");
+        LOG_ERR("******************************************************");
+        LOG_ERR("*  Unsupp'd exception, replace with \"throw FrmwkEx\"  *");
+        LOG_ERR("*     see class note in file Exception/frmwkEx.h     *");
+        LOG_ERR("******************************************************");
+        LOG_ERR("******************************************************");
+        return RUN_FAIL;
+    }
 }
 
 
@@ -195,8 +218,10 @@ Test::ReportOffendingBitPos(uint64_t val, uint64_t expectedVal)
 
     for (int i = 0; i < (int)(sizeof(uint64_t)*8); i++) {
         bitMask = (1 << i);
-        if ((val & bitMask) != (expectedVal & bitMask))
+        if ((val & bitMask) != (expectedVal & bitMask)) {
+            LOG_NRM("Reg val(0x%016lX) expect val(0x%016lX)", val, expectedVal);
             return i;
+        }
     }
     return INT_MAX; // there is no mismatch
 }
@@ -205,6 +230,14 @@ Test::ReportOffendingBitPos(uint64_t val, uint64_t expectedVal)
 void
 Test::RunCoreTest()
 {
-    LOG_ERR("Children must over ride to provide functionality");
+    throw FrmwkEx(HERE, "Children must over ride to provide functionality");
+}
+
+
+Test::RunType
+Test::RunnableCoreTest(bool preserve)
+{
+    preserve = preserve;    // Suppress compiler error/warning
+    throw FrmwkEx(HERE, "Children must over ride to provide functionality");
 }
 

@@ -45,7 +45,7 @@ IllegalNVMCmds_r10b::IllegalNVMCmds_r10b(int fd,
     // No string size limit for the long description
     mTestDesc.SetLong(
         "Don't test vendor specific opcodes, then determine all supported NVM "
-        "cmds and issue all other illegal opcodes.  Verify status code in the "
+        "cmds and issue all other illegal opcodes. Verify status code in the "
         "CE of IOCQ is 1h.");
 }
 
@@ -80,6 +80,14 @@ IllegalNVMCmds_r10b::operator=(const IllegalNVMCmds_r10b
     ///////////////////////////////////////////////////////////////////////////
     Test::operator=(other);
     return *this;
+}
+
+
+Test::RunType
+IllegalNVMCmds_r10b::RunnableCoreTest(bool preserve)
+{
+    preserve = preserve;    // Suppress compiler error/warning
+    return RUN_TRUE;        // This test is never destructive
 }
 
 

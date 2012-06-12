@@ -42,14 +42,13 @@ public:
      */
     virtual NLBABare_r10b *Clone() const
         { return new NLBABare_r10b(*this); }
-    NLBABare_r10b &operator=
-        (const NLBABare_r10b &other);
-    NLBABare_r10b
-        (const NLBABare_r10b &other);
+    NLBABare_r10b &operator=(const NLBABare_r10b &other);
+    NLBABare_r10b(const NLBABare_r10b &other);
 
 
 protected:
     virtual void RunCoreTest();
+    virtual RunType RunnableCoreTest(bool preserve);
 
 
 private:

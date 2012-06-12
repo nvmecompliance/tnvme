@@ -42,21 +42,22 @@ public:
      */
     virtual IllegalAdminCmds_r10b *Clone() const
         { return new IllegalAdminCmds_r10b(*this); }
-    IllegalAdminCmds_r10b &operator=
-        (const IllegalAdminCmds_r10b &other);
-    IllegalAdminCmds_r10b
-        (const IllegalAdminCmds_r10b &other);
+    IllegalAdminCmds_r10b &operator=(const IllegalAdminCmds_r10b &other);
+    IllegalAdminCmds_r10b(const IllegalAdminCmds_r10b &other);
 
 
 protected:
     virtual void RunCoreTest();
-    list<uint8_t> GetIllegalOpcodes();
+    virtual RunType RunnableCoreTest(bool preserve);
 
+    /// To allow future revisions of this test to override this functionality
+    list<uint8_t> GetIllegalOpcodes();
     static const uint8_t FW_ACTIVATE_OPCODE;
     static const uint8_t FW_DOWNLOAD_OPCODE;
     static const uint8_t FORMAT_NVM_OPCODE;
     static const uint8_t SECURITY_SEND_OPCODE;
     static const uint8_t SECURITY_RECEIVE_OPCODE;
+
 
 private:
     ///////////////////////////////////////////////////////////////////////////

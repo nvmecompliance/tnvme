@@ -43,14 +43,13 @@ public:
      */
     virtual DatasetMgmt_r10b *Clone() const
         { return new DatasetMgmt_r10b(*this); }
-    DatasetMgmt_r10b &operator=
-        (const DatasetMgmt_r10b &other);
-    DatasetMgmt_r10b
-        (const DatasetMgmt_r10b &other);
+    DatasetMgmt_r10b &operator=(const DatasetMgmt_r10b &other);
+    DatasetMgmt_r10b(const DatasetMgmt_r10b &other);
 
 
 protected:
     virtual void RunCoreTest();
+    virtual RunType RunnableCoreTest(bool preserve);
 
 
 private:

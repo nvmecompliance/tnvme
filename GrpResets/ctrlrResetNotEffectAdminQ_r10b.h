@@ -43,13 +43,14 @@ public:
      */
     virtual CtrlrResetNotEffectAdminQ_r10b *Clone() const
         { return new CtrlrResetNotEffectAdminQ_r10b(*this); }
-    CtrlrResetNotEffectAdminQ_r10b &operator=(const CtrlrResetNotEffectAdminQ_r10b
-        &other);
+    CtrlrResetNotEffectAdminQ_r10b &operator=
+        (const CtrlrResetNotEffectAdminQ_r10b &other);
     CtrlrResetNotEffectAdminQ_r10b(const CtrlrResetNotEffectAdminQ_r10b &other);
 
 
 protected:
     virtual void RunCoreTest();
+    virtual RunType RunnableCoreTest(bool preserve);;
 
 
 private:

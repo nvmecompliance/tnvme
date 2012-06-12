@@ -74,6 +74,14 @@ AcceptQPriority_r10b::operator=(const AcceptQPriority_r10b &other)
 }
 
 
+Test::RunType
+AcceptQPriority_r10b::RunnableCoreTest(bool preserve)
+{
+    preserve = preserve;    // Suppress compiler error/warning
+    return RUN_TRUE;        // This test is never destructive
+}
+
+
 void
 AcceptQPriority_r10b::RunCoreTest()
 {

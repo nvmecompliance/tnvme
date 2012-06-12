@@ -68,6 +68,19 @@ TestCase_r10b::operator=(const TestCase_r10b &other)
 }
 
 
+Test::RunType
+TestCase_r10b::RunnableCoreTest(bool preserve)
+{
+#if 0
+    // Choose to return one of these or create your own logic
+    return ((preserve == true) ? RUN_FALSE : RUN_TRUE);   // Test is destructive
+    return RUN_TRUE;        // This test is never destructive
+#endif
+    preserve = preserve;    // Suppress compiler error/warning
+    return RUN_TRUE;        // This test is never destructive
+}
+
+
 void
 TestCase_r10b::RunCoreTest()
 {

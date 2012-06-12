@@ -53,6 +53,8 @@ public:
 
 protected:
     virtual void RunCoreTest();
+    virtual RunType RunnableCoreTest(bool preserve);
+
 
 private:
     ///////////////////////////////////////////////////////////////////////////
@@ -64,7 +66,6 @@ private:
         SharedMemBufferPtr dataPat);
     void VerifyDataPattern(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
         SharedReadPtr readCmd, string qualifier);
-
 };
 
 }   // namespace

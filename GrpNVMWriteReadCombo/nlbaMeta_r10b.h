@@ -44,14 +44,13 @@ public:
      */
     virtual NLBAMeta_r10b *Clone() const
         { return new NLBAMeta_r10b(*this); }
-    NLBAMeta_r10b &operator=
-        (const NLBAMeta_r10b &other);
-    NLBAMeta_r10b
-        (const NLBAMeta_r10b &other);
+    NLBAMeta_r10b &operator=(const NLBAMeta_r10b &other);
+    NLBAMeta_r10b(const NLBAMeta_r10b &other);
 
 
 protected:
     virtual void RunCoreTest();
+    virtual RunType RunnableCoreTest(bool preserve);
 
 
 private:

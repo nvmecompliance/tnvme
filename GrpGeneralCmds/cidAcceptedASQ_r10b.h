@@ -43,14 +43,14 @@ public:
      */
     virtual CIDAcceptedASQ_r10b *Clone() const
         { return new CIDAcceptedASQ_r10b(*this); }
-    CIDAcceptedASQ_r10b &operator=
-        (const CIDAcceptedASQ_r10b &other);
-    CIDAcceptedASQ_r10b
-        (const CIDAcceptedASQ_r10b &other);
+    CIDAcceptedASQ_r10b &operator=(const CIDAcceptedASQ_r10b &other);
+    CIDAcceptedASQ_r10b(const CIDAcceptedASQ_r10b &other);
 
 
 protected:
     virtual void RunCoreTest();
+    virtual RunType RunnableCoreTest(bool preserve);
+
 
 private:
     ///////////////////////////////////////////////////////////////////////////

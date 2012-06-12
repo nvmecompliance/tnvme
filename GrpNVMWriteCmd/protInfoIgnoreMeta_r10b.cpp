@@ -72,6 +72,13 @@ ProtInfoIgnoreMeta_r10b::operator=(const ProtInfoIgnoreMeta_r10b &other)
 }
 
 
+Test::RunType
+ProtInfoIgnoreMeta_r10b::RunnableCoreTest(bool preserve)
+{
+    return ((preserve == true) ? RUN_FALSE : RUN_TRUE);   // Test is destructive
+}
+
+
 void
 ProtInfoIgnoreMeta_r10b::RunCoreTest()
 {

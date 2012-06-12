@@ -58,6 +58,7 @@ SOURCES:=			\
 	globals.cpp		\
 	group.cpp		\
 	test.cpp		\
+	testRef.cpp		\
 	testDescribe.cpp	\
 	tnvme.cpp		\
 	tnvmeHelpers.cpp	\

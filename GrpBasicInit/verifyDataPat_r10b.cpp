@@ -38,7 +38,7 @@ VerifyDataPat_r10b::VerifyDataPat_r10b(int fd, string grpName, string testName,
         "Search for 1 of the following namspcs to run test. Find 1st bare "
         "namspc, or find 1st meta namspc, or find 1st E2E namspc. Issue an "
         "NVM cmd set read command with approp meta/E2E requirements if "
-        "necessary and compare the data payload with a previsouly written "
+        "necessary and compare the data payload with a previously written "
         "and well known data pattern to the same namespace id. The "
         "read command shall be completely generic.");
 }
@@ -72,6 +72,14 @@ VerifyDataPat_r10b::operator=(const VerifyDataPat_r10b &other)
     ///////////////////////////////////////////////////////////////////////////
     Test::operator=(other);
     return *this;
+}
+
+
+Test::RunType
+VerifyDataPat_r10b::RunnableCoreTest(bool preserve)
+{
+    preserve = preserve;    // Suppress compiler error/warning
+    return RUN_TRUE;        // This test is never destructive
 }
 
 

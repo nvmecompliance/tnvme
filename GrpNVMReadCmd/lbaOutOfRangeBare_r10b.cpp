@@ -77,6 +77,14 @@ LBAOutOfRangeBare_r10b::operator=(const LBAOutOfRangeBare_r10b &other)
 }
 
 
+Test::RunType
+LBAOutOfRangeBare_r10b::RunnableCoreTest(bool preserve)
+{
+    preserve = preserve;    // Suppress compiler error/warning
+    return RUN_TRUE;        // This test is never destructive
+}
+
+
 void
 LBAOutOfRangeBare_r10b::RunCoreTest()
 {

@@ -71,6 +71,14 @@ InvalidNamspc_r10b::operator=(const InvalidNamspc_r10b &other)
 }
 
 
+Test::RunType
+InvalidNamspc_r10b::RunnableCoreTest(bool preserve)
+{
+    preserve = preserve;    // Suppress compiler error/warning
+    return RUN_TRUE;        // This test is never destructive
+}
+
+
 void
 InvalidNamspc_r10b::RunCoreTest()
 {

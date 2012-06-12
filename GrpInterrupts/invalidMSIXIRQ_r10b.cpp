@@ -77,6 +77,14 @@ InvalidMSIXIRQ_r10b::operator=(const InvalidMSIXIRQ_r10b &other)
 }
 
 
+Test::RunType
+InvalidMSIXIRQ_r10b::RunnableCoreTest(bool preserve)
+{
+    preserve = preserve;    // Suppress compiler error/warning
+    return RUN_TRUE;        // This test is never destructive
+}
+
+
 void
 InvalidMSIXIRQ_r10b::RunCoreTest()
 {

@@ -74,6 +74,14 @@ DeleteAllAtOnce_r10b::operator=(const DeleteAllAtOnce_r10b &other)
 }
 
 
+Test::RunType
+DeleteAllAtOnce_r10b::RunnableCoreTest(bool preserve)
+{
+    preserve = preserve;    // Suppress compiler error/warning
+    return RUN_TRUE;        // This test is never destructive
+}
+
+
 void
 DeleteAllAtOnce_r10b::RunCoreTest()
 {

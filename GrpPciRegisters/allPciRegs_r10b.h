@@ -46,21 +46,13 @@ public:
 
 protected:
     virtual void RunCoreTest();
+    virtual RunType RunnableCoreTest(bool preserve);
 
 
 private:
     ///////////////////////////////////////////////////////////////////////////
     // Adding a member variable? Then edit the copy constructor and operator=().
     ///////////////////////////////////////////////////////////////////////////
-
-    /**
-     * Report bit position of val which is not like expectedVal
-     * @param val Pass value to search against for inequality
-     * @param expectedVal Pass the value to compare against for correctness
-     * @return INT_MAX if they are equal, otherwise the bit position that isn't
-     */
-    int ReportOffendingBitPos(uint64_t val, uint64_t expectedVal);
-
     /**
      * Validate the specified PCI hdr register RO bits report correct values if
      * and only if they are not vendor specific.

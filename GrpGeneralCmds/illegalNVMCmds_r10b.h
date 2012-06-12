@@ -42,16 +42,16 @@ public:
      */
     virtual IllegalNVMCmds_r10b *Clone() const
         { return new IllegalNVMCmds_r10b(*this); }
-    IllegalNVMCmds_r10b &operator=
-        (const IllegalNVMCmds_r10b &other);
-    IllegalNVMCmds_r10b
-        (const IllegalNVMCmds_r10b &other);
+    IllegalNVMCmds_r10b &operator=(const IllegalNVMCmds_r10b &other);
+    IllegalNVMCmds_r10b(const IllegalNVMCmds_r10b &other);
 
 
 protected:
     virtual void RunCoreTest();
-    list<uint8_t> GetIllegalOpcodes();
+    virtual RunType RunnableCoreTest(bool preserve);
 
+    /// To allow future revisions of this test to override this functionality
+    list<uint8_t> GetIllegalOpcodes();
     static const uint8_t WRITE_UNCORR_OPCODE;
     static const uint8_t COMPARE_OPCODE;
     static const uint8_t DSM_OPCODE;

@@ -70,6 +70,14 @@ CreateACQASQ_r10b::operator=(const CreateACQASQ_r10b &other)
 }
 
 
+Test::RunType
+CreateACQASQ_r10b::RunnableCoreTest(bool preserve)
+{
+    preserve = preserve;    // Suppress compiler error/warning
+    return RUN_TRUE;        // This test is never destructive
+}
+
+
 void
 CreateACQASQ_r10b::RunCoreTest()
 {
@@ -80,6 +88,9 @@ CreateACQASQ_r10b::RunCoreTest()
      *    must be executed every time. Each subsequent test relies on the prior.
      * \endverbatim
      */
+    if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
+        throw FrmwkEx(HERE);
+
     SharedACQPtr acq = CAST_TO_ACQ(
         gRsrcMngr->AllocObj(Trackable::OBJ_ACQ, ACQ_GROUP_ID))
     acq->Init(5);

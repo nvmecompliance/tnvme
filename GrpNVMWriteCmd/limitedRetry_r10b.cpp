@@ -36,7 +36,7 @@ LimitedRetry_r10b::LimitedRetry_r10b(int fd, string mGrpName,
         "Search for 1 of the following namspcs to run test. Find 1st bare "
         "namspc, or find 1st meta namspc, or find 1st E2E namspc. Issue 2 "
         "write cmds, one with DW12.LR set and the other with it reset, expect "
-        "success for all.  Issue each cmd sending 1 block and approp "
+        "success for all. Issue each cmd sending 1 block and approp "
         "supporting meta/E2E if necessary to the selected namspc at LBA 0.");
 }
 
@@ -69,6 +69,13 @@ LimitedRetry_r10b::operator=(const LimitedRetry_r10b &other)
     ///////////////////////////////////////////////////////////////////////////
     Test::operator=(other);
     return *this;
+}
+
+
+Test::RunType
+LimitedRetry_r10b::RunnableCoreTest(bool preserve)
+{
+    return ((preserve == true) ? RUN_FALSE : RUN_TRUE);   // Test is destructive
 }
 
 

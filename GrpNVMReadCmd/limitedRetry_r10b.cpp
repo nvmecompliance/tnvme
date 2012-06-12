@@ -72,6 +72,14 @@ LimitedRetry_r10b::operator=(const LimitedRetry_r10b &other)
 }
 
 
+Test::RunType
+LimitedRetry_r10b::RunnableCoreTest(bool preserve)
+{
+    preserve = preserve;    // Suppress compiler error/warning
+    return RUN_TRUE;        // This test is never destructive
+}
+
+
 void
 LimitedRetry_r10b::RunCoreTest()
 {

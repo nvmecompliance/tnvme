@@ -441,6 +441,8 @@ Informative::Init()
 bool
 Informative::Reinit(SharedASQPtr &asq, SharedACQPtr &acq, uint16_t ms)
 {
+    LOG_NRM("------------gInformative(re/init) START------------");
+
     // Change dump dir to be compatible for info extraction
     FileSystem::SetBaseDumpDir(true);
     if (FileSystem::RotateDumpDir() == false) {
@@ -450,14 +452,12 @@ Informative::Reinit(SharedASQPtr &asq, SharedACQPtr &acq, uint16_t ms)
 
     Clear();    // Clear out the old, in with the new
 
-    LOG_NRM("----------------start-------------------");
-    LOG_NRM("---Re-init Informative dump registers---");
+    LOG_NRM("----------------start(dump regs)-------------------");
     KernelAPI::DumpPciSpaceRegs(
         FileSystem::PrepDumpFile(GRP_NAME, TEST_NAME, "pci", "regs"), false);
     KernelAPI::DumpCtrlrSpaceRegs(
         FileSystem::PrepDumpFile(GRP_NAME, TEST_NAME, "ctrl", "regs"), false);
-    LOG_NRM("---Re-init Informative dump registers---");
-    LOG_NRM("-----------------end--------------------");
+    LOG_NRM("-----------------end(dump regs)--------------------");
 
     SendGetFeaturesNumOfQueues(asq, acq, ms);
     SendIdentifyCtrlrStruct(asq, acq, ms);
@@ -465,6 +465,7 @@ Informative::Reinit(SharedASQPtr &asq, SharedACQPtr &acq, uint16_t ms)
 
     // Change dump dir to be compatible for test execution
     FileSystem::SetBaseDumpDir(false);
+    LOG_NRM("------------gInformative(re/init) END------------");
     return true;
 }
 
@@ -478,9 +479,7 @@ Informative::SendGetFeaturesNumOfQueues(SharedASQPtr asq, SharedACQPtr acq,
     uint16_t uniqueId;
 
 
-    LOG_NRM("----------------start-----------------");
-    LOG_NRM("---Re-init Informative get features---");
-
+    LOG_NRM("----------------start(get features)-----------------");
     LOG_NRM("Create get features");
     SharedGetFeaturesPtr gfNumQ = SharedGetFeaturesPtr(new GetFeatures());
     LOG_NRM("Force get features to request number of queues");
@@ -547,9 +546,7 @@ Informative::SendGetFeaturesNumOfQueues(SharedASQPtr asq, SharedACQPtr acq,
         // This data is static; allows all tests to extract from common point
         mGetFeaturesNumOfQ = ce.t.dw0;
     }
-
-    LOG_NRM("---Re-init Informative get features---");
-    LOG_NRM("-----------------end------------------");
+    LOG_NRM("-----------------end(get features)------------------");
 }
 
 
@@ -557,9 +554,7 @@ void
 Informative::SendIdentifyCtrlrStruct(SharedASQPtr asq, SharedACQPtr acq,
     uint16_t ms)
 {
-    LOG_NRM("----------------start-------------------");
-    LOG_NRM("---Re-init Informative identify ctrlr---");
-
+    LOG_NRM("----------------start(ID ctrlr struct)-------------------");
     LOG_NRM("Create 1st identify cmd and assoc some buffer memory");
     SharedIdentifyPtr idCmdCtrlr = SharedIdentifyPtr(new Identify());
     LOG_NRM("Force identify to request ctrlr capabilities struct");
@@ -576,9 +571,7 @@ Informative::SendIdentifyCtrlrStruct(SharedASQPtr asq, SharedACQPtr acq,
 
     // This data is static; allows all tests to extract from common point
     mIdentifyCmdCtrlr = idCmdCtrlr;
-
-    LOG_NRM("---Re-init Informative identify ctrlr---");
-    LOG_NRM("-----------------end--------------------");
+    LOG_NRM("-----------------end(ID ctrlr struct)--------------------");
 }
 
 
@@ -597,9 +590,7 @@ Informative::SendIdentifyNamespaceStruct(SharedASQPtr asq, SharedACQPtr acq,
     LOG_NRM("Gather %lld identify namspc structs from DUT",
         (unsigned long long)numNamSpc);
     for (uint64_t namSpc = 1; namSpc <= numNamSpc; namSpc++) {
-        LOG_NRM("-------------------start-------------------");
-        LOG_NRM("---Re-init Informative identify namspc %ld---", namSpc);
-
+        LOG_NRM("-------------start(ID namspc %ld struct)------------", namSpc);
         snprintf(qualifier, sizeof(qualifier), "idCmdNamSpc-%llu",
             (long long unsigned int)namSpc);
 
@@ -622,8 +613,6 @@ Informative::SendIdentifyNamespaceStruct(SharedASQPtr asq, SharedACQPtr acq,
 
         // This data is static; allows all tests to extract from common point
         mIdentifyCmdNamspc.push_back(idCmdNamSpc);
-
-        LOG_NRM("---Re-init Informative identify namspc %ld---", namSpc);
-        LOG_NRM("------------------end----------------------");
+        LOG_NRM("-------------end(ID namspc %ld struct)-------------", namSpc);
     }
 }
