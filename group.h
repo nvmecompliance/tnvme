@@ -160,8 +160,8 @@ public:
      * @param skipTest Pass the complete list of test which should be skipped
      * @param numSkipped Returns the number of tests which were skipped as a
      *        result of a failed test or a test reporting it cannot be executed.
-     * @preserve Pass true if the DUT must be preserve, false if it can be
-     *           permanently changed. See cmd line option --preserve
+     * @param preserve Pass true if the DUT must be preserve, false if it can be
+     *        permanently changed. See cmd line option --preserve
      * @return The result from executing a single test case.
      */
     TestResult RunTest(TestSetType &dependencies, int64_t &tstIdx,

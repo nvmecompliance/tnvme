@@ -49,8 +49,8 @@ public:
      * root dump directory 2 base dump directories are setup and cleaned. The
      * default base dump directory will be SetBaseDumpDir(true). The dump
      * directory structure is as follows:
-     *     1) <root_dump>/Informative or
-     *     2) <root_dump>/GrpPending
+     *     1) \<root_dump\>/Informative or
+     *     2) \<root_dump\>/GrpPending
      * @note This method will not throw
      * @param dir Pass the name of the root dump directory to certify
      * @return true if successful, otherwise false;
@@ -61,8 +61,8 @@ public:
      * Sets 1 of 2 possible base dump directories. GrpInformative gets its
      * own dump directory to remember the constant data which is always
      * extracted before all test(s) execute. Selects one of:
-     *     1) <root_dump>/Informative or
-     *     2) <root_dump>/GrpPending
+     *     1) \<root_dump\>/Informative or
+     *     2) \<root_dump\>/GrpPending
      * @note This method will not throw
      * @param useDirInfo Pass true for mDumpDirInfo, false for mDumpDirPending
      */
