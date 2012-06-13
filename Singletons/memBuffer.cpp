@@ -175,6 +175,13 @@ MemBuffer::Init(uint32_t bufSize, bool initMem, uint8_t initVal)
 }
 
 
+uint8_t
+MemBuffer::GetAt(size_t offset)
+{
+    return (GetBuffer())[offset];
+}
+
+
 void
 MemBuffer::Log(uint32_t bufOffset, unsigned long length)
 {

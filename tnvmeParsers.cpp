@@ -21,8 +21,8 @@
 #include <errno.h>
 #include <vector>
 #include <unistd.h>
-
 #include "tnvmeParsers.h"
+#include "Cmds/identify.h"
 
 struct AttribXML {
     string name;
@@ -446,14 +446,16 @@ EXIT_DW10_SEARCH:
                             uint8_t work;
                             char *endPtr = NULL;
                             char *startPtr = NULL;
-                            work = (uint8_t)strtoul(xmlFile.get_value().c_str(), &endPtr, 16);
+                            work = (uint8_t)strtoul(xmlFile.get_value().c_str(),
+                                &endPtr, 16);
                             while ((*endPtr != '\0') && (startPtr != endPtr)) {
                                 cmd.raw.push_back(work);
                                 startPtr = endPtr;
                                 work = (uint8_t)strtoul(startPtr, &endPtr, 16);
                             }
-                            if (cmd.raw.size() != 4096) {
-                                LOG_ERR("Identify payload must be 4KB");
+                            if (cmd.raw.size() != Identify::IDEAL_DATA_SIZE) {
+                                LOG_ERR("Identify payload must be 4KB: %ld",
+                                    cmd.raw.size());
                                 return false;
                             }
                         }
@@ -464,10 +466,72 @@ EXIT_DW10_SEARCH:
                         return false;
                     }
                 }
-EXIT_PRP_SEARCH:
-                golden.cmds.push_back(cmd);
-                allOK = true;
             }
+EXIT_PRP_SEARCH:
+
+
+            if (SeekSpecificXMLNode(xmlFile, "mask", 2, nodeVal, attr)) {
+                // Seek for value elements defining the cmd's params
+                while(xmlFile.read()) {
+                    nodeName = xmlFile.get_name();
+                    LOG_DBG("XML parser found: \"%s\" of type %d",
+                        nodeName.c_str(), xmlFile.get_node_type());
+
+                    switch (xmlFile.get_node_type()) {
+                    case xmlpp::TextReader::Comment:
+                        LOG_DBG("Node is a comment, continuing");
+                        continue;
+
+                    case xmlpp::TextReader::SignificantWhitespace:
+                        LOG_DBG("Node is a whitespace, continuing");
+                        continue;
+
+                    case xmlpp::TextReader::Element:
+                        LOG_ERR("Node is a element, unexpected");
+                        return false;
+
+                    case xmlpp::TextReader::EndElement:
+                        if (strcmp("mask", nodeName.c_str()) == 0) {
+                            goto EXIT_MASK_SEARCH;
+                        } else {
+                            LOG_DBG(
+                                "</%s> decoded as end element: skipping",
+                                nodeName.c_str());
+                            continue;
+                        }
+                        break;
+
+                    case xmlpp::TextReader::Text:
+                        {
+                            uint8_t work;
+                            char *endPtr = NULL;
+                            char *startPtr = NULL;
+                            work = (uint8_t)strtoul(xmlFile.get_value().c_str(),
+                                &endPtr, 16);
+                            while ((*endPtr != '\0') && (startPtr != endPtr)) {
+                                cmd.mask.push_back(work);
+                                startPtr = endPtr;
+                                work = (uint8_t)strtoul(startPtr, &endPtr, 16);
+                            }
+                            if (cmd.mask.size() != Identify::IDEAL_DATA_SIZE) {
+                                LOG_ERR("Identify mask must be 4KB: %ld",
+                                    cmd.mask.size());
+                                return false;
+                            }
+                        }
+                        break;
+
+                    default:
+                        LOG_ERR("Found unsupported node type");
+                        return false;
+                    }
+                }
+            }
+EXIT_MASK_SEARCH:
+
+            // Finalize this cmd, possible among many more
+            golden.cmds.push_back(cmd);
+            allOK = true;
         }
     }
     catch(const std::exception& e)
@@ -487,6 +551,7 @@ EXIT_PRP_SEARCH:
         LOG_DBG("  Identify:DW1.nsid = 0x%02x", golden.cmds[i].nsid);
         LOG_DBG("  Identify.DW10.cns = %c", golden.cmds[i].cns ? 'T' : 'F');
         LOG_DBG("  sizeof(Identify.raw) = %ld", golden.cmds[i].raw.size());
+        LOG_DBG("  sizeof(Identify.mask) = %ld", golden.cmds[i].mask.size());
     }
 #endif
     golden.req = true;

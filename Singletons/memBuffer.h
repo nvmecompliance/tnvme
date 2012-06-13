@@ -96,6 +96,14 @@ public:
      */
     void Init(uint32_t bufSize, bool initMem = false, uint8_t initVal = 0);
 
+    /**
+     * Get the buffer's byte value at the provided offset from beginning of
+     * the buffer.
+     * @param offset Pass the offset of the byte value to return
+     * @return The requested byte value
+     */
+    uint8_t GetAt(size_t offset);
+
     uint8_t *GetBuffer() { return mVirBaseAddr; }
     uint32_t GetBufSize() { return mVirBufSize; }
     uint32_t GetAlignment() { return mAlignment; }

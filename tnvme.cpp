@@ -83,7 +83,7 @@ InstantiateGroups(vector<Group *> &groups, struct CmdLine &cl)
 // ------------------------------EDIT HERE---------------------------------
 
 
-#define BASE_DUMP_DIR           "./Dump"
+#define BASE_DUMP_DIR           "./Logs"
 #define NO_DEVICES              "no devices found"
 #define INFORM_GRPNUM           0
 

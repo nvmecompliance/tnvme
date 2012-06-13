@@ -90,8 +90,10 @@ CompareGolden(Golden &golden)
             LOG_NRM("  Identify:DW1.nsid = 0x%02x", golden.cmds[i].nsid);
             LOG_NRM("  Identify.DW10.cns = %c", golden.cmds[i].cns ? 'T' : 'F');
             LOG_NRM("  sizeof(Identify.raw) = %ld", golden.cmds[i].raw.size());
+            LOG_NRM("  sizeof(Identify.mask) = %ld",
+                golden.cmds[i].mask.size());
 
-            LOG_NRM("Formulate an identical idenitfy cmd to issue");
+            LOG_NRM("Formulate an identical identify cmd to issue");
             idCmd->SetCNS(golden.cmds[i].cns);
             idCmd->SetNSID(golden.cmds[i].nsid);
 
@@ -101,15 +103,25 @@ CompareGolden(Golden &golden)
             IO::SendAndReapCmd("tnvme", "golden", SYSTEMWIDE_CMD_WAIT_ms, asq,
                 acq, idCmd, work, false);
 
-            if (idMem->Compare(golden.cmds[i].raw) == false) {
-                idMem->Dump(FileSystem::PrepDumpFile("tnvme", "golden",
-                    "identify", "dut.miscompare"), "DUT data miscompare");
-                SharedMemBufferPtr userMem = SharedMemBufferPtr(
-                    new MemBuffer(golden.cmds[i].raw));
-                userMem->Dump(FileSystem::PrepDumpFile("tnvme", "golden",
-                    "identify", "cmdline.miscompare"),
-                    "Golden user data miscompare");
-                throw FrmwkEx(HERE, "Golden identify data miscompare");
+            uint8_t goldenData;
+            uint8_t dutData;
+            for (size_t j = 0; j < golden.cmds[i].raw.size(); j++ ) {
+                goldenData = (golden.cmds[i].raw[j] & golden.cmds[i].mask[j]);
+                dutData = (idMem->GetAt(j) & golden.cmds[i].mask[j]);
+                if (goldenData != dutData) {
+                    idMem->Dump(FileSystem::PrepDumpFile("tnvme", "golden",
+                        "identify", "dut.miscompare"), "DUT data miscompare");
+                    SharedMemBufferPtr userMem = SharedMemBufferPtr(
+                        new MemBuffer(golden.cmds[i].raw));
+                    userMem->Dump(FileSystem::PrepDumpFile("tnvme", "golden",
+                        "identify", "cmdline.miscompare"),
+                        "Golden user data miscompare");
+                    LOG_ERR("golden=0x%02X, mask=0x%02X, DUT=0x%02X",
+                        golden.cmds[i].raw[j], golden.cmds[i].mask[j],
+                        idMem->GetAt(j));
+                    throw FrmwkEx(HERE,
+                        "Golden ID data miscompare @ offset = %ld", j);
+                }
             }
         }
 
