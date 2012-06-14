@@ -112,11 +112,6 @@ InvalidNamspc_r10b::RunCoreTest()
     // For all namspc's issue cmd to an illegal namspc
     ConstSharedIdentifyPtr idCtrlrStruct = gInformative->GetIdentifyCmdCtrlr();
     uint32_t nn = (uint32_t)idCtrlrStruct->GetValue(IDCTRLRCAP_NN);
-    if (nn == 0 ) {
-        LOG_WARN("Required to support >= 1 namspc");
-        return;
-    }
-
     for (i = (nn + 1), inc = 1; i <= 0xffffffff; i += (2 * inc), inc += 1327) {
 
         LOG_NRM("Issue dataset mgmt cmd with illegal namspc ID=%llu",
