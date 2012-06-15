@@ -16,7 +16,6 @@
 
 #include "grpNVMDatasetMgmtCmd.h"
 #include "../Exception/frmwkEx.h"
-#include "identify_r10b.h"
 #include "createResources_r10b.h"
 #include "invalidNamspc_r10b.h"
 #include "unsupportRsvdFields_r10b.h"
@@ -36,7 +35,6 @@ GrpNVMDatasetMgmtCmd::GrpNVMDatasetMgmtCmd(size_t grpNum, SpecRev specRev,
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Strategy
     switch (mSpecRev) {
     case SPECREV_10b:
-        APPEND_TEST_AT_XLEVEL(Identify_r10b, fd, GrpNVMDatasetMgmtCmd, errRegs)
         APPEND_TEST_AT_XLEVEL(CreateResources_r10b, fd, GrpNVMDatasetMgmtCmd, errRegs)
         APPEND_TEST_AT_YLEVEL(InvalidNamspc_r10b, fd, GrpNVMDatasetMgmtCmd, errRegs)
         APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r10b, fd, GrpNVMDatasetMgmtCmd, errRegs)

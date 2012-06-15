@@ -17,7 +17,6 @@
 #include "tnvme.h"
 #include "../Exception/frmwkEx.h"
 #include "grpNVMCompareCmd.h"
-#include "identify_r10b.h"
 
 namespace GrpNVMCompareCmd {
 
@@ -26,12 +25,14 @@ GrpNVMCompareCmd::GrpNVMCompareCmd(size_t grpNum, SpecRev specRev,
     ErrorRegs errRegs, int fd) :
     Group(grpNum, specRev, "GrpNVMCompareCmd", "NVM cmd set compare test cases")
 {
+    errRegs = errRegs; // Temporarily to avoid compilation error.
+    fd = fd;
+
     // For complete details about the APPEND_TEST_AT_?LEVEL() macros:
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Numbering" and
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Strategy
     switch (mSpecRev) {
     case SPECREV_10b:
-        APPEND_TEST_AT_XLEVEL(Identify_r10b, fd, GrpNVMCompareCmd, errRegs)
         break;
 
     default:
