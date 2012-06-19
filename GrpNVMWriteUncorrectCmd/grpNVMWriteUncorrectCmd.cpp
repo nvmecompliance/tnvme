@@ -17,7 +17,6 @@
 #include "tnvme.h"
 #include "../Exception/frmwkEx.h"
 #include "grpNVMWriteUncorrectCmd.h"
-#include "identify_r10b.h"
 
 namespace GrpNVMWriteUncorrectCmd {
 
@@ -27,12 +26,14 @@ GrpNVMWriteUncorrectCmd::GrpNVMWriteUncorrectCmd(size_t grpNum, SpecRev specRev,
     Group(grpNum, specRev, "GrpNVMWriteUncorrectCmd",
         "NVM cmd set compare test cases")
 {
+    errRegs = errRegs; // Temporarily to avoid compilation error.
+    fd = fd;
+
     // For complete details about the APPEND_TEST_AT_?LEVEL() macros:
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Numbering" and
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Strategy
     switch (mSpecRev) {
     case SPECREV_10b:
-        APPEND_TEST_AT_XLEVEL(Identify_r10b, fd, GrpNVMWriteUncorrectCmd, errRegs)
         break;
 
     default:

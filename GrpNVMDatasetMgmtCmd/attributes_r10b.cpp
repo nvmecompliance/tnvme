@@ -16,6 +16,7 @@
 
 #include <boost/format.hpp>
 #include <string.h>
+#include <assert.h>
 #include "attributes_r10b.h"
 #include "globals.h"
 #include "grpDefs.h"
@@ -24,7 +25,7 @@
 #include "../Utils/io.h"
 #include "../Cmds/datasetMgmt.h"
 
-#define     MAX_RANGES      256
+#define MAX_RANGES      256
 
 namespace GrpNVMDatasetMgmtCmd {
 
@@ -38,13 +39,14 @@ Attributes_r10b::Attributes_r10b(int fd, string mGrpName,
     mTestDesc.SetShort(     "Verify all combinations of attributes for all ranges");
     // No string size limit for the long description
     mTestDesc.SetLong(
-        "For namspc = 1; create a single buffer where offset into 1st "
-        "page = 0, size = 4KB; initialize this buffer describing 256 "
-        "ranges equally divided among the total address space spec'd "
-        "by Identify.NCAP. Issue the dataset mgmt cmd multiple times "
-        "iterating through all permutations of all context attributes "
-        "except the reserved values, expect success. Testing to verify "
-        "all legal attributes are accepted.");
+        "Search for 1 of the following namspcs to run test. Find 1st bare "
+        "namspc, or find 1st meta namspc, or find 1st E2E namspc. "
+        "Create a single buffer where offset into 1st page = 0, size = 4KB; "
+        "initialize this buffer describing 256 ranges equally divided among "
+        "the total address space spec'd by Identify.NCAP. Issue the dataset "
+        "mgmt cmd multiple times iterating through all permutations of all "
+        "context attributes except the reserved values, expect success. "
+        "Testing to verify all legal attributes are accepted.");
 }
 
 
@@ -97,13 +99,6 @@ Attributes_r10b::RunCoreTest()
      */
     string work;
 
-    ConstSharedIdentifyPtr idCtrlrStruct = gInformative->GetIdentifyCmdCtrlr();
-    uint32_t nn = (uint32_t)idCtrlrStruct->GetValue(IDCTRLRCAP_NN);
-    if (nn == 0) {
-        LOG_WARN("Required to support atleast 1 namspc to run this test.");
-        return;
-    }
-
     LOG_NRM("Lookup IOQS which were created in a prior test within group");
     SharedIOSQPtr iosq = CAST_TO_IOSQ(gRsrcMngr->GetObj(IOSQ_GROUP_ID));
     SharedIOCQPtr iocq = CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_GROUP_ID));
@@ -129,31 +124,29 @@ Attributes_r10b::RunCoreTest()
     datasetMgmtCmd->SetPrpBuffer(prpBitmask, rangeMem);
 
     list<uint32_t> ctrAttribs = GetUniqueCtxAttribs();
-    RangeDef *rangePtr = (RangeDef *)rangeMem->GetBuffer();
-    for (uint32_t numRange = 0; numRange < MAX_RANGES; numRange++) {
-        rangePtr->slba = 0;
-        rangePtr->length = (ncap / MAX_RANGES);
-        if (((ncap % MAX_RANGES) != 0) && (numRange == (MAX_RANGES - 1)))
-            rangePtr->length = (ncap - ((MAX_RANGES - 1) * rangePtr->length));
+    for (list <uint32_t>::iterator ctxAttrib = ctrAttribs.begin();
+        ctxAttrib != ctrAttribs.end(); ctxAttrib++) {
+        LOG_NRM("Processing %d ranges for ctxAttrib = 0x%04X", MAX_RANGES,
+            *ctxAttrib);
 
-        for (list <uint32_t>::iterator ctxAttrib = ctrAttribs.begin();
-            ctxAttrib != ctrAttribs.end(); ctxAttrib++) {
-            LOG_NRM("Range #%d, (LenLBAs, SLBA, CtxAttrib) = (%d, %ld, 0x%X)",
-                numRange, rangePtr->length, rangePtr->slba, *ctxAttrib);
-
+        RangeDef *rangePtr = (RangeDef *)rangeMem->GetBuffer();
+        for (uint32_t numRange = 0; numRange < MAX_RANGES; numRange++) {
+            rangePtr->slba = 0;
+            rangePtr->length = (ncap / MAX_RANGES);
+            if (numRange == (MAX_RANGES - 1)) // Last range consumes the rem.
+                rangePtr->length += (ncap % MAX_RANGES);
             memcpy(&rangePtr->ctxAttrib, &(*ctxAttrib),
                 sizeof(struct CtxAttrib));
-            work = str(boost::format("numRange%d.ctxAttrib0x%X ") %
-                numRange % *ctxAttrib);
-
-            bool enableLog = false;
-            if ((((numRange < 8) == 0) || ((numRange - 8) < MAX_RANGES)) == 0)
-                enableLog = true;
-
-            IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
-                iosq, iocq, datasetMgmtCmd, work, enableLog);
+            rangePtr++;
         }
-        rangePtr++;
+
+        bool enableLog = false;
+        if ((*ctxAttrib % 8) == 0)
+            enableLog = true;
+
+        work = str(boost::format("ctxAttrib0x%04X") % *ctxAttrib);
+        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
+            datasetMgmtCmd, work, enableLog);
     }
 }
 
@@ -162,23 +155,22 @@ list<uint32_t>
 Attributes_r10b::GetUniqueCtxAttribs()
 {
     list <uint32_t> ctrAttribs;
-
     uint32_t ctxVal;
-    struct CtxAttrib ctxAttrib;
-    for (uint64_t  iPow2 = 1; iPow2 <= UINT32_MAX; iPow2 <<= 1) {
-        for (uint64_t j = (iPow2 - 1); j <= (iPow2 + 1); j++) {
-            if (j > UINT32_MAX)
-                break;
-            ctxVal = j;
-            memcpy(&ctxAttrib, &ctxVal, sizeof(struct CtxAttrib));
-            // skip reserved values.
-            ctxAttrib.reserved0 = 0;
-            ctxAttrib.reserved1 = 0;
-            ctxAttrib.AF = ((ctxAttrib.AF & 7) > 5) ? 5 : (ctxAttrib.AF & 7);
-            memcpy(&ctxVal, &ctxAttrib, sizeof(uint32_t));
-            ctrAttribs.remove(ctxVal); // remove duplicates.
-            ctrAttribs.push_back(ctxVal);
+    struct CtxAttrib *ctxAttrib = (struct CtxAttrib *)&ctxVal;
+    assert(sizeof(uint32_t) == sizeof(struct CtxAttrib));
+
+    // Set 10 bits of context attributes to different values, while
+    // varying the CAS bits.
+    for (uint32_t ctx = 1; ctx <= (1 << 10); ctx++) {
+        ctxVal = ctx;
+        // skip reserved values.
+        if (ctxAttrib->reserved0 ||  ctxAttrib->reserved1 ||
+            ((ctxAttrib->AF & 7) > 5)) {
+            continue;
         }
+        // Set command access size to different values
+        ctxAttrib->CAS = (1 << (ctx % 8));
+        ctrAttribs.push_back(ctxVal);
     }
     return ctrAttribs;
 }
