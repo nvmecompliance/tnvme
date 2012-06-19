@@ -17,8 +17,7 @@ LIBS = -L../ -L/usr/local/lib -lm
 INCLUDES = -I. -I../ -I../../ -I/usr/local/include
 
 SRC =					\
-	grpNVMCompareCmd.cpp		\
-	identify_r10b.cpp
+	grpNVMCompareCmd.cpp
 
 .SUFFIXES: .cpp
 

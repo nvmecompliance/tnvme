@@ -17,8 +17,7 @@ LIBS = -L../ -L/usr/local/lib -lm
 INCLUDES = -I. -I../ -I../../ -I/usr/local/include
 
 SRC =					\
-	grpNVMWriteUncorrectCmd.cpp	\
-	identify_r10b.cpp
+	grpNVMWriteUncorrectCmd.cpp
 
 .SUFFIXES: .cpp
 

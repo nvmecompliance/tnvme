@@ -46,7 +46,7 @@ using namespace std;
 
 
 #define MAX_CHAR_PER_LINE_DESCRIPTION       63
-#define SYSTEMWIDE_CMD_WAIT_ms              4000
+#define SYSTEMWIDE_CMD_WAIT_ms              10000   // 10s
 
 /**
  * When the namespace reports unlimited transfer size, this define artificially

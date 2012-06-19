@@ -1,3 +1,35 @@
+2012-6-19
+nvmecompliance_release=1.6.0 New tests, bug fixes, high confidence.
+    1) The compliance suite continues to execute over 28 different NVMe formats
+       within QEMU using manage/regression.sh.
+    2) dnvme-bugfix: The tracking of CE's in dnvme was chopping off the high
+       order bits of the status field. This caused resources to not become
+       released back to the kernel until such time the user space issued
+       a DISABLE_COMPLETELY state change.
+    3) tnvme, dnvme were enchanced to allow tnvme to inject custom strings
+       into the dnvme logging output to mark points in time for debugging. This
+       would essentially sync reference points between the use space logging
+       and what was occuring in the kernel.
+    4) tnvme-bugfix under QEMU only: Increased the timeout period to avoid
+       tnvme reporting "Unable to see CE's in CQ" while running under QEMU.
+       The simulated world is much slower than real world hdw.
+    5) tnvme enhancement: --golden option now allows specifing a mask of which
+       bits should be compared.
+    6) tnvme enchancment: Added --preserve cmd line option and
+       RunnableCoreTest() for all test cases to indicate whether or not they
+       are runnable based upon the desire to keep the state of the DUT
+       unchanged. See https://github.com/nvmecompliance/tnvme/wiki/Runnable-Test
+    7) tnvme-bugfix: Missing rsvd bits in struct IdPowerStateDesc.
+    8) tnvme-bugfix: The creation of IOSQ's was incorrectly setting the desired
+       priority of the Q as it was being created.
+    9) tnvme-bugfix: The displayed timeout value when a test case gives up
+       waiting as a result of calling any Reap() method reported an incorrect
+       duration.
+    10) tnvme-bugfix: The framework incorrectly assumed a specific number of
+        interrupts must have ocurred during a reaping of CE's from CQ's that
+        were assoc with many IOSQ's.
+    11) Added numerous new tests, see git log for details.
+
 2012-5-21:
 nvmecompliance_release=1.5.0 New tests, bug fixes, high confidence.
     1) Using QEMU and the file manage/regression.sh the entire compliance
