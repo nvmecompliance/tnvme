@@ -84,6 +84,11 @@ Attributes_r10b::operator=(const Attributes_r10b &other)
 Test::RunType
 Attributes_r10b::RunnableCoreTest(bool preserve)
 {
+    ConstSharedIdentifyPtr idCtrlrCap = gInformative->GetIdentifyCmdCtrlr();
+    uint64_t oncs = idCtrlrCap->GetValue(IDCTRLRCAP_ONCS);
+    if ((oncs & ONCS_SUP_DSM_CMD) == 0)
+        return RUN_FALSE;
+
     preserve = preserve;    // Suppress compiler error/warning
     return RUN_TRUE;        // This test is never destructive
 }
