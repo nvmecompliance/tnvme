@@ -28,7 +28,7 @@ namespace GrpNVMFlushCmd {
 class GrpNVMFlushCmd : public Group
 {
 public:
-    GrpNVMFlushCmd(size_t grpNum, SpecRev specRev, ErrorRegs errRegs, int fd);
+    GrpNVMFlushCmd(size_t grpNum);
     virtual ~GrpNVMFlushCmd();
 };
 

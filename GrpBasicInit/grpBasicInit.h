@@ -30,7 +30,7 @@ namespace GrpBasicInit {
 class GrpBasicInit : public Group
 {
 public:
-    GrpBasicInit(size_t grpNum, SpecRev specRev, ErrorRegs errRegs, int fd);
+    GrpBasicInit(size_t grpNum);
     virtual ~GrpBasicInit();
 };
 

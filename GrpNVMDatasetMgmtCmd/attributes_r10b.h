@@ -33,8 +33,7 @@ namespace GrpNVMDatasetMgmtCmd {
 class Attributes_r10b : public Test
 {
 public:
-    Attributes_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    Attributes_r10b(string grpName, string testName);
     virtual ~Attributes_r10b();
 
     /**

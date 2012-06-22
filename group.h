@@ -21,13 +21,14 @@
 #include <deque>
 #include "tnvme.h"
 #include "test.h"
+#include "globals.h"
 
 
 /// Use to append a new x.0.0 test number at the XLEVEL
-#define APPEND_TEST_AT_XLEVEL(test, fd, grpName, errRegs)                     \
+#define APPEND_TEST_AT_XLEVEL(test, grpName)                                  \
     {                                                                         \
         deque<Test *> zlevel;                                                 \
-        zlevel.push_back(new test(fd, #grpName, #test, errRegs));             \
+        zlevel.push_back(new test(#grpName, #test));                          \
         deque<deque<Test *> > ylevel;                                         \
         ylevel.push_back(zlevel);                                             \
         mTests.push_back(ylevel);                                             \
@@ -35,17 +36,17 @@
         zlevel.clear();                                                       \
     }
 /// Use to append a new x.y.0 test number at the YLEVEL
-#define APPEND_TEST_AT_YLEVEL(test, fd, grpName, errRegs)                     \
+#define APPEND_TEST_AT_YLEVEL(test, grpName)                                  \
     {                                                                         \
         deque<Test *> zlevel;                                                 \
-        zlevel.push_back(new test(fd, #grpName, #test, errRegs));             \
+        zlevel.push_back(new test(#grpName, #test));                          \
         mTests.back().push_back(zlevel);                                      \
         zlevel.clear();                                                       \
     }
 
 /// Use to append a new x.y.z test number at the ZLEVEL
-#define APPEND_TEST_AT_ZLEVEL(test, fd, grpName, errRegs)                     \
-    mTests.back().back().push_back(new test(fd, #grpName, #test, errRegs));
+#define APPEND_TEST_AT_ZLEVEL(test, grpName)                                  \
+    mTests.back().back().push_back(new test(#grpName, #test));
 
 
 /// To allow formatting the group information string
@@ -82,12 +83,11 @@ class Group
 public:
     /**
      * @param grpNum Pass the assigned group number, globally unique ID
-     * @param specRev Pass which compliance is needed to target
      * @param grpName Pass the name assigned to this group
      * @param desc Pass a 1-line comment describing group purpose, maximum
      *      number of characters allowed: MAX_CHAR_PER_LINE_DESCRIPTION
      */
-    Group(size_t grpNum, SpecRev specRev, string grpName, string desc);
+    Group(size_t grpNum, string grpName, string desc);
     virtual ~Group();
 
     /**
@@ -172,7 +172,6 @@ protected:
     size_t  mGrpNum;
     string  mGrpName;
     string  mGrpDesc;
-    SpecRev mSpecRev;
 
     /// array[xLevel][yLevel][zLevel];
     /// Refer to: https://github.com/nvmecompliance/tnvme/wiki/Test-Numbering

@@ -33,8 +33,7 @@ namespace GrpAdminCreateIOSQCmd {
 class MaxQSizeExceed_r10b : public Test
 {
 public:
-    MaxQSizeExceed_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    MaxQSizeExceed_r10b(string grpName, string testName);
     virtual ~MaxQSizeExceed_r10b();
 
     /**

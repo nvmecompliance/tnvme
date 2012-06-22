@@ -23,9 +23,9 @@
 namespace GrpQueues {
 
 
-IllegalCreateOrder_r10b::IllegalCreateOrder_r10b(int fd, string grpName,
-    string testName, ErrorRegs errRegs) :
-    Test(fd, grpName, testName, SPECREV_10b, errRegs)
+IllegalCreateOrder_r10b::IllegalCreateOrder_r10b(
+    string grpName, string testName) :
+    Test(grpName, testName, SPECREV_10b)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 4");
@@ -90,9 +90,9 @@ IllegalCreateOrder_r10b::RunCoreTest()
         throw FrmwkEx(HERE);
 
     // Create Admin Q Objects for test lifetime
-    SharedACQPtr acq = SharedACQPtr(new ACQ(mFd));
+    SharedACQPtr acq = SharedACQPtr(new ACQ(gDutFd));
     acq->Init(5);
-    SharedASQPtr asq = SharedASQPtr(new ASQ(mFd));
+    SharedASQPtr asq = SharedASQPtr(new ASQ(gDutFd));
     asq->Init(5);
 
     gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
@@ -103,7 +103,7 @@ IllegalCreateOrder_r10b::RunCoreTest()
         GetValue(IDCTRLRCAP_SQES) & 0xf);
     gCtrlrConfig->SetIOSQES(iosqes);
 
-    SharedIOSQPtr iosq = SharedIOSQPtr(new IOSQ(mFd));
+    SharedIOSQPtr iosq = SharedIOSQPtr(new IOSQ(gDutFd));
     LOG_NRM("Associate IOSQ #%d to unallocated IOCQ #%d", IOQ_ID, IOQ_ID);
     iosq->Init(IOQ_ID, NumEntriesIOQ, IOQ_ID, 0);
     SharedCreateIOSQPtr createIOSQCmd = SharedCreateIOSQPtr(new CreateIOSQ());

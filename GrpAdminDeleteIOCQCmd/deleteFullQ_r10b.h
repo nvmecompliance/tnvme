@@ -37,8 +37,7 @@ namespace GrpAdminDeleteIOCQCmd {
 class DeleteFullQ_r10b : public Test
 {
 public:
-    DeleteFullQ_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    DeleteFullQ_r10b(string grpName, string testName);
     virtual ~DeleteFullQ_r10b();
 
     /**

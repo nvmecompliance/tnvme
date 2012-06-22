@@ -20,17 +20,11 @@
 #include "./Utils/kernelAPI.h"
 
 
-Test::Test(int fd, string grpName, string testName, SpecRev specRev,
-    ErrorRegs errRegs)
+Test::Test(string grpName, string testName, SpecRev specRev)
 {
-    mFd = fd;
-    if (mFd < 0)
-        throw FrmwkEx(HERE, "Object created with a bad fd=%d", fd);
-
     mSpecRev = specRev;
     mGrpName = grpName;
     mTestName = testName;
-    mErrRegs = errRegs;
 }
 
 
@@ -44,9 +38,8 @@ Test::~Test()
 
 
 Test::Test(const Test &other) :
-    mFd(other.mFd), mSpecRev(other.mSpecRev), mGrpName(other.mGrpName),
-    mTestName(other.mTestName), mErrRegs(other.mErrRegs),
-    mTestDesc(other.mTestDesc)
+    mSpecRev(other.mSpecRev), mGrpName(other.mGrpName),
+    mTestName(other.mTestName), mTestDesc(other.mTestDesc)
 
 {
     ///////////////////////////////////////////////////////////////////////////
@@ -63,13 +56,10 @@ Test::operator=(const Test &other)
     // All pointers in this object must be NULL, never allow shallow or deep
     // copies, see Test::Clone() header comment.
     ///////////////////////////////////////////////////////////////////////////
-    mFd = other.mFd;
     mSpecRev = other.mSpecRev;
     mGrpName = other.mGrpName;
     mTestName = other.mTestName;
-    mErrRegs = other.mErrRegs;
     mTestDesc = other.mTestDesc;
-
     return *this;
 }
 
@@ -161,7 +151,7 @@ Test::GetStatusRegErrors()
     // PCI STS register may indicate some error
     if (gRegisters->Read(PCISPC_STS, value) == false)
         return false;
-    expectedValue = (value & ~((uint64_t)mErrRegs.sts));
+    expectedValue = (value & ~((uint64_t)gCmdLine.errRegs.sts));
     if (value != expectedValue) {
         LOG_ERR("%s error bit #%d indicates test failure",
             pciMetrics[PCISPC_STS].desc,
@@ -175,7 +165,7 @@ Test::GetStatusRegErrors()
         if (cap->at(i) == PCICAP_PXCAP) {
             if (gRegisters->Read(PCISPC_PXDS, value) == false)
                 return false;
-            expectedValue = (value & ~((uint64_t)mErrRegs.pxds));
+            expectedValue = (value & ~((uint64_t)gCmdLine.errRegs.pxds));
             if (value != expectedValue) {
                 LOG_ERR("%s error bit #%d indicates test failure",
                     pciMetrics[PCISPC_PXDS].desc,
@@ -185,7 +175,7 @@ Test::GetStatusRegErrors()
         } else if (cap->at(i) == PCICAP_AERCAP) {
             if (gRegisters->Read(PCISPC_AERUCES, value) == false)
                 return false;
-            expectedValue = (value & ~((uint64_t)mErrRegs.aeruces));
+            expectedValue = (value & ~((uint64_t)gCmdLine.errRegs.aeruces));
             if (value != expectedValue) {
                 LOG_ERR("%s error bit #%d indicates test failure",
                     pciMetrics[PCISPC_PXDS].desc,
@@ -199,7 +189,7 @@ Test::GetStatusRegErrors()
     // Ctrl'r STS register may indicate some error
     if (gRegisters->Read(CTLSPC_CSTS, value) == false)
         return false;
-    expectedValue = (value & ~((uint64_t)mErrRegs.csts));
+    expectedValue = (value & ~((uint64_t)gCmdLine.errRegs.csts));
     if (value != expectedValue) {
         LOG_ERR("%s error bit #%d indicates test failure",
             ctlMetrics[CTLSPC_CSTS].desc,

@@ -32,8 +32,7 @@ namespace GrpNVMDatasetMgmtCmd {
 class VerifyNUSE_r10b : public Test
 {
 public:
-    VerifyNUSE_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    VerifyNUSE_r10b(string grpName, string testName);
     virtual ~VerifyNUSE_r10b();
 
     /**

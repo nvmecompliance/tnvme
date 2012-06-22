@@ -32,8 +32,7 @@ namespace GrpNVMReadCmd {
 class ProtInfoIgnoreBare_r10b : public Test
 {
 public:
-    ProtInfoIgnoreBare_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    ProtInfoIgnoreBare_r10b(string grpName, string testName);
     virtual ~ProtInfoIgnoreBare_r10b();
 
     /**

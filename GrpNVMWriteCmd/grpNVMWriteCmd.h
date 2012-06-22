@@ -29,7 +29,7 @@ namespace GrpNVMWriteCmd {
 class GrpNVMWriteCmd : public Group
 {
 public:
-    GrpNVMWriteCmd(size_t grpNum, SpecRev specRev, ErrorRegs errRegs, int fd);
+    GrpNVMWriteCmd(size_t grpNum);
     virtual ~GrpNVMWriteCmd();
 };
 

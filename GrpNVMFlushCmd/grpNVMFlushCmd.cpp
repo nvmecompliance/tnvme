@@ -25,26 +25,25 @@
 namespace GrpNVMFlushCmd {
 
 
-GrpNVMFlushCmd::GrpNVMFlushCmd(size_t grpNum, SpecRev specRev,
-    ErrorRegs errRegs, int fd) :
-    Group(grpNum, specRev, "GrpNVMFlushCmd",
-        "Validates NVM cmd set flush cmd tests")
+GrpNVMFlushCmd::GrpNVMFlushCmd(size_t grpNum) :
+    Group(grpNum, "GrpNVMFlushCmd", "Validates NVM cmd set flush cmd tests")
 {
     // For complete details about the APPEND_TEST_AT_?LEVEL() macros:
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Numbering" and
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Strategy
-    switch (mSpecRev) {
+    switch (gCmdLine.rev) {
     case SPECREV_10b:
-        APPEND_TEST_AT_XLEVEL(CreateResources_r10b, fd, GrpNVMFlushCmd, errRegs)
-        APPEND_TEST_AT_YLEVEL(InvalidNamspc_r10b, fd, GrpNVMFlushCmd, errRegs)
-        APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r10b, fd, GrpNVMFlushCmd, errRegs)
-        APPEND_TEST_AT_YLEVEL(FunctionalityBare_r10b, fd, GrpNVMFlushCmd, errRegs)
-        APPEND_TEST_AT_XLEVEL(FunctionalityMeta_r10b, fd, GrpNVMFlushCmd, errRegs)
+        APPEND_TEST_AT_XLEVEL(CreateResources_r10b, GrpNVMFlushCmd)
+        APPEND_TEST_AT_YLEVEL(InvalidNamspc_r10b, GrpNVMFlushCmd)
+        APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r10b, GrpNVMFlushCmd)
+        APPEND_TEST_AT_YLEVEL(FunctionalityBare_r10b, GrpNVMFlushCmd)
+        APPEND_TEST_AT_XLEVEL(FunctionalityMeta_r10b, GrpNVMFlushCmd)
         break;
 
     default:
     case SPECREVTYPE_FENCE:
-        throw FrmwkEx(HERE, "Object created with an unknown SpecRev=%d", specRev);
+        throw FrmwkEx(HERE, "Object created with an unknown SpecRev=%d",
+            gCmdLine.rev);
     }
 }
 

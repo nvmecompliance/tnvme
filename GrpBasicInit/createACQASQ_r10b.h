@@ -32,8 +32,7 @@ namespace GrpBasicInit {
 class CreateACQASQ_r10b : public Test
 {
 public:
-    CreateACQASQ_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    CreateACQASQ_r10b(string grpName, string testName);
     virtual ~CreateACQASQ_r10b();
 
     /**

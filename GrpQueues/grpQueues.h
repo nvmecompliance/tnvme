@@ -30,7 +30,7 @@ namespace GrpQueues {
 class GrpQueues : public Group
 {
 public:
-    GrpQueues(size_t grpNum, SpecRev specRev, ErrorRegs errRegs, int fd);
+    GrpQueues(size_t grpNum);
     virtual ~GrpQueues();
 };
 

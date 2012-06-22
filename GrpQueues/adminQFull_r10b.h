@@ -35,8 +35,7 @@ namespace GrpQueues {
 class AdminQFull_r10b : public Test
 {
 public:
-    AdminQFull_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    AdminQFull_r10b(string grpName, string testName);
     virtual ~AdminQFull_r10b();
 
     /**

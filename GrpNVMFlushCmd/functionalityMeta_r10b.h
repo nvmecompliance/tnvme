@@ -36,8 +36,7 @@ namespace GrpNVMFlushCmd {
 class FunctionalityMeta_r10b : public Test
 {
 public:
-    FunctionalityMeta_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    FunctionalityMeta_r10b(string grpName, string testName);
     virtual ~FunctionalityMeta_r10b();
 
     /**

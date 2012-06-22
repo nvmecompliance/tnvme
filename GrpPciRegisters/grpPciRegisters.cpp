@@ -21,21 +21,21 @@
 namespace GrpPciRegisters {
 
 
-GrpPciRegisters::GrpPciRegisters(size_t grpNum, SpecRev specRev,
-    ErrorRegs errRegs, int fd) :
-    Group(grpNum, specRev, "GrpPciRegisters", "PCI registers syntactic")
+GrpPciRegisters::GrpPciRegisters(size_t grpNum) :
+    Group(grpNum, "GrpPciRegisters", "PCI registers syntactic")
 {
     // For complete details about the APPEND_TEST_AT_?LEVEL() macros:
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Numbering" and
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Strategy
-    switch (mSpecRev) {
+    switch (gCmdLine.rev) {
     case SPECREV_10b:
-        APPEND_TEST_AT_XLEVEL(AllPciRegs_r10b, fd, GrpPciRegisters, errRegs)
+        APPEND_TEST_AT_XLEVEL(AllPciRegs_r10b, GrpPciRegisters)
         break;
 
     default:
     case SPECREVTYPE_FENCE:
-        throw FrmwkEx(HERE, "Object created with an unknown SpecRev=%d", specRev);
+        throw FrmwkEx(HERE, "Object created with an unknown SpecRev=%d",
+            gCmdLine.rev);
     }
 }
 

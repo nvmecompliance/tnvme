@@ -22,9 +22,9 @@
 namespace GrpQueues {
 
 
-IllegalCreateQs_r10b::IllegalCreateQs_r10b(int fd, string grpName,
-    string testName, ErrorRegs errRegs) :
-    Test(fd, grpName, testName, SPECREV_10b, errRegs)
+IllegalCreateQs_r10b::IllegalCreateQs_r10b(
+    string grpName, string testName) :
+    Test(grpName, testName, SPECREV_10b)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 5");
@@ -96,7 +96,7 @@ IllegalCreateQs_r10b::RunCoreTest()
     uint32_t value;
     {
         LOG_NRM("Create IOCQ ID #%d but toxify its QID to 0", IOQ_ID);
-        SharedIOCQPtr iocq = SharedIOCQPtr(new IOCQ(mFd));
+        SharedIOCQPtr iocq = SharedIOCQPtr(new IOCQ(gDutFd));
         iocq->Init(IOQ_ID, numEntries, true, 0);
 
         LOG_NRM("Form a Create IOCQ cmd");
@@ -110,7 +110,7 @@ IllegalCreateQs_r10b::RunCoreTest()
     }
     {
         LOG_NRM("Create IOSQ ID #%d but toxify its QID to 0", IOQ_ID);
-        SharedIOSQPtr iosq = SharedIOSQPtr(new IOSQ(mFd));
+        SharedIOSQPtr iosq = SharedIOSQPtr(new IOSQ(gDutFd));
         iosq->Init(IOQ_ID, numEntries, IOQ_ID, 0);
 
         LOG_NRM("Form a Create IOSQ cmd");
@@ -124,7 +124,7 @@ IllegalCreateQs_r10b::RunCoreTest()
     }
     {
         LOG_NRM("Create IOSQ ID #%d but wrongly associate to ACQ", IOQ_ID);
-        SharedIOSQPtr iosq = SharedIOSQPtr(new IOSQ(mFd));
+        SharedIOSQPtr iosq = SharedIOSQPtr(new IOSQ(gDutFd));
         iosq->Init(IOQ_ID, numEntries, IOQ_ID, 0);
 
         LOG_NRM("Form a Create IOSQ cmd");

@@ -39,8 +39,7 @@ namespace GrpQueues {
 class QIDVariations_r10b : public Test
 {
 public:
-    QIDVariations_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    QIDVariations_r10b(string grpName, string testName);
     virtual ~QIDVariations_r10b();
 
     /**

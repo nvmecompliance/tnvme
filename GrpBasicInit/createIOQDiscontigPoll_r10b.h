@@ -34,8 +34,7 @@ namespace GrpBasicInit {
 class CreateIOQDiscontigPoll_r10b : public Test
 {
 public:
-    CreateIOQDiscontigPoll_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    CreateIOQDiscontigPoll_r10b(string grpName, string testName);
     virtual ~CreateIOQDiscontigPoll_r10b();
 
     /**

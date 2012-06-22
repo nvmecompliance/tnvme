@@ -18,6 +18,7 @@
 
 
 int gDutFd = -1;
+struct CmdLine gCmdLine;
 Registers *gRegisters;
 RsrcMngr *gRsrcMngr;
 CtrlrConfig *gCtrlrConfig;

@@ -33,8 +33,7 @@ namespace GrpAdminDeleteIOSQCmd {
 class InvalidQID_r10b : public Test
 {
 public:
-    InvalidQID_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    InvalidQID_r10b(string grpName, string testName);
     virtual ~InvalidQID_r10b();
 
     /**

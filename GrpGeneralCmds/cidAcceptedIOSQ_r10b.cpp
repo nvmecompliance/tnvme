@@ -27,9 +27,9 @@ namespace GrpGeneralCmds {
 #define NUM_IO_SQS      2
 
 
-CIDAcceptedIOSQ_r10b::CIDAcceptedIOSQ_r10b(int fd,
-    string mGrpName, string mTestName, ErrorRegs errRegs) :
-    Test(fd, mGrpName, mTestName, SPECREV_10b, errRegs)
+CIDAcceptedIOSQ_r10b::CIDAcceptedIOSQ_r10b(
+    string grpName, string testName) :
+    Test(grpName, testName, SPECREV_10b)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 4");
@@ -99,9 +99,9 @@ CIDAcceptedIOSQ_r10b::RunCoreTest()
         throw FrmwkEx(HERE);
 
     LOG_NRM("Create ACQ and ASQ objects which have test life time");
-    SharedACQPtr acq = CAST_TO_ACQ(SharedACQPtr(new ACQ(mFd)))
+    SharedACQPtr acq = CAST_TO_ACQ(SharedACQPtr(new ACQ(gDutFd)))
     acq->Init(5);
-    SharedASQPtr asq = CAST_TO_ASQ(SharedASQPtr(new ASQ(mFd)))
+    SharedASQPtr asq = CAST_TO_ASQ(SharedASQPtr(new ASQ(gDutFd)))
     asq->Init(5);
 
     IRQ::SetAnySchemeSpecifyNum(2);     // throws upon error

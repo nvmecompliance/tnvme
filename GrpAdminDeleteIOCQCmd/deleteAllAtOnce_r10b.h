@@ -33,8 +33,7 @@ namespace GrpAdminDeleteIOCQCmd {
 class DeleteAllAtOnce_r10b : public Test
 {
 public:
-    DeleteAllAtOnce_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    DeleteAllAtOnce_r10b(string grpName, string testName);
     virtual ~DeleteAllAtOnce_r10b();
 
     /**

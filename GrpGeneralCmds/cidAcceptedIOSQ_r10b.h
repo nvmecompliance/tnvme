@@ -34,8 +34,7 @@ namespace GrpGeneralCmds {
 class CIDAcceptedIOSQ_r10b : public Test
 {
 public:
-    CIDAcceptedIOSQ_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    CIDAcceptedIOSQ_r10b(string grpName, string testName);
     virtual ~CIDAcceptedIOSQ_r10b();
 
     /**

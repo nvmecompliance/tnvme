@@ -29,7 +29,7 @@ namespace GrpNVMReadCmd {
 class GrpNVMReadCmd : public Group
 {
 public:
-    GrpNVMReadCmd(size_t grpNum, SpecRev specRev, ErrorRegs errRegs, int fd);
+    GrpNVMReadCmd(size_t grpNum);
     virtual ~GrpNVMReadCmd();
 };
 

@@ -22,9 +22,9 @@
 namespace GrpTemplate {
 
 
-TestCase_r10b::TestCase_r10b(int fd, string grpName, string testName,
-    ErrorRegs errRegs) :
-    Test(fd, grpName, testName, SPECREV_10b, errRegs)
+TestCase_r10b::TestCase_r10b(
+    string grpName, string testName) :
+    Test(grpName, testName, SPECREV_10b)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section ?");

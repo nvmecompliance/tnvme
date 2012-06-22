@@ -36,9 +36,9 @@ const uint8_t IllegalAdminCmds_r10b::FORMAT_NVM_OPCODE          = 0x80;
 const uint8_t IllegalAdminCmds_r10b::SECURITY_SEND_OPCODE       = 0x81;
 const uint8_t IllegalAdminCmds_r10b::SECURITY_RECEIVE_OPCODE    = 0x82;
 
-IllegalAdminCmds_r10b::IllegalAdminCmds_r10b(int fd,
-    string mGrpName, string mTestName, ErrorRegs errRegs) :
-    Test(fd, mGrpName, mTestName, SPECREV_10b, errRegs)
+IllegalAdminCmds_r10b::IllegalAdminCmds_r10b(
+    string grpName, string testName) :
+    Test(grpName, testName, SPECREV_10b)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 5");

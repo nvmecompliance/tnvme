@@ -32,8 +32,7 @@ namespace GrpNVMDatasetMgmtCmd {
 class PRP1PRP2NR_r10b : public Test
 {
 public:
-    PRP1PRP2NR_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    PRP1PRP2NR_r10b(string grpName, string testName);
     virtual ~PRP1PRP2NR_r10b();
 
     /**

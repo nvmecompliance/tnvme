@@ -26,27 +26,27 @@
 namespace GrpAdminCreateIOQCmd {
 
 
-GrpAdminCreateIOQCmd::GrpAdminCreateIOQCmd(size_t grpNum, SpecRev specRev,
-    ErrorRegs errRegs, int fd) :
-    Group(grpNum, specRev, "GrpAdminCreateIOQCmd",
+GrpAdminCreateIOQCmd::GrpAdminCreateIOQCmd(size_t grpNum) :
+    Group(grpNum, "GrpAdminCreateIOQCmd",
         "Admin cmd set common create IOCQ/IOSQ test cases")
 {
     // For complete details about the APPEND_TEST_AT_?LEVEL() macros:
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Numbering" and
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Strategy
-    switch (mSpecRev) {
+    switch (gCmdLine.rev) {
     case SPECREV_10b:
-        APPEND_TEST_AT_XLEVEL(PRPLessPageContig_r10b, fd, GrpAdminCreateIOQCmd, errRegs)
-        APPEND_TEST_AT_XLEVEL(PRPLessPageDiscontig_r10b, fd, GrpAdminCreateIOQCmd, errRegs)
-        APPEND_TEST_AT_XLEVEL(PRPSinglePageContig_r10b, fd, GrpAdminCreateIOQCmd, errRegs)
-        APPEND_TEST_AT_XLEVEL(PRPSinglePageDiscontig_r10b, fd, GrpAdminCreateIOQCmd, errRegs)
-        APPEND_TEST_AT_XLEVEL(PRPGreaterPageContig_r10b, fd, GrpAdminCreateIOQCmd, errRegs)
-        APPEND_TEST_AT_XLEVEL(PRPGreaterPageDiscontig_r10b, fd, GrpAdminCreateIOQCmd, errRegs)
+        APPEND_TEST_AT_XLEVEL(PRPLessPageContig_r10b, GrpAdminCreateIOQCmd)
+        APPEND_TEST_AT_XLEVEL(PRPLessPageDiscontig_r10b, GrpAdminCreateIOQCmd)
+        APPEND_TEST_AT_XLEVEL(PRPSinglePageContig_r10b, GrpAdminCreateIOQCmd)
+        APPEND_TEST_AT_XLEVEL(PRPSinglePageDiscontig_r10b, GrpAdminCreateIOQCmd)
+        APPEND_TEST_AT_XLEVEL(PRPGreaterPageContig_r10b, GrpAdminCreateIOQCmd)
+        APPEND_TEST_AT_XLEVEL(PRPGreaterPageDiscontig_r10b, GrpAdminCreateIOQCmd)
         break;
 
     default:
     case SPECREVTYPE_FENCE:
-        throw FrmwkEx(HERE, "Object created with an unknown SpecRev=%d", specRev);
+        throw FrmwkEx(HERE, "Object created with an unknown SpecRev=%d",
+            gCmdLine.rev);
     }
 }
 

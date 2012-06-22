@@ -40,8 +40,7 @@ namespace GrpQueues {
 class ManySQtoCQAssoc_r10b : public Test
 {
 public:
-    ManySQtoCQAssoc_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    ManySQtoCQAssoc_r10b(string grpName, string testName);
     virtual ~ManySQtoCQAssoc_r10b();
 
     /**

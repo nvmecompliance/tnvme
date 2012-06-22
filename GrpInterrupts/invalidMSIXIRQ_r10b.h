@@ -34,8 +34,7 @@ namespace GrpInterrupts {
 class InvalidMSIXIRQ_r10b : public Test
 {
 public:
-    InvalidMSIXIRQ_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    InvalidMSIXIRQ_r10b(string grpName, string testName);
     virtual ~InvalidMSIXIRQ_r10b();
 
     /**

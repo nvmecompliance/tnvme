@@ -25,9 +25,9 @@
 namespace GrpNVMWriteCmd {
 
 
-ProtInfoIgnoreMeta_r10b::ProtInfoIgnoreMeta_r10b(int fd, string mGrpName,
-    string mTestName, ErrorRegs errRegs) :
-    Test(fd, mGrpName, mTestName, SPECREV_10b, errRegs)
+ProtInfoIgnoreMeta_r10b::ProtInfoIgnoreMeta_r10b(
+    string grpName, string testName) :
+    Test(grpName, testName, SPECREV_10b)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 6");
@@ -97,10 +97,10 @@ ProtInfoIgnoreMeta_r10b::RunCoreTest()
     if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
         throw FrmwkEx(HERE);
 
-    SharedACQPtr acq = SharedACQPtr(new ACQ(mFd));
+    SharedACQPtr acq = SharedACQPtr(new ACQ(gDutFd));
     acq->Init(5);
 
-    SharedASQPtr asq = SharedASQPtr(new ASQ(mFd));
+    SharedASQPtr asq = SharedASQPtr(new ASQ(gDutFd));
     asq->Init(5);
 
     LOG_NRM("Get all the supoorted meta namespaces");

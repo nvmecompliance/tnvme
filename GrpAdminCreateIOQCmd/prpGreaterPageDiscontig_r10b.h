@@ -35,8 +35,7 @@ namespace GrpAdminCreateIOQCmd {
 class PRPGreaterPageDiscontig_r10b : public Test
 {
 public:
-    PRPGreaterPageDiscontig_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    PRPGreaterPageDiscontig_r10b(string grpName, string testName);
     virtual ~PRPGreaterPageDiscontig_r10b();
 
     /**

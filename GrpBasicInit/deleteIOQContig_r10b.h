@@ -34,8 +34,7 @@ namespace GrpBasicInit {
 class DeleteIOQContig_r10b : public Test
 {
 public:
-    DeleteIOQContig_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    DeleteIOQContig_r10b(string grpName, string testName);
     virtual ~DeleteIOQContig_r10b();
 
     /**

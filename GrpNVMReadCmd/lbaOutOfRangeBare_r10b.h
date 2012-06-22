@@ -34,8 +34,7 @@ namespace GrpNVMReadCmd {
 class LBAOutOfRangeBare_r10b : public Test
 {
 public:
-    LBAOutOfRangeBare_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    LBAOutOfRangeBare_r10b(string grpName, string testName);
     virtual ~LBAOutOfRangeBare_r10b();
 
     /**

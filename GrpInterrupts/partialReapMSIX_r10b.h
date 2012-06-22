@@ -33,8 +33,7 @@ namespace GrpInterrupts {
 class PartialReapMSIX_r10b : public Test
 {
 public:
-    PartialReapMSIX_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    PartialReapMSIX_r10b(string grpName, string testName);
     virtual ~PartialReapMSIX_r10b();
 
     /**

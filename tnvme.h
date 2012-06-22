@@ -157,6 +157,7 @@ struct CmdLine {
     bool            summary;
     bool            ignore;
     bool            reset;
+    bool            postfail;
     bool            preserve;
     size_t          loop;
     SpecRev         rev;

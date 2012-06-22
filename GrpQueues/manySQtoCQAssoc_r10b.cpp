@@ -24,9 +24,9 @@ namespace GrpQueues {
 static uint32_t NumEntriesIOQ = 5;
 
 
-ManySQtoCQAssoc_r10b::ManySQtoCQAssoc_r10b(int fd, string grpName,
-    string testName, ErrorRegs errRegs) :
-    Test(fd, grpName, testName, SPECREV_10b, errRegs)
+ManySQtoCQAssoc_r10b::ManySQtoCQAssoc_r10b(
+    string grpName, string testName) :
+    Test(grpName, testName, SPECREV_10b)
 {
     // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 4");

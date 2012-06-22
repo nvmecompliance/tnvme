@@ -21,22 +21,22 @@
 namespace GrpResets {
 
 
-GrpResets::GrpResets(size_t grpNum, SpecRev specRev, ErrorRegs errRegs,
-    int fd) :
-    Group(grpNum, specRev, "GrpResets", "All Ctrl'r reset related tests")
+GrpResets::GrpResets(size_t grpNum) :
+    Group(grpNum, "GrpResets", "All Ctrl'r reset related tests")
 {
     // For complete details about the APPEND_TEST_AT_?LEVEL() macros:
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Numbering" and
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Strategy
-    switch (mSpecRev) {
+    switch (gCmdLine.rev) {
     case SPECREV_10b:
-        APPEND_TEST_AT_XLEVEL(CtrlrResetIOQDeleted_r10b, fd, GrpResets, errRegs)
-        APPEND_TEST_AT_XLEVEL(CtrlrResetNotEffectAdminQ_r10b, fd, GrpResets, errRegs)
+        APPEND_TEST_AT_XLEVEL(CtrlrResetIOQDeleted_r10b, GrpResets)
+        APPEND_TEST_AT_XLEVEL(CtrlrResetNotEffectAdminQ_r10b, GrpResets)
         break;
 
     default:
     case SPECREVTYPE_FENCE:
-        throw FrmwkEx(HERE, "Object created with an unknown SpecRev=%d", specRev);
+        throw FrmwkEx(HERE, "Object created with an unknown SpecRev=%d",
+            gCmdLine.rev);
     }
 }
 

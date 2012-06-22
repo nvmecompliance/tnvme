@@ -35,9 +35,9 @@ const uint8_t IllegalNVMCmds_r10b::COMPARE_OPCODE       = 0x05;
 const uint8_t IllegalNVMCmds_r10b::DSM_OPCODE           = 0x09;
 
 
-IllegalNVMCmds_r10b::IllegalNVMCmds_r10b(int fd,
-    string mGrpName, string mTestName, ErrorRegs errRegs) :
-    Test(fd, mGrpName, mTestName, SPECREV_10b, errRegs)
+IllegalNVMCmds_r10b::IllegalNVMCmds_r10b(
+    string grpName, string testName) :
+    Test(grpName, testName, SPECREV_10b)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 6");

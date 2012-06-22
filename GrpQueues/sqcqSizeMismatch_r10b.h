@@ -39,8 +39,7 @@ namespace GrpQueues {
 class SQCQSizeMismatch_r10b : public Test
 {
 public:
-    SQCQSizeMismatch_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    SQCQSizeMismatch_r10b(string grpName, string testName);
     virtual ~SQCQSizeMismatch_r10b();
 
     /**

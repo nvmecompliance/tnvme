@@ -69,6 +69,10 @@ FrmwkEx::~FrmwkEx()
 void
 FrmwkEx::DumpStateOfTheSystem()
 {
+    // Only do post failure extraction and dumping if authorized to do so
+    if (gCmdLine.postfail == false)
+        return;
+
     // Mark this point in /var/log/messages from dnvme's logging output
     KernelAPI::WriteToDnvmeLog("-------START POST FAILURE STATE DUMP-------");
 

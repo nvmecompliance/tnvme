@@ -29,32 +29,31 @@
 namespace GrpNVMWriteReadCombo {
 
 
-GrpNVMWriteReadCombo::GrpNVMWriteReadCombo(size_t grpNum, SpecRev specRev,
-    ErrorRegs errRegs, int fd) :
-    Group(grpNum, specRev, "GrpNVMWriteReadCombo",
-        "NVM cmd set write/read combo tests.")
+GrpNVMWriteReadCombo::GrpNVMWriteReadCombo(size_t grpNum) :
+    Group(grpNum, "GrpNVMWriteReadCombo", "NVM cmd set write/read combo tests.")
 {
     // For complete details about the APPEND_TEST_AT_?LEVEL() macros:
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Numbering" and
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Strategy
-    switch (mSpecRev) {
+    switch (gCmdLine.rev) {
     case SPECREV_10b:
-        APPEND_TEST_AT_XLEVEL(PRPOffsetSinglePgMultiBlk_r10b, fd, GrpNVMWriteReadCombo, errRegs)
-        APPEND_TEST_AT_XLEVEL(PRPOffsetDualPgMultiBlk_r10b, fd, GrpNVMWriteReadCombo, errRegs)
-        APPEND_TEST_AT_XLEVEL(PRPOffsetMultiPgMultiBlk_r10b, fd, GrpNVMWriteReadCombo, errRegs)
-        APPEND_TEST_AT_XLEVEL(CreateResources_r10b, fd, GrpNVMWriteReadCombo, errRegs)
-        APPEND_TEST_AT_YLEVEL(PRPOffsetSinglePgSingleBlk_r10b, fd, GrpNVMWriteReadCombo, errRegs)
-        APPEND_TEST_AT_YLEVEL(StartingLBABare_r10b, fd, GrpNVMWriteReadCombo, errRegs)
-        APPEND_TEST_AT_YLEVEL(NLBABare_r10b, fd, GrpNVMWriteReadCombo, errRegs)
-        APPEND_TEST_AT_YLEVEL(DatasetMgmt_r10b, fd, GrpNVMWriteReadCombo, errRegs)
-        APPEND_TEST_AT_XLEVEL(StartingLBAMeta_r10b, fd, GrpNVMWriteReadCombo, errRegs)
-        APPEND_TEST_AT_XLEVEL(NLBAMeta_r10b, fd, GrpNVMWriteReadCombo, errRegs)
+        APPEND_TEST_AT_XLEVEL(PRPOffsetSinglePgMultiBlk_r10b, GrpNVMWriteReadCombo)
+        APPEND_TEST_AT_XLEVEL(PRPOffsetDualPgMultiBlk_r10b, GrpNVMWriteReadCombo)
+        APPEND_TEST_AT_XLEVEL(PRPOffsetMultiPgMultiBlk_r10b, GrpNVMWriteReadCombo)
+        APPEND_TEST_AT_XLEVEL(CreateResources_r10b, GrpNVMWriteReadCombo)
+        APPEND_TEST_AT_YLEVEL(PRPOffsetSinglePgSingleBlk_r10b, GrpNVMWriteReadCombo)
+        APPEND_TEST_AT_YLEVEL(StartingLBABare_r10b, GrpNVMWriteReadCombo)
+        APPEND_TEST_AT_YLEVEL(NLBABare_r10b, GrpNVMWriteReadCombo)
+        APPEND_TEST_AT_YLEVEL(DatasetMgmt_r10b, GrpNVMWriteReadCombo)
+        APPEND_TEST_AT_XLEVEL(StartingLBAMeta_r10b, GrpNVMWriteReadCombo)
+        APPEND_TEST_AT_XLEVEL(NLBAMeta_r10b, GrpNVMWriteReadCombo)
 
         break;
 
     default:
     case SPECREVTYPE_FENCE:
-        throw FrmwkEx(HERE, "Object created with an unknown SpecRev=%d", specRev);
+        throw FrmwkEx(HERE, "Object created with an unknown SpecRev=%d",
+            gCmdLine.rev);
     }
 }
 

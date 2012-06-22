@@ -32,7 +32,7 @@ namespace GrpPciRegisters {
 class AllPciRegs_r10b : public Test
 {
 public:
-    AllPciRegs_r10b(int fd, string grpName, string testName, ErrorRegs errRegs);
+    AllPciRegs_r10b(string grpName, string testName);
     virtual ~AllPciRegs_r10b();
 
     /**

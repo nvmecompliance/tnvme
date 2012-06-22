@@ -20,21 +20,21 @@
 namespace GrpTemplate {
 
 
-GrpTemplate::GrpTemplate(size_t grpNum, SpecRev specRev, ErrorRegs errRegs,
-    int fd) :
-    Group(grpNum, specRev, "GrpTemplate", "Template group description")
+GrpTemplate::GrpTemplate(size_t grpNum) :
+    Group(grpNum, "GrpTemplate", "Template group description")
 {
     // For complete details about the APPEND_TEST_AT_?LEVEL() macros:
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Numbering" and
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Strategy
-    switch (mSpecRev) {
+    switch (gCmdLine.rev) {
     case SPECREV_10b:
-        APPEND_TEST_AT_XLEVEL(TestCase_r10b, fd, GrpTemplate, errRegs)
+        APPEND_TEST_AT_XLEVEL(TestCase_r10b, GrpTemplate)
         break;
 
     default:
     case SPECREVTYPE_FENCE:
-        throw FrmwkEx("Object created with an unknown SpecRev=%d", specRev);
+        throw FrmwkEx(HERE, "Object created with an unknown SpecRev=%d",
+            gCmdLine.rev);
     }
 }
 

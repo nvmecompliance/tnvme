@@ -23,11 +23,10 @@
 #define NEWLINE                 "\n"
 
 
-Group::Group(size_t grpNum, SpecRev specRev, string grpName, string desc)
+Group::Group(size_t grpNum, string grpName, string desc)
 {
     mGrpNum = grpNum;
     mGrpName = grpName;
-    mSpecRev = specRev;
 
     if (desc.length() > MAX_CHAR_PER_LINE_DESCRIPTION) {
         LOG_ERR("Group description length violation, concatenating \"%s\"",

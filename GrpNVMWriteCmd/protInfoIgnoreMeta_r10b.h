@@ -33,8 +33,7 @@ namespace GrpNVMWriteCmd {
 class ProtInfoIgnoreMeta_r10b : public Test
 {
 public:
-    ProtInfoIgnoreMeta_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    ProtInfoIgnoreMeta_r10b(string grpName, string testName);
     virtual ~ProtInfoIgnoreMeta_r10b();
 
     /**

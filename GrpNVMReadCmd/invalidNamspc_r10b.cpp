@@ -27,9 +27,9 @@
 namespace GrpNVMReadCmd {
 
 
-InvalidNamspc_r10b::InvalidNamspc_r10b(int fd, string mGrpName,
-    string mTestName, ErrorRegs errRegs) :
-    Test(fd, mGrpName, mTestName, SPECREV_10b, errRegs)
+InvalidNamspc_r10b::InvalidNamspc_r10b(
+    string grpName, string testName) :
+    Test(grpName, testName, SPECREV_10b)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 4,6");

@@ -38,8 +38,7 @@ namespace GrpQueues {
 class MaxIOQ_r10b : public Test
 {
 public:
-    MaxIOQ_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    MaxIOQ_r10b(string grpName, string testName);
     virtual ~MaxIOQ_r10b();
 
     /**

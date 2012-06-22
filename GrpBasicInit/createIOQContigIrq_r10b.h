@@ -34,8 +34,7 @@ namespace GrpBasicInit {
 class CreateIOQContigIrq_r10b : public Test
 {
 public:
-    CreateIOQContigIrq_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    CreateIOQContigIrq_r10b(string grpName, string testName);
     virtual ~CreateIOQContigIrq_r10b();
 
     /**

@@ -28,7 +28,7 @@ namespace GrpNVMCompareCmd {
 class GrpNVMCompareCmd : public Group
 {
 public:
-    GrpNVMCompareCmd(size_t grpNum, SpecRev specRev, ErrorRegs errRegs, int fd);
+    GrpNVMCompareCmd(size_t grpNum);
     virtual ~GrpNVMCompareCmd();
 };
 

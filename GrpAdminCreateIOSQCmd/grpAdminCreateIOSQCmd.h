@@ -28,8 +28,7 @@ namespace GrpAdminCreateIOSQCmd {
 class GrpAdminCreateIOSQCmd : public Group
 {
 public:
-    GrpAdminCreateIOSQCmd(size_t grpNum, SpecRev specRev, ErrorRegs errRegs,
-        int fd);
+    GrpAdminCreateIOSQCmd(size_t grpNum);
     virtual ~GrpAdminCreateIOSQCmd();
 };
 

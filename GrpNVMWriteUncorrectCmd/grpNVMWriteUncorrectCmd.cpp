@@ -21,24 +21,20 @@
 namespace GrpNVMWriteUncorrectCmd {
 
 
-GrpNVMWriteUncorrectCmd::GrpNVMWriteUncorrectCmd(size_t grpNum, SpecRev specRev,
-    ErrorRegs errRegs, int fd) :
-    Group(grpNum, specRev, "GrpNVMWriteUncorrectCmd",
-        "NVM cmd set compare test cases")
+GrpNVMWriteUncorrectCmd::GrpNVMWriteUncorrectCmd(size_t grpNum) :
+    Group(grpNum, "GrpNVMWriteUncorrectCmd", "NVM cmd set compare test cases")
 {
-    errRegs = errRegs; // Temporarily to avoid compilation error.
-    fd = fd;
-
     // For complete details about the APPEND_TEST_AT_?LEVEL() macros:
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Numbering" and
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Strategy
-    switch (mSpecRev) {
+    switch (gCmdLine.rev) {
     case SPECREV_10b:
         break;
 
     default:
     case SPECREVTYPE_FENCE:
-        throw FrmwkEx(HERE, "Object created with unknown SpecRev=%d", specRev);
+        throw FrmwkEx(HERE, "Object created with an unknown SpecRev=%d",
+            gCmdLine.rev);
     }
 }
 
