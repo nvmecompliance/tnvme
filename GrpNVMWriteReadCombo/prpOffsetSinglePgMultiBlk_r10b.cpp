@@ -90,6 +90,12 @@ PRPOffsetSinglePgMultiBlk_r10b::operator=(const PRPOffsetSinglePgMultiBlk_r10b
 Test::RunType
 PRPOffsetSinglePgMultiBlk_r10b::RunnableCoreTest(bool preserve)
 {
+    ///////////////////////////////////////////////////////////////////////////
+    // All code contained herein must never permanently modify the state or
+    // configuration of the DUT. Permanence is defined as state or configuration
+    // changes that will not be restored after a cold hard reset.
+    ///////////////////////////////////////////////////////////////////////////
+
     return ((preserve == true) ? RUN_FALSE : RUN_TRUE);   // Test is destructive
 }
 

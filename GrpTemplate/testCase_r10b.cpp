@@ -71,6 +71,12 @@ TestCase_r10b::operator=(const TestCase_r10b &other)
 Test::RunType
 TestCase_r10b::RunnableCoreTest(bool preserve)
 {
+    ///////////////////////////////////////////////////////////////////////////
+    // All code contained herein must never permanently modify the state or
+    // configuration of the DUT. Permanence is defined as state or configuration
+    // changes that will not be restored after a cold hard reset.
+    ///////////////////////////////////////////////////////////////////////////
+
 #if 0
     // Choose to return one of these or create your own logic
     return ((preserve == true) ? RUN_FALSE : RUN_TRUE);   // Test is destructive

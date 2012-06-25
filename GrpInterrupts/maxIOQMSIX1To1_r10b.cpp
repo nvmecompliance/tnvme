@@ -86,6 +86,12 @@ MaxIOQMSIX1To1_r10b::operator=(const MaxIOQMSIX1To1_r10b &other)
 Test::RunType
 MaxIOQMSIX1To1_r10b::RunnableCoreTest(bool preserve)
 {
+    ///////////////////////////////////////////////////////////////////////////
+    // All code contained herein must never permanently modify the state or
+    // configuration of the DUT. Permanence is defined as state or configuration
+    // changes that will not be restored after a cold hard reset.
+    ///////////////////////////////////////////////////////////////////////////
+
     return ((preserve == true) ? RUN_FALSE : RUN_TRUE);   // Test is destructive
 }
 

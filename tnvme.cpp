@@ -129,6 +129,9 @@ Usage(void) {
     printf("                                      is compared; Must be only option.\n");
     printf("  -n(--postfail)                      Upon test failure, instruct framework to\n");
     printf("                                      take a post failure snapshot of the DUT\n");
+    printf("  -y(--restore)                       Upon test failure, allow an individual\n");
+    printf("                                      test to restore the configuration of the\n");
+    printf("                                      DUT as was detected at app start\n");
     printf("                      --- Advanced/Debug Options Follow ---\n");
     printf("  -e(--error) <STS:PXDS:AERUCES:CSTS> Set reg bitmask for bits indicating error\n");
     printf("                                      state after each test completes.\n");
@@ -171,12 +174,13 @@ main(int argc, char *argv[])
     bool deviceFound = false;
     bool accessingHdw = true;
     uint64_t regVal = 0;
-    const char *short_opt = "hsnlpzia::t::v:o:d:k:f:r:w:q:e:u:g:";
+    const char *short_opt = "hsnlpyzia::t::v:o:d:k:f:r:w:q:e:u:g:";
     static struct option long_opt[] = {
         // {name,           has_arg,            flag,   val}
         {   "help",         no_argument,        NULL,   'h'},
         {   "summary",      no_argument,        NULL,   's'},
         {   "preserve",     no_argument,        NULL,   'p'},
+        {   "restore",      no_argument,        NULL,   'y'},
         {   "rev",          required_argument,  NULL,   'v'},
         {   "detail",       optional_argument,  NULL,   'a'},
         {   "test",         optional_argument,  NULL,   't'},
@@ -361,10 +365,11 @@ main(int argc, char *argv[])
         default:
         case 'h':   Usage();                            exit(0);
         case '?':   Usage();                            exit(1);
-        case 'z':   gCmdLine.reset = true;               break;
-        case 'i':   gCmdLine.ignore = true;              break;
-        case 'p':   gCmdLine.preserve = true;            break;
-        case 'n':   gCmdLine.postfail = true;            break;
+        case 'z':   gCmdLine.reset = true;              break;
+        case 'i':   gCmdLine.ignore = true;             break;
+        case 'p':   gCmdLine.preserve = true;           break;
+        case 'n':   gCmdLine.postfail = true;           break;
+        case 'y':   gCmdLine.restore = true;            break;
         }
     }
 

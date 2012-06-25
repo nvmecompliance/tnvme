@@ -177,6 +177,18 @@ protected:
     /// Refer to: https://github.com/nvmecompliance/tnvme/wiki/Test-Numbering
     deque<deque<deque<Test *> > > mTests;
 
+    /**
+     * In coordination with cmd line option --restore, these functions should
+     * be over ridden by children to support the saving and restoring of a DUT's
+     * configuration, if and only if the tests contained within a group
+     * could/would or will modify the permanent DUT configuration. Permanent
+     * changes are those defined to carry through a cold hard reset.
+     * @return true when the configuration was correctly saved/restored,
+     *         otherwise false.
+     */
+    virtual bool SaveState() { return true; }
+    virtual bool RestoreState() {return true; }
+
 
 private:
     Group() {}
