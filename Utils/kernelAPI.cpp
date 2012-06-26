@@ -253,12 +253,12 @@ KernelAPI::LogCQMetrics(struct nvme_gen_cq &cqMetrics)
 void
 KernelAPI::LogSQMetrics(struct nvme_gen_sq &sqMetrics)
 {
-    LOG_NRM("CQMetrics.sq_id          = 0x%04X", sqMetrics.sq_id);
-    LOG_NRM("CQMetrics.cq_id          = 0x%04X", sqMetrics.cq_id);
-    LOG_NRM("CQMetrics.tail_ptr       = 0x%04X", sqMetrics.tail_ptr);
-    LOG_NRM("CQMetrics.tail_ptr_virt  = 0x%04X", sqMetrics.tail_ptr_virt);
-    LOG_NRM("CQMetrics.head_ptr       = 0x%04X", sqMetrics.head_ptr);
-    LOG_NRM("CQMetrics.elements       = 0x%04X", sqMetrics.elements);
+    LOG_NRM("SQMetrics.sq_id          = 0x%04X", sqMetrics.sq_id);
+    LOG_NRM("SQMetrics.cq_id          = 0x%04X", sqMetrics.cq_id);
+    LOG_NRM("SQMetrics.tail_ptr       = 0x%04X", sqMetrics.tail_ptr);
+    LOG_NRM("SQMetrics.tail_ptr_virt  = 0x%04X", sqMetrics.tail_ptr_virt);
+    LOG_NRM("SQMetrics.head_ptr       = 0x%04X", sqMetrics.head_ptr);
+    LOG_NRM("SQMetrics.elements       = 0x%04X", sqMetrics.elements);
 }
 
 
