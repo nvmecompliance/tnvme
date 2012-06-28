@@ -54,6 +54,8 @@ public:
         OBJ_GETFEATURES,        // Admin cmd set; get features cmd
         OBJ_SETFEATURES,        // Admin cmd set; get features cmd
         OBJ_GETLOGPAGE,         // Admin cmd set; get log page cmd
+        OBJ_FWACTIVATE,         // Admin cmd set; FW activate cmd
+        OBJ_FWIMGDNLD,          // Admin cmd set; FW image download cmd
         OBJ_FORMATNVM,          // Admin cmd set; format NVM cmd
         OBJ_NVMCMD,             // NVM cmd set; non descriptive general cmd
         OBJ_WRITE,              // NVM cmd set; write cmd
