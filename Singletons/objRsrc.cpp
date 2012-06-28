@@ -31,6 +31,7 @@
 #include "../Cmds/setFeatures.h"
 #include "../Cmds/getLogPage.h"
 #include "../Cmds/fwActivate.h"
+#include "../Cmds/fwImgDnld.h"
 #include "../Cmds/formatNVM.h"
 #include "../Cmds/write.h"
 #include "../Cmds/read.h"
@@ -107,7 +108,7 @@ ObjRsrc::AllocWorker(Trackable::ObjType type)
     INSTANTIATE_OBJ(SETFEATURES, SetFeatures)
     INSTANTIATE_OBJ(GETLOGPAGE, GetLogPage)
     INSTANTIATE_OBJ(FWACTIVATE, FWActivate)
-//    INSTANTIATE_OBJ(FWIMGDNLD, FWImgDnld)
+    INSTANTIATE_OBJ(FWIMGDNLD, FWImgDnld)
     INSTANTIATE_OBJ(FORMATNVM, FormatNVM)
 
     INSTANTIATE_OBJ(WRITE, Write)
