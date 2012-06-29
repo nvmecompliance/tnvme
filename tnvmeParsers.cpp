@@ -561,6 +561,42 @@ EXIT_MASK_SEARCH:
 
 /**
  * A function to specifically handle parsing cmd lines of the form
+ * "--fwimage <filename>".
+ * @param fwimage Pass a structure to populate with parsing results
+ * @param optarg Pass the 'optarg' argument from the getopt_long() API.
+ * @return true upon successful parsing, otherwise false.
+ */
+bool
+ParseFWImageCmdLine(FWImage &fwimage, const char *optarg)
+{
+    int fd;
+    ssize_t numRead;
+    uint8_t buffer[1];
+
+
+    fwimage.data.empty();
+    if ((fd = open(optarg, O_RDWR)) == -1) {
+        LOG_ERR("File=%s: %s", optarg, strerror(errno));
+        return false;
+    }
+    while ((numRead = read(fd, buffer, sizeof(buffer))) != -1) {
+        if (numRead == 0)
+            break;
+        fwimage.data.push_back(buffer[0]);
+    }
+    if (numRead == -1) {
+        LOG_ERR("File=%s: %s", optarg, strerror(errno));
+        return false;
+    }
+
+    close(fd);
+    fwimage.req = true;
+    return true;
+}
+
+
+/**
+ * A function to specifically handle parsing cmd lines of the form
  * "--format <filename>".
  * @param format Pass a structure to populate with parsing results
  * @param optarg Pass the 'optarg' argument from the getopt_long() API.

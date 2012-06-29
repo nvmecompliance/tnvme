@@ -152,6 +152,11 @@ struct Golden {
     vector<IdentifyDUT> cmds;   // Array of identify cmd data to validate
 };
 
+struct FWImage {
+    bool                req;    // Requested by cmd line
+    vector<uint8_t>     data;   // Array of raw FW binary bytes to program
+};
+
 
 struct CmdLine {
     bool            summary;
@@ -168,6 +173,7 @@ struct CmdLine {
     vector<TestRef> skiptest;
     Format          format;
     Golden          golden;
+    FWImage         fwImage;
     RmmapIo         rmmap;
     WmmapIo         wmmap;
     NumQueues       numQueues;

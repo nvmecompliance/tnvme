@@ -119,8 +119,8 @@ Usage(void) {
     printf("  -u(--dump) <dirname>                Pass the base dump directory path.\n");
     printf("                                      dflt=\"%s\"\n", BASE_DUMP_DIR);
     printf("  -i(--ignore)                        Ignore detected errors; An error causes\n");
-    printf("                                      the next test within the next group to\n");
-    printf("                                      execute, not next test within same group.\n");
+    printf("                                      the next test w/o dependencies to failing\n");
+    printf("                                      test to be executed next.\n");
     printf("  -p(--preserve)                      Preserve the current state of the DUT. Do\n");
     printf("                                      not write data on the media, nor modify\n");
     printf("                                      the configuration. Not all tests will run\n");
@@ -131,7 +131,11 @@ Usage(void) {
     printf("                                      take a post failure snapshot of the DUT\n");
     printf("  -y(--restore)                       Upon test failure, allow an individual\n");
     printf("                                      test to restore the configuration of the\n");
-    printf("                                      DUT as was detected at app start\n");
+    printf("                                      DUT as was detected at group start\n");
+    printf("  -m(--fwimage)                       Supply a FW image to allow testing of\n");
+    printf("                                      FW activate and FW image dnld cmds.\n");
+    printf("                                      Recommend supply identical FW image as\n");
+    printf("                                      current test image.\n");
     printf("                      --- Advanced/Debug Options Follow ---\n");
     printf("  -e(--error) <STS:PXDS:AERUCES:CSTS> Set reg bitmask for bits indicating error\n");
     printf("                                      state after each test completes.\n");
@@ -174,30 +178,33 @@ main(int argc, char *argv[])
     bool deviceFound = false;
     bool accessingHdw = true;
     uint64_t regVal = 0;
-    const char *short_opt = "hsnlpyzia::t::v:o:d:k:f:r:w:q:e:u:g:";
+    const char *short_opt = "hsnlpyzia::t::v:o:d:k:f:r:w:q:e:m:u:g:";
     static struct option long_opt[] = {
         // {name,           has_arg,            flag,   val}
-        {   "help",         no_argument,        NULL,   'h'},
-        {   "summary",      no_argument,        NULL,   's'},
-        {   "preserve",     no_argument,        NULL,   'p'},
-        {   "restore",      no_argument,        NULL,   'y'},
-        {   "rev",          required_argument,  NULL,   'v'},
         {   "detail",       optional_argument,  NULL,   'a'},
         {   "test",         optional_argument,  NULL,   't'},
+
+        {   "rev",          required_argument,  NULL,   'v'},
         {   "device",       required_argument,  NULL,   'd'},
         {   "rmmap" ,       required_argument,  NULL,   'r'},
         {   "wmmap" ,       required_argument,  NULL,   'w'},
-        {   "reset",        no_argument,        NULL,   'z'},
-        {   "ignore",       no_argument,        NULL,   'i'},
-        {   "postfail",     no_argument,        NULL,   'n'},
         {   "loop",         required_argument,  NULL,   'o'},
         {   "skiptest",     required_argument,  NULL,   'k'},
         {   "format",       required_argument,  NULL,   'f'},
-        {   "list",         no_argument,        NULL,   'l'},
         {   "queues",       required_argument,  NULL,   'q'},
         {   "error",        required_argument,  NULL,   'e'},
         {   "dump",         required_argument,  NULL,   'u'},
         {   "golden",       required_argument,  NULL,   'g'},
+        {   "fwimage",      required_argument,  NULL,   'm'},
+
+        {   "help",         no_argument,        NULL,   'h'},
+        {   "summary",      no_argument,        NULL,   's'},
+        {   "preserve",     no_argument,        NULL,   'p'},
+        {   "restore",      no_argument,        NULL,   'y'},
+        {   "list",         no_argument,        NULL,   'l'},
+        {   "reset",        no_argument,        NULL,   'z'},
+        {   "ignore",       no_argument,        NULL,   'i'},
+        {   "postfail",     no_argument,        NULL,   'n'},
         {   NULL,           no_argument,        NULL,    0}
     };
 
@@ -275,6 +282,13 @@ main(int argc, char *argv[])
         case 'g':
             if (ParseGoldenCmdLine(gCmdLine.golden, optarg) == false) {
                 printf("Unable to parse --golden cmd line\n");
+                exit(1);
+            }
+            break;
+
+        case 'm':
+            if (ParseFWImageCmdLine(gCmdLine.fwImage, optarg) == false) {
+                printf("Unable to parse --fwimage cmd line\n");
                 exit(1);
             }
             break;
