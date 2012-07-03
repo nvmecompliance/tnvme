@@ -30,8 +30,7 @@ namespace GrpAdminCreateIOQCmd {
 class GrpAdminCreateIOQCmd : public Group
 {
 public:
-    GrpAdminCreateIOQCmd(size_t grpNum, SpecRev specRev, ErrorRegs errRegs,
-        int fd);
+    GrpAdminCreateIOQCmd(size_t grpNum);
     virtual ~GrpAdminCreateIOQCmd();
 };
 

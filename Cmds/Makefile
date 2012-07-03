@@ -35,6 +35,8 @@ SRC =				\
 	flush.cpp		\
 	getLogPage.cpp		\
 	formatNVM.cpp		\
+	fwActivate.cpp		\
+	fwImgDnld.cpp		\
 	datasetMgmt.cpp
 
 .SUFFIXES: .cpp

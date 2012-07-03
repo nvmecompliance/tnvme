@@ -33,8 +33,7 @@ namespace GrpNVMDatasetMgmtCmd {
 class UnsupportRsvdFields_r10b : public Test
 {
 public:
-    UnsupportRsvdFields_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    UnsupportRsvdFields_r10b(string grpName, string testName);
     virtual ~UnsupportRsvdFields_r10b();
 
     /**

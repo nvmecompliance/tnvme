@@ -28,7 +28,7 @@ namespace GrpTemplate {
 class GrpTemplate : public Group
 {
 public:
-    GrpTemplate(size_t grpNum, SpecRev specRev, ErrorRegs errRegs, int fd);
+    GrpTemplate(size_t grpNum);
     virtual ~GrpTemplate();
 };
 

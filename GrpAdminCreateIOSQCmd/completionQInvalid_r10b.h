@@ -32,8 +32,7 @@ namespace GrpAdminCreateIOSQCmd {
 class CompletionQInvalid_r10b : public Test
 {
 public:
-    CompletionQInvalid_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    CompletionQInvalid_r10b(string grpName, string testName);
     virtual ~CompletionQInvalid_r10b();
 
     /**

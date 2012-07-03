@@ -33,8 +33,7 @@ namespace GrpGeneralCmds {
 class IllegalNVMCmds_r10b : public Test
 {
 public:
-    IllegalNVMCmds_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    IllegalNVMCmds_r10b(string grpName, string testName);
     virtual ~IllegalNVMCmds_r10b();
 
     /**

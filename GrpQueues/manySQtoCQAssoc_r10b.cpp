@@ -24,9 +24,9 @@ namespace GrpQueues {
 static uint32_t NumEntriesIOQ = 5;
 
 
-ManySQtoCQAssoc_r10b::ManySQtoCQAssoc_r10b(int fd, string grpName,
-    string testName, ErrorRegs errRegs) :
-    Test(fd, grpName, testName, SPECREV_10b, errRegs)
+ManySQtoCQAssoc_r10b::ManySQtoCQAssoc_r10b(
+    string grpName, string testName) :
+    Test(grpName, testName, SPECREV_10b)
 {
     // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 4");
@@ -78,6 +78,12 @@ ManySQtoCQAssoc_r10b::operator=(const ManySQtoCQAssoc_r10b &other)
 Test::RunType
 ManySQtoCQAssoc_r10b::RunnableCoreTest(bool preserve)
 {
+    ///////////////////////////////////////////////////////////////////////////
+    // All code contained herein must never permanently modify the state or
+    // configuration of the DUT. Permanence is defined as state or configuration
+    // changes that will not be restored after a cold hard reset.
+    ///////////////////////////////////////////////////////////////////////////
+
     return ((preserve == true) ? RUN_FALSE : RUN_TRUE);   // Test is destructive
 }
 

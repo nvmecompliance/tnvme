@@ -23,9 +23,9 @@
 namespace GrpNVMWriteReadCombo {
 
 
-PRPOffsetDualPgMultiBlk_r10b::PRPOffsetDualPgMultiBlk_r10b(int fd,
-    string mGrpName, string mTestName, ErrorRegs errRegs) :
-    Test(fd, mGrpName, mTestName, SPECREV_10b, errRegs)
+PRPOffsetDualPgMultiBlk_r10b::PRPOffsetDualPgMultiBlk_r10b(
+    string grpName, string testName) :
+    Test(grpName, testName, SPECREV_10b)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 6");
@@ -85,6 +85,12 @@ PRPOffsetDualPgMultiBlk_r10b::operator=(const PRPOffsetDualPgMultiBlk_r10b
 Test::RunType
 PRPOffsetDualPgMultiBlk_r10b::RunnableCoreTest(bool preserve)
 {
+    ///////////////////////////////////////////////////////////////////////////
+    // All code contained herein must never permanently modify the state or
+    // configuration of the DUT. Permanence is defined as state or configuration
+    // changes that will not be restored after a cold hard reset.
+    ///////////////////////////////////////////////////////////////////////////
+
     return ((preserve == true) ? RUN_FALSE : RUN_TRUE);   // Test is destructive
 }
 
@@ -105,9 +111,9 @@ PRPOffsetDualPgMultiBlk_r10b::RunCoreTest()
         throw FrmwkEx(HERE);
 
     LOG_NRM("Create ACQ and ASQ objects which have test life time");
-    SharedACQPtr acq = CAST_TO_ACQ(SharedACQPtr(new ACQ(mFd)))
+    SharedACQPtr acq = CAST_TO_ACQ(SharedACQPtr(new ACQ(gDutFd)))
     acq->Init(5);
-    SharedASQPtr asq = CAST_TO_ASQ(SharedASQPtr(new ASQ(mFd)))
+    SharedASQPtr asq = CAST_TO_ASQ(SharedASQPtr(new ASQ(gDutFd)))
     asq->Init(5);
 
     IRQ::SetAnySchemeSpecifyNum(2);     // throws upon error

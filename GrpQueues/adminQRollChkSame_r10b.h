@@ -34,8 +34,7 @@ namespace GrpQueues {
 class AdminQRollChkSame_r10b : public Test
 {
 public:
-    AdminQRollChkSame_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    AdminQRollChkSame_r10b(string grpName, string testName);
     virtual ~AdminQRollChkSame_r10b();
 
     /**

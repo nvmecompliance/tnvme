@@ -30,9 +30,9 @@
 namespace GrpNVMDatasetMgmtCmd {
 
 
-PRP1PRP2NR_r10b::PRP1PRP2NR_r10b(int fd, string mGrpName,
-    string mTestName, ErrorRegs errRegs) :
-    Test(fd, mGrpName, mTestName, SPECREV_10b, errRegs)
+PRP1PRP2NR_r10b::PRP1PRP2NR_r10b(
+    string grpName, string testName) :
+    Test(grpName, testName, SPECREV_10b)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 6");
@@ -92,6 +92,17 @@ PRP1PRP2NR_r10b::operator=(const PRP1PRP2NR_r10b &other)
 Test::RunType
 PRP1PRP2NR_r10b::RunnableCoreTest(bool preserve)
 {
+    ///////////////////////////////////////////////////////////////////////////
+    // All code contained herein must never permanently modify the state or
+    // configuration of the DUT. Permanence is defined as state or configuration
+    // changes that will not be restored after a cold hard reset.
+    ///////////////////////////////////////////////////////////////////////////
+
+    ConstSharedIdentifyPtr idCtrlrCap = gInformative->GetIdentifyCmdCtrlr();
+    uint64_t oncs = idCtrlrCap->GetValue(IDCTRLRCAP_ONCS);
+    if ((oncs & ONCS_SUP_DSM_CMD) == 0)
+        return RUN_FALSE;
+
     preserve = preserve;    // Suppress compiler error/warning
     return RUN_TRUE;        // This test is never destructive
 }

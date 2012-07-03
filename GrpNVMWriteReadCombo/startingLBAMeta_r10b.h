@@ -36,8 +36,7 @@ namespace GrpNVMWriteReadCombo {
 class StartingLBAMeta_r10b : public Test
 {
 public:
-    StartingLBAMeta_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    StartingLBAMeta_r10b(string grpName, string testName);
     virtual ~StartingLBAMeta_r10b();
 
     /**

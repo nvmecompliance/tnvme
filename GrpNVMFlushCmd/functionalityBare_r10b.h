@@ -35,8 +35,7 @@ namespace GrpNVMFlushCmd {
 class FunctionalityBare_r10b : public Test
 {
 public:
-    FunctionalityBare_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    FunctionalityBare_r10b(string grpName, string testName);
     virtual ~FunctionalityBare_r10b();
 
     /**

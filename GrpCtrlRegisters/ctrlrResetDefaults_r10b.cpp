@@ -21,9 +21,9 @@
 namespace GrpCtrlRegisters {
 
 
-CtrlrResetDefaults_r10b::CtrlrResetDefaults_r10b(int fd, string grpName,
-    string testName, ErrorRegs errRegs) :
-    Test(fd, grpName, testName, SPECREV_10b, errRegs)
+CtrlrResetDefaults_r10b::CtrlrResetDefaults_r10b(
+    string grpName, string testName) :
+    Test(grpName, testName, SPECREV_10b)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 3");
@@ -72,6 +72,12 @@ CtrlrResetDefaults_r10b::operator=(const CtrlrResetDefaults_r10b &other)
 Test::RunType
 CtrlrResetDefaults_r10b::RunnableCoreTest(bool preserve)
 {
+    ///////////////////////////////////////////////////////////////////////////
+    // All code contained herein must never permanently modify the state or
+    // configuration of the DUT. Permanence is defined as state or configuration
+    // changes that will not be restored after a cold hard reset.
+    ///////////////////////////////////////////////////////////////////////////
+
     preserve = preserve;    // Suppress compiler error/warning
     return RUN_TRUE;        // This test is never destructive
 }
@@ -101,10 +107,10 @@ CtrlrResetDefaults_r10b::VerifyCtrlrResetDefaults()
         throw FrmwkEx(HERE);
 
     // Create ACQ and ASQ objects which have test life time
-    SharedACQPtr acq = CAST_TO_ACQ(SharedACQPtr(new ACQ(mFd)))
+    SharedACQPtr acq = CAST_TO_ACQ(SharedACQPtr(new ACQ(gDutFd)))
     acq->Init(5);
 
-    SharedASQPtr asq = CAST_TO_ASQ(SharedASQPtr(new ASQ(mFd)))
+    SharedASQPtr asq = CAST_TO_ASQ(SharedASQPtr(new ASQ(gDutFd)))
     asq->Init(5);
 
     gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);

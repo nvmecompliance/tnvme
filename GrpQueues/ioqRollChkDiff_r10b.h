@@ -38,8 +38,7 @@ namespace GrpQueues {
 class IOQRollChkDiff_r10b : public Test
 {
 public:
-    IOQRollChkDiff_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    IOQRollChkDiff_r10b(string grpName, string testName);
     virtual ~IOQRollChkDiff_r10b();
 
     /**

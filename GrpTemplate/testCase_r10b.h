@@ -32,7 +32,7 @@ namespace GrpTemplate {
 class TestCase_r10b : public Test
 {
 public:
-    TestCase_r10b(int fd, string grpName, string testName, ErrorRegs errRegs);
+    TestCase_r10b(string grpName, string testName);
     virtual ~TestCase_r10b();
 
     /**

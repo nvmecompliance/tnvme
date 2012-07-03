@@ -32,8 +32,7 @@ namespace GrpAdminCreateIOSQCmd {
 class AcceptQPriority_r10b : public Test
 {
 public:
-    AcceptQPriority_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    AcceptQPriority_r10b(string grpName, string testName);
     virtual ~AcceptQPriority_r10b();
 
     /**

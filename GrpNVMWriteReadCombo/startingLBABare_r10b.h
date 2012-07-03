@@ -33,8 +33,7 @@ namespace GrpNVMWriteReadCombo {
 class StartingLBABare_r10b : public Test
 {
 public:
-    StartingLBABare_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    StartingLBABare_r10b(string grpName, string testName);
     virtual ~StartingLBABare_r10b();
 
     /**

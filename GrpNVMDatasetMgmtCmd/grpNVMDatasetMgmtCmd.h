@@ -28,7 +28,7 @@ namespace GrpNVMDatasetMgmtCmd {
 class GrpNVMDatasetMgmtCmd : public Group
 {
 public:
-    GrpNVMDatasetMgmtCmd(size_t grpNum, SpecRev specRev, ErrorRegs errRegs, int fd);
+    GrpNVMDatasetMgmtCmd(size_t grpNum);
     virtual ~GrpNVMDatasetMgmtCmd();
 };
 

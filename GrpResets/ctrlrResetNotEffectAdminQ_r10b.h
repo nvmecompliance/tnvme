@@ -34,8 +34,7 @@ namespace GrpResets {
 class CtrlrResetNotEffectAdminQ_r10b : public Test
 {
 public:
-    CtrlrResetNotEffectAdminQ_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    CtrlrResetNotEffectAdminQ_r10b(string grpName, string testName);
     virtual ~CtrlrResetNotEffectAdminQ_r10b();
 
     /**

@@ -39,8 +39,7 @@ namespace GrpNVMWriteReadCombo {
 class PRPOffsetMultiPgMultiBlk_r10b : public Test
 {
 public:
-    PRPOffsetMultiPgMultiBlk_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    PRPOffsetMultiPgMultiBlk_r10b(string grpName, string testName);
     virtual ~PRPOffsetMultiPgMultiBlk_r10b();
 
     /**

@@ -32,8 +32,7 @@ namespace GrpCtrlRegisters {
 class AllCtrlRegs_r10b : public Test
 {
 public:
-    AllCtrlRegs_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    AllCtrlRegs_r10b(string grpName, string testName);
     virtual ~AllCtrlRegs_r10b();
 
     /**

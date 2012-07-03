@@ -35,8 +35,7 @@ namespace GrpQueues {
 class ManyCmdSubmit_r10b : public Test
 {
 public:
-    ManyCmdSubmit_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    ManyCmdSubmit_r10b(string grpName, string testName);
     virtual ~ManyCmdSubmit_r10b();
 
     /**

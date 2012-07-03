@@ -21,30 +21,31 @@
 #include "unsupportRsvdFields_r10b.h"
 #include "prp1PRP2NR_r10b.h"
 #include "attributes_r10b.h"
+#include "verifyNUSE_r10b.h"
 
 namespace GrpNVMDatasetMgmtCmd {
 
 
-GrpNVMDatasetMgmtCmd::GrpNVMDatasetMgmtCmd(size_t grpNum, SpecRev specRev,
-    ErrorRegs errRegs, int fd) :
-    Group(grpNum, specRev, "GrpNVMDatasetMgmtCmd",
-        "NVM cmd set data set mgmt tests")
+GrpNVMDatasetMgmtCmd::GrpNVMDatasetMgmtCmd(size_t grpNum) :
+    Group(grpNum, "GrpNVMDatasetMgmtCmd", "NVM cmd set data set mgmt tests")
 {
     // For complete details about the APPEND_TEST_AT_?LEVEL() macros:
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Numbering" and
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Strategy
-    switch (mSpecRev) {
+    switch (gCmdLine.rev) {
     case SPECREV_10b:
-        APPEND_TEST_AT_XLEVEL(CreateResources_r10b, fd, GrpNVMDatasetMgmtCmd, errRegs)
-        APPEND_TEST_AT_YLEVEL(InvalidNamspc_r10b, fd, GrpNVMDatasetMgmtCmd, errRegs)
-        APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r10b, fd, GrpNVMDatasetMgmtCmd, errRegs)
-        APPEND_TEST_AT_YLEVEL(PRP1PRP2NR_r10b, fd, GrpNVMDatasetMgmtCmd, errRegs)
-        APPEND_TEST_AT_YLEVEL(Attributes_r10b, fd, GrpNVMDatasetMgmtCmd, errRegs)
+        APPEND_TEST_AT_XLEVEL(CreateResources_r10b, GrpNVMDatasetMgmtCmd)
+        APPEND_TEST_AT_YLEVEL(InvalidNamspc_r10b, GrpNVMDatasetMgmtCmd)
+        APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r10b, GrpNVMDatasetMgmtCmd)
+        APPEND_TEST_AT_YLEVEL(PRP1PRP2NR_r10b, GrpNVMDatasetMgmtCmd)
+        APPEND_TEST_AT_YLEVEL(Attributes_r10b, GrpNVMDatasetMgmtCmd)
+        APPEND_TEST_AT_YLEVEL(VerifyNUSE_r10b, GrpNVMDatasetMgmtCmd)
         break;
 
     default:
     case SPECREVTYPE_FENCE:
-        throw FrmwkEx(HERE, "Object created with an unknown SpecRev=%d", specRev);
+        throw FrmwkEx(HERE, "Object created with an unknown SpecRev=%d",
+            gCmdLine.rev);
     }
 }
 

@@ -32,8 +32,7 @@ namespace GrpNVMWriteCmd {
 class IgnoreMetaPtrMeta_r10b : public Test
 {
 public:
-    IgnoreMetaPtrMeta_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    IgnoreMetaPtrMeta_r10b(string grpName, string testName);
     virtual ~IgnoreMetaPtrMeta_r10b();
 
     /**

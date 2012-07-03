@@ -26,9 +26,9 @@
 namespace GrpNVMWriteCmd {
 
 
-ProtInfoIgnoreBare_r10b::ProtInfoIgnoreBare_r10b(int fd, string mGrpName,
-    string mTestName, ErrorRegs errRegs) :
-    Test(fd, mGrpName, mTestName, SPECREV_10b, errRegs)
+ProtInfoIgnoreBare_r10b::ProtInfoIgnoreBare_r10b(
+    string grpName, string testName) :
+    Test(grpName, testName, SPECREV_10b)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 4,6");
@@ -76,6 +76,12 @@ ProtInfoIgnoreBare_r10b::operator=(const ProtInfoIgnoreBare_r10b &other)
 Test::RunType
 ProtInfoIgnoreBare_r10b::RunnableCoreTest(bool preserve)
 {
+    ///////////////////////////////////////////////////////////////////////////
+    // All code contained herein must never permanently modify the state or
+    // configuration of the DUT. Permanence is defined as state or configuration
+    // changes that will not be restored after a cold hard reset.
+    ///////////////////////////////////////////////////////////////////////////
+
     return ((preserve == true) ? RUN_FALSE : RUN_TRUE);   // Test is destructive
 }
 

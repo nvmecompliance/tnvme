@@ -33,8 +33,7 @@ namespace GrpCtrlRegisters {
 class CtrlrResetDefaults_r10b : public Test
 {
 public:
-    CtrlrResetDefaults_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    CtrlrResetDefaults_r10b(string grpName, string testName);
     virtual ~CtrlrResetDefaults_r10b();
 
     /**

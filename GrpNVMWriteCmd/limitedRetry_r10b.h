@@ -33,8 +33,7 @@ namespace GrpNVMWriteCmd {
 class LimitedRetry_r10b : public Test
 {
 public:
-    LimitedRetry_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    LimitedRetry_r10b(string grpName, string testName);
     virtual ~LimitedRetry_r10b();
 
     /**

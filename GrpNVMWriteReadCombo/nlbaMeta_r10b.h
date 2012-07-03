@@ -35,8 +35,7 @@ namespace GrpNVMWriteReadCombo {
 class NLBAMeta_r10b : public Test
 {
 public:
-    NLBAMeta_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    NLBAMeta_r10b(string grpName, string testName);
     virtual ~NLBAMeta_r10b();
 
     /**

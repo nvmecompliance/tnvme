@@ -34,8 +34,7 @@ namespace GrpResets {
 class CtrlrResetIOQDeleted_r10b : public Test
 {
 public:
-    CtrlrResetIOQDeleted_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    CtrlrResetIOQDeleted_r10b(string grpName, string testName);
     virtual ~CtrlrResetIOQDeleted_r10b();
 
     /**

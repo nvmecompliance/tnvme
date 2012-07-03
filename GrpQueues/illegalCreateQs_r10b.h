@@ -34,8 +34,7 @@ namespace GrpQueues {
 class IllegalCreateQs_r10b : public Test
 {
 public:
-    IllegalCreateQs_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    IllegalCreateQs_r10b(string grpName, string testName);
     virtual ~IllegalCreateQs_r10b();
 
     /**

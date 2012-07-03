@@ -32,8 +32,7 @@ namespace GrpNVMReadCmd {
 class IgnoreMetaPtrBare_r10b : public Test
 {
 public:
-    IgnoreMetaPtrBare_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    IgnoreMetaPtrBare_r10b(string grpName, string testName);
     virtual ~IgnoreMetaPtrBare_r10b();
 
     /**

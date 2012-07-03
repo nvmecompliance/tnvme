@@ -30,8 +30,7 @@ namespace GrpGeneralCmds {
 class GrpGeneralCmds : public Group
 {
 public:
-    GrpGeneralCmds(size_t grpNum, SpecRev specRev, ErrorRegs errRegs,
-        int fd);
+    GrpGeneralCmds(size_t grpNum);
     virtual ~GrpGeneralCmds();
 };
 

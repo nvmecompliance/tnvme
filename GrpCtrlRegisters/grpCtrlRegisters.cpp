@@ -22,22 +22,22 @@
 namespace GrpCtrlRegisters {
 
 
-GrpCtrlRegisters::GrpCtrlRegisters(size_t grpNum, SpecRev specRev,
-    ErrorRegs errRegs, int fd) :
-    Group(grpNum, specRev, "GrpCtrlRegisters", "Controller registers syntactic")
+GrpCtrlRegisters::GrpCtrlRegisters(size_t grpNum) :
+    Group(grpNum, "GrpCtrlRegisters", "Controller registers syntactic")
 {
     // For complete details about the APPEND_TEST_AT_?LEVEL() macros:
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Numbering" and
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Strategy
-    switch (mSpecRev) {
+    switch (gCmdLine.rev) {
     case SPECREV_10b:
-        APPEND_TEST_AT_XLEVEL(AllCtrlRegs_r10b, fd, GrpCtrlRegisters, errRegs)
-        APPEND_TEST_AT_XLEVEL(CtrlrResetDefaults_r10b, fd, GrpCtrlRegisters, errRegs)
+        APPEND_TEST_AT_XLEVEL(AllCtrlRegs_r10b, GrpCtrlRegisters)
+        APPEND_TEST_AT_XLEVEL(CtrlrResetDefaults_r10b, GrpCtrlRegisters)
         break;
 
     default:
     case SPECREVTYPE_FENCE:
-        throw FrmwkEx(HERE, "Object created with an unknown SpecRev=%d", specRev);
+        throw FrmwkEx(HERE, "Object created with an unknown SpecRev=%d",
+            gCmdLine.rev);
     }
 }
 

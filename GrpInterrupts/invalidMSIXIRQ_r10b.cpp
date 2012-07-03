@@ -29,9 +29,9 @@
 namespace GrpInterrupts {
 
 
-InvalidMSIXIRQ_r10b::InvalidMSIXIRQ_r10b(int fd, string grpName,
-    string testName, ErrorRegs errRegs) :
-    Test(fd, grpName, testName, SPECREV_10b, errRegs)
+InvalidMSIXIRQ_r10b::InvalidMSIXIRQ_r10b(
+    string grpName, string testName) :
+    Test(grpName, testName, SPECREV_10b)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 4,7");
@@ -80,6 +80,12 @@ InvalidMSIXIRQ_r10b::operator=(const InvalidMSIXIRQ_r10b &other)
 Test::RunType
 InvalidMSIXIRQ_r10b::RunnableCoreTest(bool preserve)
 {
+    ///////////////////////////////////////////////////////////////////////////
+    // All code contained herein must never permanently modify the state or
+    // configuration of the DUT. Permanence is defined as state or configuration
+    // changes that will not be restored after a cold hard reset.
+    ///////////////////////////////////////////////////////////////////////////
+
     preserve = preserve;    // Suppress compiler error/warning
     return RUN_TRUE;        // This test is never destructive
 }
@@ -138,7 +144,7 @@ InvalidMSIXIRQ_r10b::RunCoreTest()
         // We must re-init the objects because a failed attempt at creating an
         // IOCQ forces dnvme to deconstruct the entire thing when it is reaped.
         LOG_NRM("Create the IOCQ and the cmd to issue to the DUT");
-        SharedIOCQPtr iocq = SharedIOCQPtr(new IOCQ(mFd));
+        SharedIOCQPtr iocq = SharedIOCQPtr(new IOCQ(gDutFd));
         LOG_NRM("Allocate contiguous memory; IOCQ has ID=%d", IOQ_ID);
         iocq->Init(IOQ_ID, NUM_IOQ_ENTRY, true, (numIrqSupport - 1));
         SharedCreateIOCQPtr createIOCQCmd =

@@ -34,8 +34,7 @@ namespace GrpNVMDatasetMgmtCmd {
 class InvalidNamspc_r10b : public Test
 {
 public:
-    InvalidNamspc_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    InvalidNamspc_r10b(string grpName, string testName);
     virtual ~InvalidNamspc_r10b();
 
     /**

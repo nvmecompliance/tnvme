@@ -28,8 +28,7 @@ namespace GrpNVMWriteUncorrectCmd {
 class GrpNVMWriteUncorrectCmd : public Group
 {
 public:
-    GrpNVMWriteUncorrectCmd(size_t grpNum, SpecRev specRev, ErrorRegs errRegs,
-        int fd);
+    GrpNVMWriteUncorrectCmd(size_t grpNum);
     virtual ~GrpNVMWriteUncorrectCmd();
 };
 

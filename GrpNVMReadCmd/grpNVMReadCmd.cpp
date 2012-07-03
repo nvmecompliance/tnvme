@@ -30,31 +30,31 @@
 namespace GrpNVMReadCmd {
 
 
-GrpNVMReadCmd::GrpNVMReadCmd(size_t grpNum, SpecRev specRev, ErrorRegs errRegs,
-    int fd) :
-    Group(grpNum, specRev, "GrpNVMReadCmd", "NVM cmd set read cmd tests")
+GrpNVMReadCmd::GrpNVMReadCmd(size_t grpNum) :
+    Group(grpNum, "GrpNVMReadCmd", "NVM cmd set read cmd tests")
 {
     // For complete details about the APPEND_TEST_AT_?LEVEL() macros:
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Numbering" and
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Strategy
-    switch (mSpecRev) {
+    switch (gCmdLine.rev) {
     case SPECREV_10b:
-        APPEND_TEST_AT_XLEVEL(CreateResources_r10b, fd, GrpNVMReadCmd, errRegs)
-        APPEND_TEST_AT_YLEVEL(LBAOutOfRangeBare_r10b, fd, GrpNVMReadCmd, errRegs)
-        APPEND_TEST_AT_YLEVEL(InvalidNamspc_r10b, fd, GrpNVMReadCmd, errRegs)
-        APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r10b, fd, GrpNVMReadCmd, errRegs)
-        APPEND_TEST_AT_YLEVEL(ProtInfoIgnoreBare_r10b, fd, GrpNVMReadCmd, errRegs)
-        APPEND_TEST_AT_YLEVEL(IgnoreMetaPtrBare_r10b, fd, GrpNVMReadCmd, errRegs)
-        APPEND_TEST_AT_YLEVEL(FUA_r10b, fd, GrpNVMReadCmd, errRegs)
-        APPEND_TEST_AT_YLEVEL(LimitedRetry_r10b, fd, GrpNVMReadCmd, errRegs)
-        APPEND_TEST_AT_YLEVEL(IgnoreMetaPtrMeta_r10b, fd, GrpNVMReadCmd, errRegs)
-        APPEND_TEST_AT_XLEVEL(LBAOutOfRangeMeta_r10b, fd, GrpNVMReadCmd, errRegs)
-        APPEND_TEST_AT_XLEVEL(ProtInfoIgnoreMeta_r10b, fd, GrpNVMReadCmd, errRegs)
+        APPEND_TEST_AT_XLEVEL(CreateResources_r10b, GrpNVMReadCmd)
+        APPEND_TEST_AT_YLEVEL(LBAOutOfRangeBare_r10b, GrpNVMReadCmd)
+        APPEND_TEST_AT_YLEVEL(InvalidNamspc_r10b, GrpNVMReadCmd)
+        APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r10b, GrpNVMReadCmd)
+        APPEND_TEST_AT_YLEVEL(ProtInfoIgnoreBare_r10b, GrpNVMReadCmd)
+        APPEND_TEST_AT_YLEVEL(IgnoreMetaPtrBare_r10b, GrpNVMReadCmd)
+        APPEND_TEST_AT_YLEVEL(FUA_r10b, GrpNVMReadCmd)
+        APPEND_TEST_AT_YLEVEL(LimitedRetry_r10b, GrpNVMReadCmd)
+        APPEND_TEST_AT_YLEVEL(IgnoreMetaPtrMeta_r10b, GrpNVMReadCmd)
+        APPEND_TEST_AT_XLEVEL(LBAOutOfRangeMeta_r10b, GrpNVMReadCmd)
+        APPEND_TEST_AT_XLEVEL(ProtInfoIgnoreMeta_r10b, GrpNVMReadCmd)
         break;
 
     default:
     case SPECREVTYPE_FENCE:
-        throw FrmwkEx(HERE, "Object created with an unknown SpecRev=%d", specRev);
+        throw FrmwkEx(HERE, "Object created with an unknown SpecRev=%d",
+            gCmdLine.rev);
     }
 }
 

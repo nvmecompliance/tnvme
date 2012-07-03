@@ -35,8 +35,7 @@ namespace GrpInterrupts {
 class MaxIOQMSIXManyTo1_r10b : public Test
 {
 public:
-    MaxIOQMSIXManyTo1_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    MaxIOQMSIXManyTo1_r10b(string grpName, string testName);
     virtual ~MaxIOQMSIXManyTo1_r10b();
 
     /**

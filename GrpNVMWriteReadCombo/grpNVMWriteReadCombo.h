@@ -31,8 +31,7 @@ namespace GrpNVMWriteReadCombo {
 class GrpNVMWriteReadCombo : public Group
 {
 public:
-    GrpNVMWriteReadCombo(size_t grpNum, SpecRev specRev, ErrorRegs errRegs,
-        int fd);
+    GrpNVMWriteReadCombo(size_t grpNum);
     virtual ~GrpNVMWriteReadCombo();
 };
 

@@ -35,8 +35,7 @@ namespace GrpAdminCreateIOQCmd {
 class PRPLessPageContig_r10b : public Test
 {
 public:
-    PRPLessPageContig_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    PRPLessPageContig_r10b(string grpName, string testName);
     virtual ~PRPLessPageContig_r10b();
 
     /**

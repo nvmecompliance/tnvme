@@ -36,8 +36,7 @@ namespace GrpQueues {
 class IOQFull_r10b : public Test
 {
 public:
-    IOQFull_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    IOQFull_r10b(string grpName, string testName);
     virtual ~IOQFull_r10b();
 
     /**

@@ -27,12 +27,19 @@
 
 /// The sole targeted DUT's file descriptor
 extern int gDutFd;
+
+/// The appliation's cmd line args
+extern struct CmdLine gCmdLine;
+
 /// Tests are encouraged to use this instance for all register access
 extern Registers *gRegisters;
+
 /// Tests are encouraged to use this instance to allocate test resources
 extern RsrcMngr *gRsrcMngr;
+
 /// Tests are encouraged to use this instance to interface with ctrlr config
 extern CtrlrConfig *gCtrlrConfig;
+
 /// Tests are encouraged to use this instance to learn common DUT parameters
 extern Informative *gInformative;
 

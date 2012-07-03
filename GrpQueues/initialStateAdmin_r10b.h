@@ -34,8 +34,7 @@ namespace GrpQueues {
 class InitialStateAdmin_r10b : public Test
 {
 public:
-    InitialStateAdmin_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    InitialStateAdmin_r10b(string grpName, string testName);
     virtual ~InitialStateAdmin_r10b();
 
     /**

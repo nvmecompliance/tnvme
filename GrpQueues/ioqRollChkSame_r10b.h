@@ -38,8 +38,7 @@ namespace GrpQueues {
 class IOQRollChkSame_r10b : public Test
 {
 public:
-    IOQRollChkSame_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    IOQRollChkSame_r10b(string grpName, string testName);
     virtual ~IOQRollChkSame_r10b();
 
     /**

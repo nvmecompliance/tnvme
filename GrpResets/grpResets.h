@@ -30,7 +30,7 @@ namespace GrpResets {
 class GrpResets : public Group
 {
 public:
-    GrpResets(size_t grpNum, SpecRev specRev, ErrorRegs errRegs, int fd);
+    GrpResets(size_t grpNum);
     virtual ~GrpResets();
 };
 

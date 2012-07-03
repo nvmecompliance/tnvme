@@ -24,9 +24,9 @@
 namespace GrpQueues {
 
 
-SQCQSizeMismatch_r10b::SQCQSizeMismatch_r10b(int fd, string grpName,
-    string testName, ErrorRegs errRegs) :
-    Test(fd, grpName, testName, SPECREV_10b, errRegs)
+SQCQSizeMismatch_r10b::SQCQSizeMismatch_r10b(
+    string grpName, string testName) :
+    Test(grpName, testName, SPECREV_10b)
 {
     // 66 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 4");
@@ -82,6 +82,12 @@ SQCQSizeMismatch_r10b::operator=(const SQCQSizeMismatch_r10b &other)
 Test::RunType
 SQCQSizeMismatch_r10b::RunnableCoreTest(bool preserve)
 {
+    ///////////////////////////////////////////////////////////////////////////
+    // All code contained herein must never permanently modify the state or
+    // configuration of the DUT. Permanence is defined as state or configuration
+    // changes that will not be restored after a cold hard reset.
+    ///////////////////////////////////////////////////////////////////////////
+
     return ((preserve == true) ? RUN_FALSE : RUN_TRUE);   // Test is destructive
 }
 

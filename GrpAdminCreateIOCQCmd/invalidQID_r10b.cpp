@@ -25,9 +25,9 @@
 namespace GrpAdminCreateIOCQCmd {
 
 
-InvalidQID_r10b::InvalidQID_r10b(int fd, string mGrpName,
-    string mTestName, ErrorRegs errRegs) :
-    Test(fd, mGrpName, mTestName, SPECREV_10b, errRegs)
+InvalidQID_r10b::InvalidQID_r10b(
+    string grpName, string testName) :
+    Test(grpName, testName, SPECREV_10b)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 5");
@@ -73,6 +73,12 @@ InvalidQID_r10b::operator=(const InvalidQID_r10b &other)
 Test::RunType
 InvalidQID_r10b::RunnableCoreTest(bool preserve)
 {
+    ///////////////////////////////////////////////////////////////////////////
+    // All code contained herein must never permanently modify the state or
+    // configuration of the DUT. Permanence is defined as state or configuration
+    // changes that will not be restored after a cold hard reset.
+    ///////////////////////////////////////////////////////////////////////////
+
     preserve = preserve;    // Suppress compiler error/warning
     return RUN_TRUE;        // This test is never destructive
 }
@@ -94,10 +100,10 @@ InvalidQID_r10b::RunCoreTest()
         throw FrmwkEx(HERE);
 
     LOG_NRM("Create admin queues ACQ and ASQ");
-    SharedACQPtr acq = SharedACQPtr(new ACQ(mFd));
+    SharedACQPtr acq = SharedACQPtr(new ACQ(gDutFd));
     acq->Init(5);
 
-    SharedASQPtr asq = SharedASQPtr(new ASQ(mFd));
+    SharedASQPtr asq = SharedASQPtr(new ASQ(gDutFd));
     asq->Init(5);
 
     // All queues will use identical IRQ vector
@@ -122,7 +128,7 @@ InvalidQID_r10b::RunCoreTest()
     for (list<uint32_t>::iterator qId = illegalQIDs.begin();
         qId != illegalQIDs.end(); qId++) {
         LOG_NRM("Process each CreateIOCQCmd with iocq id #%d", *qId);
-        SharedIOCQPtr iocq = SharedIOCQPtr(new IOCQ(mFd));
+        SharedIOCQPtr iocq = SharedIOCQPtr(new IOCQ(gDutFd));
         iocq->Init(*qId, maxIOQEntries, true, 0);
         SharedCreateIOCQPtr createIOCQCmd =
             SharedCreateIOCQPtr(new CreateIOCQ());

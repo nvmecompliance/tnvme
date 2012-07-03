@@ -28,9 +28,9 @@ namespace GrpResets {
 #define IOSQ_ID                     2
 
 
-CtrlrResetIOQDeleted_r10b::CtrlrResetIOQDeleted_r10b(int fd, string grpName,
-    string testName, ErrorRegs errRegs) :
-    Test(fd, grpName, testName, SPECREV_10b, errRegs)
+CtrlrResetIOQDeleted_r10b::CtrlrResetIOQDeleted_r10b(
+    string grpName, string testName) :
+    Test(grpName, testName, SPECREV_10b)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 7");
@@ -79,6 +79,12 @@ CtrlrResetIOQDeleted_r10b::operator=(const CtrlrResetIOQDeleted_r10b &other)
 Test::RunType
 CtrlrResetIOQDeleted_r10b::RunnableCoreTest(bool preserve)
 {
+    ///////////////////////////////////////////////////////////////////////////
+    // All code contained herein must never permanently modify the state or
+    // configuration of the DUT. Permanence is defined as state or configuration
+    // changes that will not be restored after a cold hard reset.
+    ///////////////////////////////////////////////////////////////////////////
+
     preserve = preserve;    // Suppress compiler error/warning
     return RUN_TRUE;        // This test is never destructive
 }
@@ -115,9 +121,9 @@ CtrlrResetIOQDeleted_r10b::RunCoreTest()
     }
 
     // Create Admin Q Objects with test lifetime
-    SharedACQPtr acq = SharedACQPtr(new ACQ(mFd));
+    SharedACQPtr acq = SharedACQPtr(new ACQ(gDutFd));
     acq->Init(15);
-    SharedASQPtr asq = SharedASQPtr(new ASQ(mFd));
+    SharedASQPtr asq = SharedASQPtr(new ASQ(gDutFd));
     asq->Init(15);
 
     VerifyCtrlrResetDeletesIOQs(acq, asq, numEntriesIOQ);

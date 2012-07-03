@@ -54,31 +54,31 @@
 #include "GrpAdminCreateIOQCmd/grpAdminCreateIOQCmd.h"
 
 void
-InstantiateGroups(vector<Group *> &groups, struct CmdLine &cl)
+InstantiateGroups(vector<Group *> &groups)
 {
     // Appending new groups is the most favorable action here
-    groups.push_back(new GrpPciRegisters::GrpPciRegisters(groups.size(), cl.rev, cl.errRegs, gDutFd));
-    groups.push_back(new GrpCtrlRegisters::GrpCtrlRegisters(groups.size(), cl.rev, cl.errRegs, gDutFd));
-    groups.push_back(new GrpBasicInit::GrpBasicInit(groups.size(), cl.rev, cl.errRegs, gDutFd));
-    groups.push_back(new GrpResets::GrpResets(groups.size(), cl.rev, cl.errRegs, gDutFd));
-    groups.push_back(new GrpGeneralCmds::GrpGeneralCmds(groups.size(), cl.rev, cl.errRegs, gDutFd));
+    groups.push_back(new GrpPciRegisters::GrpPciRegisters(groups.size()));
+    groups.push_back(new GrpCtrlRegisters::GrpCtrlRegisters(groups.size()));
+    groups.push_back(new GrpBasicInit::GrpBasicInit(groups.size()));
+    groups.push_back(new GrpResets::GrpResets(groups.size()));
+    groups.push_back(new GrpGeneralCmds::GrpGeneralCmds(groups.size()));
     // Following is assigned grp ID=5
-    groups.push_back(new GrpQueues::GrpQueues(groups.size(), cl.rev, cl.errRegs, gDutFd));
-    groups.push_back(new GrpNVMReadCmd::GrpNVMReadCmd(groups.size(), cl.rev, cl.errRegs, gDutFd));
-    groups.push_back(new GrpNVMWriteCmd::GrpNVMWriteCmd(groups.size(), cl.rev, cl.errRegs, gDutFd));
-    groups.push_back(new GrpNVMWriteReadCombo::GrpNVMWriteReadCombo(groups.size(), cl.rev, cl.errRegs, gDutFd));
-    groups.push_back(new GrpNVMFlushCmd::GrpNVMFlushCmd(groups.size(), cl.rev, cl.errRegs, gDutFd));
+    groups.push_back(new GrpQueues::GrpQueues(groups.size()));
+    groups.push_back(new GrpNVMReadCmd::GrpNVMReadCmd(groups.size()));
+    groups.push_back(new GrpNVMWriteCmd::GrpNVMWriteCmd(groups.size()));
+    groups.push_back(new GrpNVMWriteReadCombo::GrpNVMWriteReadCombo(groups.size()));
+    groups.push_back(new GrpNVMFlushCmd::GrpNVMFlushCmd(groups.size()));
     // Following is assigned grp ID=10
-    groups.push_back(new GrpInterrupts::GrpInterrupts(groups.size(), cl.rev, cl.errRegs, gDutFd));
-    groups.push_back(new GrpNVMWriteUncorrectCmd::GrpNVMWriteUncorrectCmd(groups.size(), cl.rev, cl.errRegs, gDutFd));
-    groups.push_back(new GrpNVMDatasetMgmtCmd::GrpNVMDatasetMgmtCmd(groups.size(), cl.rev, cl.errRegs, gDutFd));
-    groups.push_back(new GrpNVMCompareCmd::GrpNVMCompareCmd(groups.size(), cl.rev, cl.errRegs, gDutFd));
-    groups.push_back(new GrpAdminDeleteIOCQCmd::GrpAdminDeleteIOCQCmd(groups.size(), cl.rev, cl.errRegs, gDutFd));
+    groups.push_back(new GrpInterrupts::GrpInterrupts(groups.size()));
+    groups.push_back(new GrpNVMWriteUncorrectCmd::GrpNVMWriteUncorrectCmd(groups.size()));
+    groups.push_back(new GrpNVMDatasetMgmtCmd::GrpNVMDatasetMgmtCmd(groups.size()));
+    groups.push_back(new GrpNVMCompareCmd::GrpNVMCompareCmd(groups.size()));
+    groups.push_back(new GrpAdminDeleteIOCQCmd::GrpAdminDeleteIOCQCmd(groups.size()));
     // Following is assigned grp ID=15
-    groups.push_back(new GrpAdminDeleteIOSQCmd::GrpAdminDeleteIOSQCmd(groups.size(), cl.rev, cl.errRegs, gDutFd));
-    groups.push_back(new GrpAdminCreateIOCQCmd::GrpAdminCreateIOCQCmd(groups.size(), cl.rev, cl.errRegs, gDutFd));
-    groups.push_back(new GrpAdminCreateIOSQCmd::GrpAdminCreateIOSQCmd(groups.size(), cl.rev, cl.errRegs, gDutFd));
-    groups.push_back(new GrpAdminCreateIOQCmd::GrpAdminCreateIOQCmd(groups.size(), cl.rev, cl.errRegs, gDutFd));
+    groups.push_back(new GrpAdminDeleteIOSQCmd::GrpAdminDeleteIOSQCmd(groups.size()));
+    groups.push_back(new GrpAdminCreateIOCQCmd::GrpAdminCreateIOCQCmd(groups.size()));
+    groups.push_back(new GrpAdminCreateIOSQCmd::GrpAdminCreateIOSQCmd(groups.size()));
+    groups.push_back(new GrpAdminCreateIOQCmd::GrpAdminCreateIOQCmd(groups.size()));
 }
 // ------------------------------EDIT HERE---------------------------------
 
@@ -91,9 +91,9 @@ InstantiateGroups(vector<Group *> &groups, struct CmdLine &cl)
 void Usage(void);
 void DestroySingletons();
 bool ExecuteTests(struct CmdLine &cl, vector<Group *> &groups);
-bool BuildSingletons(struct CmdLine &cl);
+bool BuildSingletons();
 void DestroyTestFoundation(vector<Group *> &groups);
-bool BuildTestFoundation(vector<Group *> &groups, struct CmdLine &cl);
+bool BuildTestFoundation(vector<Group *> &groups);
 void ReportTestResults(size_t numIters, int numPass, int numFail, int numSkip,
     int numGrps);
 
@@ -119,14 +119,23 @@ Usage(void) {
     printf("  -u(--dump) <dirname>                Pass the base dump directory path.\n");
     printf("                                      dflt=\"%s\"\n", BASE_DUMP_DIR);
     printf("  -i(--ignore)                        Ignore detected errors; An error causes\n");
-    printf("                                      the next test within the next group to\n");
-    printf("                                      execute, not next test within same group.\n");
+    printf("                                      the next test w/o dependencies to failing\n");
+    printf("                                      test to be executed next.\n");
     printf("  -p(--preserve)                      Preserve the current state of the DUT. Do\n");
     printf("                                      not write data on the media, nor modify\n");
     printf("                                      the configuration. Not all tests will run\n");
     printf("  -g(--golden) <filename>             A file contains the golden identify data\n");
     printf("                                      to which the DUT's reported identify data\n");
     printf("                                      is compared; Must be only option.\n");
+    printf("  -n(--postfail)                      Upon test failure, instruct framework to\n");
+    printf("                                      take a post failure snapshot of the DUT\n");
+    printf("  -y(--restore)                       Upon test failure, allow an individual\n");
+    printf("                                      test to restore the configuration of the\n");
+    printf("                                      DUT as was detected at group start\n");
+    printf("  -m(--fwimage)                       Supply a FW image to allow testing of\n");
+    printf("                                      FW activate and FW image dnld cmds.\n");
+    printf("                                      Recommend supply identical FW image as\n");
+    printf("                                      current test image.\n");
     printf("                      --- Advanced/Debug Options Follow ---\n");
     printf("  -e(--error) <STS:PXDS:AERUCES:CSTS> Set reg bitmask for bits indicating error\n");
     printf("                                      state after each test completes.\n");
@@ -165,60 +174,48 @@ main(int argc, char *argv[])
     string work;
     vector<Group *> groups;
     vector<string> devices;
-    struct CmdLine cmdLine;
     struct dirent *dirEntry;
     bool deviceFound = false;
     bool accessingHdw = true;
     uint64_t regVal = 0;
-    const char *short_opt = "hslpzia::t::v:o:d:k:f:r:w:q:e:u:g:";
+    const char *short_opt = "hsnlpyzia::t::v:o:d:k:f:r:w:q:e:m:u:g:";
     static struct option long_opt[] = {
         // {name,           has_arg,            flag,   val}
-        {   "help",         no_argument,        NULL,   'h'},
-        {   "summary",      no_argument,        NULL,   's'},
-        {   "preserve",     no_argument,        NULL,   'p'},
-        {   "rev",          required_argument,  NULL,   'v'},
         {   "detail",       optional_argument,  NULL,   'a'},
         {   "test",         optional_argument,  NULL,   't'},
+
+        {   "rev",          required_argument,  NULL,   'v'},
         {   "device",       required_argument,  NULL,   'd'},
         {   "rmmap" ,       required_argument,  NULL,   'r'},
         {   "wmmap" ,       required_argument,  NULL,   'w'},
-        {   "reset",        no_argument,        NULL,   'z'},
-        {   "ignore",       no_argument,        NULL,   'i'},
         {   "loop",         required_argument,  NULL,   'o'},
         {   "skiptest",     required_argument,  NULL,   'k'},
         {   "format",       required_argument,  NULL,   'f'},
-        {   "list",         no_argument,        NULL,   'l'},
         {   "queues",       required_argument,  NULL,   'q'},
         {   "error",        required_argument,  NULL,   'e'},
         {   "dump",         required_argument,  NULL,   'u'},
         {   "golden",       required_argument,  NULL,   'g'},
+        {   "fwimage",      required_argument,  NULL,   'm'},
+
+        {   "help",         no_argument,        NULL,   'h'},
+        {   "summary",      no_argument,        NULL,   's'},
+        {   "preserve",     no_argument,        NULL,   'p'},
+        {   "restore",      no_argument,        NULL,   'y'},
+        {   "list",         no_argument,        NULL,   'l'},
+        {   "reset",        no_argument,        NULL,   'z'},
+        {   "ignore",       no_argument,        NULL,   'i'},
+        {   "postfail",     no_argument,        NULL,   'n'},
         {   NULL,           no_argument,        NULL,    0}
     };
 
-    // defaults if not spec'd on cmd line
-    cmdLine.rev = SPECREV_10b;
-    cmdLine.detail.req = false;
-    cmdLine.test.req = false;
-    cmdLine.reset = false;
-    cmdLine.preserve = false;
-    cmdLine.summary = false;
-    cmdLine.ignore = false;
-    cmdLine.loop = 1;
-    cmdLine.device = NO_DEVICES;
-    cmdLine.rmmap.req = false;
-    cmdLine.wmmap.req = false;
-    cmdLine.numQueues.req = false;
-    cmdLine.numQueues.ncqr = 0;
-    cmdLine.numQueues.nsqr = 0;
-    cmdLine.format.req = false;
-    cmdLine.format.cmds.empty();
-    cmdLine.golden.req = false;
-    cmdLine.golden.cmds.empty();
-    cmdLine.errRegs.sts = (STS_SSE | STS_STA | STS_RMA | STS_RTA);
-    cmdLine.errRegs.pxds = (PXDS_TP | PXDS_FED);
-    cmdLine.errRegs.aeruces = 0;
-    cmdLine.errRegs.csts = CSTS_CFS;
-    cmdLine.dump = BASE_DUMP_DIR;
+    // Defaults if not spec'd on cmd line
+    gCmdLine.rev = SPECREV_10b;
+    gCmdLine.loop = 1;
+    gCmdLine.device = NO_DEVICES;
+    gCmdLine.errRegs.sts = (STS_SSE | STS_STA | STS_RMA | STS_RTA);
+    gCmdLine.errRegs.pxds = (PXDS_TP | PXDS_FED);
+    gCmdLine.errRegs.csts = CSTS_CFS;
+    gCmdLine.dump = BASE_DUMP_DIR;
 
     if (argc == 1) {
         printf("%s is a compliance test suite for NVM Express hardware.\n",
@@ -241,7 +238,7 @@ main(int argc, char *argv[])
             devices.push_back("/dev/" + work);
     }
     if (devices.size())
-        cmdLine.device = devices[0];    // Default to 1st element listed
+        gCmdLine.device = devices[0];    // Default to 1st element listed
 
     // Report what we are about to process
     work = "";
@@ -256,12 +253,12 @@ main(int argc, char *argv[])
 
         case 'v':
             if (strcmp("1.0a", optarg) == 0) {
-                cmdLine.rev = SPECREV_10b;
+                gCmdLine.rev = SPECREV_10b;
             }
             break;
 
         case 'a':
-            if (ParseTargetCmdLine(cmdLine.detail, optarg) == false) {
+            if (ParseTargetCmdLine(gCmdLine.detail, optarg) == false) {
                 printf("Unable to parse --detail cmd line\n");
                 exit(1);
             }
@@ -269,49 +266,56 @@ main(int argc, char *argv[])
             break;
 
         case 't':
-            if (ParseTargetCmdLine(cmdLine.test, optarg) == false) {
+            if (ParseTargetCmdLine(gCmdLine.test, optarg) == false) {
                 printf("Unable to parse --test cmd line\n");
                 exit(1);
             }
             break;
 
         case 'k':
-            if (ParseSkipTestCmdLine(cmdLine.skiptest, optarg) == false) {
+            if (ParseSkipTestCmdLine(gCmdLine.skiptest, optarg) == false) {
                 printf("Unable to parse --skiptest cmd line\n");
                 exit(1);
             }
             break;
 
         case 'g':
-            if (ParseGoldenCmdLine(cmdLine.golden, optarg) == false) {
+            if (ParseGoldenCmdLine(gCmdLine.golden, optarg) == false) {
                 printf("Unable to parse --golden cmd line\n");
                 exit(1);
             }
             break;
 
+        case 'm':
+            if (ParseFWImageCmdLine(gCmdLine.fwImage, optarg) == false) {
+                printf("Unable to parse --fwimage cmd line\n");
+                exit(1);
+            }
+            break;
+
         case 'f':
-            if (ParseFormatCmdLine(cmdLine.format, optarg) == false) {
+            if (ParseFormatCmdLine(gCmdLine.format, optarg) == false) {
                 printf("Unable to parse --format cmd line\n");
                 exit(1);
             }
             break;
 
         case 'r':
-            if (ParseRmmapCmdLine(cmdLine.rmmap, optarg) == false) {
+            if (ParseRmmapCmdLine(gCmdLine.rmmap, optarg) == false) {
                 printf("Unable to parse --rmmap cmd line\n");
                 exit(1);
             }
             break;
 
         case 'w':
-            if (ParseWmmapCmdLine(cmdLine.wmmap, optarg) == false) {
+            if (ParseWmmapCmdLine(gCmdLine.wmmap, optarg) == false) {
                 printf("Unable to parse --wmmap cmd line\n");
                 exit(1);
             }
             break;
 
         case 'e':
-            if (ParseErrorCmdLine(cmdLine.errRegs, optarg) == false) {
+            if (ParseErrorCmdLine(gCmdLine.errRegs, optarg) == false) {
                 printf("Unable to parse --error cmd line\n");
                 exit(1);
             }
@@ -321,7 +325,7 @@ main(int argc, char *argv[])
             work = optarg;
             for (size_t i = 0; i < devices.size(); i++) {
                 if (work.compare(devices[i]) == 0) {
-                    cmdLine.device = work;
+                    gCmdLine.device = work;
                     deviceFound = true;
                     break;
                 }
@@ -342,7 +346,7 @@ main(int argc, char *argv[])
                 printf("Negative/zero values for --loop are unproductive\n");
                 exit(1);
             }
-            cmdLine.loop = tmp;
+            gCmdLine.loop = tmp;
             break;
 
         case 'l':
@@ -357,27 +361,29 @@ main(int argc, char *argv[])
             exit(0);
 
         case 'q':
-            if (ParseQueuesCmdLine(cmdLine.numQueues, optarg) == false) {
+            if (ParseQueuesCmdLine(gCmdLine.numQueues, optarg) == false) {
                 printf("Unable to parse --queues cmd line\n");
                 exit(1);
             }
             break;
 
         case 's':
-            cmdLine.summary = true;
+            gCmdLine.summary = true;
             accessingHdw = false;
             break;
 
         case 'u':
-            cmdLine.dump = optarg;
+            gCmdLine.dump = optarg;
             break;
 
         default:
         case 'h':   Usage();                            exit(0);
         case '?':   Usage();                            exit(1);
-        case 'z':   cmdLine.reset = true;               break;
-        case 'i':   cmdLine.ignore = true;              break;
-        case 'p':   cmdLine.preserve = true;            break;
+        case 'z':   gCmdLine.reset = true;              break;
+        case 'i':   gCmdLine.ignore = true;             break;
+        case 'p':   gCmdLine.preserve = true;           break;
+        case 'n':   gCmdLine.postfail = true;           break;
+        case 'y':   gCmdLine.restore = true;            break;
         }
     }
 
@@ -394,20 +400,20 @@ main(int argc, char *argv[])
     try {   // Everything below has the ability to throw exceptions
 
         // Instantiates and initializes all globals defined within globals.h
-        if (BuildTestFoundation(groups, cmdLine) == false) {
+        if (BuildTestFoundation(groups) == false) {
             printf("Unable to build the test foundation\n");
             exit(1);
         }
 
         // Accessing hdw requires specific checks and inquiries before running
         if (accessingHdw) {
-            if (FileSystem::SetRootDumpDir(cmdLine.dump) == false) {
+            if (FileSystem::SetRootDumpDir(gCmdLine.dump) == false) {
                 printf("Unable to establish \"%s\" dump directory\n",
-                    cmdLine.dump.c_str());
+                    gCmdLine.dump.c_str());
                 exit(1);
             }
 
-            if (BuildSingletons(cmdLine) == false) {
+            if (BuildSingletons() == false) {
                 printf("Unable to instantiate mandatory framework objects\n");
                 exit(1);
             }
@@ -422,33 +428,33 @@ main(int argc, char *argv[])
         }
 
         // Process the user's cmd line parameters
-        if (cmdLine.golden.req) {
-            if ((exitCode = !CompareGolden(cmdLine.golden))) {
+        if (gCmdLine.golden.req) {
+            if ((exitCode = !CompareGolden(gCmdLine.golden))) {
                 printf("FAILURE: Comparing golden data\n");
             } else {
                 printf("SUCCESS: Comparing golden data\n");
             }
-        } else if (cmdLine.format.req) {
-            if ((exitCode = !FormatDevice(cmdLine.format))) {
+        } else if (gCmdLine.format.req) {
+            if ((exitCode = !FormatDevice(gCmdLine.format))) {
                 printf("FAILURE: Formatting device\n");
             } else {
                 printf("SUCCESS: Formatting device\n");
             }
-        } else if (cmdLine.numQueues.req) {
-            if ((exitCode = !SetFeaturesNumberOfQueues(cmdLine.numQueues))) {
+        } else if (gCmdLine.numQueues.req) {
+            if ((exitCode = !SetFeaturesNumberOfQueues(gCmdLine.numQueues))) {
                 printf("FAILURE: Setting number of queues\n");
             } else {
                 printf("SUCCESS: Setting number of queues\n");
             }
-        } else if (cmdLine.summary) {
+        } else if (gCmdLine.summary) {
             for (size_t i = 0; i < groups.size(); i++) {
                 FORMAT_GROUP_DESCRIPTION(work, groups[i])
                 printf("%s\n", work.c_str());
                 printf("%s", groups[i]->GetGroupSummary(false).c_str());
             }
 
-        } else if (cmdLine.detail.req) {
-            if (cmdLine.detail.t.group == UINT_MAX) {
+        } else if (gCmdLine.detail.req) {
+            if (gCmdLine.detail.t.group == UINT_MAX) {
                 for (size_t i = 0; i < groups.size(); i++) {
                     FORMAT_GROUP_DESCRIPTION(work, groups[i])
                     printf("%s\n", work.c_str());
@@ -456,40 +462,40 @@ main(int argc, char *argv[])
                 }
 
             } else {    // user spec'd a group they are interested in
-                if (cmdLine.detail.t.group >= groups.size()) {
+                if (gCmdLine.detail.t.group >= groups.size()) {
                     printf("Specified test group %ld does not exist\n",
-                        cmdLine.detail.t.group);
+                        gCmdLine.detail.t.group);
                 } else {
                     for (size_t i = 0; i < groups.size(); i++) {
-                        if (i == cmdLine.detail.t.group) {
+                        if (i == gCmdLine.detail.t.group) {
                             FORMAT_GROUP_DESCRIPTION(work, groups[i])
                             printf("%s\n", work.c_str());
 
-                            if ((cmdLine.detail.t.xLev == UINT_MAX) ||
-                                (cmdLine.detail.t.yLev == UINT_MAX) ||
-                                (cmdLine.detail.t.zLev == UINT_MAX)) {
+                            if ((gCmdLine.detail.t.xLev == UINT_MAX) ||
+                                (gCmdLine.detail.t.yLev == UINT_MAX) ||
+                                (gCmdLine.detail.t.zLev == UINT_MAX)) {
                                 // Want info on all tests within group
                                 printf("%s",
                                     groups[i]->GetGroupSummary(true).c_str());
                             } else {
                                 // Want info on spec'd test within group
                                 printf("%s", groups[i]->GetTestDescription(true,
-                                    cmdLine.detail.t).c_str());
+                                    gCmdLine.detail.t).c_str());
                                 break;
                             }
                         }
                     }
                 }
             }
-        } else if (cmdLine.rmmap.req) {
-            uint8_t *value = new uint8_t[cmdLine.rmmap.size];
-            gRegisters->Read(cmdLine.rmmap.space, cmdLine.rmmap.size,
-                cmdLine.rmmap.offset, cmdLine.rmmap.acc, value);
-        } else if (cmdLine.wmmap.req) {
-            gRegisters->Write(cmdLine.wmmap.space, cmdLine.wmmap.size,
-                cmdLine.wmmap.offset, cmdLine.wmmap.acc,
-                (uint8_t *)(&cmdLine.wmmap.value));
-        } else if (cmdLine.reset) {
+        } else if (gCmdLine.rmmap.req) {
+            uint8_t *value = new uint8_t[gCmdLine.rmmap.size];
+            gRegisters->Read(gCmdLine.rmmap.space, gCmdLine.rmmap.size,
+                gCmdLine.rmmap.offset, gCmdLine.rmmap.acc, value);
+        } else if (gCmdLine.wmmap.req) {
+            gRegisters->Write(gCmdLine.wmmap.space, gCmdLine.wmmap.size,
+                gCmdLine.wmmap.offset, gCmdLine.wmmap.acc,
+                (uint8_t *)(&gCmdLine.wmmap.value));
+        } else if (gCmdLine.reset) {
             if ((exitCode = !gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY))) {
                 printf("FAILURE: reset\n");
             } else {
@@ -497,8 +503,8 @@ main(int argc, char *argv[])
             }
             // At this point we cannot enable the ctrlr because that requires
             // ACQ/ASQ's to be created, ctrlr simply won't become ready w/o them
-        } else if (cmdLine.test.req) {
-            if ((exitCode = !ExecuteTests(cmdLine, groups))) {
+        } else if (gCmdLine.test.req) {
+            if ((exitCode = !ExecuteTests(gCmdLine, groups))) {
                 printf("FAILURE: testing\n");
             } else {
                 printf("SUCCESS: testing\n");
@@ -511,19 +517,19 @@ main(int argc, char *argv[])
     // cleanup duties
     DestroyTestFoundation(groups);
     DestroySingletons();
-    cmdLine.skiptest.clear();
+    gCmdLine.skiptest.clear();
     devices.clear();
     exit(exitCode);
 }
 
 
-bool BuildSingletons(struct CmdLine &cl)
+bool BuildSingletons()
 {
     // Create globals/singletons here, which all tests objects will need
 
     // The Register singleton should be created 1st because all other Singletons
     // use it directly to become init'd or they rely on it heavily soon after.
-    gRegisters = Registers::GetInstance(gDutFd, cl.rev);
+    gRegisters = Registers::GetInstance(gDutFd, gCmdLine.rev);
     if (gRegisters == NULL) {
         LOG_ERR("Unable to create framework obj: gRegisters");
         return false;
@@ -533,21 +539,21 @@ bool BuildSingletons(struct CmdLine &cl)
     // class is used by just about every other object in the framework to learn
     // of state changes within the ctrlr. Disabling the ctrlr is extremely
     // destructive of all resources in user space and in kernel space.
-    gCtrlrConfig = CtrlrConfig::GetInstance(gDutFd, cl.rev);
+    gCtrlrConfig = CtrlrConfig::GetInstance(gDutFd, gCmdLine.rev);
     if (gCtrlrConfig == NULL) {
         LOG_ERR("Unable to create framework obj: gCtrlrConfig");
         return false;
     }
 
     // Create the remaining objects at random...
-    gRsrcMngr = RsrcMngr::GetInstance(gDutFd, cl.rev);
+    gRsrcMngr = RsrcMngr::GetInstance(gDutFd, gCmdLine.rev);
     if (gRsrcMngr == NULL) {
         LOG_ERR("Unable to create framework obj: gRsrcMngr");
         return false;
     }
     gCtrlrConfig->Attach(*gRsrcMngr);
 
-    gInformative = Informative::GetInstance(gDutFd, cl.rev);
+    gInformative = Informative::GetInstance(gDutFd, gCmdLine.rev);
     if (gInformative == NULL) {
         LOG_ERR("Unable to create framework obj: gInformative");
         return false;
@@ -572,11 +578,10 @@ void DestroySingletons()
  * with the OS which will allow testing to commence according to the cmd line
  * options presented to this app.
  * @param groups Pass the structure to contain the test objects
- * @param cl Pass the cmd line args
  * @return true upon success, otherwise false
  */
 bool
-BuildTestFoundation(vector<Group *> &groups, struct CmdLine &cl)
+BuildTestFoundation(vector<Group *> &groups)
 {
     int ret;
     struct metrics_driver driverMetrics;
@@ -592,21 +597,23 @@ BuildTestFoundation(vector<Group *> &groups, struct CmdLine &cl)
     // could cause testing corruption, and therefore a single threaded device
     // interaction model is needed. No more than 1 test can occur at any time
     // to any device and all tests must be single threaded.
-    if (cl.device.compare(NO_DEVICES) == 0) {
+    if (gCmdLine.device.compare(NO_DEVICES) == 0) {
         LOG_ERR("There are no devices present");
         return false;
     }
-    if ((gDutFd = open(cl.device.c_str(), O_RDWR)) == -1) {
+    if ((gDutFd = open(gCmdLine.device.c_str(), O_RDWR)) == -1) {
         if ((errno == EACCES) || (errno == EAGAIN)) {
             LOG_ERR("%s may need permission set for current user",
-                cl.device.c_str());
+                gCmdLine.device.c_str());
         }
-        LOG_ERR("device=%s: %s", cl.device.c_str(), strerror(errno));
+        LOG_ERR("device=%s: %s", gCmdLine.device.c_str(), strerror(errno));
         return false;
     }
     if (fcntl(gDutFd, F_SETLK, &fdlock) == -1) {
-        if ((errno == EACCES) || (errno == EAGAIN))
-            LOG_ERR("%s has been locked by another process", cl.device.c_str());
+        if ((errno == EACCES) || (errno == EAGAIN)) {
+            LOG_ERR("%s has been locked by another process",
+            gCmdLine.device.c_str());
+        }
         LOG_ERR("%s", strerror(errno));
     }
 
@@ -630,7 +637,7 @@ BuildTestFoundation(vector<Group *> &groups, struct CmdLine &cl)
         return false;
     }
 
-    InstantiateGroups(groups, cl);
+    InstantiateGroups(groups);
     return true;
 }
 

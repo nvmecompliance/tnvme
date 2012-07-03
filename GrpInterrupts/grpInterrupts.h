@@ -30,7 +30,7 @@ namespace GrpInterrupts {
 class GrpInterrupts : public Group
 {
 public:
-    GrpInterrupts(size_t grpNum, SpecRev specRev, ErrorRegs errRegs, int fd);
+    GrpInterrupts(size_t grpNum);
     virtual ~GrpInterrupts();
 };
 

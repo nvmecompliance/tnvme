@@ -32,8 +32,7 @@ namespace GrpAdminCreateIOCQCmd {
 class CreateResources_r10b : public Test
 {
 public:
-    CreateResources_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    CreateResources_r10b(string grpName, string testName);
     virtual ~CreateResources_r10b();
 
     /**

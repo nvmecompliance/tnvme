@@ -28,9 +28,9 @@ namespace GrpNVMReadCmd {
 #define RD_NUM_BLKS                 2
 
 
-LBAOutOfRangeBare_r10b::LBAOutOfRangeBare_r10b(int fd, string mGrpName,
-    string mTestName, ErrorRegs errRegs) :
-    Test(fd, mGrpName, mTestName, SPECREV_10b, errRegs)
+LBAOutOfRangeBare_r10b::LBAOutOfRangeBare_r10b(
+    string grpName, string testName) :
+    Test(grpName, testName, SPECREV_10b)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 4,6");
@@ -80,6 +80,12 @@ LBAOutOfRangeBare_r10b::operator=(const LBAOutOfRangeBare_r10b &other)
 Test::RunType
 LBAOutOfRangeBare_r10b::RunnableCoreTest(bool preserve)
 {
+    ///////////////////////////////////////////////////////////////////////////
+    // All code contained herein must never permanently modify the state or
+    // configuration of the DUT. Permanence is defined as state or configuration
+    // changes that will not be restored after a cold hard reset.
+    ///////////////////////////////////////////////////////////////////////////
+
     preserve = preserve;    // Suppress compiler error/warning
     return RUN_TRUE;        // This test is never destructive
 }

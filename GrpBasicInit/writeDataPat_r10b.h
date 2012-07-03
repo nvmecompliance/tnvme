@@ -39,8 +39,7 @@ using namespace std;
 class WriteDataPat_r10b : public Test
 {
 public:
-    WriteDataPat_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    WriteDataPat_r10b(string grpName, string testName);
     virtual ~WriteDataPat_r10b();
 
     /**

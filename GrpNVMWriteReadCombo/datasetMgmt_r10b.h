@@ -34,8 +34,7 @@ namespace GrpNVMWriteReadCombo {
 class DatasetMgmt_r10b : public Test
 {
 public:
-    DatasetMgmt_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    DatasetMgmt_r10b(string grpName, string testName);
     virtual ~DatasetMgmt_r10b();
 
     /**

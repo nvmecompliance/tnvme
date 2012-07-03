@@ -35,9 +35,9 @@ const uint8_t IllegalNVMCmds_r10b::COMPARE_OPCODE       = 0x05;
 const uint8_t IllegalNVMCmds_r10b::DSM_OPCODE           = 0x09;
 
 
-IllegalNVMCmds_r10b::IllegalNVMCmds_r10b(int fd,
-    string mGrpName, string mTestName, ErrorRegs errRegs) :
-    Test(fd, mGrpName, mTestName, SPECREV_10b, errRegs)
+IllegalNVMCmds_r10b::IllegalNVMCmds_r10b(
+    string grpName, string testName) :
+    Test(grpName, testName, SPECREV_10b)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 6");
@@ -86,6 +86,12 @@ IllegalNVMCmds_r10b::operator=(const IllegalNVMCmds_r10b
 Test::RunType
 IllegalNVMCmds_r10b::RunnableCoreTest(bool preserve)
 {
+    ///////////////////////////////////////////////////////////////////////////
+    // All code contained herein must never permanently modify the state or
+    // configuration of the DUT. Permanence is defined as state or configuration
+    // changes that will not be restored after a cold hard reset.
+    ///////////////////////////////////////////////////////////////////////////
+
     preserve = preserve;    // Suppress compiler error/warning
     return RUN_TRUE;        // This test is never destructive
 }

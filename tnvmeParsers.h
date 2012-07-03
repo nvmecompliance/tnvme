@@ -25,6 +25,7 @@
 bool ParseTargetCmdLine(TestTarget &target, const char *optarg);
 bool ParseSkipTestCmdLine(vector<TestRef> &skipTest, const char *optarg);
 bool ParseGoldenCmdLine(Golden &golden, const char *optarg);
+bool ParseFWImageCmdLine(FWImage &fwimage, const char *optarg);
 bool ParseFormatCmdLine(Format &format, const char *optarg);
 bool ParseRmmapCmdLine(RmmapIo &rmmap, const char *optarg);
 bool ParseWmmapCmdLine(WmmapIo &wmmap, const char *optarg);

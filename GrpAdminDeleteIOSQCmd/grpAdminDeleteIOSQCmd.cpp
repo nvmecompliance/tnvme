@@ -23,24 +23,24 @@
 namespace GrpAdminDeleteIOSQCmd {
 
 
-GrpAdminDeleteIOSQCmd::GrpAdminDeleteIOSQCmd(size_t grpNum, SpecRev specRev, ErrorRegs errRegs,
-    int fd) :
-    Group(grpNum, specRev, "GrpAdminDeleteIOSQCmd",
+GrpAdminDeleteIOSQCmd::GrpAdminDeleteIOSQCmd(size_t grpNum) :
+    Group(grpNum, "GrpAdminDeleteIOSQCmd",
         "Admin cmd set delete IOSQ test cases")
 {
     // For complete details about the APPEND_TEST_AT_?LEVEL() macros:
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Numbering" and
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Strategy
-    switch (mSpecRev) {
+    switch (gCmdLine.rev) {
     case SPECREV_10b:
-        APPEND_TEST_AT_XLEVEL(CreateResources_r10b, fd, GrpAdminDeleteIOSQCmd, errRegs)
-        APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r10b, fd, GrpAdminDeleteIOSQCmd, errRegs)
-        APPEND_TEST_AT_XLEVEL(InvalidQID_r10b, fd, GrpAdminDeleteIOSQCmd, errRegs)
+        APPEND_TEST_AT_XLEVEL(CreateResources_r10b, GrpAdminDeleteIOSQCmd)
+        APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r10b, GrpAdminDeleteIOSQCmd)
+        APPEND_TEST_AT_XLEVEL(InvalidQID_r10b, GrpAdminDeleteIOSQCmd)
         break;
 
     default:
     case SPECREVTYPE_FENCE:
-        throw FrmwkEx(HERE, "Object created with an unknown SpecRev=%d", specRev);
+        throw FrmwkEx(HERE, "Object created with an unknown SpecRev=%d",
+            gCmdLine.rev);
     }
 }
 

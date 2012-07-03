@@ -28,8 +28,7 @@ namespace GrpAdminDeleteIOSQCmd {
 class GrpAdminDeleteIOSQCmd : public Group
 {
 public:
-    GrpAdminDeleteIOSQCmd(size_t grpNum, SpecRev specRev, ErrorRegs errRegs,
-        int fd);
+    GrpAdminDeleteIOSQCmd(size_t grpNum);
     virtual ~GrpAdminDeleteIOSQCmd();
 };
 

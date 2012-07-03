@@ -50,15 +50,13 @@ class Test
 {
 public:
     /**
-     * @param fd Pass the opened file descriptor for the device under test
      * @param grpName Pass the name of the group to which this test belongs
      * @param testName Pass the name of the child class
      * @param specRev Provide the nvme spec rev. which is being targeted
      * @param errRegs Pass the reg bitmask to indicate which errors need to be
      *          flagged after each test completes execution.
      */
-    Test(int fd, string grpName, string testName, SpecRev specRev,
-        ErrorRegs errRegs);
+    Test(string grpName, string testName, SpecRev specRev);
 
     /**
      * Child derived Test:: objects are responsible for freeing all heap
@@ -151,16 +149,12 @@ protected:
     ///////////////////////////////////////////////////////////////////////////
     // Adding a member variable? Then edit the copy constructor and operator().
     ///////////////////////////////////////////////////////////////////////////
-    /// file descriptor to the device under test
-    int mFd;
     /// NVME spec rev being targeted
     SpecRev mSpecRev;
     /// The name of the parent container object, i.e. the group name
     string mGrpName;
     /// The name of the child
     string mTestName;
-    /// Which bits in contained registers indicate error conditions to be flag'd
-    ErrorRegs mErrRegs;
     /// Children must populate this during construction
     TestDescribe mTestDesc;
 

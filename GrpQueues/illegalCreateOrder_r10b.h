@@ -33,8 +33,7 @@ namespace GrpQueues {
 class IllegalCreateOrder_r10b : public Test
 {
 public:
-    IllegalCreateOrder_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    IllegalCreateOrder_r10b(string grpName, string testName);
     virtual ~IllegalCreateOrder_r10b();
 
     /**

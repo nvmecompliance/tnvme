@@ -64,6 +64,8 @@ FrmwkEx::FrmwkEx(string filename, int lineNum, const char *fmt, ...)
 
 FrmwkEx::~FrmwkEx()
 {
+    // Reset for possible subsequent exception to occur, i.e. ignore errors
+    mPrelimProcessingInProgress = false;
 }
 
 void
@@ -71,11 +73,25 @@ FrmwkEx::DumpStateOfTheSystem()
 {
     // Mark this point in /var/log/messages from dnvme's logging output
     KernelAPI::WriteToDnvmeLog("-------START POST FAILURE STATE DUMP-------");
-
     LOG_NRM("-------------------------------------------");
     LOG_NRM("-------START POST FAILURE STATE DUMP-------");
-    PreliminaryProcessing();    // Override in children provides custom logic
-    gCtrlrConfig->SetState(ST_DISABLE);
+
+    // Avoid exception processing within exception processing looping
+    if (mPrelimProcessingInProgress) {
+        LOG_NRM("Detected exception within an exception");
+        return;
+    }
+    mPrelimProcessingInProgress = true;
+
+    // Only do post failure extraction and dumping if authorized to do so
+    if (gCmdLine.postfail == false) {
+        // Allways reset to sync kernel with user space or risk core dump
+        if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
+            throw FrmwkEx(HERE, "Exception handler()");
+    } else {
+        PreliminaryProcessing();   // Override in children provides custom logic
+        gCtrlrConfig->SetState(ST_DISABLE);
+    }
     LOG_NRM("--------END POST FAILURE STATE DUMP--------");
     LOG_NRM("-------------------------------------------");
 }
@@ -84,13 +100,6 @@ FrmwkEx::DumpStateOfTheSystem()
 void
 FrmwkEx::PreliminaryProcessing()
 {
-    // Avoid exception processing within exception processing looping
-    if (mPrelimProcessingInProgress) {
-        LOG_NRM("Detected exception within exception condition");
-        return;
-    }
-    mPrelimProcessingInProgress = true;
-
     // First gather all non-intrusive data, things that won't change the
     // state of the DUT, effectively taking a snapshot.
     KernelAPI::DumpKernelMetrics(FileSystem::PrepDumpFile(GRP_NAME,
@@ -104,7 +113,7 @@ FrmwkEx::PreliminaryProcessing()
     // the ACQ/ASQ, or even if there are any in existence; place the DUT
     // into a well known state and then interact gathering instrusive data
     if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
-        throw FrmwkEx(HERE, "PreliminaryProcessing()");
+        throw FrmwkEx(HERE, "Exception handler()");
 
     SharedACQPtr acq = SharedACQPtr(new ACQ(gDutFd));
     acq->Init(2);
@@ -114,7 +123,7 @@ FrmwkEx::PreliminaryProcessing()
 
     gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
-        throw FrmwkEx(HERE, "PreliminaryProcessing()");
+        throw FrmwkEx(HERE, "Exception handler()");
 
     LOG_NRM("Create get log page cmd and assoc some buffer memory");
     SharedGetLogPagePtr getLogPg = SharedGetLogPagePtr(new GetLogPage());

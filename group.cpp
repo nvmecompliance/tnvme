@@ -23,11 +23,10 @@
 #define NEWLINE                 "\n"
 
 
-Group::Group(size_t grpNum, SpecRev specRev, string grpName, string desc)
+Group::Group(size_t grpNum, string grpName, string desc)
 {
     mGrpNum = grpNum;
     mGrpName = grpName;
-    mSpecRev = specRev;
 
     if (desc.length() > MAX_CHAR_PER_LINE_DESCRIPTION) {
         LOG_ERR("Group description length violation, concatenating \"%s\"",
@@ -214,6 +213,7 @@ Group::RunTest(TestSetType &dependencies, int64_t &tstIdx,
 {
     string work;
     numSkipped = 0;
+    TestResult result = TR_FAIL;
 
     // Preliminary error checking
     if ((tstIdx >= (int64_t)dependencies.size()) || (tstIdx == -1)) {
@@ -230,6 +230,17 @@ Group::RunTest(TestSetType &dependencies, int64_t &tstIdx,
     deque<Test *>::iterator myTest = mTests[tr.xLev][tr.yLev].begin();
     advance(myTest, tr.zLev);
 
+    // The first test within every group must be proceeded with a chance to
+    // save the state of the DUT, if and only if the feature is enabled.
+    if (gCmdLine.restore && (tstIdx == 0)) {
+        LOG_NRM("Saving the state of the DUT");
+        if (SaveState() == false) {
+            LOG_ERR("Unable to save the state of the DUT");
+            tstIdx = -1;
+            return TR_FAIL;
+        }
+    }
+
     LOG_NRM("-----------------START TEST-----------------");
     FORMAT_GROUP_DESCRIPTION(work, this)
     LOG_NRM("%s", work.c_str());
@@ -241,9 +252,7 @@ Group::RunTest(TestSetType &dependencies, int64_t &tstIdx,
     LOG_NRM("Compliance: %s", (*myTest)->GetComplianceDescription().c_str());
     LOG_NRM("%s", (*myTest)->GetLongDescription(false, 0).c_str());
 
-    TestResult result;
     switch ((*myTest)->Runnable(preserve)) {
-
     case Test::RUN_TRUE:
         if (SkippingTest(tr, skipTest)) {
             result = TR_SKIPPING;
@@ -253,7 +262,8 @@ Group::RunTest(TestSetType &dependencies, int64_t &tstIdx,
             if (result == TR_FAIL) {
                 numSkipped = AdvanceDependencies(dependencies, tstIdx, true);
             } else {
-                tstIdx++;   // Reference next test to execute
+                if (++tstIdx >= (int64_t)dependencies.size())
+                    tstIdx = -1;
                 LOG_NRM("SUCCESSFUL test case run");
             }
         }
@@ -268,7 +278,6 @@ Group::RunTest(TestSetType &dependencies, int64_t &tstIdx,
 
     default:
     case Test::RUN_FAIL:
-        result = TR_FAIL;
         numSkipped = AdvanceDependencies(dependencies, tstIdx, true);
         break;
     }
@@ -281,6 +290,18 @@ Group::RunTest(TestSetType &dependencies, int64_t &tstIdx,
     work += (*myTest)->GetShortDescription();
     LOG_NRM("%s", work.c_str());
     LOG_NRM("------------------END TEST------------------");
+
+    // The last test within every group or a test failure must be following
+    // with a chance to restore the state of the DUT, if and only if the
+    // feature is enabled.
+    if (gCmdLine.restore && ((tstIdx == -1) || (result == TR_FAIL))) {
+        LOG_NRM("Restoring the state of the DUT");
+        if (RestoreState() == false) {
+            LOG_ERR("Unable to restore the state of the DUT");
+            tstIdx = -1;
+            return TR_FAIL;
+        }
+    }
 
     // Guarantee nothing residing or unintended is left around. Enforce this
     // by destroying the existing test obj and replace it with a clone of
@@ -440,4 +461,22 @@ Group::TestRefToIterator(TestRef tr, TestIteratorType &testIter)
 
     LOG_ERR("Unable to locate targeted test");
     return false;
+}
+
+
+bool
+SaveState()
+{
+    // For the majority of test groups this feature most likely won't be needed
+    LOG_NRM("Saving state is intended to be over ridden in children");
+    return true;
+}
+
+
+bool
+RestoreState()
+{
+    // For the majority of test groups this feature most likely won't be needed
+    LOG_NRM("Restoring state is intended to be over ridden in children");
+    return true;
 }

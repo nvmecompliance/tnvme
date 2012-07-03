@@ -33,8 +33,7 @@ namespace GrpNVMWriteCmd {
 class FUA_r10b : public Test
 {
 public:
-    FUA_r10b(int fd, string grpName, string testName,
-        ErrorRegs errRegs);
+    FUA_r10b(string grpName, string testName);
     virtual ~FUA_r10b();
 
     /**
