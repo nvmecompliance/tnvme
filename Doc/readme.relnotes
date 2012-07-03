@@ -1,3 +1,20 @@
+2012-7-3
+nvmecompliance_release=1.7.0 New tests, bug fixes.
+    1) dnvme-bugfix: The mapping of optionali BAR registers was doing the 
+       exact opposite of what was needed; end result BARS where being mapped
+       correctly.
+    2) Described more test cases, added Intel's intention of coding.
+    3) Add new cmd line option --fwimage, see 
+       ttps://github.com/nvmecompliance/tnvme/wiki/Command-Line-Options
+    4) Added new framework cmds, FirmwareActivate and FirmwareImageDownload.
+    5) tnvme-bugfix: cmd line option --ignored would never have dumped the
+       state-of-the DUT, rather an execption within exception would have occur.
+    6) Add new cmd line option --postfail, see 
+       ttps://github.com/nvmecompliance/tnvme/wiki/Command-Line-Options
+    7) Added a few new tests, see git log for details.
+    8) Add new cmd line option --restore, see 
+       ttps://github.com/nvmecompliance/tnvme/wiki/Command-Line-Options
+
 2012-6-19
 nvmecompliance_release=1.6.0 New tests, bug fixes, high confidence.
     1) The compliance suite continues to execute over 28 different NVMe formats
