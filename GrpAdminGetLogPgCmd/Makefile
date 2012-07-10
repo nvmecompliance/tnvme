@@ -19,7 +19,9 @@ INCLUDES = -I. -I../ -I../../ -I/usr/local/include
 SRC =					\
 	grpAdminGetLogPgCmd.cpp		\
 	createResources_r10b.cpp	\
-	prp1_r10b.cpp
+	prp1_r10b.cpp			\
+	prp1PRP2_r10b.cpp		\
+	unsupportRrvdFields_r10b.cpp
 
 .SUFFIXES: .cpp
 

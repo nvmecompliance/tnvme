@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-#include "prp1_r10b.h"
+#include "prp1PRP2_r10b.h"
 #include "globals.h"
 #include "grpDefs.h"
 #include "../Utils/kernelAPI.h"
@@ -23,25 +23,25 @@
 
 #define FIRM_SLOT_INFO_LID      0x03
 #define PRP1_ONLY_NUMD          (514 / 4)
-#define BUFFER_OFFSET           0
+#define BUFFER_OFFSET           0xF00
 
 namespace GrpAdminGetLogPgCmd {
 
 
-PRP1_r10b::PRP1_r10b(string grpName, string testName) :
+PRP1PRP2_r10b::PRP1PRP2_r10b(string grpName, string testName) :
     Test(grpName, testName, SPECREV_10b)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 5");
-    mTestDesc.SetShort(     "Request data using only PRP1 only");
+    mTestDesc.SetShort(     "Request data using PRP1 and PRP2");
     // No string size limit for the long description
     mTestDesc.SetLong(
-        "Issue GetLogPage cmd, LID=3, NUMD=(512/4) utilizing only PRP1 for "
-        "the user space buffer, and expect success.");
+        "Issue GetLogPage cmd, LID=3, NUMD=(512/4) utilizing only PRP1 & PRP2 "
+        "for the user space buffer, and expect success.");
 }
 
 
-PRP1_r10b::~PRP1_r10b()
+PRP1PRP2_r10b::~PRP1PRP2_r10b()
 {
     ///////////////////////////////////////////////////////////////////////////
     // Allocations taken from the heap and not under the control of the
@@ -50,8 +50,8 @@ PRP1_r10b::~PRP1_r10b()
 }
 
 
-PRP1_r10b::
-PRP1_r10b(const PRP1_r10b &other) : Test(other)
+PRP1PRP2_r10b::
+PRP1PRP2_r10b(const PRP1PRP2_r10b &other) : Test(other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -60,8 +60,8 @@ PRP1_r10b(const PRP1_r10b &other) : Test(other)
 }
 
 
-PRP1_r10b &
-PRP1_r10b::operator=(const PRP1_r10b &other)
+PRP1PRP2_r10b &
+PRP1PRP2_r10b::operator=(const PRP1PRP2_r10b &other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -73,7 +73,7 @@ PRP1_r10b::operator=(const PRP1_r10b &other)
 
 
 Test::RunType
-PRP1_r10b::RunnableCoreTest(bool preserve)
+PRP1PRP2_r10b::RunnableCoreTest(bool preserve)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All code contained herein must never permanently modify the state or
@@ -87,7 +87,7 @@ PRP1_r10b::RunnableCoreTest(bool preserve)
 
 
 void
-PRP1_r10b::RunCoreTest()
+PRP1PRP2_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
@@ -105,15 +105,16 @@ PRP1_r10b::RunCoreTest()
     getLogPgCmd->SetNUMD(PRP1_ONLY_NUMD);
     getLogPgCmd->SetLID(FIRM_SLOT_INFO_LID);
 
+    LOG_NRM("Set the offset into the buffer at 0x%04X", BUFFER_OFFSET);
     SharedMemBufferPtr getLogPageMem = SharedMemBufferPtr(new MemBuffer());
     getLogPageMem->InitOffset1stPage(GetLogPage::FIRMSLOT_DATA_SIZE,
             BUFFER_OFFSET, true);
-
-    send_64b_bitmask prpReq = (send_64b_bitmask)(MASK_PRP1_PAGE);
+    send_64b_bitmask prpReq =
+            (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE);
     getLogPgCmd->SetPrpBuffer(prpReq, getLogPageMem);
 
     IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
-        getLogPgCmd, "prp1only", true);
+        getLogPgCmd, "prp1prp2", true);
 }
 
 }   // namespace

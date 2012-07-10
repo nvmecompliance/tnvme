@@ -17,6 +17,8 @@
 #include "grpAdminGetLogPgCmd.h"
 #include "createResources_r10b.h"
 #include "prp1_r10b.h"
+#include "prp1PRP2_r10b.h"
+#include "unsupportRrvdFields_r10b.h"
 
 namespace GrpAdminGetLogPgCmd {
 
@@ -30,8 +32,10 @@ GrpAdminGetLogPgCmd::GrpAdminGetLogPgCmd(size_t grpNum) :
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Strategy
     switch (gCmdLine.rev) {
     case SPECREV_10b:
-        APPEND_TEST_AT_XLEVEL(CreateResources_r10b, GrpAdminCreateIOCQCmd)
+        APPEND_TEST_AT_XLEVEL(CreateResources_r10b, GrpAdminGetLogPgCmd)
         APPEND_TEST_AT_YLEVEL(PRP1_r10b, GrpAdminGetLogPgCmd)
+        APPEND_TEST_AT_YLEVEL(PRP1PRP2_r10b, GrpAdminGetLogPgCmd)
+        APPEND_TEST_AT_YLEVEL(UnsupportRrvdFields_r10b, GrpAdminGetLogPgCmd)
         break;
 
     default:

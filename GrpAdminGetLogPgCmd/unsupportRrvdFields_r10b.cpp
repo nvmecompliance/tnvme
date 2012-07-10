@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-#include "prp1_r10b.h"
+#include "unsupportRrvdFields_r10b.h"
 #include "globals.h"
 #include "grpDefs.h"
 #include "../Utils/kernelAPI.h"
@@ -28,20 +28,24 @@
 namespace GrpAdminGetLogPgCmd {
 
 
-PRP1_r10b::PRP1_r10b(string grpName, string testName) :
+UnsupportRrvdFields_r10b::UnsupportRrvdFields_r10b(string grpName,
+    string testName) :
     Test(grpName, testName, SPECREV_10b)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 5");
-    mTestDesc.SetShort(     "Request data using only PRP1 only");
+    mTestDesc.SetShort(     "Set unsupported/rsvd fields in cmd");
     // No string size limit for the long description
     mTestDesc.SetLong(
-        "Issue GetLogPage cmd, LID=3, NUMD=(512/4) utilizing only PRP1 for "
-        "the user space buffer, and expect success.");
+        "Unsupported DW's and rsvd fields are treated identical, the "
+        "recipient shall not check their value. Issue GetLogPage cmd, "
+        "LID=3, NUMD=(512/4), expect success. Then issue same cmd setting "
+        "all unsupported/rsvd fields, expect success. Set: DW0_b15:10, "
+        "DW2, DW3, DW4, DW5, DW10_b31:28, DW11, DW12, DW13, DW14, DW15.");
 }
 
 
-PRP1_r10b::~PRP1_r10b()
+UnsupportRrvdFields_r10b::~UnsupportRrvdFields_r10b()
 {
     ///////////////////////////////////////////////////////////////////////////
     // Allocations taken from the heap and not under the control of the
@@ -50,8 +54,8 @@ PRP1_r10b::~PRP1_r10b()
 }
 
 
-PRP1_r10b::
-PRP1_r10b(const PRP1_r10b &other) : Test(other)
+UnsupportRrvdFields_r10b::
+UnsupportRrvdFields_r10b(const UnsupportRrvdFields_r10b &other) : Test(other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -60,8 +64,8 @@ PRP1_r10b(const PRP1_r10b &other) : Test(other)
 }
 
 
-PRP1_r10b &
-PRP1_r10b::operator=(const PRP1_r10b &other)
+UnsupportRrvdFields_r10b &
+UnsupportRrvdFields_r10b::operator=(const UnsupportRrvdFields_r10b &other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -73,7 +77,7 @@ PRP1_r10b::operator=(const PRP1_r10b &other)
 
 
 Test::RunType
-PRP1_r10b::RunnableCoreTest(bool preserve)
+UnsupportRrvdFields_r10b::RunnableCoreTest(bool preserve)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All code contained herein must never permanently modify the state or
@@ -87,7 +91,7 @@ PRP1_r10b::RunnableCoreTest(bool preserve)
 
 
 void
-PRP1_r10b::RunCoreTest()
+UnsupportRrvdFields_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
@@ -108,12 +112,38 @@ PRP1_r10b::RunCoreTest()
     SharedMemBufferPtr getLogPageMem = SharedMemBufferPtr(new MemBuffer());
     getLogPageMem->InitOffset1stPage(GetLogPage::FIRMSLOT_DATA_SIZE,
             BUFFER_OFFSET, true);
-
-    send_64b_bitmask prpReq = (send_64b_bitmask)(MASK_PRP1_PAGE);
+    send_64b_bitmask prpReq =
+            (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE);
     getLogPgCmd->SetPrpBuffer(prpReq, getLogPageMem);
 
+    LOG_NRM("Issue GetLogPage cmd without setting reserved bits.");
     IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
-        getLogPgCmd, "prp1only", true);
+        getLogPgCmd, "rsvd.notset", true);
+
+    LOG_NRM("Set all cmd's rsvd bits");
+    uint32_t work = getLogPgCmd->GetDword(0);
+    work |= 0x0000fc00;      // Set DW0_b15:10 bits
+    getLogPgCmd->SetDword(work, 0);
+
+    getLogPgCmd->SetDword(0xffffffff, 2);
+    getLogPgCmd->SetDword(0xffffffff, 3);
+    getLogPgCmd->SetDword(0xffffffff, 4);
+    getLogPgCmd->SetDword(0xffffffff, 5);
+
+    work = getLogPgCmd->GetDword(10);
+    work |= 0xf0000000;      // Set DW10_b31:28 bits
+    getLogPgCmd->SetDword(work, 10);
+
+    getLogPgCmd->SetDword(0xffffffff, 11);
+    getLogPgCmd->SetDword(0xffffffff, 12);
+    getLogPgCmd->SetDword(0xffffffff, 13);
+    getLogPgCmd->SetDword(0xffffffff, 14);
+    getLogPgCmd->SetDword(0xffffffff, 15);
+
+    LOG_NRM("Issue GetLogPage cmd after setting reserved bits.");
+    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
+        getLogPgCmd, "rsvd.set", true);
+
 }
 
 }   // namespace
