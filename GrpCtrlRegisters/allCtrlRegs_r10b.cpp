@@ -17,6 +17,8 @@
 #include "allCtrlRegs_r10b.h"
 #include "globals.h"
 
+#undef THROW_ON_ERROR
+
 namespace GrpCtrlRegisters {
 
 
@@ -174,9 +176,16 @@ AllCtrlRegs_r10b::ValidateCtlRegisterROAttribute(CtlSpc reg)
                     (ctlMetrics[reg].dfltValue & ctlMetrics[reg].maskRO);
 
                 if (value != expectedValue) {
+#ifdef  THROW_ON_ERROR
                     throw FrmwkEx(HERE, "%s RO bit #%d has incorrect value",
                         ctlMetrics[reg].desc,
                         ReportOffendingBitPos(value, expectedValue));
+#else
+                    LOG_ERR("%s RO bit #%d has incorrect value",
+                        ctlMetrics[reg].desc,
+                        ReportOffendingBitPos(value, expectedValue));
+                    return;
+#endif
                 }
             }
         }
@@ -193,9 +202,16 @@ AllCtrlRegs_r10b::ValidateCtlRegisterROAttribute(CtlSpc reg)
         expectedValue = (ctlMetrics[reg].dfltValue & ctlMetrics[reg].maskRO);
 
         if (value != expectedValue) {
+#ifdef  THROW_ON_ERROR
             throw FrmwkEx(HERE, "%s RO bit #%d has incorrect value",
                 ctlMetrics[reg].desc,
                 ReportOffendingBitPos(value, expectedValue));
+#else
+            LOG_ERR("%s RO bit #%d has incorrect value",
+                ctlMetrics[reg].desc,
+                ReportOffendingBitPos(value, expectedValue));
+            return;
+#endif
         }
     }
 }

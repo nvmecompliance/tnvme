@@ -420,9 +420,9 @@ Informative::Init()
 
         LOG_NRM("Prepare the admin Q's to setup this request");
         SharedACQPtr acq = SharedACQPtr(new ACQ(gDutFd));
-        acq->Init(2);
+        acq->Init(20);
         SharedASQPtr asq = SharedASQPtr(new ASQ(gDutFd));
-        asq->Init(2);
+        asq->Init(20);
         gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
         if (gCtrlrConfig->SetState(ST_ENABLE) == false)
             throw FrmwkEx(HERE);
