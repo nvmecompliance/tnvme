@@ -91,7 +91,7 @@ PRP1_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
-     * 1) none
+     * 1) Test CreateResources_r10b has run prior.
      *  \endverbatim
      */
     // Lookup objs which were created in a prior test within group
@@ -107,7 +107,7 @@ PRP1_r10b::RunCoreTest()
 
     SharedMemBufferPtr getLogPageMem = SharedMemBufferPtr(new MemBuffer());
     getLogPageMem->InitOffset1stPage(GetLogPage::FIRMSLOT_DATA_SIZE,
-            BUFFER_OFFSET, true);
+        BUFFER_OFFSET, true);
 
     send_64b_bitmask prpReq = (send_64b_bitmask)(MASK_PRP1_PAGE);
     getLogPgCmd->SetPrpBuffer(prpReq, getLogPageMem);
