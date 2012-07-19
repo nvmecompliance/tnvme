@@ -22,7 +22,8 @@ SRC =					\
 	prp1_r10b.cpp			\
 	prp1PRP2_r10b.cpp		\
 	unsupportRrvdFields_r10b.cpp	\
-	numDIsAdhered_r10b.cpp
+	numDIsAdhered_r10b.cpp		\
+	invalidLogPageNVMSet_r10b.cpp
 
 .SUFFIXES: .cpp
 
