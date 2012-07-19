@@ -45,21 +45,8 @@ ProcessCE::Validate(union CE &ce, CEStat status)
 {
     LogStatus(ce);
 
-    if ((ce.n.SF.b.SCT != mCEStatMetrics[status].sct) ||
-        (ce.n.SF.b.SC  != mCEStatMetrics[status].sc)) {
-
-        throw FrmwkEx(HERE, 
-            "Expected (SCT:SC) 0x%02X:0x%02X, but detected 0x%02X:0x%02X",
-            mCEStatMetrics[status].sct, mCEStatMetrics[status].sc,
-            ce.n.SF.b.SCT, ce.n.SF.b.SC);
-    } else if ((ce.n.SF.b.SCT != mCEStatMetrics[CESTAT_SUCCESS].sct) ||
-               (ce.n.SF.b.SC  != mCEStatMetrics[CESTAT_SUCCESS].sc)) {
-
-        if (ce.n.SF.b.M) {
-            throw FrmwkEx(HERE, 
-                "Illegal 'M' bit set while CE indicates success");
-        }
-    }
+    if (ValidatePeek(ce, status) == false)
+        throw FrmwkEx(HERE);
 }
 
 
@@ -74,20 +61,43 @@ ProcessCE::ValidateDetailed(union CE &ce, StatbyBits &status)
         (status.SC  != ce.n.SF.b.SC) ||
         (status.SCT != ce.n.SF.b.SCT)) {
 
-        throw FrmwkEx(HERE, 
+        throw FrmwkEx(HERE,
             "Expected (DNR:M:P:SCT:SC) 0x%02X:0x%01X:0x%01X:0x%02X:0x%02X, "
             "but detected x%02X:0x%01X:0x%01X:0x%02X:0x%02X",
             status.DNR, status.M, status.P, status.SC, status.SCT,
             ce.n.SF.b.DNR, ce.n.SF.b.M, ce.n.SF.b.P, ce.n.SF.b.SCT,
             ce.n.SF.b.SC);
-    } else if ((ce.n.SF.b.SCT != mCEStatMetrics[CESTAT_SUCCESS].sct) ||
-               (ce.n.SF.b.SC  != mCEStatMetrics[CESTAT_SUCCESS].sc)) {
+    } else if ((ce.n.SF.b.SCT == mCEStatMetrics[CESTAT_SUCCESS].sct) &&
+               (ce.n.SF.b.SC  == mCEStatMetrics[CESTAT_SUCCESS].sc)) {
 
         if (ce.n.SF.b.M) {
-            throw FrmwkEx(HERE, 
+            throw FrmwkEx(HERE,
                 "Illegal 'M' bit set while CE indicates success");
         }
     }
+}
+
+
+bool
+ProcessCE::ValidatePeek(union CE &ce, CEStat status)
+{
+    LogStatus(ce);
+
+    if ((ce.n.SF.b.SCT != mCEStatMetrics[status].sct) ||
+        (ce.n.SF.b.SC  != mCEStatMetrics[status].sc)) {
+        LOG_ERR("Expected (SCT:SC) 0x%02X:0x%02X, but detected 0x%02X:0x%02X",
+            mCEStatMetrics[status].sct, mCEStatMetrics[status].sc,
+            ce.n.SF.b.SCT, ce.n.SF.b.SC);
+        return false;
+    } else if ((ce.n.SF.b.SCT == mCEStatMetrics[CESTAT_SUCCESS].sct) &&
+               (ce.n.SF.b.SC  == mCEStatMetrics[CESTAT_SUCCESS].sc)) {
+
+        if (ce.n.SF.b.M) {
+            LOG_ERR("Illegal 'M' bit set while CE indicates success");
+            return false;
+        }
+    }
+    return true;
 }
 
 
