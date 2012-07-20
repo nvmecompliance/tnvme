@@ -39,18 +39,19 @@ GrpBasicInit::GrpBasicInit(size_t grpNum) :
         APPEND_TEST_AT_XLEVEL(CreateACQASQ_r10b, GrpBasicInit)
         // Polling 1st
         APPEND_TEST_AT_ZLEVEL(CreateIOQContigPoll_r10b, GrpBasicInit)
-        APPEND_TEST_AT_ZLEVEL(CreateIOQDiscontigPoll_r10b, GrpBasicInit)
+//        APPEND_TEST_AT_ZLEVEL(CreateIOQDiscontigPoll_r10b, GrpBasicInit)
         APPEND_TEST_AT_ZLEVEL(WriteDataPat_r10b, GrpBasicInit)
         APPEND_TEST_AT_ZLEVEL(VerifyDataPat_r10b, GrpBasicInit)
         APPEND_TEST_AT_ZLEVEL(DeleteIOQContig_r10b, GrpBasicInit)
-        APPEND_TEST_AT_ZLEVEL(DeleteIOQDiscontig_r10b, GrpBasicInit)
+//        APPEND_TEST_AT_ZLEVEL(DeleteIOQDiscontig_r10b, GrpBasicInit)
         // IRQ 2nd
+        APPEND_TEST_AT_XLEVEL(CreateACQASQ_r10b, GrpBasicInit)
         APPEND_TEST_AT_ZLEVEL(CreateIOQContigIrq_r10b, GrpBasicInit)
-        APPEND_TEST_AT_ZLEVEL(CreateIOQDiscontigIrq_r10b, GrpBasicInit)
+//        APPEND_TEST_AT_ZLEVEL(CreateIOQDiscontigIrq_r10b, GrpBasicInit)
         APPEND_TEST_AT_ZLEVEL(WriteDataPat_r10b, GrpBasicInit)
         APPEND_TEST_AT_ZLEVEL(VerifyDataPat_r10b, GrpBasicInit)
         APPEND_TEST_AT_ZLEVEL(DeleteIOQContig_r10b, GrpBasicInit)
-        APPEND_TEST_AT_ZLEVEL(DeleteIOQDiscontig_r10b, GrpBasicInit)
+//        APPEND_TEST_AT_ZLEVEL(DeleteIOQDiscontig_r10b, GrpBasicInit)
         break;
 
     default:

@@ -18,7 +18,7 @@
 
 APP_NAME = tnvme
 export CC = g++				# Mods here affect all sub-makes
-#export DFLAGS = -g -DDEBUG		# comment here affects all sub-makes
+export DFLAGS = -g -DDEBUG		# comment here affects all sub-makes
 export CFLAGS = -O0 -W -Wall -Werror	# mods here affect all sub-makes
 LDFLAGS = $(foreach stem, $(SUBDIRS),./$(stem)/lib$(stem).a)
 INCLUDES = -I./ -I../
