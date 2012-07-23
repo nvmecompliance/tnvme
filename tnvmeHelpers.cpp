@@ -105,6 +105,7 @@ CompareGolden(Golden &golden)
 
             uint8_t goldenData;
             uint8_t dutData;
+            bool foundMiscompare = false;
             for (size_t j = 0; j < golden.cmds[i].raw.size(); j++ ) {
                 goldenData = (golden.cmds[i].raw[j] & golden.cmds[i].mask[j]);
                 dutData = (idMem->GetAt(j) & golden.cmds[i].mask[j]);
@@ -119,10 +120,11 @@ CompareGolden(Golden &golden)
                     LOG_ERR("golden=0x%02X, mask=0x%02X, DUT=0x%02X",
                         golden.cmds[i].raw[j], golden.cmds[i].mask[j],
                         idMem->GetAt(j));
-                    throw FrmwkEx(HERE,
-                        "Golden ID data miscompare @ offset = %ld", j);
+                    foundMiscompare = true;
                 }
             }
+            if (foundMiscompare)
+                throw FrmwkEx(HERE, "Golden identify data miscompare");
         }
 
         LOG_NRM("The operation succeeded to compare golden data");
