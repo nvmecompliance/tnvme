@@ -14,30 +14,34 @@
  *  limitations under the License.
  */
 
-#include "testCase_r10b.h"
+#include "prp1PRP2_r10b.h"
 #include "globals.h"
 #include "grpDefs.h"
 #include "../Utils/kernelAPI.h"
+#include "../Utils/io.h"
+#include "../Cmds/getLogPage.h"
 
-namespace GrpTemplate {
+#define FIRM_SLOT_INFO_LID      0x03
+#define PRP1_ONLY_NUMD          (514 / 4)
+#define BUFFER_OFFSET           0xF00
+
+namespace GrpAdminGetLogPgCmd {
 
 
-TestCase_r10b::TestCase_r10b(
-    string grpName, string testName) :
+PRP1PRP2_r10b::PRP1PRP2_r10b(string grpName, string testName) :
     Test(grpName, testName, SPECREV_10b)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-    mTestDesc.SetCompliance("revision 1.0b, section ?");
-    mTestDesc.SetShort(     "This is a template test");
+    mTestDesc.SetCompliance("revision 1.0b, section 5");
+    mTestDesc.SetShort(     "Request data using PRP1 and PRP2");
     // No string size limit for the long description
     mTestDesc.SetLong(
-        "This test is a template for future use. This string description has "
-        "no length restrictions. See header file for class TestDescribe for "
-        "further details.c");
+        "Issue GetLogPage cmd, LID=3, NUMD=(512/4) utilizing only PRP1 & PRP2 "
+        "for the user space buffer, and expect success.");
 }
 
 
-TestCase_r10b::~TestCase_r10b()
+PRP1PRP2_r10b::~PRP1PRP2_r10b()
 {
     ///////////////////////////////////////////////////////////////////////////
     // Allocations taken from the heap and not under the control of the
@@ -46,8 +50,8 @@ TestCase_r10b::~TestCase_r10b()
 }
 
 
-TestCase_r10b::
-TestCase_r10b(const TestCase_r10b &other) : Test(other)
+PRP1PRP2_r10b::
+PRP1PRP2_r10b(const PRP1PRP2_r10b &other) : Test(other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -56,8 +60,8 @@ TestCase_r10b(const TestCase_r10b &other) : Test(other)
 }
 
 
-TestCase_r10b &
-TestCase_r10b::operator=(const TestCase_r10b &other)
+PRP1PRP2_r10b &
+PRP1PRP2_r10b::operator=(const PRP1PRP2_r10b &other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -69,7 +73,7 @@ TestCase_r10b::operator=(const TestCase_r10b &other)
 
 
 Test::RunType
-TestCase_r10b::RunnableCoreTest(bool preserve)
+PRP1PRP2_r10b::RunnableCoreTest(bool preserve)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All code contained herein must never permanently modify the state or
@@ -77,26 +81,40 @@ TestCase_r10b::RunnableCoreTest(bool preserve)
     // changes that will not be restored after a cold hard reset.
     ///////////////////////////////////////////////////////////////////////////
 
-#if 0
-    // Choose to return one of these or create your own logic
-    return ((preserve == true) ? RUN_FALSE : RUN_TRUE);   // Test is destructive
-    return RUN_TRUE;        // This test is never destructive
-#endif
     preserve = preserve;    // Suppress compiler error/warning
     return RUN_TRUE;        // This test is never destructive
 }
 
 
 void
-TestCase_r10b::RunCoreTest()
+PRP1PRP2_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
-     * 1) none
+     * 1) Test CreateResources_r10b has run prior.
      *  \endverbatim
      */
-    if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
-        throw FrmwkEx(HERE);
+    // Lookup objs which were created in a prior test within group
+    SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
+    SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
+
+    LOG_NRM("Create get log page cmd and assoc some buffer memory");
+    SharedGetLogPagePtr getLogPgCmd = SharedGetLogPagePtr(new GetLogPage());
+
+    LOG_NRM("Get log page to request firmware slot information");
+    getLogPgCmd->SetNUMD(PRP1_ONLY_NUMD);
+    getLogPgCmd->SetLID(FIRM_SLOT_INFO_LID);
+
+    LOG_NRM("Set the offset into the buffer at 0x%04X", BUFFER_OFFSET);
+    SharedMemBufferPtr getLogPageMem = SharedMemBufferPtr(new MemBuffer());
+    getLogPageMem->InitOffset1stPage(GetLogPage::FIRMSLOT_DATA_SIZE,
+        BUFFER_OFFSET, true);
+    send_64b_bitmask prpReq =
+        (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE);
+    getLogPgCmd->SetPrpBuffer(prpReq, getLogPageMem);
+
+    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
+        getLogPgCmd, "prp1prp2", true);
 }
 
 }   // namespace

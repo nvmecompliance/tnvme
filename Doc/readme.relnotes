@@ -1,3 +1,25 @@
+2012-7-25
+nvmecompliance_release=1.8.0 New tests, bug fixes.
+    1) dnvme: no changes this release.
+    2) Bugfix: Framework reg definition CAP_RES3 was incorrect.
+    3) tnvme: --golden cmd line option now reports all violation rather
+       than just the 1st one.
+    4) tnvme: Framework method CE::Validate() would never have reported
+       an illegal 'M' bit begin set.
+    5) Bugfix-tnvme: The framework incorrectly reported the number
+       of tests being skipping when using the --skiptest cmd line option.
+    6) tnvme: Added new tests, see git log for details.
+    7) Known Issues:
+      a) BUG-dnvme: Currently there is no work around for this. It 
+        affects only MSI-X interrupt handling, thus any test that
+        uses MSI-X might core-dump when running against real hdw.
+        QEMU does not correctly disallow the violation that is 
+        occuring which is why it has slipped by for so long. The
+        violation is that dnvme directly writes to the MSIXCAP.TBIR
+        and MSIXCAP.PBIR tables. Linux will not allow this to
+        mask IRQ's, thus some other method needs to be sought.
+
+
 2012-7-3
 nvmecompliance_release=1.7.0 New tests, bug fixes.
     1) dnvme-bugfix: The mapping of optionali BAR registers was doing the 

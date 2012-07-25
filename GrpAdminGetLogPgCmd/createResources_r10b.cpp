@@ -14,30 +14,33 @@
  *  limitations under the License.
  */
 
-#include "testCase_r10b.h"
+#include "createResources_r10b.h"
 #include "globals.h"
 #include "grpDefs.h"
+#include "../Queues/acq.h" 
+#include "../Queues/asq.h"
 #include "../Utils/kernelAPI.h"
+#include "../Utils/irq.h"
+#include "../Singletons/informative.h"
 
-namespace GrpTemplate {
+namespace GrpAdminGetLogPgCmd {
 
 
-TestCase_r10b::TestCase_r10b(
+CreateResources_r10b::CreateResources_r10b(
     string grpName, string testName) :
     Test(grpName, testName, SPECREV_10b)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-    mTestDesc.SetCompliance("revision 1.0b, section ?");
-    mTestDesc.SetShort(     "This is a template test");
+    mTestDesc.SetCompliance("revision 1.0b, section 5");
+    mTestDesc.SetShort(     "Create resources needed by subsequent tests");
     // No string size limit for the long description
     mTestDesc.SetLong(
-        "This test is a template for future use. This string description has "
-        "no length restrictions. See header file for class TestDescribe for "
-        "further details.c");
+        "Create resources with group lifetime which are needed by subsequent "
+        "tests");
 }
 
 
-TestCase_r10b::~TestCase_r10b()
+CreateResources_r10b::~CreateResources_r10b()
 {
     ///////////////////////////////////////////////////////////////////////////
     // Allocations taken from the heap and not under the control of the
@@ -46,8 +49,8 @@ TestCase_r10b::~TestCase_r10b()
 }
 
 
-TestCase_r10b::
-TestCase_r10b(const TestCase_r10b &other) : Test(other)
+CreateResources_r10b::
+CreateResources_r10b(const CreateResources_r10b &other) : Test(other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -56,8 +59,8 @@ TestCase_r10b(const TestCase_r10b &other) : Test(other)
 }
 
 
-TestCase_r10b &
-TestCase_r10b::operator=(const TestCase_r10b &other)
+CreateResources_r10b &
+CreateResources_r10b::operator=(const CreateResources_r10b &other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -69,7 +72,7 @@ TestCase_r10b::operator=(const TestCase_r10b &other)
 
 
 Test::RunType
-TestCase_r10b::RunnableCoreTest(bool preserve)
+CreateResources_r10b::RunnableCoreTest(bool preserve)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All code contained herein must never permanently modify the state or
@@ -77,25 +80,35 @@ TestCase_r10b::RunnableCoreTest(bool preserve)
     // changes that will not be restored after a cold hard reset.
     ///////////////////////////////////////////////////////////////////////////
 
-#if 0
-    // Choose to return one of these or create your own logic
-    return ((preserve == true) ? RUN_FALSE : RUN_TRUE);   // Test is destructive
-    return RUN_TRUE;        // This test is never destructive
-#endif
     preserve = preserve;    // Suppress compiler error/warning
     return RUN_TRUE;        // This test is never destructive
 }
 
 
 void
-TestCase_r10b::RunCoreTest()
+CreateResources_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
-     * 1) none
-     *  \endverbatim
+     * None.
+     * \endverbatim
      */
     if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
+        throw FrmwkEx(HERE);
+
+    SharedACQPtr acq = CAST_TO_ACQ(
+        gRsrcMngr->AllocObj(Trackable::OBJ_ACQ, ACQ_GROUP_ID))
+    acq->Init(5);
+
+    SharedASQPtr asq = CAST_TO_ASQ(
+        gRsrcMngr->AllocObj(Trackable::OBJ_ASQ, ASQ_GROUP_ID))
+    asq->Init(5);
+
+    // All queues will use identical IRQ vector
+    IRQ::SetAnySchemeSpecifyNum(1);     // throws upon error
+
+    gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
+    if (gCtrlrConfig->SetState(ST_ENABLE) == false)
         throw FrmwkEx(HERE);
 }
 

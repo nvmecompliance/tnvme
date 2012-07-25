@@ -34,6 +34,7 @@ SUBDIRS:=			\
 	GrpAdminCreateIOSQCmd	\
 	GrpAdminDeleteIOCQCmd	\
 	GrpAdminDeleteIOSQCmd	\
+	GrpAdminGetLogPgCmd	\
 	GrpBasicInit		\
 	GrpCtrlRegisters	\
 	GrpGeneralCmds		\

@@ -375,7 +375,7 @@ Group::AdvanceDependencies(TestSetType &dependencies, int64_t &tstIdx,
         }
     }
 
-    return (tstIdx - origTstIdx);
+    return (tstIdx - origTstIdx - 1);
 }
 
 
