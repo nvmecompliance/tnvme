@@ -41,13 +41,13 @@ IO::SendAndReapCmd(string grpName, string testName, uint16_t ms,
     uint16_t uniqueId;
 
 
-//    if ((numCE = cq->ReapInquiry(isrCount, true)) != 0) {
-//        cq->Dump(
-//            FileSystem::PrepDumpFile(grpName, testName, "cq",
-//            "notEmpty"), "Test assumption have not been met");
-//        throw FrmwkEx(HERE, "Require 0 CE's within CQ %d, not upheld, found %d",
-//            cq->GetQId(), numCE);
-//    }
+    if ((numCE = cq->ReapInquiry(isrCount, true)) != 0) {
+        cq->Dump(
+            FileSystem::PrepDumpFile(grpName, testName, "cq",
+            "notEmpty"), "Test assumption have not been met");
+        throw FrmwkEx(HERE, "Require 0 CE's within CQ %d, not upheld, found %d",
+            cq->GetQId(), numCE);
+    }
 
     LOG_NRM("Send the cmd to hdw via SQ %d", sq->GetQId());
     sq->Send(cmd, uniqueId);
@@ -68,16 +68,15 @@ IO::SendAndReapCmd(string grpName, string testName, uint16_t ms,
             FileSystem::PrepDumpFile(grpName, testName, "cq." + cmd->GetName(),
             qualify), work);
         throw FrmwkEx(HERE, work);
+    } else if (numCE != 1) {
+        work = str(boost::format(
+            "Unable to see any CE's in CQ %d, dump entire CQ") % cq->GetQId());
+        cq->Dump(
+            FileSystem::PrepDumpFile(grpName, testName, "cq." + cmd->GetName(),
+            qualify), work);
+        throw FrmwkEx(HERE, "1 cmd caused %d CE's to arrive in CQ %d",
+            numCE, cq->GetQId());
     }
-//    } else if (numCE != 1) {
-//        work = str(boost::format(
-//            "Unable to see any CE's in CQ %d, dump entire CQ") % cq->GetQId());
-//        cq->Dump(
-//            FileSystem::PrepDumpFile(grpName, testName, "cq." + cmd->GetName(),
-//            qualify), work);
-//        throw FrmwkEx(HERE, "1 cmd caused %d CE's to arrive in CQ %d",
-//            numCE, cq->GetQId());
-//    }
     if (verbose) {
         work = str(boost::format("Just B4 reaping CQ %d, dump entire CQ") %
             cq->GetQId());
@@ -110,8 +109,8 @@ IO::ReapCE(SharedCQPtr cq, uint32_t numCE, uint32_t &isrCount,
     LOG_NRM("Reaping CE from CQ %d, requires memory to hold CE", cq->GetQId());
     SharedMemBufferPtr ceMem = SharedMemBufferPtr(new MemBuffer());
     if ((numReaped = cq->Reap(ceRemain, ceMem, isrCount, numCE, true)) != 1) {
-        work = str(boost::format("Verified CE's exist, desired %d, reaped %d")
-            % numCE % numReaped);
+        work = str(boost::format("Verified CE's exist, desired 1, reaped %d")
+            % numReaped);
         cq->Dump(
             FileSystem::PrepDumpFile(grpName, testName, "cq.error", qualify),
             work);

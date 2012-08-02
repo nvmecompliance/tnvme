@@ -130,17 +130,31 @@ VerifyDataPat_r10b::VerifyDataPattern()
 
     switch (namspcData.type) {
     case Informative::NS_BARE:
-        dataPat->Init(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize);
-        readMem->Init(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize);
+//        dataPat->Init(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize);
+//        readMem->Init(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize);
+        dataPat->InitAlignment(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize,
+            lbaDataSize);
+        readMem->InitAlignment(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize,
+            lbaDataSize);
         break;
     case Informative::NS_METAS:
-        dataPat->Init(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize);
-        readMem->Init(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize);
+//        dataPat->Init(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize);
+//        readMem->Init(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize);
+        dataPat->InitAlignment(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize,
+            lbaDataSize);
+        readMem->InitAlignment(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize,
+            lbaDataSize);
+
         readCmd->AllocMetaBuffer();
         break;
     case Informative::NS_METAI:
-        dataPat->Init(WRITE_DATA_PAT_NUM_BLKS * (lbaDataSize + lbaFormat.MS));
-        readMem->Init(WRITE_DATA_PAT_NUM_BLKS * (lbaDataSize + lbaFormat.MS));
+//        dataPat->Init(WRITE_DATA_PAT_NUM_BLKS * (lbaDataSize + lbaFormat.MS));
+//        readMem->Init(WRITE_DATA_PAT_NUM_BLKS * (lbaDataSize + lbaFormat.MS));
+        dataPat->InitAlignment(WRITE_DATA_PAT_NUM_BLKS *
+            (lbaDataSize + lbaFormat.MS), lbaDataSize);
+        readMem->InitAlignment(WRITE_DATA_PAT_NUM_BLKS *
+            (lbaDataSize + lbaFormat.MS), lbaDataSize);
+
         break;
     case Informative::NS_E2ES:
     case Informative::NS_E2EI:

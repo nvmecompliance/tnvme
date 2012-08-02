@@ -166,6 +166,7 @@ PartialReapMSIX_r10b::RunCoreTest()
     uint32_t anticipatedIrqs = (2 + 1);
 
     SharedWritePtr writeCmd = CreateCmd();
+    uint8_t irqMismatch = 0;
     for (unsigned i = 1; i <= NUM_CMDS_ISSUE; i++) {
         LOG_NRM("Sending write cmd %d", i);
         iosq->Send(writeCmd, uniqueId);
@@ -183,18 +184,26 @@ PartialReapMSIX_r10b::RunCoreTest()
             iocq->Dump(
                 FileSystem::PrepDumpFile(mGrpName, mTestName, "acq",
                 "notEnough"), "Test requires seeing all CE's");
-            throw FrmwkEx(HERE,
-                "The anticipated %d CE's have not arrived", i);
+            LOG_ERR("The anticipated %d CE's have not arrived", i);
+            irqMismatch = 0xFF;
+//            throw FrmwkEx(HERE,
+//                "The anticipated %d CE's have not arrived", i);
         } else if (isrCount != anticipatedIrqs) {
             // 1 IRQ per cmd did not occur
             iocq->Dump(
                 FileSystem::PrepDumpFile(mGrpName, mTestName, "acq",
                 "irqBad"), "Test requires seeing all correct num of IRQ's");
-            throw FrmwkEx(HERE,
-                "The anticipated %d IRQ', but detected %d", anticipatedIrqs,
+            LOG_ERR("The anticipated %d IRQ's but detected %d", anticipatedIrqs,
                 isrCount);
+            irqMismatch = 0xFF;
+//            throw FrmwkEx(HERE,
+//                "The anticipated %d IRQ', but detected %d", anticipatedIrqs,
+//                isrCount);
         }
     }
+
+    if (irqMismatch)
+        throw FrmwkEx(HERE);
 
     // There is an active IRQ outstanding and another to arrive due to the
     // PBA pending bit being set. The pending bit makes the 4th IRQ arrive
@@ -241,16 +250,19 @@ PartialReapMSIX_r10b::CreateCmd()
 
     switch (namspcData.type) {
     case Informative::NS_BARE:
-        dataPat->Init(lbaDataSize);
+//        dataPat->Init(lbaDataSize);
+        dataPat->InitAlignment(lbaDataSize, lbaDataSize);
         break;
     case Informative::NS_METAS:
-        dataPat->Init(lbaDataSize);
+//        dataPat->Init(lbaDataSize);
+        dataPat->InitAlignment(lbaDataSize, lbaDataSize);
         if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
             throw FrmwkEx(HERE);
         writeCmd->AllocMetaBuffer();
         break;
     case Informative::NS_METAI:
-        dataPat->Init(lbaDataSize + lbaFormat.MS);
+//        dataPat->Init(lbaDataSize + lbaFormat.MS);
+        dataPat->InitAlignment(lbaDataSize + lbaFormat.MS, lbaDataSize);
         break;
     case Informative::NS_E2ES:
     case Informative::NS_E2EI:

@@ -144,20 +144,26 @@ MaxIOQMSIXManyTo1_r10b::RunCoreTest()
 
     switch (namspcData.type) {
     case Informative::NS_BARE:
-        writeMem->Init(lbaDataSize);
-        readMem->Init(lbaDataSize);
+//        writeMem->Init(lbaDataSize);
+//        readMem->Init(lbaDataSize);
+        writeMem->InitAlignment(lbaDataSize, lbaDataSize);
+        readMem->InitAlignment(lbaDataSize, lbaDataSize);
         break;
     case Informative::NS_METAS:
-        writeMem->Init(lbaDataSize);
-        readMem->Init(lbaDataSize);
+//        writeMem->Init(lbaDataSize);
+//        readMem->Init(lbaDataSize);
+        writeMem->InitAlignment(lbaDataSize, lbaDataSize);
+        readMem->InitAlignment(lbaDataSize, lbaDataSize);
         if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
             throw FrmwkEx(HERE);
         writeCmd->AllocMetaBuffer();
         readCmd->AllocMetaBuffer();
         break;
     case Informative::NS_METAI:
-        writeMem->Init(lbaDataSize + lbaFormat.MS);
-        readMem->Init(lbaDataSize  + lbaFormat.MS);
+//        writeMem->Init(lbaDataSize + lbaFormat.MS);
+//        readMem->Init(lbaDataSize  + lbaFormat.MS);
+        writeMem->InitAlignment(lbaDataSize + lbaFormat.MS, lbaDataSize);
+        readMem->InitAlignment(lbaDataSize + lbaFormat.MS, lbaDataSize);
         break;
     case Informative::NS_E2ES:
     case Informative::NS_E2EI:
