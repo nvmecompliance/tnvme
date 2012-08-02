@@ -117,9 +117,9 @@ CompareGolden(Golden &golden)
                     userMem->Dump(FileSystem::PrepDumpFile("tnvme", "golden",
                         "identify", "cmdline.miscompare"),
                         "Golden user data miscompare");
-                    LOG_ERR("golden=0x%02X, mask=0x%02X, DUT=0x%02X",
-                        golden.cmds[i].raw[j], golden.cmds[i].mask[j],
-                        idMem->GetAt(j));
+                    LOG_ERR("golden=0x%02X, mask=0x%02X, DUT=0x%02X, @offset= "
+                        "%ld", golden.cmds[i].raw[j], golden.cmds[i].mask[j],
+                        idMem->GetAt(j), j);
                     foundMiscompare = true;
                 }
             }
