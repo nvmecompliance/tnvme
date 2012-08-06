@@ -23,6 +23,8 @@
 #include "metaData.h"
 #include "../Exception/frmwkEx.h"
 
+class SQ;     // forward definition
+
 class Cmd;    // forward definition
 typedef boost::shared_ptr<Cmd>              SharedCmdPtr;
 #define CAST_TO_Cmd(shared_trackable_ptr)   \
@@ -131,7 +133,7 @@ protected:
      * @param opcode Pass the opcode defining this cmd, per NVME spec.
      * @param dataDir Pass the direction of data for this cmd. This is used
      *      to notify dnvme which way to send base classes PrpData. The kernel
-     *      requires special calls dependant upon the direction of xfer. If this
+     *      requires special calls dependent upon the direction of xfer. If this
      *      is not correct, unknown outcomes will be observed.
      * @param cmdSize Pass the number of bytes consisting of a single cmd.
      */
@@ -144,6 +146,10 @@ private:
     SharedMemBufferPtr mCmdBuf;
     DataDir mDataDir;
     string mCmdName;
+
+    // Allows setting the dnvme assigned CID to the cmd after it has been SQ->Send()
+    friend class SQ;
+    void SetCID(uint16_t cid);
 };
 
 

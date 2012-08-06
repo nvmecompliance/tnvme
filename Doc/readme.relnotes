@@ -1,3 +1,19 @@
+2012-8-6
+nvmecompliance_release=1.9.0 dnvme bugfix only
+    1) dnvme:
+      a) Fix MSI-X PBA table access:
+         MSI-X PBA table's pending bits should never is written by
+         the driver. A device driver is prohibited from writing this
+         bits however driver can read these bits to determine the
+         current pending IRQ's
+      b) Fix in dnvme_probe:
+         The driver probing for BAR's incorrectly used parameters in
+         pci_resource_start. Changed to use correct parameters
+      c) Fix in read_generic:
+         Corrected variable types from int to u32.
+    2) Known Issues:
+      a) none.
+
 2012-7-25
 nvmecompliance_release=1.8.0 New tests, bug fixes.
     1) dnvme: no changes this release.
