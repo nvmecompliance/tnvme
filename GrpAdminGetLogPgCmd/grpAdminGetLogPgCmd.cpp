@@ -21,6 +21,8 @@
 #include "unsupportRrvdFields_r10b.h"
 #include "numDIsAdhered_r10b.h"
 #include "invalidLogPageNVMSet_r10b.h"
+#include "invalidNamspc_r10b.h"
+
 
 namespace GrpAdminGetLogPgCmd {
 
@@ -40,6 +42,7 @@ GrpAdminGetLogPgCmd::GrpAdminGetLogPgCmd(size_t grpNum) :
         APPEND_TEST_AT_YLEVEL(UnsupportRrvdFields_r10b, GrpAdminGetLogPgCmd)
         APPEND_TEST_AT_YLEVEL(NUMDIsAdhered_r10b, GrpAdminGetLogPgCmd)
         APPEND_TEST_AT_YLEVEL(InvalidLogPageNVMSet_r10b, GrpAdminGetLogPgCmd)
+        APPEND_TEST_AT_YLEVEL(InvalidNamspc_r10b, GrpAdminGetLogPgCmd)
         break;
 
     default:
