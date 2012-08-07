@@ -281,6 +281,7 @@ SQ::Send(SharedCmdPtr cmd, uint16_t &uniqueId)
 
     // Allow tnvme to learn of the unique cmd ID which was assigned by dnvme
     uniqueId = io.unique_id;
+    cmd->SetCID(io.unique_id);
 }
 
 
