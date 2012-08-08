@@ -46,7 +46,7 @@ public:
     /**
      * Initialize this object and allocates contiguous Q content memory.
      * @param qId Pass the queue's ID
-     * @param numEntries Pass the number of elements within the Q
+     * @param numEntries Pass the number of elements within the Q (1 - based)
      * @param irqEnabled Pass true if IRQ's are to be enabled for this Q
      * @param irqVec If (irqEnabled==true) then spec's the IRQ's vector. Value
      *        must be among the set from (0 - (n-1)) where n is is spec'd
@@ -58,7 +58,7 @@ public:
     /**
      * Initialize this object and allocates discontiguous Q content memory.
      * @param qId Pass the queue's ID
-     * @param numEntries Pass the number of elements within the Q
+     * @param numEntries Pass the number of elements within the Q (1 - based)
      * @param memBuffer Hand off this Q's memory. It must satisfy
      *      MemBuffer.GetBufSize()>=(numEntries * gCtrlrConfig->GetIOCQES(). It
      *      must only ever be accessed as RO. Writing to this buffer will have

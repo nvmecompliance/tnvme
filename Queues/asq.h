@@ -46,7 +46,7 @@ public:
 
     /**
      * Initialize this object and allocates a contiguous ACQ
-     * @param numEntries Pass the number of elements within the Q
+     * @param numEntries Pass the number of elements within the Q (1 - based)
      */
     void Init(uint32_t numEntries);
 
