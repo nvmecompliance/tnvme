@@ -276,6 +276,7 @@ Group::RunTest(TestSetType &dependencies, int64_t &tstIdx,
 
     case Test::RUN_FALSE:
         result = TR_SKIPPING;
+        skippedTests.push_back(tr);
         numSkipped = (AdvanceDependencies(dependencies, tstIdx, false,
             skippedTests) + 1);
         LOG_WARN("Reporting not runnable, skipping test: %ld:%ld.%ld.%ld",

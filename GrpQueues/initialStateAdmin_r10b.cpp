@@ -114,7 +114,7 @@ InitialStateAdmin_r10b::ValidateInitialStateAdmin(SharedACQPtr acq,
     // tail pointers and verify SQ head pointer in completion entry of ACQ.
     // Repeat procedure after disabling and re-enabling ctlr.
     for (uint16_t i = 0; i < 2; i++) {
-        LOG_NRM("Validateing initial state admin for #%d times", i);
+        LOG_NRM("Validating initial state admin for #%d times", i);
         gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
         if (gCtrlrConfig->SetState(ST_ENABLE) == false)
             throw FrmwkEx(HERE);

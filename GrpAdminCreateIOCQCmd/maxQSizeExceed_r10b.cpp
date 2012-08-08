@@ -127,8 +127,8 @@ MaxQSizeExceed_r10b::RunCoreTest()
         GetValue(IDCTRLRCAP_CQES) & 0xf);
 
     LOG_NRM("Create IOCQ with illegal Q entries ranging from 0x%04X to 0x10000",
-        maxIOQEntries);
-    list<uint32_t> illegalQSizes = GetIllegalQSizes(maxIOQEntries);
+        maxIOQEntries + 1);
+    list<uint32_t> illegalQSizes = GetIllegalQSizes(maxIOQEntries + 1);
     for (list<uint32_t>::iterator qSize = illegalQSizes.begin();
         qSize != illegalQSizes.end(); qSize++) {
         LOG_NRM("Process CreateIOCQ Cmd with qSize #0x%04X", *qSize);

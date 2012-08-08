@@ -761,6 +761,7 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
                     allTestsPass = false;
                     thisTestPass = false;
                     numFailed++;
+                    numSkipped += skipped;
                     if (cl.ignore) {
                         LOG_WARN("Detected error, but forced to ignore");
                     } else {
@@ -779,12 +780,16 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
 
         // Report each iteration results
         ReportTestResults(iLoop, numPassed, numFailed, numSkipped, numGrps);
-        ReportExecution(failedTests, skippedTests);
+
+        if (failedTests.size() || skippedTests.size())
+            ReportExecution(failedTests, skippedTests);
     }
     return allTestsPass;
 
 EARLY_OUT:
     ReportTestResults(iLoop, numPassed, numFailed, numSkipped, numGrps);
+    if (failedTests.size() || skippedTests.size())
+        ReportExecution(failedTests, skippedTests);
     return allTestsPass;
 
 ABORT_OUT:

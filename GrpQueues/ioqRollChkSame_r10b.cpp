@@ -168,16 +168,19 @@ IOQRollChkSame_r10b::SetWriteCmd()
 
     switch (namspcData.type) {
     case Informative::NS_BARE:
-        dataPat->Init(lbaDataSize);
+//        dataPat->Init(lbaDataSize);
+        dataPat->InitAlignment(lbaDataSize, lbaDataSize);
         break;
     case Informative::NS_METAS:
-        dataPat->Init(lbaDataSize);
+//        dataPat->Init(lbaDataSize);
+        dataPat->InitAlignment(lbaDataSize, lbaDataSize);
         if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
             throw FrmwkEx(HERE);
         writeCmd->AllocMetaBuffer();
         break;
     case Informative::NS_METAI:
-        dataPat->Init(lbaDataSize + lbaFormat.MS);
+//        dataPat->Init(lbaDataSize + lbaFormat.MS);
+        dataPat->InitAlignment((lbaDataSize + lbaFormat.MS), lbaDataSize);
         break;
     case Informative::NS_E2ES:
     case Informative::NS_E2EI:
