@@ -121,7 +121,7 @@ MaxQSizeExceed_r10b::RunCoreTest()
     mqes = mqes + 1; // convert to 1 - based
     LOG_NRM("DUT's largest supported IOSQ size = 0x%05lX", mqes);
 
-    list<uint32_t> illegalQSizes = GetIllegalQSizes(mqes + 1);
+    list<uint32_t> illegalQSizes = GetIllegalQSizes(mqes);
     for (list<uint32_t>::iterator qSize = illegalQSizes.begin();
         qSize != illegalQSizes.end(); qSize++) {
         LOG_NRM("Create an IOSQ object with test lifetime");
