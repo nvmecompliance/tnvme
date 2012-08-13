@@ -212,14 +212,12 @@ PartialReapMSIX_r10b::RunCoreTest()
                     anticipatedIrqs, isrCount);
         }
 
-        // Now account for a new IRQ fired due to the pending bit being handled
+        // Now account for new IRQ's fired due to the pending bit being handled
         // by the DUT, but delay processing so that latency in handling this
         // extra IRQ is not the cause of a test failure. Rather make the
         // absence of the IRQ be the failure, thus delaying is OK.
-        if (i == 0) {
-            anticipatedIrqs++;
-            sleep(1);
-        }
+        anticipatedIrqs++;
+        sleep(1);
     }
 }
 

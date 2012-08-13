@@ -23,7 +23,7 @@
 #include "../Cmds/getLogPage.h"
 
 #define ERRINFO_LID         0x01
-#define ERRINFO_NUMD        (64 / 4)
+#define ERRINFO_NUMD        (GetLogPage::ERRINFO_DATA_SIZE / 4)
 
 namespace GrpAdminGetLogPgCmd {
 
@@ -136,7 +136,7 @@ MandatoryErrInfo_r10b::RunCoreTest()
         SharedMemBufferPtr cmdPayload = getLogPgCmd->GetRWPrpBuffer();
         uint32_t offset = (numd * 4);
         uint8_t *cmdPayloadBuff = (uint8_t *)cmdPayload->GetBuffer() + offset;
-        for (; offset < (X * ERRINFO_NUMD); offset++) {
+        for (; offset < (X * GetLogPage::ERRINFO_DATA_SIZE); offset++) {
             LOG_NRM("Verify data at offset = 0x%X", offset);
             if (*cmdPayloadBuff != 0x0) {
                 throw FrmwkEx(HERE, "Invalid data at buffer offset = 0x%08X, "
