@@ -149,6 +149,7 @@ struct IdentifyDUT {
 
 struct Golden {
     bool                req;    // Requested by cmd line
+    string              outputFile;
     vector<IdentifyDUT> cmds;   // Array of identify cmd data to validate
 };
 

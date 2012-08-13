@@ -127,9 +127,10 @@ Usage(void) {
     printf("  -p(--preserve)                      Preserve the current state of the DUT. Do\n");
     printf("                                      not write data on the media, nor modify\n");
     printf("                                      the configuration. Not all tests will run\n");
-    printf("  -g(--golden) <filename>             A file contains the golden identify data\n");
+    printf("  -g(--golden) <fileIn>:<fileOut>     fileIn contains the golden identify data\n");
     printf("                                      to which the DUT's reported identify data\n");
     printf("                                      is compared; Must be only option.\n");
+    printf("                                      fileOut, optional file for results output\n");
     printf("  -n(--postfail)                      Upon test failure, instruct framework to\n");
     printf("                                      take a post failure snapshot of the DUT\n");
     printf("  -y(--restore)                       Upon test failure, allow an individual\n");

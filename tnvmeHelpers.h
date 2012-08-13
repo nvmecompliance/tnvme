@@ -17,13 +17,15 @@
 #ifndef _TNVMEHELPERS_H_
 #define _TNVMEHELPERS_H_
 
-#include "tnvme.h"
-
+#include <fstream>
+#include "Utils/io.h"
 
 bool VerifySpecCompatibility(SpecRev specRev);
 bool SetFeaturesNumberOfQueues(NumQueues &numQueues);
 bool FormatDevice(Format &format);
 bool CompareGolden(Golden &golden);
 
+void ReportCompareResults(Golden &golden, SharedMemBufferPtr idMem,
+        size_t idCmdNum, size_t *misCompList, int misCompCount);
 
 #endif
