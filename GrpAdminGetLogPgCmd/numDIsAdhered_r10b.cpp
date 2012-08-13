@@ -121,9 +121,10 @@ NUMDIsAdhered_r10b::RunCoreTest()
 
     LOG_NRM("Compare cmd buffer to verify the last half of buffer = 0xA5");
     SharedMemBufferPtr cmdPayload = getLogPgCmd->GetRWPrpBuffer();
-    uint8_t *cmdPayloadBuff = (uint8_t *)cmdPayload->GetBuffer();
-    for (uint16_t offset = (NUMDW_ADHERED * 4);
-        offset < (GetLogPage::FIRMSLOT_DATA_SIZE); offset++) {
+    uint16_t offset = (NUMDW_ADHERED * 4);
+    uint8_t *cmdPayloadBuff = (uint8_t *)cmdPayload->GetBuffer() + offset;
+    for (; offset < (GetLogPage::FIRMSLOT_DATA_SIZE); offset++) {
+        LOG_NRM("Verify data at offset = 0x%X", offset);
         if (*cmdPayloadBuff != BUFFER_INIT_VAL) {
             throw FrmwkEx(HERE, "NUMD not adhered at offset = 0x%08X, "
                 "value = 0x%08X", cmdPayloadBuff, *cmdPayloadBuff);
