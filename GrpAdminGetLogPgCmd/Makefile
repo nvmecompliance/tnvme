@@ -24,7 +24,8 @@ SRC =					\
 	unsupportRrvdFields_r10b.cpp	\
 	numDIsAdhered_r10b.cpp		\
 	invalidLogPageNVMSet_r10b.cpp	\
-	invalidNamspc_r10b.cpp
+	invalidNamspc_r10b.cpp		\
+	mandatoryErrInfo_r10b.cpp
 
 .SUFFIXES: .cpp
 
