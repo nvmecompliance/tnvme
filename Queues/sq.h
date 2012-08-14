@@ -92,7 +92,7 @@ protected:
      * Initialize this object and allocates contiguous Q content memory.
      * @param qId Pass the queue's ID
      * @param entrySize Pass the number of bytes encompassing each element
-     * @param numEntries Pass the number of elements within the Q
+     * @param numEntries Pass the number of elements within the Q (1 - based)
      * @param cqId Pass the assoc CQ ID to which this SQ will be associated
      */
     void Init(uint16_t qId, uint16_t entrySize, uint32_t numEntries,
@@ -102,7 +102,7 @@ protected:
      * Initialize this object and allocates discontiguous Q content memory.
      * @param qId Pass the queue's ID
      * @param entrySize Pass the number of bytes encompassing each element
-     * @param numEntries Pass the number of elements within the Q
+     * @param numEntries Pass the number of elements within the Q (1 - based)
      * @param memBuffer Hand off this Q's memory. It must satisfy
      *      MemBuffer.GetBufSize()>=(numEntries * entrySize). It must only ever
      *      be accessed as RO. Writing to this buffer will have unpredictable

@@ -130,7 +130,7 @@ ManyCmdSubmit_r10b::RunCoreTest()
         iosq->Ring();
 
         // Variable wait time w.r.t "x" and expect all CE's to arrive in CQ.
-        if (iocq->ReapInquiryWaitSpecify((DEFAULT_CMD_WAIT_ms + x * 5),
+        if (iocq->ReapInquiryWaitSpecify((DEFAULT_CMD_WAIT_ms + x * 20),
             x, numCE, isrCount) == false) {
             iocq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName,
                 "iocq.reqpinq." + writeCmd->GetName()), "Dump Entire IOCQ");

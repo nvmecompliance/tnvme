@@ -312,12 +312,19 @@ ParseGoldenCmdLine(Golden &golden, const char *optarg)
     string nodeVal, nodeName;
     vector<AttribXML> attr;
     IdentifyDUT cmd;
+    size_t colLoc = 0;
+    string inFileName = optarg;
+
+    if ((int)(colLoc = inFileName.find_first_of(':')) > 0){
+        golden.outputFile = inFileName.substr(colLoc + 1, inFileName.length());
+        inFileName = inFileName.substr(0, colLoc);
+    }
 
     try
     {
         golden.req = false;
         golden.cmds.clear();
-        xmlpp::TextReader xmlFile(optarg);
+        xmlpp::TextReader xmlFile(inFileName.c_str());
 
         if (SeekSpecificXMLNode(xmlFile, "identify", 0, nodeVal, attr) == false)
             return false;
@@ -536,12 +543,12 @@ EXIT_MASK_SEARCH:
     }
     catch(const std::exception& e)
     {
-        LOG_ERR("While processing file %s: %s", optarg, e.what());
+        LOG_ERR("While processing file %s: %s", inFileName.c_str(), e.what());
         return false;
     }
 
     if (allOK == false) {
-        LOG_ERR("Unable to completely process file %s", optarg);
+        LOG_ERR("Unable to completely process file %s", inFileName.c_str());
         return false;
     }
 

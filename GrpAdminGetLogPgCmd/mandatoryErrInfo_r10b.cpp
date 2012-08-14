@@ -14,37 +14,37 @@
  *  limitations under the License.
  */
 
-#include "numDIsAdhered_r10b.h"
+#include <boost/format.hpp>
+#include "mandatoryErrInfo_r10b.h"
 #include "globals.h"
 #include "grpDefs.h"
 #include "../Utils/kernelAPI.h"
 #include "../Utils/io.h"
 #include "../Cmds/getLogPage.h"
 
-#define FIRM_SLOT_INFO_LID      0x03
-#define NUMDW_ADHERED           ((514 / 4) / 2)
-#define BUFFER_OFFSET           0x0
-#define BUFFER_INIT_VAL         0xA5
+#define ERRINFO_LID         0x01
+#define ERRINFO_NUMD        (GetLogPage::ERRINFO_DATA_SIZE / 4)
 
 namespace GrpAdminGetLogPgCmd {
 
 
-NUMDIsAdhered_r10b::NUMDIsAdhered_r10b(string grpName, string testName) :
-    Test(grpName, testName, SPECREV_10b)
+MandatoryErrInfo_r10b::MandatoryErrInfo_r10b
+    (string grpName, string testName) : Test(grpName, testName, SPECREV_10b)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 5");
-    mTestDesc.SetShort(     "Verify GetLogPage NUMD value is adhered");
+    mTestDesc.SetShort(     "Get mandatory error info log page");
     // No string size limit for the long description
     mTestDesc.SetLong(
-        "Desiring to request half of a mandatory page and verify the NUMD "
-        "was followed. Create buffer, size=512, initVal=0xA5; Issue "
-        "GetLogPage cmd, LID=3, NUMD=((512/4)/2), i.e half this log page, "
-        "expect success; verify the last half of buffer=0xA5.");
+        "Determine X=(Identify.ELPE+1). Create a buffer, size=(X*64). Create "
+		"GetLogPage cmd with LID=1. Issue the cmd multiple times while "
+		"looping NUMD such that the number of log entries ranges from [0..X], "
+		"expect success. For each loop init buffer=0, and verify the buffer's "
+		"non-retrieved log entries = 0x00.");
 }
 
 
-NUMDIsAdhered_r10b::~NUMDIsAdhered_r10b()
+MandatoryErrInfo_r10b::~MandatoryErrInfo_r10b()
 {
     ///////////////////////////////////////////////////////////////////////////
     // Allocations taken from the heap and not under the control of the
@@ -53,8 +53,8 @@ NUMDIsAdhered_r10b::~NUMDIsAdhered_r10b()
 }
 
 
-NUMDIsAdhered_r10b::
-NUMDIsAdhered_r10b(const NUMDIsAdhered_r10b &other) : Test(other)
+MandatoryErrInfo_r10b::
+MandatoryErrInfo_r10b(const MandatoryErrInfo_r10b &other) : Test(other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -63,8 +63,8 @@ NUMDIsAdhered_r10b(const NUMDIsAdhered_r10b &other) : Test(other)
 }
 
 
-NUMDIsAdhered_r10b &
-NUMDIsAdhered_r10b::operator=(const NUMDIsAdhered_r10b &other)
+MandatoryErrInfo_r10b &
+MandatoryErrInfo_r10b::operator=(const MandatoryErrInfo_r10b &other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -76,7 +76,7 @@ NUMDIsAdhered_r10b::operator=(const NUMDIsAdhered_r10b &other)
 
 
 Test::RunType
-NUMDIsAdhered_r10b::RunnableCoreTest(bool preserve)
+MandatoryErrInfo_r10b::RunnableCoreTest(bool preserve)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All code contained herein must never permanently modify the state or
@@ -90,47 +90,62 @@ NUMDIsAdhered_r10b::RunnableCoreTest(bool preserve)
 
 
 void
-NUMDIsAdhered_r10b::RunCoreTest()
+MandatoryErrInfo_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
      * 1) Test CreateResources_r10b has run prior.
      *  \endverbatim
      */
+    string work;
+
     // Lookup objs which were created in a prior test within group
     SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
     SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
 
+    ConstSharedIdentifyPtr idCtrlrStruct = gInformative->GetIdentifyCmdCtrlr();
+    uint8_t X = idCtrlrStruct->GetValue(IDCTRLRCAP_ELPE) + 1;
+    LOG_NRM("Identify controller ELPE = %d (1-based)", X);
+
     LOG_NRM("Create get log page cmd and assoc some buffer memory");
     SharedGetLogPagePtr getLogPgCmd = SharedGetLogPagePtr(new GetLogPage());
 
-    LOG_NRM("Get log page to request firmware slot information");
-    getLogPgCmd->SetNUMD(NUMDW_ADHERED);
-    getLogPgCmd->SetLID(FIRM_SLOT_INFO_LID);
-
-    LOG_NRM("Set the offset into the buffer at 0x%04X", BUFFER_OFFSET);
+    LOG_NRM("Create memory buffer for log page to request error information");
     SharedMemBufferPtr getLogPageMem = SharedMemBufferPtr(new MemBuffer());
-    getLogPageMem->InitOffset1stPage(GetLogPage::FIRMSLOT_DATA_SIZE,
-        BUFFER_OFFSET, true, BUFFER_INIT_VAL);
     send_64b_bitmask prpReq =
         (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE);
-    getLogPgCmd->SetPrpBuffer(prpReq, getLogPageMem);
 
-    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
-        getLogPgCmd, "NUMD.adhered", true);
+    LOG_NRM("Get log page to request error information");
+    getLogPgCmd->SetLID(ERRINFO_LID);
 
-    LOG_NRM("Compare cmd buffer to verify the last half of buffer = 0xA5");
-    SharedMemBufferPtr cmdPayload = getLogPgCmd->GetRWPrpBuffer();
-    uint16_t offset = (NUMDW_ADHERED * 4);
-    uint8_t *cmdPayloadBuff = (uint8_t *)cmdPayload->GetBuffer() + offset;
-    for (; offset < (GetLogPage::FIRMSLOT_DATA_SIZE); offset++) {
-        LOG_NRM("Verify data at offset = 0x%X", offset);
-        if (*cmdPayloadBuff != BUFFER_INIT_VAL) {
-            throw FrmwkEx(HERE, "NUMD not adhered at offset = 0x%08X, "
-                "value = 0x%08X", cmdPayloadBuff, *cmdPayloadBuff);
+    // loop for all log entries supported by controller
+    for (uint32_t numd = ERRINFO_NUMD; numd <= (X * ERRINFO_NUMD);
+        numd += ERRINFO_NUMD) {
+        LOG_NRM("Issue Get log page cmd with NUMD = %d and log entries = %d",
+            numd, (numd/ERRINFO_NUMD));
+
+        getLogPageMem->Init(GetLogPage::ERRINFO_DATA_SIZE * X, true);
+        getLogPgCmd->SetPrpBuffer(prpReq, getLogPageMem);
+        getLogPgCmd->SetNUMD(numd);
+
+        work = str(boost::format("logEnties%d") % (numd / ERRINFO_NUMD));
+        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
+            getLogPgCmd, work, true);
+
+        // Verify the buffer's non-retrieved log entries = 0x00.
+        SharedMemBufferPtr cmdPayload = getLogPgCmd->GetRWPrpBuffer();
+        uint32_t offset = (numd * 4);
+        uint8_t *cmdPayloadBuff = (uint8_t *)cmdPayload->GetBuffer() + offset;
+        for (; offset < (X * GetLogPage::ERRINFO_DATA_SIZE); offset++) {
+            LOG_NRM("Verify data at offset = 0x%X", offset);
+            if (*cmdPayloadBuff != 0x0) {
+                throw FrmwkEx(HERE, "Invalid data at buffer offset = 0x%08X, "
+                    "value = 0x%08X", cmdPayloadBuff, *cmdPayloadBuff);
+            }
+            cmdPayloadBuff++;
         }
-        cmdPayloadBuff++;
     }
 }
+
 
 }   // namespace
