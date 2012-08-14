@@ -18,6 +18,8 @@
 #include "globals.h"
 #include "grpDefs.h"
 
+// Timeout base value in milliseconds.
+#define TO_BASE_MS      20
 
 namespace GrpQueues {
 
@@ -130,7 +132,7 @@ ManyCmdSubmit_r10b::RunCoreTest()
         iosq->Ring();
 
         // Variable wait time w.r.t "x" and expect all CE's to arrive in CQ.
-        if (iocq->ReapInquiryWaitSpecify((DEFAULT_CMD_WAIT_ms + x * 20),
+        if (iocq->ReapInquiryWaitSpecify((DEFAULT_CMD_WAIT_ms + x * TO_BASE_MS),
             x, numCE, isrCount) == false) {
             iocq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName,
                 "iocq.reqpinq." + writeCmd->GetName()), "Dump Entire IOCQ");
