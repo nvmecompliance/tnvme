@@ -1,3 +1,24 @@
+2012-8-14
+nvmecompliance_release=1.10.0 New tests, enhancements, and bugfixs
+    1) dnvme: (bugfix) Driver unloaded could have caused a kernel core dump
+       since unmapping that which the driver didn't own would be
+       the cause.
+    2) dnvme: (bugfix) Checking for incorrect return values cause bad logic.
+    3) dnvme: (bugfix) A Linux kernel API call was passing incorrect data
+       to a function.
+    4) tnvme: (bugfix) Test GrpQueues::ManyCmdSubmit_r10b timed out for
+       some real world hdw because it didnt' factor in nomincal times
+       for present day hdw. Rather it was a guess based upon QEMU results.
+       The TO now should suffice all hdw.
+    5) tnvme: enhancement: The --golden option is now more verbose and
+       versatile.
+    6) tnvme: bugfix GrpAdminGetLogPgCmd::NUMDIsAdhered_r10b fixed a 
+       buffer offset miscalculation.
+    7) tnvme: spec misinterpretation due to a spec typo. The NVMe spec 1.0c
+       is also at fault, rather refer to NVMe errata 29. It states that
+       parital reaping from a CQ causes IRQ's to keep being issued to a
+       host using MSI-X IRQs.
+
 2012-8-6
 nvmecompliance_release=1.9.0 dnvme bugfix only
     1) dnvme:
