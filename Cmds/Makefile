@@ -37,7 +37,10 @@ SRC =				\
 	formatNVM.cpp		\
 	fwActivate.cpp		\
 	fwImgDnld.cpp		\
-	datasetMgmt.cpp
+	datasetMgmt.cpp		\
+	baseSecurity.cpp	\
+	securitySend.cpp	\
+	securityRcv.cpp
 
 .SUFFIXES: .cpp
 

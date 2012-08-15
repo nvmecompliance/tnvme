@@ -60,6 +60,8 @@ Trackable::GetObjName(ObjType obj)
     case OBJ_FWACTIVATE:    name = "FwActivate";         break;
     case OBJ_FWIMGDNLD:     name = "FwImgDnld";          break;
     case OBJ_FORMATNVM:     name = "FormatNVM";          break;
+    case OBJ_SECURITYSEND:  name = "SecuritySend";       break;
+    case OBJ_SECURITYRCV:   name = "SecurityRcv";        break;
     case OBJ_NVMCMD:        name = "NVMCmd";             break;
     case OBJ_WRITE:         name = "Write";              break;
     case OBJ_READ:          name = "Read";               break;
