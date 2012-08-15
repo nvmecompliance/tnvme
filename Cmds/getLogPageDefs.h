@@ -96,5 +96,55 @@ typedef enum FwLog
 } FwLog;
 #undef ZZ
 
+struct ParamErrLocFormat {
+    uint8_t     ByteInCmd;
+    uint8_t     BitInCmd : 3;
+    uint8_t     RES      : 5;
+} __attribute__((__packed__));
+
+struct ErrLogStruct {
+    uint64_t    ErrorCount;
+    uint16_t    SQID;
+    uint16_t    CID;
+    uint16_t    STC;
+    struct ParamErrLocFormat ParamErrLoc;
+    uint64_t    LBA;
+    uint32_t    Namspc;
+    uint8_t     VSInfo;
+    uint8_t     RES[35];
+} __attribute__((__packed__));
+
+struct SmartHealthLogStruct {
+    uint8_t     CriticalWarn;
+    uint16_t    Temperature;
+    uint8_t     AvailSpare;
+    uint8_t     AvailSpareThres;
+    uint8_t     PercentageUsed;
+    uint8_t     RES_06[26];
+    uint64_t    DataUnitRead[2];
+    uint64_t    DataUnitWritten[2];;
+    uint64_t    HostReadCmds[2];
+    uint64_t    HostWriteCmds[2];
+    uint64_t    CtrlrBusyTime[2];
+    uint64_t    PowerCycles[2];
+    uint64_t    PowerOnHours[2];
+    uint64_t    UnsafeShutdowns[2];
+    uint64_t    MediaErrors[2];
+    uint64_t    NumErrLogs[2];
+    uint8_t     RES_C0[320];
+}  __attribute__((__packed__));;
+
+struct FWSlotInfoStruct {
+    uint8_t     AFI;
+    uint8_t     RES_01[7];
+    uint64_t    FRS1;
+    uint64_t    FRS2;
+    uint64_t    FRS3;
+    uint64_t    FRS4;
+    uint64_t    FRS5;
+    uint64_t    FRS6;
+    uint64_t    FRS7;
+    uint8_t     RES_40[448];
+}  __attribute__((__packed__));;
 
 #endif
