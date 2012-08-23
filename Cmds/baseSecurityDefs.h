@@ -20,7 +20,7 @@
 
 struct SecDPSPUStruct {
     uint16_t    ATACmdCode;
-    uint8_t     Passphrase[32];
+    char        Passphrase[32];
     uint8_t     Pad[4062];
 } __attribute__((__packed__));
 
@@ -34,7 +34,7 @@ struct SecEPFLStruct {
 struct SecEraseUnitStruct {
     uint16_t    ATACmdCode;
     uint8_t     Mode;
-    uint8_t     Passphrase[32];
+    char        Passphrase[32];
     uint8_t     Pad[4061];
 } __attribute__((__packed__));
 
