@@ -83,6 +83,9 @@ UnsupportRsvdFields_r10b::RunnableCoreTest(bool preserve)
     // changes that will not be restored after a cold hard reset.
     ///////////////////////////////////////////////////////////////////////////
 
+    if (gCmdLine.rsvdfields == false)
+        return RUN_FALSE;   // Optional rsvd fields test skipped.
+
     preserve = preserve;    // Suppress compiler error/warning
     return RUN_TRUE;        // This test is never destructive
 }

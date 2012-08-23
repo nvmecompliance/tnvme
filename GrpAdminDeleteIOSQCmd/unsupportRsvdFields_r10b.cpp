@@ -83,9 +83,9 @@ UnsupportRsvdFields_r10b::RunnableCoreTest(bool preserve)
     // configuration of the DUT. Permanence is defined as state or configuration
     // changes that will not be restored after a cold hard reset.
     ///////////////////////////////////////////////////////////////////////////
-
-    preserve = preserve;    // Suppress compiler error/warning
-    return RUN_TRUE;        // This test is never destructive
+    if ((preserve == false) && gCmdLine.rsvdfields)
+        return RUN_TRUE;
+    return RUN_FALSE;    // Optional test skipped or is destructive
 }
 
 

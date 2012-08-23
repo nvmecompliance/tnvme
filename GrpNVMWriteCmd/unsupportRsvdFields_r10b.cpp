@@ -83,7 +83,9 @@ UnsupportRsvdFields_r10b::RunnableCoreTest(bool preserve)
     // changes that will not be restored after a cold hard reset.
     ///////////////////////////////////////////////////////////////////////////
 
-    return ((preserve == true) ? RUN_FALSE : RUN_TRUE);   // Test is destructive
+    if ((preserve == false) && gCmdLine.rsvdfields)
+        return RUN_TRUE;
+    return RUN_FALSE;    // Optional test skipped or is destructive
 }
 
 

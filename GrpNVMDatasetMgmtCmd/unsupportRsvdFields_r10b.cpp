@@ -90,8 +90,13 @@ UnsupportRsvdFields_r10b::RunnableCoreTest(bool preserve)
     }
 
     LOG_NRM("Reporting runnable (oncs)%ld", oncs);
+
+    if (gCmdLine.rsvdfields == false)
+        return RUN_FALSE;   // Optional rsvd fields test skipped.
+
     preserve = preserve;    // Suppress compiler error/warning
     return RUN_TRUE;        // This test is never destructive
+
 }
 
 
