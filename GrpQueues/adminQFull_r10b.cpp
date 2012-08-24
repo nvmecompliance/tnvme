@@ -99,7 +99,7 @@ AdminQFull_r10b::RunCoreTest()
     LOG_NRM("Force identify to request ctrlr capabilities struct");
     idCmdCtrlr->SetCNS(true);
     SharedMemBufferPtr idMemCap = SharedMemBufferPtr(new MemBuffer());
-    idMemCap->InitAlignment(Identify::IDEAL_DATA_SIZE, sizeof(uint64_t),
+    idMemCap->InitAlignment(Identify::IDEAL_DATA_SIZE, PRP_BUFFER_ALIGNMENT,
         false, 0);
     send_64b_bitmask prpReq =
         (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE);

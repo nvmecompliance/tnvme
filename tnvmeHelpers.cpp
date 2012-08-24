@@ -83,7 +83,8 @@ CompareGolden(Golden &golden)
 
         SharedIdentifyPtr idCmd = SharedIdentifyPtr(new Identify());
         SharedMemBufferPtr idMem = SharedMemBufferPtr(new MemBuffer());
-        idMem->InitAlignment(Identify::IDEAL_DATA_SIZE, sizeof(uint64_t), true, 0);
+        idMem->InitAlignment(Identify::IDEAL_DATA_SIZE, PRP_BUFFER_ALIGNMENT,
+            true, 0);
         send_64b_bitmask prpReq =
             (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE);
         idCmd->SetPrpBuffer(prpReq, idMem);
@@ -100,8 +101,8 @@ CompareGolden(Golden &golden)
             idCmd->SetCNS(golden.cmds[i].cns);
             idCmd->SetNSID(golden.cmds[i].nsid);
 
-            idMem->InitAlignment(Identify::IDEAL_DATA_SIZE, sizeof(uint64_t),
-                true, 0);
+            idMem->InitAlignment(Identify::IDEAL_DATA_SIZE,
+                PRP_BUFFER_ALIGNMENT, true, 0);
             work = str(boost::format("IdCmd%d") % i);
             IO::SendAndReapCmd("tnvme", "golden", CALC_TIMEOUT_ms(1), asq,
                 acq, idCmd, work, false);

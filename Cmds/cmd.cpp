@@ -63,7 +63,7 @@ Cmd::Init(uint8_t opcode, DataDir dataDir, uint16_t cmdSize)
 
     // Cmd buffers shall be DWORD aligned according to NVME spec., however
     // user space only has option to spec. QWORD alignment.
-    mCmdBuf->InitAlignment(cmdSize, sizeof(void *), true, 0);
+    mCmdBuf->InitAlignment(cmdSize, PRP_BUFFER_ALIGNMENT, true, 0);
     SetByte(opcode, 0, 0);
 }
 

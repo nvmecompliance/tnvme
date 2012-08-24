@@ -147,7 +147,7 @@ VerifyNUSE_r10b::RunCoreTest()
     idCmdNamSpc->SetCNS(false);
     idCmdNamSpc->SetNSID(namspcData.id);
     SharedMemBufferPtr idMemNamSpc = SharedMemBufferPtr(new MemBuffer());
-    idMemNamSpc->InitAlignment(Identify::IDEAL_DATA_SIZE, sizeof(uint64_t),
+    idMemNamSpc->InitAlignment(Identify::IDEAL_DATA_SIZE, PRP_BUFFER_ALIGNMENT,
         true, 0);
     send_64b_bitmask idPrpNamSpc =
         (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE);
