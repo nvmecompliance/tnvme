@@ -127,7 +127,7 @@ InvalidQID_r10b::RunCoreTest()
 
     LOG_NRM("Create IOCQ with QID = %d", IOQ_ID);
     SharedIOCQPtr iocq = Queues::CreateIOCQContigToHdw(mGrpName, mTestName,
-        DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, maxIOQEntries, false,
+        CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, maxIOQEntries, false,
         IOCQ_GROUP_ID, true, 0);
 
     LOG_NRM("Issue CreateIOSQ cmds with QID's ranging from %d to %d",
@@ -150,7 +150,7 @@ InvalidQID_r10b::RunCoreTest()
             enableLog = true;
 
         LOG_NRM("Send and reap cmd with SQ ID #%d", *qId);
-        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
+        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
             createIOSQCmd, work, enableLog, CESTAT_INVALID_QID);
     }
 }

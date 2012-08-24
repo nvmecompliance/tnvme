@@ -121,14 +121,14 @@ DeleteIOQDiscontig_r10b::RunCoreTest()
     LOG_NRM("Lookup IOSQ which was created in a prior test within group");
     SharedIOSQPtr iosq =
         CAST_TO_IOSQ(gRsrcMngr->GetObj(IOSQ_DISCONTIG_GROUP_ID))
-    Queues::DeleteIOSQToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+    Queues::DeleteIOSQToHdw(mGrpName, mTestName, CALC_TIMEOUT_ms(1),
         iosq, asq, acq);
 
 
     LOG_NRM("Lookup IOCQ which was created in a prior test within group");
     SharedIOCQPtr iocq =
         CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_DISCONTIG_GROUP_ID))
-    Queues::DeleteIOCQToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+    Queues::DeleteIOCQToHdw(mGrpName, mTestName, CALC_TIMEOUT_ms(1),
         iocq, asq, acq);
 }
 

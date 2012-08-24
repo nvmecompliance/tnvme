@@ -109,7 +109,7 @@ CompletionQInvalid_r10b::RunCoreTest()
     gCtrlrConfig->SetIOSQES(iosqes);
 
     SharedIOCQPtr iocq = Queues::CreateIOCQContigToHdw(mGrpName, mTestName,
-        DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, maxIOQEntries, false,
+        CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, maxIOQEntries, false,
         IOCQ_GROUP_ID, false, 0);
 
     if (gRegisters->Read(CTLSPC_CAP, mqes) == false)
@@ -130,11 +130,11 @@ CompletionQInvalid_r10b::RunCoreTest()
         createIOSQCmd->Init(iosq);
 
         qualify = str(boost::format("qsize.0x%04X") % i);
-        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
+        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
             createIOSQCmd, qualify, false, CESTAT_CQ_INVALID);
     }
 
-    Queues::DeleteIOCQToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iocq,
+    Queues::DeleteIOCQToHdw(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iocq,
         asq, acq, "", false);
 }
 

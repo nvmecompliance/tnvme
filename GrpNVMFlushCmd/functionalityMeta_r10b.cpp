@@ -231,13 +231,13 @@ FunctionalityMeta_r10b::RunCoreTest()
             work = str(boost::format("metaID.%d.SLBA.%ld") % meta[i] % sLBA);
 
             LOG_NRM("Sending write and read commands through ioq's");
-            IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+            IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq,
                 iocq, writeCmd, work, enableLog);
 
-            IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+            IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq,
                 iocq, flushCmd, work, enableLog);
 
-            IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+            IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq,
                 iocq, readCmd, work, enableLog);
 
             VerifyDataPat(readCmd, writeCmd, metaBuffSz);
@@ -302,20 +302,20 @@ FunctionalityMeta_r10b::CreateIOQs(SharedASQPtr asq, SharedACQPtr acq,
         SharedMemBufferPtr iocqBackedMem = SharedMemBufferPtr(new MemBuffer());
         iocqBackedMem->InitOffset1stPage((numEntries * (1 << iocqes)), 0, true);
         iocq = Queues::CreateIOCQDiscontigToHdw(mGrpName, mTestName,
-            DEFAULT_CMD_WAIT_ms, asq, acq, ioqId, numEntries,
+            CALC_TIMEOUT_ms(1), asq, acq, ioqId, numEntries,
             false, IOCQ_GROUP_ID, true, 0, iocqBackedMem);
 
         SharedMemBufferPtr iosqBackedMem = SharedMemBufferPtr(new MemBuffer());
         iosqBackedMem->InitOffset1stPage((numEntries * (1 << iosqes)), 0,true);
         iosq = Queues::CreateIOSQDiscontigToHdw(mGrpName, mTestName,
-            DEFAULT_CMD_WAIT_ms, asq, acq, ioqId, numEntries, false,
+            CALC_TIMEOUT_ms(1), asq, acq, ioqId, numEntries, false,
             IOSQ_GROUP_ID, ioqId, 0, iosqBackedMem);
     } else {
         iocq = Queues::CreateIOCQContigToHdw(mGrpName, mTestName,
-            DEFAULT_CMD_WAIT_ms, asq, acq, ioqId, numEntries, false,
+            CALC_TIMEOUT_ms(1), asq, acq, ioqId, numEntries, false,
             IOCQ_GROUP_ID, true, 0);
         iosq = Queues::CreateIOSQContigToHdw(mGrpName, mTestName,
-            DEFAULT_CMD_WAIT_ms, asq, acq, ioqId, numEntries, false,
+            CALC_TIMEOUT_ms(1), asq, acq, ioqId, numEntries, false,
             IOSQ_GROUP_ID, ioqId, 0);
     }
 }

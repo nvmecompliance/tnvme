@@ -148,7 +148,7 @@ CreateIOQDiscontigIrq_r10b::RunCoreTest()
     iocqMem->InitAlignment((NumEntriesIOQ * iocqElemSize),
         sysconf(_SC_PAGESIZE), true, 0);
     Queues::CreateIOCQDiscontigToHdw(mGrpName, mTestName,
-        DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, NumEntriesIOQ, true,
+        CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, NumEntriesIOQ, true,
         IOCQ_DISCONTIG_GROUP_ID, true, 0, iocqMem);
 
 
@@ -161,7 +161,7 @@ CreateIOQDiscontigIrq_r10b::RunCoreTest()
     iosqMem->InitAlignment((NumEntriesIOQ * iosqElemSize),
         sysconf(_SC_PAGESIZE), true, 0);
     Queues::CreateIOSQDiscontigToHdw(mGrpName, mTestName,
-        DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, NumEntriesIOQ, true,
+        CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, NumEntriesIOQ, true,
         IOSQ_DISCONTIG_GROUP_ID, IOQ_ID, 0, iosqMem);
 }
 

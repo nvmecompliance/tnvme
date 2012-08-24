@@ -18,8 +18,6 @@
 #include "globals.h"
 #include "grpDefs.h"
 
-// Timeout base value in milliseconds.
-#define TO_BASE_MS      20
 
 namespace GrpQueues {
 
@@ -114,11 +112,11 @@ ManyCmdSubmit_r10b::RunCoreTest()
 
     LOG_NRM("Create contig IOQ's");
     SharedIOCQPtr iocq = Queues::CreateIOCQContigToHdw(mGrpName,
-        mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, maxIOQEntries,
+        mTestName, CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, maxIOQEntries,
         false, IOCQ_CONTIG_GROUP_ID, true, 0);
 
     SharedIOSQPtr iosq = Queues::CreateIOSQContigToHdw(mGrpName,
-        mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, maxIOQEntries,
+        mTestName, CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, maxIOQEntries,
         false, IOSQ_CONTIG_GROUP_ID, IOQ_ID, 0);
 
     SharedWritePtr writeCmd = SetWriteCmd();
@@ -132,7 +130,7 @@ ManyCmdSubmit_r10b::RunCoreTest()
         iosq->Ring();
 
         // Variable wait time w.r.t "x" and expect all CE's to arrive in CQ.
-        if (iocq->ReapInquiryWaitSpecify((DEFAULT_CMD_WAIT_ms + x * TO_BASE_MS),
+        if (iocq->ReapInquiryWaitSpecify(CALC_TIMEOUT_ms(x),
             x, numCE, isrCount) == false) {
             iocq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName,
                 "iocq.reqpinq." + writeCmd->GetName()), "Dump Entire IOCQ");
@@ -172,9 +170,9 @@ ManyCmdSubmit_r10b::RunCoreTest()
     }
 
     // Delete IOSQ before the IOCQ to comply with spec.
-    Queues::DeleteIOSQToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+    Queues::DeleteIOSQToHdw(mGrpName, mTestName, CALC_TIMEOUT_ms(1),
         iosq, asq, acq);
-    Queues::DeleteIOCQToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+    Queues::DeleteIOCQToHdw(mGrpName, mTestName, CALC_TIMEOUT_ms(1),
         iocq, asq, acq);
 }
 

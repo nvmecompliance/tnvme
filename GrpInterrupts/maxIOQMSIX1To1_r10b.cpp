@@ -218,9 +218,9 @@ MaxIOQMSIX1To1_r10b::RunCoreTest()
     for(uint16_t i = 0; i < iosqs.size(); i++) {
         if ((iocqs[i])->GetIrqEnabled() == false) {
             uint16_t ioqId = (iosqs[i])->GetQId();
-            Queues::DeleteIOSQToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+            Queues::DeleteIOSQToHdw(mGrpName, mTestName, CALC_TIMEOUT_ms(1),
                 iosqs[i], asq, acq);
-            Queues::DeleteIOCQToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+            Queues::DeleteIOCQToHdw(mGrpName, mTestName, CALC_TIMEOUT_ms(1),
                 iocqs[i], asq, acq);
 
             CreateIOQs(asq, acq, ioqId, true, iosq, iocq);
@@ -262,20 +262,20 @@ MaxIOQMSIX1To1_r10b::CreateIOQs(SharedASQPtr asq, SharedACQPtr acq,
         SharedMemBufferPtr iocqBackedMem = SharedMemBufferPtr(new MemBuffer());
         iocqBackedMem->InitOffset1stPage((numEntries * (1 << iocqes)), 0, true);
         iocq = Queues::CreateIOCQDiscontigToHdw(mGrpName, mTestName,
-            DEFAULT_CMD_WAIT_ms, asq, acq, ioqId, numEntries,
+            CALC_TIMEOUT_ms(1), asq, acq, ioqId, numEntries,
             false, IOCQ_GROUP_ID, enableIrq, ioqId, iocqBackedMem);
 
         SharedMemBufferPtr iosqBackedMem = SharedMemBufferPtr(new MemBuffer());
         iosqBackedMem->InitOffset1stPage((numEntries * (1 << iosqes)), 0,true);
         iosq = Queues::CreateIOSQDiscontigToHdw(mGrpName, mTestName,
-            DEFAULT_CMD_WAIT_ms, asq, acq, ioqId, numEntries, false,
+            CALC_TIMEOUT_ms(1), asq, acq, ioqId, numEntries, false,
             IOSQ_GROUP_ID, ioqId, 0, iosqBackedMem);
     } else {
         iocq = Queues::CreateIOCQContigToHdw(mGrpName, mTestName,
-            DEFAULT_CMD_WAIT_ms, asq, acq, ioqId, numEntries, false,
+            CALC_TIMEOUT_ms(1), asq, acq, ioqId, numEntries, false,
             IOCQ_GROUP_ID, enableIrq, ioqId);
         iosq = Queues::CreateIOSQContigToHdw(mGrpName, mTestName,
-            DEFAULT_CMD_WAIT_ms, asq, acq, ioqId, numEntries, false,
+            CALC_TIMEOUT_ms(1), asq, acq, ioqId, numEntries, false,
             IOSQ_GROUP_ID, ioqId, 0);
     }
 }
@@ -298,7 +298,7 @@ MaxIOQMSIX1To1_r10b::SendCmd(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
     iosq->Ring();
 
     LOG_NRM("Wait for the CE to arrive in CQ %d", iocq->GetQId());
-    if (iocq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE, isrCount)
+    if (iocq->ReapInquiryWaitSpecify(CALC_TIMEOUT_ms(1), 1, numCE, isrCount)
         == false) {
         iocq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "iocq.fail"),
             "Dump Entire IOCQ");

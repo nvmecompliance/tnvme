@@ -144,12 +144,12 @@ UnsupportRsvdFields_r10b::RunCoreTest()
     createIOCQCmd->SetDword(0xffffffff, 14);
     createIOCQCmd->SetDword(0xffffffff, 15);
 
-    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
+    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
         createIOCQCmd, "", true);
 
     LOG_NRM("Create the assoc IOSQ");
     SharedIOSQPtr iosq = Queues::CreateIOSQContigToHdw(mGrpName, mTestName,
-        DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, maxIOQEntries, false,
+        CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, maxIOQEntries, false,
         IOCQ_GROUP_ID, IOQ_ID, 0);
 
     WriteReadVerify(iosq, iocq);
@@ -221,10 +221,10 @@ UnsupportRsvdFields_r10b::WriteReadVerify(SharedIOSQPtr iosq,
         break;
     }
 
-    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq,
         iocq, writeCmd, "", true);
 
-    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq,
         iocq, readCmd, "", true);
 
     VerifyDataPat(readCmd, writeCmd);

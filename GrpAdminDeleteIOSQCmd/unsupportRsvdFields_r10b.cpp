@@ -113,21 +113,21 @@ UnsupportRsvdFields_r10b::RunCoreTest()
 
     LOG_NRM("Create IOCQ/IOSQ pairs");
     SharedIOCQPtr iocq = Queues::CreateIOCQContigToHdw(mGrpName, mTestName,
-        DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, maxIOQEntries, false,
+        CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, maxIOQEntries, false,
         IOCQ_GROUP_ID, true, 0);
     SharedIOSQPtr iosq = Queues::CreateIOSQContigToHdw(mGrpName, mTestName,
-        DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, maxIOQEntries, false,
+        CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, maxIOQEntries, false,
         IOCQ_GROUP_ID, IOQ_ID, 0);
 
     LOG_NRM("Delete the IOSQ");
     SharedDeleteIOSQPtr deleteIOSQCmd = SharedDeleteIOSQPtr(new DeleteIOSQ());
     deleteIOSQCmd->Init(iosq);
-    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
+    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
         deleteIOSQCmd, "", true);
 
     LOG_NRM("Recreate IOSQ");
     iosq = Queues::CreateIOSQContigToHdw(mGrpName, mTestName,
-        DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, maxIOQEntries, false,
+        CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, maxIOQEntries, false,
         IOCQ_GROUP_ID, IOQ_ID, 0);
 
     deleteIOSQCmd->Init(iosq);
@@ -157,7 +157,7 @@ UnsupportRsvdFields_r10b::RunCoreTest()
     deleteIOSQCmd->SetDword(0xffffffff, 14);
     deleteIOSQCmd->SetDword(0xffffffff, 15);
 
-    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
+    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
         deleteIOSQCmd, "", true);
 }
 

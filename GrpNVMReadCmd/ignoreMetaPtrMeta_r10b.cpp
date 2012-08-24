@@ -125,7 +125,7 @@ IgnoreMetaPtrMeta_r10b::RunCoreTest()
 
         readCmd->SetNSID(imeta[i]);
         work = str(boost::format("namspc%d") % imeta[i]);
-        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
+        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq, iocq,
             readCmd, work, true);
     }
 }

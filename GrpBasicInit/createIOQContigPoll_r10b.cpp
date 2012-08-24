@@ -135,13 +135,13 @@ CreateIOQContigPoll_r10b::RunCoreTest()
 
     gCtrlrConfig->SetIOCQES(gInformative->GetIdentifyCmdCtrlr()->
         GetValue(IDCTRLRCAP_CQES) & 0xf);
-    Queues::CreateIOCQContigToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+    Queues::CreateIOCQContigToHdw(mGrpName, mTestName, CALC_TIMEOUT_ms(1),
         asq, acq, IOQ_ID, NumEntriesIOQ, true, IOCQ_CONTIG_GROUP_ID, false, 0);
 
 
     gCtrlrConfig->SetIOSQES(gInformative->GetIdentifyCmdCtrlr()->
         GetValue(IDCTRLRCAP_SQES) & 0xf);
-    Queues::CreateIOSQContigToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+    Queues::CreateIOSQContigToHdw(mGrpName, mTestName, CALC_TIMEOUT_ms(1),
         asq, acq, IOQ_ID, NumEntriesIOQ, true, IOSQ_CONTIG_GROUP_ID, IOQ_ID, 0);
 }
 

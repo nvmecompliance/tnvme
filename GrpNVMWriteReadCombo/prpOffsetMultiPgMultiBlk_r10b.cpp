@@ -255,13 +255,13 @@ PRPOffsetMultiPgMultiBlk_r10b::RunCoreTest()
                 if ((pgOff <= 8) || (pgOff >= (X - 8)))
                     enableLog = true;
 
-                IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+                IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq,
                     iocq, writeCmd, work, enableLog);
 
                 readCmd->SetPrpBuffer(prpBitmask, readMem);
                 readCmd->SetNLB(nLBA - 1); // convert to 0 based.
 
-                IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+                IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq,
                     iocq, readCmd, work, enableLog);
 
                 VerifyDataPat(readCmd, dataPat, wrVal, metabufSz);
@@ -289,21 +289,21 @@ PRPOffsetMultiPgMultiBlk_r10b::InitTstRsrcs(SharedASQPtr asq, SharedACQPtr acq,
         iocqBackMem->InitOffset1stPage((nEntriesIOQ * (1 << iocqes)), 0, true);
 
         iocq = Queues::CreateIOCQDiscontigToHdw(mGrpName, mTestName,
-            DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, nEntriesIOQ, false,
+            CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, nEntriesIOQ, false,
             IOCQ_GROUP_ID, true, 1, iocqBackMem);
 
         SharedMemBufferPtr iosqBackMem = SharedMemBufferPtr(new MemBuffer());
         iosqBackMem->InitOffset1stPage((nEntriesIOQ * (1 << iosqes)), 0, true);
         iosq = Queues::CreateIOSQDiscontigToHdw(mGrpName, mTestName,
-            DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, nEntriesIOQ, false,
+            CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, nEntriesIOQ, false,
             IOSQ_GROUP_ID, IOQ_ID, 0, iosqBackMem);
     } else {
        iocq = Queues::CreateIOCQContigToHdw(mGrpName, mTestName,
-           DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, nEntriesIOQ, false,
+           CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, nEntriesIOQ, false,
            IOCQ_GROUP_ID, true, 1);
 
        iosq = Queues::CreateIOSQContigToHdw(mGrpName, mTestName,
-           DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, nEntriesIOQ, false,
+           CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, nEntriesIOQ, false,
            IOSQ_GROUP_ID, IOQ_ID, 0);
     }
 }

@@ -155,7 +155,7 @@ CIDAcceptedASQ_r10b::ReapVerifyCID(SharedASQPtr asq, SharedACQPtr acq,
     uint32_t numReaped;
     uint32_t numCE;
 
-    if (acq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE, isrCount)
+    if (acq->ReapInquiryWaitSpecify(CALC_TIMEOUT_ms(1), 1, numCE, isrCount)
         == false) {
         acq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "acq.fail"),
             "Dump Entire ACQ");

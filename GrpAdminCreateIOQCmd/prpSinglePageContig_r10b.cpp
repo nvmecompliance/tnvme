@@ -170,11 +170,11 @@ PRPSinglePageContig_r10b::RunCoreTest()
     gCtrlrConfig->SetIOSQES(iosqes);
 
     SharedIOCQPtr iocq = Queues::CreateIOCQContigToHdw(mGrpName, mTestName,
-        DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, Y, true,
+        CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, Y, true,
         IOCQ_GROUP_ID, true, 0);
 
     SharedIOSQPtr iosq = Queues::CreateIOSQContigToHdw(mGrpName, mTestName,
-        DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, Z, true,
+        CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, Z, true,
         IOSQ_GROUP_ID, IOQ_ID, 0);
 
     SharedWritePtr writeCmd = SharedWritePtr(new Write());
@@ -242,10 +242,10 @@ PRPSinglePageContig_r10b::RunCoreTest()
             enableLog = true;
 
         work = str(boost::format("X.%d") % X);
-        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq,
             iocq, writeCmd, work, enableLog);
 
-        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq,
             iocq, readCmd, work, enableLog);
 
         VerifyDataPat(readCmd, writeCmd);

@@ -138,7 +138,7 @@ AdminQRollChkDiff_r10b::RunCoreTest()
             nsubmitTimes++) {
             LOG_NRM("Sending #%d times of %d", (nsubmitTimes + 1),
                 (acq->GetNumEntries() + 2));
-            IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+            IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1),
                 asq, acq, idCmdCap, "AdminQRollChkDiff", false);
             VerifyCESQValues(acq, (nsubmitTimes + 1) % asq->GetNumEntries());
         }

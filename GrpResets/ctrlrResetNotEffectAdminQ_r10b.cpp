@@ -136,7 +136,7 @@ CtrlrResetNotEffectAdminQ_r10b::SendIdentifyCtrlrStruct(SharedASQPtr asq,
         (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE);
     idCmdCtrlr->SetPrpBuffer(prpReq, idMemCap);
 
-    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
+    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
         idCmdCtrlr, "IdCtrlStruct", true);
 }
 

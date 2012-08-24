@@ -148,7 +148,7 @@ InvalidNamspc_r10b::SendCmdToHdw(SharedSQPtr sq, SharedCQPtr cq,
     sq->Ring();
 
     LOG_NRM("Wait for the CE to arrive in CQ %d", cq->GetQId());
-    if (cq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE, isrCount)
+    if (cq->ReapInquiryWaitSpecify(CALC_TIMEOUT_ms(1), 1, numCE, isrCount)
         == false) {
 
         work = str(boost::format(

@@ -103,7 +103,7 @@ CompareGolden(Golden &golden)
             idMem->InitAlignment(Identify::IDEAL_DATA_SIZE, sizeof(uint64_t),
                 true, 0);
             work = str(boost::format("IdCmd%d") % i);
-            IO::SendAndReapCmd("tnvme", "golden", SYSTEMWIDE_CMD_WAIT_ms, asq,
+            IO::SendAndReapCmd("tnvme", "golden", CALC_TIMEOUT_ms(1), asq,
                 acq, idCmd, work, false);
 
             uint8_t goldenData;
@@ -305,7 +305,7 @@ FormatDevice(Format &format)
             formatNVM->SetMS(format.cmds[i].ms);
             formatNVM->SetLBAF(format.cmds[i].lbaf);
 
-            IO::SendAndReapCmd("tnvme", "format", SYSTEMWIDE_CMD_WAIT_ms,
+            IO::SendAndReapCmd("tnvme", "format", CALC_TIMEOUT_ms(1),
                 asq, acq, formatNVM, "", true);
         }
         LOG_NRM("The operation succeeded to format device");
@@ -356,7 +356,7 @@ SetFeaturesNumberOfQueues(NumQueues &numQueues)
         sfNumOfQ->SetFID(BaseFeatures::FID_NUM_QUEUES);
         sfNumOfQ->SetNumberOfQueues(numQueues.ncqr, numQueues.nsqr);
 
-        IO::SendAndReapCmd("tnvme", "queues", SYSTEMWIDE_CMD_WAIT_ms,
+        IO::SendAndReapCmd("tnvme", "queues", CALC_TIMEOUT_ms(1),
             asq, acq, sfNumOfQ, "", true);
         LOG_NRM("The operation succeeded to set number of queues");
     } catch (...) {

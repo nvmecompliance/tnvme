@@ -153,22 +153,22 @@ DeleteFullQ_r10b::DeleteFullIOQs(SharedACQPtr acq, SharedASQPtr asq,
 {
     LOG_NRM("Create IOCQ with entries #%d", (numIOQEntries / 2));
     SharedIOCQPtr iocq = Queues::CreateIOCQContigToHdw(mGrpName,
-        mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, (numIOQEntries / 2),
+        mTestName, CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, (numIOQEntries / 2),
         false, IOCQ_GROUP_ID, true, 0);
 
     LOG_NRM("Create IOSQ with entries #%d", numIOQEntries);
     SharedIOSQPtr iosq = Queues::CreateIOSQContigToHdw(mGrpName,
-        mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, numIOQEntries,
+        mTestName, CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, numIOQEntries,
         false, IOSQ_GROUP_ID, IOQ_ID, 0);
 
     LOG_NRM("Fill up IOQ's with entries #%d", (numIOQEntries - 1));
     SendCmdsToFillQsAndVerify(iosq, iocq, (numIOQEntries - 1));
 
     LOG_NRM("Delete IOSQ before the IOCQ to comply with spec.");
-    Queues::DeleteIOSQToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+    Queues::DeleteIOSQToHdw(mGrpName, mTestName, CALC_TIMEOUT_ms(1),
         iosq, asq, acq);
     LOG_NRM("Delete IOCQ.");
-    Queues::DeleteIOCQToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+    Queues::DeleteIOCQToHdw(mGrpName, mTestName, CALC_TIMEOUT_ms(1),
         iocq, asq, acq);
 }
 
@@ -191,7 +191,7 @@ DeleteFullQ_r10b::SendCmdsToFillQsAndVerify(SharedIOSQPtr iosq,
 
     uint32_t expCEs = (iocq->GetNumEntries() - 1);
     LOG_NRM("Verify that expected CE's #%d arrive in IOCQ 1", expCEs);
-    if (iocq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms + (5 * expCEs),
+    if (iocq->ReapInquiryWaitSpecify(CALC_TIMEOUT_ms(expCEs),
         expCEs, numCE, isrCount) == false) {
         iocq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName,
             "iocq.fail"), "Dump entire IOCQ");

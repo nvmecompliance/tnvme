@@ -189,10 +189,10 @@ DatasetMgmt_r10b::RunCoreTest()
         readCmd->SetByte((uint8_t)dsmAtr, 13, 0);
 
         work = str(boost::format("dsm.%Xh") % dsmAtr);
-        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq,
             iocq, writeCmd, work, true);
 
-        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq,
             iocq, readCmd, work, true);
 
         VerifyDataPat(readCmd, writeCmd);

@@ -116,7 +116,7 @@ NUMDIsAdhered_r10b::RunCoreTest()
         (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE);
     getLogPgCmd->SetPrpBuffer(prpReq, getLogPageMem);
 
-    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
+    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
         getLogPgCmd, "NUMD.adhered", true);
 
     LOG_NRM("Compare cmd buffer to verify the last half of buffer = 0xA5");

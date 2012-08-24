@@ -130,7 +130,7 @@ InvalidNamspc_r10b::RunCoreTest()
 
         work = str(boost::format("namspc%d") % i);
         // Determine the status based on the per namespace mask bit.
-        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
+        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
             getLogPgCmd, work, true, logPageAttr ? CESTAT_INVAL_NAMSPC :
             CESTAT_SUCCESS);
     }
@@ -144,14 +144,14 @@ InvalidNamspc_r10b::RunCoreTest()
 
             work = str(boost::format("namspc%d") % i);
             // Determine the status based on the per namespace mask bit.
-            IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+            IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1),
                 asq, acq, getLogPgCmd, work, true);
         }
     } else {
         i = 0;
         getLogPgCmd->SetNSID(i);
         work = str(boost::format("namspc%d") % i);
-        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
+        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
             getLogPgCmd, work, true);
     }
 
@@ -159,7 +159,7 @@ InvalidNamspc_r10b::RunCoreTest()
     i = 0xffffffff;
     getLogPgCmd->SetNSID(i);
     work = str(boost::format("namspc%d") % i);
-    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
+    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
         getLogPgCmd, work, true);
 }
 

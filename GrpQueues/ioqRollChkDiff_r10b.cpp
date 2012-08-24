@@ -122,11 +122,11 @@ IOQRollChkDiff_r10b::IOQRollChkDiff(uint32_t numEntriesIOSQ,
     SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
 
     SharedIOCQPtr iocq = Queues::CreateIOCQContigToHdw(mGrpName,
-        mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, numEntriesIOCQ,
+        mTestName, CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, numEntriesIOCQ,
         false, IOCQ_CONTIG_GROUP_ID, false, 1);
 
     SharedIOSQPtr iosq = Queues::CreateIOSQContigToHdw(mGrpName,
-        mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, numEntriesIOSQ,
+        mTestName, CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, numEntriesIOSQ,
         false, IOSQ_CONTIG_GROUP_ID, IOQ_ID, 0);
 
     LOG_NRM("(IOCQ Size, IOSQ Size)=(%d,%d)", iocq->GetNumEntries(),
@@ -148,9 +148,9 @@ IOQRollChkDiff_r10b::IOQRollChkDiff(uint32_t numEntriesIOSQ,
     VerifyQPointers(iosq, iocq);
 
     LOG_NRM("Delete IOSQ before the IOCQ to comply with spec.");
-    Queues::DeleteIOSQToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+    Queues::DeleteIOSQToHdw(mGrpName, mTestName, CALC_TIMEOUT_ms(1),
         iosq, asq, acq);
-    Queues::DeleteIOCQToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+    Queues::DeleteIOCQToHdw(mGrpName, mTestName, CALC_TIMEOUT_ms(1),
         iocq, asq, acq);
 }
 
@@ -206,7 +206,7 @@ IOQRollChkDiff_r10b::ReapAndVerifyCE(SharedIOCQPtr iocq, uint32_t expectedVal)
     uint32_t isrCount;
 
     LOG_NRM("Wait for the CE to arrive in IOCQ %d", iocq->GetQId());
-    if (iocq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE, isrCount)
+    if (iocq->ReapInquiryWaitSpecify(CALC_TIMEOUT_ms(1), 1, numCE, isrCount)
         == false) {
 
         iocq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "iocq",

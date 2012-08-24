@@ -133,7 +133,7 @@ AdminQRollChkSame_r10b::RunCoreTest()
             + 2); nsubmitTimes++) {
             LOG_NRM("Sending #%d of %d", (nsubmitTimes + 1),
                 (asq->GetNumEntries() + 2));
-            IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+            IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1),
                 asq, acq, idCmdCap, "AdminQRollChkSame", false);
             VerifyCESQValues(acq, (nsubmitTimes + 1) % acq->GetNumEntries());
         }

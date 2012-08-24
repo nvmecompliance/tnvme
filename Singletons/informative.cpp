@@ -427,7 +427,7 @@ Informative::Init()
         if (gCtrlrConfig->SetState(ST_ENABLE) == false)
             throw FrmwkEx(HERE);
 
-        status = Reinit(asq, acq, SYSTEMWIDE_CMD_WAIT_ms);
+        status = Reinit(asq, acq, CALC_TIMEOUT_ms(1));
     } catch (...) {
         LOG_ERR("Failed to init Informative singleton");
         status = false;

@@ -119,7 +119,7 @@ UnsupportRrvdFields_r10b::RunCoreTest()
     getLogPgCmd->SetPrpBuffer(prpReq, getLogPageMem);
 
     LOG_NRM("Issue GetLogPage cmd without setting reserved bits.");
-    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
+    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
         getLogPgCmd, "rsvd.notset", true);
 
     LOG_NRM("Set all cmd's rsvd bits");
@@ -143,7 +143,7 @@ UnsupportRrvdFields_r10b::RunCoreTest()
     getLogPgCmd->SetDword(0xffffffff, 15);
 
     LOG_NRM("Issue GetLogPage cmd after setting reserved bits.");
-    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
+    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
         getLogPgCmd, "rsvd.set", true);
 
 }

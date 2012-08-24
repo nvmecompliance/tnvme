@@ -156,7 +156,7 @@ Attributes_r10b::RunCoreTest()
             enableLog = true;
 
         work = str(boost::format("ctxAttrib0x%04X") % *ctxAttrib);
-        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
+        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq, iocq,
             datasetMgmtCmd, work, enableLog);
     }
 }

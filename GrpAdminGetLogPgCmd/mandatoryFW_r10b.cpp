@@ -117,7 +117,7 @@ MandatoryFW_r10b::RunCoreTest()
         getLogPgCmd->SetNUMD(numd);
 
         work = str(boost::format("FWSlot.NUMD.%d") % numd);
-        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
+        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
             getLogPgCmd, work, true);
 
         LOG_NRM("Verify the buffer's non-retrieved = 0x00");

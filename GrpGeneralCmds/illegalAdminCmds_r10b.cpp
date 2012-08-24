@@ -122,7 +122,7 @@ IllegalAdminCmds_r10b::RunCoreTest()
         genericAdminCmd->Init(*opCode);
 
         work = str(boost::format("IllegalOpcode.%d") % (uint)*opCode);
-        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq,
+        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq,
             acq, genericAdminCmd, work, true, CESTAT_INVAL_OPCODE);
     }
 }
