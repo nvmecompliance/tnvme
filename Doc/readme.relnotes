@@ -1,3 +1,18 @@
+2012-9-4
+nvmecompliance_release=1.11.0 New tests, enhancements
+    1) dnvme: No changes to driver
+    2) tnvme: Enhancment, added a global constant, compile time, to align
+       buffers allocated in user space in a single place. See
+       PRP_BUFFER_ALIGNMENT.
+    3) tnvme: Enhancement, added a common macro to calc timeout values
+       on a single cmd, multi-cmd and adhere to a TO floor for QEMU. See
+       DEFAULT_CMD_WAIT_ms.
+    4) tnvme: Enhancement: Added cmd line switch -b. See
+       "https://github.com/nvmecompliance/tnvme/wiki/Command-Line-Options"
+    5) tnvme: Enhancement, added admin security cmds to the framework.
+    6) tnvme: Enhancement, RO bit test for PCI register CMD changed due to
+       an incorrect NVMe spec statement, based upon errata #29.
+
 2012-8-14
 nvmecompliance_release=1.10.0 New tests, enhancements, and bugfixs
     1) dnvme: (bugfix) Driver unloaded could have caused a kernel core dump
