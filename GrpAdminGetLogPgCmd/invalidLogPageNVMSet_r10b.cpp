@@ -119,7 +119,7 @@ InvalidLogPageNVMSet_r10b::RunCoreTest()
         getLogPgCmd->SetLID(*invalidLID);
 
         work = str(boost::format("invalidLID.%d") % *invalidLID);
-        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
+        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
             getLogPgCmd, work, true, CESTAT_INVAL_LOG_PAGE);
     }
 }

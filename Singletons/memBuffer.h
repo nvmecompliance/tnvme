@@ -23,6 +23,7 @@
 #include "limits.h"
 #include "../Utils/fileSystem.h"
 
+#define PRP_BUFFER_ALIGNMENT        128
 
 class MemBuffer;    // forward definition
 typedef boost::shared_ptr<MemBuffer>            SharedMemBufferPtr;
@@ -79,11 +80,11 @@ public:
      * requested will not be necessary.
      * @param bufSize Pass the number of bytes for buffer creation
      * @param align Pass the alignment requirements of the buffer. This value
-     *        is enforced to a multiple of sizeof(void *) alignment.
+     *        is enforced to a multiple of sizeof(void *) alignment at min.
      * @param initMem Pass true to initialize all elements, otherwise don't init
      * @param initVal Pass the init value if suppose to init the buffer
      */
-    void InitAlignment(uint32_t bufSize, uint32_t align = sizeof(void *),
+    void InitAlignment(uint32_t bufSize, uint32_t align = PRP_BUFFER_ALIGNMENT,
         bool initMem = false, uint8_t initVal = 0);
 
     /**

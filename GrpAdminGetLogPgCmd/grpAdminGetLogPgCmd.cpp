@@ -23,6 +23,8 @@
 #include "invalidLogPageNVMSet_r10b.h"
 #include "invalidNamspc_r10b.h"
 #include "mandatoryErrInfo_r10b.h"
+#include "mandatorySMART_r10b.h"
+#include "mandatoryFW_r10b.h"
 
 
 namespace GrpAdminGetLogPgCmd {
@@ -45,6 +47,8 @@ GrpAdminGetLogPgCmd::GrpAdminGetLogPgCmd(size_t grpNum) :
         APPEND_TEST_AT_YLEVEL(InvalidLogPageNVMSet_r10b, GrpAdminGetLogPgCmd)
         APPEND_TEST_AT_YLEVEL(InvalidNamspc_r10b, GrpAdminGetLogPgCmd)
         APPEND_TEST_AT_YLEVEL(MandatoryErrInfo_r10b, GrpAdminGetLogPgCmd)
+        APPEND_TEST_AT_YLEVEL(MandatorySMART_r10b, GrpAdminGetLogPgCmd)
+        APPEND_TEST_AT_YLEVEL(MandatoryFW_r10b, GrpAdminGetLogPgCmd)
         break;
 
     default:

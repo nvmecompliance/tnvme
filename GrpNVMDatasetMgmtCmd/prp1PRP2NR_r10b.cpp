@@ -177,7 +177,7 @@ PRP1PRP2NR_r10b::RunCoreTest()
                         enableLog = true;
 
                     work = str(boost::format("offset%d.nr%d ") % pgOff % nr);
-                    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+                    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1),
                         iosq, iocq, datasetMgmtCmd, work, enableLog);
                 }
             }

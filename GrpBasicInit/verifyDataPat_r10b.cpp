@@ -190,7 +190,7 @@ VerifyDataPat_r10b::SendToIOSQ(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
     SharedReadPtr readCmd, string qualifier, SharedMemBufferPtr writtenPayload,
     SharedMemBufferPtr readPayload)
 {
-    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
+    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq, iocq,
         readCmd, qualifier, true);
 
     LOG_NRM("Compare read vs written data to verify");

@@ -136,10 +136,10 @@ DeleteAllAtOnce_r10b::RunCoreTest()
     for (uint32_t ioqId = 1; ioqId <= X; ioqId++) {
         LOG_NRM("Create IOSQ and IOCQ with QID #%d", ioqId);
         SharedIOCQPtr iocq = Queues::CreateIOCQContigToHdw(mGrpName,
-            mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, ioqId, maxIOQEntries,
+            mTestName, CALC_TIMEOUT_ms(1), asq, acq, ioqId, maxIOQEntries,
             false, IOCQ_GROUP_ID, true, 0);
         SharedIOSQPtr iosq = Queues::CreateIOSQContigToHdw(mGrpName,
-            mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, ioqId, maxIOQEntries,
+            mTestName, CALC_TIMEOUT_ms(1), asq, acq, ioqId, maxIOQEntries,
             false, IOSQ_GROUP_ID, ioqId, 0);
         iocqs.push_back(iocq);
         iosqs.push_back(iosq);
@@ -175,7 +175,7 @@ DeleteAllAtOnce_r10b::DelAllIOSQsAndVerify(SharedACQPtr acq, SharedASQPtr asq,
     asq->Ring();
 
     LOG_NRM("Perform reap inquiry on ACQ for %d elements", X);
-    if (acq->ReapInquiryWaitSpecify((DEFAULT_CMD_WAIT_ms + X * 5), X, numCE,
+    if (acq->ReapInquiryWaitSpecify(CALC_TIMEOUT_ms(X), X, numCE,
         isrCount) == false) {
         asq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "asq.fail"),
             "Dump Entire ASQ");
@@ -247,7 +247,7 @@ DeleteAllAtOnce_r10b::DelAllIOCQsAndVerify(SharedACQPtr acq, SharedASQPtr asq,
     asq->Ring();
 
     LOG_NRM("Perform reap inquiry on ACQ for %d elements", X);
-    if (acq->ReapInquiryWaitSpecify((DEFAULT_CMD_WAIT_ms + X * 5), X, numCE,
+    if (acq->ReapInquiryWaitSpecify(CALC_TIMEOUT_ms(X), X, numCE,
         isrCount) == false) {
         asq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "asq.fail"),
             "Dump Entire ASQ");

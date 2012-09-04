@@ -151,13 +151,13 @@ PartialReapMSIX_r10b::RunCoreTest()
     gCtrlrConfig->SetIOCQES(gInformative->GetIdentifyCmdCtrlr()->
         GetValue(IDCTRLRCAP_CQES) & 0xf);
     SharedIOCQPtr iocq = Queues::CreateIOCQContigToHdw(mGrpName, mTestName,
-        DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, NUM_IOQ_ENTRY, false, "",
+        CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, NUM_IOQ_ENTRY, false, "",
         true, 0);
 
     gCtrlrConfig->SetIOSQES(gInformative->GetIdentifyCmdCtrlr()->
         GetValue(IDCTRLRCAP_SQES) & 0xf);
     SharedIOSQPtr iosq = Queues::CreateIOSQContigToHdw(mGrpName, mTestName,
-        DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, NUM_IOQ_ENTRY, false, "",
+        CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, NUM_IOQ_ENTRY, false, "",
         IOQ_ID, 0);
 
     // NOTE: We are overloading IRQ 0, it is being used by ACQ and we have
@@ -172,7 +172,7 @@ PartialReapMSIX_r10b::RunCoreTest()
         iosq->Ring();
 
         LOG_NRM("Wait for cmd to be processed");
-        if (iocq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, i, numCE,
+        if (iocq->ReapInquiryWaitSpecify(CALC_TIMEOUT_ms(1), i, numCE,
             isrCount) == false) {
 
             iocq->Dump(

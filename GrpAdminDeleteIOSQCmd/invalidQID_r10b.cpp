@@ -131,7 +131,7 @@ InvalidQID_r10b::RunCoreTest()
             enableLog = true;
 
         deleteIOSQCmd->SetWord(*qId, 10, 0); // Set IO QID using Cmd DW10
-        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
+        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
             deleteIOSQCmd, work, enableLog, CESTAT_INVALID_QID);
     }
 
@@ -143,16 +143,16 @@ InvalidQID_r10b::RunCoreTest()
 
     LOG_NRM("Create IOCQ/IOSQ pair with QID = %d", IOQ_ID);
     SharedIOCQPtr iocq = Queues::CreateIOCQContigToHdw(mGrpName, mTestName,
-        DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, maxIOQEntries, false,
+        CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, maxIOQEntries, false,
         IOCQ_GROUP_ID, true, 0);
     SharedIOSQPtr iosq = Queues::CreateIOSQContigToHdw(mGrpName, mTestName,
-        DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, maxIOQEntries, false,
+        CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, maxIOQEntries, false,
         IOCQ_GROUP_ID, IOQ_ID, 0);
 
     LOG_NRM("Send DeleteIOSQ and expect success for QID = 1");
     work = str(boost::format("2nd.IOQID.1"));
     deleteIOSQCmd->SetWord(1, 10, 0); // Set IO QID = 1 using Cmd DW10
-    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
+    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
         deleteIOSQCmd, work, true);
 
     LOG_NRM("Again issue DeleteIOSQ through all combinations of DW10.QID");
@@ -166,7 +166,7 @@ InvalidQID_r10b::RunCoreTest()
             enableLog = true;
 
         deleteIOSQCmd->SetWord(*qId, 10, 0); // Set IO QID using Cmd DW10
-        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
+        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
             deleteIOSQCmd, work, enableLog, CESTAT_INVALID_QID);
     }
 }

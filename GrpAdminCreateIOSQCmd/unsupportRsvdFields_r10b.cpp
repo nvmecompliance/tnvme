@@ -85,7 +85,9 @@ UnsupportRsvdFields_r10b::RunnableCoreTest(bool preserve)
     // changes that will not be restored after a cold hard reset.
     ///////////////////////////////////////////////////////////////////////////
 
-    return ((preserve == true) ? RUN_FALSE : RUN_TRUE);   // Test is destructive
+    if ((preserve == false) && gCmdLine.rsvdfields)
+        return RUN_TRUE;
+    return RUN_FALSE;    // Optional test skipped or is destructive
 }
 
 
@@ -113,7 +115,7 @@ UnsupportRsvdFields_r10b::RunCoreTest()
 
     LOG_NRM("Create IOCQ");
     SharedIOCQPtr iocq = Queues::CreateIOCQContigToHdw(mGrpName, mTestName,
-        DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, maxIOQEntries, false,
+        CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, maxIOQEntries, false,
         IOCQ_GROUP_ID, true, 0);
 
     LOG_NRM("Create IOSQ");
@@ -148,14 +150,14 @@ UnsupportRsvdFields_r10b::RunCoreTest()
     createIOSQCmd->SetDword(0xffffffff, 14);
     createIOSQCmd->SetDword(0xffffffff, 15);
 
-    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
+    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
         createIOSQCmd, "", true);
 
     WriteReadVerify(iosq, iocq);
 
-    Queues::DeleteIOSQToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+    Queues::DeleteIOSQToHdw(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq,
         asq, acq, "", false);
-    Queues::DeleteIOCQToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iocq,
+    Queues::DeleteIOCQToHdw(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iocq,
         asq, acq, "", false);
 }
 
@@ -225,10 +227,10 @@ UnsupportRsvdFields_r10b::WriteReadVerify(SharedIOSQPtr iosq,
         break;
     }
 
-    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq,
         iocq, writeCmd, "", true);
 
-    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq,
         iocq, readCmd, "", true);
 
     VerifyDataPat(readCmd, writeCmd);

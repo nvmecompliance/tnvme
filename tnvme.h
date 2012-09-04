@@ -46,7 +46,12 @@ using namespace std;
 
 
 #define MAX_CHAR_PER_LINE_DESCRIPTION       63
-#define SYSTEMWIDE_CMD_WAIT_ms              10000   // 10s
+
+#define DFLT_TIMEOUT_ms                     10000   // 10s
+#define PER_CMD_TIMEOUT_ms                  20
+#define CALC_TIMEOUT_ms(numCmds)    \
+    (((numCmds * PER_CMD_TIMEOUT_ms) > DFLT_TIMEOUT_ms) ?    \
+    (numCmds * PER_CMD_TIMEOUT_ms) : DFLT_TIMEOUT_ms)
 
 /**
  * When the namespace reports unlimited transfer size, this define artificially
@@ -165,6 +170,7 @@ struct CmdLine {
     bool            reset;
     bool            restore;
     bool            postfail;
+    bool            rsvdfields;
     bool            preserve;
     size_t          loop;
     SpecRev         rev;

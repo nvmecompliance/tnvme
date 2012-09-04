@@ -427,7 +427,7 @@ Informative::Init()
         if (gCtrlrConfig->SetState(ST_ENABLE) == false)
             throw FrmwkEx(HERE);
 
-        status = Reinit(asq, acq, SYSTEMWIDE_CMD_WAIT_ms);
+        status = Reinit(asq, acq, CALC_TIMEOUT_ms(1));
     } catch (...) {
         LOG_ERR("Failed to init Informative singleton");
         status = false;
@@ -560,7 +560,7 @@ Informative::SendIdentifyCtrlrStruct(SharedASQPtr asq, SharedACQPtr acq,
     LOG_NRM("Force identify to request ctrlr capabilities struct");
     idCmdCtrlr->SetCNS(true);
     SharedMemBufferPtr idMemCap = SharedMemBufferPtr(new MemBuffer());
-    idMemCap->InitAlignment(Identify::IDEAL_DATA_SIZE, sizeof(uint64_t),
+    idMemCap->InitAlignment(Identify::IDEAL_DATA_SIZE, PRP_BUFFER_ALIGNMENT,
         true, 0);
     send_64b_bitmask prpReq =
         (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE);
@@ -602,8 +602,8 @@ Informative::SendIdentifyNamespaceStruct(SharedASQPtr asq, SharedACQPtr acq,
         idCmdNamSpc->SetCNS(false);
         idCmdNamSpc->SetNSID(namSpc);
         SharedMemBufferPtr idMemNamSpc = SharedMemBufferPtr(new MemBuffer());
-        idMemNamSpc->InitAlignment(Identify::IDEAL_DATA_SIZE, sizeof(uint64_t),
-            true, 0);
+        idMemNamSpc->InitAlignment(Identify::IDEAL_DATA_SIZE,
+            PRP_BUFFER_ALIGNMENT, true, 0);
         send_64b_bitmask idPrpNamSpc =
             (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE);
         idCmdNamSpc->SetPrpBuffer(idPrpNamSpc, idMemNamSpc);

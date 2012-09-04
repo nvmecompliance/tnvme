@@ -129,7 +129,7 @@ MandatoryErrInfo_r10b::RunCoreTest()
         getLogPgCmd->SetNUMD(numd);
 
         work = str(boost::format("logEnties%d") % (numd / ERRINFO_NUMD));
-        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
+        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
             getLogPgCmd, work, true);
 
         // Verify the buffer's non-retrieved log entries = 0x00.

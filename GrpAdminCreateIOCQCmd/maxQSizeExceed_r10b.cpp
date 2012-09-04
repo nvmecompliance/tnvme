@@ -144,7 +144,7 @@ MaxQSizeExceed_r10b::RunCoreTest()
             enableLog = true;
 
         LOG_NRM("Send n reap ACQ for CreateIOCQCmd; qSize #0x%04X", *qSize);
-        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
+        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
             createIOCQCmd, work, enableLog, CESTAT_MAX_Q_SIZE_EXCEED);
     }
 }

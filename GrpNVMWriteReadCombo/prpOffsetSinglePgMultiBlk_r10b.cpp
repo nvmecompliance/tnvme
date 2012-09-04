@@ -265,13 +265,13 @@ PRPOffsetSinglePgMultiBlk_r10b::RunCoreTest()
             // Set 64 bits of PRP2 in CDW 8 & 9 with random or zero.
             writeCmd->SetDword(prp2RandVal[0], 8);
             writeCmd->SetDword(prp2RandVal[1], 9);
-            IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+            IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq,
                 iocq, writeCmd, work, enableLog);
 
             // Set 64 bits of PRP2 in CDW 8 & 9 with random or zero.
             readCmd->SetDword(prp2RandVal[0], 8);
             readCmd->SetDword(prp2RandVal[1], 9);
-            IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+            IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq,
                 iocq, readCmd, work, enableLog);
 
             VerifyDataPat(readCmd, dataPat, wrVal, metabufSz);
@@ -298,21 +298,21 @@ PRPOffsetSinglePgMultiBlk_r10b::InitTstRsrcs(SharedASQPtr asq, SharedACQPtr acq,
         iocqBackMem->InitOffset1stPage((nEntriesIOQ * (1 << iocqes)), 0, true);
 
         iocq = Queues::CreateIOCQDiscontigToHdw(mGrpName, mTestName,
-            DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, nEntriesIOQ, false,
+            CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, nEntriesIOQ, false,
             IOCQ_GROUP_ID, true, 1, iocqBackMem);
 
         SharedMemBufferPtr iosqBackMem = SharedMemBufferPtr(new MemBuffer());
         iosqBackMem->InitOffset1stPage((nEntriesIOQ * (1 << iosqes)), 0, true);
         iosq = Queues::CreateIOSQDiscontigToHdw(mGrpName, mTestName,
-            DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, nEntriesIOQ, false,
+            CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, nEntriesIOQ, false,
             IOSQ_GROUP_ID, IOQ_ID, 0, iosqBackMem);
     } else {
        iocq = Queues::CreateIOCQContigToHdw(mGrpName, mTestName,
-           DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, nEntriesIOQ, false,
+           CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, nEntriesIOQ, false,
            IOCQ_GROUP_ID, true, 1);
 
        iosq = Queues::CreateIOSQContigToHdw(mGrpName, mTestName,
-           DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, nEntriesIOQ, false,
+           CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, nEntriesIOQ, false,
            IOSQ_GROUP_ID, IOQ_ID, 0);
     }
 }

@@ -148,7 +148,7 @@ CtrlrResetIOQDeleted_r10b::VerifyCtrlrResetDeletesIOQs(SharedACQPtr acq,
         gCtrlrConfig->SetIOCQES(gInformative->GetIdentifyCmdCtrlr()->
             GetValue(IDCTRLRCAP_CQES) & 0xf);
         Queues::CreateIOCQContigToHdw(mGrpName, mTestName,
-            DEFAULT_CMD_WAIT_ms, asq, acq, IOCQ_ID, numEntriesIOQ, false,
+            CALC_TIMEOUT_ms(1), asq, acq, IOCQ_ID, numEntriesIOQ, false,
             IOCQ_CONTIG_GROUP_ID, false, 0, work);
 
         // Create 2 IO SQ's, start with SQ ID 1 and associate all SQ's to one
@@ -157,7 +157,7 @@ CtrlrResetIOQDeleted_r10b::VerifyCtrlrResetDeletesIOQs(SharedACQPtr acq,
             GetValue(IDCTRLRCAP_SQES) & 0xf);
         for (uint32_t j = 1; j <= IOSQ_ID; j++) {
             Queues::CreateIOSQContigToHdw(mGrpName, mTestName,
-                DEFAULT_CMD_WAIT_ms, asq, acq, j, numEntriesIOQ, false,
+                CALC_TIMEOUT_ms(1), asq, acq, j, numEntriesIOQ, false,
                 IOSQ_CONTIG_GROUP_ID, IOCQ_ID, 0, work);
         }
 

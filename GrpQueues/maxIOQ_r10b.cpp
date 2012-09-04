@@ -124,10 +124,10 @@ MaxIOQ_r10b::RunCoreTest()
     for (uint32_t ioqId = 1; ioqId <= gInformative->GetFeaturesNumOfIOSQs();
         ioqId++) {
         SharedIOCQPtr iocq = Queues::CreateIOCQContigToHdw(mGrpName,
-            mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, ioqId, NumEntriesIOQ,
+            mTestName, CALC_TIMEOUT_ms(1), asq, acq, ioqId, NumEntriesIOQ,
             false, IOCQ_CONTIG_GROUP_ID, false, 0);
         SharedIOSQPtr iosq = Queues::CreateIOSQContigToHdw(mGrpName,
-            mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, ioqId, NumEntriesIOQ,
+            mTestName, CALC_TIMEOUT_ms(1), asq, acq, ioqId, NumEntriesIOQ,
             false, IOSQ_CONTIG_GROUP_ID, ioqId, 0);
         IOSQVec.push_back(iosq);
         IOCQVec.push_back(iocq);
@@ -138,7 +138,7 @@ MaxIOQ_r10b::RunCoreTest()
         iosq != IOSQVec.end(); iosq++, iocq++) {
         writeMem->SetDataPattern(DATAPAT_CONST_16BIT, (*iosq)->GetQId());
         work = str(boost::format("dataPattern.0x%04X") % (*iosq)->GetQId());
-        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, *iosq, *iocq,
+        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), *iosq, *iocq,
             writeCmd, work, true);
 
         VerifyDataPattern(*iosq, *iocq, readCmd, work);
@@ -148,9 +148,9 @@ MaxIOQ_r10b::RunCoreTest()
     for (vector <SharedIOSQPtr>::iterator iosq = IOSQVec.begin();
         iosq != IOSQVec.end(); iosq++, iocq++) {
         // Delete IOSQ before the IOCQ to comply with spec.
-        Queues::DeleteIOSQToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+        Queues::DeleteIOSQToHdw(mGrpName, mTestName, CALC_TIMEOUT_ms(1),
             *iosq, asq, acq);
-        Queues::DeleteIOCQToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+        Queues::DeleteIOCQToHdw(mGrpName, mTestName, CALC_TIMEOUT_ms(1),
             *iocq, asq, acq);
     }
 }
@@ -237,7 +237,7 @@ void
 MaxIOQ_r10b::VerifyDataPattern(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
     SharedReadPtr readCmd, string qualifier)
 {
-    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
+    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq, iocq,
         readCmd, qualifier, true);
 
     LOG_NRM("Compare read vs written data to verify");

@@ -126,7 +126,7 @@ AdminQRollChkDiff_r10b::RunCoreTest()
         LOG_NRM("Force identify to request ctrlr capabilities struct");
         idCmdCap->SetCNS(true);
         SharedMemBufferPtr idMemCap = SharedMemBufferPtr(new MemBuffer());
-        idMemCap->InitAlignment(Identify::IDEAL_DATA_SIZE, sizeof(uint64_t),
+        idMemCap->InitAlignment(Identify::IDEAL_DATA_SIZE, PRP_BUFFER_ALIGNMENT,
             false, 0);
         send_64b_bitmask idPrpCap =
             (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE);
@@ -138,7 +138,7 @@ AdminQRollChkDiff_r10b::RunCoreTest()
             nsubmitTimes++) {
             LOG_NRM("Sending #%d times of %d", (nsubmitTimes + 1),
                 (acq->GetNumEntries() + 2));
-            IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+            IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1),
                 asq, acq, idCmdCap, "AdminQRollChkDiff", false);
             VerifyCESQValues(acq, (nsubmitTimes + 1) % asq->GetNumEntries());
         }

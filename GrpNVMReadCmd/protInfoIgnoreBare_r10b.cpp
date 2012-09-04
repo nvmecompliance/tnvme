@@ -127,7 +127,7 @@ ProtInfoIgnoreBare_r10b::RunCoreTest()
 
             snprintf(context, sizeof(context), "ns%d.protInfo0x%02X",
                 (uint32_t)i, protInfo);
-            IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+            IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq,
                 iocq, readCmd, context, true);
         }
     }

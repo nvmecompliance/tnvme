@@ -84,6 +84,8 @@ UnsupportRrvdFields_r10b::RunnableCoreTest(bool preserve)
     // configuration of the DUT. Permanence is defined as state or configuration
     // changes that will not be restored after a cold hard reset.
     ///////////////////////////////////////////////////////////////////////////
+    if (gCmdLine.rsvdfields == false)
+        return RUN_FALSE;   // Optional rsvd fields test skipped.
 
     preserve = preserve;    // Suppress compiler error/warning
     return RUN_TRUE;        // This test is never destructive
@@ -117,7 +119,7 @@ UnsupportRrvdFields_r10b::RunCoreTest()
     getLogPgCmd->SetPrpBuffer(prpReq, getLogPageMem);
 
     LOG_NRM("Issue GetLogPage cmd without setting reserved bits.");
-    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
+    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
         getLogPgCmd, "rsvd.notset", true);
 
     LOG_NRM("Set all cmd's rsvd bits");
@@ -141,7 +143,7 @@ UnsupportRrvdFields_r10b::RunCoreTest()
     getLogPgCmd->SetDword(0xffffffff, 15);
 
     LOG_NRM("Issue GetLogPage cmd after setting reserved bits.");
-    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
+    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
         getLogPgCmd, "rsvd.set", true);
 
 }

@@ -26,7 +26,7 @@ namespace GrpInterrupts {
 #define IOCQ_GROUP_ID               "IOCQ"
 #define IOSQ_GROUP_ID               "IOSQ"
 
-#define DEFAULT_CMD_WAIT_ms         SYSTEMWIDE_CMD_WAIT_ms
+
 }
 
 #endif

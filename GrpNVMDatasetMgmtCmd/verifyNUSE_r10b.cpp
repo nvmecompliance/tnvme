@@ -138,7 +138,7 @@ VerifyNUSE_r10b::RunCoreTest()
     rangePtr->length = ncap;
 
     work = str(boost::format("deallocate.%08Xh") % ncap);
-    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
+    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq, iocq,
         datasetMgmtCmd, work, true);
 
     LOG_NRM("Create identify cmd & assoc some buffer memory");
@@ -147,14 +147,14 @@ VerifyNUSE_r10b::RunCoreTest()
     idCmdNamSpc->SetCNS(false);
     idCmdNamSpc->SetNSID(namspcData.id);
     SharedMemBufferPtr idMemNamSpc = SharedMemBufferPtr(new MemBuffer());
-    idMemNamSpc->InitAlignment(Identify::IDEAL_DATA_SIZE, sizeof(uint64_t),
+    idMemNamSpc->InitAlignment(Identify::IDEAL_DATA_SIZE, PRP_BUFFER_ALIGNMENT,
         true, 0);
     send_64b_bitmask idPrpNamSpc =
         (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE);
     idCmdNamSpc->SetPrpBuffer(idPrpNamSpc, idMemNamSpc);
 
     work = str(boost::format("IdentifyNamspc.nsid.%d.lba.all") % namspcData.id);
-    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
+    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
         idCmdNamSpc, work, true);
 
     LOG_NRM("Verify namespace utilization is zero after de-allocation.");
@@ -198,11 +198,11 @@ VerifyNUSE_r10b::RunCoreTest()
     writeCmd->SetNLB(0);
 
     work = str(boost::format("write.nsid.%d.nlba.0") % namspcData.id);
-    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq,
         iocq, writeCmd, work, true);
 
     work = str(boost::format("IdentifyNamspc.nsid.%d.nlba.0") % namspcData.id);
-    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
+    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
         idCmdNamSpc, work, true);
 
     LOG_NRM("Verify namespace utilization is one after single LBA write cmd.");
