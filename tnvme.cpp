@@ -53,6 +53,7 @@
 #include "GrpAdminCreateIOSQCmd/grpAdminCreateIOSQCmd.h"
 #include "GrpAdminCreateIOQCmd/grpAdminCreateIOQCmd.h"
 #include "GrpAdminGetLogPgCmd/grpAdminGetLogPgCmd.h"
+#include "GrpAdminIdentifyCmd/grpAdminIdentifyCmd.h"
 
 
 void
@@ -82,6 +83,8 @@ InstantiateGroups(vector<Group *> &groups)
     groups.push_back(new GrpAdminCreateIOSQCmd::GrpAdminCreateIOSQCmd(groups.size()));
     groups.push_back(new GrpAdminCreateIOQCmd::GrpAdminCreateIOQCmd(groups.size()));
     groups.push_back(new GrpAdminGetLogPgCmd::GrpAdminGetLogPgCmd(groups.size()));
+    // Following is assigned grp ID=20
+    groups.push_back(new GrpAdminIdentifyCmd::GrpAdminIdentifyCmd(groups.size()));
 }
 // ------------------------------EDIT HERE---------------------------------
 
