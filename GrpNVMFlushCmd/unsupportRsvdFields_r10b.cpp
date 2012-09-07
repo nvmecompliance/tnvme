@@ -82,6 +82,9 @@ UnsupportRsvdFields_r10b::RunnableCoreTest(bool preserve)
     // changes that will not be restored after a cold hard reset.
     ///////////////////////////////////////////////////////////////////////////
 
+    if (gCmdLine.rsvdfields == false)
+        return RUN_FALSE;   // Optional rsvd fields test skipped.
+
     preserve = preserve;    // Suppress compiler error/warning
     return RUN_TRUE;        // This test is never destructive
 }
@@ -106,7 +109,7 @@ UnsupportRsvdFields_r10b::RunCoreTest()
         LOG_NRM("Processing namspc %ld", i);
         flushCmd->SetNSID(i);
 
-        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
+        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq, iocq,
             flushCmd, "none.set", true);
 
         LOG_NRM("Set all cmd's rsvd bits");
@@ -129,7 +132,7 @@ UnsupportRsvdFields_r10b::RunCoreTest()
         flushCmd->SetDword(0xffffffff, 14);
         flushCmd->SetDword(0xffffffff, 15);
 
-        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
+        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq, iocq,
             flushCmd, "all.set", true);
     }
 }

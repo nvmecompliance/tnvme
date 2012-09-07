@@ -99,11 +99,11 @@ FUA_r10b::RunCoreTest()
     SharedIOCQPtr iocq = CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_GROUP_ID));
 
     SharedWritePtr writeCmd = CreateCmd();
-    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
+    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq, iocq,
         writeCmd, "none.set", true);
 
     writeCmd->SetFUA(true);
-    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
+    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq, iocq,
         writeCmd, "all.set", true);
 }
 
@@ -125,16 +125,16 @@ FUA_r10b::CreateCmd()
 
     switch (namspcData.type) {
     case Informative::NS_BARE:
-        dataPat->Init(lbaDataSize);
+        dataPat->InitAlignment(lbaDataSize);
         break;
     case Informative::NS_METAS:
-        dataPat->Init(lbaDataSize);
+        dataPat->InitAlignment(lbaDataSize);
         if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
             throw FrmwkEx(HERE);
         writeCmd->AllocMetaBuffer();
         break;
     case Informative::NS_METAI:
-        dataPat->Init(lbaDataSize + lbaFormat.MS);
+        dataPat->InitAlignment(lbaDataSize + lbaFormat.MS);
         break;
     case Informative::NS_E2ES:
     case Informative::NS_E2EI:

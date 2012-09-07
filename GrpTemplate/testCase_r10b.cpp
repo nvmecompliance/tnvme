@@ -96,7 +96,7 @@ TestCase_r10b::RunCoreTest()
      *  \endverbatim
      */
     if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
-        throw FrmwkEx();
+        throw FrmwkEx(HERE);
 }
 
 }   // namespace

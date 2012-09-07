@@ -214,15 +214,15 @@ NLBAMeta_r10b::RunCoreTest()
                 case Informative::NS_BARE:
                     throw FrmwkEx(HERE, "Namspc type cannot be BARE.");
                 case Informative::NS_METAS:
-                    writeMem->Init(nLBA * lbaDataSize);
-                    readMem->Init(nLBA * lbaDataSize);
+                    writeMem->InitAlignment(nLBA * lbaDataSize);
+                    readMem->InitAlignment(nLBA * lbaDataSize);
                     metaBuffSz = nLBA * lbaFormat.MS;
                     writeCmd->SetMetaDataPattern
                         (dataPat[(nLBA - 1) % dpArrSize], nLBA);
                     break;
                 case Informative::NS_METAI:
-                    writeMem->Init(nLBA * (lbaDataSize + lbaFormat.MS));
-                    readMem->Init(nLBA * (lbaDataSize + lbaFormat.MS));
+                    writeMem->InitAlignment(nLBA * (lbaDataSize + lbaFormat.MS));
+                    readMem->InitAlignment(nLBA * (lbaDataSize + lbaFormat.MS));
                     break;
                 case Informative::NS_E2ES:
                 case Informative::NS_E2EI:
@@ -242,10 +242,10 @@ NLBAMeta_r10b::RunCoreTest()
                     enableLog = true;
                 work = str(boost::format("NSID.%d.LBA.%ld") % meta[i] % nLBA);
 
-                IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+                IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1),
                     iosq, iocq, writeCmd, work, enableLog);
 
-                IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+                IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1),
                     iosq, iocq, readCmd, work, enableLog);
 
                 VerifyDataPat(readCmd, writeCmd, metaBuffSz);
@@ -313,20 +313,20 @@ NLBAMeta_r10b::CreateIOQs(SharedASQPtr asq, SharedACQPtr acq, uint32_t ioqId,
         SharedMemBufferPtr iocqBackedMem = SharedMemBufferPtr(new MemBuffer());
         iocqBackedMem->InitOffset1stPage((numEntries * (1 << iocqes)), 0, true);
         iocq = Queues::CreateIOCQDiscontigToHdw(mGrpName, mTestName,
-            DEFAULT_CMD_WAIT_ms, asq, acq, ioqId, numEntries,
+            CALC_TIMEOUT_ms(1), asq, acq, ioqId, numEntries,
             false, IOCQ_GROUP_ID, true, 0, iocqBackedMem);
 
         SharedMemBufferPtr iosqBackedMem = SharedMemBufferPtr(new MemBuffer());
         iosqBackedMem->InitOffset1stPage((numEntries * (1 << iosqes)), 0,true);
         iosq = Queues::CreateIOSQDiscontigToHdw(mGrpName, mTestName,
-            DEFAULT_CMD_WAIT_ms, asq, acq, ioqId, numEntries, false,
+            CALC_TIMEOUT_ms(1), asq, acq, ioqId, numEntries, false,
             IOSQ_GROUP_ID, ioqId, 0, iosqBackedMem);
     } else {
         iocq = Queues::CreateIOCQContigToHdw(mGrpName, mTestName,
-            DEFAULT_CMD_WAIT_ms, asq, acq, ioqId, numEntries, false,
+            CALC_TIMEOUT_ms(1), asq, acq, ioqId, numEntries, false,
             IOCQ_GROUP_ID, true, 0);
         iosq = Queues::CreateIOSQContigToHdw(mGrpName, mTestName,
-            DEFAULT_CMD_WAIT_ms, asq, acq, ioqId, numEntries, false,
+            CALC_TIMEOUT_ms(1), asq, acq, ioqId, numEntries, false,
             IOSQ_GROUP_ID, ioqId, 0);
     }
 }

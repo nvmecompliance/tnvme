@@ -169,7 +169,7 @@ IllegalCreateQs_r10b::SendToxicCmd(SharedASQPtr asq, SharedACQPtr acq,
     asq->Ring();
 
     LOG_NRM("Wait for the CE to arrive in CQ %d", acq->GetQId());
-    if (acq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE, isrCnt)
+    if (acq->ReapInquiryWaitSpecify(CALC_TIMEOUT_ms(1), 1, numCE, isrCnt)
         == false) {
         acq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "acq.fail"),
             "Dump Entire ACQ");

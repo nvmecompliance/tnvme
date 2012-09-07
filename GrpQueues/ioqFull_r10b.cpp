@@ -142,7 +142,7 @@ IOQFull_r10b::IOQFull(uint32_t numIOSQEntries, uint32_t numIOCQEntries,
         iocqBackedMem->
             InitOffset1stPage((numIOCQEntries * (1 << iocqes)), 0, true);
         iocq = Queues::CreateIOCQDiscontigToHdw(mGrpName,
-            mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, numIOCQEntries,
+            mTestName, CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, numIOCQEntries,
             false, IOCQ_CONTIG_GROUP_ID, false, 1, iocqBackedMem);
 
         uint8_t iosqes = (gInformative->GetIdentifyCmdCtrlr()->
@@ -151,14 +151,14 @@ IOQFull_r10b::IOQFull(uint32_t numIOSQEntries, uint32_t numIOCQEntries,
         iosqBackedMem->
             InitOffset1stPage((numIOSQEntries * (1 << iosqes)), 0, true);
         iosq = Queues::CreateIOSQDiscontigToHdw(mGrpName,
-            mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, numIOSQEntries,
+            mTestName, CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, numIOSQEntries,
             false, IOSQ_CONTIG_GROUP_ID, IOQ_ID, 0, iosqBackedMem);
     } else {
         iocq = Queues::CreateIOCQContigToHdw(mGrpName,
-            mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, numIOCQEntries,
+            mTestName, CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, numIOCQEntries,
             false, IOCQ_CONTIG_GROUP_ID, false, 1);
         iosq = Queues::CreateIOSQContigToHdw(mGrpName,
-            mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, numIOSQEntries,
+            mTestName, CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, numIOSQEntries,
             false, IOSQ_CONTIG_GROUP_ID, IOQ_ID, 0);
     }
 
@@ -171,7 +171,7 @@ IOQFull_r10b::IOQFull(uint32_t numIOSQEntries, uint32_t numIOCQEntries,
         iosq->Ring();
 
         LOG_NRM("Wait for the CE to arrive in IOCQ");
-        if (iocq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, (nCmds + 1),
+        if (iocq->ReapInquiryWaitSpecify(CALC_TIMEOUT_ms(1), (nCmds + 1),
             numCE, isrCount) == false) {
 
             // if (iosq size == (iocq size + 1)); last CE will not arrive.
@@ -182,7 +182,7 @@ IOQFull_r10b::IOQFull(uint32_t numIOSQEntries, uint32_t numIOCQEntries,
                 IO::ReapCE(iocq, 1, isrCount, mGrpName, mTestName, "IOCQCE",
                     CESTAT_SUCCESS);
 
-                if (iocq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, nCmds,
+                if (iocq->ReapInquiryWaitSpecify(CALC_TIMEOUT_ms(1), nCmds,
                     numCE, isrCount)) {
                     break;  // Seen the last CE, all if fine
                 }
@@ -202,9 +202,9 @@ IOQFull_r10b::IOQFull(uint32_t numIOSQEntries, uint32_t numIOCQEntries,
     }
 
     LOG_NRM(" Delete IOSQ before the IOCQ to comply with spec.");
-    Queues::DeleteIOSQToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+    Queues::DeleteIOSQToHdw(mGrpName, mTestName, CALC_TIMEOUT_ms(1),
         iosq, asq, acq);
-    Queues::DeleteIOCQToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+    Queues::DeleteIOCQToHdw(mGrpName, mTestName, CALC_TIMEOUT_ms(1),
         iocq, asq, acq);
 }
 
@@ -226,19 +226,16 @@ IOQFull_r10b::SetWriteCmd()
 
     switch (namspcData.type) {
     case Informative::NS_BARE:
-//        dataPat->Init(lbaDataSize);
-        dataPat->InitAlignment(lbaDataSize, lbaDataSize);
+        dataPat->InitAlignment(lbaDataSize);
         break;
     case Informative::NS_METAS:
-//        dataPat->Init(lbaDataSize);
-        dataPat->InitAlignment(lbaDataSize, lbaDataSize);
+        dataPat->InitAlignment(lbaDataSize);
         if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
             throw FrmwkEx(HERE);
         writeCmd->AllocMetaBuffer();
         break;
     case Informative::NS_METAI:
-//        dataPat->Init(lbaDataSize + lbaFormat.MS);
-        dataPat->InitAlignment((lbaDataSize + lbaFormat.MS), lbaDataSize);
+        dataPat->InitAlignment(lbaDataSize + lbaFormat.MS);
         break;
     case Informative::NS_E2ES:
     case Informative::NS_E2EI:

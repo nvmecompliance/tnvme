@@ -130,31 +130,19 @@ VerifyDataPat_r10b::VerifyDataPattern()
 
     switch (namspcData.type) {
     case Informative::NS_BARE:
-//        dataPat->Init(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize);
-//        readMem->Init(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize);
-        dataPat->InitAlignment(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize,
-            lbaDataSize);
-        readMem->InitAlignment(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize,
-            lbaDataSize);
+        dataPat->InitAlignment(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize);
+        readMem->InitAlignment(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize);
         break;
     case Informative::NS_METAS:
-//        dataPat->Init(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize);
-//        readMem->Init(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize);
-        dataPat->InitAlignment(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize,
-            lbaDataSize);
-        readMem->InitAlignment(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize,
-            lbaDataSize);
-
+        dataPat->InitAlignment(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize);
+        readMem->InitAlignment(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize);
         readCmd->AllocMetaBuffer();
         break;
     case Informative::NS_METAI:
-//        dataPat->Init(WRITE_DATA_PAT_NUM_BLKS * (lbaDataSize + lbaFormat.MS));
-//        readMem->Init(WRITE_DATA_PAT_NUM_BLKS * (lbaDataSize + lbaFormat.MS));
-        dataPat->InitAlignment(WRITE_DATA_PAT_NUM_BLKS *
-            (lbaDataSize + lbaFormat.MS), lbaDataSize);
-        readMem->InitAlignment(WRITE_DATA_PAT_NUM_BLKS *
-            (lbaDataSize + lbaFormat.MS), lbaDataSize);
-
+        dataPat->InitAlignment
+            (WRITE_DATA_PAT_NUM_BLKS * (lbaDataSize + lbaFormat.MS));
+        readMem->InitAlignment
+            (WRITE_DATA_PAT_NUM_BLKS * (lbaDataSize + lbaFormat.MS));
         break;
     case Informative::NS_E2ES:
     case Informative::NS_E2EI:
@@ -204,7 +192,7 @@ VerifyDataPat_r10b::SendToIOSQ(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
     SharedReadPtr readCmd, string qualifier, SharedMemBufferPtr writtenPayload,
     SharedMemBufferPtr readPayload)
 {
-    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
+    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq, iocq,
         readCmd, qualifier, true);
 
     LOG_NRM("Compare read vs written data to verify");

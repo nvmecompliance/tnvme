@@ -141,12 +141,12 @@ StartingLBABare_r10b::RunCoreTest()
         uint64_t lbaDataSize = namSpcPtr->GetLBADataSize();
         uint64_t maxWrBlks = maxDtXferSz / lbaDataSize;
 
-        writeMem->Init(maxWrBlks * lbaDataSize);
+        writeMem->InitAlignment(maxWrBlks * lbaDataSize);
         writeCmd->SetPrpBuffer(prpBitmask, writeMem);
         writeCmd->SetNSID(bare[i]);
         writeCmd->SetNLB(maxWrBlks - 1);  // 0 based value.
 
-        readMem->Init(maxWrBlks * lbaDataSize);
+        readMem->InitAlignment(maxWrBlks * lbaDataSize);
         readCmd->SetPrpBuffer(prpBitmask, readMem);
         readCmd->SetNSID(bare[i]);
         readCmd->SetNLB(maxWrBlks - 1);  // 0 based value.
@@ -165,10 +165,10 @@ StartingLBABare_r10b::RunCoreTest()
                 enableLog = true;
             work = str(boost::format("NSID.%d.SLBA.%ld") % bare[i] % nWrBlks);
 
-            IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+            IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq,
                 iocq, writeCmd, work, enableLog);
 
-            IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+            IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq,
                 iocq, readCmd, work, enableLog);
 
             VerifyDataPat(readCmd, writeMem);

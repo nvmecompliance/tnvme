@@ -128,10 +128,10 @@ SQCQSizeMismatch_r10b::RunCoreTest()
         LOG_NRM("Creating IOQs with IDs #%d of maximum IDs %d",
             ioqId, maxIOQSupport);
         SharedIOCQPtr iocq = Queues::CreateIOCQContigToHdw(mGrpName,
-            mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, ioqId, NumEntriesIOCQ,
+            mTestName, CALC_TIMEOUT_ms(1), asq, acq, ioqId, NumEntriesIOCQ,
             false, IOCQ_CONTIG_GROUP_ID, false, 0);
         SharedIOSQPtr iosq = Queues::CreateIOSQContigToHdw(mGrpName,
-            mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, ioqId, NumEntriesIOSQ,
+            mTestName, CALC_TIMEOUT_ms(1), asq, acq, ioqId, NumEntriesIOSQ,
             false, IOSQ_CONTIG_GROUP_ID, ioqId, 0);
         IOSQVec.push_back(iosq);
         IOCQVec.push_back(iocq);
@@ -162,9 +162,9 @@ SQCQSizeMismatch_r10b::RunCoreTest()
     iocq = IOCQVec.begin();
     for (iosq = IOSQVec.begin(); iosq != IOSQVec.end(); iosq++, iocq++) {
         // Delete IOSQ before the IOCQ to comply with spec.
-        Queues::DeleteIOSQToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+        Queues::DeleteIOSQToHdw(mGrpName, mTestName, CALC_TIMEOUT_ms(1),
             *iosq, asq, acq);
-        Queues::DeleteIOCQToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+        Queues::DeleteIOCQToHdw(mGrpName, mTestName, CALC_TIMEOUT_ms(1),
             *iocq, asq, acq);
     }
 
@@ -188,19 +188,16 @@ SQCQSizeMismatch_r10b::SetWriteCmd()
 
     switch (namspcData.type) {
     case Informative::NS_BARE:
-//        dataPat->Init(lbaDataSize);
-        dataPat->InitAlignment(lbaDataSize, lbaDataSize);
+        dataPat->InitAlignment(lbaDataSize);
         break;
     case Informative::NS_METAS:
-//        dataPat->Init(lbaDataSize);
-        dataPat->InitAlignment(lbaDataSize, lbaDataSize);
+        dataPat->InitAlignment(lbaDataSize);
         if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
             throw FrmwkEx(HERE);
         writeCmd->AllocMetaBuffer();
         break;
     case Informative::NS_METAI:
-//        dataPat->Init(lbaDataSize + lbaFormat.MS);
-        dataPat->InitAlignment((lbaDataSize + lbaFormat.MS), lbaDataSize);
+        dataPat->InitAlignment(lbaDataSize + lbaFormat.MS);
         break;
     case Informative::NS_E2ES:
     case Informative::NS_E2EI:
@@ -226,7 +223,7 @@ SQCQSizeMismatch_r10b::ReapVerifyOnCQ(SharedIOCQPtr iocq, SharedIOSQPtr iosq)
     SharedMemBufferPtr ceMemIOCQ = SharedMemBufferPtr(new MemBuffer());
     for (uint32_t nCmds = 1; nCmds < iosq->GetNumEntries(); nCmds++) {
         LOG_NRM("Wait for the CE to arrive in IOCQ");
-        if (iocq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE,
+        if (iocq->ReapInquiryWaitSpecify(CALC_TIMEOUT_ms(1), 1, numCE,
             isrCount) == false) {
             iocq->Dump(
                 FileSystem::PrepDumpFile(mGrpName, mTestName, "iocq", "reapInq"),

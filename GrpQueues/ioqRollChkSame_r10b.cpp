@@ -119,11 +119,11 @@ IOQRollChkSame_r10b::IOQRollChkSame(uint32_t numEntriesIOQ)
     SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
 
     SharedIOCQPtr iocq = Queues::CreateIOCQContigToHdw(mGrpName,
-        mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, numEntriesIOQ,
+        mTestName, CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, numEntriesIOQ,
         false, IOCQ_CONTIG_GROUP_ID, false, 1);
 
     SharedIOSQPtr iosq = Queues::CreateIOSQContigToHdw(mGrpName,
-        mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, numEntriesIOQ,
+        mTestName, CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, numEntriesIOQ,
         false, IOSQ_CONTIG_GROUP_ID, IOQ_ID, 0);
 
     LOG_NRM("(IOCQ Size, IOSQ Size)=(%d,%d)", iocq->GetNumEntries(),
@@ -144,9 +144,9 @@ IOQRollChkSame_r10b::IOQRollChkSame(uint32_t numEntriesIOQ)
     VerifyQPointers(iosq, iocq);
 
     LOG_NRM("Delete IOSQ before the IOCQ to comply with spec.");
-    Queues::DeleteIOSQToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+    Queues::DeleteIOSQToHdw(mGrpName, mTestName, CALC_TIMEOUT_ms(1),
         iosq, asq, acq);
-    Queues::DeleteIOCQToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+    Queues::DeleteIOCQToHdw(mGrpName, mTestName, CALC_TIMEOUT_ms(1),
         iocq, asq, acq);
 }
 
@@ -168,19 +168,16 @@ IOQRollChkSame_r10b::SetWriteCmd()
 
     switch (namspcData.type) {
     case Informative::NS_BARE:
-//        dataPat->Init(lbaDataSize);
-        dataPat->InitAlignment(lbaDataSize, lbaDataSize);
+        dataPat->InitAlignment(lbaDataSize);
         break;
     case Informative::NS_METAS:
-//        dataPat->Init(lbaDataSize);
-        dataPat->InitAlignment(lbaDataSize, lbaDataSize);
+        dataPat->InitAlignment(lbaDataSize);
         if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
             throw FrmwkEx(HERE);
         writeCmd->AllocMetaBuffer();
         break;
     case Informative::NS_METAI:
-//        dataPat->Init(lbaDataSize + lbaFormat.MS);
-        dataPat->InitAlignment((lbaDataSize + lbaFormat.MS), lbaDataSize);
+        dataPat->InitAlignment(lbaDataSize + lbaFormat.MS);
         break;
     case Informative::NS_E2ES:
     case Informative::NS_E2EI:
@@ -205,7 +202,7 @@ IOQRollChkSame_r10b::ReapAndVerifyCE(SharedIOCQPtr iocq, uint32_t expectedVal)
     uint32_t isrCount;
 
     LOG_NRM("Wait for the CE to arrive in IOCQ %d", iocq->GetQId());
-    if (iocq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE, isrCount)
+    if (iocq->ReapInquiryWaitSpecify(CALC_TIMEOUT_ms(1), 1, numCE, isrCount)
         == false) {
 
         iocq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "iocq",

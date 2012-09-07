@@ -90,8 +90,13 @@ UnsupportRsvdFields_r10b::RunnableCoreTest(bool preserve)
     }
 
     LOG_NRM("Reporting runnable (oncs)%ld", oncs);
+
+    if (gCmdLine.rsvdfields == false)
+        return RUN_FALSE;   // Optional rsvd fields test skipped.
+
     preserve = preserve;    // Suppress compiler error/warning
     return RUN_TRUE;        // This test is never destructive
+
 }
 
 
@@ -127,7 +132,7 @@ UnsupportRsvdFields_r10b::RunCoreTest()
         RangeDef *rangeDef = (RangeDef *)rangeMem->GetBuffer();
         rangeDef->length = 1;
 
-        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
+        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq, iocq,
             datasetMgmtCmd, "none.set", true);
 
         LOG_NRM("Set all cmd's rsvd bits");
@@ -156,7 +161,7 @@ UnsupportRsvdFields_r10b::RunCoreTest()
         datasetMgmtCmd->SetDword(0xffffffff, 14);
         datasetMgmtCmd->SetDword(0xffffffff, 15);
 
-        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
+        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq, iocq,
             datasetMgmtCmd, "all.set", true);
     }
 }

@@ -158,12 +158,12 @@ NLBABare_r10b::RunCoreTest()
                 LOG_NRM("Processing LBA #%ld of %ld", nLBA, maxWrBlks);
                 if (nLBA > maxWrBlks)
                     break;
-                writeMem->Init(nLBA * lbaDataSize);
+                writeMem->InitAlignment(nLBA * lbaDataSize);
                 writeCmd->SetPrpBuffer(prpBitmask, writeMem);
                 writeCmd->SetNLB(nLBA - 1); // 0 based value.
                 writeMem->SetDataPattern(dataPat[(nLBA - 1) % dpArrSize], nLBA);
 
-                readMem->Init(nLBA * lbaDataSize);
+                readMem->InitAlignment(nLBA * lbaDataSize);
                 readCmd->SetPrpBuffer(prpBitmask, readMem);
                 readCmd->SetNLB(nLBA - 1); // 0 based value.
 
@@ -172,10 +172,10 @@ NLBABare_r10b::RunCoreTest()
                     enableLog = true;
                 work = str(boost::format("NSID.%d.LBA.%ld") % bare[i] % nLBA);
 
-                IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+                IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq,
                     iocq, writeCmd, work, enableLog);
 
-                IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+                IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq,
                     iocq, readCmd, work, enableLog);
 
                 VerifyDataPat(readCmd, writeMem);

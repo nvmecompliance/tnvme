@@ -21,8 +21,6 @@ using namespace std;
 
 const uint8_t  Cmd::BITMASK_FUSE_B = 0x03;
 const uint32_t Cmd::BITMASK_FUSE_DW = (BITMASK_FUSE_B << 8);
-const uint32_t Cmd::BITMASK_CID_DW = 0xffff0000;
-
 
 
 Cmd::Cmd() :
@@ -65,7 +63,7 @@ Cmd::Init(uint8_t opcode, DataDir dataDir, uint16_t cmdSize)
 
     // Cmd buffers shall be DWORD aligned according to NVME spec., however
     // user space only has option to spec. QWORD alignment.
-    mCmdBuf->InitAlignment(cmdSize, sizeof(void *), true, 0);
+    mCmdBuf->InitAlignment(cmdSize, PRP_BUFFER_ALIGNMENT, true, 0);
     SetByte(opcode, 0, 0);
 }
 
@@ -222,11 +220,19 @@ Cmd::LogCmd() const
 }
 
 
+void
+Cmd::SetCID(uint16_t cid)
+{
+    LOG_NRM("Setting CID=0x%04X", cid);
+    SetWord(cid, 0, 1);
+}
+
+
 uint16_t
 Cmd::GetCID() const
 {
     LOG_NRM("Getting CID");
-    return (uint16_t)(GetDword(0) & BITMASK_CID_DW) >> 16;
+    return GetWord(0, 1);
 }
 
 

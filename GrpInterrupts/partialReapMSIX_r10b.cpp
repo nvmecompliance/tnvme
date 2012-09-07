@@ -151,13 +151,13 @@ PartialReapMSIX_r10b::RunCoreTest()
     gCtrlrConfig->SetIOCQES(gInformative->GetIdentifyCmdCtrlr()->
         GetValue(IDCTRLRCAP_CQES) & 0xf);
     SharedIOCQPtr iocq = Queues::CreateIOCQContigToHdw(mGrpName, mTestName,
-        DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, NUM_IOQ_ENTRY, false, "",
+        CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, NUM_IOQ_ENTRY, false, "",
         true, 0);
 
     gCtrlrConfig->SetIOSQES(gInformative->GetIdentifyCmdCtrlr()->
         GetValue(IDCTRLRCAP_SQES) & 0xf);
     SharedIOSQPtr iosq = Queues::CreateIOSQContigToHdw(mGrpName, mTestName,
-        DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, NUM_IOQ_ENTRY, false, "",
+        CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, NUM_IOQ_ENTRY, false, "",
         IOQ_ID, 0);
 
     // NOTE: We are overloading IRQ 0, it is being used by ACQ and we have
@@ -173,7 +173,7 @@ PartialReapMSIX_r10b::RunCoreTest()
         iosq->Ring();
 
         LOG_NRM("Wait for cmd to be processed");
-        if (iocq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, i, numCE,
+        if (iocq->ReapInquiryWaitSpecify(CALC_TIMEOUT_ms(1), i, numCE,
             isrCount) == false) {
 
             iocq->Dump(
@@ -221,14 +221,12 @@ PartialReapMSIX_r10b::RunCoreTest()
                     anticipatedIrqs, isrCount);
         }
 
-        // Now account for a new IRQ fired due to the pending bit being handled
+        // Now account for new IRQ's fired due to the pending bit being handled
         // by the DUT, but delay processing so that latency in handling this
         // extra IRQ is not the cause of a test failure. Rather make the
         // absence of the IRQ be the failure, thus delaying is OK.
-        if (i == 0) {
-            anticipatedIrqs++;
-            sleep(1);
-        }
+        anticipatedIrqs++;
+        sleep(1);
     }
 }
 
@@ -250,19 +248,16 @@ PartialReapMSIX_r10b::CreateCmd()
 
     switch (namspcData.type) {
     case Informative::NS_BARE:
-//        dataPat->Init(lbaDataSize);
-        dataPat->InitAlignment(lbaDataSize, lbaDataSize);
+        dataPat->InitAlignment(lbaDataSize);
         break;
     case Informative::NS_METAS:
-//        dataPat->Init(lbaDataSize);
-        dataPat->InitAlignment(lbaDataSize, lbaDataSize);
+        dataPat->InitAlignment(lbaDataSize);
         if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
             throw FrmwkEx(HERE);
         writeCmd->AllocMetaBuffer();
         break;
     case Informative::NS_METAI:
-//        dataPat->Init(lbaDataSize + lbaFormat.MS);
-        dataPat->InitAlignment(lbaDataSize + lbaFormat.MS, lbaDataSize);
+        dataPat->InitAlignment(lbaDataSize + lbaFormat.MS);
         break;
     case Informative::NS_E2ES:
     case Informative::NS_E2EI:

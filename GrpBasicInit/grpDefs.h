@@ -28,7 +28,7 @@ namespace GrpBasicInit {
 #define IOCQ_DISCONTIG_GROUP_ID     "IOCQDiscontig"
 #define IOSQ_DISCONTIG_GROUP_ID     "IOSQDiscontig"
 
-#define DEFAULT_CMD_WAIT_ms         SYSTEMWIDE_CMD_WAIT_ms
+
 }   // namespace
 
 #endif

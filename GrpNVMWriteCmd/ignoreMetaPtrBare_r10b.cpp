@@ -108,7 +108,7 @@ IgnoreMetaPtrBare_r10b::RunCoreTest()
         LOG_NRM("Setup write cmd's values that won't change per namspc");
         SharedMemBufferPtr writeMem = SharedMemBufferPtr(new MemBuffer());
         uint64_t lbaDataSize = namSpcPtr->GetLBADataSize();
-        writeMem->Init(lbaDataSize);
+        writeMem->InitAlignment(lbaDataSize);
 
         SharedWritePtr writeCmd = SharedWritePtr(new Write());
         send_64b_bitmask prpBitmask = (send_64b_bitmask)
@@ -123,7 +123,7 @@ IgnoreMetaPtrBare_r10b::RunCoreTest()
 
         writeCmd->SetNSID(bare[i]);
         work = str(boost::format("namspc%d") % bare[i]);
-        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
+        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq, iocq,
             writeCmd, work, true);
     }
 }

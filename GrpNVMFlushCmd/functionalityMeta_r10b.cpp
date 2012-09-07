@@ -178,8 +178,8 @@ FunctionalityMeta_r10b::RunCoreTest()
                 throw FrmwkEx(HERE);
             LOG_NRM("Max rd/wr blks %ld using separate meta buff of ncap %ld",
                 maxWrBlks, ncap);
-            writeMem->Init(maxWrBlks * lbaDataSize);
-            readMem->Init(maxWrBlks * lbaDataSize);
+            writeMem->InitAlignment(maxWrBlks * lbaDataSize);
+            readMem->InitAlignment(maxWrBlks * lbaDataSize);
             writeCmd->AllocMetaBuffer();
             readCmd->AllocMetaBuffer();
             break;
@@ -187,8 +187,8 @@ FunctionalityMeta_r10b::RunCoreTest()
             maxWrBlks = maxDtXferSz / (lbaDataSize + lbaFormat.MS);
             LOG_NRM("Max rd/wr blks %ld using integrated meta buff of ncap %ld",
                 maxWrBlks, ncap);
-            writeMem->Init(maxWrBlks * (lbaDataSize + lbaFormat.MS));
-            readMem->Init(maxWrBlks * (lbaDataSize + lbaFormat.MS));
+            writeMem->InitAlignment(maxWrBlks * (lbaDataSize + lbaFormat.MS));
+            readMem->InitAlignment(maxWrBlks * (lbaDataSize + lbaFormat.MS));
             break;
         case Informative::NS_E2ES:
         case Informative::NS_E2EI:
@@ -231,13 +231,13 @@ FunctionalityMeta_r10b::RunCoreTest()
             work = str(boost::format("metaID.%d.SLBA.%ld") % meta[i] % sLBA);
 
             LOG_NRM("Sending write and read commands through ioq's");
-            IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+            IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq,
                 iocq, writeCmd, work, enableLog);
 
-            IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+            IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq,
                 iocq, flushCmd, work, enableLog);
 
-            IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+            IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq,
                 iocq, readCmd, work, enableLog);
 
             VerifyDataPat(readCmd, writeCmd, metaBuffSz);
@@ -302,20 +302,20 @@ FunctionalityMeta_r10b::CreateIOQs(SharedASQPtr asq, SharedACQPtr acq,
         SharedMemBufferPtr iocqBackedMem = SharedMemBufferPtr(new MemBuffer());
         iocqBackedMem->InitOffset1stPage((numEntries * (1 << iocqes)), 0, true);
         iocq = Queues::CreateIOCQDiscontigToHdw(mGrpName, mTestName,
-            DEFAULT_CMD_WAIT_ms, asq, acq, ioqId, numEntries,
+            CALC_TIMEOUT_ms(1), asq, acq, ioqId, numEntries,
             false, IOCQ_GROUP_ID, true, 0, iocqBackedMem);
 
         SharedMemBufferPtr iosqBackedMem = SharedMemBufferPtr(new MemBuffer());
         iosqBackedMem->InitOffset1stPage((numEntries * (1 << iosqes)), 0,true);
         iosq = Queues::CreateIOSQDiscontigToHdw(mGrpName, mTestName,
-            DEFAULT_CMD_WAIT_ms, asq, acq, ioqId, numEntries, false,
+            CALC_TIMEOUT_ms(1), asq, acq, ioqId, numEntries, false,
             IOSQ_GROUP_ID, ioqId, 0, iosqBackedMem);
     } else {
         iocq = Queues::CreateIOCQContigToHdw(mGrpName, mTestName,
-            DEFAULT_CMD_WAIT_ms, asq, acq, ioqId, numEntries, false,
+            CALC_TIMEOUT_ms(1), asq, acq, ioqId, numEntries, false,
             IOCQ_GROUP_ID, true, 0);
         iosq = Queues::CreateIOSQContigToHdw(mGrpName, mTestName,
-            DEFAULT_CMD_WAIT_ms, asq, acq, ioqId, numEntries, false,
+            CALC_TIMEOUT_ms(1), asq, acq, ioqId, numEntries, false,
             IOSQ_GROUP_ID, ioqId, 0);
     }
 }
@@ -337,13 +337,13 @@ FunctionalityMeta_r10b::ResizeDataBuf(SharedReadPtr &readCmd,
         throw FrmwkEx(HERE, "Namspc type cannot be BARE.");
     case Informative::NS_METAS:
         LOG_NRM("Resized max rd/wr blks to %ld for separate meta", maxWrBlks);
-        writeMem->Init(maxWrBlks * lbaDataSize);
-        readMem->Init(maxWrBlks * lbaDataSize);
+        writeMem->InitAlignment(maxWrBlks * lbaDataSize);
+        readMem->InitAlignment(maxWrBlks * lbaDataSize);
         break;
     case Informative::NS_METAI:
         LOG_NRM("Resized max rd/wr blks to %ld for integrated meta", maxWrBlks);
-        writeMem->Init(maxWrBlks * (lbaDataSize + lbaFormat.MS));
-        readMem->Init(maxWrBlks * (lbaDataSize + lbaFormat.MS));
+        writeMem->InitAlignment(maxWrBlks * (lbaDataSize + lbaFormat.MS));
+        readMem->InitAlignment(maxWrBlks * (lbaDataSize + lbaFormat.MS));
         break;
     case Informative::NS_E2ES:
     case Informative::NS_E2EI:

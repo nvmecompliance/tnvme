@@ -83,7 +83,9 @@ UnsupportRsvdFields_r10b::RunnableCoreTest(bool preserve)
     // changes that will not be restored after a cold hard reset.
     ///////////////////////////////////////////////////////////////////////////
 
-    return ((preserve == true) ? RUN_FALSE : RUN_TRUE);   // Test is destructive
+    if ((preserve == false) && gCmdLine.rsvdfields)
+        return RUN_TRUE;
+    return RUN_FALSE;    // Optional test skipped or is destructive
 }
 
 
@@ -101,7 +103,7 @@ UnsupportRsvdFields_r10b::RunCoreTest()
     SharedIOCQPtr iocq = CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_GROUP_ID));
 
     SharedWritePtr writeCmd = CreateCmd();
-    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
+    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq, iocq,
         writeCmd, "none.set", true);
 
     LOG_NRM("Set all cmd's rsvd bits");
@@ -120,7 +122,7 @@ UnsupportRsvdFields_r10b::RunCoreTest()
     work |= 0xffffff00;     // Set DW13_b31:8 bits
     writeCmd->SetDword(work, 13);
 
-    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
+    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq, iocq,
         writeCmd, "all.set", true);
 }
 
@@ -142,16 +144,16 @@ UnsupportRsvdFields_r10b::CreateCmd()
 
     switch (namspcData.type) {
     case Informative::NS_BARE:
-        dataPat->Init(lbaDataSize);
+        dataPat->InitAlignment(lbaDataSize);
         break;
     case Informative::NS_METAS:
-        dataPat->Init(lbaDataSize);
+        dataPat->InitAlignment(lbaDataSize);
         if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
             throw FrmwkEx(HERE);
         writeCmd->AllocMetaBuffer();
         break;
     case Informative::NS_METAI:
-        dataPat->Init(lbaDataSize + lbaFormat.MS);
+        dataPat->InitAlignment(lbaDataSize + lbaFormat.MS);
         break;
     case Informative::NS_E2ES:
     case Informative::NS_E2EI:

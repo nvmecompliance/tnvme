@@ -143,13 +143,13 @@ ProtInfoIgnoreMeta_r10b::RunCoreTest()
         case Informative::NS_BARE:
             throw FrmwkEx(HERE, "Namspc type cannot be BARE.");
         case Informative::NS_METAS:
-            readMem->Init(lbaDataSize);
+            readMem->InitAlignment(lbaDataSize);
             if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
                 throw FrmwkEx(HERE);
             readCmd->AllocMetaBuffer();
             break;
         case Informative::NS_METAI:
-            readMem->Init(lbaDataSize + lbaFormat.MS);
+            readMem->InitAlignment(lbaDataSize + lbaFormat.MS);
             break;
         case Informative::NS_E2ES:
         case Informative::NS_E2EI:
@@ -169,7 +169,7 @@ ProtInfoIgnoreMeta_r10b::RunCoreTest()
 
             context = str(boost::format("ns%d.protInfo0x%02X") %
                 (uint32_t)i % protInfo);
-            IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+            IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq,
                 iocq, readCmd, context, true);
         }
     }
@@ -195,20 +195,20 @@ ProtInfoIgnoreMeta_r10b::CreateIOQs(SharedASQPtr asq, SharedACQPtr acq,
         SharedMemBufferPtr iocqBackedMem = SharedMemBufferPtr(new MemBuffer());
         iocqBackedMem->InitOffset1stPage((numEntries * (1 << iocqes)), 0, true);
         iocq = Queues::CreateIOCQDiscontigToHdw(mGrpName, mTestName,
-            DEFAULT_CMD_WAIT_ms, asq, acq, ioqId, numEntries,
+            CALC_TIMEOUT_ms(1), asq, acq, ioqId, numEntries,
             false, IOCQ_GROUP_ID, true, 0, iocqBackedMem);
 
         SharedMemBufferPtr iosqBackedMem = SharedMemBufferPtr(new MemBuffer());
         iosqBackedMem->InitOffset1stPage((numEntries * (1 << iosqes)), 0,true);
         iosq = Queues::CreateIOSQDiscontigToHdw(mGrpName, mTestName,
-            DEFAULT_CMD_WAIT_ms, asq, acq, ioqId, numEntries, false,
+            CALC_TIMEOUT_ms(1), asq, acq, ioqId, numEntries, false,
             IOSQ_GROUP_ID, ioqId, 0, iosqBackedMem);
     } else {
         iocq = Queues::CreateIOCQContigToHdw(mGrpName, mTestName,
-            DEFAULT_CMD_WAIT_ms, asq, acq, ioqId, numEntries, false,
+            CALC_TIMEOUT_ms(1), asq, acq, ioqId, numEntries, false,
             IOCQ_GROUP_ID, true, 0);
         iosq = Queues::CreateIOSQContigToHdw(mGrpName, mTestName,
-            DEFAULT_CMD_WAIT_ms, asq, acq, ioqId, numEntries, false,
+            CALC_TIMEOUT_ms(1), asq, acq, ioqId, numEntries, false,
             IOSQ_GROUP_ID, ioqId, 0);
     }
 }

@@ -116,7 +116,7 @@ InvalidNamspc_r10b::RunCoreTest()
             (unsigned long long)i);
         flushCmd->SetNSID(i);
         work = str(boost::format("namspc%d") % i);
-        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq,
             iocq, flushCmd, work, true, CESTAT_INVAL_NAMSPC);
     }
 }

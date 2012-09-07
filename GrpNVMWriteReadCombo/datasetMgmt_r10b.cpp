@@ -127,20 +127,20 @@ DatasetMgmt_r10b::RunCoreTest()
 
     switch (namspcData.type) {
     case Informative::NS_BARE:
-        writeMem->Init(lbaDataSize);
-        readMem->Init(lbaDataSize);
+        writeMem->InitAlignment(lbaDataSize);
+        readMem->InitAlignment(lbaDataSize);
         break;
     case Informative::NS_METAS:
-        writeMem->Init(lbaDataSize);
-        readMem->Init(lbaDataSize);
+        writeMem->InitAlignment(lbaDataSize);
+        readMem->InitAlignment(lbaDataSize);
         if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
             throw FrmwkEx(HERE);
         writeCmd->AllocMetaBuffer();
         readCmd->AllocMetaBuffer();
         break;
     case Informative::NS_METAI:
-        writeMem->Init(lbaDataSize + lbaFormat.MS);
-        readMem->Init(lbaDataSize + lbaFormat.MS);
+        writeMem->InitAlignment(lbaDataSize + lbaFormat.MS);
+        readMem->InitAlignment(lbaDataSize + lbaFormat.MS);
         break;
     case Informative::NS_E2ES:
     case Informative::NS_E2EI:
@@ -189,10 +189,10 @@ DatasetMgmt_r10b::RunCoreTest()
         readCmd->SetByte((uint8_t)dsmAtr, 13, 0);
 
         work = str(boost::format("dsm.%Xh") % dsmAtr);
-        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq,
             iocq, writeCmd, work, true);
 
-        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq,
             iocq, readCmd, work, true);
 
         VerifyDataPat(readCmd, writeCmd);

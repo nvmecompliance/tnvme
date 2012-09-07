@@ -114,7 +114,7 @@ InvalidNamspc_r10b::RunCoreTest()
     LOG_NRM("Setup write cmd's values that won't change per namspc");
     SharedMemBufferPtr writeMem = SharedMemBufferPtr(new MemBuffer());
     uint64_t lbaDataSize = 512;
-    writeMem->Init(lbaDataSize);
+    writeMem->InitAlignment(lbaDataSize);
 
     SharedWritePtr writeCmd = SharedWritePtr(new Write());
     send_64b_bitmask prpBitmask = (send_64b_bitmask)
@@ -158,7 +158,7 @@ InvalidNamspc_r10b::SendCmdToHdw(SharedSQPtr sq, SharedCQPtr cq,
     sq->Ring();
 
     LOG_NRM("Wait for the CE to arrive in CQ %d", cq->GetQId());
-    if (cq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE, isrCount)
+    if (cq->ReapInquiryWaitSpecify(CALC_TIMEOUT_ms(1), 1, numCE, isrCount)
         == false) {
 
         work = str(boost::format(

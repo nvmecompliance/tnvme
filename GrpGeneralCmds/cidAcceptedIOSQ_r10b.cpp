@@ -173,25 +173,25 @@ CIDAcceptedIOSQ_r10b::InitTstRsrcs(SharedASQPtr asq, SharedACQPtr acq,
         iocqMem->InitOffset1stPage((nEntriesIOQ * (1 << iocqes)), 0, true);
 
         iocq = Queues::CreateIOCQDiscontigToHdw(mGrpName, mTestName,
-            DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, nEntriesIOQ, false,
+            CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, nEntriesIOQ, false,
             IOCQ_GROUP_ID, true, 1, iocqMem);
 
         for (uint32_t iosqId = 1; iosqId <= numIOSQs; iosqId++) {
             SharedMemBufferPtr iosqMem = SharedMemBufferPtr(new MemBuffer());
             iosqMem->InitOffset1stPage((nEntriesIOQ * (1 << iosqes)), 0, true);
             iosq = Queues::CreateIOSQDiscontigToHdw(mGrpName, mTestName,
-                DEFAULT_CMD_WAIT_ms, asq, acq, iosqId, nEntriesIOQ, false,
+                CALC_TIMEOUT_ms(1), asq, acq, iosqId, nEntriesIOQ, false,
                 IOSQ_GROUP_ID, IOQ_ID, 0, iosqMem);
             iosqs.push_back(iosq);
         }
     } else {
        iocq = Queues::CreateIOCQContigToHdw(mGrpName, mTestName,
-           DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, nEntriesIOQ, false,
+           CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, nEntriesIOQ, false,
            IOCQ_GROUP_ID, true, 1);
 
        for (uint32_t iosqId = 1; iosqId <= numIOSQs; iosqId++) {
            iosq = Queues::CreateIOSQContigToHdw(mGrpName, mTestName,
-               DEFAULT_CMD_WAIT_ms, asq, acq, iosqId, nEntriesIOQ, false,
+               CALC_TIMEOUT_ms(1), asq, acq, iosqId, nEntriesIOQ, false,
                IOSQ_GROUP_ID, IOQ_ID, 0);
            iosqs.push_back(iosq);
        }
@@ -214,16 +214,16 @@ CIDAcceptedIOSQ_r10b::CreateWriteCmd()
 
     switch (namspcData.type) {
     case Informative::NS_BARE:
-        wrMemBuf->Init(lbaDataSize);
+        wrMemBuf->InitAlignment(lbaDataSize);
         break;
     case Informative::NS_METAS:
-        wrMemBuf->Init(lbaDataSize);
+        wrMemBuf->InitAlignment(lbaDataSize);
         if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
             throw FrmwkEx(HERE);
         writeCmd->AllocMetaBuffer();
         break;
     case Informative::NS_METAI:
-        wrMemBuf->Init(lbaDataSize + lbaFormat.MS);
+        wrMemBuf->InitAlignment(lbaDataSize + lbaFormat.MS);
         break;
     case Informative::NS_E2ES:
     case Informative::NS_E2EI:
@@ -247,7 +247,7 @@ CIDAcceptedIOSQ_r10b::ReapVerifyCID(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
     uint32_t numReaped;
     uint32_t numCE;
 
-    if (iocq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE,
+    if (iocq->ReapInquiryWaitSpecify(CALC_TIMEOUT_ms(1), 1, numCE,
         isrCount) == false) {
         iocq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "iocq.fail"),
             "Dump Entire IOCQ");

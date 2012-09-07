@@ -57,6 +57,8 @@ public:
         OBJ_FWACTIVATE,         // Admin cmd set; FW activate cmd
         OBJ_FWIMGDNLD,          // Admin cmd set; FW image download cmd
         OBJ_FORMATNVM,          // Admin cmd set; format NVM cmd
+        OBJ_SECURITYSEND,       // NVM cmd set; security send cmd
+        OBJ_SECURITYRCV,        // NVM cmd set; security receive cmd
         OBJ_NVMCMD,             // NVM cmd set; non descriptive general cmd
         OBJ_WRITE,              // NVM cmd set; write cmd
         OBJ_READ,               // NVM cmd set; write cmd

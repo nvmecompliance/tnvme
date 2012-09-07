@@ -105,6 +105,17 @@ public:
     static void ValidateDetailed(union CE &ce, StatbyBits &status);
 
     /**
+     * Peeks at the status field of the CE, when the supplied expected status
+     * is what is contained with the supplied CE it will return true,
+     * otherwise it will return false.
+     * @note This method never throws
+     * @param ce Pass the CE to perform the interrogation against
+     * @param status Pass the expected state of the CE to verify with
+     * @return true upon success, otherwise false.
+     */
+    static bool ValidatePeek(union CE &ce, CEStat status = CESTAT_SUCCESS);
+
+    /**
      * Indicate the status of the CE in the log file, i.e. stderr.
      * @note This method may throw
      */

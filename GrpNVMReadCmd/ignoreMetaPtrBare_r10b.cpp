@@ -110,7 +110,7 @@ IgnoreMetaPtrBare_r10b::RunCoreTest()
         LOG_NRM("Setup read cmd's values that won't change per namspc");
         SharedMemBufferPtr readMem = SharedMemBufferPtr(new MemBuffer());
         uint64_t lbaDataSize = namSpcPtr->GetLBADataSize();
-        readMem->Init(lbaDataSize);
+        readMem->InitAlignment(lbaDataSize);
 
         SharedReadPtr readCmd = SharedReadPtr(new Read());
         send_64b_bitmask prpBitmask = (send_64b_bitmask)
@@ -125,7 +125,7 @@ IgnoreMetaPtrBare_r10b::RunCoreTest()
 
         readCmd->SetNSID(bare[i]);
         work = str(boost::format("namspc%d") % bare[i]);
-        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
+        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq, iocq,
             readCmd, work, true);
     }
 }

@@ -139,7 +139,7 @@ CreateResources_r10b::RunCoreTest()
              iocqBackedMem->InitOffset1stPage
                  ((numEntriesIOQ * (1 << iocqes)), 0, true);
              Queues::CreateIOCQDiscontigToHdw(mGrpName, mTestName,
-                 DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, numEntriesIOQ, true,
+                 CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, numEntriesIOQ, true,
                  IOCQ_GROUP_ID, true, 1, iocqBackedMem);
 
              SharedMemBufferPtr iosqBackedMem =
@@ -147,15 +147,15 @@ CreateResources_r10b::RunCoreTest()
              iosqBackedMem->InitOffset1stPage
                  ((numEntriesIOQ * (1 << iosqes)), 0, true);
              Queues::CreateIOSQDiscontigToHdw(mGrpName, mTestName,
-                 DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, numEntriesIOQ, true,
+                 CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, numEntriesIOQ, true,
                  IOSQ_GROUP_ID, IOQ_ID, 0, iosqBackedMem);
          } else {
             Queues::CreateIOCQContigToHdw(mGrpName, mTestName,
-                DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, numEntriesIOQ, true,
+                CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, numEntriesIOQ, true,
                 IOCQ_GROUP_ID, true, 1);
 
             Queues::CreateIOSQContigToHdw(mGrpName, mTestName,
-                DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, numEntriesIOQ, true,
+                CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, numEntriesIOQ, true,
                 IOSQ_GROUP_ID, IOQ_ID, 0);
          }
     }

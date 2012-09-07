@@ -123,17 +123,17 @@ AcceptQPriority_r10b::RunCoreTest()
 
     LOG_NRM("Create IOCQ with QID = %d", IOQ_ID);
     SharedIOCQPtr iocq = Queues::CreateIOCQContigToHdw(mGrpName, mTestName,
-        DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, maxIOQEntries, false,
+        CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, maxIOQEntries, false,
         IOCQ_GROUP_ID, true, 0);
 
     for (uint8_t priority = 0; priority < PRIORITY_RANGE; priority++) {
         LOG_NRM("Create IOSQ with QID = %d and priority #%d", IOQ_ID, priority);
         SharedIOSQPtr iosq = Queues::CreateIOSQContigToHdw(mGrpName,
-            mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, maxIOQEntries,
+            mTestName, CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, maxIOQEntries,
             false, IOSQ_GROUP_ID, IOQ_ID, priority);
 
         LOG_NRM("Delete IOSQ with QID = %d and priority #%d", IOQ_ID, priority);
-        Queues::DeleteIOSQToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+        Queues::DeleteIOSQToHdw(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq,
             asq, acq, "", false);
     }
 }

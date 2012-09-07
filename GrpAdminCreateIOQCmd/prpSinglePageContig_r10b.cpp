@@ -170,11 +170,11 @@ PRPSinglePageContig_r10b::RunCoreTest()
     gCtrlrConfig->SetIOSQES(iosqes);
 
     SharedIOCQPtr iocq = Queues::CreateIOCQContigToHdw(mGrpName, mTestName,
-        DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, Y, true,
+        CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, Y, true,
         IOCQ_GROUP_ID, true, 0);
 
     SharedIOSQPtr iosq = Queues::CreateIOSQContigToHdw(mGrpName, mTestName,
-        DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, Z, true,
+        CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, Z, true,
         IOSQ_GROUP_ID, IOQ_ID, 0);
 
     SharedWritePtr writeCmd = SharedWritePtr(new Write());
@@ -188,20 +188,20 @@ PRPSinglePageContig_r10b::RunCoreTest()
 
     switch (namspcData.type) {
     case Informative::NS_BARE:
-        writeMem->Init(lbaDataSize);
-        readMem->Init(lbaDataSize);
+        writeMem->InitAlignment(lbaDataSize);
+        readMem->InitAlignment(lbaDataSize);
         break;
     case Informative::NS_METAS:
-        writeMem->Init(lbaDataSize);
-        readMem->Init(lbaDataSize);
+        writeMem->InitAlignment(lbaDataSize);
+        readMem->InitAlignment(lbaDataSize);
         if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
             throw FrmwkEx(HERE);
         writeCmd->AllocMetaBuffer();
         readCmd->AllocMetaBuffer();
         break;
     case Informative::NS_METAI:
-        writeMem->Init(lbaDataSize + lbaFormat.MS);
-        readMem->Init(lbaDataSize + lbaFormat.MS);
+        writeMem->InitAlignment(lbaDataSize + lbaFormat.MS);
+        readMem->InitAlignment(lbaDataSize + lbaFormat.MS);
         break;
     case Informative::NS_E2ES:
     case Informative::NS_E2EI:
@@ -242,10 +242,10 @@ PRPSinglePageContig_r10b::RunCoreTest()
             enableLog = true;
 
         work = str(boost::format("X.%d") % X);
-        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq,
             iocq, writeCmd, work, enableLog);
 
-        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq,
             iocq, readCmd, work, enableLog);
 
         VerifyDataPat(readCmd, writeCmd);

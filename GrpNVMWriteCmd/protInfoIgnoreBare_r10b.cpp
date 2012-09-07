@@ -108,7 +108,7 @@ ProtInfoIgnoreBare_r10b::RunCoreTest()
         LOG_NRM("Create memory to contain write payload");
         SharedMemBufferPtr writeMem = SharedMemBufferPtr(new MemBuffer());
         uint64_t lbaDataSize = namSpcPtr->GetLBADataSize();
-        writeMem->Init(lbaDataSize);
+        writeMem->InitAlignment(lbaDataSize);
 
         LOG_NRM("Create a write cmd to read data from namspc %d", bare[i]);
         SharedWritePtr writeCmd = SharedWritePtr(new Write());
@@ -126,7 +126,7 @@ ProtInfoIgnoreBare_r10b::RunCoreTest()
 
             snprintf(context, sizeof(context), "ns%d.protInfo0x%02X",
                 (uint32_t)i, protInfo);
-            IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+            IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq,
                 iocq, writeCmd, context, true);
         }
     }

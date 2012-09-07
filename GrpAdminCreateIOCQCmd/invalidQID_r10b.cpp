@@ -140,7 +140,7 @@ InvalidQID_r10b::RunCoreTest()
             enableLog = true;
 
         LOG_NRM("Send and reap cmd with CQ ID #%d", *qId);
-        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
+        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
             createIOCQCmd, work, enableLog, CESTAT_INVALID_QID);
     }
 }

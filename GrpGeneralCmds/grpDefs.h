@@ -27,7 +27,6 @@ namespace GrpGeneralCmds {
 #define IOSQ_GROUP_ID               "IOSQ"
 #define IOQ_ID                      1
 
-#define DEFAULT_CMD_WAIT_ms         (SYSTEMWIDE_CMD_WAIT_ms * 2)
 }   // namespace
 
 #endif

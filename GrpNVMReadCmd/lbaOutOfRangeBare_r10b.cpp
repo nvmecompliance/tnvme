@@ -115,7 +115,7 @@ LBAOutOfRangeBare_r10b::RunCoreTest()
         LOG_NRM("Create memory to contain read payload");
         SharedMemBufferPtr readMem = SharedMemBufferPtr(new MemBuffer());
         uint64_t lbaDataSize = namSpcPtr->GetLBADataSize();
-        readMem->Init(RD_NUM_BLKS * lbaDataSize);
+        readMem->InitAlignment(RD_NUM_BLKS * lbaDataSize);
 
         LOG_NRM("Create a read cmd to read data from namspc %d", bare[i]);
         SharedReadPtr readCmd = SharedReadPtr(new Read());
@@ -128,7 +128,7 @@ LBAOutOfRangeBare_r10b::RunCoreTest()
         LOG_NRM("Issue cmd where 1st block starts at LBA (Identify.NSZE-2)");
         snprintf(work, sizeof(work), "nsze-2.%01d", (uint32_t)i);
         readCmd->SetSLBA(nsze - 2);
-        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq,
             iocq, readCmd, work, true);
 
         LOG_NRM("Issue cmd where 1st block starts at LBA (Identify.NSZE-1)");
@@ -173,7 +173,7 @@ LBAOutOfRangeBare_r10b::SendCmdToHdw(SharedSQPtr sq, SharedCQPtr cq,
 
 
     LOG_NRM("Wait for the CE to arrive in CQ %d", cq->GetQId());
-    if (cq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE, isrCount)
+    if (cq->ReapInquiryWaitSpecify(CALC_TIMEOUT_ms(1), 1, numCE, isrCount)
         == false) {
 
         work = str(boost::format(

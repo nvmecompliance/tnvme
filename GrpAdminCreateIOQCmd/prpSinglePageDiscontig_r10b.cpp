@@ -178,13 +178,13 @@ PRPSinglePageDiscontig_r10b::RunCoreTest()
     SharedMemBufferPtr iocqBackedMem = SharedMemBufferPtr(new MemBuffer());
     iocqBackedMem->InitOffset1stPage((Y * (1 << iocqes)), 0, true);
     SharedIOCQPtr iocq = Queues::CreateIOCQDiscontigToHdw(mGrpName, mTestName,
-        DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, Y, false, IOCQ_GROUP_ID,
+        CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, Y, false, IOCQ_GROUP_ID,
         true, 0, iocqBackedMem);
 
     SharedMemBufferPtr iosqBackedMem = SharedMemBufferPtr(new MemBuffer());
     iosqBackedMem->InitOffset1stPage((Z * (1 << iosqes)), 0,true);
     SharedIOSQPtr iosq = Queues::CreateIOSQDiscontigToHdw(mGrpName, mTestName,
-        DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, Z, false, IOSQ_GROUP_ID,
+        CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, Z, false, IOSQ_GROUP_ID,
         IOQ_ID, 0, iosqBackedMem);
 
     SharedWritePtr writeCmd = SharedWritePtr(new Write());
@@ -198,20 +198,20 @@ PRPSinglePageDiscontig_r10b::RunCoreTest()
 
     switch (namspcData.type) {
     case Informative::NS_BARE:
-        writeMem->Init(lbaDataSize);
-        readMem->Init(lbaDataSize);
+        writeMem->InitAlignment(lbaDataSize);
+        readMem->InitAlignment(lbaDataSize);
         break;
     case Informative::NS_METAS:
-        writeMem->Init(lbaDataSize);
-        readMem->Init(lbaDataSize);
+        writeMem->InitAlignment(lbaDataSize);
+        readMem->InitAlignment(lbaDataSize);
         if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
             throw FrmwkEx(HERE);
         writeCmd->AllocMetaBuffer();
         readCmd->AllocMetaBuffer();
         break;
     case Informative::NS_METAI:
-        writeMem->Init(lbaDataSize + lbaFormat.MS);
-        readMem->Init(lbaDataSize + lbaFormat.MS);
+        writeMem->InitAlignment(lbaDataSize + lbaFormat.MS);
+        readMem->InitAlignment(lbaDataSize + lbaFormat.MS);
         break;
     case Informative::NS_E2ES:
     case Informative::NS_E2EI:
@@ -252,10 +252,10 @@ PRPSinglePageDiscontig_r10b::RunCoreTest()
             enableLog = true;
 
         work = str(boost::format("X.%d") % X);
-        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq,
             iocq, writeCmd, work, enableLog);
 
-        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq,
             iocq, readCmd, work, enableLog);
 
         VerifyDataPat(readCmd, writeCmd);

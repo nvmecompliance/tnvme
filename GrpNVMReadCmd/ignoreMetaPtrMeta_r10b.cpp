@@ -111,7 +111,7 @@ IgnoreMetaPtrMeta_r10b::RunCoreTest()
         SharedMemBufferPtr readMem = SharedMemBufferPtr(new MemBuffer());
         uint64_t lbaDataSize = namSpcPtr->GetLBADataSize();
         LBAFormat lbaFormat = namSpcPtr->GetLBAFormat();
-        readMem->Init(lbaDataSize + lbaFormat.MS);
+        readMem->InitAlignment(lbaDataSize + lbaFormat.MS);
 
         SharedReadPtr readCmd = SharedReadPtr(new Read());
         send_64b_bitmask prpBitmask = (send_64b_bitmask)
@@ -125,7 +125,7 @@ IgnoreMetaPtrMeta_r10b::RunCoreTest()
 
         readCmd->SetNSID(imeta[i]);
         work = str(boost::format("namspc%d") % imeta[i]);
-        IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq, iocq,
+        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq, iocq,
             readCmd, work, true);
     }
 }

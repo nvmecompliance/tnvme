@@ -84,8 +84,9 @@ UnsupportRsvdFields_r10b::RunnableCoreTest(bool preserve)
     // configuration of the DUT. Permanence is defined as state or configuration
     // changes that will not be restored after a cold hard reset.
     ///////////////////////////////////////////////////////////////////////////
-
-    return ((preserve == true) ? RUN_FALSE : RUN_TRUE);   // Test is destructive
+    if ((preserve == false) && gCmdLine.rsvdfields)
+        return RUN_TRUE;
+    return RUN_FALSE;    // Optional test skipped or is destructive
 }
 
 
@@ -143,12 +144,12 @@ UnsupportRsvdFields_r10b::RunCoreTest()
     createIOCQCmd->SetDword(0xffffffff, 14);
     createIOCQCmd->SetDword(0xffffffff, 15);
 
-    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
+    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
         createIOCQCmd, "", true);
 
     LOG_NRM("Create the assoc IOSQ");
     SharedIOSQPtr iosq = Queues::CreateIOSQContigToHdw(mGrpName, mTestName,
-        DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, maxIOQEntries, false,
+        CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, maxIOQEntries, false,
         IOCQ_GROUP_ID, IOQ_ID, 0);
 
     WriteReadVerify(iosq, iocq);
@@ -174,20 +175,20 @@ UnsupportRsvdFields_r10b::WriteReadVerify(SharedIOSQPtr iosq,
 
     switch (namspcData.type) {
     case Informative::NS_BARE:
-        writeMem->Init(lbaDataSize);
-        readMem->Init(lbaDataSize);
+        writeMem->InitAlignment(lbaDataSize);
+        readMem->InitAlignment(lbaDataSize);
         break;
     case Informative::NS_METAS:
-        writeMem->Init(lbaDataSize);
-        readMem->Init(lbaDataSize);
+        writeMem->InitAlignment(lbaDataSize);
+        readMem->InitAlignment(lbaDataSize);
         if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
             throw FrmwkEx(HERE);
         writeCmd->AllocMetaBuffer();
         readCmd->AllocMetaBuffer();
         break;
     case Informative::NS_METAI:
-        writeMem->Init(lbaDataSize + lbaFormat.MS);
-        readMem->Init(lbaDataSize + lbaFormat.MS);
+        writeMem->InitAlignment(lbaDataSize + lbaFormat.MS);
+        readMem->InitAlignment(lbaDataSize + lbaFormat.MS);
         break;
     case Informative::NS_E2ES:
     case Informative::NS_E2EI:
@@ -220,10 +221,10 @@ UnsupportRsvdFields_r10b::WriteReadVerify(SharedIOSQPtr iosq,
         break;
     }
 
-    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq,
         iocq, writeCmd, "", true);
 
-    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, iosq,
+    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq,
         iocq, readCmd, "", true);
 
     VerifyDataPat(readCmd, writeCmd);

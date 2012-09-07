@@ -112,11 +112,11 @@ ManyCmdSubmit_r10b::RunCoreTest()
 
     LOG_NRM("Create contig IOQ's");
     SharedIOCQPtr iocq = Queues::CreateIOCQContigToHdw(mGrpName,
-        mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, maxIOQEntries,
+        mTestName, CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, maxIOQEntries,
         false, IOCQ_CONTIG_GROUP_ID, true, 0);
 
     SharedIOSQPtr iosq = Queues::CreateIOSQContigToHdw(mGrpName,
-        mTestName, DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, maxIOQEntries,
+        mTestName, CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, maxIOQEntries,
         false, IOSQ_CONTIG_GROUP_ID, IOQ_ID, 0);
 
     SharedWritePtr writeCmd = SetWriteCmd();
@@ -130,7 +130,7 @@ ManyCmdSubmit_r10b::RunCoreTest()
         iosq->Ring();
 
         // Variable wait time w.r.t "x" and expect all CE's to arrive in CQ.
-        if (iocq->ReapInquiryWaitSpecify((DEFAULT_CMD_WAIT_ms + x * 20),
+        if (iocq->ReapInquiryWaitSpecify(CALC_TIMEOUT_ms(x),
             x, numCE, isrCount) == false) {
             iocq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName,
                 "iocq.reqpinq." + writeCmd->GetName()), "Dump Entire IOCQ");
@@ -170,9 +170,9 @@ ManyCmdSubmit_r10b::RunCoreTest()
     }
 
     // Delete IOSQ before the IOCQ to comply with spec.
-    Queues::DeleteIOSQToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+    Queues::DeleteIOSQToHdw(mGrpName, mTestName, CALC_TIMEOUT_ms(1),
         iosq, asq, acq);
-    Queues::DeleteIOCQToHdw(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms,
+    Queues::DeleteIOCQToHdw(mGrpName, mTestName, CALC_TIMEOUT_ms(1),
         iocq, asq, acq);
 }
 
@@ -193,19 +193,16 @@ ManyCmdSubmit_r10b::SetWriteCmd()
 
     switch (namspcData.type) {
     case Informative::NS_BARE:
-//        dataPat->Init(lbaDataSize);
-        dataPat->InitAlignment(lbaDataSize, lbaDataSize);
+        dataPat->InitAlignment(lbaDataSize);
         break;
     case Informative::NS_METAS:
-//        dataPat->Init(lbaDataSize);
-        dataPat->InitAlignment(lbaDataSize, lbaDataSize);
+        dataPat->InitAlignment(lbaDataSize);
         if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
             throw FrmwkEx(HERE);
         writeCmd->AllocMetaBuffer();
         break;
     case Informative::NS_METAI:
-//        dataPat->Init(lbaDataSize + lbaFormat.MS);
-        dataPat->InitAlignment((lbaDataSize + lbaFormat.MS), lbaDataSize);
+        dataPat->InitAlignment(lbaDataSize + lbaFormat.MS);
         break;
     case Informative::NS_E2ES:
     case Informative::NS_E2EI:

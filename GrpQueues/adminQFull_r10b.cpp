@@ -99,7 +99,7 @@ AdminQFull_r10b::RunCoreTest()
     LOG_NRM("Force identify to request ctrlr capabilities struct");
     idCmdCtrlr->SetCNS(true);
     SharedMemBufferPtr idMemCap = SharedMemBufferPtr(new MemBuffer());
-    idMemCap->InitAlignment(Identify::IDEAL_DATA_SIZE, sizeof(uint64_t),
+    idMemCap->InitAlignment(Identify::IDEAL_DATA_SIZE, PRP_BUFFER_ALIGNMENT,
         false, 0);
     send_64b_bitmask prpReq =
         (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE);
@@ -148,7 +148,7 @@ AdminQFull_r10b::AdminQFull(uint16_t numASQEntries, uint16_t numACQEntries,
         asq->Ring();
 
         LOG_NRM("Wait for the CE to arrive in ACQ");
-        if (acq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, (nCmds + 1), numCE,
+        if (acq->ReapInquiryWaitSpecify(CALC_TIMEOUT_ms(1), (nCmds + 1), numCE,
             isrCount) == false) {
 
             // when asq size = acq size + 1, last CE will never arrive.
@@ -157,7 +157,7 @@ AdminQFull_r10b::AdminQFull(uint16_t numASQEntries, uint16_t numACQEntries,
                 // Reap one element from IOCQ to make room for last CE.
                 IO::ReapCE(acq, 1, isrCount, mGrpName, mTestName, "ACQCE",
                     CESTAT_SUCCESS);
-                if (acq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, nCmds,
+                if (acq->ReapInquiryWaitSpecify(CALC_TIMEOUT_ms(1), nCmds,
                     numCE, isrCount) == false) {
                     acq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName,
                         "acq." + idCmdCtrlr->GetName()), "Dump entire ACQ");

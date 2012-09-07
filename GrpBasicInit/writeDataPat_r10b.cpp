@@ -137,21 +137,16 @@ WriteDataPat_r10b::WriteDataPattern()
 
     switch (namspcData.type) {
     case Informative::NS_BARE:
-//        dataPat->Init(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize);
-        dataPat->InitAlignment(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize,
-            lbaDataSize);
+        dataPat->InitAlignment(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize);
         break;
     case Informative::NS_METAS:
-//        dataPat->Init(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize);
-        dataPat->InitAlignment(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize,
-            lbaDataSize);
+        dataPat->InitAlignment(WRITE_DATA_PAT_NUM_BLKS * lbaDataSize);
         writeCmd->AllocMetaBuffer();
         writeCmd->SetMetaDataPattern(DATAPAT_INC_16BIT);
         break;
     case Informative::NS_METAI:
-//        dataPat->Init(WRITE_DATA_PAT_NUM_BLKS * (lbaDataSize + lbaFormat.MS));
-        dataPat->InitAlignment(WRITE_DATA_PAT_NUM_BLKS *
-            (lbaDataSize + lbaFormat.MS), lbaDataSize);
+        dataPat->InitAlignment(
+            WRITE_DATA_PAT_NUM_BLKS * (lbaDataSize + lbaFormat.MS));
         break;
     case Informative::NS_E2ES:
     case Informative::NS_E2EI:
@@ -212,7 +207,7 @@ WriteDataPat_r10b::SendToIOSQ(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
 
 
     LOG_NRM("Wait for the CE to arrive in IOCQ");
-    if (iocq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE, isrCount)
+    if (iocq->ReapInquiryWaitSpecify(CALC_TIMEOUT_ms(1), 1, numCE, isrCount)
         == false) {
 
         iocq->Dump(

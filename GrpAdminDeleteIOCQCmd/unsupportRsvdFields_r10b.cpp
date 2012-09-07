@@ -82,6 +82,8 @@ UnsupportRsvdFields_r10b::RunnableCoreTest(bool preserve)
     // configuration of the DUT. Permanence is defined as state or configuration
     // changes that will not be restored after a cold hard reset.
     ///////////////////////////////////////////////////////////////////////////
+    if (gCmdLine.rsvdfields == false)
+        return RUN_FALSE;   // Optional rsvd fields test skipped.
 
     preserve = preserve;    // Suppress compiler error/warning
     return RUN_TRUE;        // This test is never destructive
@@ -112,18 +114,18 @@ UnsupportRsvdFields_r10b::RunCoreTest()
 
     LOG_NRM("Create IOCQ/IOSQ pairs");
     SharedIOCQPtr iocq = Queues::CreateIOCQContigToHdw(mGrpName, mTestName,
-        DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, maxIOQEntries, false,
+        CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, maxIOQEntries, false,
         IOCQ_GROUP_ID, true, 0);
 
     LOG_NRM("Delete the IOCQ");
     SharedDeleteIOCQPtr deleteIOCQCmd = SharedDeleteIOCQPtr(new DeleteIOCQ());
     deleteIOCQCmd->Init(iocq);
-    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
+    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
         deleteIOCQCmd, "", true);
 
     LOG_NRM("Recreate IOCQ");
     iocq = Queues::CreateIOCQContigToHdw(mGrpName, mTestName,
-        DEFAULT_CMD_WAIT_ms, asq, acq, IOQ_ID, maxIOQEntries, false,
+        CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, maxIOQEntries, false,
         IOCQ_GROUP_ID, true, 0);
 
     deleteIOCQCmd->Init(iocq);
@@ -153,7 +155,7 @@ UnsupportRsvdFields_r10b::RunCoreTest()
     deleteIOCQCmd->SetDword(0xffffffff, 14);
     deleteIOCQCmd->SetDword(0xffffffff, 15);
 
-    IO::SendAndReapCmd(mGrpName, mTestName, DEFAULT_CMD_WAIT_ms, asq, acq,
+    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
         deleteIOCQCmd, "", true);
 }
 

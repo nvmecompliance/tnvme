@@ -144,26 +144,20 @@ MaxIOQMSIXManyTo1_r10b::RunCoreTest()
 
     switch (namspcData.type) {
     case Informative::NS_BARE:
-//        writeMem->Init(lbaDataSize);
-//        readMem->Init(lbaDataSize);
-        writeMem->InitAlignment(lbaDataSize, lbaDataSize);
-        readMem->InitAlignment(lbaDataSize, lbaDataSize);
+        writeMem->InitAlignment(lbaDataSize);
+        readMem->InitAlignment(lbaDataSize);
         break;
     case Informative::NS_METAS:
-//        writeMem->Init(lbaDataSize);
-//        readMem->Init(lbaDataSize);
-        writeMem->InitAlignment(lbaDataSize, lbaDataSize);
-        readMem->InitAlignment(lbaDataSize, lbaDataSize);
+        writeMem->InitAlignment(lbaDataSize);
+        readMem->InitAlignment(lbaDataSize);
         if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
             throw FrmwkEx(HERE);
         writeCmd->AllocMetaBuffer();
         readCmd->AllocMetaBuffer();
         break;
     case Informative::NS_METAI:
-//        writeMem->Init(lbaDataSize + lbaFormat.MS);
-//        readMem->Init(lbaDataSize  + lbaFormat.MS);
-        writeMem->InitAlignment(lbaDataSize + lbaFormat.MS, lbaDataSize);
-        readMem->InitAlignment(lbaDataSize + lbaFormat.MS, lbaDataSize);
+        writeMem->InitAlignment(lbaDataSize + lbaFormat.MS);
+        readMem->InitAlignment(lbaDataSize  + lbaFormat.MS);
         break;
     case Informative::NS_E2ES:
     case Informative::NS_E2EI:
@@ -190,10 +184,10 @@ MaxIOQMSIXManyTo1_r10b::RunCoreTest()
     LOG_NRM("Created IOQ's and increment anticipated IRQs.");
     for (uint32_t ioqId = 1; ioqId <= numIOQPairs; ioqId++) {
         SharedIOCQPtr iocq = Queues::CreateIOCQContigToHdw(mGrpName, mTestName,
-            DEFAULT_CMD_WAIT_ms, asq, acq, ioqId, numEntries, false,
+            CALC_TIMEOUT_ms(1), asq, acq, ioqId, numEntries, false,
             IOCQ_GROUP_ID, true, 0);
         SharedIOSQPtr iosq = Queues::CreateIOSQContigToHdw(mGrpName, mTestName,
-            DEFAULT_CMD_WAIT_ms, asq, acq, ioqId, numEntries, false,
+            CALC_TIMEOUT_ms(1), asq, acq, ioqId, numEntries, false,
             IOSQ_GROUP_ID, ioqId, 0);
         iosqs.push_back(iosq);
         iocqs.push_back(iocq);
@@ -230,7 +224,7 @@ MaxIOQMSIXManyTo1_r10b::SendCmdAndReap(SharedIOSQPtr iosq, SharedIOCQPtr iocq,
     iosq->Ring();
 
     LOG_NRM("Wait for the CE to arrive in CQ %d", iocq->GetQId());
-    if (iocq->ReapInquiryWaitSpecify(DEFAULT_CMD_WAIT_ms, 1, numCE, isrCount)
+    if (iocq->ReapInquiryWaitSpecify(CALC_TIMEOUT_ms(1), 1, numCE, isrCount)
         == false) {
         iocq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "iocq.fail",
             work), "Dump Entire IOCQ");

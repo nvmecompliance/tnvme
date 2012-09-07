@@ -55,7 +55,7 @@ typedef enum PciCapabilities {
 /*     PciSpc,           cap,            offset,    size, specRev,     maskRO,             impSpec,            dfltValue,          desc */
 #define PCISPC_TABLE                                                                                                                                                                   \
     ZZ(PCISPC_ID,        PCICAP_FENCE,   0x00,      4,    SPECREV_10b, 0x00000000ffffffff, 0x00000000ffffffff, 0x0000000000000000, "PCI hdr identifier register (ID)")                 \
-    ZZ(PCISPC_CMD,       PCICAP_FENCE,   0x04,      2,    SPECREV_10b, 0x000000000000fbb8, 0x0000000000000040, 0x0000000000000000, "PCI hdr cmd register (CMD)")                       \
+    ZZ(PCISPC_CMD,       PCICAP_FENCE,   0x04,      2,    SPECREV_10b, 0x000000000000fab8, 0x0000000000000040, 0x0000000000000000, "PCI hdr cmd register (CMD)")                       \
     ZZ(PCISPC_STS,       PCICAP_FENCE,   0x06,      2,    SPECREV_10b, 0x0000000000004eff, 0x00000000000006a0, 0x0000000000000010, "PCI hdr device status register (STS)")             \
     ZZ(PCISPC_RID,       PCICAP_FENCE,   0x08,      1,    SPECREV_10b, 0x00000000000000ff, 0x00000000000000ff, 0x0000000000000000, "PCI hdr revision ID register (RID)")               \
     ZZ(PCISPC_CC,        PCICAP_FENCE,   0x09,      3,    SPECREV_10b, 0x0000000000ffffff, 0x0000000000000000, 0x0000000000010802, "PCI hdr class codes register (CC)")                \
@@ -305,7 +305,7 @@ typedef enum CAPBits {
     CAP_RES2       = 0x0000001000000000,
     CAP_DSTRD      = 0x0000000f00000000,
     CAP_TO         = 0x00000000ff000000,
-    CAP_RES3       = 0x0000000000f10000,
+    CAP_RES3       = 0x0000000000f80000,
     CAP_AMS        = 0x0000000000060000,
     CAP_CQR        = 0x0000000000010000,
     CAP_MQES       = 0x000000000000ffff

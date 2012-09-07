@@ -52,6 +52,9 @@
 #include "GrpAdminCreateIOCQCmd/grpAdminCreateIOCQCmd.h"
 #include "GrpAdminCreateIOSQCmd/grpAdminCreateIOSQCmd.h"
 #include "GrpAdminCreateIOQCmd/grpAdminCreateIOQCmd.h"
+#include "GrpAdminGetLogPgCmd/grpAdminGetLogPgCmd.h"
+#include "GrpAdminIdentifyCmd/grpAdminIdentifyCmd.h"
+
 
 void
 InstantiateGroups(vector<Group *> &groups)
@@ -79,6 +82,9 @@ InstantiateGroups(vector<Group *> &groups)
     groups.push_back(new GrpAdminCreateIOCQCmd::GrpAdminCreateIOCQCmd(groups.size()));
     groups.push_back(new GrpAdminCreateIOSQCmd::GrpAdminCreateIOSQCmd(groups.size()));
     groups.push_back(new GrpAdminCreateIOQCmd::GrpAdminCreateIOQCmd(groups.size()));
+    groups.push_back(new GrpAdminGetLogPgCmd::GrpAdminGetLogPgCmd(groups.size()));
+    // Following is assigned grp ID=20
+    groups.push_back(new GrpAdminIdentifyCmd::GrpAdminIdentifyCmd(groups.size()));
 }
 // ------------------------------EDIT HERE---------------------------------
 
@@ -125,11 +131,14 @@ Usage(void) {
     printf("  -p(--preserve)                      Preserve the current state of the DUT. Do\n");
     printf("                                      not write data on the media, nor modify\n");
     printf("                                      the configuration. Not all tests will run\n");
-    printf("  -g(--golden) <filename>             A file contains the golden identify data\n");
+    printf("  -g(--golden) <fileIn>:<fileOut>     fileIn contains the golden identify data\n");
     printf("                                      to which the DUT's reported identify data\n");
     printf("                                      is compared; Must be only option.\n");
+    printf("                                      fileOut, optional file for results output\n");
     printf("  -n(--postfail)                      Upon test failure, instruct framework to\n");
     printf("                                      take a post failure snapshot of the DUT\n");
+    printf("  -b(--rsvdfields)                    Execute the optional reserved field\n");
+    printf("                                      tests; verifying fields are zero value\n");
     printf("  -y(--restore)                       Upon test failure, allow an individual\n");
     printf("                                      test to restore the configuration of the\n");
     printf("                                      DUT as was detected at group start\n");
@@ -179,7 +188,7 @@ main(int argc, char *argv[])
     bool deviceFound = false;
     bool accessingHdw = true;
     uint64_t regVal = 0;
-    const char *short_opt = "hsnlpyzia::t::v:o:d:k:f:r:w:q:e:m:u:g:";
+    const char *short_opt = "hsnblpyzia::t::v:o:d:k:f:r:w:q:e:m:u:g:";
     static struct option long_opt[] = {
         // {name,           has_arg,            flag,   val}
         {   "detail",       optional_argument,  NULL,   'a'},
@@ -206,6 +215,7 @@ main(int argc, char *argv[])
         {   "reset",        no_argument,        NULL,   'z'},
         {   "ignore",       no_argument,        NULL,   'i'},
         {   "postfail",     no_argument,        NULL,   'n'},
+        {   "rsvdfields",   no_argument,        NULL,   'b'},
         {   NULL,           no_argument,        NULL,    0}
     };
 
@@ -384,6 +394,7 @@ main(int argc, char *argv[])
         case 'i':   gCmdLine.ignore = true;             break;
         case 'p':   gCmdLine.preserve = true;           break;
         case 'n':   gCmdLine.postfail = true;           break;
+        case 'b':   gCmdLine.rsvdfields = true;         break;
         case 'y':   gCmdLine.restore = true;            break;
         }
     }

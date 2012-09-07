@@ -1,3 +1,94 @@
+2012-9-4
+nvmecompliance_release=1.11.0 New tests, enhancements
+    1) dnvme: No changes to driver
+    2) tnvme: Enhancment, added a global constant, compile time, to align
+       buffers allocated in user space in a single place. See
+       PRP_BUFFER_ALIGNMENT.
+    3) tnvme: Enhancement, added a common macro to calc timeout values
+       on a single cmd, multi-cmd and adhere to a TO floor for QEMU. See
+       DEFAULT_CMD_WAIT_ms.
+    4) tnvme: Enhancement: Added cmd line switch -b. See
+       "https://github.com/nvmecompliance/tnvme/wiki/Command-Line-Options"
+    5) tnvme: Enhancement, added admin security cmds to the framework.
+    6) tnvme: Enhancement, RO bit test for PCI register CMD changed due to
+       an incorrect NVMe spec statement, based upon errata #29.
+
+2012-8-14
+nvmecompliance_release=1.10.0 New tests, enhancements, and bugfixs
+    1) dnvme: (bugfix) Driver unloaded could have caused a kernel core dump
+       since unmapping that which the driver didn't own would be
+       the cause.
+    2) dnvme: (bugfix) Checking for incorrect return values cause bad logic.
+    3) dnvme: (bugfix) A Linux kernel API call was passing incorrect data
+       to a function.
+    4) tnvme: (bugfix) Test GrpQueues::ManyCmdSubmit_r10b timed out for
+       some real world hdw because it didnt' factor in nomincal times
+       for present day hdw. Rather it was a guess based upon QEMU results.
+       The TO now should suffice all hdw.
+    5) tnvme: enhancement: The --golden option is now more verbose and
+       versatile.
+    6) tnvme: bugfix GrpAdminGetLogPgCmd::NUMDIsAdhered_r10b fixed a 
+       buffer offset miscalculation.
+    7) tnvme: spec misinterpretation due to a spec typo. The NVMe spec 1.0c
+       is also at fault, rather refer to NVMe errata 29. It states that
+       parital reaping from a CQ causes IRQ's to keep being issued to a
+       host using MSI-X IRQs.
+
+2012-8-6
+nvmecompliance_release=1.9.0 dnvme bugfix only
+    1) dnvme:
+      a) Fix MSI-X PBA table access:
+         MSI-X PBA table's pending bits should never is written by
+         the driver. A device driver is prohibited from writing this
+         bits however driver can read these bits to determine the
+         current pending IRQ's
+      b) Fix in dnvme_probe:
+         The driver probing for BAR's incorrectly used parameters in
+         pci_resource_start. Changed to use correct parameters
+      c) Fix in read_generic:
+         Corrected variable types from int to u32.
+    2) Known Issues:
+      a) none.
+
+2012-7-25
+nvmecompliance_release=1.8.0 New tests, bug fixes.
+    1) dnvme: no changes this release.
+    2) Bugfix: Framework reg definition CAP_RES3 was incorrect.
+    3) tnvme: --golden cmd line option now reports all violation rather
+       than just the 1st one.
+    4) tnvme: Framework method CE::Validate() would never have reported
+       an illegal 'M' bit begin set.
+    5) Bugfix-tnvme: The framework incorrectly reported the number
+       of tests being skipping when using the --skiptest cmd line option.
+    6) tnvme: Added new tests, see git log for details.
+    7) Known Issues:
+      a) BUG-dnvme: Currently there is no work around for this. It 
+        affects only MSI-X interrupt handling, thus any test that
+        uses MSI-X might core-dump when running against real hdw.
+        QEMU does not correctly disallow the violation that is 
+        occuring which is why it has slipped by for so long. The
+        violation is that dnvme directly writes to the MSIXCAP.TBIR
+        and MSIXCAP.PBIR tables. Linux will not allow this to
+        mask IRQ's, thus some other method needs to be sought.
+
+
+2012-7-3
+nvmecompliance_release=1.7.0 New tests, bug fixes.
+    1) dnvme-bugfix: The mapping of optionali BAR registers was doing the 
+       exact opposite of what was needed; end result BARS where being mapped
+       correctly.
+    2) Described more test cases, added Intel's intention of coding.
+    3) Add new cmd line option --fwimage, see 
+       ttps://github.com/nvmecompliance/tnvme/wiki/Command-Line-Options
+    4) Added new framework cmds, FirmwareActivate and FirmwareImageDownload.
+    5) tnvme-bugfix: cmd line option --ignored would never have dumped the
+       state-of-the DUT, rather an execption within exception would have occur.
+    6) Add new cmd line option --postfail, see 
+       ttps://github.com/nvmecompliance/tnvme/wiki/Command-Line-Options
+    7) Added a few new tests, see git log for details.
+    8) Add new cmd line option --restore, see 
+       ttps://github.com/nvmecompliance/tnvme/wiki/Command-Line-Options
+
 2012-6-19
 nvmecompliance_release=1.6.0 New tests, bug fixes, high confidence.
     1) The compliance suite continues to execute over 28 different NVMe formats
