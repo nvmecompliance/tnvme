@@ -105,7 +105,7 @@ NUMDIsAdhered_r10b::RunCoreTest()
     SharedGetLogPagePtr getLogPgCmd = SharedGetLogPagePtr(new GetLogPage());
 
     LOG_NRM("Get log page to request firmware slot information");
-    getLogPgCmd->SetNUMD(NUMDW_ADHERED);
+    getLogPgCmd->SetNUMD(NUMDW_ADHERED - 1);  // 0-based
     getLogPgCmd->SetLID(FIRM_SLOT_INFO_LID);
 
     LOG_NRM("Set the offset into the buffer at 0x%04X", BUFFER_OFFSET);

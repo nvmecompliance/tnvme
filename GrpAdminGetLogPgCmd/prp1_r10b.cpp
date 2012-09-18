@@ -102,7 +102,7 @@ PRP1_r10b::RunCoreTest()
     SharedGetLogPagePtr getLogPgCmd = SharedGetLogPagePtr(new GetLogPage());
 
     LOG_NRM("Get log page to request firmware slot information");
-    getLogPgCmd->SetNUMD(PRP1_ONLY_NUMD);
+    getLogPgCmd->SetNUMD(PRP1_ONLY_NUMD - 1); // 0-based
     getLogPgCmd->SetLID(FIRM_SLOT_INFO_LID);
 
     SharedMemBufferPtr getLogPageMem = SharedMemBufferPtr(new MemBuffer());

@@ -24,6 +24,7 @@
 
 #define BUFFER_SIZE         0x4
 #define MAX_LID             0xBF
+#define NUMD                1
 
 namespace GrpAdminGetLogPgCmd {
 
@@ -110,7 +111,7 @@ InvalidLogPageNVMSet_r10b::RunCoreTest()
 
     getLogPageMem->InitOffset1stPage(BUFFER_SIZE, 0, true);
     getLogPgCmd->SetPrpBuffer(prpReq, getLogPageMem);
-    getLogPgCmd->SetNUMD(1);
+    getLogPgCmd->SetNUMD(NUMD - 1); // 0-based
 
     list<uint32_t> invalidLIDs = GetInvalidLIDs();
     for (list<uint32_t>::iterator invalidLID = invalidLIDs.begin();
