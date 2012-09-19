@@ -14,27 +14,21 @@
  *  limitations under the License.
  */
 
-#include "grpAdminGetFeatCmd.h"
+#include "grpAdminSetGetFeatCombo.h"
 #include "createResources_r10b.h"
-#include "invalidFieldInCmd_r10b.h"
-#include "unsupportRrvdFields_r10b.h"
+
+namespace GrpAdminSetGetFeatCombo {
 
 
-namespace GrpAdminGetFeatCmd {
-
-
-GrpAdminGetFeatCmd::GrpAdminGetFeatCmd(size_t grpNum) :
-    Group(grpNum, "GrpAdminGetFeatCmd",
-        "Admin cmd set features test cases w/o get features")
+GrpAdminSetGetFeatCombo::GrpAdminSetGetFeatCombo(size_t grpNum) :
+    Group(grpNum, "GrpAdminSetGetFeatCombo", "Template group description")
 {
     // For complete details about the APPEND_TEST_AT_?LEVEL() macros:
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Numbering" and
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Strategy
     switch (gCmdLine.rev) {
     case SPECREV_10b:
-        APPEND_TEST_AT_XLEVEL(CreateResources_r10b, GrpAdminGetFeatCmd)
-        APPEND_TEST_AT_YLEVEL(InvalidFieldInCmd_r10b, GrpAdminGetFeatCmd)
-        APPEND_TEST_AT_YLEVEL(UnsupportRrvdFields_r10b, GrpAdminGetFeatCmd)
+        APPEND_TEST_AT_XLEVEL(CreateResources_r10b, GrpAdminSetGetFeatCombo)
         break;
 
     default:
@@ -45,7 +39,7 @@ GrpAdminGetFeatCmd::GrpAdminGetFeatCmd(size_t grpNum) :
 }
 
 
-GrpAdminGetFeatCmd::~GrpAdminGetFeatCmd()
+GrpAdminSetGetFeatCombo::~GrpAdminSetGetFeatCombo()
 {
     // mTests deallocated in parent
 }
