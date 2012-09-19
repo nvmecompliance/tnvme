@@ -20,9 +20,9 @@
 #include "grpDefs.h"
 #include "../Utils/kernelAPI.h"
 #include "../Utils/io.h"
-#include "../Cmds/setFeatures.h"
+#include "../Cmds/getFeatures.h"
 
-namespace GrpAdminSetFeatCmd {
+namespace GrpAdminGetFeatCmd {
 
 
 InvalidFieldInCmd_r10b::InvalidFieldInCmd_r10b(
@@ -34,7 +34,7 @@ InvalidFieldInCmd_r10b::InvalidFieldInCmd_r10b(
     mTestDesc.SetShort(     "Issue reserved FID's; SC = Invalid field in cmd");
     // No string size limit for the long description
     mTestDesc.SetLong(
-        "Create a baseline SetFeatures cmd, with no PRP payload. Issue cmd "
+        "Create a baseline GetFeatures cmd, with no PRP payload. Issue cmd "
         "for all reserved DW10.FID = {0x00, 0x0C to 0x7F, 0x81 to 0xBF}, "
         "expect failure.");
 }
@@ -89,26 +89,18 @@ InvalidFieldInCmd_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
-     * 1) none
-     *  \endverbatim
+     * 1) Test CreateResources_r10b has run prior.
+     * \endverbatim
      */
     string work;
 
-    if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
-        throw FrmwkEx(HERE);
+    // Lookup objs which were created in a prior test within group
+    SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
+    SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
 
-    LOG_NRM("Prepare the admin Q's");
-    SharedACQPtr acq = SharedACQPtr(new ACQ(gDutFd));
-    acq->Init(5);
-    SharedASQPtr asq = SharedASQPtr(new ASQ(gDutFd));
-    asq->Init(5);
-    gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
-    if (gCtrlrConfig->SetState(ST_ENABLE) == false)
-        throw FrmwkEx(HERE);
-
-    LOG_NRM("Create Set features cmd");
-    SharedSetFeaturesPtr setFeaturesCmd =
-        SharedSetFeaturesPtr(new SetFeatures());
+    LOG_NRM("Create Get features cmd");
+    SharedGetFeaturesPtr getFeaturesCmd =
+        SharedGetFeaturesPtr(new GetFeatures());
 
     LOG_NRM("Form a vector of invalid FID's");
     vector<uint16_t> invalidFIDs;
@@ -120,11 +112,11 @@ InvalidFieldInCmd_r10b::RunCoreTest()
         invalidFIDs.push_back(invalFID);
 
     for (uint16_t i = 0; i < invalidFIDs.size(); i++) {
-        LOG_NRM("Issue set feat cmd using invalid FID = 0x%X", invalidFIDs[i]);
-        setFeaturesCmd->SetFID(invalidFIDs[i]);
+        LOG_NRM("Issue get feat cmd using invalid FID = 0x%X", invalidFIDs[i]);
+        getFeaturesCmd->SetFID(invalidFIDs[i]);
         work = str(boost::format("invalidFIDs.%xh") % invalidFIDs[i]);
         IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
-            setFeaturesCmd, work, true, CESTAT_INVAL_FIELD);
+            getFeaturesCmd, work, true, CESTAT_INVAL_FIELD);
     }
 }
 

@@ -37,6 +37,7 @@ SUBDIRS:=			\
 	GrpAdminGetLogPgCmd	\
 	GrpAdminIdentifyCmd	\
 	GrpAdminSetFeatCmd	\
+	GrpAdminGetFeatCmd	\
 	GrpBasicInit		\
 	GrpCtrlRegisters	\
 	GrpGeneralCmds		\

@@ -14,33 +14,35 @@
  *  limitations under the License.
  */
 
-#include <boost/format.hpp>
-#include "invalidFieldInCmd_r10b.h"
+#include "unsupportRrvdFields_r10b.h"
 #include "globals.h"
 #include "grpDefs.h"
 #include "../Utils/kernelAPI.h"
 #include "../Utils/io.h"
-#include "../Cmds/setFeatures.h"
+#include "../Cmds/getFeatures.h"
 
-namespace GrpAdminSetFeatCmd {
+#define FEATURE_ID      0x01
+
+namespace GrpAdminGetFeatCmd {
 
 
-InvalidFieldInCmd_r10b::InvalidFieldInCmd_r10b(
+UnsupportRrvdFields_r10b::UnsupportRrvdFields_r10b(
     string grpName, string testName) :
     Test(grpName, testName, SPECREV_10b)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 5");
-    mTestDesc.SetShort(     "Issue reserved FID's; SC = Invalid field in cmd");
+    mTestDesc.SetShort(     "Set unsupported/rsvd fields in cmd");
     // No string size limit for the long description
     mTestDesc.SetLong(
-        "Create a baseline SetFeatures cmd, with no PRP payload. Issue cmd "
-        "for all reserved DW10.FID = {0x00, 0x0C to 0x7F, 0x81 to 0xBF}, "
-        "expect failure.");
+        "Unsupported DW's and rsvd fields are treated identical, the recipient "
+        "shall not check their value. Issue a GetFeature cmd with DW10.FID = "
+        "0x01, and set bits DW0_b15:10, DW2, DW3, DW4, DW5, DW10_31:8, "
+        "DW12, DW13, DW14, DW15, expect success.");
 }
 
 
-InvalidFieldInCmd_r10b::~InvalidFieldInCmd_r10b()
+UnsupportRrvdFields_r10b::~UnsupportRrvdFields_r10b()
 {
     ///////////////////////////////////////////////////////////////////////////
     // Allocations taken from the heap and not under the control of the
@@ -49,8 +51,8 @@ InvalidFieldInCmd_r10b::~InvalidFieldInCmd_r10b()
 }
 
 
-InvalidFieldInCmd_r10b::
-InvalidFieldInCmd_r10b(const InvalidFieldInCmd_r10b &other) : Test(other)
+UnsupportRrvdFields_r10b::
+UnsupportRrvdFields_r10b(const UnsupportRrvdFields_r10b &other) : Test(other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -59,8 +61,8 @@ InvalidFieldInCmd_r10b(const InvalidFieldInCmd_r10b &other) : Test(other)
 }
 
 
-InvalidFieldInCmd_r10b &
-InvalidFieldInCmd_r10b::operator=(const InvalidFieldInCmd_r10b &other)
+UnsupportRrvdFields_r10b &
+UnsupportRrvdFields_r10b::operator=(const UnsupportRrvdFields_r10b &other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -72,60 +74,66 @@ InvalidFieldInCmd_r10b::operator=(const InvalidFieldInCmd_r10b &other)
 
 
 Test::RunType
-InvalidFieldInCmd_r10b::RunnableCoreTest(bool preserve)
+UnsupportRrvdFields_r10b::RunnableCoreTest(bool preserve)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All code contained herein must never permanently modify the state or
     // configuration of the DUT. Permanence is defined as state or configuration
     // changes that will not be restored after a cold hard reset.
     ///////////////////////////////////////////////////////////////////////////
+    if (gCmdLine.rsvdfields == false)
+        return RUN_FALSE;   // Optional rsvd fields test skipped.
+
     preserve = preserve;    // Suppress compiler error/warning
     return RUN_TRUE;        // This test is never destructive
 }
 
 
 void
-InvalidFieldInCmd_r10b::RunCoreTest()
+UnsupportRrvdFields_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
-     * 1) none
-     *  \endverbatim
+     * 1) Test CreateResources_r10b has run prior.
+     * \endverbatim
      */
-    string work;
 
-    if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
-        throw FrmwkEx(HERE);
+    // Lookup objs which were created in a prior test within group
+    SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
+    SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
 
-    LOG_NRM("Prepare the admin Q's");
-    SharedACQPtr acq = SharedACQPtr(new ACQ(gDutFd));
-    acq->Init(5);
-    SharedASQPtr asq = SharedASQPtr(new ASQ(gDutFd));
-    asq->Init(5);
-    gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
-    if (gCtrlrConfig->SetState(ST_ENABLE) == false)
-        throw FrmwkEx(HERE);
+    LOG_NRM("Create Get features cmd");
+    SharedGetFeaturesPtr getFeaturesCmd =
+        SharedGetFeaturesPtr(new GetFeatures());
+    getFeaturesCmd->SetFID(FEATURE_ID);
 
-    LOG_NRM("Create Set features cmd");
-    SharedSetFeaturesPtr setFeaturesCmd =
-        SharedSetFeaturesPtr(new SetFeatures());
+    LOG_NRM("Set all cmd's rsvd bits");
+    uint32_t work = getFeaturesCmd->GetDword(0);
+    work |= 0x0000fc00;      // Set DW0_b15:10 bits
+    getFeaturesCmd->SetDword(work, 0);
 
-    LOG_NRM("Form a vector of invalid FID's");
-    vector<uint16_t> invalidFIDs;
-    invalidFIDs.push_back(0x00);
-    for (uint8_t invalFID = 0x0C; invalFID <= 0x7F; invalFID++)
-        invalidFIDs.push_back(invalFID);
+    getFeaturesCmd->SetDword(0xffffffff, 2);
+    getFeaturesCmd->SetDword(0xffffffff, 3);
+    getFeaturesCmd->SetDword(0xffffffff, 4);
+    getFeaturesCmd->SetDword(0xffffffff, 5);
+    getFeaturesCmd->SetDword(0xffffffff, 6);
+    getFeaturesCmd->SetDword(0xffffffff, 7);
+    getFeaturesCmd->SetDword(0xffffffff, 8);
+    getFeaturesCmd->SetDword(0xffffffff, 9);
 
-    for (uint8_t invalFID = 0x81; invalFID <= 0xBF; invalFID++)
-        invalidFIDs.push_back(invalFID);
+    // DW10_b31:8
+    work = getFeaturesCmd->GetDword(10);
+    work |= 0xffffff00;
+    getFeaturesCmd->SetDword(work, 10);
 
-    for (uint16_t i = 0; i < invalidFIDs.size(); i++) {
-        LOG_NRM("Issue set feat cmd using invalid FID = 0x%X", invalidFIDs[i]);
-        setFeaturesCmd->SetFID(invalidFIDs[i]);
-        work = str(boost::format("invalidFIDs.%xh") % invalidFIDs[i]);
-        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
-            setFeaturesCmd, work, true, CESTAT_INVAL_FIELD);
-    }
+    getFeaturesCmd->SetDword(0xffffffff, 12);
+    getFeaturesCmd->SetDword(0xffffffff, 13);
+    getFeaturesCmd->SetDword(0xffffffff, 14);
+    getFeaturesCmd->SetDword(0xffffffff, 15);
+
+    LOG_NRM("Issue Get features cmd with reserved fields set");
+    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
+        getFeaturesCmd, "rsvd.set", true);
 }
 
 }   // namespace
