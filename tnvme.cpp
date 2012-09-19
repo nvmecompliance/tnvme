@@ -54,6 +54,7 @@
 #include "GrpAdminCreateIOQCmd/grpAdminCreateIOQCmd.h"
 #include "GrpAdminGetLogPgCmd/grpAdminGetLogPgCmd.h"
 #include "GrpAdminIdentifyCmd/grpAdminIdentifyCmd.h"
+#include "GrpAdminSetFeatCmd/grpAdminSetFeatCmd.h"
 
 
 void
@@ -85,6 +86,7 @@ InstantiateGroups(vector<Group *> &groups)
     groups.push_back(new GrpAdminGetLogPgCmd::GrpAdminGetLogPgCmd(groups.size()));
     // Following is assigned grp ID=20
     groups.push_back(new GrpAdminIdentifyCmd::GrpAdminIdentifyCmd(groups.size()));
+    groups.push_back(new GrpAdminSetFeatCmd::GrpAdminSetFeatCmd(groups.size()));
 }
 // ------------------------------EDIT HERE---------------------------------
 
