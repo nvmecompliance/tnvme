@@ -1,3 +1,13 @@
+2012-9-27
+nvmecompliance_release=1.12.0 New tests, bug fix
+    1) dnvme: No changes to driver
+    2) tnvme: Added new group of tests called GrpAdminSetFeatCombo
+    3) tnvme: Added new group of tests called GrpAdminSetFeatCmd
+    4) tnvme-bugfix: A typo in NVMe spec rev B incorrectly stated
+       (or implied) that the NUMD value in Get Log Page cmd is
+       1-baed, when in fact it should be 0-based. Tests and QEMU
+       have been updated to reflect the correction now in Rev C
+
 2012-9-4
 nvmecompliance_release=1.11.0 New tests, enhancements
     1) dnvme: No changes to driver

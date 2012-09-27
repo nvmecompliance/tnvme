@@ -113,7 +113,7 @@ InvalidNamspc_r10b::RunCoreTest()
     getLogPageMem->InitOffset1stPage(GetLogPage::SMART_DATA_SIZE, 0, true);
     getLogPgCmd->SetPrpBuffer(prpReq, getLogPageMem);
     getLogPgCmd->SetLID(SMART_HEALTH_INFO_LID);
-    getLogPgCmd->SetNUMD(SMART_NUMD);
+    getLogPgCmd->SetNUMD(SMART_NUMD - 1); // 0 - based
 
     ConstSharedIdentifyPtr idCtrlrStruct = gInformative->GetIdentifyCmdCtrlr();
     uint32_t nn = (uint32_t)idCtrlrStruct->GetValue(IDCTRLRCAP_NN);

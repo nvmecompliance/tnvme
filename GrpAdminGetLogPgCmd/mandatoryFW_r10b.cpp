@@ -110,11 +110,11 @@ MandatoryFW_r10b::RunCoreTest()
     getLogPgCmd->SetLID(GetLogPage::LOGID_FW_SLOT);
 
     LOG_NRM("Issue cmd multiple times such that NUMD loops X=[0...512]");
-    for (uint32_t numd = 0; numd <= FW_SLOT_NUMD; numd++) {
+    for (uint32_t numd = 1; numd <= FW_SLOT_NUMD; numd++) {
         LOG_NRM("Issue get log page for FW slot info with NUMD = %d", numd);
         getLogPageMem->Init(GetLogPage::FIRMSLOT_DATA_SIZE, true);
         getLogPgCmd->SetPrpBuffer(prpReq, getLogPageMem);
-        getLogPgCmd->SetNUMD(numd);
+        getLogPgCmd->SetNUMD(numd - 1); // 0-based
 
         work = str(boost::format("FWSlot.NUMD.%d") % numd);
         IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,

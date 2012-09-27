@@ -14,34 +14,33 @@
  *  limitations under the License.
  */
 
-#include "prp1PRP2_r10b.h"
+#include <boost/format.hpp>
+#include "invalidFieldInCmd_r10b.h"
 #include "globals.h"
 #include "grpDefs.h"
 #include "../Utils/kernelAPI.h"
 #include "../Utils/io.h"
-#include "../Cmds/getLogPage.h"
+#include "../Cmds/getFeatures.h"
 
-#define FIRM_SLOT_INFO_LID      0x03
-#define PRP1_ONLY_NUMD          (514 / 4)
-#define BUFFER_OFFSET           0xF00
-
-namespace GrpAdminGetLogPgCmd {
+namespace GrpAdminGetFeatCmd {
 
 
-PRP1PRP2_r10b::PRP1PRP2_r10b(string grpName, string testName) :
+InvalidFieldInCmd_r10b::InvalidFieldInCmd_r10b(
+    string grpName, string testName) :
     Test(grpName, testName, SPECREV_10b)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 5");
-    mTestDesc.SetShort(     "Request data using PRP1 and PRP2");
+    mTestDesc.SetShort(     "Issue reserved FID's; SC = Invalid field in cmd");
     // No string size limit for the long description
     mTestDesc.SetLong(
-        "Issue GetLogPage cmd, LID=3, NUMD=(512/4) utilizing only PRP1 & PRP2 "
-        "for the user space buffer, and expect success.");
+        "Create a baseline GetFeatures cmd, with no PRP payload. Issue cmd "
+        "for all reserved DW10.FID = {0x00, 0x0C to 0x7F, 0x81 to 0xBF}, "
+        "expect failure.");
 }
 
 
-PRP1PRP2_r10b::~PRP1PRP2_r10b()
+InvalidFieldInCmd_r10b::~InvalidFieldInCmd_r10b()
 {
     ///////////////////////////////////////////////////////////////////////////
     // Allocations taken from the heap and not under the control of the
@@ -50,8 +49,8 @@ PRP1PRP2_r10b::~PRP1PRP2_r10b()
 }
 
 
-PRP1PRP2_r10b::
-PRP1PRP2_r10b(const PRP1PRP2_r10b &other) : Test(other)
+InvalidFieldInCmd_r10b::
+InvalidFieldInCmd_r10b(const InvalidFieldInCmd_r10b &other) : Test(other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -60,8 +59,8 @@ PRP1PRP2_r10b(const PRP1PRP2_r10b &other) : Test(other)
 }
 
 
-PRP1PRP2_r10b &
-PRP1PRP2_r10b::operator=(const PRP1PRP2_r10b &other)
+InvalidFieldInCmd_r10b &
+InvalidFieldInCmd_r10b::operator=(const InvalidFieldInCmd_r10b &other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -73,48 +72,52 @@ PRP1PRP2_r10b::operator=(const PRP1PRP2_r10b &other)
 
 
 Test::RunType
-PRP1PRP2_r10b::RunnableCoreTest(bool preserve)
+InvalidFieldInCmd_r10b::RunnableCoreTest(bool preserve)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All code contained herein must never permanently modify the state or
     // configuration of the DUT. Permanence is defined as state or configuration
     // changes that will not be restored after a cold hard reset.
     ///////////////////////////////////////////////////////////////////////////
-
     preserve = preserve;    // Suppress compiler error/warning
     return RUN_TRUE;        // This test is never destructive
 }
 
 
 void
-PRP1PRP2_r10b::RunCoreTest()
+InvalidFieldInCmd_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
      * 1) Test CreateResources_r10b has run prior.
-     *  \endverbatim
+     * \endverbatim
      */
+    string work;
+
     // Lookup objs which were created in a prior test within group
     SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
     SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
 
-    LOG_NRM("Create get log page cmd and assoc some buffer memory");
-    SharedGetLogPagePtr getLogPgCmd = SharedGetLogPagePtr(new GetLogPage());
+    LOG_NRM("Create Get features cmd");
+    SharedGetFeaturesPtr getFeaturesCmd =
+        SharedGetFeaturesPtr(new GetFeatures());
 
-    LOG_NRM("Get log page to request firmware slot information");
-    getLogPgCmd->SetNUMD(PRP1_ONLY_NUMD - 1); // 0-based
-    getLogPgCmd->SetLID(FIRM_SLOT_INFO_LID);
+    LOG_NRM("Form a vector of invalid FID's");
+    vector<uint16_t> invalidFIDs;
+    invalidFIDs.push_back(0x00);
+    for (uint8_t invalFID = 0x0C; invalFID <= 0x7F; invalFID++)
+        invalidFIDs.push_back(invalFID);
 
-    LOG_NRM("Set the offset into the buffer at 0x%04X", BUFFER_OFFSET);
-    SharedMemBufferPtr getLogPageMem = SharedMemBufferPtr(new MemBuffer());
-    getLogPageMem->InitOffset1stPage(GetLogPage::FIRMSLOT_DATA_SIZE,
-        BUFFER_OFFSET, true);
-    send_64b_bitmask prpReq =
-        (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE);
-    getLogPgCmd->SetPrpBuffer(prpReq, getLogPageMem);
+    for (uint8_t invalFID = 0x81; invalFID <= 0xBF; invalFID++)
+        invalidFIDs.push_back(invalFID);
 
-    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
-        getLogPgCmd, "prp1prp2", true);
+    for (uint16_t i = 0; i < invalidFIDs.size(); i++) {
+        LOG_NRM("Issue get feat cmd using invalid FID = 0x%X", invalidFIDs[i]);
+        getFeaturesCmd->SetFID(invalidFIDs[i]);
+        work = str(boost::format("invalidFIDs.%xh") % invalidFIDs[i]);
+        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
+            getFeaturesCmd, work, true, CESTAT_INVAL_FIELD);
+    }
 }
 
 }   // namespace

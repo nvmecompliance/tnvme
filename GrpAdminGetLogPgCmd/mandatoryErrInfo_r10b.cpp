@@ -126,7 +126,7 @@ MandatoryErrInfo_r10b::RunCoreTest()
 
         getLogPageMem->Init(GetLogPage::ERRINFO_DATA_SIZE * X, true);
         getLogPgCmd->SetPrpBuffer(prpReq, getLogPageMem);
-        getLogPgCmd->SetNUMD(numd);
+        getLogPgCmd->SetNUMD(numd - 1); // 0-based
 
         work = str(boost::format("logEnties%d") % (numd / ERRINFO_NUMD));
         IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,

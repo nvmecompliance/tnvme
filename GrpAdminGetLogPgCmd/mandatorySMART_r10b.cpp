@@ -140,11 +140,11 @@ MandatorySMART_r10b::IssueGetLogPgCmdLessDwords(SharedASQPtr asq,
     send_64b_bitmask prpReq =
         (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE);
 
-    for (uint32_t numd = 0; numd <= SMART_HEALTH_NUMD; numd++) {
+    for (uint32_t numd = 1; numd <= SMART_HEALTH_NUMD; numd++) {
         LOG_NRM("Issue get log page for smart info with NUMD = %d", numd);
         getLogPageMem->Init(GetLogPage::SMART_DATA_SIZE, true);
         getLogPgCmd->SetPrpBuffer(prpReq, getLogPageMem);
-        getLogPgCmd->SetNUMD(numd);
+        getLogPgCmd->SetNUMD(numd - 1); // 0-based
 
         work = str(boost::format("Smart.NSID.%Xh.NUMD.%d") %
             getLogPgCmd->GetNSID() % numd);

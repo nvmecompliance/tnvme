@@ -14,34 +14,36 @@
  *  limitations under the License.
  */
 
-#include "prp1PRP2_r10b.h"
+#include <boost/format.hpp>
+#include "invalidNamspc_r10b.h"
 #include "globals.h"
 #include "grpDefs.h"
 #include "../Utils/kernelAPI.h"
+#include "../Singletons/informative.h"
+#include "../Queues/acq.h"
+#include "../Queues/asq.h"
 #include "../Utils/io.h"
-#include "../Cmds/getLogPage.h"
 
-#define FIRM_SLOT_INFO_LID      0x03
-#define PRP1_ONLY_NUMD          (514 / 4)
-#define BUFFER_OFFSET           0xF00
+#define PRP_BUFFER_OFFSET       0x0
 
-namespace GrpAdminGetLogPgCmd {
+namespace GrpAdminIdentifyCmd {
 
 
-PRP1PRP2_r10b::PRP1PRP2_r10b(string grpName, string testName) :
+InvalidNamspc_r10b::InvalidNamspc_r10b(
+    string grpName, string testName) :
     Test(grpName, testName, SPECREV_10b)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 5");
-    mTestDesc.SetShort(     "Request data using PRP1 and PRP2");
+    mTestDesc.SetShort(     "Issue Identify and cause SC=Invalid Namspc or Format");
     // No string size limit for the long description
     mTestDesc.SetLong(
-        "Issue GetLogPage cmd, LID=3, NUMD=(512/4) utilizing only PRP1 & PRP2 "
-        "for the user space buffer, and expect success.");
+        "Determine Identify.NN and issue Identify cmd requesting ctrlr namspc "
+        "to all namspcs not supported by DUT, expect failure.");
 }
 
 
-PRP1PRP2_r10b::~PRP1PRP2_r10b()
+InvalidNamspc_r10b::~InvalidNamspc_r10b()
 {
     ///////////////////////////////////////////////////////////////////////////
     // Allocations taken from the heap and not under the control of the
@@ -50,8 +52,8 @@ PRP1PRP2_r10b::~PRP1PRP2_r10b()
 }
 
 
-PRP1PRP2_r10b::
-PRP1PRP2_r10b(const PRP1PRP2_r10b &other) : Test(other)
+InvalidNamspc_r10b::
+InvalidNamspc_r10b(const InvalidNamspc_r10b &other) : Test(other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -60,8 +62,8 @@ PRP1PRP2_r10b(const PRP1PRP2_r10b &other) : Test(other)
 }
 
 
-PRP1PRP2_r10b &
-PRP1PRP2_r10b::operator=(const PRP1PRP2_r10b &other)
+InvalidNamspc_r10b &
+InvalidNamspc_r10b::operator=(const InvalidNamspc_r10b &other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -73,7 +75,7 @@ PRP1PRP2_r10b::operator=(const PRP1PRP2_r10b &other)
 
 
 Test::RunType
-PRP1PRP2_r10b::RunnableCoreTest(bool preserve)
+InvalidNamspc_r10b::RunnableCoreTest(bool preserve)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All code contained herein must never permanently modify the state or
@@ -87,34 +89,43 @@ PRP1PRP2_r10b::RunnableCoreTest(bool preserve)
 
 
 void
-PRP1PRP2_r10b::RunCoreTest()
+InvalidNamspc_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
      * 1) Test CreateResources_r10b has run prior.
-     *  \endverbatim
+     * \endverbatim
      */
-    // Lookup objs which were created in a prior test within group
+    uint64_t inc, i;
+    string work;
+
+    LOG_NRM("Lookup objs which were created in a prior test within group");
     SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
     SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
 
-    LOG_NRM("Create get log page cmd and assoc some buffer memory");
-    SharedGetLogPagePtr getLogPgCmd = SharedGetLogPagePtr(new GetLogPage());
+    LOG_NRM("Form identify namespace cmd and associate some buffer");
+    SharedIdentifyPtr idCmdNamSpc = SharedIdentifyPtr(new Identify());
+    idCmdNamSpc->SetCNS(false);
 
-    LOG_NRM("Get log page to request firmware slot information");
-    getLogPgCmd->SetNUMD(PRP1_ONLY_NUMD - 1); // 0-based
-    getLogPgCmd->SetLID(FIRM_SLOT_INFO_LID);
+    SharedMemBufferPtr idMemNamSpc = SharedMemBufferPtr(new MemBuffer());
+    idMemNamSpc->InitOffset1stPage(Identify::IDEAL_DATA_SIZE,
+        PRP_BUFFER_OFFSET, true);
 
-    LOG_NRM("Set the offset into the buffer at 0x%04X", BUFFER_OFFSET);
-    SharedMemBufferPtr getLogPageMem = SharedMemBufferPtr(new MemBuffer());
-    getLogPageMem->InitOffset1stPage(GetLogPage::FIRMSLOT_DATA_SIZE,
-        BUFFER_OFFSET, true);
-    send_64b_bitmask prpReq =
-        (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE);
-    getLogPgCmd->SetPrpBuffer(prpReq, getLogPageMem);
+    LOG_NRM("Allow PRP1 only flag");
+    send_64b_bitmask idPrpNamSpc = (send_64b_bitmask)(MASK_PRP1_PAGE);
+    idCmdNamSpc->SetPrpBuffer(idPrpNamSpc, idMemNamSpc);
 
-    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
-        getLogPgCmd, "prp1prp2", true);
+    // For all namspc's issue cmd to an illegal namspc
+    ConstSharedIdentifyPtr idCtrlrStruct = gInformative->GetIdentifyCmdCtrlr();
+    uint32_t nn = (uint32_t)idCtrlrStruct->GetValue(IDCTRLRCAP_NN);
+    for (i = (nn + 1), inc = 1; i <= 0xffffffff; i += (2 * inc), inc += 1327) {
+        LOG_NRM("Issue identify namspc cmd with illegal namspc ID=%llu",
+            (unsigned long long)i);
+        idCmdNamSpc->SetNSID(i);
+        work = str(boost::format("namspc%d") % i);
+        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq,
+            acq, idCmdNamSpc, work, true, CESTAT_INVAL_NAMSPC);
+    }
 }
 
 }   // namespace

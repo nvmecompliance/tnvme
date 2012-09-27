@@ -53,6 +53,10 @@
 #include "GrpAdminCreateIOSQCmd/grpAdminCreateIOSQCmd.h"
 #include "GrpAdminCreateIOQCmd/grpAdminCreateIOQCmd.h"
 #include "GrpAdminGetLogPgCmd/grpAdminGetLogPgCmd.h"
+#include "GrpAdminIdentifyCmd/grpAdminIdentifyCmd.h"
+#include "GrpAdminSetFeatCmd/grpAdminSetFeatCmd.h"
+#include "GrpAdminGetFeatCmd/grpAdminGetFeatCmd.h"
+#include "GrpAdminSetGetFeatCombo/grpAdminSetGetFeatCombo.h"
 
 
 void
@@ -82,6 +86,11 @@ InstantiateGroups(vector<Group *> &groups)
     groups.push_back(new GrpAdminCreateIOSQCmd::GrpAdminCreateIOSQCmd(groups.size()));
     groups.push_back(new GrpAdminCreateIOQCmd::GrpAdminCreateIOQCmd(groups.size()));
     groups.push_back(new GrpAdminGetLogPgCmd::GrpAdminGetLogPgCmd(groups.size()));
+    // Following is assigned grp ID=20
+    groups.push_back(new GrpAdminIdentifyCmd::GrpAdminIdentifyCmd(groups.size()));
+    groups.push_back(new GrpAdminSetFeatCmd::GrpAdminSetFeatCmd(groups.size()));
+    groups.push_back(new GrpAdminGetFeatCmd::GrpAdminGetFeatCmd(groups.size()));
+    groups.push_back(new GrpAdminSetGetFeatCombo::GrpAdminSetGetFeatCombo(groups.size()));
 }
 // ------------------------------EDIT HERE---------------------------------
 

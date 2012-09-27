@@ -18,17 +18,18 @@
 #include "globals.h"
 #include "grpDefs.h"
 #include "../Utils/kernelAPI.h"
+#include "../Singletons/informative.h"
+#include "../Queues/acq.h"
+#include "../Queues/asq.h"
 #include "../Utils/io.h"
-#include "../Cmds/getLogPage.h"
 
-#define FIRM_SLOT_INFO_LID      0x03
-#define PRP1_ONLY_NUMD          (514 / 4)
-#define BUFFER_OFFSET           0xF00
+#define PRP_BUFFER_OFFSET       0x800
 
-namespace GrpAdminGetLogPgCmd {
+namespace GrpAdminIdentifyCmd {
 
 
-PRP1PRP2_r10b::PRP1PRP2_r10b(string grpName, string testName) :
+PRP1PRP2_r10b::PRP1PRP2_r10b(
+    string grpName, string testName) :
     Test(grpName, testName, SPECREV_10b)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -36,8 +37,8 @@ PRP1PRP2_r10b::PRP1PRP2_r10b(string grpName, string testName) :
     mTestDesc.SetShort(     "Request data using PRP1 and PRP2");
     // No string size limit for the long description
     mTestDesc.SetLong(
-        "Issue GetLogPage cmd, LID=3, NUMD=(512/4) utilizing only PRP1 & PRP2 "
-        "for the user space buffer, and expect success.");
+        "Issue Identify cmd requesting ctrlr namspc struct utilizing PRP1 & "
+        "PRP2 for the user space buffer, and expect success.");
 }
 
 
@@ -92,29 +93,34 @@ PRP1PRP2_r10b::RunCoreTest()
     /** \verbatim
      * Assumptions:
      * 1) Test CreateResources_r10b has run prior.
-     *  \endverbatim
+     * \endverbatim
      */
-    // Lookup objs which were created in a prior test within group
+
+    LOG_NRM("Lookup objs which were created in a prior test within group");
     SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
     SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
 
-    LOG_NRM("Create get log page cmd and assoc some buffer memory");
-    SharedGetLogPagePtr getLogPgCmd = SharedGetLogPagePtr(new GetLogPage());
+    LOG_NRM("Determine if DUT has atleast one namespace support");
+    ConstSharedIdentifyPtr idCmdCtrlr = gInformative->GetIdentifyCmdCtrlr();
+    if ((idCmdCtrlr->GetValue(IDCTRLRCAP_NN)) == 0)
+        throw FrmwkEx(HERE, "Required to support >= 1 namespace");
 
-    LOG_NRM("Get log page to request firmware slot information");
-    getLogPgCmd->SetNUMD(PRP1_ONLY_NUMD - 1); // 0-based
-    getLogPgCmd->SetLID(FIRM_SLOT_INFO_LID);
+    LOG_NRM("Form identify namespace cmd and associate some buffer");
+    SharedIdentifyPtr idCmdNamSpc = SharedIdentifyPtr(new Identify());
+    idCmdNamSpc->SetCNS(false);
+    idCmdNamSpc->SetNSID(1);
 
-    LOG_NRM("Set the offset into the buffer at 0x%04X", BUFFER_OFFSET);
-    SharedMemBufferPtr getLogPageMem = SharedMemBufferPtr(new MemBuffer());
-    getLogPageMem->InitOffset1stPage(GetLogPage::FIRMSLOT_DATA_SIZE,
-        BUFFER_OFFSET, true);
-    send_64b_bitmask prpReq =
+    SharedMemBufferPtr idMemNamSpc = SharedMemBufferPtr(new MemBuffer());
+    idMemNamSpc->InitOffset1stPage(Identify::IDEAL_DATA_SIZE,
+        PRP_BUFFER_OFFSET, true);
+
+    LOG_NRM("Allow PRP1 and PRP2");
+    send_64b_bitmask idPrpNamSpc =
         (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE);
-    getLogPgCmd->SetPrpBuffer(prpReq, getLogPageMem);
+    idCmdNamSpc->SetPrpBuffer(idPrpNamSpc, idMemNamSpc);
 
     IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
-        getLogPgCmd, "prp1prp2", true);
+        idCmdNamSpc, "prp1Prp2", true);
 }
 
 }   // namespace
