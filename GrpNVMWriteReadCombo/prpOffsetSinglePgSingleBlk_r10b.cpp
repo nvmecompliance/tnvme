@@ -40,13 +40,7 @@ PRPOffsetSinglePgSingleBlk_r10b::PRPOffsetSinglePgSingleBlk_r10b(
         "verified for it will have the same data pattern as the data. ALGO) "
         "Alloc discontig memory; vary offset into 1st memory page from 0 to X, "
         "where X = (CC.MPS - Identify.LBAF[Identify.FLBAS].LBADS) in steps of "
-        "4B; alternate the data pattern between byteK, word++ for each write. "
-        "NOTE: Since PRP1 is the only effective ptr, then PRP2 becomes "
-        "reserved. Reserved fields must not be checked by the recipient. "
-        "Verify this fact by injecting random 64b values into PRP2 by "
-        "alternating random number, then zero, for each and every write/read "
-        "cmd issued to the DUT. Always initiate the random gen with seed 17 "
-        "before this test starts.");
+        "4B; alternate the data pattern between byteK, word++ for each write.");
 }
 
 
@@ -108,9 +102,6 @@ PRPOffsetSinglePgSingleBlk_r10b::RunCoreTest()
     int64_t X;
     bool enableLog;
 
-    LOG_NRM("Initialize random seed");
-    srand (17);
-
     // Lookup objs which were created in a prior test within group
     SharedIOSQPtr iosq = CAST_TO_IOSQ(gRsrcMngr->GetObj(IOSQ_GROUP_ID));
     SharedIOCQPtr iocq = CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_GROUP_ID));
@@ -155,20 +146,15 @@ PRPOffsetSinglePgSingleBlk_r10b::RunCoreTest()
 
     DataPattern dataPattern;
     uint64_t wrVal;
-    uint32_t prp2RandVal[2];
     for (int64_t pgOff = 0; pgOff <= X; pgOff += 4) {
         LOG_NRM("Processing at page offset #%ld", pgOff);
         if ((pgOff % 8) != 0) {
             dataPattern = DATAPAT_CONST_8BIT;
             wrVal = pgOff;
-            prp2RandVal[0] = rand();
-            prp2RandVal[1] = rand();
             work = str(boost::format("dataPat.constb.memOff.%d") % pgOff);
         } else {
             dataPattern = DATAPAT_INC_16BIT;
             wrVal = pgOff;
-            prp2RandVal[0] = 0;
-            prp2RandVal[1] = 0;
             work = str(boost::format("dataPat.incw.memOff.%d") % pgOff);
         }
         SharedMemBufferPtr writeMem = SharedMemBufferPtr(new MemBuffer());
@@ -192,10 +178,6 @@ PRPOffsetSinglePgSingleBlk_r10b::RunCoreTest()
         }
         writeCmd->SetPrpBuffer(prpBitmask, writeMem);
         writeMem->SetDataPattern(dataPattern, wrVal);
-
-        LOG_NRM("Set 64 bits of PRP2 CDW 8 & 9 with random or 0 for wr cmd.");
-        writeCmd->SetDword(prp2RandVal[0], 8);
-        writeCmd->SetDword(prp2RandVal[1], 9);
 
         enableLog = false;
         if ((pgOff <= 8) || (pgOff >= (X - 8)))
@@ -222,10 +204,6 @@ PRPOffsetSinglePgSingleBlk_r10b::RunCoreTest()
             break;
         }
         readCmd->SetPrpBuffer(prpBitmask, readMem);
-
-        LOG_NRM("Set 64 bits of PRP2 CDW 8 & 9 with random or 0 for rd cmd.");
-        readCmd->SetDword(prp2RandVal[0], 8);
-        readCmd->SetDword(prp2RandVal[1], 9);
 
         IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq, iocq,
             readCmd, work, enableLog);

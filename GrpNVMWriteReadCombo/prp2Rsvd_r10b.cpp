@@ -15,7 +15,7 @@
  */
 
 #include <boost/format.hpp>
-#include "prpOffsetSinglePgMultiBlk_r10b.h"
+#include "prp2Rsvd_r10b.h"
 #include "grpDefs.h"
 #include "../Utils/irq.h"
 
@@ -23,7 +23,7 @@
 namespace GrpNVMWriteReadCombo {
 
 
-PRPOffsetSinglePgMultiBlk_r10b::PRPOffsetSinglePgMultiBlk_r10b(
+PRP2Rsvd_r10b::PRP2Rsvd_r10b(
     string grpName, string testName) :
     Test(grpName, testName, SPECREV_10b)
 {
@@ -45,11 +45,16 @@ PRPOffsetSinglePgMultiBlk_r10b::PRPOffsetSinglePgMultiBlk_r10b(
         "in inner loop vary the number of blocks sent from 1 to Y, where "
         "Y = ((CC.MPS - X) / Identify.LBAF[Identify.FLBAS].LBADS) but make "
         "sure the total xfer size does not exceed Identify.MDTS; alternate the "
-        "data pattern between byte++, wordK for each write.");
+        "data pattern between byte++, wordK for each write. NOTE: Since PRP1 "
+        "is the only effective ptr, then PRP2 becomes reserved. Reserved "
+        "fields must not be checked by the recipient. Verify this fact by "
+        "injecting random 64b values into PRP2 by alternating random number, "
+        "then zero, for each and every write/read cmd issued to the DUT. "
+        "Always initiate the random gen with seed 51 before this test starts.");
 }
 
 
-PRPOffsetSinglePgMultiBlk_r10b::~PRPOffsetSinglePgMultiBlk_r10b()
+PRP2Rsvd_r10b::~PRP2Rsvd_r10b()
 {
     ///////////////////////////////////////////////////////////////////////////
     // Allocations taken from the heap and not under the control of the
@@ -58,8 +63,8 @@ PRPOffsetSinglePgMultiBlk_r10b::~PRPOffsetSinglePgMultiBlk_r10b()
 }
 
 
-PRPOffsetSinglePgMultiBlk_r10b::
-PRPOffsetSinglePgMultiBlk_r10b(const PRPOffsetSinglePgMultiBlk_r10b &other) :
+PRP2Rsvd_r10b::
+PRP2Rsvd_r10b(const PRP2Rsvd_r10b &other) :
     Test(other)
 {
     ///////////////////////////////////////////////////////////////////////////
@@ -69,8 +74,8 @@ PRPOffsetSinglePgMultiBlk_r10b(const PRPOffsetSinglePgMultiBlk_r10b &other) :
 }
 
 
-PRPOffsetSinglePgMultiBlk_r10b &
-PRPOffsetSinglePgMultiBlk_r10b::operator=(const PRPOffsetSinglePgMultiBlk_r10b
+PRP2Rsvd_r10b &
+PRP2Rsvd_r10b::operator=(const PRP2Rsvd_r10b
     &other)
 {
     ///////////////////////////////////////////////////////////////////////////
@@ -83,20 +88,21 @@ PRPOffsetSinglePgMultiBlk_r10b::operator=(const PRPOffsetSinglePgMultiBlk_r10b
 
 
 Test::RunType
-PRPOffsetSinglePgMultiBlk_r10b::RunnableCoreTest(bool preserve)
+PRP2Rsvd_r10b::RunnableCoreTest(bool preserve)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All code contained herein must never permanently modify the state or
     // configuration of the DUT. Permanence is defined as state or configuration
     // changes that will not be restored after a cold hard reset.
     ///////////////////////////////////////////////////////////////////////////
-
-    return ((preserve == true) ? RUN_FALSE : RUN_TRUE);   // Test is destructive
+    if ((preserve == false) && gCmdLine.rsvdfields)
+        return RUN_TRUE;
+    return RUN_FALSE;    // Optional test skipped or is destructive
 }
 
 
 void
-PRPOffsetSinglePgMultiBlk_r10b::RunCoreTest()
+PRP2Rsvd_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
@@ -106,6 +112,9 @@ PRPOffsetSinglePgMultiBlk_r10b::RunCoreTest()
     string work;
     int64_t X;
     bool enableLog;
+
+    LOG_NRM("Initialize random seed");
+    srand (51);
 
     if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
         throw FrmwkEx(HERE);
@@ -179,6 +188,7 @@ PRPOffsetSinglePgMultiBlk_r10b::RunCoreTest()
 
     DataPattern dataPat;
     uint64_t wrVal;
+    uint32_t prp2RandVal[2];
     uint64_t Y;
     for (int64_t pgOff = 0; pgOff <= X; pgOff += 4) {
         LOG_NRM("Processing at page offset #%ld", pgOff);
@@ -207,9 +217,13 @@ PRPOffsetSinglePgMultiBlk_r10b::RunCoreTest()
             if ((nLBAs % 2) != 0) {
                 dataPat = DATAPAT_INC_8BIT;
                 wrVal = pgOff + nLBAs;
+                prp2RandVal[0] = rand();
+                prp2RandVal[1] = rand();
             } else {
                 dataPat = DATAPAT_CONST_16BIT;
                 wrVal = pgOff + nLBAs;
+                prp2RandVal[0] = 0;
+                prp2RandVal[1] = 0;
             }
 
             uint64_t metabufSz = nLBAs * lbaFormat.MS;
@@ -249,9 +263,15 @@ PRPOffsetSinglePgMultiBlk_r10b::RunCoreTest()
             if ((pgOff <= 8) || (pgOff >= (X - 8)))
                 enableLog = true;
 
+            // Set 64 bits of PRP2 in CDW 8 & 9 with random or zero.
+            writeCmd->SetDword(prp2RandVal[0], 8);
+            writeCmd->SetDword(prp2RandVal[1], 9);
             IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq,
                 iocq, writeCmd, work, enableLog);
 
+            // Set 64 bits of PRP2 in CDW 8 & 9 with random or zero.
+            readCmd->SetDword(prp2RandVal[0], 8);
+            readCmd->SetDword(prp2RandVal[1], 9);
             IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq,
                 iocq, readCmd, work, enableLog);
 
@@ -262,7 +282,7 @@ PRPOffsetSinglePgMultiBlk_r10b::RunCoreTest()
 
 
 void
-PRPOffsetSinglePgMultiBlk_r10b::InitTstRsrcs(SharedASQPtr asq, SharedACQPtr acq,
+PRP2Rsvd_r10b::InitTstRsrcs(SharedASQPtr asq, SharedACQPtr acq,
     SharedIOSQPtr &iosq, SharedIOCQPtr &iocq)
 {
     uint8_t iocqes = (gInformative->GetIdentifyCmdCtrlr()->
@@ -300,7 +320,7 @@ PRPOffsetSinglePgMultiBlk_r10b::InitTstRsrcs(SharedASQPtr asq, SharedACQPtr acq,
 
 
 void
-PRPOffsetSinglePgMultiBlk_r10b::VerifyDataPat(SharedReadPtr readCmd,
+PRP2Rsvd_r10b::VerifyDataPat(SharedReadPtr readCmd,
     DataPattern dataPat, uint64_t wrVal, uint64_t metabufSz)
 {
     LOG_NRM("Compare read vs written data to verify");

@@ -25,6 +25,7 @@
 #include "datasetMgmt_r10b.h"
 #include "startingLBAMeta_r10b.h"
 #include "nlbaMeta_r10b.h"
+#include "prp2Rsvd_r10b.h"
 
 namespace GrpNVMWriteReadCombo {
 
@@ -47,6 +48,7 @@ GrpNVMWriteReadCombo::GrpNVMWriteReadCombo(size_t grpNum) :
         APPEND_TEST_AT_YLEVEL(DatasetMgmt_r10b, GrpNVMWriteReadCombo)
         APPEND_TEST_AT_XLEVEL(StartingLBAMeta_r10b, GrpNVMWriteReadCombo)
         APPEND_TEST_AT_XLEVEL(NLBAMeta_r10b, GrpNVMWriteReadCombo)
+        APPEND_TEST_AT_XLEVEL(PRP2Rsvd_r10b, GrpNVMWriteReadCombo)
 
         break;
 
