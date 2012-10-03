@@ -165,7 +165,8 @@ public:
      * @return The result from executing a single test case.
      */
     TestResult RunTest(TestSetType &dependencies, int64_t &tstIdx,
-        vector<TestRef> &skipTest, int64_t &numSkipped, bool preserve);
+        vector<TestRef> &skipTest, int64_t &numSkipped, bool preserve,
+        vector<TestRef> &failedTests, vector<TestRef> &skippedTests);
 
 
 protected:
@@ -242,7 +243,8 @@ private:
      * @ returns Returns the number of tests dependent upon the tstIdx iterator.
      */
     int64_t  AdvanceDependencies(TestSetType &dependencies, int64_t &tstIdx,
-        bool failed);
+        bool failed, vector<TestRef> &skippedTests);
+
 };
 
 

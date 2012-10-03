@@ -209,7 +209,8 @@ Group::GetTestSet(TestRef &target, TestSetType &dependencies, int64_t &tstIdx)
 
 Group::TestResult
 Group::RunTest(TestSetType &dependencies, int64_t &tstIdx,
-    vector<TestRef> &skipTest, int64_t &numSkipped, bool preserve)
+    vector<TestRef> &skipTest, int64_t &numSkipped, bool preserve,
+    vector<TestRef> &failedTests, vector<TestRef> &skippedTests)
 {
     string work;
     numSkipped = 0;
@@ -252,34 +253,42 @@ Group::RunTest(TestSetType &dependencies, int64_t &tstIdx,
     LOG_NRM("Compliance: %s", (*myTest)->GetComplianceDescription().c_str());
     LOG_NRM("%s", (*myTest)->GetLongDescription(false, 0).c_str());
 
-    switch ((*myTest)->Runnable(preserve)) {
-    case Test::RUN_TRUE:
-        if (SkippingTest(tr, skipTest)) {
-            result = TR_SKIPPING;
-            numSkipped = (AdvanceDependencies(dependencies, tstIdx, false) + 1);
-        } else {
+    if (SkippingTest(tr, skipTest)) {
+        result = TR_SKIPPING;
+        skippedTests.push_back(tr);
+        numSkipped = (AdvanceDependencies(dependencies, tstIdx, false,
+            skippedTests) + 1);
+    } else {
+        switch ((*myTest)->Runnable(preserve)) {
+        case Test::RUN_TRUE:
             result = (*myTest)->Run() ? TR_SUCCESS: TR_FAIL;
             if (result == TR_FAIL) {
-                numSkipped = AdvanceDependencies(dependencies, tstIdx, true);
+                failedTests.push_back(tr);
+                numSkipped = AdvanceDependencies(dependencies, tstIdx, true,
+                    skippedTests);
             } else {
                 if (++tstIdx >= (int64_t)dependencies.size())
                     tstIdx = -1;
                 LOG_NRM("SUCCESSFUL test case run");
             }
+            break;
+
+        case Test::RUN_FALSE:
+            result = TR_SKIPPING;
+            skippedTests.push_back(tr);
+            numSkipped = (AdvanceDependencies(dependencies, tstIdx, false,
+                skippedTests) + 1);
+            LOG_WARN("Reporting not runnable, skipping test: %ld:%ld.%ld.%ld",
+                tr.group, tr.xLev, tr.yLev, tr.zLev);
+            break;
+
+        default:
+        case Test::RUN_FAIL:
+            failedTests.push_back(tr);
+            numSkipped = AdvanceDependencies(dependencies, tstIdx, true,
+                skippedTests);
+            break;
         }
-        break;
-
-    case Test::RUN_FALSE:
-        result = TR_SKIPPING;
-        numSkipped = (AdvanceDependencies(dependencies, tstIdx, false) + 1);
-        LOG_WARN("Reporting not runnable, skipping test: %ld:%ld.%ld.%ld",
-            tr.group, tr.xLev, tr.yLev, tr.zLev);
-        break;
-
-    default:
-    case Test::RUN_FAIL:
-        numSkipped = AdvanceDependencies(dependencies, tstIdx, true);
-        break;
     }
 
     FORMAT_GROUP_DESCRIPTION(work, this)
@@ -317,7 +326,7 @@ Group::RunTest(TestSetType &dependencies, int64_t &tstIdx,
 
 int64_t
 Group::AdvanceDependencies(TestSetType &dependencies, int64_t &tstIdx,
-    bool failed)
+    bool failed, vector<TestRef> &skippedTests)
 {
     int64_t origTstIdx = tstIdx;
     int64_t work;
@@ -341,6 +350,7 @@ Group::AdvanceDependencies(TestSetType &dependencies, int64_t &tstIdx,
         // framework, and thus everything subsequent of the xLev must be
         // considered dependents since no resource remains in the DUT
         while (dt.xLev == st.xLev) {
+            skippedTests.push_back(st);
             if (++tstIdx >= (int64_t)dependencies.size()) {
                 work = ((tstIdx - origTstIdx) - 1);
                 tstIdx = -1;
@@ -355,6 +365,7 @@ Group::AdvanceDependencies(TestSetType &dependencies, int64_t &tstIdx,
         if ((dt.yLev == 0) && (dt.zLev == 0)) {
             // All the following are dependents
             while (dt.xLev == st.xLev) {
+                skippedTests.push_back(st);
                 if (++tstIdx >= (int64_t)dependencies.size()) {
                     work = ((tstIdx - origTstIdx) - 1);
                     tstIdx = -1;
@@ -365,6 +376,7 @@ Group::AdvanceDependencies(TestSetType &dependencies, int64_t &tstIdx,
         } else {
             // All the following are dependents
             while ((dt.xLev == st.xLev)  && (dt.yLev == st.yLev)){
+                skippedTests.push_back(st);
                 if (++tstIdx >= (int64_t)dependencies.size()) {
                     work = ((tstIdx - origTstIdx) - 1);
                     tstIdx = -1;

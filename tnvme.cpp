@@ -108,6 +108,7 @@ void DestroyTestFoundation(vector<Group *> &groups);
 bool BuildTestFoundation(vector<Group *> &groups);
 void ReportTestResults(size_t numIters, int numPass, int numFail, int numSkip,
     int numGrps);
+void ReportExecution(vector<TestRef> failedTests, vector<TestRef> skippedTests);
 
 
 void
@@ -709,7 +710,8 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
     TestRef targetTst;
     TestSetType testsToRun;
     bool tstSetOK;
-
+    vector<TestRef> failedTests;
+    vector<TestRef> skippedTests;
 
     if ((cl.test.t.group != UINT_MAX) && (cl.test.t.group >= groups.size())) {
         LOG_ERR("Specified test group does not exist");
@@ -767,7 +769,8 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
                 thisTestPass = true;
 
                 switch (groups[iGrp]->RunTest(testsToRun, tstIdx,
-                    cl.skiptest, skipped, cl.preserve)) {
+                    cl.skiptest, skipped, cl.preserve, failedTests,
+                    skippedTests)) {
                 case Group::TR_SUCCESS:
                     numPassed++;
                     break;
@@ -775,7 +778,7 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
                     allTestsPass = false;
                     thisTestPass = false;
                     numFailed++;
-
+                    numSkipped += skipped;
                     if (cl.ignore) {
                         LOG_WARN("Detected error, but forced to ignore");
                     } else {
@@ -794,11 +797,16 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
 
         // Report each iteration results
         ReportTestResults(iLoop, numPassed, numFailed, numSkipped, numGrps);
+
+        if (failedTests.size() || skippedTests.size())
+            ReportExecution(failedTests, skippedTests);
     }
     return allTestsPass;
 
 EARLY_OUT:
     ReportTestResults(iLoop, numPassed, numFailed, numSkipped, numGrps);
+    if (failedTests.size() || skippedTests.size())
+        ReportExecution(failedTests, skippedTests);
     return allTestsPass;
 
 ABORT_OUT:
@@ -824,3 +832,22 @@ ReportTestResults(size_t numIters, int numPass, int numFail, int numSkip,
     LOG_NRM("Stop loop execution #%ld", numIters);
 }
 
+
+void
+ReportExecution(vector<TestRef> failedTests, vector<TestRef> skippedTests)
+{
+    LOG_NRM("Detailed Iteration SUMMARY");
+    LOG_NRM("   Tests Failed :");
+    for(uint32_t i = 0; i < failedTests.size(); i++)
+        LOG_NRM("      %d:%d.%d.%d", (int)failedTests[i].group,
+            (int)failedTests[i].xLev, (int)failedTests[i].yLev,
+            (int)failedTests[i].zLev);
+
+    LOG_NRM("   Tests Skipped :");
+    for(uint32_t i = 0; i < skippedTests.size(); i++)
+        LOG_NRM("      %d:%d.%d.%d", (int)skippedTests[i].group,
+            (int)skippedTests[i].xLev, (int)skippedTests[i].yLev,
+            (int)skippedTests[i].zLev);
+
+
+}
