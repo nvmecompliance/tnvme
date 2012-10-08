@@ -18,7 +18,8 @@ INCLUDES = -I. -I../ -I../../ -I/usr/local/include
 
 SRC =					\
 	grpAdminSetGetFeatCombo.cpp	\
-	createResources_r10b.cpp
+	createResources_r10b.cpp	\
+	fidArbitration_r10b.cpp
 
 .SUFFIXES: .cpp
 

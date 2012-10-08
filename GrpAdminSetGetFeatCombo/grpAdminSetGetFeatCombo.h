@@ -23,13 +23,21 @@ namespace GrpAdminSetGetFeatCombo {
 
 
 /**
-* This class implements a template for all groups to come.
+*  This class implements tests for Admin cmd set/get features utilizing
+*  both cmds for efficiency..
 */
 class GrpAdminSetGetFeatCombo : public Group
 {
 public:
     GrpAdminSetGetFeatCombo(size_t grpNum);
     virtual ~GrpAdminSetGetFeatCombo();
+
+protected:
+    virtual bool SaveState();
+    virtual bool RestoreState();
+
+private:
+    uint32_t arbStateSave;
 };
 
 }   // namespace
