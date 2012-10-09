@@ -38,6 +38,7 @@ protected:
 
 private:
     uint32_t arbStateSave;
+    uint32_t psdStateSave;
 };
 
 }   // namespace

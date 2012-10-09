@@ -24,10 +24,9 @@
 #include "../Utils/io.h"
 #include "../Cmds/getFeatures.h"
 #include "../Cmds/setFeatures.h"
-#include "createResources_r10b.h"
 #include "fidArbitration_r10b.h"
+#include "fidPwrMgmt_r10b.h"
 
-#define FID_ARBITRATION     0x1
 
 namespace GrpAdminSetGetFeatCombo {
 
@@ -42,7 +41,7 @@ GrpAdminSetGetFeatCombo::GrpAdminSetGetFeatCombo(size_t grpNum) :
     switch (gCmdLine.rev) {
     case SPECREV_10b:
         APPEND_TEST_AT_XLEVEL(FIDArbitration_r10b, GrpAdminSetGetFeatCombo)
-        APPEND_TEST_AT_XLEVEL(CreateResources_r10b, GrpAdminSetGetFeatCombo)
+        APPEND_TEST_AT_XLEVEL(FIDPwrMgmt_r10b, GrpAdminSetGetFeatCombo)
         break;
 
     default:
@@ -66,14 +65,13 @@ GrpAdminSetGetFeatCombo::SaveState()
 
     // Reset saved value to account for regression
     arbStateSave = 0;
+    psdStateSave = 0;
 
     if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
         throw FrmwkEx(HERE);
 
-    LOG_NRM("Create admin queues ACQ and ASQ for test lifetime");
     SharedACQPtr acq = SharedACQPtr(new ACQ(gDutFd));
     acq->Init(5);
-
     SharedASQPtr asq = SharedASQPtr(new ASQ(gDutFd));
     asq->Init(5);
 
@@ -88,13 +86,24 @@ GrpAdminSetGetFeatCombo::SaveState()
     SharedGetFeaturesPtr getFeaturesCmd =
         SharedGetFeaturesPtr(new GetFeatures());
 
-    LOG_NRM("Get features arbitration (FID = 0x%x)", FID_ARBITRATION);
-    getFeaturesCmd->SetFID(FID_ARBITRATION);
-
+    getFeaturesCmd->SetFID(BaseFeatures::FID_ARBITRATION);
+    struct nvme_gen_cq acqMetrics = acq->GetQMetrics();
     IO::SendAndReapCmd(mGrpName, mGrpName, CALC_TIMEOUT_ms(1), asq, acq,
-        getFeaturesCmd, "SaveFeat", true);
+        getFeaturesCmd, "SaveFeatArb", true);
+
+    union CE ce = acq->PeekCE(acqMetrics.head_ptr);
+    arbStateSave = ce.t.dw0;
 
     LOG_NRM("Default arbitration using Get Features = 0x%04X", arbStateSave);
+
+    getFeaturesCmd->SetFID(BaseFeatures::FID_PWR_MGMT);
+    acqMetrics = acq->GetQMetrics();
+    IO::SendAndReapCmd(mGrpName, mGrpName, CALC_TIMEOUT_ms(1), asq, acq,
+        getFeaturesCmd, "SaveFeatPwrMgmt", true);
+    ce = acq->PeekCE(acqMetrics.head_ptr);
+    psdStateSave = ce.t.dw0;
+
+    LOG_NRM("Default power state using Get Features = 0x%04X", psdStateSave);
 
     return true;
 }
@@ -104,12 +113,9 @@ bool
 GrpAdminSetGetFeatCombo::RestoreState()
 {
     // For the majority of test groups this feature most likely won't be needed
-    LOG_NRM("Restoring state with arbitration = 0x%04X", arbStateSave);
-
-    if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
+     if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
         throw FrmwkEx(HERE);
 
-    LOG_NRM("Create admin queues ACQ and ASQ for test lifetime");
     SharedACQPtr acq = SharedACQPtr(new ACQ(gDutFd));
     acq->Init(5);
 
@@ -123,39 +129,52 @@ GrpAdminSetGetFeatCombo::RestoreState()
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
         throw FrmwkEx(HERE);
 
-    LOG_NRM("Create Set features cmd to restore the arbitration");
+    LOG_NRM("Create Set and get feature cmds");
     SharedSetFeaturesPtr setFeaturesCmd =
         SharedSetFeaturesPtr(new SetFeatures());
-
-    LOG_NRM("Set features arbitration FID = 0x%x", FID_ARBITRATION);
-    setFeaturesCmd->SetFID(FID_ARBITRATION);
-
-    setFeaturesCmd->SetDword(arbStateSave, 11);
-
-    IO::SendAndReapCmd(mGrpName, mGrpName, CALC_TIMEOUT_ms(1), asq, acq,
-        setFeaturesCmd, "RestoreFeat", true);
-
-    LOG_NRM("Create Get features cmd");
     SharedGetFeaturesPtr getFeaturesCmd =
         SharedGetFeaturesPtr(new GetFeatures());
-    LOG_NRM("Get features arbitration (FID = 0x%x)", FID_ARBITRATION);
-    getFeaturesCmd->SetFID(FID_ARBITRATION);
 
-    LOG_NRM("The CQ's metrics before reaping holds head_ptr");
-    struct nvme_gen_cq acqMetrics = acq->GetQMetrics();
+    LOG_NRM("Restoring state with arbitration = 0x%04X", arbStateSave);
+    setFeaturesCmd->SetFID(BaseFeatures::FID_ARBITRATION);
+    getFeaturesCmd->SetFID(BaseFeatures::FID_ARBITRATION);
 
+    setFeaturesCmd->SetDword(arbStateSave, 11);
     IO::SendAndReapCmd(mGrpName, mGrpName, CALC_TIMEOUT_ms(1), asq, acq,
-        getFeaturesCmd, "GetFeat_Restore", true);
+        setFeaturesCmd, "RestoreArb", true);
 
+    struct nvme_gen_cq acqMetrics = acq->GetQMetrics();
+    IO::SendAndReapCmd(mGrpName, mGrpName, CALC_TIMEOUT_ms(1), asq, acq,
+        getFeaturesCmd, "RestoreArb", true);
     union CE ce = acq->PeekCE(acqMetrics.head_ptr);
+
     if (arbStateSave != ce.t.dw0) {
-        LOG_ERR("System restore to original state failed. "
+        LOG_ERR("Arbitration restore to original state failed. "
             "(Actual: Expected) = (0x%04X:0x%04X)", ce.t.dw0, arbStateSave);
         return false;
-    } else {
-        LOG_NRM("System restore to original state successful.");
-        return true;
     }
+
+    LOG_NRM("Restoring state with PSD = 0x%04X", psdStateSave);
+    setFeaturesCmd->SetFID(BaseFeatures::FID_PWR_MGMT);
+    getFeaturesCmd->SetFID(BaseFeatures::FID_PWR_MGMT);
+
+    setFeaturesCmd->SetDword(psdStateSave, 11);
+    IO::SendAndReapCmd(mGrpName, mGrpName, CALC_TIMEOUT_ms(1), asq, acq,
+        setFeaturesCmd, "RestorePSD", true);
+
+    acqMetrics = acq->GetQMetrics();
+    IO::SendAndReapCmd(mGrpName, mGrpName, CALC_TIMEOUT_ms(1), asq, acq,
+        getFeaturesCmd, "RestorePSD", true);
+    ce = acq->PeekCE(acqMetrics.head_ptr);
+
+    if (psdStateSave != ce.t.dw0) {
+        LOG_ERR("PSD restore to original state failed. "
+            "(Actual: Expected) = (0x%04X:0x%04X)", ce.t.dw0, psdStateSave);
+        return false;
+    }
+
+    LOG_NRM("System restore successful for arbitration and power management");
+    return true;
 }
 
 

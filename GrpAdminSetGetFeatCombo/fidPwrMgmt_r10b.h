@@ -14,8 +14,8 @@
  *  limitations under the License.
  */
 
-#ifndef _CREATERESOURCES_r10b_H_
-#define _CREATERESOURCES_r10b_H_
+#ifndef _FIDPWRMGMT_r10b_H_
+#define _FIDPWRMGMT_r10b_H_
 
 #include "test.h"
 
@@ -29,19 +29,19 @@ namespace GrpAdminSetGetFeatCombo {
  * 1) See notes in the header file of the Test base class
  * \endverbatim
  */
-class CreateResources_r10b : public Test
+class FIDPwrMgmt_r10b : public Test
 {
 public:
-    CreateResources_r10b(string grpName, string testName);
-    virtual ~CreateResources_r10b();
+    FIDPwrMgmt_r10b(string grpName, string testName);
+    virtual ~FIDPwrMgmt_r10b();
 
     /**
      * IMPORTANT: Read Test::Clone() header comment.
      */
-    virtual CreateResources_r10b *Clone() const
-        { return new CreateResources_r10b(*this); }
-    CreateResources_r10b &operator=(const CreateResources_r10b &other);
-    CreateResources_r10b(const CreateResources_r10b &other);
+    virtual FIDPwrMgmt_r10b *Clone() const
+        { return new FIDPwrMgmt_r10b(*this); }
+    FIDPwrMgmt_r10b &operator=(const FIDPwrMgmt_r10b &other);
+    FIDPwrMgmt_r10b(const FIDPwrMgmt_r10b &other);
 
 
 protected:

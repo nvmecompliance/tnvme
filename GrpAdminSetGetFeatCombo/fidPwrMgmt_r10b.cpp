@@ -15,10 +15,10 @@
  */
 
 #include <boost/format.hpp>
-#include "fidArbitration_r10b.h"
+#include "fidPwrMgmt_r10b.h"
 #include "globals.h"
 #include "grpDefs.h"
-#include "../Queues/acq.h" 
+#include "../Queues/acq.h"
 #include "../Queues/asq.h"
 #include "../Utils/kernelAPI.h"
 #include "../Utils/irq.h"
@@ -26,29 +26,27 @@
 #include "../Cmds/getFeatures.h"
 #include "../Cmds/setFeatures.h"
 
-#define NO_LIMIT            0x7
-
 namespace GrpAdminSetGetFeatCombo {
 
 
-FIDArbitration_r10b::FIDArbitration_r10b(
+FIDPwrMgmt_r10b::FIDPwrMgmt_r10b(
     string grpName, string testName) :
     Test(grpName, testName, SPECREV_10b)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.0b, section 5");
-    mTestDesc.SetShort(     "Verify changes are allowed on FID = Arbitration");
+    mTestDesc.SetShort(     "Verify changes are allowed on FID = Pwr mgmt");
     // No string size limit for the long description
     mTestDesc.SetLong(
         "Reset ctrlr to cause a clearing of DUT state. Issue GetFeatures, "
-        "FID = 0x01. Programmatically and dynamically force new, legal values "
-        "into all fields of CE.DW0 and assoc changes with SetFeatures. "
-        "Redo GetFeatures to verify settings were accepted.");
+        "FID = 0x02. Programmatically and dynamically force new, legal values "
+        "into all fields of CE.DW0 and assoc changes with SetFeatures. Redo "
+        "GetFeatures to verify settings were accepted.");
 
 }
 
 
-FIDArbitration_r10b::~FIDArbitration_r10b()
+FIDPwrMgmt_r10b::~FIDPwrMgmt_r10b()
 {
     ///////////////////////////////////////////////////////////////////////////
     // Allocations taken from the heap and not under the control of the
@@ -57,8 +55,8 @@ FIDArbitration_r10b::~FIDArbitration_r10b()
 }
 
 
-FIDArbitration_r10b::
-FIDArbitration_r10b(const FIDArbitration_r10b &other) : Test(other)
+FIDPwrMgmt_r10b::
+FIDPwrMgmt_r10b(const FIDPwrMgmt_r10b &other) : Test(other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -67,8 +65,8 @@ FIDArbitration_r10b(const FIDArbitration_r10b &other) : Test(other)
 }
 
 
-FIDArbitration_r10b &
-FIDArbitration_r10b::operator=(const FIDArbitration_r10b &other)
+FIDPwrMgmt_r10b &
+FIDPwrMgmt_r10b::operator=(const FIDPwrMgmt_r10b &other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -80,7 +78,7 @@ FIDArbitration_r10b::operator=(const FIDArbitration_r10b &other)
 
 
 Test::RunType
-FIDArbitration_r10b::RunnableCoreTest(bool preserve)
+FIDPwrMgmt_r10b::RunnableCoreTest(bool preserve)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All code contained herein must never permanently modify the state or
@@ -93,7 +91,7 @@ FIDArbitration_r10b::RunnableCoreTest(bool preserve)
 
 
 void
-FIDArbitration_r10b::RunCoreTest()
+FIDPwrMgmt_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
@@ -101,7 +99,6 @@ FIDArbitration_r10b::RunCoreTest()
      * \endverbatim
      */
     string work;
-    uint32_t arbValDW11 = 0;
     union CE ce;
     struct nvme_gen_cq acqMetrics;
 
@@ -128,42 +125,44 @@ FIDArbitration_r10b::RunCoreTest()
     SharedSetFeaturesPtr setFeaturesCmd =
         SharedSetFeaturesPtr(new SetFeatures());
 
-    LOG_NRM("Set and Get features arbitration (FID = 0x%x)",
-        BaseFeatures::FID_ARBITRATION);
-    getFeaturesCmd->SetFID(BaseFeatures::FID_ARBITRATION);
-    setFeaturesCmd->SetFID(BaseFeatures::FID_ARBITRATION);
+    LOG_NRM("Set and Get features PSD (FID = 0x%x)", BaseFeatures::FID_PWR_MGMT);
+    getFeaturesCmd->SetFID(BaseFeatures::FID_PWR_MGMT);
+    setFeaturesCmd->SetFID(BaseFeatures::FID_PWR_MGMT);
 
-    uint8_t arbBurst[] =  {
-        1 << 0, 1 << 1, 1 << 2, 1 << 3, 1 << 4, 1 << 5, NO_LIMIT
-    };
-    uint64_t arbSize = sizeof(arbBurst) / sizeof(arbBurst[0]);
+    uint8_t npss = gInformative->GetIdentifyCmdCtrlr()->
+        GetValue(IDCTRLRCAP_NPSS); // 0-based
 
-    for (uint64_t arbVal = 0, inc = 1; arbVal < 0xFFFFFFFF;
-        arbVal += (2 * inc), inc += 1327) {
-        LOG_NRM("Prepare arbitration value for loop # %ld", arbVal);
-        arbValDW11 = arbVal & 0xFFFFFF00;
-        arbValDW11 |= arbBurst[arbVal % arbSize];
+    LOG_NRM("Number of power states supported by the ctrlr (NPSS) = %d", npss);
 
-        LOG_NRM("Issue set features with arb setting (DW11)= 0x%X", arbValDW11);
-        setFeaturesCmd->SetArbitration(arbValDW11);
-        work = str(boost::format("arbValDW11.%xh") % arbValDW11);
+    uint8_t psdMismatch = 0;
+    for (uint16_t psd = 0; psd <= npss; psd++) {
+        LOG_NRM("Set and Get features for PSD # %d", psd);
+        setFeaturesCmd->SetPSD(psd);
+        LOG_NRM("Issue set features cmd with PSDD = %d", psd);
+
+        work = str(boost::format("psd.%d") % psd);
         IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
-            setFeaturesCmd, work, false);
+            setFeaturesCmd, work, true);
 
         acqMetrics = acq->GetQMetrics();
 
-        LOG_NRM("Issue get features cmd and check for arb = 0x%X", arbValDW11);
+        LOG_NRM("Issue get features cmd and check for psd = %d", psd);
         IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
             getFeaturesCmd, work, false);
 
         ce = acq->PeekCE(acqMetrics.head_ptr);
-        LOG_NRM("Arbitration status using Get Features = 0x%04X", ce.t.dw0);
-        if (arbValDW11 != ce.t.dw0) {
-            throw FrmwkEx(HERE, "Arbitration get feat does not match set feat"
-                "(expected, rcvd) = (0x%04X, 0x%04X)", arbValDW11, ce.t.dw0);
+        LOG_NRM("Power state descriptor using Get Features = %d", ce.t.dw0);
+        if (psd != ce.t.dw0) {
+            LOG_ERR("PSD get feat does not match set feat"
+                "(expected, rcvd) = (%d, %d)", psd, ce.t.dw0);
+            psdMismatch = 0xFF;
         }
     }
+
+    if (psdMismatch)
+        throw FrmwkEx(HERE, "Power state mismatched.");
 }
+
 
 
 }   // namespace
