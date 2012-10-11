@@ -18,6 +18,14 @@
 #include "globals.h"
 #include "../Utils/buffers.h"
 
+#define BYTE_BITMASK_AB         0x7
+#define BYTE_BITMASK_PS         0x1F
+#define BYTE_BITMASK_NUM        0x3F
+#define BYTE_BITMASK_WCE        0x1
+#define BYTE_BITMASK_CD         0x1
+#define BYTE_BITMASK_DN         0x1
+
+
 SharedSetFeaturesPtr SetFeatures::NullSetFeaturesPtr;
 const uint8_t SetFeatures::Opcode = 0x09;
 
@@ -39,30 +47,49 @@ SetFeatures::~SetFeatures()
 
 
 void
-SetFeatures::SetNumberOfQueues(uint16_t ncqr, uint16_t nsqr)
+SetFeatures::SetArbitration(uint8_t hpw, uint8_t mpw, uint8_t lpw, uint8_t ab)
 {
-    LOG_NRM("Setting Set Features(Number of Queues): ncqr=0x%04X, nsqr=0x%04X",
-        ncqr, nsqr);
-
-    uint32_t dw11 = nsqr;
-    dw11 |= (((uint32_t)ncqr) << 16);
-    SetDword(dw11, 11);
-}
-
-
-uint32_t
-SetFeatures::GetNumberOfQueues() const
-{
-    LOG_NRM("Getting Set Features(Number of Queues)");
-    return GetDword(11);
+    LOG_NRM("Setting abritration");
+    SetArbitrationHPW(hpw);
+    SetArbitrationMPW(mpw);
+    SetArbitrationLPW(lpw);
+    SetArbitrationAB(ab);
 }
 
 
 void
-SetFeatures::SetArbitration(uint32_t arb)
+SetFeatures::SetArbitrationHPW(uint8_t hpw)
 {
-    LOG_NRM("Setting cmd arbitation to: 0x%04X", arb);
-    SetDword(arb, 11);
+    LOG_NRM("Setting HPW = 0x%02X", hpw);
+    SetByte(hpw, 11, 3);
+}
+
+
+void
+SetFeatures::SetArbitrationMPW(uint8_t mpw)
+{
+    LOG_NRM("Setting MPW = 0x%02X", mpw);
+    SetByte(mpw, 11, 2);
+}
+
+
+void
+SetFeatures::SetArbitrationLPW(uint8_t lpw)
+{
+    LOG_NRM("Setting LPW = 0x%02X", lpw);
+    SetByte(lpw, 11, 1);
+}
+
+
+void
+SetFeatures::SetArbitrationAB(uint8_t ab)
+{
+    LOG_NRM("Setting AB = 0x%02X", ab);
+
+    uint8_t work = GetByte(11, 0);
+    work &= ~BYTE_BITMASK_AB;
+    work |= (ab & BYTE_BITMASK_AB);
+    SetByte(ab, 11, 0);
 }
 
 
@@ -74,45 +101,93 @@ SetFeatures::GetArbitration() const
 }
 
 
-void
-SetFeatures::SetPSD(uint8_t psd)
+uint8_t
+SetFeatures::GetArbitrationHPW() const
 {
-    LOG_NRM("Setting power state descriptor (PSD): 0x%02X", psd);
-
-    uint8_t npss = gInformative->GetIdentifyCmdCtrlr()->
-        GetValue(IDCTRLRCAP_NPSS);
-    if (psd > 0x1F) {
-        throw FrmwkEx(HERE, "Undefined behavior for setting rsvd bits of PSD");
-    } else if (psd > npss) {
-        throw FrmwkEx(HERE, "PSD # %d shall not be greater than NPSS # %d",
-            psd, npss);
-    }
-
-    uint32_t dw11 = psd & 0x1F;
-    SetDword(dw11, 11);
+    LOG_NRM("Getting HPW");
+    return GetByte(11, 3);
 }
 
 
 uint8_t
-SetFeatures::GetPSD() const
+SetFeatures::GetArbitrationMPW() const
 {
-    LOG_NRM("Getting power state descriptor (PSD)");
-    return GetByte(11, 0);
+    LOG_NRM("Getting MPW");
+    return GetByte(11, 2);
+}
+
+
+uint8_t
+SetFeatures::GetArbitrationLPW() const
+{
+    LOG_NRM("Getting LPW");
+    return GetByte(11, 1);
+}
+
+
+uint8_t
+SetFeatures::GetArbitrationAB() const
+{
+    LOG_NRM("Getting AB");
+    return (GetByte(11, 0) & BYTE_BITMASK_AB);
 }
 
 
 void
-SetFeatures::SetTempThreshold(uint16_t tmpth)
+SetFeatures::SetPowerManagementPS(uint8_t ps)
+{
+    LOG_NRM("Setting power state (PS): 0x%02X", ps);
+
+    uint8_t npss = gInformative->GetIdentifyCmdCtrlr()->
+        GetValue(IDCTRLRCAP_NPSS);
+    if (ps > npss)
+        throw FrmwkEx(HERE, "PS %d shall not be > NPSS # %d", ps, npss);
+
+    uint8_t work = GetByte(11, 0);
+    work &= ~BYTE_BITMASK_PS;
+    work |= (ps & BYTE_BITMASK_PS);
+    SetByte(work, 11, 0);
+}
+
+
+uint8_t
+SetFeatures::GetPowerManagementPS() const
+{
+    LOG_NRM("Getting power state (PS)");
+    return (GetByte(11, 0) & BYTE_BITMASK_PS);
+}
+
+
+void
+SetFeatures::SetLBARangeTypeNUM(uint8_t num)
+{
+    LOG_NRM("Setting number of LBA range (NUM): 0x%02X", num);
+
+    uint8_t work = GetByte(11, 0);
+    work &= ~BYTE_BITMASK_NUM;
+    work |= (num & BYTE_BITMASK_NUM);
+    SetByte(work, 11, 0);
+}
+
+
+uint8_t
+SetFeatures::GetLBARangeTypeNUM() const
+{
+    LOG_NRM("Getting number of LBA range (NUM)");
+    return (GetByte(11, 0) & BYTE_BITMASK_NUM);
+}
+
+
+void
+SetFeatures::SetTempThresholdTMPTH(uint16_t tmpth)
 {
     LOG_NRM("Setting temperature threshold (TMPTH): 0x%04X in Kelvin", tmpth);
-
-    uint32_t dw11 = tmpth;
-    SetDword(dw11, 11);
+    SetWord(tmpth, 11, 0);
 }
 
 
 uint16_t
-SetFeatures::GetTempThreshold() const
+SetFeatures::GetTempThresholdTMPTH() const
 {
     LOG_NRM("Getting temperature threshold (TMPTH)");
     return GetWord(11, 0);
@@ -120,17 +195,15 @@ SetFeatures::GetTempThreshold() const
 
 
 void
-SetFeatures::SetErrRecoveryTime(uint16_t tler)
+SetFeatures::SetErrRecoveryTLER(uint16_t tler)
 {
     LOG_NRM("Setting error recovery retry timeout (TLER): 0x%04X", tler);
-
-    uint32_t dw11 = tler;
-    SetDword(dw11, 11);
+    SetWord(tler, 11, 0);
 }
 
 
 uint16_t
-SetFeatures::GetErrRecoveryTime() const
+SetFeatures::GetErrRecoveryTLER() const
 {
     LOG_NRM("Getting Error recover retry timeout (TLER)");
     return GetWord(11, 0);
@@ -138,77 +211,208 @@ SetFeatures::GetErrRecoveryTime() const
 
 
 void
-SetFeatures::SetVolatileWriteCache(uint8_t wce)
+SetFeatures::SetVolatileWriteCacheWCE(uint8_t wce)
 {
-    LOG_NRM("Setting volatile write cache (WCE): 0x%02X", wce & 0x1);
+    LOG_NRM("Setting volatile write cache (WCE): 0x%02X", wce);
 
-    uint32_t dw11 = wce & 0x1;
-    SetDword(dw11, 11);
+    uint8_t work = GetByte(11, 0);
+    work &= ~BYTE_BITMASK_WCE;
+    work |= (wce & BYTE_BITMASK_WCE);
+    SetByte(work, 11, 0);
+
 }
 
 
 uint8_t
-SetFeatures::GetVolatileWriteCache() const
+SetFeatures::GetVolatileWriteCacheWCE() const
 {
     LOG_NRM("Getting Volatile Write Cache (WCE)");
-    return (GetByte(11, 0) & 0x1);
+    return (GetByte(11, 0) & BYTE_BITMASK_WCE);
 }
 
-void
-SetFeatures::SetIntCoalescing(uint8_t aTime, uint8_t aThr)
-{
-    LOG_NRM("Setting aggregation time (TIME): 0x%02X", aTime);
-    LOG_NRM("Setting aggregation threshold (THR): 0x%02X", aThr);
 
-    uint32_t dw11 = aTime & 0xFF;
-    dw11 <<= 8;
-    dw11 |= aThr;
-    SetDword(dw11, 11);
+void
+SetFeatures::SetNumberOfQueues(uint16_t ncqr, uint16_t nsqr)
+{
+    LOG_NRM("Setting Set Features(Number of Queues): ncqr=0x%04X, nsqr=0x%04X",
+        ncqr, nsqr);
+
+    SetNumberOfQueuesNCQR(ncqr);
+    SetNumberOfQueuesNSQR(nsqr);
+}
+
+
+void
+SetFeatures::SetNumberOfQueuesNCQR(uint16_t ncqr)
+{
+    LOG_NRM("Setting Set Features(Number of CQs): NCQR=0x%04X", ncqr);
+    SetWord(ncqr, 11, 1);
+}
+
+
+void
+SetFeatures::SetNumberOfQueuesNSQR(uint16_t nsqr)
+{
+    LOG_NRM("Setting Set Features(Number of SQs): NSQR=0x%04X", nsqr);
+    SetWord(nsqr, 11, 0);
+}
+
+
+uint32_t
+SetFeatures::GetNumberOfQueues() const
+{
+    LOG_NRM("Getting Set Features(Number of Queues)");
+    return GetDword(11);
 }
 
 
 uint16_t
-SetFeatures::GetIntCoalescing() const
+SetFeatures::GetNumberOfQueuesNCQR() const
 {
-    LOG_NRM("Getting interrupt coalescing (TIME|THR)");
+    LOG_NRM("Getting Set Features(Number of CQs): NCQR");
+    return GetWord(11, 1);
+}
+
+
+uint16_t
+SetFeatures::GetNumberOfQueuesNSQR() const
+{
+    LOG_NRM("Getting Set Features(Number of SQs): NSQR");
     return GetWord(11, 0);
 }
 
 
 void
-SetFeatures::SetIntVecConfig(uint8_t cd, uint16_t iv)
+SetFeatures::SetIntCoalescing(uint8_t time, uint8_t thr)
 {
-    LOG_NRM("Setting coalescing disable value (CD): 0x%02X", cd);
-    LOG_NRM("Setting interrupt vector (IV): 0x%04X", iv);
+    LOG_NRM("Setting interrupt coalescing");
+    SetIntCoalescingTIME(time);
+    SetIntCoalescingTHR(thr);
+}
 
-    uint32_t dw11 = cd & 0x1;
-    dw11 <<= 16;
-    dw11 |= iv;
-    SetDword(dw11, 11);
+
+void
+SetFeatures::SetIntCoalescingTIME(uint8_t time)
+{
+    LOG_NRM("Setting aggregation time (TIME): 0x%02X", time);
+    SetByte(time, 11, 1);
+}
+
+
+void
+SetFeatures::SetIntCoalescingTHR(uint8_t thr)
+{
+    LOG_NRM("Setting aggregation threshold (THR): 0x%02X", thr);
+    SetByte(thr, 11, 0);
 }
 
 
 uint32_t
-SetFeatures::GetIntVecConfig() const
+SetFeatures::GetIntCoalescing() const
 {
     LOG_NRM("Getting interrupt coalescing (TIME|THR)");
     return GetDword(11);
 }
 
 
-void
-SetFeatures::SetAsyncEventConfig(uint16_t critWarn)
+uint8_t
+SetFeatures::GetIntCoalescingTIME() const
 {
-    LOG_NRM("Setting critical warning bits for "
-        "(SMART/Health critical warnings): 0x%04X", critWarn);
+    LOG_NRM("Getting aggregation time (TIME)");
+    return GetByte(11, 1);
+}
 
-    uint32_t dw11 = critWarn;
-    SetDword(dw11, 11);
+
+uint8_t
+SetFeatures::GetIntCoalescingTHR() const
+{
+    LOG_NRM("Getting aggregation threshold (THR)");
+    return GetByte(11, 0);
+}
+
+
+void
+SetFeatures::SetIntVecConfig(uint8_t cd, uint16_t iv)
+{
+    LOG_NRM("Setting interrupt vector configuration");
+
+    SetIntVecConfigCD(cd);
+    SetIntVecConfigIV(iv);
+}
+
+
+void
+SetFeatures::SetIntVecConfigIV(uint16_t iv)
+{
+    LOG_NRM("Setting interrupt vector (IV): 0x%04X", iv);
+    SetWord(iv, 11, 0);
+}
+
+
+void
+SetFeatures::SetIntVecConfigCD(uint8_t cd)
+{
+    LOG_NRM("Setting coalescing disable (CD): 0x%02X", cd);
+    uint8_t work = GetByte(11, 2);
+    work &= ~BYTE_BITMASK_CD;
+    work |= (cd & BYTE_BITMASK_CD);
+    SetByte(work, 11, 2);
+}
+
+
+uint32_t
+SetFeatures::GetIntVecConfig() const
+{
+    LOG_NRM("Getting interrupt vector configuration");
+    return GetDword(11);
 }
 
 
 uint16_t
-SetFeatures::GetAsyncEventConfig() const
+SetFeatures::GetIntVecConfigIV() const
+{
+    LOG_NRM("Getting interrupt vector (IV)");
+    return GetWord(11, 0);
+}
+
+
+void
+SetFeatures::SetWriteAtomicityDN(uint8_t dn)
+{
+    LOG_NRM("Setting write atomicity (DN): 0x%02X", dn);
+    uint8_t work = GetByte(11, 0);
+    work &= ~BYTE_BITMASK_DN;
+    work |= (dn & BYTE_BITMASK_DN);
+    SetByte(work, 11, 0);
+}
+
+
+uint8_t
+SetFeatures::GetWriteAtomicityDN() const
+{
+    LOG_NRM("Getting Write atomicity (DN)");
+    return (GetByte(11, 0)  & BYTE_BITMASK_DN);;
+}
+
+
+uint8_t
+SetFeatures::GetIntVecConfigCD() const
+{
+    LOG_NRM("Getting coalescing disable(CD)");
+    return (GetByte(11, 2) & BYTE_BITMASK_CD);
+}
+
+void
+SetFeatures::SetAsyncEventConfigSMART(uint16_t critWarn)
+{
+    LOG_NRM("Setting critical warning bits for "
+        "(SMART/Health critical warnings): 0x%04X", critWarn);
+    SetWord(critWarn, 11, 0);
+}
+
+
+uint16_t
+SetFeatures::GetAsyncEventConfigSMART() const
 {
     LOG_NRM("Getting critical warning bit vector SMART/Health critical warns)");
     return GetWord(11, 0);
@@ -216,17 +420,15 @@ SetFeatures::GetAsyncEventConfig() const
 
 
 void
-SetFeatures::SetSWProgressMarker(uint8_t pbslc)
+SetFeatures::SetSWProgressMarkerPBSLC(uint8_t pbslc)
 {
     LOG_NRM("Setting software progress marker (PBSLC): 0x%02X", pbslc);
-
-    uint32_t dw11 = pbslc & 0xFF;
-    SetDword(dw11, 11);
+    SetByte(pbslc, 11, 0);
 }
 
 
 uint8_t
-SetFeatures::GetSWProgressMarker() const
+SetFeatures::GetSWProgressMarkerPBSLC() const
 {
     LOG_NRM("Getting software progress marker (PBSLC)");
     return GetByte(11, 0);

@@ -134,32 +134,32 @@ FIDPwrMgmt_r10b::RunCoreTest()
 
     LOG_NRM("Number of power states supported by the ctrlr (NPSS) = %d", npss);
 
-    uint8_t psdMismatch = 0;
-    for (uint16_t psd = 0; psd <= npss; psd++) {
-        LOG_NRM("Set and Get features for PSD # %d", psd);
-        setFeaturesCmd->SetPSD(psd);
-        LOG_NRM("Issue set features cmd with PSDD = %d", psd);
+    uint8_t psMismatch = 0;
+    for (uint16_t ps = 0; ps <= npss; ps++) {
+        LOG_NRM("Set and Get features for PS # %d", ps);
+        setFeaturesCmd->SetPowerManagementPS(ps);
+        LOG_NRM("Issue set features cmd with PS = %d", ps);
 
-        work = str(boost::format("psd.%d") % psd);
+        work = str(boost::format("ps.%d") % ps);
         IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
             setFeaturesCmd, work, true);
 
         acqMetrics = acq->GetQMetrics();
 
-        LOG_NRM("Issue get features cmd and check for psd = %d", psd);
+        LOG_NRM("Issue get features cmd and check for ps = %d", ps);
         IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
             getFeaturesCmd, work, false);
 
         ce = acq->PeekCE(acqMetrics.head_ptr);
         LOG_NRM("Power state descriptor using Get Features = %d", ce.t.dw0);
-        if (psd != ce.t.dw0) {
+        if (ps != ce.t.dw0) {
             LOG_ERR("PSD get feat does not match set feat"
-                "(expected, rcvd) = (%d, %d)", psd, ce.t.dw0);
-            psdMismatch = 0xFF;
+                "(expected, rcvd) = (%d, %d)", ps, ce.t.dw0);
+            psMismatch = 0xFF;
         }
     }
 
-    if (psdMismatch)
+    if (psMismatch)
         throw FrmwkEx(HERE, "Power state mismatched.");
 }
 

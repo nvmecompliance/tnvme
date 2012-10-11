@@ -145,7 +145,10 @@ FIDArbitration_r10b::RunCoreTest()
         arbValDW11 |= arbBurst[arbVal % arbSize];
 
         LOG_NRM("Issue set features with arb setting (DW11)= 0x%X", arbValDW11);
-        setFeaturesCmd->SetArbitration(arbValDW11);
+        setFeaturesCmd->SetArbitrationHPW(arbValDW11 >> 24);
+        setFeaturesCmd->SetArbitrationMPW(arbValDW11 >> 16);
+        setFeaturesCmd->SetArbitrationLPW(arbValDW11 >> 8);
+        setFeaturesCmd->SetArbitrationAB(arbValDW11);
         work = str(boost::format("arbValDW11.%xh") % arbValDW11);
         IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
             setFeaturesCmd, work, false);
