@@ -15,6 +15,7 @@
  */
 
 #include <boost/format.hpp>
+#include <vector>
 #include "kernelAPI.h"
 #include "globals.h"
 #include "io.h"
@@ -30,10 +31,22 @@ IO::~IO()
 }
 
 
-void
+CEStat
 IO::SendAndReapCmd(string grpName, string testName, uint16_t ms,
     SharedSQPtr sq, SharedCQPtr cq, SharedCmdPtr cmd, string qualify,
     bool verbose, CEStat status)
+{
+    std::vector<CEStat> localStatus;
+    localStatus.push_back(status);
+    return SendAndReapCmd(grpName, testName, ms, sq, cq, cmd, qualify,
+        verbose, localStatus);
+}
+
+
+CEStat
+IO::SendAndReapCmd(string grpName, string testName, uint16_t ms,
+    SharedSQPtr sq, SharedCQPtr cq, SharedCmdPtr cmd, string qualify,
+    bool verbose, std::vector<CEStat> &status)
 {
     uint32_t numCE;
     uint32_t isrCount;
@@ -58,7 +71,6 @@ IO::SendAndReapCmd(string grpName, string testName, uint16_t ms,
             "sq." + cmd->GetName(), qualify), work);
     }
     sq->Ring();
-
 
     LOG_NRM("Wait for the CE to arrive in CQ %d", cq->GetQId());
     if (cq->ReapInquiryWaitSpecify(ms, 1, numCE, isrCount) == false) {
@@ -85,22 +97,34 @@ IO::SendAndReapCmd(string grpName, string testName, uint16_t ms,
     }
 
     // throws if an error occurs
-    ReapCE(cq, numCE, isrCount, grpName, testName, qualify, status);
+    CEStat retStat =
+        ReapCE(cq, numCE, isrCount, grpName, testName, qualify, status);
     if (verbose) {
         cmd->Dump(FileSystem::PrepDumpFile(grpName, testName,
             cmd->GetName(), qualify), "A cmd's contents dumped");
     }
+    return retStat;
 }
 
 
-void
+CEStat
 IO::ReapCE(SharedCQPtr cq, uint32_t numCE, uint32_t &isrCount,
     string grpName, string testName, string qualify, CEStat status)
+{
+    std::vector<CEStat> localStatus;
+    localStatus.push_back(status);
+    return ReapCE(cq, numCE, isrCount, grpName, testName, qualify, localStatus);
+}
+
+
+CEStat
+IO::ReapCE(SharedCQPtr cq, uint32_t numCE, uint32_t &isrCount,
+    string grpName, string testName, string qualify,
+    std::vector<CEStat> &status)
 {
     uint32_t ceRemain;
     uint32_t numReaped;
     string work;
-
 
     LOG_NRM("The CQ's metrics before reaping holds head_ptr");
     struct nvme_gen_cq cqMetrics = cq->GetQMetrics();
@@ -117,6 +141,20 @@ IO::ReapCE(SharedCQPtr cq, uint32_t numCE, uint32_t &isrCount,
         throw FrmwkEx(HERE, work);
     }
     union CE ce = cq->PeekCE(cqMetrics.head_ptr);
-    ProcessCE::Validate(ce, status);  // throws upon error
+
+    if (status.empty()) {
+        throw FrmwkEx(HERE,
+            "Internal Programming Error; Must supply >= 1 status");
+    }
+
+    // Search for 1 matching CEStat to match the device status
+    for (size_t sIdx = 0; sIdx < status.size(); sIdx++) {
+        if (ProcessCE::ValidatePeek(ce, status[sIdx]) == true)
+            return status[sIdx];
+    }
+
+    throw FrmwkEx(HERE,
+        "%d CeStat's compared to device status, but no match found",
+        status.size());
 }
 

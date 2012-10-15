@@ -55,10 +55,14 @@ public:
      * @param qualify Pass a qualifying string to append to each dump file
      * @param status Pass the expected status to verify with
      * @param verbose Pass true to dump resources to dump files, otherwise false
+     * @return matching status if successful; throws exception otherwise;
      */
-    static void SendAndReapCmd(string grpName, string testName, uint16_t ms,
+    static CEStat SendAndReapCmd(string grpName, string testName, uint16_t ms,
         SharedSQPtr sq, SharedCQPtr cq, SharedCmdPtr cmd, string qualify,
         bool verbose, CEStat status = CESTAT_SUCCESS);
+    static CEStat SendAndReapCmd(string grpName, string testName, uint16_t ms,
+        SharedSQPtr sq, SharedCQPtr cq, SharedCmdPtr cmd, string qualify,
+        bool verbose, std::vector<CEStat> &status);
 
     /**
      * Reap a specified number of CE's from the specified CQ.
@@ -70,10 +74,14 @@ public:
      * @param testName Pass the name of the child testclass
      * @param qualify Pass a qualifying string to append to each dump file
      * @param status Pass the expected status to verify with
+     * @return matching status if successful; throws exception otherwise;
      */
-    static void ReapCE(SharedCQPtr cq, uint32_t numCE, uint32_t &isrCount,
+    static CEStat ReapCE(SharedCQPtr cq, uint32_t numCE, uint32_t &isrCount,
         string grpName, string testName, string qualify,
         CEStat status = CESTAT_SUCCESS);
+    static CEStat ReapCE(SharedCQPtr cq, uint32_t numCE, uint32_t &isrCount,
+        string grpName, string testName, string qualify,
+        std::vector<CEStat> &status);
 
 private:
 };
