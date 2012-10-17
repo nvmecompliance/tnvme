@@ -19,7 +19,10 @@ INCLUDES = -I. -I../ -I../../ -I/usr/local/include
 SRC =					\
 	grpAdminSetGetFeatCombo.cpp	\
 	fidArbitration_r10b.cpp		\
-	fidPwrMgmt_r10b.cpp
+	fidPwrMgmt_r10b.cpp		\
+	fidTempThres_r10b.cpp		\
+	fidErrRecovery_r10b.cpp		\
+	fidVolatileCash_r10b.cpp
 
 .SUFFIXES: .cpp
 

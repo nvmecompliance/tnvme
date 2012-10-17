@@ -23,7 +23,7 @@ namespace GrpAdminSetGetFeatCombo {
 
 #define ACQ_GROUP_ID                "ACQ"
 #define ASQ_GROUP_ID                "ASQ"
-
+#define BITMASK_VWC                 0x1
 
 }   // namespace
 

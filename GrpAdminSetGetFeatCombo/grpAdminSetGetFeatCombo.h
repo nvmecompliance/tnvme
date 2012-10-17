@@ -18,6 +18,8 @@
 #define _GRPADMINSETGETFEATCOMBO_H_
 
 #include "../group.h"
+#include "../Queues/acq.h"
+#include "../Queues/asq.h"
 
 namespace GrpAdminSetGetFeatCombo {
 
@@ -37,8 +39,26 @@ protected:
     virtual bool RestoreState();
 
 private:
-    uint32_t arbStateSave;
-    uint32_t psdStateSave;
+    uint32_t mArbitration;
+    uint32_t mPowerState;
+    uint32_t mTmpThreshold;
+    uint32_t mTimeLimErrRec;
+    uint32_t mVolWrCache;
+
+    void SaveArbitration(SharedASQPtr asq, SharedACQPtr acq);
+    bool RestoreArbitration(SharedASQPtr asq, SharedACQPtr acq);
+
+    void SavePowerState(SharedASQPtr asq, SharedACQPtr acq);
+    bool RestorePowerState(SharedASQPtr asq, SharedACQPtr acq);
+
+    void SaveTMPTH(SharedASQPtr asq, SharedACQPtr acq);
+    bool RestoreTMPTH(SharedASQPtr asq, SharedACQPtr acq);
+
+    void SaveTLER(SharedASQPtr asq, SharedACQPtr acq);
+    bool RestoreTLER(SharedASQPtr asq, SharedACQPtr acq);
+
+    void SaveVolWrCache(SharedASQPtr asq, SharedACQPtr acq);
+    bool RestoreVolWrCache(SharedASQPtr asq, SharedACQPtr acq);
 };
 
 }   // namespace
