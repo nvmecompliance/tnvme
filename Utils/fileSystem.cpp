@@ -121,7 +121,7 @@ FileSystem::RotateDumpDir()
 
     // Rename all files to "*.prev"
     for (size_t i = 0; i < allFiles.size(); i++) {
-        string newName = (allFiles[i].filename() + ".prev");
+        //string newName = (allFiles[i].filename() + ".prev");
         snprintf(work, sizeof(work), "mv %s%s %s%s.prev",
             dumpDir.c_str(), allFiles[i].filename().c_str(),
             dumpDir.c_str(), allFiles[i].filename().c_str());
