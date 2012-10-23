@@ -1,3 +1,30 @@
+2012-10-23
+nvmecompliance_release=1.13.0 New tests, bug fixes
+    1) dnvme: Nothing significant, changed debug logging to error logging
+    2) tnvme: Added various new tests, see git log for details.
+    3) tnvme: Enhanced Get/Set Features framework cmd to have more
+       getters and settters for access to the encapsulated data.
+    4) tnvme: Enhanced IO::SendAndReadCmd() to accept an array of 
+       anticipated error codes to achieve a successful outcome.
+    5) tnvme: Come upon our 1st test to utilize cmd line params "-p -y",
+       since Set Features changes the state of the DUT permenantly.
+       For details of these cmd line options see: 
+       https://github.com/nvmecompliance/tnvme/wiki/Command-Line-Options.
+    6) tnvme: More segregation of "reserved bit" tests. A compile time
+       flag can be used to skip rsvd bit tests, see cmd line option "-b".
+       https://github.com/nvmecompliance/tnvme/wiki/Command-Line-Options.
+       Specifically the setting of PRP2 rsvd bits when PRP2 is not used
+       needed to be included under the "reserved bit" tests.
+    7) tnvme: bugfix: GrpPciRegisters and Singletons directories. A pull
+       request was generated to address known outstanding issues with
+       GrpPciRegister test(s) and Singletons::Registers and in the 
+       definitions for NVMe registers. These areas could not be tested 
+       within QEMU due to limitations of QEMU vs. the accepted method
+       of embedding a new device within QEMU. Thus, they were coded and
+       left as is, until such time someone in the industry could run
+       them on real hdw. As of now, 3 vendors have tested these 
+       fixes and these issues should now be concluded.
+
 2012-9-27
 nvmecompliance_release=1.12.0 New tests, bug fix
     1) dnvme: No changes to driver
