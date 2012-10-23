@@ -88,19 +88,24 @@ AllPciRegs_r10b::RunCoreTest()
      * 1) none
      *  \endverbatim
      */
+    bool result = true;
+
     if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
         throw FrmwkEx(HERE);
 
-    ValidateDefaultValues();
-    ValidateROBitsAfterWriting();
+    result &= ValidateDefaultValues();
+    result &= ValidateROBitsAfterWriting();
+    if (!result) 
+    	throw FrmwkEx(HERE, "Test failed, check log for specific bit errors.");
 }
 
 
-void
+bool
 AllPciRegs_r10b::ValidateDefaultValues()
 {
     const PciSpcType *pciMetrics = gRegisters->GetPciMetrics();
     const vector<PciCapabilities> *pciCap = gRegisters->GetPciCapabilities();
+    bool result = true;
 
     LOG_NRM("Validating default register values");
 
@@ -111,9 +116,8 @@ AllPciRegs_r10b::ValidateDefaultValues()
 
         // PCI hdr registers don't have an assoc capability
         if (pciMetrics[j].cap == PCICAP_FENCE)
-            ValidatePciHdrRegisterROAttribute((PciSpc)j);
+            result &= ValidatePciHdrRegisterROAttribute((PciSpc)j);
     }
-
     // Traverse all discovered capabilities
     for (size_t i = 0; i < pciCap->size(); i++) {
         // Read all registers assoc with the discovered capability
@@ -121,19 +125,22 @@ AllPciRegs_r10b::ValidateDefaultValues()
             if (pciMetrics[j].specRev != SPECREV_10b)
                 continue;
             else if (pciCap->at(i) == pciMetrics[j].cap)
-                ValidatePciCapRegisterROAttribute((PciSpc)j);
+                result &= ValidatePciCapRegisterROAttribute((PciSpc)j);
         }
     }
+    return result;
 }
 
 
-void
+bool
 AllPciRegs_r10b::ValidateROBitsAfterWriting()
 {
+    uint32_t tmpValue;
     uint64_t value;
     uint64_t origValue;
     const PciSpcType *pciMetrics = gRegisters->GetPciMetrics();
     const vector<PciCapabilities> *pciCap = gRegisters->GetPciCapabilities();
+    bool result = true;
 
     LOG_NRM("Validating RO bits after writing");
 
@@ -154,13 +161,13 @@ AllPciRegs_r10b::ValidateROBitsAfterWriting()
             value = (origValue | pciMetrics[j].maskRO);
             if (gRegisters->Write((PciSpc)j, value) == false)
                 throw FrmwkEx(HERE);
-            ValidatePciHdrRegisterROAttribute((PciSpc)j);
+            result &= ValidatePciHdrRegisterROAttribute((PciSpc)j);
 
             LOG_NRM("Validate RO attribute after trying to write 0");
             value = (origValue & ~pciMetrics[j].maskRO);
             if (gRegisters->Write((PciSpc)j, value) == false)
                 throw FrmwkEx(HERE);
-            ValidatePciHdrRegisterROAttribute((PciSpc)j);
+            result &= ValidatePciHdrRegisterROAttribute((PciSpc)j);
         }
     }
 
@@ -177,35 +184,101 @@ AllPciRegs_r10b::ValidateROBitsAfterWriting()
 
             if (pciCap->at(i) == pciMetrics[j].cap) {
                 LOG_NRM("Validate RO attribute after trying to write 1");
-                if (gRegisters->Read((PciSpc)j, origValue) == false)
-                    throw FrmwkEx(HERE);
+                if (pciMetrics[j].size > MAX_SUPPORTED_REG_SIZE) {
+                    origValue = 0;
+                    LOG_NRM("Reading %s",pciMetrics[j].desc);
+                    for (uint32_t k = 0; (k*DWORD_LEN) < pciMetrics[j].size;
+                        k++) {
+                        if (gRegisters->Read(NVMEIO_PCI_HDR, DWORD_LEN,
+                            pciMetrics[j].offset + (k * DWORD_LEN),
+                            (uint8_t *)&tmpValue) == false) {
+                            throw FrmwkEx(HERE);
+                        }
+                        origValue |= (tmpValue << (k * DWORD_LEN * 8));
+                    }
+                    LOG_NRM("Value = 0x%016lX",(long unsigned int)origValue);
+                } else {
+                    if (gRegisters->Read((PciSpc)j, origValue) == false)
+                        throw FrmwkEx(HERE);
+                }
+
                 value = (origValue | pciMetrics[j].maskRO);
-                if (gRegisters->Write((PciSpc)j, value) == false)
-                    throw FrmwkEx(HERE);
-                ValidatePciCapRegisterROAttribute((PciSpc)j);
+                if (pciMetrics[j].size > MAX_SUPPORTED_REG_SIZE) {
+                    tmpValue = 0;
+                    LOG_NRM("Writing %s",pciMetrics[j].desc);
+                    for (uint32_t k=0; (k*DWORD_LEN) < pciMetrics[j].size;
+                        k++) {
+                        tmpValue = (value >> ( k*DWORD_LEN*8 )) & 0xFFFFFFFF;
+                        if (gRegisters->Write
+                            (NVMEIO_PCI_HDR, DWORD_LEN, pciMetrics[j].offset +
+                            (k * DWORD_LEN), (uint8_t *)&tmpValue) == false) {
+                            throw FrmwkEx(HERE);
+                        }
+                    }
+                    LOG_NRM("Value = 0x%016lX",(long unsigned int)value);
+                } else {
+                    if (gRegisters->Write((PciSpc)j, value) == false)
+                        throw FrmwkEx(HERE);
+                }
+
+                result &= ValidatePciCapRegisterROAttribute((PciSpc)j);
 
                 LOG_NRM("Validate RO attribute after trying to write 0");
+
+                if (pciMetrics[j].size > MAX_SUPPORTED_REG_SIZE) {
+                    origValue = 0;
+                    LOG_NRM("Reading %s",pciMetrics[j].desc);
+                    for (uint32_t k = 0; (k*DWORD_LEN) < pciMetrics[j].size;
+                        k++) {
+                        if (gRegisters->Read
+                            (NVMEIO_PCI_HDR, DWORD_LEN, pciMetrics[j].offset +
+                            (k * DWORD_LEN), (uint8_t *)&tmpValue) == false) {
+                            throw FrmwkEx(HERE);
+                        }
+                        origValue |= (tmpValue << (k * DWORD_LEN * 8));
+                    }
+                    LOG_NRM("Value = 0x%016lX",(long unsigned int)origValue);
+                } else {
+                    if (gRegisters->Read((PciSpc)j, origValue) == false)
+                        throw FrmwkEx(HERE);
+                }
+
                 value = (origValue & ~pciMetrics[j].maskRO);
-                if (gRegisters->Write((PciSpc)j, value) == false)
-                    throw FrmwkEx(HERE);
-                ValidatePciCapRegisterROAttribute((PciSpc)j);
+                if (pciMetrics[j].size > MAX_SUPPORTED_REG_SIZE) {
+                    tmpValue = 0;
+                    LOG_NRM("Writing %s",pciMetrics[j].desc);
+                    for (uint32_t k=0; (k*DWORD_LEN) < pciMetrics[j].size;
+                        k++) {
+                        tmpValue = (value >> ( k*DWORD_LEN*8 )) & 0xFFFFFFFF;
+                        if (gRegisters->Write(NVMEIO_PCI_HDR, DWORD_LEN,
+                            pciMetrics[j].offset + (k * DWORD_LEN),
+                            (uint8_t *)&tmpValue) == false) {
+                            throw FrmwkEx(HERE);
+                        }
+                    }
+                    LOG_NRM("Value = 0x%016lX",(long unsigned int)value);
+                } else {
+                    if (gRegisters->Write((PciSpc)j, value) == false)
+                        throw FrmwkEx(HERE);
+                }
+		        result &= ValidatePciCapRegisterROAttribute((PciSpc)j);
             }
         }
     }
+    return result;
 }
 
 
-void
+bool
 AllPciRegs_r10b::ValidatePciCapRegisterROAttribute(PciSpc reg)
 {
     uint64_t value;
     uint64_t expectedValue;
     const PciSpcType *pciMetrics = gRegisters->GetPciMetrics();
-
+    bool result = true;
 
     if (pciMetrics[reg].size > MAX_SUPPORTED_REG_SIZE) {
         for (uint32_t k = 0; (k*DWORD_LEN) < pciMetrics[reg].size; k++) {
-
             if (gRegisters->Read(NVMEIO_PCI_HDR, DWORD_LEN,
                 pciMetrics[reg].offset + (k * DWORD_LEN),
                 (uint8_t *)&value) == false) {
@@ -225,9 +298,10 @@ AllPciRegs_r10b::ValidatePciCapRegisterROAttribute(PciSpc reg)
                     pciMetrics[reg].maskRO);
 
                 if (value != expectedValue) {
-                    throw FrmwkEx(HERE, "%s RO bit #%d has incorrect value",
+                    LOG_ERR("%s RO bit #%d has incorrect value",
                         pciMetrics[reg].desc,
                         ReportOffendingBitPos(value, expectedValue));
+                    result = false;
                 }
             }
         }
@@ -247,20 +321,22 @@ AllPciRegs_r10b::ValidatePciCapRegisterROAttribute(PciSpc reg)
             pciMetrics[reg].maskRO);
 
         if (value != expectedValue) {
-            throw FrmwkEx(HERE, 
-                "%s RO bit #%d has incorrect value", pciMetrics[reg].desc,
+            LOG_ERR("%s RO bit #%d has incorrect value", pciMetrics[reg].desc,
                 ReportOffendingBitPos(value, expectedValue));
+            result = false;
         }
     }
+    return result;
 }
 
 
-void
+bool
 AllPciRegs_r10b::ValidatePciHdrRegisterROAttribute(PciSpc reg)
 {
     uint64_t value;
     uint64_t expectedValue;
     const PciSpcType *pciMetrics = gRegisters->GetPciMetrics();
+    bool result = true;
 
     if (pciMetrics[reg].size > MAX_SUPPORTED_REG_SIZE) {
         for (int k = 0; (k*sizeof(value)) < pciMetrics[reg].size; k++) {
@@ -290,25 +366,26 @@ AllPciRegs_r10b::ValidatePciHdrRegisterROAttribute(PciSpc reg)
 
                     if (cmdReg & CMD_IOSE) {
                         if (value != expectedValue) {
-                            throw FrmwkEx(HERE,
-                                "%s RO bit #%d has incorrect value",
+                            LOG_ERR("%s RO bit #%d has incorrect value",
                                 pciMetrics[reg].desc,
                                 ReportOffendingBitPos(value, expectedValue));
+                            result = false;
                         }
                     } else {  // Optional index/Data pair register not supported
                         expectedValue = 0;
                         if (value != expectedValue) {
-                            throw FrmwkEx(HERE,
-                                "%s RO bit #%d has incorrect value",
+                            LOG_ERR("%s RO bit #%d has incorrect value",
                                 pciMetrics[reg].desc,
                                 ReportOffendingBitPos(value, expectedValue));
+                            result = false;
                         }
                     }
                 } else {    // generically handled all other registers
                     if (value != expectedValue) {
-                        throw FrmwkEx(HERE, "%s RO bit #%d has incorrect value",
+                        LOG_ERR("%s RO bit #%d has incorrect value",
                             pciMetrics[reg].desc,
                             ReportOffendingBitPos(value, expectedValue));
+                        result = false;
                     }
                 }
             }
@@ -334,26 +411,30 @@ AllPciRegs_r10b::ValidatePciHdrRegisterROAttribute(PciSpc reg)
 
             if (cmdReg & CMD_IOSE) {
                 if (value != expectedValue) {
-                    throw FrmwkEx(HERE, "%s RO bit #%d has incorrect value",
+                    LOG_ERR("%s RO bit #%d has incorrect value",
                         pciMetrics[reg].desc,
                         ReportOffendingBitPos(value, expectedValue));
+                    result = false;
                 }
             } else {    // Optional index/Data pair register not supported
                 expectedValue = 0;
                 if (value != expectedValue) {
-                    throw FrmwkEx(HERE, "%s RO bit #%d has incorrect value",
+                    LOG_ERR("%s RO bit #%d has incorrect value",
                         pciMetrics[reg].desc,
                         ReportOffendingBitPos(value, expectedValue));
+                    result = false;
                 }
             }
         } else {    // generically handled all other registers
             if (value != expectedValue) {
-                throw FrmwkEx(HERE, "%s RO bit #%d has incorrect value",
+                LOG_ERR("%s RO bit #%d has incorrect value",
                     pciMetrics[reg].desc,
                     ReportOffendingBitPos(value, expectedValue));
+                result = false;
             }
         }
     }
+    return result;
 }
 
 }   // namespace

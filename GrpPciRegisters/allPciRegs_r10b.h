@@ -57,30 +57,30 @@ private:
      * Validate the specified PCI hdr register RO bits report correct values if
      * and only if they are not vendor specific.
      * @param reg Pass the register to validate
-     * @return returns upon success, otherwise throws exception
+     * @return returns upon success, otherwise false
      */
-    void ValidatePciHdrRegisterROAttribute(PciSpc reg);
+    bool ValidatePciHdrRegisterROAttribute(PciSpc reg);
 
     /**
      * Validate the specified capabilities registers' RO bits report correct
      * values if and only if they are not vendor specific.
      * @param reg Pass the register to validate
-     * @return returns upon success, otherwise throws exception
+     * @return returns upon success, otherwise false
      */
-    void ValidatePciCapRegisterROAttribute(PciSpc reg);
+    bool ValidatePciCapRegisterROAttribute(PciSpc reg);
 
     /**
      * Validate all the registers have default values being reported for
      * the RO bits which are not vendor specific.
-     * @return returns upon success, otherwise throws exception
+     * @return returns upon success, otherwise false
      */
-    void ValidateDefaultValues();
+    bool ValidateDefaultValues();
 
     /**
      * Validate all the registers hare RO after attempting to write to them.
-     * @return returns upon success, otherwise throws exception
+     * @return returns upon success, otherwise false
      */
-    void ValidateROBitsAfterWriting();
+    bool ValidateROBitsAfterWriting();
 };
 
 }   // namespace

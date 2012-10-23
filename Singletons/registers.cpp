@@ -482,15 +482,15 @@ Registers::DiscoverPciCapabilities()
         return;
     }
     LOG_NRM("Reading extended PCI space offset 0x%04X=0x%08X", io.offset,
-        (uint16_t)REGMASK(nextCap, 4));
+        (uint32_t)REGMASK(nextCap, 4));
     capId = (uint16_t)REGMASK(nextCap, 2);
     capOffset = (uint16_t)REGMASK((nextCap >> 20), 2);
-    if (nextCap == 0) {
+    if (capId == 0) {
         LOG_NRM("No extended PCI capabilities supported");
     } else if (capId == 0x0001) {
         LOG_NRM("Decoding AERCAP capabilities");
         mPciCap.push_back(PCICAP_AERCAP);
-        mPciSpcMetrics[PCISPC_AERID].offset = capOffset;
+        mPciSpcMetrics[PCISPC_AERID].offset = io.offset;
         for (int i = PCISPC_AERUCES; i <= PCISPC_AERTLP; i++) {
             mPciSpcMetrics[i].offset =
                 mPciSpcMetrics[i-1].offset + mPciSpcMetrics[i-1].size;
