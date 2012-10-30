@@ -37,3 +37,10 @@ GetFeatures::~GetFeatures()
 }
 
 
+
+void
+GetFeatures::SetIntVecConfigIV(uint16_t iv)
+{
+    LOG_NRM("Setting interrupt vector (IV): 0x%04X", iv);
+    SetWord(iv, 11, 0);
+}

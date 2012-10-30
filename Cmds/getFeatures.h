@@ -41,6 +41,13 @@ public:
     /// Used to compare for NULL pointers being returned by allocations
     static SharedGetFeaturesPtr NullGetFeaturesPtr;
     static const uint8_t Opcode;
+
+    /**
+     * Set the interrupt vector desired for getting the ivec configuration
+     * using get features cmd.
+     * @param iv Specify the interrupt vec for which the config settings needed.
+     */
+    void SetIntVecConfigIV(uint16_t iv);
 };
 
 

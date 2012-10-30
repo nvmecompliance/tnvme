@@ -21,6 +21,9 @@
 #include "../Queues/acq.h"
 #include "../Queues/asq.h"
 
+#define MAX_IVEC        2048
+
+
 namespace GrpAdminSetGetFeatCombo {
 
 
@@ -44,6 +47,10 @@ private:
     uint32_t mTmpThreshold;
     uint32_t mTimeLimErrRec;
     uint32_t mVolWrCache;
+    uint32_t mIrqCoalescing;
+    uint32_t mIvecConf[MAX_IVEC];
+    uint32_t mWrAtomicity;
+    uint32_t mAsyncEvent;
 
     void SaveArbitration(SharedASQPtr asq, SharedACQPtr acq);
     bool RestoreArbitration(SharedASQPtr asq, SharedACQPtr acq);
@@ -59,6 +66,19 @@ private:
 
     void SaveVolWrCache(SharedASQPtr asq, SharedACQPtr acq);
     bool RestoreVolWrCache(SharedASQPtr asq, SharedACQPtr acq);
+
+    void SaveIRQCoalescing(SharedASQPtr asq, SharedACQPtr acq);
+    bool RestoreIRQCoalescing(SharedASQPtr asq, SharedACQPtr acq);
+
+    void SaveIvecConf(SharedASQPtr asq, SharedACQPtr acq);
+    bool RestoreSaveIvecConf(SharedASQPtr asq, SharedACQPtr acq);
+
+    void SaveWrAtomicity(SharedASQPtr asq, SharedACQPtr acq);
+    bool RestoreWrAtomicity(SharedASQPtr asq, SharedACQPtr acq);
+
+    void SaveAsyncEvent(SharedASQPtr asq, SharedACQPtr acq);
+    bool RestoreAsyncEvent(SharedASQPtr asq, SharedACQPtr acq);
+
 };
 
 }   // namespace
