@@ -78,3 +78,38 @@ IRQ::SetAnySchemeSpecifyNum(uint16_t numIrqsDesire)
     if (gCtrlrConfig->SetIrqScheme(irqScheme, numIrqsDesire) == false)
         throw FrmwkEx(HERE);
 }
+
+
+uint16_t
+IRQ::GetMaxIRQsSupportedAnyScheme()
+{
+    uint16_t max_ivec = 0;
+    enum nvme_irq_type irq;
+    bool capable;
+
+    if (gCtrlrConfig->GetIrqScheme(irq, max_ivec) == false)
+        throw FrmwkEx(HERE, "Unable to retrieve current IRQ scheme");
+
+    switch (irq) {
+    case INT_MSI_MULTI:
+        // Get the max ivec with MSI-Mutli scheme.
+        if (gCtrlrConfig->IsMSICapable(capable, max_ivec) == false)
+            throw FrmwkEx(HERE);
+        LOG_NRM("MSI-Multi IRQ scheme with max ivec = %d", max_ivec);
+        break;
+    case INT_MSIX:
+        // Get the max ivec with MSI-X scheme.
+        if (gCtrlrConfig->IsMSIXCapable(capable, max_ivec) == false)
+            throw FrmwkEx(HERE);
+        LOG_NRM("MSI-X IRQ scheme with max ivec = %d", max_ivec);
+        break;
+    case INT_MSI_SINGLE:
+    case INT_NONE:
+        max_ivec = 0;   // Required to be zero
+        LOG_NRM("NONE/MSI-S scheme with max ivec = %d", max_ivec);
+        break;
+    default:
+        throw FrmwkEx(HERE, "Unsupported IRQ scheme, what to do?");
+    }
+    return max_ivec;
+}
