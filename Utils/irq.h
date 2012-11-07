@@ -47,6 +47,7 @@ public:
     static bool VerifyAnySchemeSpecifyNum(uint16_t numIrqsDesire,
         enum nvme_irq_type &irq);
     static void SetAnySchemeSpecifyNum(uint16_t numIrqsDesire);
+    static uint16_t GetMaxIRQsSupportedAnyScheme();
 
 private:
 };
