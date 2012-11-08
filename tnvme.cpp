@@ -57,6 +57,7 @@
 #include "GrpAdminSetFeatCmd/grpAdminSetFeatCmd.h"
 #include "GrpAdminGetFeatCmd/grpAdminGetFeatCmd.h"
 #include "GrpAdminSetGetFeatCombo/grpAdminSetGetFeatCombo.h"
+#include "GrpAdminAsyncCmd/grpAdminAsyncCmd.h"
 
 
 void
@@ -91,6 +92,7 @@ InstantiateGroups(vector<Group *> &groups)
     groups.push_back(new GrpAdminSetFeatCmd::GrpAdminSetFeatCmd(groups.size()));
     groups.push_back(new GrpAdminGetFeatCmd::GrpAdminGetFeatCmd(groups.size()));
     groups.push_back(new GrpAdminSetGetFeatCombo::GrpAdminSetGetFeatCombo(groups.size()));
+    groups.push_back(new GrpAdminAsyncCmd::GrpAdminAsyncCmd(groups.size()));
 }
 // ------------------------------EDIT HERE---------------------------------
 

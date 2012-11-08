@@ -44,6 +44,14 @@ union StatField {
     struct StatbyType   t;
 };
 
+struct AsyncEventReqs {
+    uint8_t asyncEventType  : 3;
+    uint8_t rsvd03          : 5;
+    uint8_t asyncEventInfo;
+    uint8_t assocLogPage;
+    uint8_t rsvd24;
+} __attribute__((__packed__));
+
 struct CEbyType {
     uint32_t dw0;
     uint32_t dw1;
@@ -51,8 +59,12 @@ struct CEbyType {
     uint32_t dw3;
 } __attribute__((__packed__));
 
+
 struct CEbyName {
-    uint32_t  cmdSpec;
+    union {
+        uint32_t cmdSpec;
+        struct AsyncEventReqs async;
+    };
     uint32_t  reserved;
     uint16_t  SQHD;
     uint16_t  SQID;
