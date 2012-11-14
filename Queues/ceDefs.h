@@ -46,7 +46,7 @@ typedef enum SCT {
     ZZ(CESTAT_INVALID_QID,       SCT_CMD,     0x01, "Invalid queue ID")                     \
     ZZ(CESTAT_MAX_Q_SIZE_EXCEED, SCT_CMD,     0x02, "Maximum queue size exceeded")          \
     ZZ(CESTAT_ABORT_CMD_LIMIT,   SCT_CMD,     0x03, "Abort cmd limit exceeded")             \
-    ZZ(CESTAT_ASYNC_REQ_EXCEED,  SCT_CMD,     0x05, "Async require limit exceeded")         \
+    ZZ(CESTAT_ASYNC_REQ_EXCEED,  SCT_CMD,     0x05, "Async request limit exceeded")         \
     ZZ(CESTAT_INVAL_FIRM_SLOT,   SCT_CMD,     0x06, "Invalid firmware slot")                \
     ZZ(CESTAT_INVAL_FIRM_IMAGE,  SCT_CMD,     0x07, "Invalid firmware image")               \
     ZZ(CESTAT_INVAL_INT_VEC,     SCT_CMD,     0x08, "Invalid interrupt vector")             \

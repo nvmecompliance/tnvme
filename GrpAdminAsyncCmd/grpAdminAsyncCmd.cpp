@@ -16,6 +16,11 @@
 
 #include "grpAdminAsyncCmd.h"
 #include "unsupportRrvdFields_r10b.h"
+#include "abortByReset_r10b.h"
+#include "verifyMaxEvents_r10b.h"
+#include "verifyMasking_r10b.h"
+#include "verifyEventQueueing_r10b.h"
+
 
 namespace GrpAdminAsyncCmd {
 
@@ -29,6 +34,10 @@ GrpAdminAsyncCmd::GrpAdminAsyncCmd(size_t grpNum) :
     switch (gCmdLine.rev) {
     case SPECREV_10b:
         APPEND_TEST_AT_XLEVEL(UnsupportRrvdFields_r10b, GrpAdminAsyncCmd)
+        APPEND_TEST_AT_XLEVEL(AbortByReset_r10b, GrpAdminAsyncCmd)
+        APPEND_TEST_AT_XLEVEL(VerifyMaxEvents_r10b, GrpAdminAsyncCmd)
+        APPEND_TEST_AT_XLEVEL(VerifyMasking_r10b, GrpAdminAsyncCmd)
+        APPEND_TEST_AT_XLEVEL(VerifyEventQueueing_r10b, GrpAdminAsyncCmd)
         break;
 
     default:

@@ -14,8 +14,8 @@
  *  limitations under the License.
  */
 
-#ifndef _UNSUPPORTRRVDFIELDS_r10b_H_
-#define _UNSUPPORTRRVDFIELDS_r10b_H_
+#ifndef _VERIFYMAXEVENTS_r10b_H_
+#define _VERIFYMAXEVENTS_r10b_H_
 
 #include "test.h"
 #include "../Queues/acq.h"
@@ -32,19 +32,19 @@ namespace GrpAdminAsyncCmd {
  * 1) See notes in the header file of the Test base class
  * \endverbatim
  */
-class UnsupportRrvdFields_r10b : public Test
+class VerifyMaxEvents_r10b : public Test
 {
 public:
-    UnsupportRrvdFields_r10b(string grpName, string testName);
-    virtual ~UnsupportRrvdFields_r10b();
+    VerifyMaxEvents_r10b(string grpName, string testName);
+    virtual ~VerifyMaxEvents_r10b();
 
     /**
      * IMPORTANT: Read Test::Clone() header comment.
      */
-    virtual UnsupportRrvdFields_r10b *Clone() const
-        { return new UnsupportRrvdFields_r10b(*this); }
-    UnsupportRrvdFields_r10b &operator=(const UnsupportRrvdFields_r10b &other);
-    UnsupportRrvdFields_r10b(const UnsupportRrvdFields_r10b &other);
+    virtual VerifyMaxEvents_r10b *Clone() const
+        { return new VerifyMaxEvents_r10b(*this); }
+    VerifyMaxEvents_r10b &operator=(const VerifyMaxEvents_r10b &other);
+    VerifyMaxEvents_r10b(const VerifyMaxEvents_r10b &other);
 
 
 protected:
@@ -56,10 +56,9 @@ private:
     ///////////////////////////////////////////////////////////////////////////
     // Adding a member variable? Then edit the copy constructor and operator=().
     ///////////////////////////////////////////////////////////////////////////
-    void SendAsyncEventRequests(SharedASQPtr &asq, uint32_t nCmds, bool rsvd);
+    void SendAsyncEventRequests(SharedASQPtr &asq, uint32_t nCmds);
     void InvalidSQWriteDoorbell();
     void ReadLogPage(SharedACQPtr &acq, SharedASQPtr &asq, uint8_t logId);
-    void TestAsyncEvents(SharedACQPtr &acq, SharedASQPtr &asq, bool rsvd);
 };
 
 }   // namespace
