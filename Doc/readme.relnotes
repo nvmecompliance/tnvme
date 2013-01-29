@@ -16,12 +16,15 @@ nvmecompliance_release=2.0.0 New tests, bug fixes, last release
        of github to invite community involvment.
 
 2012-11-05
+nvmecompliance_release=1.14.1 New tests, bug fixes
+    1) tnvme: testPlan.ods was updated with Intels future plan of work.
+
+2012-11-05
 nvmecompliance_release=1.14.0 New tests, bug fixes
     1) dnvme: bugfix: An array was overflowing the stack when a device
        would report a large number of suppported MSI-X IRQ's. A core
        dump of the kernel was being observed.
     2) tnvme: Various new tests were added, please reference the git log
-    3) tnvme: testPlan.ods was updated with Intels future plan of work.
 
 2012-10-23
 nvmecompliance_release=1.13.0 New tests, bug fixes
