@@ -1,3 +1,20 @@
+2013-1-29
+nvmecompliance_release=2.0.0 New tests, bug fixes, last release
+    1) dnvme: No changes in the driver.
+    2) tnvme: Added Async Event Request cmd in the framework.
+    3) tnvme: Added new tests group GrpAdminAsyncCmd
+    4) tnvme: Bugfix: Singletons:regDefs.h file bad value in
+       definition file was never caught. 
+    5) This is the last official release from Intel onto github.
+       The procedure from this point forward will be to solely
+       interact with github for...
+       a) code reviews
+       b) push and pull updates to the source.
+       c) Questions are still, and always, invited to the alias:
+          nvmecompliance@intel.com
+       The interactation model is changing to conform to the intent
+       of github to invite community involvment.
+
 2012-11-05
 nvmecompliance_release=1.14.0 New tests, bug fixes
     1) dnvme: bugfix: An array was overflowing the stack when a device
