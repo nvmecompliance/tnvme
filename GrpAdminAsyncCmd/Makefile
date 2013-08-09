@@ -16,42 +16,23 @@ LDFLAGS=-lm
 LIBS = -L../ -L/usr/local/lib -lm
 INCLUDES = -I. -I../ -I../../ -I/usr/local/include
 
-SRC =				\
-	cmd.cpp			\
-	prpData.cpp		\
-	metaData.cpp		\
-	adminCmd.cpp		\
-	nvmCmd.cpp		\
-	createIOCQ.cpp		\
-	deleteIOCQ.cpp		\
-	createIOSQ.cpp		\
-	deleteIOSQ.cpp		\
-	identify.cpp		\
-	baseFeatures.cpp	\
-	getFeatures.cpp		\
-	setFeatures.cpp		\
-	write.cpp		\
-	read.cpp		\
-	flush.cpp		\
-	getLogPage.cpp		\
-	formatNVM.cpp		\
-	fwActivate.cpp		\
-	fwImgDnld.cpp		\
-	datasetMgmt.cpp		\
-	baseSecurity.cpp	\
-	securitySend.cpp	\
-	securityRcv.cpp		\
-	asyncEventReq.cpp
+SRC =					\
+	grpAdminAsyncCmd.cpp		\
+        unsupportRrvdFields_r10b.cpp	\
+	abortByReset_r10b.cpp		\
+	verifyMaxEvents_r10b.cpp	\
+	verifyMasking_r10b.cpp		\
+	verifyEventQueueing_r10b.cpp
 
 .SUFFIXES: .cpp
 
 OBJ = $(SRC:.cpp=.o)
-OUT = libCmds.a
+OUT = libGrpAdminAsyncCmd.a
 
 all: $(OUT)
 
 .cpp.o:
-	$(CC) $(INCLUDES) $(CFLAGS) $(DFLAGS)-c $< -o $@ $(LDFLAGS)
+	$(CC) $(INCLUDES) $(CFLAGS) $(DFLAGS) -c $< -o $@ $(LDFLAGS)
 
 $(OUT): $(OBJ)
 	ar rcs $(OUT) $(OBJ)

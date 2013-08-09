@@ -66,7 +66,7 @@ typedef enum PciCapabilities {
     ZZ(PCISPC_BAR0,      PCICAP_FENCE,   0x10,      4,    SPECREV_10b, 0x0000000000003fff, 0x0000000000000000, 0x0000000000000004, "PCI hdr MLBAR register (BAR0)")                    \
     ZZ(PCISPC_BAR1,      PCICAP_FENCE,   0x14,      4,    SPECREV_10b, 0x0000000000000000, 0x0000000000000000, 0x0000000000000000, "PCI hdr MUBAR register (BAR1)")                    \
     ZZ(PCISPC_BAR2,      PCICAP_FENCE,   0x18,      4,    SPECREV_10b, 0x0000000000000007, 0x0000000000000000, 0x0000000000000001, "PCI hdr index/data pair register (BAR2)")          \
-    ZZ(PCISPC_BAR3,      PCICAP_FENCE,   0x1c,      5,    SPECREV_10b, 0x0000000000000000, 0x0000000000000000, 0x0000000000000000, "PCI hdr reserved area (BAR3)")                     \
+    ZZ(PCISPC_BAR3,      PCICAP_FENCE,   0x1c,      4,    SPECREV_10b, 0x0000000000000000, 0x0000000000000000, 0x0000000000000000, "PCI hdr reserved area (BAR3)")                     \
     ZZ(PCISPC_BAR4,      PCICAP_FENCE,   0x20,      4,    SPECREV_10b, 0x0000000000000000, 0x00000000ffffffff, 0x0000000000000000, "PCI hdr vendor specific register (BAR4)")          \
     ZZ(PCISPC_BAR5,      PCICAP_FENCE,   0x24,      4,    SPECREV_10b, 0x0000000000000000, 0x00000000ffffffff, 0x0000000000000000, "PCI hdr vendor specific register (BAR5)")          \
     ZZ(PCISPC_CCPTR,     PCICAP_FENCE,   0x28,      4,    SPECREV_10b, 0x00000000ffffffff, 0x0000000000000000, 0x0000000000000000, "PCI hdr CardBus CIS register (CCPTR)")             \

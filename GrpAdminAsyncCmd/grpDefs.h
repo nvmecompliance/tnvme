@@ -14,17 +14,17 @@
  *  limitations under the License.
  */
 
-/*
- * Specify the software release version numbers on their own line for use with
- * awk and the creation of RPM's while also being compatible with building
- * the binaries via the Makefile with *.cpp source code.
- * If the line numbers within this file change by the result of editing, then
- * you must modify both the Makefile and build.sh for awk parsing. Additionally
- * test this modification by running the Makefile rpm target.
- */
+#ifndef _GRPDEFS_H_
+#define _GRPDEFS_H_
 
-#define VER_MAJOR	\
-2
+#include "dutDefs.h"
 
-#define VER_MINOR	\
-12
+namespace GrpAdminAsyncCmd {
+
+#define ACQ_GROUP_ID                "ACQ"
+#define ASQ_GROUP_ID                "ASQ"
+
+
+}   // namespace
+
+#endif

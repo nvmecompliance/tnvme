@@ -40,6 +40,7 @@
 #include "../Cmds/read.h"
 #include "../Cmds/flush.h"
 #include "../Cmds/datasetMgmt.h"
+#include "../Cmds/asyncEventReq.h"
 
 /**
  * Instantiate a class.
@@ -113,6 +114,7 @@ ObjRsrc::AllocWorker(Trackable::ObjType type)
     INSTANTIATE_OBJ(FWACTIVATE, FWActivate)
     INSTANTIATE_OBJ(FWIMGDNLD, FWImgDnld)
     INSTANTIATE_OBJ(FORMATNVM, FormatNVM)
+    INSTANTIATE_OBJ(ASYNCEVENTREQ, AsyncEventReq)
     INSTANTIATE_OBJ(SECURITYSEND, SecuritySend)
     INSTANTIATE_OBJ(SECURITYRCV, SecurityRcv)
 

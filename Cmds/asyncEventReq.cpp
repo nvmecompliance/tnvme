@@ -14,17 +14,20 @@
  *  limitations under the License.
  */
 
-/*
- * Specify the software release version numbers on their own line for use with
- * awk and the creation of RPM's while also being compatible with building
- * the binaries via the Makefile with *.cpp source code.
- * If the line numbers within this file change by the result of editing, then
- * you must modify both the Makefile and build.sh for awk parsing. Additionally
- * test this modification by running the Makefile rpm target.
- */
+#include "asyncEventReqDefs.h"
+#include "asyncEventReq.h"
 
-#define VER_MAJOR	\
-2
 
-#define VER_MINOR	\
-12
+SharedAsyncEventReqPtr AsyncEventReq::NullAsyncEventReqPtr;
+const uint8_t AsyncEventReq::Opcode = 0x0c;
+
+
+AsyncEventReq::AsyncEventReq() : Cmd(Trackable::OBJ_ASYNCEVENTREQ)
+{
+    Init(Opcode, DATADIR_NONE, 64);
+}
+
+
+AsyncEventReq::~AsyncEventReq()
+{
+}
