@@ -151,8 +151,14 @@ StartingLBABare_r10b::RunCoreTest()
         readCmd->SetNSID(bare[i]);
         readCmd->SetNLB(maxWrBlks - 1);  // 0 based value.
 
-        for (uint64_t nWrBlks = 0; nWrBlks < (ncap - 1); nWrBlks += maxWrBlks) {
+        for (uint64_t nWrBlks = 0; (nWrBlks + maxWrBlks - 1) < ncap; nWrBlks += maxWrBlks) {
             LOG_NRM("Sending #%ld blks of #%ld", nWrBlks, (ncap -1));
+            if ((nWrBlks + maxWrBlks) >= ncap) {
+                maxWrBlks = ncap - nWrBlks;
+                LOG_NRM("Resize max write blocks to #%ld", maxWrBlks);
+                ResizeDataBuf(readCmd, writeCmd, namSpcPtr, maxWrBlks,
+                    prpBitmask);
+            }            
             for (uint64_t nLBA = 0; nLBA < maxWrBlks; nLBA++) {
                 writeMem->SetDataPattern(dataPat[nLBA % dpArrSize],
                     (nWrBlks + nLBA + 1), (nLBA * lbaDataSize), lbaDataSize);
@@ -196,5 +202,43 @@ StartingLBABare_r10b::VerifyDataPat(SharedReadPtr readCmd,
         throw FrmwkEx(HERE, "Data miscompare");
     }
 }
+
+void
+StartingLBABare_r10b::ResizeDataBuf(SharedReadPtr &readCmd,
+    SharedWritePtr &writeCmd, ConstSharedIdentifyPtr namSpcPtr,
+    uint64_t maxWrBlks, send_64b_bitmask prpBitmask)
+{
+    LBAFormat lbaFormat = namSpcPtr->GetLBAFormat();
+    uint64_t lbaDataSize = (1 << lbaFormat.LBADS);
+
+    SharedMemBufferPtr readMem = readCmd->GetRWPrpBuffer();
+    SharedMemBufferPtr writeMem = writeCmd->GetRWPrpBuffer();
+
+    switch (gInformative->IdentifyNamespace(namSpcPtr)) {
+    case Informative::NS_BARE:
+    case Informative::NS_METAS:
+        LOG_NRM("Resized max rd/wr blks to %ld for separate meta or bare", maxWrBlks);
+        writeMem->Init(maxWrBlks * lbaDataSize);
+        readMem->Init(maxWrBlks * lbaDataSize);
+        break;
+    case Informative::NS_METAI:
+        LOG_NRM("Resized max rd/wr blks to %ld for integrated meta", maxWrBlks);
+        writeMem->Init(maxWrBlks * (lbaDataSize + lbaFormat.MS));
+        readMem->Init(maxWrBlks * (lbaDataSize + lbaFormat.MS));
+        break;
+    case Informative::NS_E2ES:
+    case Informative::NS_E2EI:
+    throw FrmwkEx(HERE, "Deferring work to handle this case in future");
+    break;
+    }
+
+    writeCmd->SetPrpBuffer(prpBitmask, writeMem);
+    writeCmd->SetNLB(maxWrBlks - 1); // 0 based value.
+
+    readCmd->SetPrpBuffer(prpBitmask, readMem);
+    readCmd->SetNLB(maxWrBlks - 1); // 0 based value.
+}
+
+
 
 }   // namespace
