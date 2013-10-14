@@ -134,7 +134,7 @@ FIDArbitration_r10b::RunCoreTest()
     setFeaturesCmd->SetFID(BaseFeatures::FID_ARBITRATION);
 
     uint8_t arbBurst[] =  {
-        1 << 0, 1 << 1, 1 << 2, 1 << 3, 1 << 4, 1 << 5, NO_LIMIT
+        0, 1, 2, 3, 4, 5, 6,  NO_LIMIT
     };
     uint64_t arbSize = sizeof(arbBurst) / sizeof(arbBurst[0]);
 

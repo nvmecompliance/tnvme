@@ -19,6 +19,8 @@
 
 #include "test.h"
 #include "../Cmds/read.h"
+#include "../Cmds/write.h"
+#include "../Cmds/identify.h"
 
 namespace GrpNVMWriteReadCombo {
 
@@ -55,6 +57,9 @@ private:
     // Adding a member variable? Then edit the copy constructor and operator=().
     ///////////////////////////////////////////////////////////////////////////
     void VerifyDataPat(SharedReadPtr readCmd, SharedMemBufferPtr wrPayload);
+    void ResizeDataBuf(SharedReadPtr &readCmd, SharedWritePtr &writeCmd,
+        ConstSharedIdentifyPtr namSpcPtr, uint64_t maxWrBlks,
+        send_64b_bitmask prpBitmask);    
 };
 
 }   // namespace
