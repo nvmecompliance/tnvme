@@ -57,7 +57,7 @@
 * ******************************************************************************
 * If you find yourself using this interface, in most cases your probably not
 * going about the test in the correct manner. It is recommended to contact
-* nvmecompliance@intel.com to toss out your idea to valid the coding attempt.
+* compliance@nvmexpress.org to toss out your idea to valid the coding attempt.
 * ******************************************************************************
 *
 * @note This class may throw exceptions.
