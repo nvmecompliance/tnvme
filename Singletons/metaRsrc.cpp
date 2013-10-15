@@ -159,7 +159,6 @@ MetaRsrc::ReleaseMetaBuf(MetaDataBuf metaBuf)
 void
 MetaRsrc::FreeAllMetaBuf()
 {
-    int rc;
     deque<MetaDataBuf>::iterator resIter = mMetaReserved.begin();
 
     // Search the ordered elements, moves every reserved item into released
@@ -180,7 +179,7 @@ MetaRsrc::FreeAllMetaBuf()
         // been deleted by a prior NVME_IOCTL_DEVICE_STATE call to dnvme. The
         // act of not freeing causes memory leak, the act of freeing to many
         // times is of no harm.
-        rc = ioctl(mFd, NVME_IOCTL_METABUF_DELETE, tmp.ID);
+        ioctl(mFd, NVME_IOCTL_METABUF_DELETE, tmp.ID);
     }
 
     mMetaAllocSize = 0;

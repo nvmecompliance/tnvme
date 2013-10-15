@@ -708,7 +708,6 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
     int numGrps = 0;
     bool allTestsPass = true;    // assuming success until we find otherwise
     bool allHaveRun = false;
-    bool thisTestPass;
     TestRef targetTst;
     TestSetType testsToRun;
     bool tstSetOK;
@@ -768,7 +767,6 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
 
             numGrps++;
             while (allHaveRun == false) {
-                thisTestPass = true;
 
                 switch (groups[iGrp]->RunTest(testsToRun, tstIdx,
                     cl.skiptest, skipped, cl.preserve, failedTests,
@@ -778,7 +776,6 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
                     break;
                 case Group::TR_FAIL:
                     allTestsPass = false;
-                    thisTestPass = false;
                     numFailed++;
                     numSkipped += skipped;
                     if (cl.ignore) {
