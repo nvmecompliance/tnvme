@@ -59,7 +59,9 @@ using namespace std;
  */
 #define MAX_DATA_TX_SIZE                    (256 * 1024)
 
+#ifndef UINT32_MAX
 #define UINT32_MAX                          ((uint32_t)-1)
+#endif
 
 #define MAX(a,b)                            (((a) > (b)) ? (a) : (b))
 #define MIN(a,b)                            (((a) < (b)) ? (a) : (b))
