@@ -114,6 +114,12 @@ PRP1_r10b::RunCoreTest()
 
     IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
         getLogPgCmd, "prp1only", true);
+        
+    i = 0xffffffff;
+    getLogPgCmd->SetNSID(i);
+    work = str(boost::format("namspc%d") % i);
+    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
+        getLogPgCmd, work, true);
 }
 
 }   // namespace
