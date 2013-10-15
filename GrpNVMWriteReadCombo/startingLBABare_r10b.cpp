@@ -151,7 +151,7 @@ StartingLBABare_r10b::RunCoreTest()
         readCmd->SetNSID(bare[i]);
         readCmd->SetNLB(maxWrBlks - 1);  // 0 based value.
 
-        for (uint64_t nWrBlks = 0; (nWrBlks + maxWrBlks - 1) < ncap; nWrBlks += maxWrBlks) {
+         for (uint64_t nWrBlks = 0; nWrBlks < (ncap - 1); nWrBlks += maxWrBlks) {
             LOG_NRM("Sending #%ld blks of #%ld", nWrBlks, (ncap -1));
             if ((nWrBlks + maxWrBlks) >= ncap) {
                 maxWrBlks = ncap - nWrBlks;
