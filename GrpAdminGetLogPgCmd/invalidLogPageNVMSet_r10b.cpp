@@ -21,6 +21,7 @@
 #include "../Utils/kernelAPI.h"
 #include "../Utils/io.h"
 #include "../Cmds/getLogPage.h"
+#include <boost/format.hpp>
 
 #define BUFFER_SIZE         0x4
 #define MAX_LID             0xBF
@@ -98,7 +99,7 @@ InvalidLogPageNVMSet_r10b::RunCoreTest()
      *  \endverbatim
      */
     string work;
-
+    uint64_t i;
     // Lookup objs which were created in a prior test within group
     SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
     SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
