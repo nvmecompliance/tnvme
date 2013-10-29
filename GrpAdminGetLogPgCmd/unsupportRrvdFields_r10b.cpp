@@ -101,7 +101,7 @@ UnsupportRrvdFields_r10b::RunCoreTest()
      *  \endverbatim
      */
     // Lookup objs which were created in a prior test within group
-    string work;
+    string globalWork;
     uint64_t i;
     
     SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
@@ -151,9 +151,9 @@ UnsupportRrvdFields_r10b::RunCoreTest()
         
     i = 0xffffffff;
     getLogPgCmd->SetNSID(i);
-    work = str(boost::format("namspc%d") % i);
+    globalWork = str(boost::format("namspc%d") % i);
     IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
-        getLogPgCmd, work, true);
+        getLogPgCmd, globalWork, true);
 }
 
 }   // namespace
