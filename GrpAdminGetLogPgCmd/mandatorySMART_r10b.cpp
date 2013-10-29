@@ -100,6 +100,7 @@ MandatorySMART_r10b::RunCoreTest()
      *  \endverbatim
      */
     // Lookup objs which were created in a prior test within group\
+    
     string work;
     uint64_t i;
     
