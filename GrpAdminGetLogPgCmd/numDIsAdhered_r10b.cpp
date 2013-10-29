@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
+#include <boost/format.hpp>
 #include "numDIsAdhered_r10b.h"
 #include "globals.h"
 #include "grpDefs.h"
@@ -98,6 +98,9 @@ NUMDIsAdhered_r10b::RunCoreTest()
      *  \endverbatim
      */
     // Lookup objs which were created in a prior test within group
+    string work;
+    uint64_t i;
+    
     SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
     SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
 
