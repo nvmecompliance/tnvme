@@ -67,7 +67,7 @@ void
 KernelAPI::DumpKernelMetrics(DumpFilename filename)
 {
     int rc;
-    struct nvme_file dumpMe = { filename.length(), filename.c_str() };
+    struct nvme_file dumpMe = { (short unsigned int)filename.length(), filename.c_str() };
 
     LOG_NRM("Dump dnvme metrics to filename: %s", filename.c_str());
     if ((rc = ioctl(gDutFd, NVME_IOCTL_DUMP_METRICS, &dumpMe)) < 0)
