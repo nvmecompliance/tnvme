@@ -266,7 +266,7 @@ void
 KernelAPI::WriteToDnvmeLog(string log)
 {
     int rc;
-    struct nvme_logstr logMe = { log.length(), log.c_str() };
+    struct nvme_logstr logMe = { (short unsigned int)log.length(), log.c_str() };
 
     LOG_NRM("Write custom string to dnvme's log output: \"%s\"", log.c_str());
     if ((rc = ioctl(gDutFd, NVME_IOCTL_MARK_SYSLOG, &logMe)) < 0) {
