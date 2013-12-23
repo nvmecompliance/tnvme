@@ -25,6 +25,7 @@ INCLUDES = -I./ -I../
 
 # Notify the compiler/linker where the Boost library and hdr files are located
 CFLAGS += -lboost_filesystem
+CFLAGS += -lboost_system
 # Notify the compiler/linker where the XML library and hdr files are located
 CFLAGS += $(shell pkg-config libxml++-2.6 --cflags --libs)
 
@@ -114,7 +115,7 @@ $(SUBDIRS):
 	$(MAKE) -C $@ $(GOAL)
 
 $(APP_NAME): $(SUBDIRS) $(SOURCES)
-	$(CC) $(INCLUDES) $(CFLAGS) $(DFLAGS) $(SOURCES) -o $(APP_NAME) $(LDFLAGS)
+	$(CC) $(INCLUDES) $(DFLAGS) $(SOURCES) -o $(APP_NAME) $(LDFLAGS) $(CFLAGS)
 
 # Specify a custom source compile dir: "make src SRCDIR=../compile/dir"
 # If the specified dir could cause recursive copies, then specify w/o './'
