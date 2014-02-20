@@ -83,6 +83,7 @@ CtrlrConfig::IsMSICapable(bool &capable, uint16_t &numIrqs)
             uint16_t work = (uint16_t)((value & MC_MMC) >> 1);
             capable = true;
             numIrqs = work;
+            numIrqs = 1 << work;
             break;
         }
     }
