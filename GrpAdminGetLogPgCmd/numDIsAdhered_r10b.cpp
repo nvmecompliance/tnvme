@@ -110,7 +110,8 @@ NUMDIsAdhered_r10b::RunCoreTest()
     LOG_NRM("Get log page to request firmware slot information");
     getLogPgCmd->SetNUMD(NUMDW_ADHERED - 1);  // 0-based
     getLogPgCmd->SetLID(FIRM_SLOT_INFO_LID);
-
+    getLogPgCmd->SetNSID(0xFFFFFFFF);
+    
     LOG_NRM("Set the offset into the buffer at 0x%04X", BUFFER_OFFSET);
     SharedMemBufferPtr getLogPageMem = SharedMemBufferPtr(new MemBuffer());
     getLogPageMem->InitOffset1stPage(GetLogPage::FIRMSLOT_DATA_SIZE,
@@ -134,11 +135,6 @@ NUMDIsAdhered_r10b::RunCoreTest()
         }
         cmdPayloadBuff++;
     }
-    i = 0xffffffff;
-    getLogPgCmd->SetNSID(i);
-    work = str(boost::format("namspc%d") % i);
-    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
-        getLogPgCmd, work, true);
 }
 
 }   // namespace
