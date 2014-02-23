@@ -107,7 +107,7 @@ PRP1_r10b::RunCoreTest()
     LOG_NRM("Get log page to request firmware slot information");
     getLogPgCmd->SetNUMD(PRP1_ONLY_NUMD - 1); // 0-based
     getLogPgCmd->SetLID(FIRM_SLOT_INFO_LID);
-
+    getLogPgCmd->SetNSID(0xFFFFFFFF);
     SharedMemBufferPtr getLogPageMem = SharedMemBufferPtr(new MemBuffer());
     getLogPageMem->InitOffset1stPage(GetLogPage::FIRMSLOT_DATA_SIZE,
         BUFFER_OFFSET, true);
@@ -117,12 +117,6 @@ PRP1_r10b::RunCoreTest()
 
     IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
         getLogPgCmd, "prp1only", true);
-        
-    i = 0xffffffff;
-    getLogPgCmd->SetNSID(i);
-    work = str(boost::format("namspc%d") % i);
-    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
-        getLogPgCmd, work, true);
 }
 
 }   // namespace
