@@ -115,7 +115,8 @@ MandatoryFW_r10b::RunCoreTest()
         getLogPageMem->Init(GetLogPage::FIRMSLOT_DATA_SIZE, true);
         getLogPgCmd->SetPrpBuffer(prpReq, getLogPageMem);
         getLogPgCmd->SetNUMD(numd - 1); // 0-based
-
+        getLogPgCmd->SetNSID(0xFFFFFFFF);
+        
         work = str(boost::format("FWSlot.NUMD.%d") % numd);
         IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
             getLogPgCmd, work, true);
@@ -133,11 +134,6 @@ MandatoryFW_r10b::RunCoreTest()
             cmdPayloadBuff++;
         }
     }
-    i = 0xffffffff;
-    getLogPgCmd->SetNSID(i);
-    work = str(boost::format("namspc%d") % i);
-    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
-        getLogPgCmd, work, true);
 }
 
 
