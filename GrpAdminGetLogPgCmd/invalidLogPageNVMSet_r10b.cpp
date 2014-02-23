@@ -113,7 +113,7 @@ InvalidLogPageNVMSet_r10b::RunCoreTest()
     getLogPageMem->InitOffset1stPage(BUFFER_SIZE, 0, true);
     getLogPgCmd->SetPrpBuffer(prpReq, getLogPageMem);
     getLogPgCmd->SetNUMD(NUMD - 1); // 0-based
-
+    getLogPgCmd->SetNSID(0xFFFFFFFF);
     list<uint32_t> invalidLIDs = GetInvalidLIDs();
     for (list<uint32_t>::iterator invalidLID = invalidLIDs.begin();
         invalidLID != invalidLIDs.end(); invalidLID++) {
@@ -124,11 +124,6 @@ InvalidLogPageNVMSet_r10b::RunCoreTest()
         IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
             getLogPgCmd, work, true, CESTAT_INVAL_LOG_PAGE);
     }
-    i = 0xffffffff;
-    getLogPgCmd->SetNSID(i);
-    work = str(boost::format("namspc%d") % i);
-    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
-        getLogPgCmd, work, true);
 }
 
 
