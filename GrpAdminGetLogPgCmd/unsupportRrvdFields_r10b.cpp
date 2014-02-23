@@ -113,7 +113,8 @@ UnsupportRrvdFields_r10b::RunCoreTest()
     LOG_NRM("Get log page to request firmware slot information");
     getLogPgCmd->SetNUMD(PRP1_ONLY_NUMD - 1); // 0-based
     getLogPgCmd->SetLID(FIRM_SLOT_INFO_LID);
-
+    getLogPgCmd->SetNSID(0xFFFFFFFF);
+    
     SharedMemBufferPtr getLogPageMem = SharedMemBufferPtr(new MemBuffer());
     getLogPageMem->InitOffset1stPage(GetLogPage::FIRMSLOT_DATA_SIZE,
         BUFFER_OFFSET, true);
@@ -148,12 +149,6 @@ UnsupportRrvdFields_r10b::RunCoreTest()
     LOG_NRM("Issue GetLogPage cmd after setting reserved bits.");
     IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
         getLogPgCmd, "rsvd.set", true);
-        
-    i = 0xffffffff;
-    getLogPgCmd->SetNSID(i);
-    globalWork = str(boost::format("namspc%d") % i);
-    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
-        getLogPgCmd, globalWork, true);
 }
 
 }   // namespace
