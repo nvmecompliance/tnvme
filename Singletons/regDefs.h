@@ -153,7 +153,7 @@ struct PciSpcType {
  */
 /*     CtlSpc,           offset,  size, specRev,     maskRO,             impSpec,            dfltValue,          desc */
 #define CTLSPC_TABLE                                                                                                                                             \
-    ZZ(CTLSPC_CAP,       0x00,    8,    SPECREV_10b, 0xffffffffffffffff, 0x00ff01efff07ffff, 0x0000000000000000, "ctrlr CAP register (CAP)")                     \
+    ZZ(CTLSPC_CAP,       0x00,    8,    SPECREV_10b, 0xffffffffffffffff, 0x00ff1fffff07ffff, 0x0000000000000000, "ctrlr CAP register (CAP)")                     \
     ZZ(CTLSPC_VS,        0x08,    4,    SPECREV_10b, 0x00000000ffffffff, 0x0000000000000000, 0x0000000000010000, "ctrlr version register (VS)")                  \
     ZZ(CTLSPC_INTMS,     0x0c,    4,    SPECREV_10b, 0x0000000000000000, 0x0000000000000000, 0x0000000000000000, "ctrlr interrupt mask set register (INTMS)")    \
     ZZ(CTLSPC_INTMC,     0x10,    4,    SPECREV_10b, 0x0000000000000000, 0x0000000000000000, 0x0000000000000000, "ctrlr interrupt mask clear register (INTMC)")  \
