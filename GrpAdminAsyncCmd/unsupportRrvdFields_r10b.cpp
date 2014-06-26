@@ -203,7 +203,7 @@ UnsupportRrvdFields_r10b::SendAsyncEventRequests(SharedASQPtr &asq,
     if (rsvd == true) {
         LOG_NRM("Set all cmd's rsvd bits");
         uint32_t work = asyncEventReqCmd->GetDword(0);
-        work |= 0x0000fc00;      // Set DW0_b15:10 bits
+        work |= 0x00007c00;      // Set DW0_b14:10 bits
         asyncEventReqCmd->SetDword(work, 0);
 
         for (uint32_t dw = 2; dw <= 15; dw++)

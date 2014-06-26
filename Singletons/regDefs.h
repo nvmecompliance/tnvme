@@ -59,7 +59,7 @@ typedef enum PciCapabilities {
     ZZ(PCISPC_STS,       PCICAP_FENCE,   0x06,      2,    SPECREV_10b, 0x0000000000004eff, 0x00000000000006a0, 0x0000000000000010, "PCI hdr device status register (STS)")             \
     ZZ(PCISPC_RID,       PCICAP_FENCE,   0x08,      1,    SPECREV_10b, 0x00000000000000ff, 0x00000000000000ff, 0x0000000000000000, "PCI hdr revision ID register (RID)")               \
     ZZ(PCISPC_CC,        PCICAP_FENCE,   0x09,      3,    SPECREV_10b, 0x0000000000ffffff, 0x0000000000000000, 0x0000000000010802, "PCI hdr class codes register (CC)")                \
-    ZZ(PCISPC_CLS,       PCICAP_FENCE,   0x0c,      1,    SPECREV_10b, 0x00000000000000ff, 0x0000000000000000, 0x0000000000000000, "PCI hdr cache line size register (CLS)")           \
+    ZZ(PCISPC_CLS,       PCICAP_FENCE,   0x0c,      1,    SPECREV_10b, 0x00000000000000ff, 0x00000000000000ff, 0x0000000000000000, "PCI hdr cache line size register (CLS)")           \
     ZZ(PCISPC_MLT,       PCICAP_FENCE,   0x0d,      1,    SPECREV_10b, 0x00000000000000ff, 0x0000000000000000, 0x0000000000000000, "PCI hdr master latency timer reg (MLT)")           \
     ZZ(PCISPC_HTYPE,     PCICAP_FENCE,   0x0e,      1,    SPECREV_10b, 0x00000000000000ff, 0x0000000000000080, 0x0000000000000000, "PCI hdr header type register (HTYPE)")             \
     ZZ(PCISPC_BIST,      PCICAP_FENCE,   0x0f,      1,    SPECREV_10b, 0x00000000000000bf, 0x0000000000000080, 0x0000000000000000, "PCI hdr built in self test register (BIST)")       \
@@ -78,10 +78,10 @@ typedef enum PciCapabilities {
     ZZ(PCISPC_MGNT,      PCICAP_FENCE,   0x3e,      1,    SPECREV_10b, 0x00000000000000ff, 0x0000000000000000, 0x0000000000000000, "PCI hdr min grant register (MGMT)")                \
     ZZ(PCISPC_MLAT,      PCICAP_FENCE,   0x3f,      1,    SPECREV_10b, 0x00000000000000ff, 0x0000000000000000, 0x0000000000000000, "PCI hdr max latency register (MLAT)")              \
     ZZ(PCISPC_PID,       PCICAP_PMCAP,   USHRT_MAX, 2,    SPECREV_10b, 0x000000000000ffff, 0x000000000000fffe, 0x0000000000000001, "PCI power mgmt ID register (PID)")                 \
-    ZZ(PCISPC_PC,        PCICAP_PMCAP,   USHRT_MAX, 2,    SPECREV_10b, 0x000000000000ffff, 0x0000000000000027, 0x0000000000000000, "PCI power mgmt CAP register (PC)")                 \
+    ZZ(PCISPC_PC,        PCICAP_PMCAP,   USHRT_MAX, 2,    SPECREV_10b, 0x000000000000b7ff, 0x0000000000000027, 0x0000000000000000, "PCI power mgmt CAP register (PC)")                 \
     ZZ(PCISPC_PMCS,      PCICAP_PMCAP,   USHRT_MAX, 2,    SPECREV_10b, 0x000000000000fffc, 0x0000000000000000, 0x0000000000000008, "PCI pwr mgmt ctrl & status reg (PMCS)")            \
     ZZ(PCISPC_MID,       PCICAP_MSICAP,  USHRT_MAX, 2,    SPECREV_10b, 0x000000000000ffff, 0x000000000000ff00, 0x0000000000000005, "PCI MSI ID register (MID)")                        \
-    ZZ(PCISPC_MC,        PCICAP_MSICAP,  USHRT_MAX, 2,    SPECREV_10b, 0x000000000000ff8e, 0x000000000000000e, 0x0000000000000080, "PCI MSI msg ctrl register (MC)")                   \
+    ZZ(PCISPC_MC,        PCICAP_MSICAP,  USHRT_MAX, 2,    SPECREV_10b, 0x000000000000fe8e, 0x000000000000000e, 0x0000000000000080, "PCI MSI msg ctrl register (MC)")                   \
     ZZ(PCISPC_MA,        PCICAP_MSICAP,  USHRT_MAX, 4,    SPECREV_10b, 0x0000000000000003, 0x0000000000000000, 0x0000000000000000, "PCI MSI msg addr  register (MA)")                  \
     ZZ(PCISPC_MUA,       PCICAP_MSICAP,  USHRT_MAX, 4,    SPECREV_10b, 0x0000000000000000, 0x0000000000000000, 0x0000000000000000, "PCI MSI msg upper addr register (MUA)")            \
     ZZ(PCISPC_MD,        PCICAP_MSICAP,  USHRT_MAX, 2,    SPECREV_10b, 0x0000000000000000, 0x0000000000000000, 0x0000000000000000, "PCI MSI msg data register (MD)")                   \
@@ -93,10 +93,10 @@ typedef enum PciCapabilities {
     ZZ(PCISPC_MPBA,      PCICAP_MSIXCAP, USHRT_MAX, 4,    SPECREV_10b, 0x00000000ffffffff, 0x00000000ffffffff, 0x0000000000000000, "PCI MSI-X PBA offset/BIR register (MPBA)")         \
     ZZ(PCISPC_PXID,      PCICAP_PXCAP,   USHRT_MAX, 2,    SPECREV_10b, 0x000000000000ffff, 0x000000000000ff00, 0x0000000000000010, "PCI express CAP ID register (PXID)")               \
     ZZ(PCISPC_PXCAP,     PCICAP_PXCAP,   USHRT_MAX, 2,    SPECREV_10b, 0x000000000000ffff, 0x0000000000003e00, 0x0000000000000002, "PCI express CAP register (PXCAP)")                 \
-    ZZ(PCISPC_PXDCAP,    PCICAP_PXCAP,   USHRT_MAX, 4,    SPECREV_10b, 0x00000000ffffffff, 0x0000000000000fff, 0x0000000010008000, "PCI express device CAP register (PXDCAP)")         \
+    ZZ(PCISPC_PXDCAP,    PCICAP_PXCAP,   USHRT_MAX, 4,    SPECREV_10b, 0x00000000ffffffff, 0x000000000ffc0fff, 0x0000000010008000, "PCI express device CAP register (PXDCAP)")         \
     ZZ(PCISPC_PXDC,      PCICAP_PXCAP,   USHRT_MAX, 2,    SPECREV_10b, 0x0000000000000000, 0x000000000000fff0, 0x0000000000000000, "PCI express device ctrl register (PXDC)")          \
     ZZ(PCISPC_PXDS,      PCICAP_PXCAP,   USHRT_MAX, 2,    SPECREV_10b, 0x000000000000fff0, 0x0000000000000010, 0x0000000000000000, "PCI express device status register (PXDS)")        \
-    ZZ(PCISPC_PXLCAP,    PCICAP_PXCAP,   USHRT_MAX, 4,    SPECREV_10b, 0x00000000ffffffff, 0x00000000ff07ffff, 0x0000000000000000, "PCI express link CAP register (PXLCAP)")           \
+    ZZ(PCISPC_PXLCAP,    PCICAP_PXCAP,   USHRT_MAX, 4,    SPECREV_10b, 0x00000000fff7ffff, 0x00000000ff07ffff, 0x0000000000000000, "PCI express link CAP register (PXLCAP)")           \
     ZZ(PCISPC_PXLC,      PCICAP_PXCAP,   USHRT_MAX, 2,    SPECREV_10b, 0x000000000000fc34, 0x0000000000000200, 0x0000000000000000, "PCI express link ctrl register (PXLC)")            \
     ZZ(PCISPC_PXLS,      PCICAP_PXCAP,   USHRT_MAX, 2,    SPECREV_10b, 0x000000000000ffff, 0x00000000000013ff, 0x0000000000000000, "PCI express link status register (PXLS)")          \
     ZZ(PCISPC_RES1,      PCICAP_PXCAP,   USHRT_MAX, 16,   SPECREV_10b, 0xffffffffffffffff, 0x0000000000000000, 0x0000000000000000, "PCI hdr reserved area #1")                         \
@@ -104,8 +104,8 @@ typedef enum PciCapabilities {
     ZZ(PCISPC_PXDC2,     PCICAP_PXCAP,   USHRT_MAX, 2,    SPECREV_10b, 0x00000000ffff9b0f, 0x000000000000700f, 0x0000000000000000, "PCI express device ctrl2 register (PXDC2)")        \
     ZZ(PCISPC_AERID,     PCICAP_AERCAP,  USHRT_MAX, 4,    SPECREV_10b, 0x00000000ffffffff, 0x00000000fff00000, 0x0000000000020001, "PCI AER CAP ID register (AERID)")                  \
     ZZ(PCISPC_AERUCES,   PCICAP_AERCAP,  USHRT_MAX, 4,    SPECREV_10b, 0x00000000fc0007ef, 0x00000000003fff0f, 0x0000000000000000, "PCI AER uncorrect err stat register (AERECES)")    \
-    ZZ(PCISPC_AERUCEM,   PCICAP_AERCAP,  USHRT_MAX, 4,    SPECREV_10b, 0x00000000fc000fef, 0x000000000000f1c1, 0x0000000000400000, "PCI AER uncorrect err mask register (AERUCEM)")    \
-    ZZ(PCISPC_AERUCESEV, PCICAP_AERCAP,  USHRT_MAX, 4,    SPECREV_10b, 0x00000000fc000fef, 0x0000000003eaa000, 0x0000000000462010, "PCI AER uncorrect err severity reg (AERECESEV)")   \
+    ZZ(PCISPC_AERUCEM,   PCICAP_AERCAP,  USHRT_MAX, 4,    SPECREV_10b, 0x00000000fc000fcf, 0x000000000000f1c1, 0x0000000000400000, "PCI AER uncorrect err mask register (AERUCEM)")    \
+    ZZ(PCISPC_AERUCESEV, PCICAP_AERCAP,  USHRT_MAX, 4,    SPECREV_10b, 0x00000000fc000fcf, 0x0000000003eaa000, 0x0000000000462010, "PCI AER uncorrect err severity reg (AERECESEV)")   \
     ZZ(PCISPC_AERCS,     PCICAP_AERCAP,  USHRT_MAX, 4,    SPECREV_10b, 0x00000000ffff0e3e, 0x000000000000c000, 0x0000000000000000, "PCI AER correctable err stat reg (AERCES)")        \
     ZZ(PCISPC_AERCEM,    PCICAP_AERCAP,  USHRT_MAX, 4,    SPECREV_10b, 0x00000000ffff0e3e, 0x000000000000c000, 0x0000000000000000, "PCI AER correctable err mask reg (AERCEM)")        \
     ZZ(PCISPC_AERCC,     PCICAP_AERCAP,  USHRT_MAX, 4,    SPECREV_10b, 0x00000000fffff8af, 0x00000000000007e0, 0x0000000000000000, "PCI AER adv err CAP & ctrl register AERCC)")       \
@@ -154,7 +154,7 @@ struct PciSpcType {
 /*     CtlSpc,           offset,  size, specRev,     maskRO,             impSpec,            dfltValue,          desc */
 #define CTLSPC_TABLE                                                                                                                                             \
     ZZ(CTLSPC_CAP,       0x00,    8,    SPECREV_10b, 0xffffffffffffffff, 0x00ff1fffff07ffff, 0x0000000000000000, "ctrlr CAP register (CAP)")                     \
-    ZZ(CTLSPC_VS,        0x08,    4,    SPECREV_10b, 0x00000000ffffffff, 0x0000000000000000, 0x0000000000010000, "ctrlr version register (VS)")                  \
+    ZZ(CTLSPC_VS,        0x08,    4,    SPECREV_10b, 0x00000000ffffffff, 0x0000000000000000, 0x0000000000010100, "ctrlr version register (VS)")                  \
     ZZ(CTLSPC_INTMS,     0x0c,    4,    SPECREV_10b, 0x0000000000000000, 0x0000000000000000, 0x0000000000000000, "ctrlr interrupt mask set register (INTMS)")    \
     ZZ(CTLSPC_INTMC,     0x10,    4,    SPECREV_10b, 0x0000000000000000, 0x0000000000000000, 0x0000000000000000, "ctrlr interrupt mask clear register (INTMC)")  \
     ZZ(CTLSPC_CC,        0x14,    4,    SPECREV_10b, 0x00000000ff00000e, 0x0000000000000000, 0x0000000000000000, "ctrlr config register (CC)")                   \

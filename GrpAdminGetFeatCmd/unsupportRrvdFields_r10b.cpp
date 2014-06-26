@@ -109,7 +109,7 @@ UnsupportRrvdFields_r10b::RunCoreTest()
 
     LOG_NRM("Set all cmd's rsvd bits");
     uint32_t work = getFeaturesCmd->GetDword(0);
-    work |= 0x0000fc00;      // Set DW0_b15:10 bits
+    work |= 0x00007c00;      // Set DW0_b14:10 bits
     getFeaturesCmd->SetDword(work, 0);
 
     getFeaturesCmd->SetDword(0xffffffff, 2);
@@ -123,7 +123,7 @@ UnsupportRrvdFields_r10b::RunCoreTest()
 
     // DW10_b31:8
     work = getFeaturesCmd->GetDword(10);
-    work |= 0xffffff00;
+    work |= 0xfffff800;
     getFeaturesCmd->SetDword(work, 10);
 
     getFeaturesCmd->SetDword(0xffffffff, 12);

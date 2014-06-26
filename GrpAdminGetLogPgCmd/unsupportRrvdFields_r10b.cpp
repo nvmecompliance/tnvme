@@ -102,7 +102,7 @@ UnsupportRrvdFields_r10b::RunCoreTest()
      */
     // Lookup objs which were created in a prior test within group
     string globalWork;
-    uint64_t i;
+    //uint64_t i;
     
     SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
     SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
@@ -128,7 +128,7 @@ UnsupportRrvdFields_r10b::RunCoreTest()
 
     LOG_NRM("Set all cmd's rsvd bits");
     uint32_t work = getLogPgCmd->GetDword(0);
-    work |= 0x0000fc00;      // Set DW0_b15:10 bits
+    work |= 0x00007c00;      // Set DW0_b14:10 bits
     getLogPgCmd->SetDword(work, 0);
 
     getLogPgCmd->SetDword(0xffffffff, 2);

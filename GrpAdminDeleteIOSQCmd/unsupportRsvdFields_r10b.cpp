@@ -134,7 +134,7 @@ UnsupportRsvdFields_r10b::RunCoreTest()
 
     LOG_NRM("Set all cmd's rsvd bits");
     uint32_t work = deleteIOSQCmd->GetDword(0);
-    work |= 0x0000fc00;      // Set DW0_b15:10 bits
+    work |= 0x00007c00;      // Set DW0_b14:10 bits
     deleteIOSQCmd->SetDword(work, 0);
 
     deleteIOSQCmd->SetDword(0xffffffff, 2);

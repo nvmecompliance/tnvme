@@ -54,6 +54,11 @@ protected:
     static const uint8_t WRITE_UNCORR_OPCODE;
     static const uint8_t COMPARE_OPCODE;
     static const uint8_t DSM_OPCODE;
+    static const uint8_t WRITE_ZEROES_OPCODE;
+    static const uint8_t RSV_REG_OPCODE;
+    static const uint8_t RSV_REPORT_OPCODE;
+    static const uint8_t RSV_ACQUIRE_OPCODE;
+    static const uint8_t RSV_RELEASE_OPCODE;
 
 private:
     ///////////////////////////////////////////////////////////////////////////

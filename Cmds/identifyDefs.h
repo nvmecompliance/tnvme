@@ -216,7 +216,10 @@ struct IdNamespcStruct {
 typedef enum ONCSBits {
     ONCS_SUP_COMP_CMD    = 0x0001,
     ONCS_SUP_WR_UNC_CMD  = 0x0002,
-    ONCS_SUP_DSM_CMD     = 0x0004
+    ONCS_SUP_DSM_CMD     = 0x0004,
+    ONCS_SUP_WR_ZERO_CMD = 0x0008/*,
+    ONCS_SUP_SV_AND_SLCT_FEATS = 0x0010,  //NYI
+    ONCE_SUP_RSVNS = 0x0020*/
 } ONCSBits;
 
 /// Bit definitions for IDCTRLRCAP_OACS

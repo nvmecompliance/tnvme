@@ -96,7 +96,7 @@ PRP1PRP2_r10b::RunCoreTest()
      */
     // Lookup objs which were created in a prior test within group
     string work;
-    uint64_t i;
+    //uint64_t i;
     
     SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
     SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))

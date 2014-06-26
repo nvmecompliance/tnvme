@@ -108,7 +108,7 @@ UnsupportRsvdFields_r10b::RunCoreTest()
 
     LOG_NRM("Set all cmd's rsvd bits");
     uint32_t work = writeCmd->GetDword(0);
-    work |= 0x0000fc00;      // Set DW0_b15:10 bits
+    work |= 0x00007c00;      // Set DW0_b14:10 bits
     writeCmd->SetDword(work, 0);
 
     writeCmd->SetDword(0xffffffff, 2);

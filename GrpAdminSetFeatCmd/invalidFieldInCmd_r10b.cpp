@@ -113,7 +113,7 @@ InvalidFieldInCmd_r10b::RunCoreTest()
     LOG_NRM("Form a vector of invalid FID's");
     vector<uint16_t> invalidFIDs;
     invalidFIDs.push_back(0x00);
-    for (uint8_t invalFID = 0x0C; invalFID <= 0x7F; invalFID++)
+    for (uint8_t invalFID = 0x0D; invalFID <= 0x7F; invalFID++)
         invalidFIDs.push_back(invalFID);
 
     for (uint8_t invalFID = 0x81; invalFID <= 0xBF; invalFID++)
