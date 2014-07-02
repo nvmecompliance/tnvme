@@ -34,10 +34,10 @@ const uint8_t IllegalNVMCmds_r10b::WRITE_UNCORR_OPCODE  = 0x04;
 const uint8_t IllegalNVMCmds_r10b::COMPARE_OPCODE       = 0x05;
 const uint8_t IllegalNVMCmds_r10b::WRITE_ZEROES_OPCODE	= 0x08;
 const uint8_t IllegalNVMCmds_r10b::DSM_OPCODE           = 0x09;
-/*const uint8_t IllegalNVMCmds_r10b::RSV_REG_OPCODE	= 0x0D;
+const uint8_t IllegalNVMCmds_r10b::RSV_REG_OPCODE	    = 0x0D;
 const uint8_t IllegalNVMCmds_r10b::RSV_REPORT_OPCODE	= 0x0E;
 const uint8_t IllegalNVMCmds_r10b::RSV_ACQUIRE_OPCODE	= 0x11;
-const uint8_t IllegalNVMCmds_r10b::RSV_RELEASE_OPCODE	= 0x15; NYI*/
+const uint8_t IllegalNVMCmds_r10b::RSV_RELEASE_OPCODE	= 0x15;
 
 
 IllegalNVMCmds_r10b::IllegalNVMCmds_r10b(
@@ -155,7 +155,14 @@ IllegalNVMCmds_r10b::GetIllegalOpcodes()
 
     if ((optNVMCmds & ONCS_SUP_WR_ZERO_CMD) != 0)
         illegalOpCodes.remove(WRITE_ZEROES_OPCODE);
-
+        
+    if ((optNVMCmds & ONCS_SUP_RSRV_CMD) != 0)
+    {
+       illegalOpCodes.remove(RSRV_REGISTER_OPCODE);
+       illegalOpCodes.remove(RSRV_REPORT_OPCODE);
+       illegalOpCodes.remove(RSRV_ACQUIRE_OPCODE);
+       illegalOpCodes.remove(RSRV_RELEASE_OPCODE);
+    }
 /*TODO Add checks for reservation support and save/select features for 1.1 update,
  uncomment ONCS codes in identifyDes.h
 */
