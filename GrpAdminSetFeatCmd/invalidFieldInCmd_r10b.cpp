@@ -112,11 +112,18 @@ InvalidFieldInCmd_r10b::RunCoreTest()
 
     LOG_NRM("Form a vector of invalid FID's");
     vector<uint16_t> invalidFIDs;
+    uint8_t invalFID;
+    
     invalidFIDs.push_back(0x00);
     for (uint8_t invalFID = 0x0D; invalFID <= 0x7F; invalFID++)
         invalidFIDs.push_back(invalFID);
 
-    for (uint8_t invalFID = 0x81; invalFID <= 0xBF; invalFID++)
+    if((gInformative->GetIdentifyCmdCtrlr()->GetValue(IDCTRLRCAP_ONCS)) & ONCS_SUP_RSRV_CMD)
+        invalFID = 0x84;
+    else
+        invalFID = 0x81;  
+ 
+    for (; invalFID <= 0xBF; invalFID++)
         invalidFIDs.push_back(invalFID);
 
     for (uint16_t i = 0; i < invalidFIDs.size(); i++) {
