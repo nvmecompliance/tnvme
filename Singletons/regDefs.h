@@ -186,6 +186,8 @@ struct CtlSpcType {
     const char     *desc;
 };
 
+// PXLCAP default value for ASPM 
+#define PXLCAP_ASPM_DEFAULT  0x0000000000400000
 
 ////////////////////////////////////////////////////////////////////////////////
 //                   REGISTER BIT DEFINITIONS FOLLOW
@@ -311,5 +313,17 @@ typedef enum CAPBits {
     CAP_MQES       = 0x000000000000ffff
 } CAPBits;
 
+typedef enum PXLCAPBits {
+    PXLCAP_PN      = 0xff000000,
+    PXLCAP_LBNC    = 0x00200000,
+    PXLCAP_DLLLA   = 0x00100000,
+    PXLCAP_SDERC   = 0x00080000,
+    PXLCAP_CPM     = 0x00040000,
+    PXLCAP_L1EL    = 0x00038000,
+    PXLCAP_L0SEL   = 0x00007000,
+    PXLCAP_ASPMS   = 0x00000c00,
+    PXLCAP_MLW     = 0x000003f0,
+    PXLCAP_SLS     = 0x0000000f
+} PXLCAPBits;
 
 #endif
