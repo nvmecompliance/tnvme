@@ -308,17 +308,35 @@ AllPciRegs_r10b::ValidatePciCapRegisterROAttribute(PciSpc reg)
     } else if (gRegisters->Read(reg, value) == false) {
         throw FrmwkEx(HERE);
     } else {
-        // Ignore the implementation specific bits, and bits that
-        // the manufacturer can make a decision as to their type of
-        // access RW,RO
-        value &= ~pciMetrics[reg].impSpec;
+        // If ASPMS is supported via bits 10 and 11, bit 22 (ASPM) would be set by the firmware 
+        if (((reg == PCISPC_PXLCAP)  && (value & PXLCAP_ASPMS)  )) {
 
-        // Verify that the RO bits are set to correct default
-        // values, no reset needed to achieve this because there's
-        // no way to change.
-        value &= pciMetrics[reg].maskRO;
-        expectedValue = (pciMetrics[reg].dfltValue &
-            pciMetrics[reg].maskRO);
+            // Ignore the implementation specific bits, and bits that
+            // the manufacturer can make a decision as to their type of
+            // access RW,RO
+            value &= ~pciMetrics[reg].impSpec;
+
+            // Verify that the RO bits are set to correct default
+            // values, no reset needed to achieve this because there's
+            // no way to change.
+            value &= pciMetrics[reg].maskRO;
+            expectedValue =
+                (PXLCAP_ASPM_DEFAULT & pciMetrics[reg].maskRO);
+
+        } else  {
+			// Ignore the implementation specific bits, and bits that
+			// the manufacturer can make a decision as to their type of
+			// access RW,RO
+			value &= ~pciMetrics[reg].impSpec;
+
+			// Verify that the RO bits are set to correct default
+			// values, no reset needed to achieve this because there's
+			// no way to change.
+			value &= pciMetrics[reg].maskRO;
+			expectedValue = (pciMetrics[reg].dfltValue &
+				pciMetrics[reg].maskRO);
+
+		}
 
         if (value != expectedValue) {
             LOG_ERR("%s RO bit #%d has incorrect value", pciMetrics[reg].desc,
