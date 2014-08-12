@@ -222,7 +222,7 @@ SQCQSizeMismatch_r10b::ReapVerifyOnCQ(SharedIOCQPtr iocq, SharedIOSQPtr iosq)
     uint32_t isrCount;
 
     SharedMemBufferPtr ceMemIOCQ = SharedMemBufferPtr(new MemBuffer());
-    for (uint32_t nCmds = 1; nCmds < iocq->GetNumEntries(); nCmds++) {
+    for (uint32_t nCmds = 1; nCmds < iosq->GetNumEntries(); nCmds++) {
         LOG_NRM("Wait for the CE to arrive in IOCQ");
         if (iocq->ReapInquiryWaitSpecify(CALC_TIMEOUT_ms(1), 1, numCE,
             isrCount) == false) {
