@@ -261,7 +261,7 @@ AllPciRegs_r10b::ValidateROBitsAfterWriting()
                     if (gRegisters->Write((PciSpc)j, value) == false)
                         throw FrmwkEx(HERE);
                 }
-		        result &= ValidatePciCapRegisterROAttribute((PciSpc)j);
+                result &= ValidatePciCapRegisterROAttribute((PciSpc)j);
             }
         }
     }
@@ -272,77 +272,63 @@ AllPciRegs_r10b::ValidateROBitsAfterWriting()
 bool
 AllPciRegs_r10b::ValidatePciCapRegisterROAttribute(PciSpc reg)
 {
+    uint64_t tmpValue;
     uint64_t value;
     uint64_t expectedValue;
     const PciSpcType *pciMetrics = gRegisters->GetPciMetrics();
     bool result = true;
 
     if (pciMetrics[reg].size > MAX_SUPPORTED_REG_SIZE) {
+        value = 0;
         for (uint32_t k = 0; (k*DWORD_LEN) < pciMetrics[reg].size; k++) {
+            tmpValue = 0;
             if (gRegisters->Read(NVMEIO_PCI_HDR, DWORD_LEN,
                 pciMetrics[reg].offset + (k * DWORD_LEN),
-                (uint8_t *)&value) == false) {
+                (uint8_t *)&tmpValue) == false) {
 
                 throw FrmwkEx(HERE);
             } else {
-                // Ignore the implementation specific bits, and bits that
-                // the manufacturer can make a decision as to their type of
-                // access RW,RO
-                value &= ~pciMetrics[reg].impSpec;
-
-                // Verify that the RO bits are set to correct default
-                // values, no reset needed to achieve this because there's
-                // no way to change.
-                value &= pciMetrics[reg].maskRO;
-                expectedValue = (pciMetrics[reg].dfltValue &
-                    pciMetrics[reg].maskRO);
-
-                if (value != expectedValue) {
-                    LOG_ERR("%s RO bit #%d has incorrect value",
-                        pciMetrics[reg].desc,
-                        ReportOffendingBitPos(value, expectedValue));
-                    result = false;
-                }
+                value |= (tmpValue << (k * DWORD_LEN * 8));
             }
         }
     } else if (gRegisters->Read(reg, value) == false) {
         throw FrmwkEx(HERE);
-    } else {
-        // If ASPMS is supported via bits 10 and 11, bit 22 (ASPM) would be set by the firmware 
-        if (((reg == PCISPC_PXLCAP)  && (value & PXLCAP_ASPMS)  )) {
+    }
 
-            // Ignore the implementation specific bits, and bits that
-            // the manufacturer can make a decision as to their type of
-            // access RW,RO
-            value &= ~pciMetrics[reg].impSpec;
+    // If ASPMS is supported via bits 10 and 11, bit 22 (ASPM) would be set by the firmware
+    if (((reg == PCISPC_PXLCAP)  && (value & PXLCAP_ASPMS)  )) {
 
-            // Verify that the RO bits are set to correct default
-            // values, no reset needed to achieve this because there's
-            // no way to change.
-            value &= pciMetrics[reg].maskRO;
-            expectedValue =
-                (PXLCAP_ASPM_DEFAULT & pciMetrics[reg].maskRO);
+        // Ignore the implementation specific bits, and bits that
+        // the manufacturer can make a decision as to their type of
+        // access RW,RO
+        value &= ~pciMetrics[reg].impSpec;
 
-        } else  {
-			// Ignore the implementation specific bits, and bits that
-			// the manufacturer can make a decision as to their type of
-			// access RW,RO
-			value &= ~pciMetrics[reg].impSpec;
+        // Verify that the RO bits are set to correct default
+        // values, no reset needed to achieve this because there's
+        // no way to change.
+        value &= pciMetrics[reg].maskRO;
+        expectedValue =
+            (PXLCAP_ASPM_DEFAULT & pciMetrics[reg].maskRO);
 
-			// Verify that the RO bits are set to correct default
-			// values, no reset needed to achieve this because there's
-			// no way to change.
-			value &= pciMetrics[reg].maskRO;
-			expectedValue = (pciMetrics[reg].dfltValue &
-				pciMetrics[reg].maskRO);
+    } else  {
+        // Ignore the implementation specific bits, and bits that
+        // the manufacturer can make a decision as to their type of
+        // access RW,RO
+        value &= ~pciMetrics[reg].impSpec;
 
-		}
+        // Verify that the RO bits are set to correct default
+        // values, no reset needed to achieve this because there's
+        // no way to change.
+        value &= pciMetrics[reg].maskRO;
+        expectedValue = (pciMetrics[reg].dfltValue &
+                         pciMetrics[reg].maskRO);
 
-        if (value != expectedValue) {
-            LOG_ERR("%s RO bit #%d has incorrect value", pciMetrics[reg].desc,
-                ReportOffendingBitPos(value, expectedValue));
-            result = false;
-        }
+    }
+
+    if (value != expectedValue) {
+        LOG_ERR("%s RO bit #%d has incorrect value", pciMetrics[reg].desc,
+            ReportOffendingBitPos(value, expectedValue));
+        result = false;
     }
     return result;
 }
