@@ -55,9 +55,15 @@ VerifySpecCompatibility(SpecRev specRev)
     if ((tgtMajor != hdwMajor) || (tgtMinor != hdwMinor)) {
         LOG_ERR("(Targeted vs hdw) spec rev incompatibility (%d.%d != %d.%d)",
             tgtMajor, tgtMinor, hdwMajor, hdwMinor);
-        sprintf(revision_warning, "WARNING: hardware targets spec v%d.%d but tests were for spec v%d.%d", hdwMajor, hdwMinor, tgtMajor, tgtMinor);
+        sprintf(revision_warning, "WARNING: hardware targets spec v%d.%d but "
+            "tests were for spec v%d.%d\n", hdwMajor, hdwMinor, tgtMajor,
+            tgtMinor);
         // return false;
     }
+
+    else
+      revision_warning[0] = '\0';
+
     return true;
 }
 

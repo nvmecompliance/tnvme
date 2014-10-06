@@ -530,7 +530,7 @@ main(int argc, char *argv[])
             } else {
                 printf("SUCCESS: testing\n");
             }
-            LOG_WARN("%s", revision_warning);
+            printf("%s", revision_warning);
         }
     } catch (...) {
         LOG_ERR("An unforeseen exception has been caught");
