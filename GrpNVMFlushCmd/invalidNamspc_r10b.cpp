@@ -103,6 +103,17 @@ InvalidNamspc_r10b::RunCoreTest()
     for (uint8_t invalFID = 0x0D; invalFID <= 0x7F; invalFID++)
         invalidFIDs.push_back(invalFID);
 
+    if((gInformative->GetIdentifyCmdCtrlr()->GetValue(IDCTRLRCAP_ONCS)) & ONCS_SUP_RSRV_CMD)
+        invalFID = 0x84;
+    else
+        invalFID = 0x81;  
+ 
+    for (; invalFID <= 0xBF; invalFID++)
+        invalidFIDs.push_back(invalFID);
+
+    LOG_NRM("Create Set features cmd");
+    SharedSetFeaturesPtr setFeaturesCmd =
+        SharedSetFeaturesPtr(new SetFeatures());
     // Lookup objs which were created in a prior test within group
     SharedIOSQPtr iosq = CAST_TO_IOSQ(gRsrcMngr->GetObj(IOSQ_GROUP_ID));
     SharedIOCQPtr iocq = CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_GROUP_ID));
