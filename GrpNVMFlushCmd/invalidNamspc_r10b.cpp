@@ -106,6 +106,12 @@ InvalidNamspc_r10b::RunCoreTest()
     // For all namspc's issue cmd to an illegal namspc
     ConstSharedIdentifyPtr idCtrlrStruct = gInformative->GetIdentifyCmdCtrlr();
     uint32_t nn = (uint32_t)idCtrlrStruct->GetValue(IDCTRLRCAP_NN);
+    uint32_t write_cache_enabled = (uint32_t)idCtrlrStruct->GetValue(IDCTRLRCAP_VWC);
+
+    if (write_cache_enabled == 0){
+         return;
+    }
+    
     if (nn == 0 ) {
         throw FrmwkEx(HERE, "Required to support >= 1 namspc");
     }
