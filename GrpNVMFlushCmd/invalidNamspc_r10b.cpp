@@ -22,6 +22,7 @@
 #include "../Queues/iosq.h"
 #include "../Utils/io.h"
 #include "../Cmds/flush.h"
+#include "../Cmds/setFeatures.h"
 
 namespace GrpNVMFlushCmd {
 
@@ -112,14 +113,12 @@ InvalidNamspc_r10b::RunCoreTest()
         invalidFIDs.push_back(invalFID);
 
     LOG_NRM("Create Set features cmd");
-    SharedSetFeaturesPtr setFeaturesCmd =
-        SharedSetFeaturesPtr(new SetFeatures());
     // Lookup objs which were created in a prior test within group
     SharedIOSQPtr iosq = CAST_TO_IOSQ(gRsrcMngr->GetObj(IOSQ_GROUP_ID));
     SharedIOCQPtr iocq = CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_GROUP_ID));
 
     SharedFlushPtr flushCmd = SharedFlushPtr(new Flush());
-
+    SharedSetFeaturesPtr setFeaturesCmd = SharedSetFeaturesPtr(new SetFeatures());
     // For all namspc's issue cmd to an illegal namspc
     ConstSharedIdentifyPtr idCtrlrStruct = gInformative->GetIdentifyCmdCtrlr();
     uint32_t nn = (uint32_t)idCtrlrStruct->GetValue(IDCTRLRCAP_NN);
