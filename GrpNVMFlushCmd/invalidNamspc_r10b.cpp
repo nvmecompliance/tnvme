@@ -96,6 +96,12 @@ InvalidNamspc_r10b::RunCoreTest()
     uint64_t inc, i;
     string work;
     ConstSharedIdentifyPtr namSpcPtr;
+    vector<uint16_t> invalidFIDs;
+    uint8_t invalFID;
+    
+    invalidFIDs.push_back(0x00);
+    for (uint8_t invalFID = 0x0D; invalFID <= 0x7F; invalFID++)
+        invalidFIDs.push_back(invalFID);
 
     // Lookup objs which were created in a prior test within group
     SharedIOSQPtr iosq = CAST_TO_IOSQ(gRsrcMngr->GetObj(IOSQ_GROUP_ID));
@@ -121,6 +127,13 @@ InvalidNamspc_r10b::RunCoreTest()
         LOG_NRM("Issue flush cmd with illegal namspc ID=%llu",
             (unsigned long long)i);
         flushCmd->SetNSID(i);
+         for (uint16_t i = 0; i < invalidFIDs.size(); i++) {
+            if (invalidFIDs[i] == 0x81)
+               continue;
+             LOG_NRM("Issue get feat cmd using invalid FID = 0x%X", invalidFIDs[i]);
+             getFeaturesCmd->SetFID(invalidFIDs[i]);
+             work = str(boost::format("invalidFIDs.%xh") % invalidFIDs[i]);
+         }
         work = str(boost::format("namspc%d") % i);
         IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq,
             iocq, flushCmd, work, true, CESTAT_INVAL_NAMSPC);
