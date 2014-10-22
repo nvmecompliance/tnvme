@@ -28,7 +28,7 @@ class SQ;     // forward definition
 class Cmd;    // forward definition
 typedef boost::shared_ptr<Cmd>              SharedCmdPtr;
 #define CAST_TO_Cmd(shared_trackable_ptr)   \
-        boost::shared_polymorphic_downcast<Cmd>(shared_trackable_ptr);
+        boost::dynamic_pointer_cast<Cmd>(shared_trackable_ptr);
 
 
 /**

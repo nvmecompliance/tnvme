@@ -25,7 +25,7 @@ typedef boost::shared_ptr<AsyncEventReq>        SharedAsyncEventReqPtr;
 typedef boost::shared_ptr<const AsyncEventReq>
     ConstSharedAsyncEventRequestPtr;
 #define CAST_TO_ASYNCEVENT(shared_trackable_ptr)   \
-    boost::shared_polymorphic_downcast<AsyncEventRequest>(shared_trackable_ptr);
+    boost::dynamic_pointer_cast<AsyncEventRequest>(shared_trackable_ptr);
 
 
 /**

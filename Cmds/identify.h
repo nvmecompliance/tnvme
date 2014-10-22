@@ -25,7 +25,7 @@ class Identify;    // forward definition
 typedef boost::shared_ptr<Identify>             SharedIdentifyPtr;
 typedef boost::shared_ptr<const Identify>       ConstSharedIdentifyPtr;
 #define CAST_TO_IDENTIFY(shared_trackable_ptr)  \
-        boost::shared_polymorphic_downcast<Identify>(shared_trackable_ptr);
+        boost::dynamic_pointer_cast<Identify>(shared_trackable_ptr);
 
 
 /**
