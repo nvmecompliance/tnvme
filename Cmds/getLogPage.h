@@ -25,7 +25,7 @@ class GetLogPage;    // forward definition
 typedef boost::shared_ptr<GetLogPage>               SharedGetLogPagePtr;
 typedef boost::shared_ptr<const GetLogPage>         ConstSharedGetLogPagePtr;
 #define CAST_TO_GETLOGPAGE(shared_trackable_ptr)    \
-        boost::shared_polymorphic_downcast<GetLogPage>(shared_trackable_ptr);
+        boost::dynamic_pointer_cast<GetLogPage>(shared_trackable_ptr);
 
 
 /**

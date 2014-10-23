@@ -24,7 +24,7 @@ class Flush;    // forward definition
 typedef boost::shared_ptr<Flush>             SharedFlushPtr;
 typedef boost::shared_ptr<const Flush>       ConstSharedFlushPtr;
 #define CAST_TO_FLUSH(shared_trackable_ptr)  \
-        boost::shared_polymorphic_downcast<Flush>(shared_trackable_ptr);
+        boost::dynamic_pointer_cast<Flush>(shared_trackable_ptr);
 
 
 /**

@@ -24,7 +24,7 @@ class FWImgDnld;    // forward definition
 typedef boost::shared_ptr<FWImgDnld>              SharedFWImgDnldPtr;
 typedef boost::shared_ptr<const FWImgDnld>        ConstSharedFWImgDnldPtr;
 #define CAST_TO_FWIMGDNLD(shared_trackable_ptr)   \
-        boost::shared_polymorphic_downcast<FWImgDnld>(shared_trackable_ptr);
+        boost::dynamic_pointer_cast<FWImgDnld>(shared_trackable_ptr);
 
 
 /**
