@@ -25,7 +25,7 @@ class CreateIOCQ;    // forward definition
 typedef boost::shared_ptr<CreateIOCQ>             SharedCreateIOCQPtr;
 typedef boost::shared_ptr<const CreateIOCQ>       ConstSharedCreateIOCQPtr;
 #define CAST_TO_CREATEIOCQ(shared_trackable_ptr)  \
-        boost::shared_polymorphic_downcast<CreateIOCQ>(shared_trackable_ptr);
+        boost::dynamic_pointer_cast<CreateIOCQ>(shared_trackable_ptr);
 
 
 /**

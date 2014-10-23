@@ -23,7 +23,7 @@
 class CQ;    // forward definition
 typedef boost::shared_ptr<CQ>               SharedCQPtr;
 #define CAST_TO_CQ(shared_trackable_ptr)    \
-        boost::shared_polymorphic_downcast<CQ>(shared_trackable_ptr);
+        boost::dynamic_pointer_cast<CQ>(shared_trackable_ptr);
 
 
 /**

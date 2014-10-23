@@ -24,7 +24,7 @@ class SecuritySend;    // forward definition
 typedef boost::shared_ptr<SecuritySend>             SharedSecuritySendPtr;
 typedef boost::shared_ptr<const SecuritySend>       ConstSharedSecuritySendPtr;
 #define CAST_TO_SECURITYSEND(shared_trackable_ptr)  \
-        boost::shared_polymorphic_downcast<SecuritySend>(shared_trackable_ptr);
+        boost::dynamic_pointer_cast<SecuritySend>(shared_trackable_ptr);
 
 
 /**

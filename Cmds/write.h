@@ -24,7 +24,7 @@ class Write;    // forward definition
 typedef boost::shared_ptr<Write>             SharedWritePtr;
 typedef boost::shared_ptr<const Write>       ConstSharedWritePtr;
 #define CAST_TO_WRITE(shared_trackable_ptr)  \
-        boost::shared_polymorphic_downcast<Write>(shared_trackable_ptr);
+        boost::dynamic_pointer_cast<Write>(shared_trackable_ptr);
 
 
 /**

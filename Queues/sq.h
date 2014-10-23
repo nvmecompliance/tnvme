@@ -25,7 +25,7 @@
 class SQ;    // forward definition
 typedef boost::shared_ptr<SQ>               SharedSQPtr;
 #define CAST_TO_SQ(shared_trackable_ptr)    \
-        boost::shared_polymorphic_downcast<SQ>(shared_trackable_ptr);
+        boost::dynamic_pointer_cast<SQ>(shared_trackable_ptr);
 
 
 /**

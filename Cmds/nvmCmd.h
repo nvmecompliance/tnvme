@@ -24,7 +24,7 @@ class NVMCmd;    // forward definition
 typedef boost::shared_ptr<NVMCmd>             SharedNVMCmdPtr;
 typedef boost::shared_ptr<const NVMCmd>       ConstSharedNVMCmdPtr;
 #define CAST_TO_NVMCMD(shared_trackable_ptr)  \
-    boost::shared_polymorphic_downcast<NVMCmd>(shared_trackable_ptr);
+    boost::dynamic_pointer_cast<NVMCmd>(shared_trackable_ptr);
 
 
 /**

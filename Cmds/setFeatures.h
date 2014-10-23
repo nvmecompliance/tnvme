@@ -24,7 +24,7 @@ class SetFeatures;    // forward definition
 typedef boost::shared_ptr<SetFeatures>              SharedSetFeaturesPtr;
 typedef boost::shared_ptr<const SetFeatures>        ConstSharedSetFeaturesPtr;
 #define CAST_TO_SETFEATURES(shared_trackable_ptr)   \
-        boost::shared_polymorphic_downcast<SetFeatures>(shared_trackable_ptr);
+        boost::dynamic_pointer_cast<SetFeatures>(shared_trackable_ptr);
 
 
 /**

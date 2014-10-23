@@ -24,7 +24,7 @@ class FWActivate;    // forward definition
 typedef boost::shared_ptr<FWActivate>               SharedFWActivatePtr;
 typedef boost::shared_ptr<const FWActivate>         ConstSharedFWActivatePtr;
 #define CAST_TO_FWACTIVATE(shared_trackable_ptr)    \
-        boost::shared_polymorphic_downcast<FWActivate>(shared_trackable_ptr);
+        boost::dynamic_pointer_cast<FWActivate>(shared_trackable_ptr);
 
 
 /**
