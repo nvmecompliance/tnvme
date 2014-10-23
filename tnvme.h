@@ -190,5 +190,6 @@ struct CmdLine {
     string          dump;
 };
 
+extern char revision_warning[1024];
 
 #endif

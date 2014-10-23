@@ -272,7 +272,7 @@ AllPciRegs_r10b::ValidateROBitsAfterWriting()
 bool
 AllPciRegs_r10b::ValidatePciCapRegisterROAttribute(PciSpc reg)
 {
-    uint64_t value;
+    uint64_t value = 0;
     uint64_t expectedValue;
     const PciSpcType *pciMetrics = gRegisters->GetPciMetrics();
     bool result = true;
