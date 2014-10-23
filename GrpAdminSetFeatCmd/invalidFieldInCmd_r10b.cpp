@@ -127,6 +127,8 @@ InvalidFieldInCmd_r10b::RunCoreTest()
         invalidFIDs.push_back(invalFID);
 
     for (uint16_t i = 0; i < invalidFIDs.size(); i++) {
+        if (invalidFIDs[i] == 0x81)
+            continue;
         LOG_NRM("Issue set feat cmd using invalid FID = 0x%X", invalidFIDs[i]);
         setFeaturesCmd->SetFID(invalidFIDs[i]);
         work = str(boost::format("invalidFIDs.%xh") % invalidFIDs[i]);

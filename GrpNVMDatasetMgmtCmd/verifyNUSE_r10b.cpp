@@ -162,7 +162,8 @@ VerifyNUSE_r10b::RunCoreTest()
 
     LOG_NRM("Verify namespace utilization is zero after de-allocation.");
     uint64_t nuse = idCmdNamSpc->GetValue(IDNAMESPC_NUSE);
-    if (nuse != 0x0) {
+    uint64_t nsfeat = idCmdNamSpc->GetValue(IDNAMESPC_NSFEAT);
+    if (nuse != 0x0 && ((nsfeat & 0x1) == 0x1)) {
         throw FrmwkEx(HERE, "Expected namspc utilization = 0x0 but found "
             "namspc utilization = 0x%08X", nuse);
     }
@@ -210,7 +211,8 @@ VerifyNUSE_r10b::RunCoreTest()
 
     LOG_NRM("Verify namespace utilization is one after single LBA write cmd.");
     nuse = idCmdNamSpc->GetValue(IDNAMESPC_NUSE);
-    if (nuse != 0x1) {
+    nsfeat = idCmdNamSpc->GetValue(IDNAMESPC_NSFEAT);
+    if (nuse != 0x1  && ((nsfeat & 0x1) == 0x1)) {
         throw FrmwkEx(HERE, "Expected namspc utilization = 0x1 but found "
             "namspc utilization = 0x%08X", nuse);
     }
