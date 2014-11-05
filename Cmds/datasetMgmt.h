@@ -42,7 +42,7 @@ class DatasetMgmt;    // forward definition
 typedef boost::shared_ptr<DatasetMgmt>             SharedDatasetMgmtPtr;
 typedef boost::shared_ptr<const DatasetMgmt>       ConstSharedDatasetMgmtPtr;
 #define CAST_TO_DATASETMGMT(shared_trackable_ptr)  \
-        boost::shared_polymorphic_downcast<DatasetMgmt>(shared_trackable_ptr);
+        boost::dynamic_pointer_cast<DatasetMgmt>(shared_trackable_ptr);
 
 
 /**

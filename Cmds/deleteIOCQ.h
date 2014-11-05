@@ -25,7 +25,7 @@ class DeleteIOCQ;    // forward definition
 typedef boost::shared_ptr<DeleteIOCQ>             SharedDeleteIOCQPtr;
 typedef boost::shared_ptr<const DeleteIOCQ>       ConstSharedDeleteIOCQPtr;
 #define CAST_TO_DELETEIOCQ(shared_trackable_ptr)  \
-        boost::shared_polymorphic_downcast<DeleteIOCQ>(shared_trackable_ptr);
+        boost::dynamic_pointer_cast<DeleteIOCQ>(shared_trackable_ptr);
 
 
 /**

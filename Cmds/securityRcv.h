@@ -24,7 +24,7 @@ class SecurityRcv;    // forward definition
 typedef boost::shared_ptr<SecurityRcv>             SharedSecurityRcvPtr;
 typedef boost::shared_ptr<const SecurityRcv>       ConstSharedSecurityRcvPtr;
 #define CAST_TO_SECURITYRCV(shared_trackable_ptr)  \
-        boost::shared_polymorphic_downcast<SecurityRcv>(shared_trackable_ptr);
+        boost::dynamic_pointer_cast<SecurityRcv>(shared_trackable_ptr);
 
 
 /**

@@ -24,7 +24,7 @@ class FormatNVM;    // forward definition
 typedef boost::shared_ptr<FormatNVM>             SharedFormatNVMPtr;
 typedef boost::shared_ptr<const FormatNVM>       ConstSharedFormatNVMPtr;
 #define CAST_TO_FORMATNVM(shared_trackable_ptr)  \
-        boost::shared_polymorphic_downcast<FormatNVM>(shared_trackable_ptr);
+        boost::dynamic_pointer_cast<FormatNVM>(shared_trackable_ptr);
 
 
 /**

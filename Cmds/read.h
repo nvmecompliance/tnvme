@@ -24,7 +24,7 @@ class Read;    // forward definition
 typedef boost::shared_ptr<Read>             SharedReadPtr;
 typedef boost::shared_ptr<const Read>       ConstSharedReadPtr;
 #define CAST_TO_READ(shared_trackable_ptr)  \
-        boost::shared_polymorphic_downcast<Read>(shared_trackable_ptr);
+        boost::dynamic_pointer_cast<Read>(shared_trackable_ptr);
 
 
 /**

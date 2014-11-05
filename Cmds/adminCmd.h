@@ -24,7 +24,7 @@ class AdminCmd;    // forward definition
 typedef boost::shared_ptr<AdminCmd>             SharedAdminCmdPtr;
 typedef boost::shared_ptr<const AdminCmd>       ConstSharedAdminCmdPtr;
 #define CAST_TO_ADMINCMD(shared_trackable_ptr)  \
-    boost::shared_polymorphic_downcast<AdminCmd>(shared_trackable_ptr);
+    boost::dynamic_pointer_cast<AdminCmd>(shared_trackable_ptr);
 
 
 /**

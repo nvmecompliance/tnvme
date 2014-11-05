@@ -59,6 +59,7 @@
 #include "GrpAdminSetGetFeatCombo/grpAdminSetGetFeatCombo.h"
 #include "GrpAdminAsyncCmd/grpAdminAsyncCmd.h"
 
+char revision_warning[1024];
 
 void
 InstantiateGroups(vector<Group *> &groups)
@@ -529,6 +530,7 @@ main(int argc, char *argv[])
             } else {
                 printf("SUCCESS: testing\n");
             }
+            printf("%s", revision_warning);
         }
     } catch (...) {
         LOG_ERR("An unforeseen exception has been caught");

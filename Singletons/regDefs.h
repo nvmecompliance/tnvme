@@ -96,7 +96,7 @@ typedef enum PciCapabilities {
     ZZ(PCISPC_PXDCAP,    PCICAP_PXCAP,   USHRT_MAX, 4,    SPECREV_10b, 0x00000000ffffffff, 0x000000000ffc0fff, 0x0000000010008000, "PCI express device CAP register (PXDCAP)")         \
     ZZ(PCISPC_PXDC,      PCICAP_PXCAP,   USHRT_MAX, 2,    SPECREV_10b, 0x0000000000000000, 0x000000000000fff0, 0x0000000000000000, "PCI express device ctrl register (PXDC)")          \
     ZZ(PCISPC_PXDS,      PCICAP_PXCAP,   USHRT_MAX, 2,    SPECREV_10b, 0x000000000000fff0, 0x0000000000000010, 0x0000000000000000, "PCI express device status register (PXDS)")        \
-    ZZ(PCISPC_PXLCAP,    PCICAP_PXCAP,   USHRT_MAX, 4,    SPECREV_10b, 0x00000000fff7ffff, 0x00000000ff07ffff, 0x0000000000000000, "PCI express link CAP register (PXLCAP)")           \
+    ZZ(PCISPC_PXLCAP,    PCICAP_PXCAP,   USHRT_MAX, 4,    SPECREV_10b, 0x00000000ffffffff, 0x00000000ff47ffff, 0x0000000000000000, "PCI express link CAP register (PXLCAP)")           \
     ZZ(PCISPC_PXLC,      PCICAP_PXCAP,   USHRT_MAX, 2,    SPECREV_10b, 0x000000000000fc34, 0x0000000000000200, 0x0000000000000000, "PCI express link ctrl register (PXLC)")            \
     ZZ(PCISPC_PXLS,      PCICAP_PXCAP,   USHRT_MAX, 2,    SPECREV_10b, 0x000000000000ffff, 0x00000000000013ff, 0x0000000000000000, "PCI express link status register (PXLS)")          \
     ZZ(PCISPC_RES1,      PCICAP_PXCAP,   USHRT_MAX, 16,   SPECREV_10b, 0xffffffffffffffff, 0x0000000000000000, 0x0000000000000000, "PCI hdr reserved area #1")                         \
