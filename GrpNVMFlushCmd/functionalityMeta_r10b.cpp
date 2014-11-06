@@ -206,7 +206,7 @@ FunctionalityMeta_r10b::RunCoreTest()
 
         flushCmd->SetNSID(meta[i]);
 
-        for (uint64_t sLBA = 0; sLBA < (ncap - 1); sLBA += maxWrBlks) {
+        for (uint64_t sLBA = 0; sLBA < maxWrBlks/*(ncap - 1)*/; sLBA += maxWrBlks) {
             LOG_NRM("Processing at #%ld blk of %ld", sLBA, (ncap -1));
             if ((sLBA + maxWrBlks) >= ncap) {
                 maxWrBlks = ncap - sLBA;
