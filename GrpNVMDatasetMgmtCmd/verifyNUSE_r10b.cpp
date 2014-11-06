@@ -117,7 +117,9 @@ VerifyNUSE_r10b::RunCoreTest()
     uint64_t ncap = namspcData.idCmdNamspc->GetValue(IDNAMESPC_NCAP);
     LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
     uint64_t lbaDataSize = namspcData.idCmdNamspc->GetLBADataSize();
-    LOG_NRM("For namespace ID #%d; NCAP = 0x%08lX", namspcData.id, ncap);
+    LOG_NRM("For namespace ID #%d; NCAP = 0x%08lX; LBA Size (B): %lu; NCAP*LBA "
+        "Size (GB): %.2f", namspcData.id, ncap, lbaDataSize,
+        ncap * lbaDataSize / 1e9);
 
     LOG_NRM("Create dataset mgmt cmd to be used subsequently");
     SharedDatasetMgmtPtr datasetMgmtCmd =
@@ -137,9 +139,10 @@ VerifyNUSE_r10b::RunCoreTest()
     rangePtr->slba = 0;
     rangePtr->length = ncap;
 
+    const double deallocRate = 1.6e8; // bytes / ms
     work = str(boost::format("deallocate.%08Xh") % ncap);
-    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq, iocq,
-        datasetMgmtCmd, work, true);
+    IO::SendAndReapCmd(mGrpName, mTestName, ncap * lbaDataSize / deallocRate
+        + 10000, iosq, iocq, datasetMgmtCmd, work, true);
 
     LOG_NRM("Create identify cmd & assoc some buffer memory");
     SharedIdentifyPtr idCmdNamSpc = SharedIdentifyPtr(new Identify());
