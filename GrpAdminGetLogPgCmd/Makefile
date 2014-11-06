@@ -25,6 +25,7 @@ SRC =					\
 	numDIsAdhered_r10b.cpp		\
 	invalidLogPageNVMSet_r10b.cpp	\
 	invalidNamspc_r10b.cpp		\
+	invalidNamspc_r11a.cpp		\
 	mandatoryErrInfo_r10b.cpp	\
 	mandatorySMART_r10b.cpp		\
 	mandatoryFW_r10b.cpp
