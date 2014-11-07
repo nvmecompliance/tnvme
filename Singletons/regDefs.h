@@ -315,6 +315,7 @@ typedef enum CAPBits {
 
 typedef enum PXLCAPBits {
     PXLCAP_PN      = 0xff000000,
+    PXLCAP_AOC     = 0x00400000,
     PXLCAP_LBNC    = 0x00200000,
     PXLCAP_DLLLA   = 0x00100000,
     PXLCAP_SDERC   = 0x00080000,
