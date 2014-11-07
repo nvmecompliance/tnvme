@@ -314,7 +314,7 @@ AllPciRegs_r10b::ValidatePciCapRegisterROAttribute(PciSpc reg)
             // Ignore the implementation specific bits, and bits that
             // the manufacturer can make a decision as to their type of
             // access RW,RO
-            value &= ~pciMetrics[reg].impSpec;
+            value &= ~(pciMetrics[reg].impSpec & ~PXLCAP_AOC);
 
             // Verify that the RO bits are set to correct default
             // values, no reset needed to achieve this because there's
