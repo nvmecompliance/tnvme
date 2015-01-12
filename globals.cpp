@@ -22,5 +22,6 @@ struct CmdLine gCmdLine;
 Registers *gRegisters;
 RsrcMngr *gRsrcMngr;
 CtrlrConfig *gCtrlrConfig;
+CtrlrCap *gCtrlrCap;
 Informative *gInformative;
 

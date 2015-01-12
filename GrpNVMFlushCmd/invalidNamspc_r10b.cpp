@@ -104,7 +104,8 @@ InvalidNamspc_r10b::RunCoreTest()
     for (uint8_t invalFID = 0x0D; invalFID <= 0x7F; invalFID++)
         invalidFIDs.push_back(invalFID);
 
-    if((gInformative->GetIdentifyCmdCtrlr()->GetValue(IDCTRLRCAP_ONCS)) & ONCS_SUP_RSRV_CMD)
+    if ((gInformative->GetIdentifyCmdCtrlr()->GetValue(IDCTRLRCAP_ONCS))
+            & ONCS_SUP_RSRV)
         invalFID = 0x84;
     else
         invalFID = 0x81;  
@@ -118,11 +119,13 @@ InvalidNamspc_r10b::RunCoreTest()
     SharedIOCQPtr iocq = CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_GROUP_ID));
 
     SharedFlushPtr flushCmd = SharedFlushPtr(new Flush());
-    SharedGetFeaturesPtr getFeaturesCmd = SharedGetFeaturesPtr(new GetFeatures());
+    SharedGetFeaturesPtr getFeaturesCmd = SharedGetFeaturesPtr(
+            new GetFeatures());
     // For all namspc's issue cmd to an illegal namspc
     ConstSharedIdentifyPtr idCtrlrStruct = gInformative->GetIdentifyCmdCtrlr();
     uint32_t nn = (uint32_t)idCtrlrStruct->GetValue(IDCTRLRCAP_NN);
-    uint32_t write_cache_enabled = (uint32_t)idCtrlrStruct->GetValue(IDCTRLRCAP_VWC);
+    uint32_t write_cache_enabled = (uint32_t)idCtrlrStruct->GetValue(
+            IDCTRLRCAP_VWC);
 
     if (write_cache_enabled == 0){
          return;
@@ -140,7 +143,8 @@ InvalidNamspc_r10b::RunCoreTest()
          for (uint16_t i = 0; i < invalidFIDs.size(); i++) {
             if (invalidFIDs[i] == 0x81)
                continue;
-             LOG_NRM("Issue get feat cmd using invalid FID = 0x%X", invalidFIDs[i]);
+            LOG_NRM("Issue get feat cmd using invalid FID = 0x%X",
+                    invalidFIDs[i]);
              getFeaturesCmd->SetFID(invalidFIDs[i]);
              work = str(boost::format("invalidFIDs.%xh") % invalidFIDs[i]);
          }

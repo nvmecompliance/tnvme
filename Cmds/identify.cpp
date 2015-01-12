@@ -29,7 +29,7 @@ const uint16_t Identify::IDEAL_DATA_SIZE =  4096;
 
 
 // Register metrics (ID Cmd Ctrlr Cap struct) to aid interfacing with the dnvme
-#define ZZ(a, b, c, d)         { b, c, d },
+#define ZZ(a, b, c, d, e, f)         { b, c, d, e, f},
 IdentifyDataType Identify::mIdCtrlrCapMetrics[] =
 {
     IDCTRLRCAP_TABLE
@@ -37,7 +37,7 @@ IdentifyDataType Identify::mIdCtrlrCapMetrics[] =
 #undef ZZ
 
 // Register metrics (ID Cmd namespace struct) to aid interfacing with the dnvme
-#define ZZ(a, b, c, d)         { b, c, d },
+#define ZZ(a, b, c, d, e, f)         { b, c, d, e, f },
 IdentifyDataType Identify::mIdNamespcType[] =
 {
     IDNAMESPC_TABLE
@@ -162,75 +162,81 @@ Identify::Dump(DumpFilename filename, string fileHdr) const
     fclose(fp);
 }
 
-
 void
-Identify::Dump(FILE *fp, int field, IdentifyDataType *idData) const
+Identify::getStr(const IdentifyDataType idData, string *const output) const
 {
-    const uint8_t *data;
+    unsigned long addr = idData.offset;
+    const uint8_t *data = &((GetROPrpBuffer())[idData.offset]);
+    unsigned long dumpLen = idData.length;
     const int BUF_SIZE = 40;
     char work[BUF_SIZE];
-    string output;
-    unsigned long dumpLen = idData[field].length;
 
-    fprintf(fp, "\n%s\n", idData[field].desc);
-
-    data = &((GetROPrpBuffer())[idData[field].offset]);
-    if ((idData[field].length + idData[field].offset) > GetPrpBufferSize()) {
-        LOG_ERR("Detected illegal definition in IDxxxxx_TABLE");
-        throw FrmwkEx(HERE, "Reference calc (%d): %d + %d >= %ld", field,
-            idData[field].length, idData[field].offset, GetPrpBufferSize());
-    }
-
-    unsigned long addr = idData[field].offset;
     switch (dumpLen) {
     case 1:
         snprintf(work, BUF_SIZE, "0x%08X: 0x%02X", (uint32_t)addr,
             *((uint8_t *)data));
-        output += work;
-        fprintf(fp, "%s\n", output.c_str());
+        *output += work;
         break;
 
     case 2:
         snprintf(work, BUF_SIZE, "0x%08X: 0x%04X", (uint32_t)addr,
             *((uint16_t *)data));
-        output += work;
-        fprintf(fp, "%s\n", output.c_str());
+        *output += work;
         break;
 
     case 4:
         snprintf(work, BUF_SIZE, "0x%08X: 0x%08X", (uint32_t)addr,
             *((uint32_t *)data));
-        output += work;
-        fprintf(fp, "%s\n", output.c_str());
+        *output += work;
         break;
 
     case 8:
         snprintf(work, BUF_SIZE, "0x%08X: 0x%016lX", (uint32_t)addr,
             *((uint64_t *)data));
-        output += work;
-        fprintf(fp, "%s\n", output.c_str());
+        *output += work;
         break;
 
     default:
         for (unsigned long j = 0; j < dumpLen; j++, addr++) {
             if ((j % 16) == 15) {
                 snprintf(work, BUF_SIZE, " %02X\n", *data++);
-                output += work;
-                fprintf(fp, "%s", output.c_str());
-                output.clear();
+                *output += work;
             } else if ((j % 16) == 0) {
                 snprintf(work, BUF_SIZE, "0x%08X: %02X",
                     (uint32_t)addr, *data++);
-                output += work;
+                *output += work;
             } else {
                 snprintf(work, BUF_SIZE, " %02X", *data++);
-                output += work;
+                *output += work;
             }
         }
-        if (output.length() != 0)
-            fprintf(fp, "%s\n", output.c_str());
         break;
     }
+}
+
+void
+Identify::log(IdCtrlrCap field) const
+{
+    string output;
+    getStr(mIdCtrlrCapMetrics[field], &output);
+    LOG_NRM("%s: %s", mIdCtrlrCapMetrics[field].desc, output.c_str());
+}
+
+void
+Identify::Dump(FILE *fp, int field, IdentifyDataType *idData) const
+{
+    string output;
+
+    fprintf(fp, "\n%s\n", idData[field].desc);
+
+    if ((idData[field].length + idData[field].offset) > GetPrpBufferSize()) {
+        LOG_ERR("Detected illegal definition in IDxxxxx_TABLE");
+        throw FrmwkEx(HERE, "Reference calc (%d): %d + %d >= %ld", field,
+            idData[field].length, idData[field].offset, GetPrpBufferSize());
+    }
+
+    getStr(idData[field], &output);
+    fprintf(fp, "%s\n", output.c_str());
 }
 
 

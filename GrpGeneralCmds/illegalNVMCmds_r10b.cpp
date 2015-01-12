@@ -156,7 +156,7 @@ IllegalNVMCmds_r10b::GetIllegalOpcodes()
     if ((optNVMCmds & ONCS_SUP_WR_ZERO_CMD) != 0)
         illegalOpCodes.remove(WRITE_ZEROES_OPCODE);
         
-    if ((optNVMCmds & ONCS_SUP_RSRV_CMD) != 0)
+    if ((optNVMCmds & ONCS_SUP_RSRV) != 0)
     {
        illegalOpCodes.remove(RSV_REG_OPCODE);
        illegalOpCodes.remove(RSV_REPORT_OPCODE);
