@@ -180,7 +180,7 @@ ReportCompareResults(Golden &golden, SharedMemBufferPtr idMem, size_t idCmdNum,
     int lastProcessed = -1;
     uint16_t LstOffset;
     uint16_t nextOffset;
-    #define ZZ(a, b, c, d)         { b, c, d },
+    #define ZZ(a, b, c, d, e, f)         { b, c, d, e, f },
     IdentifyDataType idCtrlrCapMetrics[] =
     {
         IDCTRLRCAP_TABLE

@@ -98,6 +98,18 @@ public:
      */
     virtual void Dump(DumpFilename filename, string fileHdr) const;
 
+    /**
+     * Log the given field using the LOG_NRM macro from tnvme.h.
+     * @param field the field whose value should be printed
+     */
+    virtual void log(IdCtrlrCap field) const;
+
+    /**
+     * Log the given field using the LOG_NRM macro from tnvme.h.
+     * @param field the field whose value should be printed
+     */
+    virtual void log(IdNamespc field) const;
+
 
 private:
     /// Details the fields within the identify controller capabilities struct
@@ -109,6 +121,7 @@ private:
     /// General functions to support the more specific public versions
     uint64_t GetValue(int field, IdentifyDataType *idData) const;
     void Dump(FILE *fp, int field, IdentifyDataType *idData) const;
+    void getStr(const IdentifyDataType idData, string *const work) const;
 };
 
 
