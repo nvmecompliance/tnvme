@@ -296,6 +296,17 @@ typedef enum CCBits {
     CC_EN          = 0000000001
 } CCBits;
 
+typedef enum CCShift {
+    CC_SH_RES0     = 24,
+    CC_SH_IOCQES   = 20,
+    CC_SH_IOSQES   = 16,
+    CC_SH_SHN      = 14,
+    CC_SH_AMS      = 11,
+    CC_SH_MPS      = 7,
+    CC_SH_CSS      = 4,
+    CC_SH_RES1     = 1,
+    CC_SH_EN       = 0
+} CCShift;
 
 /// Bit definitions for CTLSPC_CAP
 typedef enum CAPBits {
@@ -303,8 +314,11 @@ typedef enum CAPBits {
     CAP_MPSMAX     = 0x00f0000000000000,
     CAP_MPSMIN     = 0x000f000000000000,
     CAP_RES1       = 0x0000fe0000000000,
+    CAP_RES1_r11   = 0x0000e00000000000, /* 1.1+ */
     CAP_CSS        = 0x000001e000000000,
+    CAP_CSS_r11    = 0x00001fe000000000, /* 1.1+ */
     CAP_RES2       = 0x0000001000000000,
+    CAP_NSSRS      = 0x0000001000000000, /* 1.1+ */
     CAP_DSTRD      = 0x0000000f00000000,
     CAP_TO         = 0x00000000ff000000,
     CAP_RES3       = 0x0000000000f80000,
@@ -312,6 +326,23 @@ typedef enum CAPBits {
     CAP_CQR        = 0x0000000000010000,
     CAP_MQES       = 0x000000000000ffff
 } CAPBits;
+
+typedef enum CAPShift {
+    CAP_SH_RES0       = 56,
+    CAP_SH_MPSMAX     = 52,
+    CAP_SH_MPSMIN     = 48,
+    CAP_SH_RES1       = 41,
+    CAP_SH_RES1_r11   = 45, /* 1.1+ */
+    CAP_SH_CSS        = 37,
+    CAP_SH_RES2       = 36,
+    CAP_SH_NSSRS      = 36, /* 1.1+ */
+    CAP_SH_DSTRD      = 32,
+    CAP_SH_TO         = 24,
+    CAP_SH_RES3       = 19,
+    CAP_SH_AMS        = 17,
+    CAP_SH_CQR        = 16,
+    CAP_SH_MQES       = 0
+} CAPShift;
 
 typedef enum PXLCAPBits {
     PXLCAP_PN      = 0xff000000,

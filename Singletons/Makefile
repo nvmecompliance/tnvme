@@ -19,10 +19,11 @@ INCLUDES = -I. -I../ -I../../ -I/usr/local/include
 SRC = \
 	registers.cpp		\
 	memBuffer.cpp		\
-	objRsrc.cpp		\
+	objRsrc.cpp			\
 	metaRsrc.cpp		\
 	rsrcMngr.cpp		\
-	ctrlrConfig.cpp		\
+	ctrlrCap.cpp     \
+	ctrlrConfig.cpp	\
 	informative.cpp
 
 .SUFFIXES: .cpp

@@ -575,6 +575,12 @@ bool BuildSingletons()
     }
     gCtrlrConfig->Attach(*gRsrcMngr);
 
+    gCtrlrCap = CtrlrCap::GetInstance(gCmdLine.rev);
+    if (gCtrlrCap == NULL) {
+        LOG_ERR("Unable to create framework obj: gCtrlrCap");
+        return false;
+    }
+
     gInformative = Informative::GetInstance(gDutFd, gCmdLine.rev);
     if (gInformative == NULL) {
         LOG_ERR("Unable to create framework obj: gInformative");

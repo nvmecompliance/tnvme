@@ -118,7 +118,8 @@ InvalidFieldInCmd_r10b::RunCoreTest()
     for (uint8_t invalFID = 0x0D; invalFID <= 0x7F; invalFID++)
         invalidFIDs.push_back(invalFID);
 
-    if((gInformative->GetIdentifyCmdCtrlr()->GetValue(IDCTRLRCAP_ONCS)) & ONCS_SUP_RSRV_CMD)
+    if ((gInformative->GetIdentifyCmdCtrlr()->GetValue(IDCTRLRCAP_ONCS))
+            & ONCS_SUP_RSRV)
         invalFID = 0x84;
     else
         invalFID = 0x81;  
