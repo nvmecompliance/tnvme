@@ -223,6 +223,14 @@ Identify::log(IdCtrlrCap field) const
 }
 
 void
+Identify::log(IdNamespc field) const
+{
+    string output;
+    getStr(mIdNamespcType[field], &output);
+    LOG_NRM("%s: %s", mIdNamespcType[field].desc, output.c_str());
+}
+
+void
 Identify::Dump(FILE *fp, int field, IdentifyDataType *idData) const
 {
     string output;
