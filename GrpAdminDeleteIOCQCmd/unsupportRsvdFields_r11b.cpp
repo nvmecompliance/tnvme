@@ -14,37 +14,37 @@
  *  limitations under the License.
  */
 
-#include "unsupportRsvdFields_r10b.h"
+#include "unsupportRsvdFields_r11b.h"
 #include "globals.h"
 #include "grpDefs.h"
-#include "../Cmds/deleteIOSQ.h"
+#include "../Cmds/deleteIOCQ.h"
 #include "../Utils/queues.h"
 #include "../Utils/io.h"
 
-namespace GrpAdminDeleteIOSQCmd {
+namespace GrpAdminDeleteIOCQCmd {
 
 
-UnsupportRsvdFields_r10b::UnsupportRsvdFields_r10b(
+UnsupportRsvdFields_r11b::UnsupportRsvdFields_r11b(
     string grpName, string testName) :
-    Test(grpName, testName, SPECREV_10b)
+    Test(grpName, testName, SPECREV_10b /* SPECREV_11b */)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-    mTestDesc.SetCompliance("revision 1.0b, section 6");
+    mTestDesc.SetCompliance("revision 1.1b, section 5.5");
     mTestDesc.SetShort(     "Set unsupported/rsvd fields in cmd");
     // No string size limit for the long description
     mTestDesc.SetLong(
-        "Unsupported DW's and rsvd fields are treated identical, the recipient "
-        "shall not check their value.  Issue a CreateIOCQ cmd with QID=1, num "
-        "elements=2. Assoc a CreateIOSQ cmd with QID=1, num elements=2. Issue "
-        "a DeleteIOSQ cmd deleting QID=1, expect success. Reissue identical "
-        "CreateIOSQ, and issue same DeleteIOSQ cmd but set all "
-        "unsupported/rsvd fields, expect success. Set: DW0_b15:10, DW2, "
-        "DW3, DW4, DW5, DW6, DW7, DW8, DW9, DW10_b31:16, DW11, DW12, DW13, "
-        "DW14, DW15");
+        "Unsupported DW's and rsvd fields are treated identical, the "
+        "recipient is not required to check their value. Receipt of reserved "
+        "coded values shall be reported as an error. Issue a CreateIOCQ cmd "
+        "with QID=1, num elements=2. Issue a DeleteIOCQ cmd deleting QID=1, "
+        "expect success. Reissue identical CreateIOCQ, and issue same "
+        "DeleteIOCQ cmd but set all unsupported/rsvd fields, expect success. "
+        "Set: DW0_b14:10, DW2, DW3, DW4, DW5, DW6, DW7, DW8, DW9, DW10_b31:16, "
+        "DW11, DW12, DW13, DW14, DW15");
 }
 
 
-UnsupportRsvdFields_r10b::~UnsupportRsvdFields_r10b()
+UnsupportRsvdFields_r11b::~UnsupportRsvdFields_r11b()
 {
     ///////////////////////////////////////////////////////////////////////////
     // Allocations taken from the heap and not under the control of the
@@ -53,8 +53,8 @@ UnsupportRsvdFields_r10b::~UnsupportRsvdFields_r10b()
 }
 
 
-UnsupportRsvdFields_r10b::
-UnsupportRsvdFields_r10b(const UnsupportRsvdFields_r10b &other) : Test(other)
+UnsupportRsvdFields_r11b::
+UnsupportRsvdFields_r11b(const UnsupportRsvdFields_r11b &other) : Test(other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -63,8 +63,8 @@ UnsupportRsvdFields_r10b(const UnsupportRsvdFields_r10b &other) : Test(other)
 }
 
 
-UnsupportRsvdFields_r10b &
-UnsupportRsvdFields_r10b::operator=(const UnsupportRsvdFields_r10b &other)
+UnsupportRsvdFields_r11b &
+UnsupportRsvdFields_r11b::operator=(const UnsupportRsvdFields_r11b &other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -76,21 +76,23 @@ UnsupportRsvdFields_r10b::operator=(const UnsupportRsvdFields_r10b &other)
 
 
 Test::RunType
-UnsupportRsvdFields_r10b::RunnableCoreTest(bool preserve)
+UnsupportRsvdFields_r11b::RunnableCoreTest(bool preserve)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All code contained herein must never permanently modify the state or
     // configuration of the DUT. Permanence is defined as state or configuration
     // changes that will not be restored after a cold hard reset.
     ///////////////////////////////////////////////////////////////////////////
-    if ((preserve == false) && gCmdLine.rsvdfields)
-        return RUN_TRUE;
-    return RUN_FALSE;    // Optional test skipped or is destructive
+    if (gCmdLine.rsvdfields == false)
+        return RUN_FALSE;   // Optional rsvd fields test skipped.
+
+    preserve = preserve;    // Suppress compiler error/warning
+    return RUN_TRUE;        // This test is never destructive
 }
 
 
 void
-UnsupportRsvdFields_r10b::RunCoreTest()
+UnsupportRsvdFields_r11b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
@@ -115,50 +117,47 @@ UnsupportRsvdFields_r10b::RunCoreTest()
     SharedIOCQPtr iocq = Queues::CreateIOCQContigToHdw(mGrpName, mTestName,
         CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, maxIOQEntries, false,
         IOCQ_GROUP_ID, true, 0);
-    SharedIOSQPtr iosq = Queues::CreateIOSQContigToHdw(mGrpName, mTestName,
-        CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, maxIOQEntries, false,
-        IOCQ_GROUP_ID, IOQ_ID, 0);
 
-    LOG_NRM("Delete the IOSQ");
-    SharedDeleteIOSQPtr deleteIOSQCmd = SharedDeleteIOSQPtr(new DeleteIOSQ());
-    deleteIOSQCmd->Init(iosq);
+    LOG_NRM("Delete the IOCQ");
+    SharedDeleteIOCQPtr deleteIOCQCmd = SharedDeleteIOCQPtr(new DeleteIOCQ());
+    deleteIOCQCmd->Init(iocq);
     IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
-        deleteIOSQCmd, "", true);
+        deleteIOCQCmd, "", true);
 
-    LOG_NRM("Recreate IOSQ");
-    iosq = Queues::CreateIOSQContigToHdw(mGrpName, mTestName,
+    LOG_NRM("Recreate IOCQ");
+    iocq = Queues::CreateIOCQContigToHdw(mGrpName, mTestName,
         CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, maxIOQEntries, false,
-        IOCQ_GROUP_ID, IOQ_ID, 0);
+        IOCQ_GROUP_ID, true, 0);
 
-    deleteIOSQCmd->Init(iosq);
+    deleteIOCQCmd->Init(iocq);
 
     LOG_NRM("Set all cmd's rsvd bits");
-    uint32_t work = deleteIOSQCmd->GetDword(0);
-    work |= 0x0000fc00;      // Set DW0_b15:10 bits
-    deleteIOSQCmd->SetDword(work, 0);
+    uint32_t work = deleteIOCQCmd->GetDword(0);
+    work |= 0x00007c00;      // Set DW0_b14:10 bits
+    deleteIOCQCmd->SetDword(work, 0);
 
-    deleteIOSQCmd->SetDword(0xffffffff, 2);
-    deleteIOSQCmd->SetDword(0xffffffff, 3);
-    deleteIOSQCmd->SetDword(0xffffffff, 4);
-    deleteIOSQCmd->SetDword(0xffffffff, 5);
-    deleteIOSQCmd->SetDword(0xffffffff, 6);
-    deleteIOSQCmd->SetDword(0xffffffff, 7);
-    deleteIOSQCmd->SetDword(0xffffffff, 8);
-    deleteIOSQCmd->SetDword(0xffffffff, 9);
+    deleteIOCQCmd->SetDword(0xffffffff, 2);
+    deleteIOCQCmd->SetDword(0xffffffff, 3);
+    deleteIOCQCmd->SetDword(0xffffffff, 4);
+    deleteIOCQCmd->SetDword(0xffffffff, 5);
+    deleteIOCQCmd->SetDword(0xffffffff, 6);
+    deleteIOCQCmd->SetDword(0xffffffff, 7);
+    deleteIOCQCmd->SetDword(0xffffffff, 8);
+    deleteIOCQCmd->SetDword(0xffffffff, 9);
 
     // DW10_b31:16
-    work = deleteIOSQCmd->GetDword(10);
+    work = deleteIOCQCmd->GetDword(10);
     work |= 0xffff0000;
-    deleteIOSQCmd->SetDword(work, 10);
+    deleteIOCQCmd->SetDword(work, 10);
 
-    deleteIOSQCmd->SetDword(0xffffffff, 11);
-    deleteIOSQCmd->SetDword(0xffffffff, 12);
-    deleteIOSQCmd->SetDword(0xffffffff, 13);
-    deleteIOSQCmd->SetDword(0xffffffff, 14);
-    deleteIOSQCmd->SetDword(0xffffffff, 15);
+    deleteIOCQCmd->SetDword(0xffffffff, 11);
+    deleteIOCQCmd->SetDword(0xffffffff, 12);
+    deleteIOCQCmd->SetDword(0xffffffff, 13);
+    deleteIOCQCmd->SetDword(0xffffffff, 14);
+    deleteIOCQCmd->SetDword(0xffffffff, 15);
 
     IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
-        deleteIOSQCmd, "", true);
+        deleteIOCQCmd, "", true);
 }
 
 

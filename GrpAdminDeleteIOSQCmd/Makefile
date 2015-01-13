@@ -20,6 +20,7 @@ SRC =					\
 	grpAdminDeleteIOSQCmd.cpp	\
 	createResources_r10b.cpp	\
 	unsupportRsvdFields_r10b.cpp	\
+	unsupportRsvdFields_r11b.cpp	\
 	invalidQID_r10b.cpp
 
 .SUFFIXES: .cpp

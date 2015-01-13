@@ -30,6 +30,35 @@ IO::~IO()
 {
 }
 
+CEStat
+IO::SendAndReapCmdIgnore(string grpName, string testName, uint16_t ms,
+    SharedSQPtr sq, SharedCQPtr cq, SharedCmdPtr cmd, string qualify,
+    bool verbose)
+{
+    std::vector<CEStat> localStatus;
+    return SendAndReapCmd(grpName, testName, ms, sq, cq, cmd, qualify, verbose,
+        localStatus, ReapCEIgnore);
+}
+
+CEStat
+IO::SendAndReapCmdNot(string grpName, string testName, uint16_t ms,
+    SharedSQPtr sq, SharedCQPtr cq, SharedCmdPtr cmd, string qualify,
+    bool verbose, CEStat status)
+{
+    std::vector<CEStat> localStatus;
+    localStatus.push_back(status);
+    return SendAndReapCmdNot(grpName, testName, ms, sq, cq, cmd, qualify,
+        verbose, localStatus);
+}
+
+CEStat
+IO::SendAndReapCmdNot(string grpName, string testName, uint16_t ms,
+    SharedSQPtr sq, SharedCQPtr cq, SharedCmdPtr cmd, string qualify,
+    bool verbose, std::vector<CEStat> &status)
+{
+    return SendAndReapCmd(grpName, testName, ms, sq, cq, cmd, qualify, verbose,
+        status, ReapCENot);
+}
 
 CEStat
 IO::SendAndReapCmd(string grpName, string testName, uint16_t ms,
@@ -47,6 +76,17 @@ CEStat
 IO::SendAndReapCmd(string grpName, string testName, uint16_t ms,
     SharedSQPtr sq, SharedCQPtr cq, SharedCmdPtr cmd, string qualify,
     bool verbose, std::vector<CEStat> &status)
+{
+    return SendAndReapCmd(grpName, testName, ms, sq, cq, cmd, qualify, verbose,
+        status, ReapCE);
+}
+
+CEStat
+IO::SendAndReapCmd(string grpName, string testName, uint16_t ms,
+    SharedSQPtr sq, SharedCQPtr cq, SharedCmdPtr cmd, string qualify,
+    bool verbose, std::vector<CEStat> &status,
+    CEStat (*Reap)(SharedCQPtr, uint32_t, uint32_t &, string, string,
+            string, std::vector<CEStat> &))
 {
     uint32_t numCE;
     uint32_t isrCount;
@@ -98,12 +138,66 @@ IO::SendAndReapCmd(string grpName, string testName, uint16_t ms,
 
     // throws if an error occurs
     CEStat retStat =
-        ReapCE(cq, numCE, isrCount, grpName, testName, qualify, status);
+        Reap(cq, numCE, isrCount, grpName, testName, qualify, status);
     if (verbose) {
         cmd->Dump(FileSystem::PrepDumpFile(grpName, testName,
             cmd->GetName(), qualify), "A cmd's contents dumped");
     }
     return retStat;
+}
+
+
+CEStat
+IO::ReapCEIgnore(SharedCQPtr cq, uint32_t numCE, uint32_t &isrCount,
+    string grpName, string testName, string qualify)
+{
+    return ProcessCE::GetCEStat(
+        RetrieveCE(cq, numCE, isrCount, grpName, testName, qualify));
+}
+
+
+CEStat
+IO::ReapCEIgnore(SharedCQPtr cq, uint32_t numCE, uint32_t &isrCount,
+    string grpName, string testName, string qualify,
+    std::vector<CEStat> &status)
+{
+    status = status;    // Suppress compiler error/warning
+    return ReapCEIgnore(cq, numCE, isrCount, grpName, testName, qualify);
+}
+
+
+CEStat
+IO::ReapCENot(SharedCQPtr cq, uint32_t numCE, uint32_t &isrCount,
+    string grpName, string testName, string qualify, CEStat status)
+{
+    std::vector<CEStat> localStatus;
+    localStatus.push_back(status);
+    return ReapCENot(cq, numCE, isrCount, grpName, testName, qualify,
+        localStatus);
+}
+
+
+CEStat
+IO::ReapCENot(SharedCQPtr cq, uint32_t numCE, uint32_t &isrCount,
+        string grpName, string testName, string qualify,
+        std::vector<CEStat> &status)
+{
+    union CE ce = RetrieveCE(cq, numCE, isrCount, grpName, testName, qualify);
+
+    if (status.empty()) {
+        throw FrmwkEx(HERE,
+            "Internal Programming Error; Must supply >= 1 status");
+    }
+
+    // Search for 1 matching CEStat to match the device status
+    for (size_t sIdx = 0; sIdx < status.size(); sIdx++) {
+        if (ProcessCE::InvalidatePeek(ce, status[sIdx]) == false)
+            throw FrmwkEx(HERE,
+                "%d CeStat's compared to device status, and match found",
+                status.size());
+    }
+
+    return ProcessCE::GetCEStat(ce);
 }
 
 
@@ -121,6 +215,28 @@ CEStat
 IO::ReapCE(SharedCQPtr cq, uint32_t numCE, uint32_t &isrCount,
     string grpName, string testName, string qualify,
     std::vector<CEStat> &status)
+{
+    union CE ce = RetrieveCE(cq, numCE, isrCount, grpName, testName, qualify);
+
+    if (status.empty()) {
+        throw FrmwkEx(HERE,
+            "Internal Programming Error; Must supply >= 1 status");
+    }
+
+    // Search for 1 matching CEStat to match the device status
+    for (size_t sIdx = 0; sIdx < status.size(); sIdx++) {
+        if (ProcessCE::ValidatePeek(ce, status[sIdx]) == true)
+            return status[sIdx];
+    }
+
+    throw FrmwkEx(HERE,
+        "%d CeStat's compared to device status, but no match found",
+        status.size());
+}
+
+union CE
+IO::RetrieveCE(SharedCQPtr cq, uint32_t numCE, uint32_t &isrCount,
+            string grpName, string testName, string qualify)
 {
     uint32_t ceRemain;
     uint32_t numReaped;
@@ -140,21 +256,6 @@ IO::ReapCE(SharedCQPtr cq, uint32_t numCE, uint32_t &isrCount,
             work);
         throw FrmwkEx(HERE, work);
     }
-    union CE ce = cq->PeekCE(cqMetrics.head_ptr);
-
-    if (status.empty()) {
-        throw FrmwkEx(HERE,
-            "Internal Programming Error; Must supply >= 1 status");
-    }
-
-    // Search for 1 matching CEStat to match the device status
-    for (size_t sIdx = 0; sIdx < status.size(); sIdx++) {
-        if (ProcessCE::ValidatePeek(ce, status[sIdx]) == true)
-            return status[sIdx];
-    }
-
-    throw FrmwkEx(HERE,
-        "%d CeStat's compared to device status, but no match found",
-        status.size());
+    return cq->PeekCE(cqMetrics.head_ptr);
 }
 
