@@ -15,37 +15,38 @@
  */
 
 #include <string.h>
-#include "unsupportRsvdFields_r10b.h"
+#include "unsupportRsvdFields_r11b.h"
 #include "globals.h"
 #include "grpDefs.h"
 #include "../Utils/queues.h"
 #include "../Utils/io.h"
 
-namespace GrpAdminCreateIOCQCmd {
+namespace GrpAdminCreateIOSQCmd {
 
 
-UnsupportRsvdFields_r10b::UnsupportRsvdFields_r10b(
+UnsupportRsvdFields_r11b::UnsupportRsvdFields_r11b(
     string grpName, string testName) :
-    Test(grpName, testName, SPECREV_10b)
+    Test(grpName, testName, SPECREV_10b /* SPECREV_11b */)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-    mTestDesc.SetCompliance("revision 1.0b, section 6");
+    mTestDesc.SetCompliance("revision 1.1b, section 5.4");
     mTestDesc.SetShort(     "Set unsupported/rsvd fields in cmd");
     // No string size limit for the long description
     mTestDesc.SetLong(
         "Find 1st bare namspc, or find 1st meta namspc, or find 1st E2E "
         "namspc. Unsupported DW's and rsvd fields are treated identical, the "
-        "recipient shall not check their value.  Issue a CreateIOCQ cmd "
-        "with QID=1, num elements=2, but set all unsupported/rsvd fields, "
-        "expect success. Set: DW0_b15:10, DW2, DW3, DW4, DW5, DW6, DW7, "
-        "DW11_b15:2, DW12, DW13, DW14, DW15. Then issue a CreateIOSQ cmd to "
-        "assoc, QID=1, num elements = 2. Issue a write cmd sending 1 block and "
-        "approp supporting meta/E2E if necessary to the selected namspc at "
+        "recipient is not required to check their value. Receipt of reserved "
+        "coded values shall be reported as an error. Issue a CreateIOCQ cmd "
+        "with QID=1, num elements=2, and then issue a corresponding "
+        "CreateIOSQ, same parameters, but set all unsupported/rsvd fields, "
+        "expect success. Set: DW0_b14:10, DW2, DW3, DW4, DW5, DW6, DW7, "
+        "DW11_b15:3, DW12, DW13, DW14, DW15. Issue a write cmd sending 1 block "
+        "and approp supporting meta/E2E if necessary to the selected namspc at "
         "LBA 0, data pattern of word++, read back, verify pattern.");
 }
 
 
-UnsupportRsvdFields_r10b::~UnsupportRsvdFields_r10b()
+UnsupportRsvdFields_r11b::~UnsupportRsvdFields_r11b()
 {
     ///////////////////////////////////////////////////////////////////////////
     // Allocations taken from the heap and not under the control of the
@@ -54,8 +55,8 @@ UnsupportRsvdFields_r10b::~UnsupportRsvdFields_r10b()
 }
 
 
-UnsupportRsvdFields_r10b::
-UnsupportRsvdFields_r10b(const UnsupportRsvdFields_r10b &other) : Test(other)
+UnsupportRsvdFields_r11b::
+UnsupportRsvdFields_r11b(const UnsupportRsvdFields_r11b &other) : Test(other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -64,8 +65,8 @@ UnsupportRsvdFields_r10b(const UnsupportRsvdFields_r10b &other) : Test(other)
 }
 
 
-UnsupportRsvdFields_r10b &
-UnsupportRsvdFields_r10b::operator=(const UnsupportRsvdFields_r10b &other)
+UnsupportRsvdFields_r11b &
+UnsupportRsvdFields_r11b::operator=(const UnsupportRsvdFields_r11b &other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -77,13 +78,14 @@ UnsupportRsvdFields_r10b::operator=(const UnsupportRsvdFields_r10b &other)
 
 
 Test::RunType
-UnsupportRsvdFields_r10b::RunnableCoreTest(bool preserve)
+UnsupportRsvdFields_r11b::RunnableCoreTest(bool preserve)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All code contained herein must never permanently modify the state or
     // configuration of the DUT. Permanence is defined as state or configuration
     // changes that will not be restored after a cold hard reset.
     ///////////////////////////////////////////////////////////////////////////
+
     if ((preserve == false) && gCmdLine.rsvdfields)
         return RUN_TRUE;
     return RUN_FALSE;    // Optional test skipped or is destructive
@@ -91,7 +93,7 @@ UnsupportRsvdFields_r10b::RunnableCoreTest(bool preserve)
 
 
 void
-UnsupportRsvdFields_r10b::RunCoreTest()
+UnsupportRsvdFields_r11b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
@@ -113,51 +115,56 @@ UnsupportRsvdFields_r10b::RunCoreTest()
     gCtrlrConfig->SetIOSQES(iosqes);
 
     LOG_NRM("Create IOCQ");
-    SharedIOCQPtr iocq = SharedIOCQPtr(new IOCQ(gDutFd));
+    SharedIOCQPtr iocq = Queues::CreateIOCQContigToHdw(mGrpName, mTestName,
+        CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, maxIOQEntries, false,
+        IOCQ_GROUP_ID, true, 0);
 
-    LOG_NRM("Allocate contiguous memory; IOCQ has ID=%d", IOQ_ID);
-    iocq->Init(IOQ_ID, maxIOQEntries, true, 0);
+    LOG_NRM("Create IOSQ");
+    SharedIOSQPtr iosq = SharedIOSQPtr(new IOSQ(gDutFd));
 
-    LOG_NRM("Form a Create IOCQ cmd to perform queue creation");
-    SharedCreateIOCQPtr createIOCQCmd = SharedCreateIOCQPtr(new CreateIOCQ());
-    createIOCQCmd->Init(iocq);
+    LOG_NRM("Allocate contiguous memory; IOSQ has ID=%d", IOQ_ID);
+    iosq->Init(IOQ_ID, maxIOQEntries, IOQ_ID, 0);
+
+    LOG_NRM("Form a Create IOSQ cmd to perform queue creation");
+    SharedCreateIOSQPtr createIOSQCmd = SharedCreateIOSQPtr(new CreateIOSQ());
+    createIOSQCmd->Init(iosq);
 
     LOG_NRM("Set all cmd's rsvd bits");
-    uint32_t work = createIOCQCmd->GetDword(0);
-    work |= 0x0000fc00;      // Set DW0_b15:10 bits
-    createIOCQCmd->SetDword(work, 0);
+    uint32_t work = createIOSQCmd->GetDword(0);
+    work |= 0x00007c00;      // Set DW0_b14:10 bits
+    createIOSQCmd->SetDword(work, 0);
 
-    createIOCQCmd->SetDword(0xffffffff, 2);
-    createIOCQCmd->SetDword(0xffffffff, 3);
-    createIOCQCmd->SetDword(0xffffffff, 4);
-    createIOCQCmd->SetDword(0xffffffff, 5);
-    createIOCQCmd->SetDword(0xffffffff, 6);
-    createIOCQCmd->SetDword(0xffffffff, 7);
+    createIOSQCmd->SetDword(0xffffffff, 2);
+    createIOSQCmd->SetDword(0xffffffff, 3);
+    createIOSQCmd->SetDword(0xffffffff, 4);
+    createIOSQCmd->SetDword(0xffffffff, 5);
+    createIOSQCmd->SetDword(0xffffffff, 6);
+    createIOSQCmd->SetDword(0xffffffff, 7);
 
-    // DW11_b15:2
-    work = createIOCQCmd->GetDword(11);
-    work |= 0x0000fffc;
-    createIOCQCmd->SetDword(work, 11);
+    // DW11_b15:3
+    work = createIOSQCmd->GetDword(11);
+    work |= 0x0000fff8;
+    createIOSQCmd->SetDword(work, 11);
 
-    createIOCQCmd->SetDword(0xffffffff, 12);
-    createIOCQCmd->SetDword(0xffffffff, 13);
-    createIOCQCmd->SetDword(0xffffffff, 14);
-    createIOCQCmd->SetDword(0xffffffff, 15);
+    createIOSQCmd->SetDword(0xffffffff, 12);
+    createIOSQCmd->SetDword(0xffffffff, 13);
+    createIOSQCmd->SetDword(0xffffffff, 14);
+    createIOSQCmd->SetDword(0xffffffff, 15);
 
     IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
-        createIOCQCmd, "", true);
-
-    LOG_NRM("Create the assoc IOSQ");
-    SharedIOSQPtr iosq = Queues::CreateIOSQContigToHdw(mGrpName, mTestName,
-        CALC_TIMEOUT_ms(1), asq, acq, IOQ_ID, maxIOQEntries, false,
-        IOCQ_GROUP_ID, IOQ_ID, 0);
+        createIOSQCmd, "", true);
 
     WriteReadVerify(iosq, iocq);
+
+    Queues::DeleteIOSQToHdw(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq,
+        asq, acq, "", false);
+    Queues::DeleteIOCQToHdw(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iocq,
+        asq, acq, "", false);
 }
 
 
 void
-UnsupportRsvdFields_r10b::WriteReadVerify(SharedIOSQPtr iosq,
+UnsupportRsvdFields_r11b::WriteReadVerify(SharedIOSQPtr iosq,
     SharedIOCQPtr iocq)
 {
     Informative::Namspc namspcData = gInformative->Get1stBareMetaE2E();
@@ -232,7 +239,7 @@ UnsupportRsvdFields_r10b::WriteReadVerify(SharedIOSQPtr iosq,
 
 
 void
-UnsupportRsvdFields_r10b::VerifyDataPat(SharedReadPtr readCmd,
+UnsupportRsvdFields_r11b::VerifyDataPat(SharedReadPtr readCmd,
     SharedWritePtr writeCmd)
 {
     LOG_NRM("Compare read vs written data to verify");

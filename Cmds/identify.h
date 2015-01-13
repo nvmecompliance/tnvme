@@ -104,6 +104,12 @@ public:
      */
     virtual void log(IdCtrlrCap field) const;
 
+    /**
+     * Log the given field using the LOG_NRM macro from tnvme.h.
+     * @param field the field whose value should be printed
+     */
+    virtual void log(IdNamespc field) const;
+
 
 private:
     /// Details the fields within the identify controller capabilities struct
