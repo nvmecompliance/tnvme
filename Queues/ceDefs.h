@@ -72,6 +72,7 @@ typedef enum CEStat
 #undef ZZ
 
 struct CEStatType {
+    CEStat      ceStat;
     SCT         sct;    // Status Code Type (sct)
     uint8_t     sc;     // Status Code (sc)
     const char *desc;

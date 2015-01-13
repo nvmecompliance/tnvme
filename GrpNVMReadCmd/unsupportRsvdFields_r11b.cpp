@@ -14,36 +14,41 @@
  *  limitations under the License.
  */
 
-#include "unsupportRsvdFields_r10b.h"
+#include <boost/utility/binary.hpp>
+
+#include "unsupportRsvdFields_r11b.h"
 #include "globals.h"
 #include "grpDefs.h"
 #include "../Queues/iocq.h"
 #include "../Queues/iosq.h"
 #include "../Utils/io.h"
 
-namespace GrpNVMWriteCmd {
+namespace GrpNVMReadCmd {
 
 
-UnsupportRsvdFields_r10b::UnsupportRsvdFields_r10b(
+UnsupportRsvdFields_r11b::UnsupportRsvdFields_r11b(
     string grpName, string testName) :
-    Test(grpName, testName, SPECREV_10b)
+    Test(grpName, testName, SPECREV_10b /* SPECREV_11b */)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-    mTestDesc.SetCompliance("revision 1.0b, section 6");
+    mTestDesc.SetCompliance("revision 1.1b, section 6.9");
     mTestDesc.SetShort(     "Set unsupported/rsvd fields in cmd");
     // No string size limit for the long description
     mTestDesc.SetLong(
         "Search for 1 of the following namspcs to run test. Find 1st bare "
         "namspc, or find 1st meta namspc, or find 1st E2E namspc. Unsupported "
-        "DW's and rsvd fields are treated identical, the recipient shall not "
-        "check their value. Issue a write cmd sending 1 block and approp "
-        "supporting meta/E2E if necessary to the selected namspc at LBA 0, "
-        "expect success. Issue same cmd setting all unsupported/rsvd fields, "
-        "expect success. Set: DW0_b15:10, DW2, DW3, DW12_b25:16, DW13_b31:8");
+        "DW's and rsvd fields are treated identical, the recipient is not "
+        "required to check their value. Receipt of reserved coded values shall "
+        "be reported as an error. Issue a read cmd requesting 1 block and "
+        "approp supporting meta/E2E if necessary from the selected namspc at "
+        "LBA 0, expect success. Issue same cmd setting all unsupported/rsvd "
+        "fields, expect success. Set: DW0_b14:10, DW2, DW3, DW12_b25:16, "
+        "DW13_b31:8. Issue same cmd setting all rsvd coded values, expect "
+        "fail. Set: DW13_b3:0");
 }
 
 
-UnsupportRsvdFields_r10b::~UnsupportRsvdFields_r10b()
+UnsupportRsvdFields_r11b::~UnsupportRsvdFields_r11b()
 {
     ///////////////////////////////////////////////////////////////////////////
     // Allocations taken from the heap and not under the control of the
@@ -52,8 +57,8 @@ UnsupportRsvdFields_r10b::~UnsupportRsvdFields_r10b()
 }
 
 
-UnsupportRsvdFields_r10b::
-UnsupportRsvdFields_r10b(const UnsupportRsvdFields_r10b &other) : Test(other)
+UnsupportRsvdFields_r11b::
+UnsupportRsvdFields_r11b(const UnsupportRsvdFields_r11b &other) : Test(other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -62,8 +67,8 @@ UnsupportRsvdFields_r10b(const UnsupportRsvdFields_r10b &other) : Test(other)
 }
 
 
-UnsupportRsvdFields_r10b &
-UnsupportRsvdFields_r10b::operator=(const UnsupportRsvdFields_r10b &other)
+UnsupportRsvdFields_r11b &
+UnsupportRsvdFields_r11b::operator=(const UnsupportRsvdFields_r11b &other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -75,7 +80,7 @@ UnsupportRsvdFields_r10b::operator=(const UnsupportRsvdFields_r10b &other)
 
 
 Test::RunType
-UnsupportRsvdFields_r10b::RunnableCoreTest(bool preserve)
+UnsupportRsvdFields_r11b::RunnableCoreTest(bool preserve)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All code contained herein must never permanently modify the state or
@@ -83,14 +88,16 @@ UnsupportRsvdFields_r10b::RunnableCoreTest(bool preserve)
     // changes that will not be restored after a cold hard reset.
     ///////////////////////////////////////////////////////////////////////////
 
-    if ((preserve == false) && gCmdLine.rsvdfields)
-        return RUN_TRUE;
-    return RUN_FALSE;    // Optional test skipped or is destructive
+    if (gCmdLine.rsvdfields == false)
+        return RUN_FALSE;   // Optional rsvd fields test skipped.
+
+    preserve = preserve;    // Suppress compiler error/warning
+    return RUN_TRUE;        // This test is never destructive
 }
 
 
 void
-UnsupportRsvdFields_r10b::RunCoreTest()
+UnsupportRsvdFields_r11b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
@@ -102,33 +109,45 @@ UnsupportRsvdFields_r10b::RunCoreTest()
     SharedIOSQPtr iosq = CAST_TO_IOSQ(gRsrcMngr->GetObj(IOSQ_GROUP_ID));
     SharedIOCQPtr iocq = CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_GROUP_ID));
 
-    SharedWritePtr writeCmd = CreateCmd();
+    SharedReadPtr readCmd = CreateCmd();
     IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq, iocq,
-        writeCmd, "none.set", true);
+        readCmd, "none.set", true);
 
     LOG_NRM("Set all cmd's rsvd bits");
-    uint32_t work = writeCmd->GetDword(0);
-    work |= 0x0000fc00;      // Set DW0_b15:10 bits
-    writeCmd->SetDword(work, 0);
+    uint32_t work = readCmd->GetDword(0);
+    work |= 0x00007c00;      // Set DW0_b14:10 bits
+    readCmd->SetDword(work, 0);
 
-    writeCmd->SetDword(0xffffffff, 2);
-    writeCmd->SetDword(0xffffffff, 3);
+    readCmd->SetDword(0xffffffff, 2);
+    readCmd->SetDword(0xffffffff, 3);
 
-    work = writeCmd->GetDword(12);
+    work = readCmd->GetDword(12);
     work |= 0x03ff0000;      // Set DW12_b25:16 bits
-    writeCmd->SetDword(work, 12);
+    readCmd->SetDword(work, 12);
 
-    work = writeCmd->GetDword(13);
+    work = readCmd->GetDword(13);
     work |= 0xffffff00;     // Set DW13_b31:8 bits
-    writeCmd->SetDword(work, 13);
+    readCmd->SetDword(work, 13);
 
     IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq, iocq,
-        writeCmd, "all.set", true);
+        readCmd, "all.set", true);
+
+    LOG_NRM("Set DSM field reserved coded values");
+    uint32_t cdw13 = readCmd->GetDword(13) & ~0xf;
+    for (int accFreq = BOOST_BINARY(111); accFreq <= BOOST_BINARY(1111);
+        ++accFreq) {
+        work = cdw13 | accFreq;
+        readCmd->SetDword(work, 13);
+
+        /* Controller may ignore context attributes */
+        IO::SendAndReapCmdIgnore(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq,
+            iocq, readCmd, "all.set", true);
+    }
 }
 
 
-SharedWritePtr
-UnsupportRsvdFields_r10b::CreateCmd()
+SharedReadPtr
+UnsupportRsvdFields_r11b::CreateCmd()
 {
     Informative::Namspc namspcData = gInformative->Get1stBareMetaE2E();
     LBAFormat lbaFormat = namspcData.idCmdNamspc->GetLBAFormat();
@@ -138,7 +157,7 @@ UnsupportRsvdFields_r10b::CreateCmd()
     uint64_t lbaDataSize = namSpcPtr->GetLBADataSize();;
     SharedMemBufferPtr dataPat = SharedMemBufferPtr(new MemBuffer());
 
-    SharedWritePtr writeCmd = SharedWritePtr(new Write());
+    SharedReadPtr readCmd = SharedReadPtr(new Read());
     send_64b_bitmask prpBitmask = (send_64b_bitmask)(MASK_PRP1_PAGE
         | MASK_PRP2_PAGE | MASK_PRP2_LIST);
 
@@ -150,7 +169,7 @@ UnsupportRsvdFields_r10b::CreateCmd()
         dataPat->Init(lbaDataSize);
         if (gRsrcMngr->SetMetaAllocSize(lbaFormat.MS) == false)
             throw FrmwkEx(HERE);
-        writeCmd->AllocMetaBuffer();
+        readCmd->AllocMetaBuffer();
         break;
     case Informative::NS_METAI:
         dataPat->Init(lbaDataSize + lbaFormat.MS);
@@ -161,10 +180,10 @@ UnsupportRsvdFields_r10b::CreateCmd()
         break;
     }
 
-    writeCmd->SetPrpBuffer(prpBitmask, dataPat);
-    writeCmd->SetNSID(namspcData.id);
-    writeCmd->SetNLB(0);
-    return writeCmd;
+    readCmd->SetPrpBuffer(prpBitmask, dataPat);
+    readCmd->SetNSID(namspcData.id);
+    readCmd->SetNLB(0);
+    return readCmd;
 }
 
 

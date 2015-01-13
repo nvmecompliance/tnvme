@@ -21,6 +21,7 @@ SRC =					\
 	createResources_r10b.cpp	\
 	invalidNamspc_r10b.cpp		\
 	unsupportRsvdFields_r10b.cpp	\
+	unsupportRsvdFields_r11b.cpp	\
 	prp1PRP2NR_r10b.cpp		\
 	attributes_r10b.cpp		\
 	verifyNUSE_r10b.cpp

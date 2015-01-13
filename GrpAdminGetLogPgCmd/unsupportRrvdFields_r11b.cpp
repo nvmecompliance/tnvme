@@ -13,8 +13,10 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+
 #include <boost/format.hpp>
-#include "unsupportRrvdFields_r10b.h"
+
+#include "unsupportRrvdFields_r11b.h"
 #include "globals.h"
 #include "grpDefs.h"
 #include "../Utils/kernelAPI.h"
@@ -28,24 +30,26 @@
 namespace GrpAdminGetLogPgCmd {
 
 
-UnsupportRrvdFields_r10b::UnsupportRrvdFields_r10b(string grpName,
+UnsupportRrvdFields_r11b::UnsupportRrvdFields_r11b(string grpName,
     string testName) :
-    Test(grpName, testName, SPECREV_10b)
+    Test(grpName, testName, SPECREV_10b /* SPECREV_11b */)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-    mTestDesc.SetCompliance("revision 1.0b, section 5");
+    mTestDesc.SetCompliance("revision 1.1b, section 5.10");
     mTestDesc.SetShort(     "Set unsupported/rsvd fields in cmd");
     // No string size limit for the long description
     mTestDesc.SetLong(
         "Unsupported DW's and rsvd fields are treated identical, the "
-        "recipient shall not check their value. Issue GetLogPage cmd, "
+        "recipient is not required to check their value. Receipt of reserved "
+        "coded values shall be reported as an error. Issue GetLogPage cmd, "
         "LID=3, NUMD=(512/4), expect success. Then issue same cmd setting "
-        "all unsupported/rsvd fields, expect success. Set: DW0_b15:10, "
-        "DW2, DW3, DW4, DW5, DW10_b31:28, DW11, DW12, DW13, DW14, DW15.");
+        "all unsupported/rsvd fields, expect success. Set: DW0_b14:10, "
+        "DW2, DW3, DW4, DW5, DW10_b31:28, DW11, DW12, DW13, DW14, DW15. Issue "
+        "same cmd setting all rsvd coded values, expect fail.  Set: DW10_b7:0");
 }
 
 
-UnsupportRrvdFields_r10b::~UnsupportRrvdFields_r10b()
+UnsupportRrvdFields_r11b::~UnsupportRrvdFields_r11b()
 {
     ///////////////////////////////////////////////////////////////////////////
     // Allocations taken from the heap and not under the control of the
@@ -54,8 +58,8 @@ UnsupportRrvdFields_r10b::~UnsupportRrvdFields_r10b()
 }
 
 
-UnsupportRrvdFields_r10b::
-UnsupportRrvdFields_r10b(const UnsupportRrvdFields_r10b &other) : Test(other)
+UnsupportRrvdFields_r11b::
+UnsupportRrvdFields_r11b(const UnsupportRrvdFields_r11b &other) : Test(other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -64,8 +68,8 @@ UnsupportRrvdFields_r10b(const UnsupportRrvdFields_r10b &other) : Test(other)
 }
 
 
-UnsupportRrvdFields_r10b &
-UnsupportRrvdFields_r10b::operator=(const UnsupportRrvdFields_r10b &other)
+UnsupportRrvdFields_r11b &
+UnsupportRrvdFields_r11b::operator=(const UnsupportRrvdFields_r11b &other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -77,7 +81,7 @@ UnsupportRrvdFields_r10b::operator=(const UnsupportRrvdFields_r10b &other)
 
 
 Test::RunType
-UnsupportRrvdFields_r10b::RunnableCoreTest(bool preserve)
+UnsupportRrvdFields_r11b::RunnableCoreTest(bool preserve)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All code contained herein must never permanently modify the state or
@@ -93,7 +97,7 @@ UnsupportRrvdFields_r10b::RunnableCoreTest(bool preserve)
 
 
 void
-UnsupportRrvdFields_r10b::RunCoreTest()
+UnsupportRrvdFields_r11b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
@@ -128,7 +132,7 @@ UnsupportRrvdFields_r10b::RunCoreTest()
 
     LOG_NRM("Set all cmd's rsvd bits");
     uint32_t work = getLogPgCmd->GetDword(0);
-    work |= 0x0000fc00;      // Set DW0_b15:10 bits
+    work |= 0x00007c00;      // Set DW0_b14:10 bits
     getLogPgCmd->SetDword(work, 0);
 
     getLogPgCmd->SetDword(0xffffffff, 2);
@@ -146,9 +150,42 @@ UnsupportRrvdFields_r10b::RunCoreTest()
     getLogPgCmd->SetDword(0xffffffff, 14);
     getLogPgCmd->SetDword(0xffffffff, 15);
 
-    LOG_NRM("Issue GetLogPage cmd after setting reserved bits.");
     IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
         getLogPgCmd, "rsvd.set", true);
+
+    LOG_NRM("Set LID field reserved coded values");
+    uint32_t cdw10 = getLogPgCmd->GetDword(10) & ~0xff;
+
+    getLogPgCmd->SetDword(cdw10, 10);
+
+    IO::SendAndReapCmdNot(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
+            getLogPgCmd, "rsvd.set", true, CESTAT_SUCCESS);
+
+    for (uint32_t lid = 0x4; lid <= 0x7f; ++lid) {
+        work = cdw10 | lid;
+        getLogPgCmd->SetDword(work, 10);
+
+        IO::SendAndReapCmdNot(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
+            getLogPgCmd, "rsvd.val.set", true, CESTAT_SUCCESS);
+    }
+
+    uint8_t css;
+    gCtrlrConfig->GetCSS(css);
+    if (css == 0) { /* NVM Command Set selected */
+        for (uint32_t lid = 0x81; lid <= 0xbf; ++lid) {
+            work = cdw10 | lid;
+            getLogPgCmd->SetDword(work, 10);
+
+            IO::SendAndReapCmdNot(mGrpName, mTestName, CALC_TIMEOUT_ms(1),
+                asq, acq, getLogPgCmd, "rsvd.val.set", true);
+        }
+    }
+
+    else
+    {
+        throw new FrmwkEx(HERE, "Unsupported command set selected for test "
+                "revision: %hhX", css);
+    }
 }
 
 }   // namespace

@@ -14,6 +14,7 @@
  *  limitations under the License.
  */
 
+#include <boost/range.hpp>
 #include <stdio.h>
 #include "ce.h"
 #include "globals.h"
@@ -22,7 +23,7 @@
 
 
 // Contains details about every CE status field
-#define ZZ(a, b, c, d)      { b, c, d },
+#define ZZ(a, b, c, d)      { a, b, c, d },
 CEStatType ProcessCE::mCEStatMetrics[] =
 {
     CESTAT_TABLE
@@ -98,6 +99,40 @@ ProcessCE::ValidatePeek(union CE &ce, CEStat status)
         }
     }
     return true;
+}
+
+
+bool
+ProcessCE::InvalidatePeek(union CE &ce, CEStat status)
+{
+    LogStatus(ce);
+
+    if ((ce.n.SF.b.SCT == mCEStatMetrics[CESTAT_SUCCESS].sct) &&
+        (ce.n.SF.b.SC  == mCEStatMetrics[CESTAT_SUCCESS].sc)) {
+        LOG_ERR(
+            "Did not expect (SCT:SC) 0x%02X:0x%02X, but detected 0x%02X:0x%02X",
+            mCEStatMetrics[status].sct, mCEStatMetrics[status].sc,
+            ce.n.SF.b.SCT, ce.n.SF.b.SC);
+        return false;
+    }
+    return true;
+}
+
+
+CEStat
+ProcessCE::GetCEStat(union CE ce)
+{
+    uint16_t sct = ce.n.SF.b.SCT;
+    uint16_t sc = ce.n.SF.b.SC;
+
+    size_t size = boost::size(mCEStatMetrics);
+
+    for (size_t i = 0; i < size; i++) {
+        if (mCEStatMetrics[i].sct == sct && mCEStatMetrics[i].sc == sc)
+            return mCEStatMetrics[i].ceStat;
+    }
+
+    throw new FrmwkEx(HERE, "CE has unknown status");
 }
 
 
