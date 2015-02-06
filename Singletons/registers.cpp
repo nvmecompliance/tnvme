@@ -491,10 +491,13 @@ Registers::DiscoverPciCapabilities()
         LOG_NRM("Decoding AERCAP capabilities");
         mPciCap.push_back(PCICAP_AERCAP);
         mPciSpcMetrics[PCISPC_AERID].offset = io.offset;
-        for (int i = PCISPC_AERUCES; i <= PCISPC_AERTLP; i++) {
+        for (int i = PCISPC_AERUCES; i <= PCISPC_AERHL; i++) {
             mPciSpcMetrics[i].offset =
                 mPciSpcMetrics[i-1].offset + mPciSpcMetrics[i-1].size;
         }
+        // NVMe skips three registers between AERHL and AERTLP so it must be
+        // set manually instead of adding the size of AERHL to its offset.
+        mPciSpcMetrics[PCISPC_AERTLP].offset = io.offset + 0x38;
     } else {
         LOG_ERR("Decoded an unknown extended capability ID: 0x%04X", capId);
         return;
