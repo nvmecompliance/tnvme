@@ -150,20 +150,27 @@ FIDArbitration_r10b::RunCoreTest()
         setFeaturesCmd->SetArbitrationLPW(arbValDW11 >> 8);
         setFeaturesCmd->SetArbitrationAB(arbValDW11);
         work = str(boost::format("arbValDW11.%xh") % arbValDW11);
-        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
-            setFeaturesCmd, work, false);
+        CEStat setStat = IO::SendAndReapCmdIgnore(mGrpName, mTestName,
+            CALC_TIMEOUT_ms(1), asq, acq, setFeaturesCmd, work, false);
 
-        acqMetrics = acq->GetQMetrics();
+        /*
+         * Only send get features if the set features was successful
+         */
+        if (setStat == CESTAT_SUCCESS) {
+            acqMetrics = acq->GetQMetrics();
 
-        LOG_NRM("Issue get features cmd and check for arb = 0x%X", arbValDW11);
-        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
-            getFeaturesCmd, work, false);
+            LOG_NRM("Issue get features cmd and check for arb = 0x%X",
+                arbValDW11);
+            IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq,
+                acq, getFeaturesCmd, work, false);
 
-        ce = acq->PeekCE(acqMetrics.head_ptr);
-        LOG_NRM("Arbitration status using Get Features = 0x%04X", ce.t.dw0);
-        if (arbValDW11 != ce.t.dw0) {
-            throw FrmwkEx(HERE, "Arbitration get feat does not match set feat"
-                "(expected, rcvd) = (0x%04X, 0x%04X)", arbValDW11, ce.t.dw0);
+            ce = acq->PeekCE(acqMetrics.head_ptr);
+            LOG_NRM("Arbitration status using Get Features = 0x%04X", ce.t.dw0);
+            if (arbValDW11 != ce.t.dw0) {
+                throw FrmwkEx(HERE, "Arbitration get feat does not match set "
+                    "feat (expected, rcvd) = (0x%04X, 0x%04X)", arbValDW11,
+                    ce.t.dw0);
+            }
         }
     }
 }
