@@ -296,7 +296,7 @@ CQ::ReapInquiryWaitAny(uint32_t ms, uint32_t &numCE, uint32_t &isrCount)
 
 
 bool
-CQ::ReapInquiryWaitSpecify(uint32_t ms, uint32_t numTil, uint32_t &numCE,
+CQ::DoReapInquiry(uint32_t ms, uint32_t numTil, uint32_t &numCE,
     uint32_t &isrCount)
 {
     uint32_t delta;
@@ -319,18 +319,39 @@ CQ::ReapInquiryWaitSpecify(uint32_t ms, uint32_t numTil, uint32_t &numCE,
         usleep(10);
     }
 
-    LOG_ERR("Timed out waiting %d ms for %d CE's in CQ %d, found %d",
-        ms, numTil, GetQId(), numCE);
-    struct nvme_gen_cq qMetrics = LogQMetrics();
-    LOG_NRM("qMetrics.head_ptr dump follows:");
-    LogCE(qMetrics.head_ptr);
-    LOG_NRM("qMetrics.tail_ptr dump follows:");
-    LogCE(qMetrics.tail_ptr);
-    LOG_NRM("qMetrics.head_ptr+1 dump follows:");
-    LogCE((qMetrics.head_ptr + 1) % qMetrics.elements);
-    LOG_NRM("qMetrics.tail_ptr+1 dump follows:");
-    LogCE((qMetrics.tail_ptr + 1) % qMetrics.elements);
     return false;
+}
+
+
+bool
+CQ::ReapInquiryWaitSpecify(uint32_t ms, uint32_t numTil, uint32_t &numCE,
+    uint32_t &isrCount)
+{
+    bool result = DoReapInquiry(ms, numTil, numCE, isrCount);
+
+    if (!result) {
+        LOG_ERR("Timed out waiting %d ms for %d CE's in CQ %d, found %d",
+            ms, numTil, GetQId(), numCE);
+        struct nvme_gen_cq qMetrics = LogQMetrics();
+        LOG_NRM("qMetrics.head_ptr dump follows:");
+        LogCE(qMetrics.head_ptr);
+        LOG_NRM("qMetrics.tail_ptr dump follows:");
+        LogCE(qMetrics.tail_ptr);
+        LOG_NRM("qMetrics.head_ptr+1 dump follows:");
+        LogCE((qMetrics.head_ptr + 1) % qMetrics.elements);
+        LOG_NRM("qMetrics.tail_ptr+1 dump follows:");
+        LogCE((qMetrics.tail_ptr + 1) % qMetrics.elements);
+    }
+
+    return result;
+}
+
+
+bool
+CQ::ReapInquiryWaitSpecifyQ(uint32_t ms, uint32_t numTil, uint32_t &numCE,
+    uint32_t &isrCount)
+{
+    return DoReapInquiry(ms, numTil, numCE, isrCount);
 }
 
 

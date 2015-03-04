@@ -298,7 +298,7 @@ bool
 CtrlrConfig::GetIOCQES(uint8_t &value)
 {
     bool retVal;
-    retVal = GetRegValue(value, CC_IOCQES, 20);
+    retVal = GetRegValue(value, CC_IOCQES, CC_SH_IOCQES);
     LOG_NRM("Reading CC.IOCQES = 0x%02X; (2^%d) = %d", value, value,
         (1 << value));
     return retVal;
@@ -310,7 +310,7 @@ CtrlrConfig::SetIOCQES(uint8_t value)
 {
     LOG_NRM("Writing CC.IOCQES = 0x%02X; (2^%d) = %d", value, value,
         (1 << value));
-    return SetRegValue(value, 0x0f, CC_IOCQES, 20);
+    return SetRegValue(value, 0x0f, CC_IOCQES, CC_SH_IOCQES);
 }
 
 
@@ -318,7 +318,7 @@ bool
 CtrlrConfig::GetIOSQES(uint8_t &value)
 {
     bool retVal;
-    retVal = GetRegValue(value, CC_IOSQES, 16);
+    retVal = GetRegValue(value, CC_IOSQES, CC_SH_IOSQES);
     LOG_NRM("Reading CC.IOSQES = 0x%02X; (2^%d) = %d", value, value,
         (1 << value));
     return retVal;
@@ -330,7 +330,7 @@ CtrlrConfig::SetIOSQES(uint8_t value)
 {
     LOG_NRM("Writing CC.IOSQES = 0x%02X; (2^%d) = %d", value, value,
         (1 << value));
-    return SetRegValue(value, 0x0f, CC_IOSQES, 16);
+    return SetRegValue(value, 0x0f, CC_IOSQES, CC_SH_IOSQES);
 }
 
 
@@ -338,7 +338,7 @@ bool
 CtrlrConfig::GetSHN(uint8_t &value)
 {
     bool retVal;
-    retVal = GetRegValue(value, CC_SHN, 14);
+    retVal = GetRegValue(value, CC_SHN, CC_SH_SHN);
     LOG_NRM("Reading CC.SHN = 0x%02X", value);
     return retVal;
 }
@@ -348,7 +348,7 @@ bool
 CtrlrConfig::SetSHN(uint8_t value)
 {
     LOG_NRM("Writing CC.SHN = 0x%02X", value);
-    return SetRegValue(value, 0x03, CC_SHN, 14);
+    return SetRegValue(value, 0x03, CC_SHN, CC_SH_SHN);
 }
 
 
@@ -356,7 +356,7 @@ bool
 CtrlrConfig::GetAMS(uint8_t &value)
 {
     bool retVal;
-    retVal = GetRegValue(value, CC_AMS, 11);
+    retVal = GetRegValue(value, CC_AMS, CC_SH_AMS);
     LOG_NRM("Reading CC.AMS = 0x%02X", value);
     return retVal;
 }
@@ -366,7 +366,7 @@ bool
 CtrlrConfig::SetAMS(uint8_t value)
 {
     LOG_NRM("Writing CC.AMS = 0x%02X", value);
-    return SetRegValue(value, 0x07, CC_AMS, 11);
+    return SetRegValue(value, 0x07, CC_AMS, CC_SH_AMS);
 }
 
 
@@ -374,7 +374,7 @@ bool
 CtrlrConfig::GetMPS(uint8_t &value)
 {
     bool retVal;
-    retVal = GetRegValue(value, CC_MPS, 7);
+    retVal = GetRegValue(value, CC_MPS, CC_SH_MPS);
     LOG_NRM("Reading CC.MPS = 0x%02X", value);
     return retVal;
 }
@@ -386,7 +386,7 @@ CtrlrConfig::SetMPS()
     switch (sysconf(_SC_PAGESIZE)) {
     case 4096:
         LOG_NRM("Writing CC.MPS for a 4096 byte page size");
-        return SetRegValue(0, 0x0f, CC_MPS, 7);
+        return SetRegValue(0, 0x0f, CC_MPS, CC_SH_MPS);
     default:
         LOG_ERR("Kernel reporting unsupported page size: 0x%08lX",
             sysconf(_SC_PAGESIZE));
@@ -399,7 +399,7 @@ bool
 CtrlrConfig::GetCSS(uint8_t &value)
 {
     bool retVal;
-    retVal = GetRegValue(value, CC_CSS, 4);
+    retVal = GetRegValue(value, CC_CSS, CC_SH_CSS);
     LOG_NRM("Reading CC.CSS = 0x%02X", value);
     return retVal;
 }
@@ -409,7 +409,16 @@ bool
 CtrlrConfig::SetCSS(uint8_t value)
 {
     LOG_NRM("Writing CC.CSS = 0x%02X", value);
-    return SetRegValue(value, 0x07, CC_CSS, 4);
+    return SetRegValue(value, 0x07, CC_CSS, CC_SH_CSS);
 }
 
+
+bool
+CtrlrConfig::GetEN(uint8_t &value)
+{
+    bool retVal;
+    retVal = GetRegValue(value, CC_EN, CC_SH_EN);
+    LOG_NRM("Reading CC.EN = 0x%02X", value);
+    return retVal;
+}
 

@@ -113,6 +113,29 @@ public:
         string qualify, bool verbose);
 
     /**
+     * Send and verify that no Reap occurs for an existing, user defined cmd
+     * to/from hdw using the spec'd SQ/CQ pairs. This method requires 0
+     * elements to reside in the CQ and also assume no other cmd will complete
+     * into that CQ while this operation is occurring. In the end the number of
+     * CE's will be verified to guarantee that no CE arrived as a result of
+     * sending this 1 cmd.
+     * @note Does not throw
+     * @note Method uses pre-existing values of CC.IOCQES
+     * @param grpName Pass the name of the group to which this test belongs
+     * @param testName Pass the name of the child testclass
+     * @param ms Pass the max number of ms to wait until numTil CE's arrive.
+     * @param sq Pass pre-existing SQ to issue a cmd into
+     * @param cq Pass pre-existing CQ to reap CE to verify successful creation
+     * @param cmd Pass the cmd to issue into the supplied CQ
+     * @param qualify Pass a qualifying string to append to each dump file
+     * @param verbose Pass true to dump resources to dump files, otherwise false
+     * @return ce status
+     */
+    static void SendAndReapCmdFail(string grpName, string testName,
+        uint16_t ms, SharedSQPtr sq, SharedCQPtr cq, SharedCmdPtr cmd,
+        string qualify, bool verbose);
+
+    /**
      * Reap a specified number of CE's from the specified CQ.
      * @note Throws upon errors
      * @param cq Pass the CQ to reap from
@@ -188,6 +211,12 @@ private:
      */
     static union CE RetrieveCE(SharedCQPtr cq, uint32_t numCE,
         uint32_t &isrCount, string grpName, string testName, string qualify);
+
+    /**
+     * Attempt to retrieve CE from CQ.  Returns number retrieved.
+     */
+    static uint32_t AttemptRetrieveCE(SharedCQPtr cq, uint32_t numCE,
+        uint32_t &isrCount, struct nvme_gen_cq *cqMetrics);
 };
 
 

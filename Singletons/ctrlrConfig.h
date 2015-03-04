@@ -138,6 +138,7 @@ public:
     bool SetCSS(uint8_t value);
     static const uint8_t CSS_NVM_CMDSET;
 
+    bool GetEN(uint8_t &value);
 
 private:
     // Implement singleton design pattern

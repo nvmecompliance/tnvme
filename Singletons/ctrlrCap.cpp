@@ -128,7 +128,7 @@ bool CtrlrCap::GetNVMCSS(bool &value)
     bool retVal;
     uint8_t tmp;
     retVal = GetCSS(tmp);
-    value = (tmp != 0);
+    value = (tmp & CSSBits::CAP_CSS_NVMCS) != 0;
     return retVal;
 }
 

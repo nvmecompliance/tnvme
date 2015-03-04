@@ -30,6 +30,57 @@ IO::~IO()
 {
 }
 
+
+void
+IO::SendAndReapCmdFail(string grpName, string testName, uint16_t ms,
+    SharedSQPtr sq, SharedCQPtr cq, SharedCmdPtr cmd, string qualify,
+    bool verbose)
+{
+    uint32_t numCE;
+    uint32_t isrCount;
+    string work;
+    uint16_t uniqueId;
+
+    if ((numCE = cq->ReapInquiry(isrCount, true)) != 0) {
+        cq->Dump(
+            FileSystem::PrepDumpFile(grpName, testName, "cq",
+            "notEmpty"), "Test assumption have not been met");
+        throw FrmwkEx(HERE, "Require 0 CE's within CQ %d, not upheld, found %d",
+            cq->GetQId(), numCE);
+    }
+
+    LOG_NRM("Send the cmd to hdw via SQ %d", sq->GetQId());
+    sq->Send(cmd, uniqueId);
+    if (verbose) {
+        work = str(boost::format(
+            "Just B4 ringing SQ %d doorbell, dump entire SQ") % sq->GetQId());
+        sq->Dump(FileSystem::PrepDumpFile(grpName, testName,
+            "sq." + cmd->GetName(), qualify), work);
+    }
+    sq->Ring();
+
+    LOG_NRM("Wait for the CE to arrive in CQ %d", cq->GetQId());
+    if (cq->ReapInquiryWaitSpecifyQ(ms, 1, numCE, isrCount) == true) {
+        /* Found a CE...reap it then throw so that it gets cleared from CQ */
+        if (verbose) {
+            work = str(boost::format("Just B4 reaping CQ %d, dump entire CQ") %
+                cq->GetQId());
+            cq->Dump(FileSystem::PrepDumpFile(grpName, testName,
+                "cq." + cmd->GetName(), qualify), work);
+        }
+
+        // throws if an error occurs
+        ReapCEIgnore(cq, numCE, isrCount, grpName, testName, qualify);
+        if (verbose) {
+            cmd->Dump(FileSystem::PrepDumpFile(grpName, testName,
+                cmd->GetName(), qualify), "A cmd's contents dumped");
+        }
+
+        throw FrmwkEx(HERE, "Command was successfully processed and its "
+            "completion was reaped from the CQ");
+    }
+}
+
 CEStat
 IO::SendAndReapCmdIgnore(string grpName, string testName, uint16_t ms,
     SharedSQPtr sq, SharedCQPtr cq, SharedCmdPtr cmd, string qualify,
@@ -92,7 +143,6 @@ IO::SendAndReapCmd(string grpName, string testName, uint16_t ms,
     uint32_t isrCount;
     string work;
     uint16_t uniqueId;
-
 
     if ((numCE = cq->ReapInquiry(isrCount, true)) != 0) {
         cq->Dump(
@@ -234,28 +284,38 @@ IO::ReapCE(SharedCQPtr cq, uint32_t numCE, uint32_t &isrCount,
         status.size());
 }
 
+
 union CE
 IO::RetrieveCE(SharedCQPtr cq, uint32_t numCE, uint32_t &isrCount,
             string grpName, string testName, string qualify)
 {
-    uint32_t ceRemain;
-    uint32_t numReaped;
+    struct nvme_gen_cq cqMetrics = cq->GetQMetrics();
+    uint32_t numReaped = AttemptRetrieveCE(cq, numCE, isrCount, &cqMetrics);
     string work;
 
-    LOG_NRM("The CQ's metrics before reaping holds head_ptr");
-    struct nvme_gen_cq cqMetrics = cq->GetQMetrics();
-    KernelAPI::LogCQMetrics(cqMetrics);
-
-    LOG_NRM("Reaping CE from CQ %d, requires memory to hold CE", cq->GetQId());
-    SharedMemBufferPtr ceMem = SharedMemBufferPtr(new MemBuffer());
-    if ((numReaped = cq->Reap(ceRemain, ceMem, isrCount, numCE, true)) != 1) {
-        work = str(boost::format("Verified CE's exist, desired %d, reaped %d")
-            % numCE % numReaped);
-        cq->Dump(
-            FileSystem::PrepDumpFile(grpName, testName, "cq.error", qualify),
-            work);
+    if (numReaped != 1) {
+        work = str( boost::format("Verified CE's exist, desired %d, reaped %d")
+                % numCE % numReaped);
+        cq->Dump(FileSystem::PrepDumpFile(grpName, testName, "cq.error",
+            qualify), work);
         throw FrmwkEx(HERE, work);
     }
     return cq->PeekCE(cqMetrics.head_ptr);
 }
 
+
+uint32_t
+IO::AttemptRetrieveCE(SharedCQPtr cq, uint32_t numCE, uint32_t &isrCount,
+    struct nvme_gen_cq *cqMetrics)
+{
+    uint32_t ceRemain;
+    string work;
+
+    LOG_NRM("The CQ's metrics before reaping holds head_ptr");
+    KernelAPI::LogCQMetrics(*cqMetrics);
+
+    LOG_NRM("Reaping CE from CQ %d, requires memory to hold CE", cq->GetQId());
+    SharedMemBufferPtr ceMem = SharedMemBufferPtr(new MemBuffer());
+
+    return cq->Reap(ceRemain, ceMem, isrCount, numCE, true);
+}

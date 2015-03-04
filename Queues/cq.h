@@ -140,6 +140,20 @@ public:
         uint32_t &isrCount);
 
     /**
+     * Wait until at least the specified number of CE's become available or
+     * until a time out period expires. Quietly returns result (no output).
+     * @param ms Pass the max number of ms to wait until numTil CE's arrive.
+     * @param numTil Pass the number of CE's that need to become available
+     * @param numCE Returns the number of unreap'd CE's awaiting
+     * @param isrCount Returns the number of ISR's which fired and were counted
+     *        that are assoc with this CQ. If this CQ does not use IRQ's, then
+     *        this value will remain 0.
+     * @return true when CE's are awaiting to be reaped, otherwise a timeout
+     */
+    bool ReapInquiryWaitSpecifyQ(uint32_t ms, uint32_t numTil, uint32_t &numCE,
+        uint32_t &isrCount);
+
+    /**
      * Reap a specified number of Completion Elements (CE) from this CQ. The
      * memBuffer will be resized. Calling this method when (ReapInquiry() == 0)
      * is fine.
@@ -208,6 +222,12 @@ private:
      * @return true if the TO has expired, false otherwise
      */
     bool CalcTimeout(uint32_t ms, struct timeval &initial, uint32_t &delta);
+
+    /**
+     * Do the actual reaping for ReapInquiryWaitSpecify
+     */
+    bool DoReapInquiry(uint32_t ms, uint32_t numTil, uint32_t &numCE,
+        uint32_t &isrCount);
 };
 
 

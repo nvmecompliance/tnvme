@@ -282,6 +282,12 @@ typedef enum CSTSBits {
     CSTS_RDY       = 0x00000001
 } CSTSBits;
 
+typedef enum CSTSShift {
+    CSTS_SH_RES0   = 0x04,
+    CSTS_SH_SHST   = 0x02,
+    CSTS_SH_CFS    = 0x01,
+    CSTS_SH_RDY    = 0x00
+} CSTSShift;
 
 /// Bit definitions for CTLSPC_CC
 typedef enum CCBits {
@@ -357,5 +363,42 @@ typedef enum PXLCAPBits {
     PXLCAP_MLW     = 0x000003f0,
     PXLCAP_SLS     = 0x0000000f
 } PXLCAPBits;
+
+typedef enum AMSBits {
+    CAP_AMS_WRRwUPC         = 0x1, // Weighted RR w/ Urgent Priority Class
+    CAP_AMS_VendorSpecific  = 0x2
+} AMSBits;
+
+typedef enum CSSBits {
+    CAP_CSS_NVMCS = 0x01,
+    CAP_CSS_RESV0 = 0x02,
+    CAP_CSS_RESV1 = 0x04,
+    CAP_CSS_RESV2 = 0x08,
+    CAP_CSS_RESV3 = 0x10,
+    CAP_CSS_RESV4 = 0x20,
+    CAP_CSS_RESV5 = 0x40,
+    CAP_CSS_RESV6 = 0x80
+} CSSBits;
+
+typedef enum CC_SHNValues {
+    CC_SHN_NoNotif         = 0x0,
+    CC_SHN_NormalShDNotif  = 0x1,
+    CC_SHN_AbruptShDNotif  = 0x2,
+    CC_SHN_Rsvd0           = 0x3
+} CC_SHNValues;
+
+typedef enum CC_AMSValues {
+    CC_AMS_RoundRobin      = 0x0,
+    CC_AMS_WRRwUPC         = 0x1, // Weighted RR w/ Urgent Priority Class
+    CC_AMS_ReservedStart   = 0x2,
+    CC_AMS_ReservedEnd     = 0x6,
+    CC_AMS_VendorSpecific  = 0x7
+} CC_AMSValues;
+
+typedef enum CC_CSSValues {
+    CC_CSS_NVMCS           = 0x0,
+    CC_CSS_ReservedStart   = 0x1,
+    CC_CSS_ReservedEnd     = 0x7
+} CC_CSSValues;
 
 #endif
