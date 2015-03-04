@@ -594,8 +594,9 @@ bool BuildSingletons()
 void DestroySingletons()
 {
     // Destroy in reverse order as was created
-    RsrcMngr::KillInstance();
     Informative::KillInstance();
+    CtrlrCap::KillInstance();
+    RsrcMngr::KillInstance();
     CtrlrConfig::KillInstance();
     Registers::KillInstance();
 }
