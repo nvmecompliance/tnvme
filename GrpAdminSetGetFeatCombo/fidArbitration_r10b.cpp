@@ -172,6 +172,8 @@ FIDArbitration_r10b::RunCoreTest()
                     ce.t.dw0);
             }
         }
+        else
+            LOG_WARN("Unable to set arb = 0x%X", arbValDW11);
     }
 }
 
