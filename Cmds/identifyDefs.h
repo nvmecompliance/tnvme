@@ -28,6 +28,42 @@ struct IdentifyDataType {
 
 /* m=true, o=false */
 /*     IdCtrlrCap,          offset, length, m/o,   specRev,     desc                                   */
+#define IDCTRLRCAP_PSD_TABLE \
+    ZZ(IDCTRLRCAP_PSD0,     2048,   32,     true,  SPECREV_10b, "Power State 0 Desc (PSD0)")            \
+    ZZ(IDCTRLRCAP_PSD1,     2080,   32,     false, SPECREV_10b, "Power State 1 Desc (PSD1)")            \
+    ZZ(IDCTRLRCAP_PSD2,     2112,   32,     false, SPECREV_10b, "Power State 2 Desc (PSD2)")            \
+    ZZ(IDCTRLRCAP_PSD3,     2144,   32,     false, SPECREV_10b, "Power State 3 Desc (PSD3)")            \
+    ZZ(IDCTRLRCAP_PSD4,     2176,   32,     false, SPECREV_10b, "Power State 4 Desc (PSD4)")            \
+    ZZ(IDCTRLRCAP_PSD5,     2208,   32,     false, SPECREV_10b, "Power State 5 Desc (PSD5)")            \
+    ZZ(IDCTRLRCAP_PSD6,     2240,   32,     false, SPECREV_10b, "Power State 6 Desc (PSD6)")            \
+    ZZ(IDCTRLRCAP_PSD7,     2272,   32,     false, SPECREV_10b, "Power State 7 Desc (PSD7)")            \
+    ZZ(IDCTRLRCAP_PSD8,     2304,   32,     false, SPECREV_10b, "Power State 8 Desc (PSD8)")            \
+    ZZ(IDCTRLRCAP_PSD9,     2336,   32,     false, SPECREV_10b, "Power State 9 Desc (PSD9)")            \
+    ZZ(IDCTRLRCAP_PSD10,    2368,   32,     false, SPECREV_10b, "Power State 10 Desc (PSD10)")          \
+    ZZ(IDCTRLRCAP_PSD11,    2400,   32,     false, SPECREV_10b, "Power State 11 Desc (PSD11)")          \
+    ZZ(IDCTRLRCAP_PSD12,    2432,   32,     false, SPECREV_10b, "Power State 12 Desc (PSD12)")          \
+    ZZ(IDCTRLRCAP_PSD13,    2464,   32,     false, SPECREV_10b, "Power State 13 Desc (PSD13)")          \
+    ZZ(IDCTRLRCAP_PSD14,    2496,   32,     false, SPECREV_10b, "Power State 14 Desc (PSD14)")          \
+    ZZ(IDCTRLRCAP_PSD15,    2528,   32,     false, SPECREV_10b, "Power State 15 Desc (PSD15)")          \
+    ZZ(IDCTRLRCAP_PSD16,    2560,   32,     false, SPECREV_10b, "Power State 16 Desc (PSD16)")          \
+    ZZ(IDCTRLRCAP_PSD17,    2592,   32,     false, SPECREV_10b, "Power State 17 Desc (PSD17)")          \
+    ZZ(IDCTRLRCAP_PSD18,    2624,   32,     false, SPECREV_10b, "Power State 18 Desc (PSD18)")          \
+    ZZ(IDCTRLRCAP_PSD19,    2656,   32,     false, SPECREV_10b, "Power State 19 Desc (PSD19)")          \
+    ZZ(IDCTRLRCAP_PSD20,    2688,   32,     false, SPECREV_10b, "Power State 20 Desc (PSD20)")          \
+    ZZ(IDCTRLRCAP_PSD21,    2720,   32,     false, SPECREV_10b, "Power State 21 Desc (PSD21)")          \
+    ZZ(IDCTRLRCAP_PSD22,    2752,   32,     false, SPECREV_10b, "Power State 22 Desc (PSD22)")          \
+    ZZ(IDCTRLRCAP_PSD23,    2784,   32,     false, SPECREV_10b, "Power State 23 Desc (PSD23)")          \
+    ZZ(IDCTRLRCAP_PSD24,    2816,   32,     false, SPECREV_10b, "Power State 24 Desc (PSD24)")          \
+    ZZ(IDCTRLRCAP_PSD25,    2848,   32,     false, SPECREV_10b, "Power State 25 Desc (PSD25)")          \
+    ZZ(IDCTRLRCAP_PSD26,    2880,   32,     false, SPECREV_10b, "Power State 26 Desc (PSD26)")          \
+    ZZ(IDCTRLRCAP_PSD27,    2912,   32,     false, SPECREV_10b, "Power State 27 Desc (PSD27)")          \
+    ZZ(IDCTRLRCAP_PSD28,    2944,   32,     false, SPECREV_10b, "Power State 28 Desc (PSD28)")          \
+    ZZ(IDCTRLRCAP_PSD29,    2976,   32,     false, SPECREV_10b, "Power State 29 Desc (PSD29)")          \
+    ZZ(IDCTRLRCAP_PSD30,    3008,   32,     false, SPECREV_10b, "Power State 30 Desc (PSD30)")          \
+    ZZ(IDCTRLRCAP_PSD31,    3040,   32,     false, SPECREV_10b, "Power State 31 Desc (PSD31)")
+
+/* m=true, o=false */
+/*     IdCtrlrCap,          offset, length, m/o,   specRev,     desc                                   */
 #define IDCTRLRCAP_TABLE                                                            \
     ZZ(IDCTRLRCAP_VID,      0,      2,      true,  SPECREV_10b, "PCI Vendor ID (VID)")                  \
     ZZ(IDCTRLRCAP_SSVID,    2,      2,      true,  SPECREV_10b, "PCI Subsystem Vendor ID (SSVID)")      \
@@ -69,38 +105,7 @@ struct IdentifyDataType {
     ZZ(IDCTRLRCAP_SGLS,     536,    4,      false, SPECREV_10b/*SPECREV_11b*/, "SGL Support (SGLS)")                   \
     ZZ(IDCTRLRCAP_RES21C,   540,    164,    true,  SPECREV_10b/*SPECREV_11b*/, "Reserved area @ 0x21C")                \
     ZZ(IDCTRLRCAP_RES2C0,   704,    1344,   true,  SPECREV_10b, "Reserved area @ 2c0")                  \
-    ZZ(IDCTRLRCAP_PSD0,     2048,   32,     true,  SPECREV_10b, "Power State 0 Desc (PSD0)")            \
-    ZZ(IDCTRLRCAP_PSD1,     2080,   32,     false, SPECREV_10b, "Power State 1 Desc (PSD1)")            \
-    ZZ(IDCTRLRCAP_PSD2,     2112,   32,     false, SPECREV_10b, "Power State 2 Desc (PSD2)")            \
-    ZZ(IDCTRLRCAP_PSD3,     2144,   32,     false, SPECREV_10b, "Power State 3 Desc (PSD3)")            \
-    ZZ(IDCTRLRCAP_PSD4,     2176,   32,     false, SPECREV_10b, "Power State 4 Desc (PSD4)")            \
-    ZZ(IDCTRLRCAP_PSD5,     2208,   32,     false, SPECREV_10b, "Power State 5 Desc (PSD5)")            \
-    ZZ(IDCTRLRCAP_PSD6,     2240,   32,     false, SPECREV_10b, "Power State 6 Desc (PSD6)")            \
-    ZZ(IDCTRLRCAP_PSD7,     2272,   32,     false, SPECREV_10b, "Power State 7 Desc (PSD7)")            \
-    ZZ(IDCTRLRCAP_PSD8,     2304,   32,     false, SPECREV_10b, "Power State 8 Desc (PSD8)")            \
-    ZZ(IDCTRLRCAP_PSD9,     2336,   32,     false, SPECREV_10b, "Power State 9 Desc (PSD9)")            \
-    ZZ(IDCTRLRCAP_PSD10,    2368,   32,     false, SPECREV_10b, "Power State 10 Desc (PSD10)")          \
-    ZZ(IDCTRLRCAP_PSD11,    2400,   32,     false, SPECREV_10b, "Power State 11 Desc (PSD11)")          \
-    ZZ(IDCTRLRCAP_PSD12,    2432,   32,     false, SPECREV_10b, "Power State 12 Desc (PSD12)")          \
-    ZZ(IDCTRLRCAP_PSD13,    2464,   32,     false, SPECREV_10b, "Power State 13 Desc (PSD13)")          \
-    ZZ(IDCTRLRCAP_PSD14,    2496,   32,     false, SPECREV_10b, "Power State 14 Desc (PSD14)")          \
-    ZZ(IDCTRLRCAP_PSD15,    2528,   32,     false, SPECREV_10b, "Power State 15 Desc (PSD15)")          \
-    ZZ(IDCTRLRCAP_PSD16,    2560,   32,     false, SPECREV_10b, "Power State 16 Desc (PSD16)")          \
-    ZZ(IDCTRLRCAP_PSD17,    2592,   32,     false, SPECREV_10b, "Power State 17 Desc (PSD17)")          \
-    ZZ(IDCTRLRCAP_PSD18,    2624,   32,     false, SPECREV_10b, "Power State 18 Desc (PSD18)")          \
-    ZZ(IDCTRLRCAP_PSD19,    2656,   32,     false, SPECREV_10b, "Power State 19 Desc (PSD19)")          \
-    ZZ(IDCTRLRCAP_PSD20,    2688,   32,     false, SPECREV_10b, "Power State 20 Desc (PSD20)")          \
-    ZZ(IDCTRLRCAP_PSD21,    2720,   32,     false, SPECREV_10b, "Power State 21 Desc (PSD21)")          \
-    ZZ(IDCTRLRCAP_PSD22,    2752,   32,     false, SPECREV_10b, "Power State 22 Desc (PSD22)")          \
-    ZZ(IDCTRLRCAP_PSD23,    2784,   32,     false, SPECREV_10b, "Power State 23 Desc (PSD23)")          \
-    ZZ(IDCTRLRCAP_PSD24,    2816,   32,     false, SPECREV_10b, "Power State 24 Desc (PSD24)")          \
-    ZZ(IDCTRLRCAP_PSD25,    2848,   32,     false, SPECREV_10b, "Power State 25 Desc (PSD25)")          \
-    ZZ(IDCTRLRCAP_PSD26,    2880,   32,     false, SPECREV_10b, "Power State 26 Desc (PSD26)")          \
-    ZZ(IDCTRLRCAP_PSD27,    2912,   32,     false, SPECREV_10b, "Power State 27 Desc (PSD27)")          \
-    ZZ(IDCTRLRCAP_PSD28,    2944,   32,     false, SPECREV_10b, "Power State 28 Desc (PSD28)")          \
-    ZZ(IDCTRLRCAP_PSD29,    2976,   32,     false, SPECREV_10b, "Power State 29 Desc (PSD29)")          \
-    ZZ(IDCTRLRCAP_PSD30,    3008,   32,     false, SPECREV_10b, "Power State 30 Desc (PSD30)")          \
-    ZZ(IDCTRLRCAP_PSD31,    3040,   32,     false, SPECREV_10b, "Power State 31 Desc (PSD31)")          \
+    IDCTRLRCAP_PSD_TABLE    \
     ZZ(IDCTRLRCAP_VS,       3072,   1024,   false, SPECREV_10b, "Vendor Specific (VS)")
 
 #define ZZ(a, b, c, d, e, f)         a,
@@ -110,6 +115,8 @@ typedef enum IdCtrlrCap
     IDCTRLRCAP_FENCE               // always must be the last element
 } IdCtrlrCap;
 #undef ZZ
+
+extern IdCtrlrCap IDCTRLRCAP_PSD[];
 
 struct IdPowerStateDesc {
     uint16_t    MP;
@@ -122,6 +129,26 @@ struct IdPowerStateDesc {
     uint8_t     RWL;
     uint64_t    RES_7D[2];
 } __attribute__((__packed__));
+
+struct IdPowerStateDescUnpacked {
+    uint16_t    MP;
+    uint8_t     RES0;
+    uint8_t     MPS;
+    uint8_t     NOPS;
+    uint8_t     RES1;
+    uint32_t    ENLAT;
+    uint32_t    EXLAT;
+    uint8_t     RRT;
+    uint8_t     RES2;
+    uint8_t     RRL;
+    uint8_t     RES3;
+    uint8_t     RWT;
+    uint8_t     RES4;
+    uint8_t     RWL;
+    uint64_t    RES5_1;
+    uint64_t    RES5_2;
+    uint8_t     RES5_3;
+};
 
 struct IdCtrlrCapStruct {
     uint16_t    VID;

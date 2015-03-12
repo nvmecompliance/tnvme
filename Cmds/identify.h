@@ -110,6 +110,13 @@ public:
      */
     virtual void log(IdNamespc field) const;
 
+    /**
+     * Get the power state descriptor (PSD) for the given power state number.
+     * throws if psdNum is greater than idCtrlrCap.NPSS
+     * @param psdNum the number of the PSD to retrieve
+     */
+    IdPowerStateDescUnpacked getPSD(const uint8_t psdNum) const;
+
 
 private:
     /// Details the fields within the identify controller capabilities struct
