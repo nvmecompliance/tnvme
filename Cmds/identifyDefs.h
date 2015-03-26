@@ -273,4 +273,15 @@ typedef enum OACSBits {
     OACS_SUP_FIRMWARE_CMD     = 0x0004
 } OACSBits;
 
+typedef enum RESCAPBits {
+    RESCAP_PERSIST          = 0x01,
+    RESCAP_WRITE_EXCL       = 0x02,
+    RESCAP_EXCL_ACCESS      = 0x04,
+    RESCAP_WRITE_EXCL_REG   = 0x08,
+    RESCAP_EXCL_ACCESS_REG  = 0x10,
+    RESCAP_WRITE_EXCL_ALL   = 0x20,
+    RESCAP_EXCL_ACCESS_ALL  = 0x40,
+    RESCAP_RESV             = 0x80
+} RESCAPBits;
+
 #endif

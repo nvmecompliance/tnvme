@@ -51,7 +51,11 @@ public:
     static const uint8_t FID_IRQ_VEC_CONFIG;     // admin cmd
     static const uint8_t FID_WRITE_ATOMICITY;    // admin cmd
     static const uint8_t FID_ASYNC_EVENT_CONFIG; // admin cmd
+    static const uint8_t FID_AUTO_PS_TRANS;      // admin cmd
     static const uint8_t FID_SW_PROGRESS;        // NVM cmd
+    static const uint8_t FID_HOST_ID;            // NVM cmd
+    static const uint8_t FID_RESV_NOTIF_MASK;    // NVM cmd
+    static const uint8_t FID_RESV_PERSIST;       // NVM cmd
 
 
 private:
