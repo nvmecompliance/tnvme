@@ -238,7 +238,7 @@ VerifyMaxEvents_r10b::ReadLogPage(SharedACQPtr &acq, SharedASQPtr &asq,
 
     LOG_NRM("Reading log page with LID = %d to clear the event mask", logId);
     ConstSharedIdentifyPtr idCtrlrStruct = gInformative->GetIdentifyCmdCtrlr();
-    uint8_t X = idCtrlrStruct->GetValue(IDCTRLRCAP_ELPE) + 1;
+    uint16_t X = idCtrlrStruct->GetValue(IDCTRLRCAP_ELPE) + 1;
     LOG_NRM("Identify controller ELPE = %d (1-based)", X);
 
     LOG_NRM("Create get log page cmd and assoc some buffer memory");
