@@ -136,6 +136,13 @@ public:
         string qualify, bool verbose);
 
     /**
+     * Verifies the status of the reaped CE.
+     * @param ce The reaped CE
+     * @param status Pass the expected status to verify with
+     */
+    static CEStat VerifyCE(union CE *ce, std::vector<CEStat> &status);
+
+    /**
      * Reap a specified number of CE's from the specified CQ.
      * @note Throws upon errors
      * @param cq Pass the CQ to reap from
@@ -149,10 +156,10 @@ public:
      */
     static CEStat ReapCE(SharedCQPtr cq, uint32_t numCE, uint32_t &isrCount,
         string grpName, string testName, string qualify,
-        CEStat status = CESTAT_SUCCESS);
+        CEStat status = CESTAT_SUCCESS, const bool failOnIoctl = true);
     static CEStat ReapCE(SharedCQPtr cq, uint32_t numCE, uint32_t &isrCount,
         string grpName, string testName, string qualify,
-        std::vector<CEStat> &status);
+        std::vector<CEStat> &status, const bool failOnIoctl = true);
 
     /**
      * Reap a specified number of CE's from the specified CQ.
@@ -168,10 +175,10 @@ public:
      */
     static CEStat ReapCENot(SharedCQPtr cq, uint32_t numCE, uint32_t &isrCount,
         string grpName, string testName, string qualify,
-        CEStat status = CESTAT_SUCCESS);
+        CEStat status = CESTAT_SUCCESS, const bool failOnIoctl = true);
     static CEStat ReapCENot(SharedCQPtr cq, uint32_t numCE, uint32_t &isrCount,
         string grpName, string testName, string qualify,
-        std::vector<CEStat> &status);
+        std::vector<CEStat> &status, const bool failOnIoctl = true);
 
     /**
      * Reap a specified number of CE's from the specified CQ.
@@ -185,7 +192,8 @@ public:
      * @return ce status
      */
     static CEStat ReapCEIgnore(SharedCQPtr cq, uint32_t numCE,
-        uint32_t &isrCount, string grpName, string testName, string qualify);
+        uint32_t &isrCount, string grpName, string testName, string qualify,
+        const bool failOnIoctl = true);
 
     /**
      * Send and Reap an existing, user defined cmd to/from hdw using the spec'd
@@ -221,7 +229,8 @@ public:
      * @return status of ce if successful; throws exception otherwise;
      */
     static union CE ReapCEWhole(SharedCQPtr cq, uint32_t numCE,
-        uint32_t &isrCount, string grpName, string testName, string qualify);
+        uint32_t &isrCount, string grpName, string testName, string qualify,
+        const bool failOnIoctl = true);
 
 private:
     /**
@@ -232,7 +241,7 @@ private:
         bool verbose, std::vector<CEStat> &status,
         CEStat (*Reap)(SharedCQPtr cq, uint32_t numCE, uint32_t &isrCount,
             string grpName, string testName, string qualify,
-            std::vector<CEStat> &status));
+            std::vector<CEStat> &status, const bool failOnIoctl));
 
     /**
      * Just send a command without reaping.
@@ -258,19 +267,21 @@ private:
      */
     static CEStat ReapCEIgnore(SharedCQPtr cq, uint32_t numCE,
         uint32_t &isrCount, string grpName, string testName, string qualify,
-        std::vector<CEStat> &status);
+        std::vector<CEStat> &status, const bool failOnIoctl = true);
 
     /**
      * Retrieve CE from CQ.
      */
     static union CE RetrieveCE(SharedCQPtr cq, uint32_t numCE,
-        uint32_t &isrCount, string grpName, string testName, string qualify);
+        uint32_t &isrCount, string grpName, string testName, string qualify,
+        const bool failOnIoctl = true);
 
     /**
      * Attempt to retrieve CE from CQ.  Returns number retrieved.
      */
     static uint32_t AttemptRetrieveCE(SharedCQPtr cq, uint32_t numCE,
-        uint32_t &isrCount, struct nvme_gen_cq *cqMetrics);
+        uint32_t &isrCount, struct nvme_gen_cq *cqMetrics,
+        const bool failOnIoctl = true);
 };
 
 

@@ -168,10 +168,13 @@ public:
      *      reap all which can be reaped.
      * @param zeroMem Pass true to zero out memBuffer before reaping, otherwise
      *      the buffer is not modified.
+     * @param failOnIoctl Pass true to fail if ioctl returns an error, otherwise
+     *      an error is logged and no exception is thrown
      * @return Returns the actual number of CE's reaped
      */
     uint32_t Reap(uint32_t &ceRemain, SharedMemBufferPtr memBuffer,
-        uint32_t &isrCount, uint32_t ceDesire = 0, bool zeroMem = false);
+        uint32_t &isrCount, uint32_t ceDesire = 0, bool zeroMem = false,
+        bool failOnIoctl = true);
 
 
 protected:

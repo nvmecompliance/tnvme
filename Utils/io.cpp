@@ -200,7 +200,7 @@ IO::SendAndReapCmd(string grpName, string testName, uint16_t ms,
     SharedSQPtr sq, SharedCQPtr cq, SharedCmdPtr cmd, string qualify,
     bool verbose, std::vector<CEStat> &status,
     CEStat (*Reap)(SharedCQPtr, uint32_t, uint32_t &, string, string,
-            string, std::vector<CEStat> &))
+            string, std::vector<CEStat> &, bool))
 {
     uint32_t numCE;
     uint32_t isrCount;
@@ -212,7 +212,7 @@ IO::SendAndReapCmd(string grpName, string testName, uint16_t ms,
 
     // throws if an error occurs
     CEStat retStat =
-        Reap(cq, numCE, isrCount, grpName, testName, qualify, status);
+        Reap(cq, numCE, isrCount, grpName, testName, qualify, status, true);
     if (verbose) {
         cmd->Dump(FileSystem::PrepDumpFile(grpName, testName,
             cmd->GetName(), qualify), "A cmd's contents dumped");
@@ -223,40 +223,44 @@ IO::SendAndReapCmd(string grpName, string testName, uint16_t ms,
 
 CEStat
 IO::ReapCEIgnore(SharedCQPtr cq, uint32_t numCE, uint32_t &isrCount,
-    string grpName, string testName, string qualify)
+    string grpName, string testName, string qualify, const bool failOnIoctl)
 {
     return ProcessCE::GetCEStat(
-        RetrieveCE(cq, numCE, isrCount, grpName, testName, qualify));
+        RetrieveCE(cq, numCE, isrCount, grpName, testName, qualify,
+            failOnIoctl));
 }
 
 
 CEStat
 IO::ReapCEIgnore(SharedCQPtr cq, uint32_t numCE, uint32_t &isrCount,
     string grpName, string testName, string qualify,
-    std::vector<CEStat> &status)
+    std::vector<CEStat> &status, const bool failOnIoctl)
 {
     status = status;    // Suppress compiler error/warning
-    return ReapCEIgnore(cq, numCE, isrCount, grpName, testName, qualify);
+    return ReapCEIgnore(cq, numCE, isrCount, grpName, testName, qualify,
+        failOnIoctl);
 }
 
 
 CEStat
 IO::ReapCENot(SharedCQPtr cq, uint32_t numCE, uint32_t &isrCount,
-    string grpName, string testName, string qualify, CEStat status)
+    string grpName, string testName, string qualify, CEStat status,
+    const bool failOnIoctl)
 {
     std::vector<CEStat> localStatus;
     localStatus.push_back(status);
     return ReapCENot(cq, numCE, isrCount, grpName, testName, qualify,
-        localStatus);
+        localStatus, failOnIoctl);
 }
 
 
 CEStat
 IO::ReapCENot(SharedCQPtr cq, uint32_t numCE, uint32_t &isrCount,
-        string grpName, string testName, string qualify,
-        std::vector<CEStat> &status)
+    string grpName, string testName, string qualify,
+    std::vector<CEStat> &status, const bool failOnIoctl)
 {
-    union CE ce = RetrieveCE(cq, numCE, isrCount, grpName, testName, qualify);
+    union CE ce = RetrieveCE(cq, numCE, isrCount, grpName, testName, qualify,
+        failOnIoctl);
 
     if (status.empty()) {
         throw FrmwkEx(HERE,
@@ -274,24 +278,8 @@ IO::ReapCENot(SharedCQPtr cq, uint32_t numCE, uint32_t &isrCount,
     return ProcessCE::GetCEStat(ce);
 }
 
-
 CEStat
-IO::ReapCE(SharedCQPtr cq, uint32_t numCE, uint32_t &isrCount,
-    string grpName, string testName, string qualify, CEStat status)
-{
-    std::vector<CEStat> localStatus;
-    localStatus.push_back(status);
-    return ReapCE(cq, numCE, isrCount, grpName, testName, qualify, localStatus);
-}
-
-
-CEStat
-IO::ReapCE(SharedCQPtr cq, uint32_t numCE, uint32_t &isrCount,
-    string grpName, string testName, string qualify,
-    std::vector<CEStat> &status)
-{
-    union CE ce = RetrieveCE(cq, numCE, isrCount, grpName, testName, qualify);
-
+IO::VerifyCE(union CE *ce, std::vector<CEStat> &status) {
     if (status.empty()) {
         throw FrmwkEx(HERE,
             "Internal Programming Error; Must supply >= 1 status");
@@ -299,13 +287,36 @@ IO::ReapCE(SharedCQPtr cq, uint32_t numCE, uint32_t &isrCount,
 
     // Search for 1 matching CEStat to match the device status
     for (size_t sIdx = 0; sIdx < status.size(); sIdx++) {
-        if (ProcessCE::ValidatePeek(ce, status[sIdx]) == true)
+        if (ProcessCE::ValidatePeek(*ce, status[sIdx]) == true)
             return status[sIdx];
     }
 
     throw FrmwkEx(HERE,
         "%d CeStat's compared to device status, but no match found",
         status.size());
+}
+
+
+CEStat
+IO::ReapCE(SharedCQPtr cq, uint32_t numCE, uint32_t &isrCount,
+    string grpName, string testName, string qualify, CEStat status,
+    bool failOnIoctl)
+{
+    std::vector<CEStat> localStatus;
+    localStatus.push_back(status);
+    return ReapCE(cq, numCE, isrCount, grpName, testName, qualify, localStatus,
+        failOnIoctl);
+}
+
+
+CEStat
+IO::ReapCE(SharedCQPtr cq, uint32_t numCE, uint32_t &isrCount,
+    string grpName, string testName, string qualify,
+    std::vector<CEStat> &status, bool failOnIoctl)
+{
+    union CE ce = RetrieveCE(cq, numCE, isrCount, grpName, testName, qualify,
+        failOnIoctl);
+    return VerifyCE(&ce, status);
 }
 
 
@@ -335,18 +346,20 @@ IO::SendAndReapCmdWhole(string grpName, string testName, uint16_t ms,
 
 union CE
 IO::ReapCEWhole(SharedCQPtr cq, uint32_t numCE, uint32_t &isrCount,
-    string grpName, string testName, string qualify)
+    string grpName, string testName, string qualify, const bool failOnIoctl)
 {
-    return RetrieveCE(cq, numCE, isrCount, grpName, testName, qualify);
+    return RetrieveCE(cq, numCE, isrCount, grpName, testName, qualify,
+        failOnIoctl);
 }
 
 
 union CE
 IO::RetrieveCE(SharedCQPtr cq, uint32_t numCE, uint32_t &isrCount,
-            string grpName, string testName, string qualify)
+    string grpName, string testName, string qualify, const bool failOnIoctl)
 {
     struct nvme_gen_cq cqMetrics = cq->GetQMetrics();
-    uint32_t numReaped = AttemptRetrieveCE(cq, numCE, isrCount, &cqMetrics);
+    uint32_t numReaped = AttemptRetrieveCE(cq, numCE, isrCount, &cqMetrics,
+        failOnIoctl);
     string work;
 
     if (numReaped != 1) {
@@ -362,7 +375,7 @@ IO::RetrieveCE(SharedCQPtr cq, uint32_t numCE, uint32_t &isrCount,
 
 uint32_t
 IO::AttemptRetrieveCE(SharedCQPtr cq, uint32_t numCE, uint32_t &isrCount,
-    struct nvme_gen_cq *cqMetrics)
+    struct nvme_gen_cq *cqMetrics, const bool failOnIoctl)
 {
     uint32_t ceRemain;
     string work;
@@ -373,5 +386,5 @@ IO::AttemptRetrieveCE(SharedCQPtr cq, uint32_t numCE, uint32_t &isrCount,
     LOG_NRM("Reaping CE from CQ %d, requires memory to hold CE", cq->GetQId());
     SharedMemBufferPtr ceMem = SharedMemBufferPtr(new MemBuffer());
 
-    return cq->Reap(ceRemain, ceMem, isrCount, numCE, true);
+    return cq->Reap(ceRemain, ceMem, isrCount, numCE, true, failOnIoctl);
 }

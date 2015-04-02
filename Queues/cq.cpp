@@ -379,7 +379,7 @@ CQ::CalcTimeout(uint32_t ms, struct timeval &initial, uint32_t &delta)
 
 uint32_t
 CQ::Reap(uint32_t &ceRemain, SharedMemBufferPtr memBuffer, uint32_t &isrCount,
-    uint32_t ceDesire, bool zeroMem)
+    uint32_t ceDesire, bool zeroMem, bool failOnIoctl)
 {
     int rc;
     struct nvme_reap reap;
@@ -408,8 +408,12 @@ CQ::Reap(uint32_t &ceRemain, SharedMemBufferPtr memBuffer, uint32_t &isrCount,
     reap.elements = ceDesire;
     reap.size = memBuffer->GetBufSize();
     reap.buffer = memBuffer->GetBuffer();
-    if ((rc = ioctl(mFd, NVME_IOCTL_REAP, &reap)) < 0)
-        throw FrmwkEx(HERE, "Error during reaping CE's, rc =%d", rc);
+    if ((rc = ioctl(mFd, NVME_IOCTL_REAP, &reap)) < 0) {
+        if (failOnIoctl)
+            throw FrmwkEx(HERE, "Error during reaping CE's, rc = %d", rc);
+        else
+            LOG_ERR("Error during reaping CE's, rc = %d", rc);
+    }
 
     isrCount = reap.isr_count;
     ceRemain = reap.num_remaining;
