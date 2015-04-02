@@ -132,7 +132,7 @@ InvalidNamspc_r10b::RunCoreTest()
 
     for (i = (nn + 1), inc = 1; i <= 0xffffffff; i += (2 * inc), inc += 1327) {
 
-        LOG_NRM("Issue flush cmd with illegal namspc ID=%llu",
+        LOG_NRM("Issue write cmd with illegal namspc ID=%llu",
             (unsigned long long)i);
         writeCmd->SetNSID(i);
         work = str(boost::format("namspc%d") % i);
