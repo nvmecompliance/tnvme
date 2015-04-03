@@ -273,6 +273,12 @@ typedef enum OACSBits {
     OACS_SUP_FIRMWARE_CMD     = 0x0004
 } OACSBits;
 
+typedef enum FRMWBits {
+    FRMW_SLOT1_RO   = 0x01,
+    FRMW_NUM_SLOTS  = 0x0e,
+    FRMW_RESV0      = 0xf0
+} FRMWBits;
+
 typedef enum RESCAPBits {
     RESCAP_PERSIST          = 0x01,
     RESCAP_WRITE_EXCL       = 0x02,
