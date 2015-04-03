@@ -21,6 +21,20 @@
 
 using namespace std;
 
+/*
+    ASSERT_(here, condition, message)
+#define ASSERT_(here, condition, message)                         \*/
+#ifndef NDEBUG
+#define ASSERT(here, condition, message)                          \
+    do {                                                                       \
+        if (!(condition)) {                                                    \
+            throw FrmwkEx(here,                                   \
+                "Assertion `" #condition "` failed: " #message);               \
+        }                                                                      \
+    } while (false)
+#else
+#define ASSERT(here, condition, message) do { } while (false)
+#endif
 
 /**
 * This class is the base class for all exceptions thrown from the source
