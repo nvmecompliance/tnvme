@@ -248,7 +248,7 @@ CQ::ReapInquiry(uint32_t &isrCount, bool reportOn0)
 
     inq.q_id = GetQId();
     if ((rc = ioctl(mFd, NVME_IOCTL_REAP_INQUIRY, &inq)) < 0)
-        throw FrmwkEx(HERE, "Error during reap inquiry, rc =%d", rc);
+        throw FrmwkEx(HERE, "Error during reap inquiry, rc = %d", rc);
 
     isrCount = inq.isr_count;
     if (inq.num_remaining || reportOn0) {
