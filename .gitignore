@@ -8,6 +8,8 @@ tnvme-*/
 tnvme
 .cproject
 .project
+*.sublime-project
+*.sublime-workspace
 *.a
 *.o
 doxygen.log
