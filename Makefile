@@ -52,6 +52,9 @@ SUBDIRS:=			\
 	GrpNVMWriteCmd		\
 	GrpNVMWriteReadCombo	\
 	GrpNVMWriteUncorrectCmd	\
+	GrpAdminNamespaceManagement \
+	GrpReservationsHostA    \
+	GrpReservationsHostB    \
 	GrpPciRegisters		\
 	GrpQueues		\
 	GrpResets		\

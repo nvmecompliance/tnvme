@@ -147,7 +147,7 @@ VerifyNUSE_r10b::RunCoreTest()
     LOG_NRM("Create identify cmd & assoc some buffer memory");
     SharedIdentifyPtr idCmdNamSpc = SharedIdentifyPtr(new Identify());
     LOG_NRM("Force identify to request namespace struct");
-    idCmdNamSpc->SetCNS(false);
+    idCmdNamSpc->SetCNS(0);
     idCmdNamSpc->SetNSID(namspcData.id);
     SharedMemBufferPtr idMemNamSpc = SharedMemBufferPtr(new MemBuffer());
     idMemNamSpc->InitAlignment(Identify::IDEAL_DATA_SIZE, PRP_BUFFER_ALIGNMENT,

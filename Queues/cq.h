@@ -73,6 +73,16 @@ public:
      * @return The CE requested.
      */
     union CE PeekCE(uint16_t indexPtr);
+	
+    /**
+     * Peek at a Completion Element (CE) in CQ position indicated by its CID.
+     * Only dnvme can reap CE's from a CQ by calling Reap(), however user space
+     * does have eyes into that CQ's memory, and thus allows peeking at any CE
+     * at any time without reaping anything.
+     * @param indexPtr Pass [0 to (GetNumEntries()-1)] as the index into the CQ.
+     * @return The CE requested.
+     */	
+    union CE PeekCEwithCID(uint16_t CIDtoPeek);
 
     /**
      * Log the entire contents of CE at CQ position indicated by indexPtr to

@@ -58,6 +58,9 @@
 #include "GrpAdminGetFeatCmd/grpAdminGetFeatCmd.h"
 #include "GrpAdminSetGetFeatCombo/grpAdminSetGetFeatCombo.h"
 #include "GrpAdminAsyncCmd/grpAdminAsyncCmd.h"
+#include "GrpReservationsHostA/grpReservationsHostA.h"
+#include "GrpReservationsHostB/grpReservationsHostB.h"
+#include "GrpAdminNamespaceManagement/grpAdminNamespaceManagement.h"
 
 char revision_warning[1024];
 
@@ -94,6 +97,10 @@ InstantiateGroups(vector<Group *> &groups)
     groups.push_back(new GrpAdminGetFeatCmd::GrpAdminGetFeatCmd(groups.size()));
     groups.push_back(new GrpAdminSetGetFeatCombo::GrpAdminSetGetFeatCombo(groups.size()));
     groups.push_back(new GrpAdminAsyncCmd::GrpAdminAsyncCmd(groups.size()));
+    // Following is assigned grp ID=25
+    groups.push_back(new GrpReservationsHostA::GrpReservationsHostA(groups.size()));
+    groups.push_back(new GrpReservationsHostB::GrpReservationsHostB(groups.size()));
+    groups.push_back(new GrpAdminNamespaceManagement::GrpAdminNamespaceManagement(groups.size()));
 }
 // ------------------------------EDIT HERE---------------------------------
 

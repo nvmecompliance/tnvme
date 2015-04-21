@@ -69,6 +69,8 @@ using namespace std;
 
 typedef enum {
     SPECREV_10b,             // http://www.nvmexpress.org/ spec. rev. 1.0b
+    SPECREV_11,
+    SPECREV_12,
     SPECREVTYPE_FENCE        // always must be last element
 } SpecRev;
 

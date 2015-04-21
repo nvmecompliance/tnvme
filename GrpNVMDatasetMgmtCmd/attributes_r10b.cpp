@@ -133,6 +133,7 @@ Attributes_r10b::RunCoreTest()
     datasetMgmtCmd->SetNSID(namspcData.id);
     datasetMgmtCmd->SetNR(MAX_RANGES - 1);  // convert to 0-based
     datasetMgmtCmd->SetPrpBuffer(prpBitmask, rangeMem);
+    datasetMgmtCmd->SetAD(true);
 
     list<uint32_t> ctrAttribs = GetUniqueCtxAttribs();
     for (list <uint32_t>::iterator ctxAttrib = ctrAttribs.begin();
@@ -156,7 +157,7 @@ Attributes_r10b::RunCoreTest()
             enableLog = true;
 
         work = str(boost::format("ctxAttrib0x%04X") % *ctxAttrib);
-        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq, iocq,
+        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1000), iosq, iocq,
             datasetMgmtCmd, work, enableLog);
     }
 }

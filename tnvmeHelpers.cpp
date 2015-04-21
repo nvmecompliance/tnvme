@@ -46,7 +46,9 @@ VerifySpecCompatibility(SpecRev specRev)
 
     switch (specRev) {
     case SPECREV_10b:   tgtMajor = 1;  tgtMinor = 1;  break; //really 1.1a (errata 8)
-    //case SPECREV_11a:   tgtMajor = 1;  tgtMinor = 1;  break;
+    case SPECREV_11:    tgtMajor = 1;  tgtMinor = 1;  break;
+    case SPECREV_12:    tgtMajor = 1;  tgtMinor = 2;  break;
+
     default:
         LOG_ERR("Requesting comparison against unknown SpecRev=%d", specRev);
         return false;

@@ -83,9 +83,10 @@ public:
      *        is enforced to a multiple of sizeof(void *) alignment at min.
      * @param initMem Pass true to initialize all elements, otherwise don't init
      * @param initVal Pass the init value if suppose to init the buffer
+	 * @param buffer Pass a user buffer to be used for write data in the PRP
      */
     void InitAlignment(uint32_t bufSize, uint32_t align = PRP_BUFFER_ALIGNMENT,
-        bool initMem = false, uint8_t initVal = 0);
+        bool initMem = false, uint8_t initVal = 0, volatile uint8_t *buffer=NULL);
 
     /**
      * Allocates memory not allowed to specify anything, heap memory is taken

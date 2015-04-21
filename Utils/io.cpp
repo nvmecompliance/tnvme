@@ -287,6 +287,13 @@ IO::VerifyCE(union CE *ce, std::vector<CEStat> &status) {
 
     // Search for 1 matching CEStat to match the device status
     for (size_t sIdx = 0; sIdx < status.size(); sIdx++) {
+
+    	// Allows a test to send a command without requiring a CE validation
+    	if(status[sIdx] == CESTAT_IGNORE) {
+    		// Shoudl convert the reaped CE to a CESTAT enum
+    		return status[sIdx];
+    	}
+
         if (ProcessCE::ValidatePeek(*ce, status[sIdx]) == true)
             return status[sIdx];
     }

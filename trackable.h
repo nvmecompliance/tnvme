@@ -65,7 +65,13 @@ public:
         OBJ_READ,               // NVM cmd set; write cmd
         OBJ_FLUSH,              // NVM cmd set; flush cmd
         OBJ_DATASETMGMT,        // NVM cmd set; dataset mgmt cmd
-
+		OBJ_WRITEZEROES,		// NVM Spec 1.1 cmds
+        OBJ_RESERVATIONREGISTER,
+        OBJ_RESERVATIONREPORT,
+        OBJ_RESERVATIONACQUIRE,
+        OBJ_RESERVATIONRELEASE,
+        OBJ_NAMESPACEATTACH,    // NVM Spec 1.2 cmds
+        OBJ_NAMESPACEMANAGEMENT,
         OBJTYPE_FENCE           // always must be last element
     } ObjType;
 

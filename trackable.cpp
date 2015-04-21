@@ -68,6 +68,13 @@ Trackable::GetObjName(ObjType obj)
     case OBJ_READ:          name = "Read";               break;
     case OBJ_FLUSH:         name = "Flush";              break;
     case OBJ_DATASETMGMT:   name = "DatasetMgmt";        break;
+    case OBJ_WRITEZEROES:         name = "WriteZeroes";               break; // Not yet implemented
+    case OBJ_RESERVATIONREGISTER: name = "ReservationRegister";       break;
+    case OBJ_RESERVATIONREPORT:   name = "ReservationReport";         break;
+    case OBJ_RESERVATIONACQUIRE:  name = "ReservationAcquire";        break;
+    case OBJ_RESERVATIONRELEASE:  name = "ReservationRelease";        break;
+    case OBJ_NAMESPACEATTACH:     name = "NamespaceAttach"; break;
+    case OBJ_NAMESPACEMANAGEMENT: name = "NamespaceManagement"; break;
     default:
         throw FrmwkEx(HERE, "Forgot to label this unknown obj");
     }

@@ -119,7 +119,7 @@ MemBuffer::InitOffset1stPage(uint32_t bufSize, uint32_t offset1stPg,
 
 void
 MemBuffer::InitAlignment(uint32_t bufSize, uint32_t align, bool initMem,
-    uint8_t initVal)
+    uint8_t initVal, volatile uint8_t *srcBuffer)
 {
     int err;
 
@@ -145,9 +145,17 @@ MemBuffer::InitAlignment(uint32_t bufSize, uint32_t align, bool initMem,
     mVirBaseAddr = mRealBaseAddr;
     mAlignment = align;
 
-    if (initMem)
+    if (srcBuffer != NULL) {
+    	//memcpy(mVirBaseAddr, buffer, bufSize );
+        for(uint32_t dataIndex = 0; dataIndex < bufSize; dataIndex++) {
+        	mVirBaseAddr[dataIndex] = (volatile uint8_t) srcBuffer[dataIndex];
+        }
+    }
+    else if (initMem) {
         memset(mVirBaseAddr, initVal, mVirBufSize);
+    }
 }
+
 
 
 void

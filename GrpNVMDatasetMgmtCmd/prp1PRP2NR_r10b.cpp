@@ -158,6 +158,7 @@ PRP1PRP2NR_r10b::RunCoreTest()
                     datasetMgmtCmd->SetDword(rand(), 8);
                     datasetMgmtCmd->SetDword(rand(), 9);
 
+					datasetMgmtCmd->SetAD(true);
                     uint64_t slba = 0;
                     RangeDef *rangePtr = (RangeDef *)rangeMem->GetBuffer();
                     for (uint32_t idx = 1; idx <= nr; idx++, rangePtr++) {

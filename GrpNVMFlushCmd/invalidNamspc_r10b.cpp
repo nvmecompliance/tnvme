@@ -140,13 +140,12 @@ InvalidNamspc_r10b::RunCoreTest()
         LOG_NRM("Issue flush cmd with illegal namspc ID=%llu",
             (unsigned long long)i);
         flushCmd->SetNSID(i);
-         for (uint16_t j = 0; j < invalidFIDs.size(); j++) {
-            if (invalidFIDs[j] == 0x81)
+        for (uint16_t invalidFIDIndex = 0; invalidFIDIndex < invalidFIDs.size(); invalidFIDIndex++) {
+            if (invalidFIDs[invalidFIDIndex] == 0x81)
                continue;
-            LOG_NRM("Issue get feat cmd using invalid FID = 0x%X",
-                    invalidFIDs[j]);
-             getFeaturesCmd->SetFID(invalidFIDs[j]);
-             work = str(boost::format("invalidFIDs.%xh") % invalidFIDs[j]);
+             LOG_NRM("Issue get feat cmd using invalid FID = 0x%X", invalidFIDs[invalidFIDIndex]);
+             getFeaturesCmd->SetFID(invalidFIDs[invalidFIDIndex]);
+             work = str(boost::format("invalidFIDs.%xh") % invalidFIDs[invalidFIDIndex]);
          }
         work = str(boost::format("namspc%d") % i);
         IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq,

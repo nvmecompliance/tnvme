@@ -97,7 +97,7 @@ AdminQFull_r10b::RunCoreTest()
     LOG_NRM("Create identify cmd and assoc some buffer memory");
     SharedIdentifyPtr idCmdCtrlr = SharedIdentifyPtr(new Identify());
     LOG_NRM("Force identify to request ctrlr capabilities struct");
-    idCmdCtrlr->SetCNS(true);
+    idCmdCtrlr->SetCNS(1);
     SharedMemBufferPtr idMemCap = SharedMemBufferPtr(new MemBuffer());
     idMemCap->InitAlignment(Identify::IDEAL_DATA_SIZE, PRP_BUFFER_ALIGNMENT,
         false, 0);

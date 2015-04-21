@@ -115,7 +115,8 @@ UnsupportRsvdFields_r10b::RunCoreTest()
 
     SharedDatasetMgmtPtr datasetMgmtCmd =
         SharedDatasetMgmtPtr(new DatasetMgmt());
-
+	datasetMgmtCmd->SetAD(true);
+	
     ConstSharedIdentifyPtr idCtrlr = gInformative->GetIdentifyCmdCtrlr();
     for (uint64_t i = 1; i <= idCtrlr->GetValue(IDCTRLRCAP_NN); i++) {
         LOG_NRM("Processing namspc %ld", i);
@@ -132,6 +133,7 @@ UnsupportRsvdFields_r10b::RunCoreTest()
         RangeDef *rangeDef = (RangeDef *)rangeMem->GetBuffer();
         rangeDef->length = 1;
 
+        datasetMgmtCmd->SetAD(true);
         IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq, iocq,
             datasetMgmtCmd, "none.set", true);
 
@@ -154,6 +156,7 @@ UnsupportRsvdFields_r10b::RunCoreTest()
 
         work = datasetMgmtCmd->GetDword(11);
         work |= 0xfffffff8;     // Set DW11_b31:3 bits
+        work |= 0x4; // Set Bit2 AD=1 (Deallocate)
         datasetMgmtCmd->SetDword(work, 11);
 
         datasetMgmtCmd->SetDword(0xffffffff, 12);

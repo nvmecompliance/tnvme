@@ -105,7 +105,7 @@ InvalidNamspc_r10b::RunCoreTest()
 
     LOG_NRM("Form identify namespace cmd and associate some buffer");
     SharedIdentifyPtr idCmdNamSpc = SharedIdentifyPtr(new Identify());
-    idCmdNamSpc->SetCNS(false);
+    idCmdNamSpc->SetCNS(0);
 
     SharedMemBufferPtr idMemNamSpc = SharedMemBufferPtr(new MemBuffer());
     idMemNamSpc->InitOffset1stPage(Identify::IDEAL_DATA_SIZE,

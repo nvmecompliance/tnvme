@@ -218,6 +218,24 @@ CQ::PeekCE(uint16_t indexPtr)
     throw FrmwkEx(HERE, "Unable to locate index within Q");
 }
 
+union CE
+CQ::PeekCEwithCID(uint16_t CIDtoPeek)
+{
+    union CE *dataPtr;
+
+    if (GetIsContig())
+        dataPtr = (union CE *)mContigBuf;
+    else
+        dataPtr = (union CE *)mDiscontigBuf->GetBuffer();
+
+    for (uint32_t i = 0; i < GetNumEntries(); i++, dataPtr++) {
+        if (dataPtr->n.CID == CIDtoPeek)
+            return *dataPtr;
+    }
+
+    throw FrmwkEx(HERE, "Unable to locate CID within CQ");
+}
+
 
 void
 CQ::LogCE(uint16_t indexPtr)

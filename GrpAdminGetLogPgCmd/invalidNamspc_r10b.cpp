@@ -41,6 +41,7 @@ InvalidNamspc_r10b::InvalidNamspc_r10b
         "GetLogPage to all namspcs not supported by DUT and expect failure, "
         "0xFFFFFFFF is legal and return global page. If SMART "
         "is not supported then all NSID values are legal, verify success.");
+    // Where does it say that the last sentence is true in the spec?
 }
 
 
