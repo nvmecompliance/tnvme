@@ -17,6 +17,8 @@
 #include "cmd.h"
 #include "../Utils/buffers.h"
 
+#include "../Queues/se.h"
+
 using namespace std;
 
 const uint8_t  Cmd::BITMASK_FUSE_B = 0x03;
@@ -252,4 +254,26 @@ Cmd::Dump(DumpFilename filename, string fileHdr) const
         mCmdBuf->GetBufSize(), "Cmd contents:");
     PrpData::Dump(filename, "Payload contents:");
     MetaData::Dump(filename, "Meta data contents:");
+}
+
+void
+Cmd::Print()
+{
+	union SE *se = (union SE *) mCmdBuf->GetBuffer();
+	LOG_NRM("SE DW0:  0x%08X Opcode: 0x%04x Fuse: 0x%01x CID: 0x%02x", se->d.dw0, se->n.OPC, se->n.FUSE, se->n.CID); // Opcode, Fused, CID
+	LOG_NRM("SE DW1:  0x%08X NSID", se->d.dw1); // NSID
+	LOG_NRM("SE DW2:  0x%08X RSVD", se->d.dw2); // RSVD
+	LOG_NRM("SE DW3:  0x%08X RSVD", se->d.dw3); // RSVD
+	LOG_NRM("SE DW4:  0x%08X MetaA", se->d.dw4); // Metadata Pointer A
+	LOG_NRM("SE DW5:  0x%08X MetaB", se->d.dw5); // Metadata Pointer B
+	LOG_NRM("SE DW6:  0x%08X PRP1A", se->d.dw6); // PRP1A
+	LOG_NRM("SE DW7:  0x%08X PRP1B", se->d.dw7); // PRP1B
+	LOG_NRM("SE DW8:  0x%08X PRP2A", se->d.dw8); // PRP2A
+	LOG_NRM("SE DW9:  0x%08X PRP2B", se->d.dw9); // PRP2B
+	LOG_NRM("SE DW10: 0x%08X CmdSpc", se->d.dw10);// Admin CmdSpecific / NVME Num Dwords in PRP
+	LOG_NRM("SE DW11: 0x%08X CmdSpc", se->d.dw11);// Admin CmdSpecific / NVME Num Dwords in Meta
+	LOG_NRM("SE DW12: 0x%08X CmdSpc", se->d.dw12);// CmdSpecific
+	LOG_NRM("SE DW13: 0x%08X CmdSpc", se->d.dw13);// CmdSpecific
+	LOG_NRM("SE DW14: 0x%08X CmdSpc", se->d.dw14);// CmdSpecific
+	LOG_NRM("SE DW15: 0x%08X CmdSpc", se->d.dw15);// CmdSpecific
 }

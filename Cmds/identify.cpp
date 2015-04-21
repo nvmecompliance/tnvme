@@ -68,7 +68,7 @@ Identify::~Identify()
 {
 }
 
-
+/*
 void
 Identify::SetCNS(bool ctrlr)
 {
@@ -83,7 +83,7 @@ Identify::SetCNS(bool ctrlr)
 
 
 bool
-Identify::GetCNS() const
+Identify::GetCNS()
 {
     uint8_t curVal = GetByte(10, 0);
     if (curVal & CNS_BITMASK) {
@@ -93,6 +93,38 @@ Identify::GetCNS() const
     LOG_NRM("Getting CNS=0");
     return false;
 }
+*/
+
+void
+Identify::SetCNS(uint8_t ctrlr)
+{
+    LOG_NRM("Setting CNS");
+    SetByte(ctrlr, 10, 0);
+}
+
+
+uint8_t
+Identify::GetCNS() const
+{
+    LOG_NRM("Getting CNS");
+    return GetByte(10, 0);;
+}
+
+
+void
+Identify::SetCNTID(uint16_t cntid)
+{
+    LOG_NRM("Setting CNTID");
+    SetWord(cntid, 10, 1);
+}
+
+
+uint16_t
+Identify::GetCNTID() const
+{
+    LOG_NRM("Getting CNTID");
+    return GetWord(10, 1);
+}
 
 
 uint64_t
@@ -100,7 +132,7 @@ Identify::GetValue(IdCtrlrCap field) const
 {
     if (field >= IDCTRLRCAP_FENCE)
         throw FrmwkEx(HERE, "Unknown ctrlr cap field: %d", field);
-    else if (GetCNS() == false)
+    else if (GetCNS() != 1)
         throw FrmwkEx(HERE, "This cmd does not contain a ctrlr data struct");
 
     return GetValue(field, mIdCtrlrCapMetrics);
@@ -112,7 +144,7 @@ Identify::GetValue(IdNamespc field) const
 {
     if (field >= IDNAMESPC_FENCE)
         throw FrmwkEx(HERE, "Unknown namespace field: %d", field);
-    else if (GetCNS())
+    else if (GetCNS() != 0)
         throw FrmwkEx(HERE,"This cmd does not contain a namspc data struct");
 
     return GetValue(field, mIdNamespcType);
@@ -358,7 +390,7 @@ Identify::GetLBADataSize() const
 uint32_t
 Identify::GetMaxDataXferSize() const
 {
-    if (GetCNS() == false)
+    if (GetCNS() == 0)
         throw FrmwkEx(HERE, "This cmd does not contain a ctrlr data struct");
 
     uint8_t mdts = GetValue(IDCTRLRCAP_MDTS);

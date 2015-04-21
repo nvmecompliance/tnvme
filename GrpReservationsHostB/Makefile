@@ -16,54 +16,32 @@ LDFLAGS=-lm
 LIBS = -L../ -L/usr/local/lib -lm
 INCLUDES = -I. -I../ -I../../ -I/usr/local/include
 
-SRC =				\
-	cmd.cpp			\
-	prpData.cpp		\
-	metaData.cpp		\
-	adminCmd.cpp		\
-	nvmCmd.cpp		\
-	createIOCQ.cpp		\
-	deleteIOCQ.cpp		\
-	createIOSQ.cpp		\
-	deleteIOSQ.cpp		\
-	identify.cpp		\
-	baseFeatures.cpp	\
-	getFeatures.cpp		\
-	setFeatures.cpp		\
-	write.cpp		\
-	read.cpp		\
-	flush.cpp		\
-	getLogPage.cpp		\
-	formatNVM.cpp		\
-	fwActivate.cpp		\
-	fwImgDnld.cpp		\
-	datasetMgmt.cpp		\
-	baseSecurity.cpp	\
-	securitySend.cpp	\
-	securityRcv.cpp		\
-	asyncEventReq.cpp	 \
-	namespaceAttach.cpp \
-	namespaceManagement.cpp \
-	reservationAcquire.cpp  \
-	reservationRegister.cpp \
-	reservationRelease.cpp  \
-	reservationReport.cpp
+SRC =						\
+	grpReservationsHostB.cpp			\
+	createResources_r11.cpp	\
+	unsupportRrvdFields_r10b.cpp \
+	registerReservation.cpp	\
+	replaceReservation.cpp \
+	acquireReservation.cpp \
+	readWriteToUnacquiredReservation.cpp 
 
 .SUFFIXES: .cpp
 
 OBJ = $(SRC:.cpp=.o)
-OUT = libCmds.a
+OUT = libGrpReservationsHostB.a
 
 all: $(OUT)
 
 .cpp.o:
-	$(CC) $(INCLUDES) $(CFLAGS) $(DFLAGS)-c $< -o $@ $(LDFLAGS)
+	$(CC) $(INCLUDES) $(CFLAGS) $(DFLAGS) -c $< -o $@ $(LDFLAGS)
 
 $(OUT): $(OBJ)
 	ar rcs $(OUT) $(OBJ)
 
 clean:
-	rm -f $(OBJ) $(OUT) Makefile.bak
+	rm -rf *.a
+	rm -rf *.o
+	rm -f $(OBJ) Makefile.bak
 
 clobber: clean
 	rm -f $(OUT)

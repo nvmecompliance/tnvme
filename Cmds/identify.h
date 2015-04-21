@@ -50,9 +50,15 @@ public:
      * @note See base class for access to the NSID field if passing false
      * @param ctrlr Pass true for controller, otherwise false for namespace
      */
-    void SetCNS(bool ctrlr);
+    void SetCNS(uint8_t ctrlr);
     /// @return true for controller data, false for namespace data
-    bool GetCNS() const;
+    uint8_t GetCNS() const;
+
+    //void SetCNS(bool ctrlr);
+    //bool GetCNS();
+
+    void SetCNTID(uint16_t cntid);
+    uint16_t GetCNTID() const;
 
     /**
      * Retrieve the specified PRP payload parameter. If the value can fit within

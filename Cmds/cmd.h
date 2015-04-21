@@ -125,7 +125,7 @@ public:
      * @param fileHdr Pass a custom file header description to dump
      */
     virtual void Dump(DumpFilename filename, string fileHdr) const;
-
+    void Print();
 
 protected:
     /**

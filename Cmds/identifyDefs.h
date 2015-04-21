@@ -26,7 +26,15 @@ struct IdentifyDataType {
     const char *desc;          // this fields formal description
 };
 
-/* m=true, o=false */
+
+typedef enum {
+	NS_BARE,    // no meta data, nor E2E data
+	NS_METAI,   // META data Interleaved (METAI) in LBA payload
+	NS_METAS,   // META data Separate (METAS) buffer
+	NS_E2EI,    // E2E data Interleaved (E2EI) in LBA payload
+	NS_E2ES,    // E2E data Separate (E2ES) buffer
+	NS_UNKNOWN, // failure type case
+} NamspcType;
 /*     IdCtrlrCap,          offset, length, m/o,   specRev,     desc                                   */
 #define IDCTRLRCAP_PSD_TABLE \
     ZZ(IDCTRLRCAP_PSD0,     2048,   32,     true,  SPECREV_10b, "Power State 0 Desc (PSD0)")            \
@@ -75,7 +83,12 @@ struct IdentifyDataType {
     ZZ(IDCTRLRCAP_MIC,      76,     1,      true,  SPECREV_10b, "Multi-Interface Capabilities (MIC)")  \
     ZZ(IDCTRLRCAP_CMIC,     76,     1,      false, SPECREV_10b/*SPECREV_11b*/, "Controller Multi-Path I/O and Namespace Sharing Capabilities (CMIC)")  \
     ZZ(IDCTRLRCAP_MDTS,     77,     1,      true,  SPECREV_10b, "Maximum Data Xfer Size (MDTS)")        \
-    ZZ(IDCTRLRCAP_RES4E,    78,     178,    true,  SPECREV_10b, "Reserved area @ 0x4e")                 \
+    ZZ(IDCTRLRCAP_CNTLID,   78,     2,      false, SPECREV_11,  "Controller ID (CNTLID)")               \
+    ZZ(IDCTRLRCAP_VER   ,   80,     4,      false, SPECREV_11,  "NVMe Spec Version (VER)")              \
+    ZZ(IDCTRLRCAP_RTD3R,    84,     4,      false, SPECREV_11,  "Resume Latency (RTD3R)")               \
+    ZZ(IDCTRLRCAP_RTD3E,    88,     4,      false, SPECREV_11,  "Entry Latency (RTD3E)")                \
+    ZZ(IDCTRLRCAP_OAES,     92,     4,      false, SPECREV_11,  "Opt Async Events Supported)")          \
+    ZZ(IDCTRLRCAP_RES4E,    96,     160,    false, SPECREV_11,  "Reserved area @ 0x4e")                 \
     ZZ(IDCTRLRCAP_OACS,     256,    2,      true,  SPECREV_10b, "Optional Admin Cmd Support (OACS)")    \
     ZZ(IDCTRLRCAP_ACL,      258,    1,      true,  SPECREV_10b, "Abort Cmd Limit (ACL)")                \
     ZZ(IDCTRLRCAP_AERL,     259,    1,      true,  SPECREV_10b, "Async Event Req Limit (AERL)")         \
@@ -84,9 +97,18 @@ struct IdentifyDataType {
     ZZ(IDCTRLRCAP_ELPE,     262,    1,      true,  SPECREV_10b, "Error Log Page Entries (ELPE)")        \
     ZZ(IDCTRLRCAP_NPSS,     263,    1,      true,  SPECREV_10b, "Number of Power States Support (NPSS)")\
     ZZ(IDCTRLRCAP_AVSCC,    264,    1,      true,  SPECREV_10b/*SPECREV_11b*/, "Admin Vendor Spec Cmd Config (AVSCC)") \
-    ZZ(IDCTRLRCAP_APSTA,    265,    1,      false, SPECREV_10b/*SPECREV_11b*/, "Autonomous PS Transition Attr (APSTA)")\
-    ZZ(IDCTRLRCAP_RES108,   264,    248,    true,  SPECREV_10b, "Reserved area @ 0x108")                \
-    ZZ(IDCTRLRCAP_RES10A,   266,    246,    true,  SPECREV_10b/*SPECREV_11b*/, "Reserved area @ 0x10A")                \
+    ZZ(IDCTRLRCAP_APSTA,    265,    1,      false, SPECREV_11,  "")\
+    ZZ(IDCTRLRCAP_WCTEMP,   266,    2,      false, SPECREV_11,  "WCTEMP")\
+    ZZ(IDCTRLRCAP_CCTEMP,   268,    2,      false, SPECREV_11,  "CCTEMP")\
+    ZZ(IDCTRLRCAP_MTFA,     270,    2,      false, SPECREV_11,  "MTFA")\
+    ZZ(IDCTRLRCAP_HMPRE,    272,    4,      false, SPECREV_11,  "HMPRE")\
+    ZZ(IDCTRLRCAP_HMMIN,    276,    4,      false, SPECREV_11,  "HMMIN")\
+    ZZ(IDCTRLRCAP_TNVMCAP_LOWER,    280,    8,false, SPECREV_11,        "TNVMCAP_LOWER")\
+    ZZ(IDCTRLRCAP_TNVMCAP_UPPER,    288,    8,false, SPECREV_11,        "TNVMCAP_UPPER")\
+    ZZ(IDCTRLRCAP_UNVMCAP_LOWER,    296,    8,false, SPECREV_11,        "UNVMCAP_LOWER")\
+    ZZ(IDCTRLRCAP_UNVMCAP_UPPER,    304,    8,false, SPECREV_11,        "UNVMCAP_UPPER")\
+    ZZ(IDCTRLRCAP_RPMBS,    312,    4,      false, SPECREV_11,  "RPMBS")\
+    ZZ(IDCTRLRCAP_RES13C,   316,    196,    false, SPECREV_11,  "Reserved area @ 0x13c")                \
     ZZ(IDCTRLRCAP_SQES,     512,    1,      true,  SPECREV_10b, "Submission Q Entry Size (SQES)")       \
     ZZ(IDCTRLRCAP_CQES,     513,    1,      true,  SPECREV_10b, "Completion Q Entry Size (CQES)")       \
     ZZ(IDCTRLRCAP_RES202,   514,    2,      true,  SPECREV_10b, "Reserved area @ 0x202")                \
@@ -151,6 +173,7 @@ struct IdPowerStateDescUnpacked {
 };
 
 struct IdCtrlrCapStruct {
+	// Cntrlr Caps and Features
     uint16_t    VID;
     uint16_t    SSVID;
     uint8_t     SN[20];
@@ -159,16 +182,35 @@ struct IdCtrlrCapStruct {
     uint8_t     RAB;
     uint8_t     IEEE[3];
     uint8_t     MIC;
-    uint8_t     MDTS;
-    uint8_t     RES_4E[178];
-    uint16_t    OACS;
-    uint8_t     ACL;
-    uint8_t     AERL;
-    uint8_t     FRMW;
+    uint8_t     MDTS;    // Byte  77
+    uint16_t    CNTLID;  // Bytes 78-79
+    uint32_t    VER;     // Bytes 80-83
+    uint32_t    RTD3R;   // Bytes 84-87
+    uint32_t    RTD3E;   // Bytes 88-91
+    uint32_t    OAES;    // Bytes 92-95
+    uint8_t     RES_60[160]; //   96-255
+    // Admin Cmd Set Attribs
+    uint16_t    OACS;   // Bytes 256-257
+    uint8_t     ACL;    //       258
+    uint8_t     AERL;   //       259
+    uint8_t     FRMW;   //
     uint8_t     LPA;
     uint8_t     ELPE;
     uint8_t     NPSS;
-    uint8_t     RES_108[248];
+    uint8_t		AVSCC; // 1.0c addition. Admin Vendor Spec Cmd Config
+    uint8_t     APSTA;   // Byte 265
+    uint16_t    WCTEMP;
+    uint16_t    CCTEMP;
+    uint16_t    MTFA;
+    uint32_t    HMPRE;
+    uint32_t    HMMIN;
+    uint64_t    TNVMCAP_LOWER;
+    uint64_t    TNVMCAP_UPPER;
+    uint64_t    UNVMCAP_LOWER;
+    uint64_t    UNVMCAP_UPPER;
+    uint32_t    RPMBS;
+    uint8_t     RES_13C[196]; // 316-511
+    // NVM Command Set Attributes
     uint8_t     SQES;
     uint8_t     CQES;
     uint16_t    RES_202;
@@ -178,10 +220,18 @@ struct IdCtrlrCapStruct {
     uint8_t     FNA;
     uint8_t     VWC;
     uint16_t    AWUN;
-    uint16_t    SWUP;
-    uint8_t     RES_212[174];
+    uint16_t    AWUPF; // 1.0c change? Atomic Write Unit Power Fail
+    uint8_t		NVSCC; // 1.0c addition. NVM Vendor Spec Cmd Config
+    uint8_t     RES_213;
+    uint16_t    ACWU;  // 532/533
+    uint8_t     RES_216[2];
+    uint32_t    SGLS;  // 536-539
+    uint8_t     RES_21C[164]; // 540-703
+    // I/O Command set Attributes (none yet)
     uint8_t     RES_2C0[1344];
+    // Power State Descriptors
     struct IdPowerStateDesc PSD[32];
+    // Vendor Specific
     uint8_t     VS[1024];
 } __attribute__((__packed__));
 
@@ -233,7 +283,16 @@ struct LBAFormat {
     uint16_t    MS;
     uint8_t     LBADS;
     uint8_t     RP;
+    string parse() {
+    	string retStr = "";
+    	char   stringToAppend[1024];
+    	snprintf(stringToAppend, 1024, " MS   : 0x%04x\n", MS); retStr+=stringToAppend;
+    	snprintf(stringToAppend, 1024, " LBADS: 0x%02x\n", LBADS); retStr+=stringToAppend;
+    	snprintf(stringToAppend, 1024, " RP   : 0x%02x\n", RP); retStr+=stringToAppend;
+    	return retStr;
+    }
 } __attribute__((__packed__));
+
 
 struct IdNamespcStruct {
     uint64_t    NSZE;
@@ -249,6 +308,97 @@ struct IdNamespcStruct {
     struct LBAFormat LBAF[16];
     uint8_t     RES_C0[192];
     uint8_t     VS[3712];
+
+    uint8_t getLBAFormatIndex() {
+    	return this->FLBAS & 0x0F;
+    }
+    LBAFormat getLBAFormat() {
+        return this->LBAF[this->getLBAFormatIndex() & 0x0f]; // FLBAS is a 1 byte value. 8 bits. Bottom nibble is the index.
+    }
+
+    bool    isMetaDataSeparate() {
+    	return ( (this->FLBAS & 0x10) == 0 ); // Bit 4 is 0 separate, else interleaved
+    }
+    bool    isMetaLast8B() {
+    	return ( (this->DPS & 0x08) == 0); // Bit 3 is 0 then last 8B, else first 8B (if e2e enabled)
+    }
+    bool    isMetaPI() {
+    	return ( (this->DPS & 0x07) > 0); // If any bits 0-2 set, then PI is enabled, else disabled
+    }
+
+    uint32_t getLBADataSize() {
+        return (1 << ( this->getLBAFormat().LBADS) );
+    }
+
+    uint32_t getMetaDataSize() {
+        return this->getLBAFormat().MS;
+    }
+
+    NamspcType getNamespaceType() {
+    	if (getMetaDataSize() == 0)
+    		return NS_BARE;
+
+        if ( !isMetaPI() ) {
+            // Meta namespaces supporting meta data, and E2E is disabled;
+            // Implies: Identify.LBAF[Identify.FLBAS].MS=!0, Identify.DPS_b2:0=0
+            if ( isMetaDataSeparate() )
+                return NS_METAS;
+            else
+                return NS_METAI;
+
+        } else {
+            // Meta namespaces supporting meta data, and E2E is ENABLED;
+            // Implies: Identify.LBAF[Identify.FLBAS].MS=!0, Identify.DPS_b2:0=0
+            if ( isMetaDataSeparate() )
+                return NS_E2ES;
+            else
+                return NS_E2EI;
+        }
+        return NS_UNKNOWN;
+    }
+
+    string parse() {
+    	string retStr = "";
+    	char   stringToAppend[1024];
+    	snprintf(stringToAppend, 1024, "NSZE  : 0x%016llx\n", (unsigned long long) NSZE); retStr+=stringToAppend;
+    	snprintf(stringToAppend, 1024, "NCAP  : 0x%016llx\n", (unsigned long long) NCAP); retStr+=stringToAppend;
+    	snprintf(stringToAppend, 1024, "NUSE  : 0x%016llx\n", (unsigned long long) NUSE); retStr+=stringToAppend;
+    	snprintf(stringToAppend, 1024, "NSFEAT: 0x%016llx\n", (unsigned long long) NSFEAT); retStr+=stringToAppend;
+    	snprintf(stringToAppend, 1024, "NLBAF : 0x%016llx\n", (unsigned long long) NLBAF); retStr+=stringToAppend;
+    	snprintf(stringToAppend, 1024, "FLBAS : 0x%016llx\n", (unsigned long long) FLBAS); retStr+=stringToAppend;
+    	snprintf(stringToAppend, 1024, "MC    : 0x%02x\n", MC); retStr+=stringToAppend;
+    	snprintf(stringToAppend, 1024, "DPC   : 0x%02x\n", DPC); retStr+=stringToAppend;
+    	snprintf(stringToAppend, 1024, "DPS   : 0x%02x\n", DPS); retStr+=stringToAppend;
+    	for(uint8_t LBAFindex = 0; LBAFindex < 16; LBAFindex++) {
+        	snprintf(stringToAppend, 1024, "LBAF[%02d]:\n", LBAFindex); retStr+=stringToAppend;
+    		retStr+=LBAF[LBAFindex].parse();
+    	}
+    	printf("\n%s\n", retStr.c_str() );
+    	return retStr;
+    }
+} __attribute__((__packed__));
+
+struct NamespaceManagementStruct {
+    uint64_t    NSZE;
+    uint64_t    NCAP;
+    uint8_t     Reserved16_25[10];
+    uint8_t     FLBAS;
+    uint8_t     Reserved27_28[2];
+    uint8_t     DPS;
+    uint8_t     NMIC;
+    uint8_t     Reserved31_383[353];
+    string parse() {
+    	string retStr = "";
+    	char   stringToAppend[1024];
+    	snprintf(stringToAppend, 1024, "NSZE  : 0x%016llx\n", (unsigned long long) NSZE); retStr+=stringToAppend;
+    	snprintf(stringToAppend, 1024, "NCAP  : 0x%016llx\n", (unsigned long long) NCAP); retStr+=stringToAppend;
+    	snprintf(stringToAppend, 1024, "FLBAS : 0x%02x\n", FLBAS); retStr+=stringToAppend;
+    	snprintf(stringToAppend, 1024, "DPS   : 0x%02x\n", DPS);   retStr+=stringToAppend;
+    	snprintf(stringToAppend, 1024, "NMIC  : 0x%02x\n", NMIC);  retStr+=stringToAppend;
+    	printf("\n%s\n", retStr.c_str() );
+    	return retStr;
+
+    }
 } __attribute__((__packed__));
 
 
@@ -256,6 +406,23 @@ struct IdNamespcStruct {
 //                   REGISTER BIT DEFINITIONS FOLLOW
 ////////////////////////////////////////////////////////////////////////////////
 
+// Figure 86 in 1.2 spec               CNS  NSID CNTID Returns
+// CNS_Namespace                      0x00    X     -   (Identify Namespace from NSID X. If attached, receive struct, else all 0's, else invalid namespace ID)
+// CNS_Controller                     0x01    -     -   (Identify Controller struct)
+// CNS_NamespaceListAttached          0x02    Y     -   (Identify Namespace LIST, starting at NSID Y and in an increasing order)
+// CNS_NamespaceListSubsystem         0x10    Z     -   (Identify Namespace LIST, starting at NSID Z present in subsystem that may or may not be attached)
+// CNS_NamespaceStructSubsystem       0x11    X     -   (Identify Namespace from NSID A. If attached or not, receive the struct, else invalid namespace ID)
+// CNS_ControllerListAttachedToNSID   0x12    X     A   (Controller List that are attached to NSID X, starting with CNTID greater than A)
+// CNS_ControllerListSubsystem        0x13    -     B   (Controller List present in subsystem starting with CNTID greater than B)
+typedef enum CNSValues {
+	CNS_Namespace  = 0x0,
+	CNS_Controller = 0x1,
+	CNS_NamespaceListAttached = 0x2,
+	CNS_NamespaceListSubsystem = 0x10,
+	CNS_NamespaceStructSubsystem = 0x11,
+	CNS_ControllerListAttachedToNSID = 0x12,
+	CNS_ControllerListSubsystem = 0x13
+} CNSValues;
 /// Bit definitions for IDCTRLRCAP_ONCS
 typedef enum ONCSBits {
     ONCS_SUP_COMP_CMD           = 0x0001,
@@ -270,7 +437,8 @@ typedef enum ONCSBits {
 typedef enum OACSBits {
     OACS_SUP_SECURITY_CMD     = 0x0001,
     OACS_SUP_FORMAT_NVM_CMD   = 0x0002,
-    OACS_SUP_FIRMWARE_CMD     = 0x0004
+    OACS_SUP_FIRMWARE_CMD     = 0x0004,
+    OACS_SUP_NSMANAGEMENT_CMD = 0x0008
 } OACSBits;
 
 typedef enum FRMWBits {
