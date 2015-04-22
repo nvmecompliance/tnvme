@@ -41,6 +41,12 @@
 #include "../Cmds/flush.h"
 #include "../Cmds/datasetMgmt.h"
 #include "../Cmds/asyncEventReq.h"
+#include "../Cmds/namespaceAttach.h"
+#include "../Cmds/namespaceManagement.h"
+#include "../Cmds/reservationAcquire.h"
+#include "../Cmds/reservationRegister.h"
+#include "../Cmds/reservationRelease.h"
+#include "../Cmds/reservationReport.h"
 
 /**
  * Instantiate a class.
@@ -122,6 +128,13 @@ ObjRsrc::AllocWorker(Trackable::ObjType type)
     INSTANTIATE_OBJ(READ, Read)
     INSTANTIATE_OBJ(FLUSH, Flush)
     INSTANTIATE_OBJ(DATASETMGMT, DatasetMgmt)
+
+    INSTANTIATE_OBJ(NAMESPACEATTACH, NamespaceAttach)
+    INSTANTIATE_OBJ(NAMESPACEMANAGEMENT, NamespaceManagement)
+    INSTANTIATE_OBJ(RESERVATIONACQUIRE, ReservationAcquire)
+    INSTANTIATE_OBJ(RESERVATIONREGISTER, ReservationRegister)
+    INSTANTIATE_OBJ(RESERVATIONRELEASE, ReservationRelease)
+    INSTANTIATE_OBJ(RESERVATIONREPORT, ReservationReport)
 
     default:
         throw FrmwkEx("Unknown obj type specified: 0x%02X", type);
