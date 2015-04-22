@@ -27,8 +27,8 @@ GrpReservationsHostB::GrpReservationsHostB(size_t grpNum) :
 		Group(grpNum, "GrpReservationsHostB", "Reservation Commands For Second Host (dual port)")
 {
     APPEND_TEST_AT_XLEVEL(CreateResources_r11, GrpReservationsHostB)
-    APPEND_TEST_AT_XLEVEL(RegisterReservation, GrpReservationsHostB)
-    APPEND_TEST_AT_XLEVEL(ReadWriteToUnacquiredReservation, GrpReservationsHostB)
+    APPEND_TEST_AT_YLEVEL(RegisterReservation, GrpReservationsHostB)
+    APPEND_TEST_AT_YLEVEL(ReadWriteToUnacquiredReservation, GrpReservationsHostB)
     //APPEND_TEST_AT_XLEVEL(ReplaceReservation,  GrpReservationsHostB)
     //APPEND_TEST_AT_XLEVEL(AcquireReservation,  GrpReservationsHostB)
 

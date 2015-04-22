@@ -27,10 +27,10 @@ GrpReservationsHostA::GrpReservationsHostA(size_t grpNum) :
 		Group(grpNum, "GrpReservationsHostA", "Reservation Commands HostA")
 {
     APPEND_TEST_AT_XLEVEL(CreateResources_r11, GrpReservationsHostA)
-    APPEND_TEST_AT_XLEVEL(RegisterReservation, GrpReservationsHostA)
-    APPEND_TEST_AT_XLEVEL(ReplaceReservation,  GrpReservationsHostA)
-    APPEND_TEST_AT_XLEVEL(AcquireReservation,  GrpReservationsHostA)
-    APPEND_TEST_AT_XLEVEL(ReleaseReservation,  GrpReservationsHostA)
+    APPEND_TEST_AT_YLEVEL(RegisterReservation, GrpReservationsHostA)
+    APPEND_TEST_AT_YLEVEL(ReplaceReservation,  GrpReservationsHostA)
+    APPEND_TEST_AT_YLEVEL(AcquireReservation,  GrpReservationsHostA)
+    APPEND_TEST_AT_YLEVEL(ReleaseReservation,  GrpReservationsHostA)
 }
 
 GrpReservationsHostA::~GrpReservationsHostA()
