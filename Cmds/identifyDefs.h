@@ -81,14 +81,16 @@ typedef enum {
     ZZ(IDCTRLRCAP_RAB,      72,     1,      true,  SPECREV_10b, "Recommend Arbitration Burst (RAB)")    \
     ZZ(IDCTRLRCAP_IEEE,     73,     3,      true,  SPECREV_10b, "IEEE OUI Identifier (IEEE)")           \
     ZZ(IDCTRLRCAP_MIC,      76,     1,      true,  SPECREV_10b, "Multi-Interface Capabilities (MIC)")  \
-    ZZ(IDCTRLRCAP_CMIC,     76,     1,      false, SPECREV_10b/*SPECREV_11b*/, "Controller Multi-Path I/O and Namespace Sharing Capabilities (CMIC)")  \
+    ZZ(IDCTRLRCAP_CMIC,     76,     1,      false, SPECREV_11,  "Ctrlr Multipath IO & Namspc Share Cap (CMIC)")  \
     ZZ(IDCTRLRCAP_MDTS,     77,     1,      true,  SPECREV_10b, "Maximum Data Xfer Size (MDTS)")        \
+    ZZ(IDCTRLRCAP_RES4E,    78,     178,    true,  SPECREV_10b, "Reserved area @ 0x4e")                 \
     ZZ(IDCTRLRCAP_CNTLID,   78,     2,      false, SPECREV_11,  "Controller ID (CNTLID)")               \
-    ZZ(IDCTRLRCAP_VER   ,   80,     4,      false, SPECREV_11,  "NVMe Spec Version (VER)")              \
-    ZZ(IDCTRLRCAP_RTD3R,    84,     4,      false, SPECREV_11,  "Resume Latency (RTD3R)")               \
-    ZZ(IDCTRLRCAP_RTD3E,    88,     4,      false, SPECREV_11,  "Entry Latency (RTD3E)")                \
-    ZZ(IDCTRLRCAP_OAES,     92,     4,      false, SPECREV_11,  "Opt Async Events Supported)")          \
-    ZZ(IDCTRLRCAP_RES4E,    96,     160,    false, SPECREV_11,  "Reserved area @ 0x4e")                 \
+    ZZ(IDCTRLRCAP_RES50,    80,     176,    true,  SPECREV_11,  "Reserved area @ 0x50")                 \
+    ZZ(IDCTRLRCAP_VER,      80,     4,      false, SPECREV_12,  "NVMe Spec Version (VER)")              \
+    ZZ(IDCTRLRCAP_RTD3R,    84,     4,      false, SPECREV_12,  "Resume Latency (RTD3R)")               \
+    ZZ(IDCTRLRCAP_RTD3E,    88,     4,      false, SPECREV_12,  "Entry Latency (RTD3E)")                \
+    ZZ(IDCTRLRCAP_OAES,     92,     4,      false, SPECREV_12,  "Opt Async Events Supported)")          \
+    ZZ(IDCTRLRCAP_RES60,    96,     160,    false, SPECREV_12,  "Reserved area @ 0x60")                 \
     ZZ(IDCTRLRCAP_OACS,     256,    2,      true,  SPECREV_10b, "Optional Admin Cmd Support (OACS)")    \
     ZZ(IDCTRLRCAP_ACL,      258,    1,      true,  SPECREV_10b, "Abort Cmd Limit (ACL)")                \
     ZZ(IDCTRLRCAP_AERL,     259,    1,      true,  SPECREV_10b, "Async Event Req Limit (AERL)")         \
@@ -96,19 +98,21 @@ typedef enum {
     ZZ(IDCTRLRCAP_LPA,      261,    1,      true,  SPECREV_10b, "Log Page Atribute (LPA)")              \
     ZZ(IDCTRLRCAP_ELPE,     262,    1,      true,  SPECREV_10b, "Error Log Page Entries (ELPE)")        \
     ZZ(IDCTRLRCAP_NPSS,     263,    1,      true,  SPECREV_10b, "Number of Power States Support (NPSS)")\
-    ZZ(IDCTRLRCAP_AVSCC,    264,    1,      true,  SPECREV_10b/*SPECREV_11b*/, "Admin Vendor Spec Cmd Config (AVSCC)") \
-    ZZ(IDCTRLRCAP_APSTA,    265,    1,      false, SPECREV_11,  "")\
-    ZZ(IDCTRLRCAP_WCTEMP,   266,    2,      false, SPECREV_11,  "WCTEMP")\
-    ZZ(IDCTRLRCAP_CCTEMP,   268,    2,      false, SPECREV_11,  "CCTEMP")\
-    ZZ(IDCTRLRCAP_MTFA,     270,    2,      false, SPECREV_11,  "MTFA")\
-    ZZ(IDCTRLRCAP_HMPRE,    272,    4,      false, SPECREV_11,  "HMPRE")\
-    ZZ(IDCTRLRCAP_HMMIN,    276,    4,      false, SPECREV_11,  "HMMIN")\
-    ZZ(IDCTRLRCAP_TNVMCAP_LOWER,    280,    8,false, SPECREV_11,        "TNVMCAP_LOWER")\
-    ZZ(IDCTRLRCAP_TNVMCAP_UPPER,    288,    8,false, SPECREV_11,        "TNVMCAP_UPPER")\
-    ZZ(IDCTRLRCAP_UNVMCAP_LOWER,    296,    8,false, SPECREV_11,        "UNVMCAP_LOWER")\
-    ZZ(IDCTRLRCAP_UNVMCAP_UPPER,    304,    8,false, SPECREV_11,        "UNVMCAP_UPPER")\
-    ZZ(IDCTRLRCAP_RPMBS,    312,    4,      false, SPECREV_11,  "RPMBS")\
-    ZZ(IDCTRLRCAP_RES13C,   316,    196,    false, SPECREV_11,  "Reserved area @ 0x13c")                \
+    ZZ(IDCTRLRCAP_RES108,   264,    248,    true,  SPECREV_10b, "Reserved area @ 0x108")                \
+    ZZ(IDCTRLRCAP_AVSCC,    264,    1,      true,  SPECREV_11,  "Admin Vendor Spec Cmd Config (AVSCC)") \
+    ZZ(IDCTRLRCAP_APSTA,    265,    1,      false, SPECREV_11,  "Autonomous PS Transition Attr (APSTA)")\
+    ZZ(IDCTRLRCAP_RES10A,   266,    246,    true,  SPECREV_11,  "Reserved area @ 0x10A")                \
+    ZZ(IDCTRLRCAP_WCTEMP,   266,    2,      false, SPECREV_12,  "Warn Composite Temp Thresh (WCTEMP)")  \
+    ZZ(IDCTRLRCAP_CCTEMP,   268,    2,      false, SPECREV_12,  "Crit Composite Temp Thresh (CCTEMP)")  \
+    ZZ(IDCTRLRCAP_MTFA,     270,    2,      false, SPECREV_12,  "Max Time for FW Activation (MTFA)")    \
+    ZZ(IDCTRLRCAP_HMPRE,    272,    4,      false, SPECREV_12,  "Host Mem Buf Preferred Size (HMPRE)")  \
+    ZZ(IDCTRLRCAP_HMMIN,    276,    4,      false, SPECREV_12,  "Host Mem Buffer Minimum Size (HMMIN)") \
+    ZZ(IDCTRLRCAP_TNVMCAP_LOWER,280,8,      false, SPECREV_12,        "TNVMCAP_LOWER")\
+    ZZ(IDCTRLRCAP_TNVMCAP_UPPER,288,8,      false, SPECREV_12,        "TNVMCAP_UPPER")\
+    ZZ(IDCTRLRCAP_UNVMCAP_LOWER,296,8,      false, SPECREV_12,        "UNVMCAP_LOWER")\
+    ZZ(IDCTRLRCAP_UNVMCAP_UPPER,304,8,      false, SPECREV_12,        "UNVMCAP_UPPER")\
+    ZZ(IDCTRLRCAP_RPMBS,    312,    4,      false, SPECREV_12,  "Replay Protected Mem Blk Supp (RPMBS)")\
+    ZZ(IDCTRLRCAP_RES13C,   316,    196,    false, SPECREV_12,  "Reserved area @ 0x13c")                \
     ZZ(IDCTRLRCAP_SQES,     512,    1,      true,  SPECREV_10b, "Submission Q Entry Size (SQES)")       \
     ZZ(IDCTRLRCAP_CQES,     513,    1,      true,  SPECREV_10b, "Completion Q Entry Size (CQES)")       \
     ZZ(IDCTRLRCAP_RES202,   514,    2,      true,  SPECREV_10b, "Reserved area @ 0x202")                \
@@ -119,13 +123,13 @@ typedef enum {
     ZZ(IDCTRLRCAP_VWC,      525,    1,      true,  SPECREV_10b, "Volatile Write Cache (VWC)")           \
     ZZ(IDCTRLRCAP_AWUN,     526,    2,      true,  SPECREV_10b, "Atomic Write Unit Normal (AWUN)")      \
     ZZ(IDCTRLRCAP_AWUPF,    528,    2,      true,  SPECREV_10b, "Atomic Write Unit Power Fail (AWUPF)") \
-    ZZ(IDCTRLRCAP_NVSCC,    530,    1,      true,  SPECREV_10b/*SPECREV_11b*/, "NVM Vendor Spec Cmd Config (NVSCC)")   \
     ZZ(IDCTRLRCAP_RES212,   530,    174,    true,  SPECREV_10b, "Reserved area @ 0x212")                \
-    ZZ(IDCTRLRCAP_RES213,   531,    1,      true,  SPECREV_10b/*SPECREV_11b*/, "Reserved area @ 0x213")                \
-    ZZ(IDCTRLRCAP_ACWU,     532,    2,      false, SPECREV_10b/*SPECREV_11b*/, "Atomic Compare & Write Unit (ACWU)")   \
-    ZZ(IDCTRLRCAP_RES216,   531,    1,      true,  SPECREV_10b/*SPECREV_11b*/, "Reserved area @ 0x216")                \
-    ZZ(IDCTRLRCAP_SGLS,     536,    4,      false, SPECREV_10b/*SPECREV_11b*/, "SGL Support (SGLS)")                   \
-    ZZ(IDCTRLRCAP_RES21C,   540,    164,    true,  SPECREV_10b/*SPECREV_11b*/, "Reserved area @ 0x21C")                \
+    ZZ(IDCTRLRCAP_NVSCC,    530,    1,      true,  SPECREV_11,  "NVM Vendor Spec Cmd Config (NVSCC)")   \
+    ZZ(IDCTRLRCAP_RES213,   531,    1,      true,  SPECREV_11,  "Reserved area @ 0x213")                \
+    ZZ(IDCTRLRCAP_ACWU,     532,    2,      false, SPECREV_11,  "Atomic Compare & Write Unit (ACWU)")   \
+    ZZ(IDCTRLRCAP_RES216,   531,    1,      true,  SPECREV_11,  "Reserved area @ 0x216")                \
+    ZZ(IDCTRLRCAP_SGLS,     536,    4,      false, SPECREV_11,  "SGL Support (SGLS)")                   \
+    ZZ(IDCTRLRCAP_RES21C,   540,    164,    true,  SPECREV_11,  "Reserved area @ 0x21C")                \
     ZZ(IDCTRLRCAP_RES2C0,   704,    1344,   true,  SPECREV_10b, "Reserved area @ 2c0")                  \
     IDCTRLRCAP_PSD_TABLE    \
     ZZ(IDCTRLRCAP_VS,       3072,   1024,   false, SPECREV_10b, "Vendor Specific (VS)")
