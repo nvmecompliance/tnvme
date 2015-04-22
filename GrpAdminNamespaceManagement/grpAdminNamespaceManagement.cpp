@@ -26,8 +26,8 @@ GrpAdminNamespaceManagement::GrpAdminNamespaceManagement(size_t grpNum) :
 		Group(grpNum, "GrpAdminNamespaceManagement", "Namespace Management")
 {
     APPEND_TEST_AT_XLEVEL(CreateResources_r12,           GrpAdminNamespaceManagement)
-	APPEND_TEST_AT_XLEVEL(DeleteAllNamespacesAndVerify,  GrpAdminNamespaceManagement)
-	APPEND_TEST_AT_XLEVEL(CreateAndAttachMaxNamespacesAndVerify,  GrpAdminNamespaceManagement)
+  	APPEND_TEST_AT_YLEVEL(DeleteAllNamespacesAndVerify,  GrpAdminNamespaceManagement)
+  	APPEND_TEST_AT_YLEVEL(CreateAndAttachMaxNamespacesAndVerify,  GrpAdminNamespaceManagement)
     //APPEND_TEST_AT_XLEVEL(NamespaceAttachment,  GrpAdminNamespaceManagement)
 }
 

@@ -42,11 +42,11 @@ DeleteAllNamespacesAndVerify::DeleteAllNamespacesAndVerify(
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.2");
-    mTestDesc.SetShort(     "Delete All Current Namespaces And Verify They Are No Longer Attached");
+    mTestDesc.SetShort(     "Delete all current namespaces and verify no longer attached");
     // No string size limit for the long description
     mTestDesc.SetLong(
-        "Using namespaceAttach/Management commands with SEL=1 as well as Identify with CNS values for 1.2spec"
-        "tests");
+        "Using namespaceAttach/Management commands with SEL=1 as well as "
+        "Identify with CNS values for 1.2spec tests");
 }
 
 DeleteAllNamespacesAndVerify::~DeleteAllNamespacesAndVerify()

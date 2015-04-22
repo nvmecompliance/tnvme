@@ -44,11 +44,12 @@ CreateAndAttachMaxNamespacesAndVerify::CreateAndAttachMaxNamespacesAndVerify(
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.2");
-    mTestDesc.SetShort(     "Create CTRLR.NN number of namespaces of equal size and attach to all controllers in subsystem");
+    mTestDesc.SetShort(     "Create CTRLR.NN namespaces and attach to all ctlrs in subsystem");
     // No string size limit for the long description
     mTestDesc.SetLong(
-        "Using namespaceAttach/Management commands with SEL=0 as well as Identify with CNS values for 1.2spec"
-        "tests");
+        "Using namespaceAttach/Management commands with SEL=0 as well as "
+        "Identify with CNS values for 1.2spec tests. Create CTRLR.NN number of "
+        "namespaces of equal size and attach to all controllers in subsystem");
 }
 
 CreateAndAttachMaxNamespacesAndVerify::~CreateAndAttachMaxNamespacesAndVerify()
