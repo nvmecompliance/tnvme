@@ -143,7 +143,7 @@ CtrlrResetDefaults_r10b::ModifyRWBitsOfCtrlrRegisters(std::map <int, uint64_t> &
 
     /// Traverse the ctrl'r registers
     for (int j = 0; j < CTLSPC_FENCE; j++) {
-        if (ctlMetrics[j].specRev != mSpecRev)
+        if (!gRegisters->ValidSpecRev(ctlMetrics[j].specRev, mSpecRev))
             continue;
 
         // Reserved areas at NOT suppose to be written, so skip these
@@ -182,7 +182,7 @@ CtrlrResetDefaults_r10b::ValidateCtrlrRWDefaultsAfterReset(std::map <int,
 
     /// Traverse the ctrl'r registers
     for (int j = 0; j < CTLSPC_FENCE; j++) {
-        if (ctlMetrics[j].specRev != mSpecRev)
+        if (!gRegisters->ValidSpecRev(ctlMetrics[j].specRev, mSpecRev))
             continue;
 
         // Reserved areas at NOT suppose to be written so not validated

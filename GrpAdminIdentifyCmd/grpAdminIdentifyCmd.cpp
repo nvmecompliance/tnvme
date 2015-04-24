@@ -37,17 +37,17 @@ GrpAdminIdentifyCmd::GrpAdminIdentifyCmd(size_t grpNum) :
         APPEND_TEST_AT_XLEVEL(CreateResources_r10b, GrpAdminIdentifyCmd)
         APPEND_TEST_AT_YLEVEL(PRP1_r10b, GrpAdminIdentifyCmd)
         APPEND_TEST_AT_YLEVEL(PRP1PRP2_r10b, GrpAdminIdentifyCmd)
-//        APPEND_TEST_AT_YLEVEL(UnsupportRrvdFields_r10b, GrpAdminIdentifyCmd)
-        APPEND_TEST_AT_YLEVEL(UnsupportRrvdFields_r11b, GrpAdminIdentifyCmd)
+        APPEND_TEST_AT_YLEVEL(UnsupportRrvdFields_r10b, GrpAdminIdentifyCmd)
         APPEND_TEST_AT_YLEVEL(InvalidNamspc_r10b, GrpAdminIdentifyCmd)
         break;
-    /*case SPECREV_11b:
+    case SPECREV_12:
+    case SPECREV_11:
         APPEND_TEST_AT_XLEVEL(CreateResources_r10b, GrpAdminIdentifyCmd)
         APPEND_TEST_AT_YLEVEL(PRP1_r10b, GrpAdminIdentifyCmd)
         APPEND_TEST_AT_YLEVEL(PRP1PRP2_r10b, GrpAdminIdentifyCmd)
         APPEND_TEST_AT_YLEVEL(UnsupportRrvdFields_r11b, GrpAdminIdentifyCmd)
         APPEND_TEST_AT_YLEVEL(InvalidNamspc_r10b, GrpAdminIdentifyCmd)
-        break;*/
+        break;
 
     default:
     case SPECREVTYPE_FENCE:

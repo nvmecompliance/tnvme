@@ -41,20 +41,6 @@ GrpAdminGetLogPgCmd::GrpAdminGetLogPgCmd(size_t grpNum) :
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Numbering" and
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Strategy
     switch (gCmdLine.rev) {
-    /*case SPECREV_11b:
-      APPEND_TEST_AT_XLEVEL(CreateResources_r10b, GrpAdminGetLogPgCmd)
-      APPEND_TEST_AT_YLEVEL(PRP1_r10b, GrpAdminGetLogPgCmd)
-      APPEND_TEST_AT_YLEVEL(PRP1PRP2_r10b, GrpAdminGetLogPgCmd)
-      APPEND_TEST_AT_YLEVEL(UnsupportRrvdFields_r11b, GrpAdminGetLogPgCmd)
-      APPEND_TEST_AT_YLEVEL(NUMDIsAdhered_r10b, GrpAdminGetLogPgCmd)
-      APPEND_TEST_AT_YLEVEL(InvalidLogPageNVMSet_r11b, GrpAdminGetLogPgCmd)
-      APPEND_TEST_AT_YLEVEL(InvalidNamspc_r11a, GrpAdminGetLogPgCmd)
-      APPEND_TEST_AT_YLEVEL(MandatoryErrInfo_r10b, GrpAdminGetLogPgCmd)
-      APPEND_TEST_AT_YLEVEL(MandatorySMART_r10b, GrpAdminGetLogPgCmd)
-      APPEND_TEST_AT_YLEVEL(MandatoryFW_r10b, GrpAdminGetLogPgCmd)
-      break;
-      */
-
     case SPECREV_10b:
         APPEND_TEST_AT_XLEVEL(CreateResources_r10b, GrpAdminGetLogPgCmd)
         APPEND_TEST_AT_YLEVEL(PRP1_r10b, GrpAdminGetLogPgCmd)
@@ -67,33 +53,15 @@ GrpAdminGetLogPgCmd::GrpAdminGetLogPgCmd(size_t grpNum) :
         APPEND_TEST_AT_YLEVEL(MandatorySMART_r10b, GrpAdminGetLogPgCmd)
         APPEND_TEST_AT_YLEVEL(MandatoryFW_r10b, GrpAdminGetLogPgCmd)
         break;
+    case SPECREV_12:
     case SPECREV_11:
         APPEND_TEST_AT_XLEVEL(CreateResources_r10b, GrpAdminGetLogPgCmd)
         APPEND_TEST_AT_YLEVEL(PRP1_r10b, GrpAdminGetLogPgCmd)
         APPEND_TEST_AT_YLEVEL(PRP1PRP2_r10b, GrpAdminGetLogPgCmd)
-//        APPEND_TEST_AT_YLEVEL(UnsupportRrvdFields_r10b, GrpAdminGetLogPgCmd)
         APPEND_TEST_AT_YLEVEL(UnsupportRrvdFields_r11b, GrpAdminGetLogPgCmd)
         APPEND_TEST_AT_YLEVEL(NUMDIsAdhered_r10b, GrpAdminGetLogPgCmd)
-//        APPEND_TEST_AT_YLEVEL(InvalidLogPageNVMSet_r10b, GrpAdminGetLogPgCmd)
         APPEND_TEST_AT_YLEVEL(InvalidLogPageNVMSet_r11b, GrpAdminGetLogPgCmd)
-//        APPEND_TEST_AT_YLEVEL(InvalidNamspc_r10b, GrpAdminGetLogPgCmd)
-        APPEND_TEST_AT_YLEVEL(InvalidNamspc_r11a, GrpAdminGetLogPgCmd) /*10b*/
-        APPEND_TEST_AT_YLEVEL(MandatoryErrInfo_r10b, GrpAdminGetLogPgCmd)
-        APPEND_TEST_AT_YLEVEL(MandatorySMART_r10b, GrpAdminGetLogPgCmd)
-        APPEND_TEST_AT_YLEVEL(MandatoryFW_r10b, GrpAdminGetLogPgCmd)
-        break;
-
-    case SPECREV_12:
-        APPEND_TEST_AT_XLEVEL(CreateResources_r10b, GrpAdminGetLogPgCmd)
-        APPEND_TEST_AT_YLEVEL(PRP1_r10b, GrpAdminGetLogPgCmd)
-        APPEND_TEST_AT_YLEVEL(PRP1PRP2_r10b, GrpAdminGetLogPgCmd)
-//        APPEND_TEST_AT_YLEVEL(UnsupportRrvdFields_r10b, GrpAdminGetLogPgCmd)
-        APPEND_TEST_AT_YLEVEL(UnsupportRrvdFields_r11b, GrpAdminGetLogPgCmd)
-        APPEND_TEST_AT_YLEVEL(NUMDIsAdhered_r10b, GrpAdminGetLogPgCmd)
-//        APPEND_TEST_AT_YLEVEL(InvalidLogPageNVMSet_r10b, GrpAdminGetLogPgCmd)
-        APPEND_TEST_AT_YLEVEL(InvalidLogPageNVMSet_r11b, GrpAdminGetLogPgCmd)
-//        APPEND_TEST_AT_YLEVEL(InvalidNamspc_r10b, GrpAdminGetLogPgCmd)
-        APPEND_TEST_AT_YLEVEL(InvalidNamspc_r11a, GrpAdminGetLogPgCmd) /*10b*/
+        APPEND_TEST_AT_YLEVEL(InvalidNamspc_r11a, GrpAdminGetLogPgCmd)
         APPEND_TEST_AT_YLEVEL(MandatoryErrInfo_r10b, GrpAdminGetLogPgCmd)
         APPEND_TEST_AT_YLEVEL(MandatorySMART_r10b, GrpAdminGetLogPgCmd)
         APPEND_TEST_AT_YLEVEL(MandatoryFW_r10b, GrpAdminGetLogPgCmd)

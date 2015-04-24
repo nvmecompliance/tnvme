@@ -25,10 +25,24 @@ namespace GrpAdminNamespaceManagement {
 GrpAdminNamespaceManagement::GrpAdminNamespaceManagement(size_t grpNum) :
 		Group(grpNum, "GrpAdminNamespaceManagement", "Namespace Management")
 {
-    APPEND_TEST_AT_XLEVEL(CreateResources_r12,           GrpAdminNamespaceManagement)
-  	APPEND_TEST_AT_YLEVEL(DeleteAllNamespacesAndVerify,  GrpAdminNamespaceManagement)
-  	APPEND_TEST_AT_YLEVEL(CreateAndAttachMaxNamespacesAndVerify,  GrpAdminNamespaceManagement)
-    //APPEND_TEST_AT_XLEVEL(NamespaceAttachment,  GrpAdminNamespaceManagement)
+    // For complete details about the APPEND_TEST_AT_?LEVEL() macros:
+    // "https://github.com/nvmecompliance/tnvme/wiki/Test-Numbering" and
+    // "https://github.com/nvmecompliance/tnvme/wiki/Test-Strategy
+    switch (gCmdLine.rev) {
+    case SPECREV_10b:
+    case SPECREV_11:
+        break;
+    case SPECREV_12:
+        APPEND_TEST_AT_XLEVEL(CreateResources_r12, GrpAdminNamespaceManagement)
+        APPEND_TEST_AT_YLEVEL(DeleteAllNamespacesAndVerify, GrpAdminNamespaceManagement)
+        APPEND_TEST_AT_YLEVEL(CreateAndAttachMaxNamespacesAndVerify, GrpAdminNamespaceManagement)
+        //APPEND_TEST_AT_XLEVEL(NamespaceAttachment,  GrpAdminNamespaceManagement)
+        break;
+    default:
+    case SPECREVTYPE_FENCE:
+        throw FrmwkEx(HERE, "Object created with an unknown SpecRev=%d",
+            gCmdLine.rev);
+    }
 }
 
 GrpAdminNamespaceManagement::~GrpAdminNamespaceManagement()

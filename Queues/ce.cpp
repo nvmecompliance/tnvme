@@ -235,3 +235,12 @@ ProcessCE::DecodeStatus(union CE &ce, vector<string> &desc)
         desc.push_back(work);
     }
 }
+
+
+void
+ProcessCE::PrintStatus(CEStat status)
+{
+    CEStatType statType = mCEStatMetrics[status];
+    LOG_NRM("Status: SC=0x%02x, SCT=0x%02x, Desc=%s", statType.sc, statType.sct,
+        statType.desc);
+}

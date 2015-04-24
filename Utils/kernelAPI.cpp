@@ -91,7 +91,7 @@ KernelAPI::DumpCtrlrSpaceRegs(DumpFilename filename, bool verbose)
 
     // Read all registers in ctrlr space
     for (int i = 0; i < CTLSPC_FENCE; i++) {
-        if (ctlMetrics[i].specRev != gRegisters->GetSpecRev())
+        if (!gRegisters->ValidSpecRev(ctlMetrics[i].specRev))
             continue;
 
         if (ctlMetrics[i].size > MAX_SUPPORTED_REG_SIZE) {
@@ -146,7 +146,7 @@ KernelAPI::DumpPciSpaceRegs(DumpFilename filename, bool verbose)
     work = "PCI header registers\n";
     write(fd, work.c_str(), work.size());
     for (int j = 0; j < PCISPC_FENCE; j++) {
-        if (pciMetrics[j].specRev != gRegisters->GetSpecRev())
+        if (!gRegisters->ValidSpecRev(pciMetrics[j].specRev))
             continue;
 
         // All PCI hdr regs don't have an associated capability
@@ -185,7 +185,7 @@ KernelAPI::DumpPciSpaceRegs(DumpFilename filename, bool verbose)
 
         // Read all registers assoc with the discovered capability
         for (int j = 0; j < PCISPC_FENCE; j++) {
-            if (pciMetrics[j].specRev != gRegisters->GetSpecRev())
+            if (!gRegisters->ValidSpecRev(pciMetrics[j].specRev))
                 continue;
 
             if (pciCap->at(i) == pciMetrics[j].cap) {

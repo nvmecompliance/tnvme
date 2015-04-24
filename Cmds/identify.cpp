@@ -324,7 +324,11 @@ Identify::log(IdCtrlrCap field) const
 {
     string output;
     getStr(mIdCtrlrCapMetrics[field], &output);
-    LOG_NRM("%s: %s", mIdCtrlrCapMetrics[field].desc, output.c_str());
+    if (strlen(mIdCtrlrCapMetrics[field].desc) + output.length() + 2 > 55) {
+        LOG_NRM("%s:\n%s", mIdCtrlrCapMetrics[field].desc, output.c_str());
+    } else {
+        LOG_NRM("%s: %s", mIdCtrlrCapMetrics[field].desc, output.c_str());
+    }
 }
 
 
@@ -333,7 +337,11 @@ Identify::log(IdNamespc field) const
 {
     string output;
     getStr(mIdNamespcType[field], &output);
-    LOG_NRM("%s: %s", mIdNamespcType[field].desc, output.c_str());
+    if (strlen(mIdNamespcType[field].desc) + output.length() + 2 > 55) {
+        LOG_NRM("%s:\n%s", mIdNamespcType[field].desc, output.c_str());
+    } else {
+        LOG_NRM("%s: %s", mIdNamespcType[field].desc, output.c_str());
+    }
 }
 
 

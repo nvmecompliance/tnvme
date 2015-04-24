@@ -14,10 +14,13 @@
  *  limitations under the License.
  */
 
+
 #include "registers.h"
 #include "tnvme.h"
 #include "../Exception/frmwkEx.h"
 
+#include <boost/assign/list_of.hpp>
+using namespace boost::assign;
 
 // Register metrics (meta data) to aid interfacing with the kernel driver
 #define ZZ(a, b, c, d, e, f, g, h, i)          { b, c, d, e, f, g, h, i },
@@ -78,7 +81,7 @@ Registers::~Registers()
 bool
 Registers::Read(PciSpc reg, uint64_t &value, bool verbose)
 {
-    if (mPciSpcMetrics[reg].specRev != mSpecRev) {
+    if (!ValidSpecRev(mPciSpcMetrics[reg].specRev)) {
         LOG_ERR("Attempting reg (%d) access to incompatible spec release", reg);
         return false;
     }
@@ -90,7 +93,7 @@ Registers::Read(PciSpc reg, uint64_t &value, bool verbose)
 bool
 Registers::Read(CtlSpc reg, uint64_t &value, bool verbose)
 {
-    if (mPciSpcMetrics[reg].specRev != mSpecRev) {
+    if (!ValidSpecRev(mPciSpcMetrics[reg].specRev)) {
         LOG_ERR("Attempting reg (%d) access to incompatible spec release", reg);
         return false;
     }
@@ -189,7 +192,8 @@ Registers::Read(nvme_io_space regSpc, uint16_t rsize, uint16_t roffset,
 bool
 Registers::Write(PciSpc reg, uint64_t value, bool verbose)
 {
-    if (mPciSpcMetrics[reg].specRev != mSpecRev) {
+    const vector<SpecRev> regRevs = mPciSpcMetrics[reg].specRev;
+    if (std::find(regRevs.begin(), regRevs.end(), mSpecRev) == regRevs.end()) {
         LOG_ERR("Attempting reg (%d) access to incompatible spec release", reg);
         return false;
     }
@@ -201,7 +205,8 @@ Registers::Write(PciSpc reg, uint64_t value, bool verbose)
 bool
 Registers::Write(CtlSpc reg, uint64_t value, bool verbose)
 {
-    if (mPciSpcMetrics[reg].specRev != mSpecRev) {
+    const vector<SpecRev> regRevs = mPciSpcMetrics[reg].specRev;
+    if (std::find(regRevs.begin(), regRevs.end(), mSpecRev) == regRevs.end()) {
         LOG_ERR("Attempting reg (%d) access to incompatible spec release", reg);
         return false;
     }

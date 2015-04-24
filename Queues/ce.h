@@ -159,6 +159,14 @@ public:
      * @param desc Returns an array of decoded strings
      */
     static void DecodeStatus(union CE &ce, vector<string> &desc);
+    
+    /**
+     * Print the status in the form:<br/>
+     * Status: SCT=0x[SCT], SC=0x[SC], Desc=[desc]
+     *
+     * @param status the status to print
+     */
+    static void PrintStatus(CEStat status);
 
 private:
     /// Contains details about every CE status field

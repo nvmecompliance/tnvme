@@ -45,7 +45,7 @@ VerifySpecCompatibility(SpecRev specRev)
     hdwMinor = (uint16_t)(versionReg >> 8 & 0xFF); //1.1a errata 8 changed Bits 07:00 to reserved and set Minor Version Number(MVN) to 0x01
 
     switch (specRev) {
-    case SPECREV_10b:   tgtMajor = 1;  tgtMinor = 1;  break; //really 1.1a (errata 8)
+    case SPECREV_10b:   tgtMajor = 1;  tgtMinor = 0;  break;
     case SPECREV_11:    tgtMajor = 1;  tgtMinor = 1;  break;
     case SPECREV_12:    tgtMajor = 1;  tgtMinor = 2;  break;
 

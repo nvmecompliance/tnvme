@@ -26,11 +26,26 @@ namespace GrpReservationsHostB {
 GrpReservationsHostB::GrpReservationsHostB(size_t grpNum) :
 		Group(grpNum, "GrpReservationsHostB", "Reservation Commands For Second Host (dual port)")
 {
-    APPEND_TEST_AT_XLEVEL(CreateResources_r11, GrpReservationsHostB)
-    APPEND_TEST_AT_YLEVEL(RegisterReservation, GrpReservationsHostB)
-    APPEND_TEST_AT_YLEVEL(ReadWriteToUnacquiredReservation, GrpReservationsHostB)
-    //APPEND_TEST_AT_XLEVEL(ReplaceReservation,  GrpReservationsHostB)
-    //APPEND_TEST_AT_XLEVEL(AcquireReservation,  GrpReservationsHostB)
+    // For complete details about the APPEND_TEST_AT_?LEVEL() macros:
+    // "https://github.com/nvmecompliance/tnvme/wiki/Test-Numbering" and
+    // "https://github.com/nvmecompliance/tnvme/wiki/Test-Strategy
+    switch (gCmdLine.rev) {
+    case SPECREV_10b:
+        break;
+    case SPECREV_12:
+    case SPECREV_11:
+        APPEND_TEST_AT_XLEVEL(CreateResources_r11, GrpReservationsHostB)
+        APPEND_TEST_AT_YLEVEL(RegisterReservation, GrpReservationsHostB)
+        APPEND_TEST_AT_YLEVEL(ReadWriteToUnacquiredReservation, GrpReservationsHostB)
+        //APPEND_TEST_AT_XLEVEL(ReplaceReservation,  GrpReservationsHostB)
+        //APPEND_TEST_AT_XLEVEL(AcquireReservation,  GrpReservationsHostB)
+        break;
+
+    default:
+    case SPECREVTYPE_FENCE:
+        throw FrmwkEx(HERE, "Object created with an unknown SpecRev=%d",
+            gCmdLine.rev);
+    }
 
 }
 

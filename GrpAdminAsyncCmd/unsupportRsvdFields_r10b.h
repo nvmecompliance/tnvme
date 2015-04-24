@@ -32,19 +32,19 @@ namespace GrpAdminAsyncCmd {
  * 1) See notes in the header file of the Test base class
  * \endverbatim
  */
-class UnsupportRrvdFields_r10b : public Test
+class UnsupportRsvdFields_r10b : public Test
 {
 public:
-    UnsupportRrvdFields_r10b(string grpName, string testName);
-    virtual ~UnsupportRrvdFields_r10b();
+    UnsupportRsvdFields_r10b(string grpName, string testName);
+    virtual ~UnsupportRsvdFields_r10b();
 
     /**
      * IMPORTANT: Read Test::Clone() header comment.
      */
-    virtual UnsupportRrvdFields_r10b *Clone() const
-        { return new UnsupportRrvdFields_r10b(*this); }
-    UnsupportRrvdFields_r10b &operator=(const UnsupportRrvdFields_r10b &other);
-    UnsupportRrvdFields_r10b(const UnsupportRrvdFields_r10b &other);
+    virtual UnsupportRsvdFields_r10b *Clone() const
+        { return new UnsupportRsvdFields_r10b(*this); }
+    UnsupportRsvdFields_r10b &operator=(const UnsupportRsvdFields_r10b &other);
+    UnsupportRsvdFields_r10b(const UnsupportRsvdFields_r10b &other);
 
 
 protected:

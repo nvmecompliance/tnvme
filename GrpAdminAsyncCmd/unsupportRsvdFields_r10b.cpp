@@ -16,7 +16,7 @@
 
 #include <string.h>
 #include <boost/format.hpp>
-#include "unsupportRrvdFields_r10b.h"
+#include "unsupportRsvdFields_r10b.h"
 #include "globals.h"
 #include "grpDefs.h"
 #include "../Utils/kernelAPI.h"
@@ -33,7 +33,7 @@
 namespace GrpAdminAsyncCmd {
 
 
-UnsupportRrvdFields_r10b::UnsupportRrvdFields_r10b(
+UnsupportRsvdFields_r10b::UnsupportRsvdFields_r10b(
     string grpName, string testName) :
     Test(grpName, testName, SPECREV_10b)
 {
@@ -55,7 +55,7 @@ UnsupportRrvdFields_r10b::UnsupportRrvdFields_r10b(
 }
 
 
-UnsupportRrvdFields_r10b::~UnsupportRrvdFields_r10b()
+UnsupportRsvdFields_r10b::~UnsupportRsvdFields_r10b()
 {
     ///////////////////////////////////////////////////////////////////////////
     // Allocations taken from the heap and not under the control of the
@@ -64,8 +64,8 @@ UnsupportRrvdFields_r10b::~UnsupportRrvdFields_r10b()
 }
 
 
-UnsupportRrvdFields_r10b::
-UnsupportRrvdFields_r10b(const UnsupportRrvdFields_r10b &other) : Test(other)
+UnsupportRsvdFields_r10b::
+UnsupportRsvdFields_r10b(const UnsupportRsvdFields_r10b &other) : Test(other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -74,8 +74,8 @@ UnsupportRrvdFields_r10b(const UnsupportRrvdFields_r10b &other) : Test(other)
 }
 
 
-UnsupportRrvdFields_r10b &
-UnsupportRrvdFields_r10b::operator=(const UnsupportRrvdFields_r10b &other)
+UnsupportRsvdFields_r10b &
+UnsupportRsvdFields_r10b::operator=(const UnsupportRsvdFields_r10b &other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -87,7 +87,7 @@ UnsupportRrvdFields_r10b::operator=(const UnsupportRrvdFields_r10b &other)
 
 
 Test::RunType
-UnsupportRrvdFields_r10b::RunnableCoreTest(bool preserve)
+UnsupportRsvdFields_r10b::RunnableCoreTest(bool preserve)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All code contained herein must never permanently modify the state or
@@ -104,7 +104,7 @@ UnsupportRrvdFields_r10b::RunnableCoreTest(bool preserve)
 
 
 void
-UnsupportRrvdFields_r10b::RunCoreTest()
+UnsupportRsvdFields_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
@@ -138,7 +138,7 @@ UnsupportRrvdFields_r10b::RunCoreTest()
 
 
 void
-UnsupportRrvdFields_r10b::TestAsyncEvents(SharedACQPtr &acq, SharedASQPtr &asq,
+UnsupportRsvdFields_r10b::TestAsyncEvents(SharedACQPtr &acq, SharedASQPtr &asq,
     bool rsvd)
 {
     uint32_t isrCount;
@@ -190,7 +190,7 @@ UnsupportRrvdFields_r10b::TestAsyncEvents(SharedACQPtr &acq, SharedASQPtr &asq,
 
 
 void
-UnsupportRrvdFields_r10b::SendAsyncEventRequests(SharedASQPtr &asq,
+UnsupportRsvdFields_r10b::SendAsyncEventRequests(SharedASQPtr &asq,
     uint32_t nCmds, bool rsvd)
 {
     uint16_t uniqueId;
@@ -203,7 +203,7 @@ UnsupportRrvdFields_r10b::SendAsyncEventRequests(SharedASQPtr &asq,
     if (rsvd == true) {
         LOG_NRM("Set all cmd's rsvd bits");
         uint32_t work = asyncEventReqCmd->GetDword(0);
-        work |= 0x00007c00;      // Set DW0_b14:10 bits
+        work |= 0x0000fc00;      // Set DW0_b15:10 bits
         asyncEventReqCmd->SetDword(work, 0);
 
         for (uint32_t dw = 2; dw <= 15; dw++)
@@ -224,7 +224,7 @@ UnsupportRrvdFields_r10b::SendAsyncEventRequests(SharedASQPtr &asq,
 
 
 void
-UnsupportRrvdFields_r10b::InvalidSQWriteDoorbell()
+UnsupportRsvdFields_r10b::InvalidSQWriteDoorbell()
 {
     uint64_t value;
     if (gRegisters->Read((CtlSpc)CTLSPC_CAP, value) == false)
@@ -243,7 +243,7 @@ UnsupportRrvdFields_r10b::InvalidSQWriteDoorbell()
 
 
 void
-UnsupportRrvdFields_r10b::ReadLogPage(SharedACQPtr &acq, SharedASQPtr &asq,
+UnsupportRsvdFields_r10b::ReadLogPage(SharedACQPtr &acq, SharedASQPtr &asq,
     uint8_t logId)
 {
     string work;

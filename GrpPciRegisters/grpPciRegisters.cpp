@@ -28,6 +28,8 @@ GrpPciRegisters::GrpPciRegisters(size_t grpNum) :
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Numbering" and
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Strategy
     switch (gCmdLine.rev) {
+    case SPECREV_11:
+    case SPECREV_12:
     case SPECREV_10b:
         APPEND_TEST_AT_XLEVEL(AllPciRegs_r10b, GrpPciRegisters)
         break;

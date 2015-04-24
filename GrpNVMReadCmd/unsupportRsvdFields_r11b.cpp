@@ -28,7 +28,7 @@ namespace GrpNVMReadCmd {
 
 UnsupportRsvdFields_r11b::UnsupportRsvdFields_r11b(
     string grpName, string testName) :
-    Test(grpName, testName, SPECREV_10b /* SPECREV_11b */)
+    Test(grpName, testName, SPECREV_11)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.1b, section 6.9");

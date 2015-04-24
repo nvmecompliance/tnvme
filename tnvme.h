@@ -69,8 +69,8 @@ using namespace std;
 
 typedef enum {
     SPECREV_10b,             // http://www.nvmexpress.org/ spec. rev. 1.0b
-    SPECREV_11,
-    SPECREV_12,
+    SPECREV_11,              // http://www.nvmexpress.org/ spec. rev. 1.1
+    SPECREV_12,              // http://www.nvmexpress.org/ spec. rev. 1.2
     SPECREVTYPE_FENCE        // always must be last element
 } SpecRev;
 
@@ -176,6 +176,7 @@ struct CmdLine {
     bool            postfail;
     bool            rsvdfields;
     bool            preserve;
+    bool            setAD;
     size_t          loop;
     SpecRev         rev;
     TestTarget      detail;

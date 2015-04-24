@@ -18,7 +18,8 @@ INCLUDES = -I. -I../ -I../../ -I/usr/local/include
 
 SRC =					\
 	grpAdminAsyncCmd.cpp		\
-        unsupportRrvdFields_r10b.cpp	\
+  unsupportRsvdFields_r10b.cpp	\
+  unsupportRsvdFields_r11b.cpp	\
 	abortByReset_r10b.cpp		\
 	verifyMaxEvents_r10b.cpp	\
 	verifyMasking_r10b.cpp		\

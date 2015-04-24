@@ -29,6 +29,8 @@ GrpCtrlRegisters::GrpCtrlRegisters(size_t grpNum) :
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Numbering" and
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Strategy
     switch (gCmdLine.rev) {
+    case SPECREV_11:
+    case SPECREV_12:
     case SPECREV_10b:
         APPEND_TEST_AT_XLEVEL(AllCtrlRegs_r10b, GrpCtrlRegisters)
         APPEND_TEST_AT_XLEVEL(CtrlrResetDefaults_r10b, GrpCtrlRegisters)

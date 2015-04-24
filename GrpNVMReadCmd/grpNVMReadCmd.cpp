@@ -42,8 +42,7 @@ GrpNVMReadCmd::GrpNVMReadCmd(size_t grpNum) :
         APPEND_TEST_AT_XLEVEL(CreateResources_r10b, GrpNVMReadCmd)
         APPEND_TEST_AT_YLEVEL(LBAOutOfRangeBare_r10b, GrpNVMReadCmd)
         APPEND_TEST_AT_YLEVEL(InvalidNamspc_r10b, GrpNVMReadCmd)
-//        APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r10b, GrpNVMReadCmd)
-        APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r11b, GrpNVMReadCmd)
+        APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r10b, GrpNVMReadCmd)
         APPEND_TEST_AT_YLEVEL(ProtInfoIgnoreBare_r10b, GrpNVMReadCmd)
         APPEND_TEST_AT_YLEVEL(IgnoreMetaPtrBare_r10b, GrpNVMReadCmd)
         APPEND_TEST_AT_YLEVEL(FUA_r10b, GrpNVMReadCmd)
@@ -52,7 +51,8 @@ GrpNVMReadCmd::GrpNVMReadCmd(size_t grpNum) :
         APPEND_TEST_AT_XLEVEL(LBAOutOfRangeMeta_r10b, GrpNVMReadCmd)
         APPEND_TEST_AT_XLEVEL(ProtInfoIgnoreMeta_r10b, GrpNVMReadCmd)
         break;
-    /*case SPECREV_11b:
+    case SPECREV_12:
+    case SPECREV_11:
         APPEND_TEST_AT_XLEVEL(CreateResources_r10b, GrpNVMReadCmd)
         APPEND_TEST_AT_YLEVEL(LBAOutOfRangeBare_r10b, GrpNVMReadCmd)
         APPEND_TEST_AT_YLEVEL(InvalidNamspc_r10b, GrpNVMReadCmd)
@@ -64,7 +64,7 @@ GrpNVMReadCmd::GrpNVMReadCmd(size_t grpNum) :
         APPEND_TEST_AT_YLEVEL(IgnoreMetaPtrMeta_r10b, GrpNVMReadCmd)
         APPEND_TEST_AT_XLEVEL(LBAOutOfRangeMeta_r10b, GrpNVMReadCmd)
         APPEND_TEST_AT_XLEVEL(ProtInfoIgnoreMeta_r10b, GrpNVMReadCmd)
-        break;*/
+        break;
 
     default:
     case SPECREVTYPE_FENCE:

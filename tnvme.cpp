@@ -155,6 +155,8 @@ Usage(void) {
     printf("                                      take a post failure snapshot of the DUT\n");
     printf("  -b(--rsvdfields)                    Execute the optional reserved field\n");
     printf("                                      tests; verifying fields are zero value\n");
+    printf("  -c(--setad)                         Set the AD bit for Dataset Management\n");
+    printf("                                      tests\n");
     printf("  -y(--restore)                       Upon test failure, allow an individual\n");
     printf("                                      test to restore the configuration of the\n");
     printf("                                      DUT as was detected at group start\n");
@@ -204,7 +206,7 @@ main(int argc, char *argv[])
     bool deviceFound = false;
     bool accessingHdw = true;
     uint64_t regVal = 0;
-    const char *short_opt = "hsnblpyzia::t::v:o:d:k:f:r:w:q:e:m:u:g:";
+    const char *short_opt = "hsnbclpyzia::t::v:o:d:k:f:r:w:q:e:m:u:g:";
     static struct option long_opt[] = {
         // {name,           has_arg,            flag,   val}
         {   "detail",       optional_argument,  NULL,   'a'},
@@ -232,6 +234,7 @@ main(int argc, char *argv[])
         {   "ignore",       no_argument,        NULL,   'i'},
         {   "postfail",     no_argument,        NULL,   'n'},
         {   "rsvdfields",   no_argument,        NULL,   'b'},
+        {   "setad",        no_argument,        NULL,   'c'},
         {   NULL,           no_argument,        NULL,    0}
     };
 
@@ -279,9 +282,14 @@ main(int argc, char *argv[])
         switch (c) {
 
         case 'v':
-            if (strcmp("1.0a", optarg) == 0) {
+            if (strcmp("1.0", optarg) == 0 || strcmp("1.0a", optarg) == 0
+                || strcmp("1.0b", optarg) == 0) {
                 gCmdLine.rev = SPECREV_10b;
-            }
+            } else if (strcmp("1.1", optarg) == 0
+                || strcmp("1.1b", optarg) == 0) {
+                gCmdLine.rev = SPECREV_11;
+            } else if (strcmp("1.2", optarg) == 0)
+                gCmdLine.rev = SPECREV_12;
             break;
 
         case 'a':
@@ -411,6 +419,7 @@ main(int argc, char *argv[])
         case 'p':   gCmdLine.preserve = true;           break;
         case 'n':   gCmdLine.postfail = true;           break;
         case 'b':   gCmdLine.rsvdfields = true;         break;
+        case 'c':   gCmdLine.setAD = true;              break;
         case 'y':   gCmdLine.restore = true;            break;
         }
     }

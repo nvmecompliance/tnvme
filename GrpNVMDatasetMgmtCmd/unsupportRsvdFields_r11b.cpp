@@ -27,7 +27,7 @@ namespace GrpNVMDatasetMgmtCmd {
 
 UnsupportRsvdFields_r11b::UnsupportRsvdFields_r11b(
     string grpName, string testName) :
-    Test(grpName, testName, SPECREV_10b /* SPECREV_11b */)
+    Test(grpName, testName, SPECREV_11)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.1b, section 6.7");
@@ -118,6 +118,12 @@ UnsupportRsvdFields_r11b::RunCoreTest()
     SharedDatasetMgmtPtr datasetMgmtCmd =
         SharedDatasetMgmtPtr(new DatasetMgmt());
 
+    uint16_t timeout;
+    if (gCmdLine.setAD)
+        timeout = 1000;
+    else
+        timeout = 1;
+
     ConstSharedIdentifyPtr idCtrlr = gInformative->GetIdentifyCmdCtrlr();
     for (uint64_t i = 1; i <= idCtrlr->GetValue(IDCTRLRCAP_NN); i++) {
         LOG_NRM("Processing namspc %ld", i);
@@ -134,8 +140,11 @@ UnsupportRsvdFields_r11b::RunCoreTest()
         RangeDef *rangeDef = (RangeDef *)rangeMem->GetBuffer();
         rangeDef->length = 1;
 
-        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq, iocq,
-            datasetMgmtCmd, "none.set", true);
+        if (gCmdLine.setAD)
+            datasetMgmtCmd->SetAD(true);
+
+        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(timeout), iosq,
+            iocq, datasetMgmtCmd, "none.set", true);
 
         LOG_NRM("Set all cmd's rsvd bits");
         uint32_t work = datasetMgmtCmd->GetDword(0);
@@ -153,9 +162,10 @@ UnsupportRsvdFields_r11b::RunCoreTest()
         work |= 0xffffff00;     // Set DW10_b31:8 bits
         datasetMgmtCmd->SetDword(work, 10);
 
-
         work = datasetMgmtCmd->GetDword(11);
         work |= 0xfffffff8;     // Set DW11_b31:3 bits
+        if (gCmdLine.setAD)
+            work |= 0x4; // Set Bit2 AD=1 (Deallocate)
         datasetMgmtCmd->SetDword(work, 11);
 
         datasetMgmtCmd->SetDword(0xffffffff, 12);
@@ -163,8 +173,8 @@ UnsupportRsvdFields_r11b::RunCoreTest()
         datasetMgmtCmd->SetDword(0xffffffff, 14);
         datasetMgmtCmd->SetDword(0xffffffff, 15);
 
-        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq, iocq,
-            datasetMgmtCmd, "all.set", true);
+        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(timeout), iosq,
+            iocq, datasetMgmtCmd, "all.set", true);
     }
 }
 

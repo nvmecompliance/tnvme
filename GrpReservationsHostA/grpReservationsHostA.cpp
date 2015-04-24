@@ -26,11 +26,26 @@ namespace GrpReservationsHostA {
 GrpReservationsHostA::GrpReservationsHostA(size_t grpNum) :
 		Group(grpNum, "GrpReservationsHostA", "Reservation Commands HostA")
 {
-    APPEND_TEST_AT_XLEVEL(CreateResources_r11, GrpReservationsHostA)
-    APPEND_TEST_AT_YLEVEL(RegisterReservation, GrpReservationsHostA)
-    APPEND_TEST_AT_YLEVEL(ReplaceReservation,  GrpReservationsHostA)
-    APPEND_TEST_AT_YLEVEL(AcquireReservation,  GrpReservationsHostA)
-    APPEND_TEST_AT_YLEVEL(ReleaseReservation,  GrpReservationsHostA)
+    // For complete details about the APPEND_TEST_AT_?LEVEL() macros:
+    // "https://github.com/nvmecompliance/tnvme/wiki/Test-Numbering" and
+    // "https://github.com/nvmecompliance/tnvme/wiki/Test-Strategy
+    switch (gCmdLine.rev) {
+    case SPECREV_10b:
+        break;
+    case SPECREV_12:
+    case SPECREV_11:
+        APPEND_TEST_AT_XLEVEL(CreateResources_r11, GrpReservationsHostA)
+        APPEND_TEST_AT_YLEVEL(RegisterReservation, GrpReservationsHostA)
+        APPEND_TEST_AT_YLEVEL(ReplaceReservation, GrpReservationsHostA)
+        APPEND_TEST_AT_YLEVEL(AcquireReservation, GrpReservationsHostA)
+        APPEND_TEST_AT_YLEVEL(ReleaseReservation, GrpReservationsHostA)
+        break;
+
+    default:
+    case SPECREVTYPE_FENCE:
+        throw FrmwkEx(HERE, "Object created with an unknown SpecRev=%d",
+            gCmdLine.rev);
+    }
 }
 
 GrpReservationsHostA::~GrpReservationsHostA()

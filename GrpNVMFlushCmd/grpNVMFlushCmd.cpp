@@ -36,19 +36,18 @@ GrpNVMFlushCmd::GrpNVMFlushCmd(size_t grpNum) :
     case SPECREV_10b:
         APPEND_TEST_AT_XLEVEL(CreateResources_r10b, GrpNVMFlushCmd)
         APPEND_TEST_AT_YLEVEL(InvalidNamspc_r10b, GrpNVMFlushCmd)
-//        APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r10b, GrpNVMFlushCmd)
+        APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r10b, GrpNVMFlushCmd)
+        APPEND_TEST_AT_YLEVEL(FunctionalityBare_r10b, GrpNVMFlushCmd)
+        APPEND_TEST_AT_XLEVEL(FunctionalityMeta_r10b, GrpNVMFlushCmd)
+        break;
+    case SPECREV_12:
+    case SPECREV_11:
+        APPEND_TEST_AT_XLEVEL(CreateResources_r10b, GrpNVMFlushCmd)
+        APPEND_TEST_AT_YLEVEL(InvalidNamspc_r10b, GrpNVMFlushCmd)
         APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r11b, GrpNVMFlushCmd)
         APPEND_TEST_AT_YLEVEL(FunctionalityBare_r10b, GrpNVMFlushCmd)
         APPEND_TEST_AT_XLEVEL(FunctionalityMeta_r10b, GrpNVMFlushCmd)
         break;
-    /*case SPECREV_11b:
-        APPEND_TEST_AT_XLEVEL(CreateResources_r10b, GrpNVMFlushCmd)
-        APPEND_TEST_AT_YLEVEL(InvalidNamspc_r10b, GrpNVMFlushCmd)
-//        APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r10b, GrpNVMFlushCmd)
-        APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r11b, GrpNVMFlushCmd)
-        APPEND_TEST_AT_YLEVEL(FunctionalityBare_r10b, GrpNVMFlushCmd)
-        APPEND_TEST_AT_XLEVEL(FunctionalityMeta_r10b, GrpNVMFlushCmd)
-        break;*/
 
     default:
     case SPECREVTYPE_FENCE:

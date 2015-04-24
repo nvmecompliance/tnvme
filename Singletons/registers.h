@@ -19,6 +19,7 @@
 
 #include <string>
 #include <vector>
+#include <algorithm>
 #include "regDefs.h"
 #include "dnvme.h"
 
@@ -147,6 +148,29 @@ public:
      */
     const PciSpcType *GetPciMetrics() { return mPciSpcMetrics; }
     const CtlSpcType *GetCtlMetrics() { return mCtlSpcMetrics; }
+
+    /**
+     * Checks whether the given SpecRev is valid against a vector of SpecRev 
+     * values.
+     * @param  specRevs the vector of valid SpecRevs
+     * @param  test     the SpecRev to test for validity
+     * @return          true if <code>test</code> is valid; false otherwise
+     */
+    bool ValidSpecRev(const vector<SpecRev> specRevs, const SpecRev test) {
+        return std::find(specRevs.begin(), specRevs.end(), test)
+            != specRevs.end();
+    }
+
+    /**
+     * Checks whether the SpecRev of this register is valid against a vector of 
+     * SpecRev values.
+     * @param  specRevs the vector of valid SpecRevs
+     * @return          true if <code>mSpecRev</code> is valid; false otherwise
+     */
+    bool ValidSpecRev(const vector<SpecRev> specRevs) {
+        return std::find(specRevs.begin(), specRevs.end(), mSpecRev)
+            != specRevs.end();
+    }
 
     /**
      * Format, beautify for printing, a register's value based upon its size.

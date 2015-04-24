@@ -20,6 +20,7 @@
 #include "grpDefs.h"
 #include "../Queues/iocq.h"
 #include "../Queues/iosq.h"
+#include "../Queues/ce.h"
 #include "../Utils/io.h"
 #include "../Cmds/datasetMgmt.h"
 
@@ -158,7 +159,13 @@ PRP1PRP2NR_r10b::RunCoreTest()
                     datasetMgmtCmd->SetDword(rand(), 8);
                     datasetMgmtCmd->SetDword(rand(), 9);
 
-					datasetMgmtCmd->SetAD(true);
+                    uint16_t timeout;
+                    if (gCmdLine.setAD) {
+                        datasetMgmtCmd->SetAD(true);
+                        timeout = 1000;
+                    } else
+                        timeout = 1;
+
                     uint64_t slba = 0;
                     RangeDef *rangePtr = (RangeDef *)rangeMem->GetBuffer();
                     for (uint32_t idx = 1; idx <= nr; idx++, rangePtr++) {
@@ -178,8 +185,11 @@ PRP1PRP2NR_r10b::RunCoreTest()
                         enableLog = true;
 
                     work = str(boost::format("offset%d.nr%d ") % pgOff % nr);
-                    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1),
-                        iosq, iocq, datasetMgmtCmd, work, enableLog);
+                    // Spec does not explicitly state that the cmd must succeed
+                    CEStat status = IO::SendAndReapCmdIgnore(mGrpName, 
+                        mTestName, CALC_TIMEOUT_ms(timeout), iosq, iocq,
+                        datasetMgmtCmd, work, enableLog);
+                    ProcessCE::PrintStatus(status);
                 }
             }
         }

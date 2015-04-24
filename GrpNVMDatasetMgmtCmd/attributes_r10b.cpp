@@ -22,6 +22,7 @@
 #include "grpDefs.h"
 #include "../Queues/iocq.h"
 #include "../Queues/iosq.h"
+#include "../Queues/ce.h"
 #include "../Utils/io.h"
 #include "../Cmds/datasetMgmt.h"
 
@@ -45,8 +46,8 @@ Attributes_r10b::Attributes_r10b(
         "initialize this buffer describing 256 ranges equally divided among "
         "the total address space spec'd by Identify.NCAP. Issue the dataset "
         "mgmt cmd multiple times iterating through all permutations of all "
-        "context attributes except the reserved values, expect success. "
-        "Testing to verify all legal attributes are accepted.");
+        "context attributes except the reserved values. Testing to verify all "
+        "legal attributes are accepted.");
 }
 
 
@@ -133,7 +134,12 @@ Attributes_r10b::RunCoreTest()
     datasetMgmtCmd->SetNSID(namspcData.id);
     datasetMgmtCmd->SetNR(MAX_RANGES - 1);  // convert to 0-based
     datasetMgmtCmd->SetPrpBuffer(prpBitmask, rangeMem);
-    datasetMgmtCmd->SetAD(true);
+    uint16_t timeout;
+    if (gCmdLine.setAD) {
+        datasetMgmtCmd->SetAD(true);
+        timeout = 1000;
+    } else
+        timeout = 1;
 
     list<uint32_t> ctrAttribs = GetUniqueCtxAttribs();
     for (list <uint32_t>::iterator ctxAttrib = ctrAttribs.begin();
@@ -157,8 +163,11 @@ Attributes_r10b::RunCoreTest()
             enableLog = true;
 
         work = str(boost::format("ctxAttrib0x%04X") % *ctxAttrib);
-        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1000), iosq, iocq,
-            datasetMgmtCmd, work, enableLog);
+        // Spec does not explicitly state that the cmd must succeed
+        CEStat status = IO::SendAndReapCmdIgnore(mGrpName, mTestName,
+            CALC_TIMEOUT_ms(timeout), iosq, iocq, datasetMgmtCmd, work,
+            enableLog);
+        ProcessCE::PrintStatus(status);
     }
 }
 

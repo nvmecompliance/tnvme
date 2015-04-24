@@ -105,7 +105,7 @@ AllCtrlRegs_r10b::ValidateDefaultValues()
 
     // Traverse the ctrl'r registers
     for (int j = 0; j < CTLSPC_FENCE; j++) {
-        if (ctlMetrics[j].specRev != mSpecRev)
+        if (!gRegisters->ValidSpecRev(ctlMetrics[j].specRev, mSpecRev))
             continue;
         ValidateCtlRegisterROAttribute((CtlSpc)j);
     }
@@ -123,7 +123,7 @@ AllCtrlRegs_r10b::ValidateROBitsAfterWriting()
 
     /// Traverse the ctrl'r registers
     for (int j = 0; j < CTLSPC_FENCE; j++) {
-        if (ctlMetrics[j].specRev != mSpecRev)
+        if (!gRegisters->ValidSpecRev(ctlMetrics[j].specRev, mSpecRev))
             continue;
 
         // Reserved areas at NOT suppose to be written
