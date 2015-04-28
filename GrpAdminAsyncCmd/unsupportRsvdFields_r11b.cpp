@@ -38,7 +38,7 @@ UnsupportRsvdFields_r11b::UnsupportRsvdFields_r11b(
     Test(grpName, testName, SPECREV_11)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-    mTestDesc.SetCompliance("revision 1.1b, section 5.3");
+    mTestDesc.SetCompliance("revision 1.1b, section 5.2");
     mTestDesc.SetShort(     "Set unsupported/rsvd fields in cmd");
     // No string size limit for the long description
     mTestDesc.SetLong(
@@ -249,8 +249,22 @@ UnsupportRsvdFields_r11b::ReadLogPage(SharedACQPtr &acq, SharedASQPtr &asq,
 
     LOG_NRM("Reading log page with LID = %d to clear the event mask", logId);
     ConstSharedIdentifyPtr idCtrlrStruct = gInformative->GetIdentifyCmdCtrlr();
-    uint8_t X = idCtrlrStruct->GetValue(IDCTRLRCAP_ELPE) + 1;
-    LOG_NRM("Identify controller ELPE = %d (1-based)", X);
+    uint16_t elpeVal = idCtrlrStruct->GetValue(IDCTRLRCAP_ELPE) + 1;
+    LOG_NRM("Identify controller ELPE = %d (1-based)", elpeVal);
+
+    uint16_t totalBytes = elpeVal * GetLogPage::ERRINFO_DATA_SIZE;
+    LOG_NRM("Total bytes available for error info log page: %d", totalBytes);
+    uint8_t mps;
+    if (!gCtrlrConfig->GetMPS(mps))
+        throw FrmwkEx(HERE, "Failed to retrieve CC.MPS value");
+    uint32_t twoPages = 2 * (1 << (mps + 12));
+    LOG_NRM("Size of two memory pages (i.e. PRP1 & PRP2): %d bytes", twoPages);
+    // PRP2 cannot be pointer to PRP list, so don't ask for more than 2 pages
+    if (totalBytes > twoPages) {
+        LOG_NRM("Can only utilize two memory pages; reducing total bytes");
+        totalBytes = twoPages;
+    }
+    uint16_t totalDwords = totalBytes / 4;
 
     LOG_NRM("Create get log page cmd and assoc some buffer memory");
     SharedGetLogPagePtr getLogPgCmd = SharedGetLogPagePtr(new GetLogPage());
@@ -262,9 +276,9 @@ UnsupportRsvdFields_r11b::ReadLogPage(SharedACQPtr &acq, SharedASQPtr &asq,
 
     LOG_NRM("Get log page to request error information logId = %d", logId);
     getLogPgCmd->SetLID(logId);
-    getLogPageMem->Init(GetLogPage::ERRINFO_DATA_SIZE * X, true);
+    getLogPageMem->Init(totalBytes, true);
     getLogPgCmd->SetPrpBuffer(prpReq, getLogPageMem);
-    getLogPgCmd->SetNUMD((GetLogPage::ERRINFO_DATA_SIZE * X / 4) - 1); //0-based
+    getLogPgCmd->SetNUMD(totalDwords - 1); //0-based
 
     work = str(boost::format("ErrorLog%d") % (uint32_t)logId);
     IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,

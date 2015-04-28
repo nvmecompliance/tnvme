@@ -38,7 +38,7 @@ VerifyEventQueueing_r10b::VerifyEventQueueing_r10b(
     Test(grpName, testName, SPECREV_10b)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-    mTestDesc.SetCompliance("revision 1.0b, section ?");
+    mTestDesc.SetCompliance("revision 1.0b, section 5.2");
     mTestDesc.SetShort(     "Verify async events are queued.");
     // No string size limit for the long description
     mTestDesc.SetLong(

@@ -21,8 +21,8 @@ SRC =					\
 	createResources_r10b.cpp	\
 	prp1_r10b.cpp			\
 	prp1PRP2_r10b.cpp		\
-	unsupportRrvdFields_r10b.cpp	\
-	unsupportRrvdFields_r11b.cpp	\
+	unsupportRsvdFields_r10b.cpp	\
+	unsupportRsvdFields_r11b.cpp	\
 	invalidNamspc_r10b.cpp
 
 .SUFFIXES: .cpp

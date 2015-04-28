@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 #include <boost/format.hpp>
-#include "unsupportRrvdFields_r10b.h"
+#include "unsupportRsvdFields_r10b.h"
 #include "globals.h"
 #include "grpDefs.h"
 #include "../Utils/kernelAPI.h"
@@ -28,7 +28,7 @@
 namespace GrpAdminGetLogPgCmd {
 
 
-UnsupportRrvdFields_r10b::UnsupportRrvdFields_r10b(string grpName,
+UnsupportRsvdFields_r10b::UnsupportRsvdFields_r10b(string grpName,
     string testName) :
     Test(grpName, testName, SPECREV_10b)
 {
@@ -45,7 +45,7 @@ UnsupportRrvdFields_r10b::UnsupportRrvdFields_r10b(string grpName,
 }
 
 
-UnsupportRrvdFields_r10b::~UnsupportRrvdFields_r10b()
+UnsupportRsvdFields_r10b::~UnsupportRsvdFields_r10b()
 {
     ///////////////////////////////////////////////////////////////////////////
     // Allocations taken from the heap and not under the control of the
@@ -54,8 +54,8 @@ UnsupportRrvdFields_r10b::~UnsupportRrvdFields_r10b()
 }
 
 
-UnsupportRrvdFields_r10b::
-UnsupportRrvdFields_r10b(const UnsupportRrvdFields_r10b &other) : Test(other)
+UnsupportRsvdFields_r10b::
+UnsupportRsvdFields_r10b(const UnsupportRsvdFields_r10b &other) : Test(other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -64,8 +64,8 @@ UnsupportRrvdFields_r10b(const UnsupportRrvdFields_r10b &other) : Test(other)
 }
 
 
-UnsupportRrvdFields_r10b &
-UnsupportRrvdFields_r10b::operator=(const UnsupportRrvdFields_r10b &other)
+UnsupportRsvdFields_r10b &
+UnsupportRsvdFields_r10b::operator=(const UnsupportRsvdFields_r10b &other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -77,7 +77,7 @@ UnsupportRrvdFields_r10b::operator=(const UnsupportRrvdFields_r10b &other)
 
 
 Test::RunType
-UnsupportRrvdFields_r10b::RunnableCoreTest(bool preserve)
+UnsupportRsvdFields_r10b::RunnableCoreTest(bool preserve)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All code contained herein must never permanently modify the state or
@@ -93,7 +93,7 @@ UnsupportRrvdFields_r10b::RunnableCoreTest(bool preserve)
 
 
 void
-UnsupportRrvdFields_r10b::RunCoreTest()
+UnsupportRsvdFields_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:

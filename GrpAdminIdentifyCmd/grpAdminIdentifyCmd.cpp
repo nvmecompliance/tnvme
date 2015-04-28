@@ -18,8 +18,8 @@
 #include "createResources_r10b.h"
 #include "prp1_r10b.h"
 #include "prp1PRP2_r10b.h"
-#include "unsupportRrvdFields_r10b.h"
-#include "unsupportRrvdFields_r11b.h"
+#include "unsupportRsvdFields_r10b.h"
+#include "unsupportRsvdFields_r11b.h"
 #include "invalidNamspc_r10b.h"
 
 
@@ -37,7 +37,7 @@ GrpAdminIdentifyCmd::GrpAdminIdentifyCmd(size_t grpNum) :
         APPEND_TEST_AT_XLEVEL(CreateResources_r10b, GrpAdminIdentifyCmd)
         APPEND_TEST_AT_YLEVEL(PRP1_r10b, GrpAdminIdentifyCmd)
         APPEND_TEST_AT_YLEVEL(PRP1PRP2_r10b, GrpAdminIdentifyCmd)
-        APPEND_TEST_AT_YLEVEL(UnsupportRrvdFields_r10b, GrpAdminIdentifyCmd)
+        APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r10b, GrpAdminIdentifyCmd)
         APPEND_TEST_AT_YLEVEL(InvalidNamspc_r10b, GrpAdminIdentifyCmd)
         break;
     case SPECREV_12:
@@ -45,7 +45,7 @@ GrpAdminIdentifyCmd::GrpAdminIdentifyCmd(size_t grpNum) :
         APPEND_TEST_AT_XLEVEL(CreateResources_r10b, GrpAdminIdentifyCmd)
         APPEND_TEST_AT_YLEVEL(PRP1_r10b, GrpAdminIdentifyCmd)
         APPEND_TEST_AT_YLEVEL(PRP1PRP2_r10b, GrpAdminIdentifyCmd)
-        APPEND_TEST_AT_YLEVEL(UnsupportRrvdFields_r11b, GrpAdminIdentifyCmd)
+        APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r11b, GrpAdminIdentifyCmd)
         APPEND_TEST_AT_YLEVEL(InvalidNamspc_r10b, GrpAdminIdentifyCmd)
         break;
 

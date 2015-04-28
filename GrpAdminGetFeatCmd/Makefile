@@ -20,8 +20,8 @@ SRC =					\
 	grpAdminGetFeatCmd.cpp		\
 	createResources_r10b.cpp	\
 	invalidFieldInCmd_r10b.cpp	\
-	unsupportRrvdFields_r10b.cpp \
-	unsupportRrvdFields_r11b.cpp
+	unsupportRsvdFields_r10b.cpp \
+	unsupportRsvdFields_r11b.cpp
 
 .SUFFIXES: .cpp
 

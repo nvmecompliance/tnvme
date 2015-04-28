@@ -104,8 +104,22 @@ MandatoryErrInfo_r10b::RunCoreTest()
     SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID))
 
     ConstSharedIdentifyPtr idCtrlrStruct = gInformative->GetIdentifyCmdCtrlr();
-    uint8_t X = idCtrlrStruct->GetValue(IDCTRLRCAP_ELPE) + 1;
-    LOG_NRM("Identify controller ELPE = %d (1-based)", X);
+    uint16_t elpeVal = idCtrlrStruct->GetValue(IDCTRLRCAP_ELPE) + 1;
+    LOG_NRM("Identify controller ELPE = %d (1-based)", elpeVal);
+
+    uint16_t totalBytes = elpeVal * GetLogPage::ERRINFO_DATA_SIZE;
+    LOG_NRM("Total bytes available for error info log page: %d", totalBytes);
+    uint8_t mps;
+    if (!gCtrlrConfig->GetMPS(mps))
+        throw FrmwkEx(HERE, "Failed to retrieve CC.MPS value");
+    uint32_t twoPages = 2 * (1 << (mps + 12));
+    LOG_NRM("Size of two memory pages (i.e. PRP1 & PRP2): %d bytes", twoPages);
+    // PRP2 cannot be pointer to PRP list, so don't ask for more than 2 pages
+    if (totalBytes > twoPages) {
+        LOG_NRM("Can only utilize two memory pages; reducing total bytes");
+        totalBytes = twoPages;
+    }
+    uint16_t totalDwords = totalBytes / 4;
 
     LOG_NRM("Create get log page cmd and assoc some buffer memory");
     SharedGetLogPagePtr getLogPgCmd = SharedGetLogPagePtr(new GetLogPage());
@@ -119,17 +133,18 @@ MandatoryErrInfo_r10b::RunCoreTest()
     getLogPgCmd->SetLID(ERRINFO_LID);
 
     // loop for all log entries supported by controller
-    for (uint32_t numd = ERRINFO_NUMD; numd <= (X * ERRINFO_NUMD);
+    for (uint32_t numd = ERRINFO_NUMD; numd <= totalDwords;
         numd += ERRINFO_NUMD) {
+        uint32_t numLogEntries = numd / ERRINFO_NUMD;
         LOG_NRM("Issue Get log page cmd with NUMD = %d and log entries = %d",
-            numd, (numd/ERRINFO_NUMD));
+            numd, numLogEntries);
 
-        getLogPageMem->Init(GetLogPage::ERRINFO_DATA_SIZE * X, true);
+        getLogPageMem->Init(totalBytes, true);
         getLogPgCmd->SetPrpBuffer(prpReq, getLogPageMem);
         getLogPgCmd->SetNUMD(numd - 1); // 0-based
         getLogPgCmd->SetNSID(0xFFFFFFFF);
         
-        work = str(boost::format("logEnties%d") % (numd / ERRINFO_NUMD));
+        work = str(boost::format("logEnties%d") % numLogEntries);
         IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
             getLogPgCmd, work, true);
 
@@ -137,7 +152,7 @@ MandatoryErrInfo_r10b::RunCoreTest()
         SharedMemBufferPtr cmdPayload = getLogPgCmd->GetRWPrpBuffer();
         uint32_t offset = (numd * 4);
         uint8_t *cmdPayloadBuff = (uint8_t *)cmdPayload->GetBuffer() + offset;
-        for (; offset < (X * GetLogPage::ERRINFO_DATA_SIZE); offset++) {
+        for (; offset < totalBytes; offset++) {
             LOG_NRM("Verify data at offset = 0x%X", offset);
             if (*cmdPayloadBuff != 0x0) {
                 throw FrmwkEx(HERE, "Invalid data at buffer offset = 0x%08X, "

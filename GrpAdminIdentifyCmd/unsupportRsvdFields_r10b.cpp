@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-#include "unsupportRrvdFields_r11b.h"
+#include "unsupportRsvdFields_r10b.h"
 #include "globals.h"
 #include "grpDefs.h"
 #include "../Utils/kernelAPI.h"
@@ -28,26 +28,24 @@
 namespace GrpAdminIdentifyCmd {
 
 
-UnsupportRrvdFields_r11b::UnsupportRrvdFields_r11b(
+UnsupportRsvdFields_r10b::UnsupportRsvdFields_r10b(
     string grpName, string testName) :
-    Test(grpName, testName, SPECREV_10b /* SPEREV_11b */)
+    Test(grpName, testName, SPECREV_10b)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-    mTestDesc.SetCompliance("revision 1.1b, section 5.11");
+    mTestDesc.SetCompliance("revision 1.0b, section 5");
     mTestDesc.SetShort(     "Set unsupported/rsvd fields in cmd");
     // No string size limit for the long description
     mTestDesc.SetLong(
         "Unsupported DW's and rsvd fields are treated identical, the recipient "
-        "is not required to check their value. Receipt of reserved coded "
-        "values shall be reported as an error. Issue Identify cmd requesting "
-        "ctrlr namspc, expect success. Then issue same cmd setting all "
-        "unsupported/rsvd fields, expect success. Set: DW0_b14:10, DW2, DW3, "
-        "DW4, DW5, DW10_b31:2, DW11, DW12, DW13, DW14, DW15. Issue same cmd "
-        "setting all rsvd coded values, expect fail. Set: DW10_b1:0");
+        "shall not check their value. Issue Identify cmd requesting ctrlr "
+        "namspc, expect success. Then issue same cmd setting all unsupported/ "
+        "rsvd fields, expect success. Set: DW0_b15:10, DW2, DW3, DW4, DW5, "
+        "DW10_b31:1, DW11, DW12, DW13, DW14, DW15.");
 }
 
 
-UnsupportRrvdFields_r11b::~UnsupportRrvdFields_r11b()
+UnsupportRsvdFields_r10b::~UnsupportRsvdFields_r10b()
 {
     ///////////////////////////////////////////////////////////////////////////
     // Allocations taken from the heap and not under the control of the
@@ -56,8 +54,8 @@ UnsupportRrvdFields_r11b::~UnsupportRrvdFields_r11b()
 }
 
 
-UnsupportRrvdFields_r11b::
-UnsupportRrvdFields_r11b(const UnsupportRrvdFields_r11b &other) : Test(other)
+UnsupportRsvdFields_r10b::
+UnsupportRsvdFields_r10b(const UnsupportRsvdFields_r10b &other) : Test(other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -66,8 +64,8 @@ UnsupportRrvdFields_r11b(const UnsupportRrvdFields_r11b &other) : Test(other)
 }
 
 
-UnsupportRrvdFields_r11b &
-UnsupportRrvdFields_r11b::operator=(const UnsupportRrvdFields_r11b &other)
+UnsupportRsvdFields_r10b &
+UnsupportRsvdFields_r10b::operator=(const UnsupportRsvdFields_r10b &other)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All pointers in this object must be NULL, never allow shallow or deep
@@ -79,7 +77,7 @@ UnsupportRrvdFields_r11b::operator=(const UnsupportRrvdFields_r11b &other)
 
 
 Test::RunType
-UnsupportRrvdFields_r11b::RunnableCoreTest(bool preserve)
+UnsupportRsvdFields_r10b::RunnableCoreTest(bool preserve)
 {
     ///////////////////////////////////////////////////////////////////////////
     // All code contained herein must never permanently modify the state or
@@ -95,7 +93,7 @@ UnsupportRrvdFields_r11b::RunnableCoreTest(bool preserve)
 
 
 void
-UnsupportRrvdFields_r11b::RunCoreTest()
+UnsupportRsvdFields_r10b::RunCoreTest()
 {
     /** \verbatim
      * Assumptions:
@@ -114,7 +112,7 @@ UnsupportRrvdFields_r11b::RunCoreTest()
 
     LOG_NRM("Form identify namespace cmd and associate some buffer");
     SharedIdentifyPtr idCmdNamSpc = SharedIdentifyPtr(new Identify());
-    idCmdNamSpc->SetCNS(false);
+    idCmdNamSpc->SetCNS(0);
     idCmdNamSpc->SetNSID(1);
 
     SharedMemBufferPtr idMemNamSpc = SharedMemBufferPtr(new MemBuffer());
@@ -131,7 +129,7 @@ UnsupportRrvdFields_r11b::RunCoreTest()
 
     LOG_NRM("Set all cmd's rsvd bits");
     uint32_t work = idCmdNamSpc->GetDword(0);
-    work |= 0x00007c00;      // Set DW0_b14:10 bits
+    work |= 0x0000fc00;      // Set DW0_b15:10 bits
     idCmdNamSpc->SetDword(work, 0);
 
     idCmdNamSpc->SetDword(0xffffffff, 2);
@@ -140,7 +138,7 @@ UnsupportRrvdFields_r11b::RunCoreTest()
     idCmdNamSpc->SetDword(0xffffffff, 5);
 
     work = idCmdNamSpc->GetDword(10);
-    work |= 0xfffffffc;      // Set DW10_b31:2 bits
+    work |= 0xfffffffe;      // Set DW10_b31:1 bits
     idCmdNamSpc->SetDword(work, 10);
 
     idCmdNamSpc->SetDword(0xffffffff, 11);
@@ -151,14 +149,6 @@ UnsupportRrvdFields_r11b::RunCoreTest()
 
     IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
         idCmdNamSpc, "rsvdall.set", true);
-
-    LOG_NRM("Set CNS field reserved coded value");
-    uint32_t cdw10 = idCmdNamSpc->GetDword(10);
-    work = cdw10 | 0x3;
-    idCmdNamSpc->SetDword(work, 10);
-
-    IO::SendAndReapCmdNot(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
-        idCmdNamSpc, "rsvdall.val.set", true, CESTAT_SUCCESS);
 }
 
 }   // namespace

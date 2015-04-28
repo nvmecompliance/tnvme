@@ -19,7 +19,7 @@ INCLUDES = -I. -I../ -I../../ -I/usr/local/include
 SRC =						\
 	grpReservationsHostA.cpp			\
 	createResources_r11.cpp	\
-	unsupportRrvdFields_r10b.cpp \
+	unsupportRsvdFields_r10b.cpp \
 	registerReservation.cpp	\
 	replaceReservation.cpp \
 	acquireReservation.cpp \
