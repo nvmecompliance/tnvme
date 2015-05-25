@@ -369,6 +369,40 @@ typedef enum AMSBits {
     CAP_AMS_VendorSpecific  = 0x2
 } AMSBits;
 
+typedef enum AQABits {
+    AQA_RESV0 = 0xf0000000,
+    AQA_ACQS  = 0x0fff0000,
+    AQA_RESV1 = 0x0000f000,
+    AQA_ASQS  = 0x00000fff
+} AQABits;
+
+typedef enum AQAShift {
+    AQA_SH_RESV0 = 28,
+    AQA_SH_ACQS  = 16,
+    AQA_SH_RESV1 = 12,
+    AQA_SH_ASQS  = 0
+} AQAShift;
+
+typedef enum ASQBits {
+    ASQ_ASQB  = 0xfffffffffffff000,
+    ASQ_RESV0 = 0x0000000000000fff
+} ASQBits;
+
+typedef enum ASQShift {
+    ASQ_SH_ASQB  = 12,
+    ASQ_SH_RESV0 = 0
+} ASQShift;
+
+typedef enum ACQBits {
+    ACQ_ACQB  = 0xfffffffffffff000,
+    ACQ_RESV0 = 0x0000000000000fff
+} ACQBits;
+
+typedef enum ACQShift {
+    ACQ_SH_ACQB  = 12,
+    ACQ_SH_RESV0 = 0
+} ACQShift;
+
 typedef enum CSSBits {
     CAP_CSS_NVMCS = 0x01,
     CAP_CSS_RESV0 = 0x02,
@@ -400,5 +434,6 @@ typedef enum CC_CSSValues {
     CC_CSS_ReservedStart   = 0x1,
     CC_CSS_ReservedEnd     = 0x7
 } CC_CSSValues;
+
 
 #endif
