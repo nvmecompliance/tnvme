@@ -187,7 +187,7 @@ RegisterReservation::RunCoreTest()
     retStat = IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq, iocq, reservationRegisterCmd, "Register Key 0xBD HostB", true, CESTAT_SUCCESS);
 
 
-	LOG_NRM("Try to register (not replace) a new key. Should always fail even with IEKEY=1 and same key as before... Expecting Rsvr Conflict.");
+	//LOG_NRM("Try to register (not replace) a new key. Should always fail even with IEKEY=1 and same key as before... Expecting Rsvr Conflict.");
 	// Same command as before...
 	/*
 	reservationRegisterCmd->SetNSID(1);
@@ -197,7 +197,7 @@ RegisterReservation::RunCoreTest()
 	writeRegKey->InitAlignment(16, true, 0xAE); // 0xAF's as arbitrary new key
 	reservationRegisterCmd->SetPrpBuffer(prpBitmask, writeRegKey);
 	*/
-    retStat = IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq, iocq, reservationRegisterCmd, "Register Key 0xBD HostB", true, CESTAT_RSRV_CONFLICT);
+    //retStat = IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq, iocq, reservationRegisterCmd, "Register Key 0xBD HostB", true, CESTAT_RSRV_CONFLICT);
 
     LOG_NRM("Completed RegisterReservationHostB::RunCoreTest")
 }
