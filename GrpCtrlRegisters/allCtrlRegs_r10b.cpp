@@ -105,8 +105,13 @@ AllCtrlRegs_r10b::ValidateDefaultValues()
 
     // Traverse the ctrl'r registers
     for (int j = 0; j < CTLSPC_FENCE; j++) {
+        LOG_NRM("Reg: %s", ctlMetrics[j].desc);
+        LOG_NRM("Ctrlr specrev = %i, test specrev = %i", (int)ctlMetrics[j].specRev.at(0), (int)mSpecRev);
+        if (ctlMetrics[j].specRev.size() > 1)
+            LOG_NRM("Second Ctrlr specrev = %i", (int)ctlMetrics[j].specRev.at(1));
         if (!gRegisters->ValidSpecRev(ctlMetrics[j].specRev, mSpecRev))
             continue;
+        LOG_NRM("HEREEEEE == Ctrlr specrev = %i, test specrev = %i", (int)ctlMetrics[j].specRev.at(0), (int)mSpecRev);
         ValidateCtlRegisterROAttribute((CtlSpc)j);
     }
 }

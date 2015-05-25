@@ -17,6 +17,8 @@
 #include "../Exception/frmwkEx.h"
 #include "grpCtrlRegisters.h"
 #include "allCtrlRegs_r10b.h"
+#include "allCtrlRegs_r11.h"
+#include "allCtrlRegs_r12.h"
 #include "ctrlrResetDefaults_r10b.h"
 
 namespace GrpCtrlRegisters {
@@ -29,10 +31,16 @@ GrpCtrlRegisters::GrpCtrlRegisters(size_t grpNum) :
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Numbering" and
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Strategy
     switch (gCmdLine.rev) {
-    case SPECREV_11:
-    case SPECREV_12:
     case SPECREV_10b:
         APPEND_TEST_AT_XLEVEL(AllCtrlRegs_r10b, GrpCtrlRegisters)
+        APPEND_TEST_AT_XLEVEL(CtrlrResetDefaults_r10b, GrpCtrlRegisters)
+        break;
+    case SPECREV_11:
+        APPEND_TEST_AT_XLEVEL(AllCtrlRegs_r11, GrpCtrlRegisters)
+        APPEND_TEST_AT_XLEVEL(CtrlrResetDefaults_r10b, GrpCtrlRegisters)
+        break;
+    case SPECREV_12:
+        APPEND_TEST_AT_XLEVEL(AllCtrlRegs_r12, GrpCtrlRegisters)
         APPEND_TEST_AT_XLEVEL(CtrlrResetDefaults_r10b, GrpCtrlRegisters)
         break;
 

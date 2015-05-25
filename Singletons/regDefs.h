@@ -151,10 +151,12 @@ struct PciSpcType {
  *  ZZ(CTLSPC_CC_1,      0x14,    4,    SPECREV_10c, 0x00fffffffff00000, 0x0000000000000000, 0x0000000000000000, "ctrlr config register (CC)")
  *  ZZ(CTLSPC_CC_2,      0x14,    4,    SPECREV_10d, 0x0000000000000000, 0x0000000000000000, 0x0ffffffffff00000, "ctrlr config register (CC)")
  */
-/*     CtlSpc,           offset,  size, specRev,     maskRO,             impSpec,            dfltValue,          desc */
+/*     CtlSpc,           offset,  size, specRev,                                      maskRO,             impSpec,            dfltValue,          desc */
 #define CTLSPC_TABLE                                                                                                                                             \
     ZZ(CTLSPC_CAP,       0x00,    8,    list_of(SPECREV_10b)(SPECREV_11)(SPECREV_12), 0xffffffffffffffff, 0x00ff1fffff07ffff, 0x0000000000000000, "ctrlr CAP register (CAP)")                     \
-    ZZ(CTLSPC_VS,        0x08,    4,    list_of(SPECREV_10b)(SPECREV_11)(SPECREV_12), 0x00000000ffffffff, 0x0000000000000000, 0x0000000000010100, "ctrlr version register (VS)")                  \
+    ZZ(CTLSPC_VS,        0x08,    4,    list_of(SPECREV_10b),                         0x00000000ffffffff, 0x0000000000000000, 0x0000000000010000, "ctrlr version register (VS)")                  \
+    ZZ(CTLSPC_VS_11,     0x08,    4,    list_of(SPECREV_11),                          0x00000000ffffffff, 0x0000000000000000, 0x0000000000010100, "ctrlr version register (VS)")                  \
+    ZZ(CTLSPC_VS_12,     0x08,    4,    list_of(SPECREV_12),                          0x00000000ffffffff, 0x0000000000000000, 0x0000000000010200, "ctrlr version register (VS)")                  \
     ZZ(CTLSPC_INTMS,     0x0c,    4,    list_of(SPECREV_10b)(SPECREV_11)(SPECREV_12), 0x0000000000000000, 0x0000000000000000, 0x0000000000000000, "ctrlr interrupt mask set register (INTMS)")    \
     ZZ(CTLSPC_INTMC,     0x10,    4,    list_of(SPECREV_10b)(SPECREV_11)(SPECREV_12), 0x0000000000000000, 0x0000000000000000, 0x0000000000000000, "ctrlr interrupt mask clear register (INTMC)")  \
     ZZ(CTLSPC_CC,        0x14,    4,    list_of(SPECREV_10b)(SPECREV_11)(SPECREV_12), 0x00000000ff00000e, 0x0000000000000000, 0x0000000000000000, "ctrlr config register (CC)")                   \

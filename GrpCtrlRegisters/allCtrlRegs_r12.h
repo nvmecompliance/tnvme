@@ -14,9 +14,10 @@
  *  limitations under the License.
  */
 
-#ifndef _ALLCTRLREGS_r10b_H_
-#define _ALLCTRLREGS_r10b_H_
+#ifndef _ALLCTRLREGS_r12_H_
+#define _ALLCTRLREGS_r12_H_
 
+#include "allCtrlRegs_r10b.h"
 #include "test.h"
 
 namespace GrpCtrlRegisters {
@@ -29,45 +30,25 @@ namespace GrpCtrlRegisters {
  * 1) See notes in the header file of the Test base class
  * \endverbatim
  */
-class AllCtrlRegs_r10b : virtual public Test
+class AllCtrlRegs_r12 : public AllCtrlRegs_r10b
 {
 public:
-    AllCtrlRegs_r10b(string grpName, string testName);
-    virtual ~AllCtrlRegs_r10b();
+    AllCtrlRegs_r12(string grpName, string testName);
+    virtual ~AllCtrlRegs_r12();
 
     /**
      * IMPORTANT: Read Test::Clone() header comment.
      */
-    virtual AllCtrlRegs_r10b *Clone() const
-        { return new AllCtrlRegs_r10b(*this); }
-    AllCtrlRegs_r10b &operator=(const AllCtrlRegs_r10b &other);
-    AllCtrlRegs_r10b(const AllCtrlRegs_r10b &other);
+    virtual AllCtrlRegs_r12 *Clone() const
+        { return new AllCtrlRegs_r12(*this); }
+    AllCtrlRegs_r12 &operator=(const AllCtrlRegs_r12 &other);
+    AllCtrlRegs_r12(const AllCtrlRegs_r12 &other);
 
 
 protected:
     virtual void RunCoreTest();
     virtual RunType RunnableCoreTest(bool preserve);
 
-    /**
-     * Validate the specified ctrl'r register RO bits report correct values if
-     * and only if they are not vendor specific.
-     * @param reg Pass the register to validate
-     * @return returns upon success, otherwise throws exception
-     */
-    virtual void ValidateCtlRegisterROAttribute(CtlSpc reg);
-
-    /**
-     * Validate all the registers have default values being reported for
-     * the RO bits which are not vendor specific.
-     * @return returns upon success, otherwise throws exception
-     */
-    virtual void ValidateDefaultValues();
-
-    /**
-     * Validate all the registers hare RO after attempting to write to them.
-     * @return returns upon success, otherwise throws exception
-     */
-    virtual void ValidateROBitsAfterWriting();
 
 private:
     ///////////////////////////////////////////////////////////////////////////

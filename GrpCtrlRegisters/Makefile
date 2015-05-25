@@ -19,6 +19,8 @@ INCLUDES = -I. -I../ -I../../ -I/usr/local/include
 SRC = \
 	grpCtrlRegisters.cpp		\
 	allCtrlRegs_r10b.cpp		\
+	allCtrlRegs_r11.cpp			\
+	allCtrlRegs_r12.cpp			\
 	ctrlrResetDefaults_r10b.cpp
 
 .SUFFIXES: .cpp
