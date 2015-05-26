@@ -151,7 +151,7 @@ struct Format {
 
 struct IdentifyDUT {
     uint32_t            nsid;   // The Identify.DW1.NSID field
-    bool                cns;    // The Identify.DW10.CNS field
+    uint8_t             cns;    // The Identify.DW10.CNS field
     vector<uint8_t>     raw;    // Raw identify data payload to compare against
     vector<uint8_t>     mask;   // Mask set bits indicate raw[x] bits to compare
 };

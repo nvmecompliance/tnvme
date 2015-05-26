@@ -68,32 +68,6 @@ Identify::~Identify()
 {
 }
 
-/*
-void
-Identify::SetCNS(bool ctrlr)
-{
-    LOG_NRM("Setting CNS");
-    uint8_t curVal = GetByte(10, 0);
-    if (ctrlr)
-        curVal |= CNS_BITMASK;
-    else
-        curVal &= ~CNS_BITMASK;
-    SetByte(curVal, 10, 0);
-}
-
-
-bool
-Identify::GetCNS()
-{
-    uint8_t curVal = GetByte(10, 0);
-    if (curVal & CNS_BITMASK) {
-        LOG_NRM("Getting CNS=1");
-        return true;
-    }
-    LOG_NRM("Getting CNS=0");
-    return false;
-}
-*/
 
 void
 Identify::SetCNS(uint8_t ctrlr)

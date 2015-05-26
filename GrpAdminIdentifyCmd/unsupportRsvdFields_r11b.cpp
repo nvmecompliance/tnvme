@@ -114,7 +114,7 @@ UnsupportRsvdFields_r11b::RunCoreTest()
 
     LOG_NRM("Form identify namespace cmd and associate some buffer");
     SharedIdentifyPtr idCmdNamSpc = SharedIdentifyPtr(new Identify());
-    idCmdNamSpc->SetCNS(false);
+    idCmdNamSpc->SetCNS(CNS_Namespace);
     idCmdNamSpc->SetNSID(1);
 
     SharedMemBufferPtr idMemNamSpc = SharedMemBufferPtr(new MemBuffer());

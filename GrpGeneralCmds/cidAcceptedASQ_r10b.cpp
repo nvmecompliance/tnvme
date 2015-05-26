@@ -114,7 +114,7 @@ CIDAcceptedASQ_r10b::RunCoreTest()
     LOG_NRM("Create identify cmd and assoc some buffer memory");
     SharedIdentifyPtr idCmdCap = SharedIdentifyPtr(new Identify());
     LOG_NRM("Force identify to request ctrlr capabilities struct");
-    idCmdCap->SetCNS(1);
+    idCmdCap->SetCNS(CNS_Controller);
     SharedMemBufferPtr idMemCap = SharedMemBufferPtr(new MemBuffer());
     idMemCap->InitAlignment(Identify::IDEAL_DATA_SIZE, PRP_BUFFER_ALIGNMENT,
         false, 0);

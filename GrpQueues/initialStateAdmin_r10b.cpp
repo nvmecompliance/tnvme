@@ -114,7 +114,7 @@ InitialStateAdmin_r10b::ValidateInitialStateAdmin(SharedACQPtr acq,
     // tail pointers and verify SQ head pointer in completion entry of ACQ.
     // Repeat procedure after disabling and re-enabling ctlr.
     for (uint16_t i = 0; i < 2; i++) {
-        LOG_NRM("Validateing initial state admin for #%d times", i);
+        LOG_NRM("Validating initial state admin for #%d times", i);
         gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
         if (gCtrlrConfig->SetState(ST_ENABLE) == false)
             throw FrmwkEx(HERE);
@@ -133,7 +133,7 @@ InitialStateAdmin_r10b::SubmitIdentifyCmd(SharedACQPtr acq, SharedASQPtr asq)
     LOG_NRM("Create identify cmd and assoc some buffer memory");
     SharedIdentifyPtr idCmdCap = SharedIdentifyPtr(new Identify());
     LOG_NRM("Force identify to request ctrlr capabilities struct");
-    idCmdCap->SetCNS(1);
+    idCmdCap->SetCNS(CNS_Controller);
     SharedMemBufferPtr idMemCap = SharedMemBufferPtr(new MemBuffer());
     idMemCap->InitAlignment(Identify::IDEAL_DATA_SIZE, PRP_BUFFER_ALIGNMENT,
         false, 0);

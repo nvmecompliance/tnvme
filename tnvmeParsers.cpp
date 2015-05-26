@@ -219,7 +219,7 @@ bool ExtractIdentifyXMLValue(xmlpp::TextReader &xmlFile, IdentifyDUT &cmd,
             LOG_DBG("Found <%s>: processing", nodeName.c_str());
             xmlFile.read();
             if (xmlFile.get_node_type() == xmlpp::TextReader::Text) {
-                cmd.cns = strtoul(xmlFile.get_value().c_str(), NULL, 10);
+                cmd.cns = strtoul(xmlFile.get_value().c_str(), NULL, 16);
                 LOG_DBG("Identify.cns = 0x%02X", cmd.cns);
                 return true;
             }

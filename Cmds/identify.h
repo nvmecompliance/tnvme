@@ -51,11 +51,7 @@ public:
      * @param ctrlr Pass true for controller, otherwise false for namespace
      */
     void SetCNS(uint8_t ctrlr);
-    /// @return true for controller data, false for namespace data
     uint8_t GetCNS() const;
-
-    //void SetCNS(bool ctrlr);
-    //bool GetCNS();
 
     void SetCNTID(uint16_t cntid);
     uint16_t GetCNTID() const;

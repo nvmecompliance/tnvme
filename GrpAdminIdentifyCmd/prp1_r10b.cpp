@@ -107,7 +107,7 @@ PRP1_r10b::RunCoreTest()
 
     LOG_NRM("Form identify namespace cmd and associate some buffer");
     SharedIdentifyPtr idCmdNamSpc = SharedIdentifyPtr(new Identify());
-    idCmdNamSpc->SetCNS(0);
+    idCmdNamSpc->SetCNS(CNS_Namespace);
     idCmdNamSpc->SetNSID(1);
 
     SharedMemBufferPtr idMemNamSpc = SharedMemBufferPtr(new MemBuffer());

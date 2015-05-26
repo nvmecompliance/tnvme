@@ -102,7 +102,7 @@ CompareGolden(Golden &golden)
         for (size_t i = 0; i < golden.cmds.size(); i++) {
             LOG_NRM("Identify cmd #%ld", i);
             LOG_NRM("  Identify:DW1.nsid = 0x%02x", golden.cmds[i].nsid);
-            LOG_NRM("  Identify.DW10.cns = %c", golden.cmds[i].cns ? 'T' : 'F');
+            LOG_NRM("  Identify.DW10.cns = 0x%02x", golden.cmds[i].cns);
             LOG_NRM("  sizeof(Identify.raw) = %ld", golden.cmds[i].raw.size());
             LOG_NRM("  sizeof(Identify.mask) = %ld",
                 golden.cmds[i].mask.size());
