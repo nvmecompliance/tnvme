@@ -14,11 +14,12 @@
  *  limitations under the License.
  */
 
-#ifndef _ILLEGALNVMCMDS_r10b_H_
-#define _ILLEGALNVMCMDS_r10b_H_
+#ifndef _ILLEGALADMINCMDS_r12_H_
+#define _ILLEGALADMINCMDS_r12_H_
 
 #include <list>
 #include "test.h"
+#include "illegalAdminCmds_r10b.h"
 
 namespace GrpGeneralCmds {
 
@@ -30,31 +31,27 @@ namespace GrpGeneralCmds {
  * 1) See notes in the header file of the Test base class
  * \endverbatim
  */
-class IllegalNVMCmds_r10b : virtual public Test
+class IllegalAdminCmds_r12 : public IllegalAdminCmds_r10b
 {
 public:
-    IllegalNVMCmds_r10b(string grpName, string testName);
-    virtual ~IllegalNVMCmds_r10b();
+    IllegalAdminCmds_r12(string grpName, string testName);
+    virtual ~IllegalAdminCmds_r12();
 
     /**
      * IMPORTANT: Read Test::Clone() header comment.
      */
-    virtual IllegalNVMCmds_r10b *Clone() const
-        { return new IllegalNVMCmds_r10b(*this); }
-    IllegalNVMCmds_r10b &operator=(const IllegalNVMCmds_r10b &other);
-    IllegalNVMCmds_r10b(const IllegalNVMCmds_r10b &other);
+    virtual IllegalAdminCmds_r12 *Clone() const
+        { return new IllegalAdminCmds_r12(*this); }
+    IllegalAdminCmds_r12 &operator=(const IllegalAdminCmds_r12 &other);
+    IllegalAdminCmds_r12(const IllegalAdminCmds_r12 &other);
 
 
 protected:
-    virtual void RunCoreTest();
-    virtual RunType RunnableCoreTest(bool preserve);
-
     /// To allow future revisions of this test to override this functionality
     virtual list<uint8_t> GetIllegalOpcodes();
-    static const uint8_t WRITE_UNCORR_OPCODE;
-    static const uint8_t COMPARE_OPCODE;
-    static const uint8_t DSM_OPCODE;
-    static const uint8_t WRITE_ZEROES_OPCODE;
+    static const uint8_t NAMESPACE_MNGMT_OPCODE;
+    static const uint8_t NAMESPACE_ATTACH_OPCODE;
+
 
 private:
     ///////////////////////////////////////////////////////////////////////////

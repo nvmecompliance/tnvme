@@ -14,11 +14,12 @@
  *  limitations under the License.
  */
 
-#ifndef _ILLEGALNVMCMDS_r10b_H_
-#define _ILLEGALNVMCMDS_r10b_H_
+#ifndef _ILLEGALNVMCMDS_r11_H_
+#define _ILLEGALNVMCMDS_r11_H_
 
 #include <list>
 #include "test.h"
+#include "illegalNVMCmds_r10b.h"
 
 namespace GrpGeneralCmds {
 
@@ -30,31 +31,28 @@ namespace GrpGeneralCmds {
  * 1) See notes in the header file of the Test base class
  * \endverbatim
  */
-class IllegalNVMCmds_r10b : virtual public Test
+class IllegalNVMCmds_r11 : public IllegalNVMCmds_r10b
 {
 public:
-    IllegalNVMCmds_r10b(string grpName, string testName);
-    virtual ~IllegalNVMCmds_r10b();
+    IllegalNVMCmds_r11(string grpName, string testName);
+    virtual ~IllegalNVMCmds_r11();
 
     /**
      * IMPORTANT: Read Test::Clone() header comment.
      */
-    virtual IllegalNVMCmds_r10b *Clone() const
-        { return new IllegalNVMCmds_r10b(*this); }
-    IllegalNVMCmds_r10b &operator=(const IllegalNVMCmds_r10b &other);
-    IllegalNVMCmds_r10b(const IllegalNVMCmds_r10b &other);
+    virtual IllegalNVMCmds_r11 *Clone() const
+        { return new IllegalNVMCmds_r11(*this); }
+    IllegalNVMCmds_r11 &operator=(const IllegalNVMCmds_r11 &other);
+    IllegalNVMCmds_r11(const IllegalNVMCmds_r11 &other);
 
 
 protected:
-    virtual void RunCoreTest();
-    virtual RunType RunnableCoreTest(bool preserve);
-
     /// To allow future revisions of this test to override this functionality
     virtual list<uint8_t> GetIllegalOpcodes();
-    static const uint8_t WRITE_UNCORR_OPCODE;
-    static const uint8_t COMPARE_OPCODE;
-    static const uint8_t DSM_OPCODE;
-    static const uint8_t WRITE_ZEROES_OPCODE;
+    static const uint8_t RSV_REG_OPCODE;
+    static const uint8_t RSV_REPORT_OPCODE;
+    static const uint8_t RSV_ACQUIRE_OPCODE;
+    static const uint8_t RSV_RELEASE_OPCODE;
 
 private:
     ///////////////////////////////////////////////////////////////////////////

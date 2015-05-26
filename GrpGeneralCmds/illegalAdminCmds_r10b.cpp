@@ -140,8 +140,8 @@ IllegalAdminCmds_r10b::GetIllegalOpcodes()
     for (uint8_t opCode = 0x0D; opCode < VENDOR_SPEC_OPC; opCode++)
         illegalOpCodes.push_back(opCode);
 
-    uint8_t optAdminCmds = (gInformative->GetIdentifyCmdCtrlr()->
-        GetValue(IDCTRLRCAP_OACS) & 0x7);
+    uint8_t optAdminCmds = gInformative->GetIdentifyCmdCtrlr()->
+        GetValue(IDCTRLRCAP_OACS);
 
     if ((optAdminCmds & OACS_SUP_SECURITY_CMD) != 0) {
         illegalOpCodes.remove(SECURITY_SEND_OPCODE);
