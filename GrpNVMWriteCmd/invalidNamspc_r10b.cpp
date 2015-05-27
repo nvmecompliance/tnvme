@@ -126,12 +126,10 @@ InvalidNamspc_r10b::RunCoreTest()
     LOG_NRM("For all namspc's issue cmd to an illegal namspc");
     ConstSharedIdentifyPtr idCtrlrStruct = gInformative->GetIdentifyCmdCtrlr();
     uint32_t nn = (uint32_t)idCtrlrStruct->GetValue(IDCTRLRCAP_NN);
-    if (nn == 0 ) {
+    if (nn == 0)
         throw FrmwkEx(HERE, "Required to support >= 1 namespace");
-    }
 
     for (i = (nn + 1), inc = 1; i <= 0xffffffff; i += (2 * inc), inc += 1327) {
-
         LOG_NRM("Issue write cmd with illegal namspc ID=%llu",
             (unsigned long long)i);
         writeCmd->SetNSID(i);
@@ -151,7 +149,6 @@ InvalidNamspc_r10b::SendCmdToHdw(SharedSQPtr sq, SharedCQPtr cq,
     uint32_t numReaped;
     string work;
     uint16_t uniqueId;
-
 
     LOG_NRM("Send the cmd to hdw via SQ %d", sq->GetQId());
     sq->Send(cmd, uniqueId);

@@ -389,3 +389,30 @@ Identify::GetMaxDataXferSize() const
     LOG_NRM("Calculated Maximum Data Transfer Size (bytes) = 0x%08X", mdtsCalc);
     return mdtsCalc;
 }
+
+
+bool
+Identify::isZeroFilled(void) const
+{
+    const uint8_t *data = GetROPrpBuffer();
+
+    if (GetCNS() == CNS_Controller) {
+        for (int i = 0; i < IDCTRLRCAP_FENCE; i++) {
+            for (unsigned long j = 0; j < mIdCtrlrCapMetrics[i].length; j++) {
+                if (*data++ != 0)
+                    return false;
+            }
+        }
+    } else if (GetCNS() == CNS_Namespace) {
+        for (int i = 0; i < IDNAMESPC_FENCE; i++) {
+            for (unsigned long j = 0; j < mIdNamespcType[i].length; j++) {
+                if (*data++ != 0)
+                    return false;
+            }
+        }
+    } else {
+        throw FrmwkEx(HERE, "CNS currently unsupported: 0x%x", GetCNS());
+    }
+
+    return true;
+}

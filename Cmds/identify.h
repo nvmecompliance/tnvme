@@ -119,6 +119,8 @@ public:
      */
     IdPowerStateDescUnpacked getPSD(const uint8_t psdNum) const;
 
+    bool isZeroFilled(void) const;
+
 
 private:
     /// Details the fields within the identify controller capabilities struct

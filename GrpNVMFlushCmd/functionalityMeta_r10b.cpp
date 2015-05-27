@@ -117,13 +117,6 @@ FunctionalityMeta_r10b::RunCoreTest()
     SharedASQPtr asq = SharedASQPtr(new ASQ(gDutFd));
     asq->Init(5);
 
-    // All queues will use identical IRQ vector
-    IRQ::SetAnySchemeSpecifyNum(1);
-
-    gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
-    if (gCtrlrConfig->SetState(ST_ENABLE) == false)
-        throw FrmwkEx(HERE);
-
     ConstSharedIdentifyPtr idCmdCtrlr = gInformative->GetIdentifyCmdCtrlr();
     uint32_t maxDtXferSz = idCmdCtrlr->GetMaxDataXferSize();
     if (maxDtXferSz == 0)
@@ -154,6 +147,15 @@ FunctionalityMeta_r10b::RunCoreTest()
     vector<uint32_t> meta = gInformative->GetMetaNamespaces();
     for (size_t i = 0; i < meta.size(); i++) {
         LOG_NRM("Processing meta namspc id #%d of %ld", meta[i], meta.size());
+        if (gCtrlrConfig->SetState(ST_DISABLE) == false)
+            throw FrmwkEx(HERE);
+
+        // All queues will use identical IRQ vector
+        IRQ::SetAnySchemeSpecifyNum(1);
+
+        gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
+        if (gCtrlrConfig->SetState(ST_ENABLE) == false)
+            throw FrmwkEx(HERE);
 
         LOG_NRM("Create IOSQ and IOCQ with ID #%d", IOQ_ID);
         CreateIOQs(asq, acq, IOQ_ID, iosq, iocq);
