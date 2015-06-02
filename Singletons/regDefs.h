@@ -146,10 +146,10 @@ struct PciSpcType {
  * are only specific to their respective released documents. Thus, the
  * following may occur:
  *
- *  CtlSpc,              offset,  size, specRev,     maskRO,             impSpec,            dfltValue,          desc
- *  ZZ(CTLSPC_CC,        0x14,    4,    SPECREV_10b, 0x0000000000000000, 0x0000000000000000, 0x0000000000000000, "ctrlr config register (CC)")
- *  ZZ(CTLSPC_CC_1,      0x14,    4,    SPECREV_10c, 0x00fffffffff00000, 0x0000000000000000, 0x0000000000000000, "ctrlr config register (CC)")
- *  ZZ(CTLSPC_CC_2,      0x14,    4,    SPECREV_10d, 0x0000000000000000, 0x0000000000000000, 0x0ffffffffff00000, "ctrlr config register (CC)")
+ *     CtlSpc,           offset,  size, specRev,                                      maskRO,             impSpec,            dfltValue,          desc
+ *  ZZ(CTLSPC_CC,        0x14,    4,    list_of(SPECREV_10b)(SPECREV_10a),            0x0000000000000000, 0x0000000000000000, 0x0000000000000000, "ctrlr config register (CC)")
+ *  ZZ(CTLSPC_CC_1,      0x14,    4,    list_of(SPECREV_10c),                         0x00fffffffff00000, 0x0000000000000000, 0x0000000000000000, "ctrlr config register (CC)")
+ *  ZZ(CTLSPC_CC_2,      0x14,    4,    list_of(SPECREV_10d),                         0x0000000000000000, 0x0000000000000000, 0x0ffffffffff00000, "ctrlr config register (CC)")
  */
 /*     CtlSpc,           offset,  size, specRev,                                      maskRO,             impSpec,            dfltValue,          desc */
 #define CTLSPC_TABLE                                                                                                                                             \
@@ -161,8 +161,10 @@ struct PciSpcType {
     ZZ(CTLSPC_INTMC,     0x10,    4,    list_of(SPECREV_10b)(SPECREV_11)(SPECREV_12), 0x0000000000000000, 0x0000000000000000, 0x0000000000000000, "ctrlr interrupt mask clear register (INTMC)")  \
     ZZ(CTLSPC_CC,        0x14,    4,    list_of(SPECREV_10b)(SPECREV_11)(SPECREV_12), 0x00000000ff00000e, 0x0000000000000000, 0x0000000000000000, "ctrlr config register (CC)")                   \
     ZZ(CTLSPC_RES0,      0x18,    4,    list_of(SPECREV_10b)(SPECREV_11)(SPECREV_12), 0x0000000000000000, 0x0000000000000000, 0x0000000000000000, "ctrlr reserved area 0x18")                     \
-    ZZ(CTLSPC_CSTS,      0x1c,    4,    list_of(SPECREV_10b)(SPECREV_11)(SPECREV_12), 0x00000000ffffffff, 0x0000000000000000, 0x0000000000000000, "ctrlr status register (CSTS)")                 \
-    ZZ(CTLSPC_RES1,      0x20,    4,    list_of(SPECREV_10b)(SPECREV_11)(SPECREV_12), 0x00000000ffffffff, 0x0000000000000000, 0x0000000000000000, "ctrlr reserved area 0x20")                     \
+    ZZ(CTLSPC_CSTS,      0x1c,    4,    list_of(SPECREV_10b),                         0x00000000ffffffff, 0x0000000000000000, 0x0000000000000000, "ctrlr status register (CSTS)")                 \
+    ZZ(CTLSPC_CSTS_11,   0x1c,    4,    list_of(SPECREV_11)(SPECREV_12),              0x00000000ffffffef, 0x0000000000000012, 0x0000000000000000, "ctrlr status register (CSTS)")                 \
+    ZZ(CTLSPC_RES1,      0x20,    4,    list_of(SPECREV_10b),                         0x00000000ffffffff, 0x0000000000000000, 0x0000000000000000, "ctrlr reserved area 0x20")                     \
+    ZZ(CTLSPC_NSSR,      0x20,    4,    list_of(SPECREV_11)(SPECREV_12),              0x0000000000000000, 0x0000000000000000, 0x0000000000000000, "ctrlr NVM subsystem reset (NSSR)")                     \
     ZZ(CTLSPC_AQA,       0x24,    4,    list_of(SPECREV_10b)(SPECREV_11)(SPECREV_12), 0x00000000f000f000, 0x0000000000000000, 0x0000000000000000, "ctrlr admin Q attrib register (AQA)")          \
     ZZ(CTLSPC_ASQ,       0x28,    8,    list_of(SPECREV_10b)(SPECREV_11)(SPECREV_12), 0x0000000000000fff, 0x00000000fffff000, 0x0000000000000000, "ctrlr admin SQ BAR register (ASQ)")            \
     ZZ(CTLSPC_ACQ,       0x30,    8,    list_of(SPECREV_10b)(SPECREV_11)(SPECREV_12), 0x0000000000000fff, 0x00000000fffff000, 0x0000000000000000, "ctrlr admin CQ BAR register (ACQ)")            \
@@ -279,16 +281,20 @@ typedef enum AERUCESBits {
 /// Bit definitions for CTLSPC_CSTS
 typedef enum CSTSBits {
     CSTS_RES0      = 0xfffffff0,
+    CSTS_RES0_r11  = 0xffffffe0, /* 1.1+ */
+    CSTS_NSSRO     = 0x00000010, /* 1.1+ */
     CSTS_SHST      = 0x0000000c,
     CSTS_CFS       = 0x00000002,
     CSTS_RDY       = 0x00000001
 } CSTSBits;
 
 typedef enum CSTSShift {
-    CSTS_SH_RES0   = 0x04,
-    CSTS_SH_SHST   = 0x02,
-    CSTS_SH_CFS    = 0x01,
-    CSTS_SH_RDY    = 0x00
+    CSTS_SH_RES0     = 4,
+    CSTS_SH_RES0_r11 = 5, /* 1.1+ */
+    CSTS_SH_NSSRO    = 4, /* 1.1+ */
+    CSTS_SH_SHST     = 2,
+    CSTS_SH_CFS      = 1,
+    CSTS_SH_RDY      = 0
 } CSTSShift;
 
 /// Bit definitions for CTLSPC_CC
