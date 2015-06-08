@@ -445,6 +445,13 @@ typedef enum OACSBits {
     OACS_SUP_NSMANAGEMENT_CMD = 0x0008
 } OACSBits;
 
+///Bit definitions for IDCTRLRCAP_MIO
+typedef enum MICBits{
+	MIC_SUP_PCI_PORTS 		= 0x0001,
+	MIC_SUP_CONTROLLERS 	= 0x0002,
+	MIC_SUP_SRIOV			= 0x0004
+}MICBits;
+
 typedef enum FRMWBits {
     FRMW_SLOT1_RO   = 0x01,
     FRMW_NUM_SLOTS  = 0x0e,

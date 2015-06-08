@@ -89,9 +89,19 @@ RegisterReservation::RunnableCoreTest(bool preserve)
 
     ConstSharedIdentifyPtr idCtrlrCap = gInformative->GetIdentifyCmdCtrlr();
     uint64_t oncs = idCtrlrCap->GetValue(IDCTRLRCAP_ONCS);
-    if ((oncs & ONCS_SUP_RSRV) == 0) {
-        LOG_NRM("Reporting Reservations not supported (oncs)%ld", oncs);
+    uint64_t mic = idCtrlrCap->GetValue(IDCTRLRCAP_MIC);
+    if((mic & MIC_SUP_PCI_PORTS) == 0)
+    {
+        LOG_NRM("Reporting only one PCI port is supported (mic)%ld", mic);
         return RUN_FALSE;
+    }
+    else
+    {
+        if ((oncs & ONCS_SUP_RSRV) == 0)
+        {
+            LOG_NRM("Reporting Reservations not supported (oncs)%ld", oncs);
+            return RUN_FALSE;
+        }
     }
     preserve = preserve;    // Suppress compiler error/warning
     return RUN_TRUE;        // This test is never destructive
