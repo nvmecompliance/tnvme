@@ -29,7 +29,7 @@ namespace GrpAdminGetFeatCmd {
  * 1) See notes in the header file of the Test base class
  * \endverbatim
  */
-class InvalidFieldInCmd_r10b : public Test
+class InvalidFieldInCmd_r10b : public virtual Test
 {
 public:
     InvalidFieldInCmd_r10b(string grpName, string testName);
@@ -46,8 +46,9 @@ public:
 
 protected:
     virtual void RunCoreTest();
-    virtual RunType RunnableCoreTest(bool preserve);;
+    virtual RunType RunnableCoreTest(bool preserve);
 
+    virtual void getInvalidFIDs(vector<uint16_t> invalidFIDs) const;
 
 private:
     ///////////////////////////////////////////////////////////////////////////

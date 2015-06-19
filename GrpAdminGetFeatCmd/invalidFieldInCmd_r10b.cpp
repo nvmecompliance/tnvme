@@ -104,24 +104,9 @@ InvalidFieldInCmd_r10b::RunCoreTest()
 
     LOG_NRM("Form a vector of invalid FID's");
     vector<uint16_t> invalidFIDs;
-    uint8_t invalFID;
-    
-    invalidFIDs.push_back(0x00);
-    for (uint8_t invalFID = 0x0D; invalFID <= 0x7F; invalFID++)
-        invalidFIDs.push_back(invalFID);
-
-    if ((gInformative->GetIdentifyCmdCtrlr()->GetValue(IDCTRLRCAP_ONCS))
-            & ONCS_SUP_RSRV)
-       invalFID = 0x84;
-    else
-       invalFID = 0x81;  
-
-    for (; invalFID <= 0xBF; invalFID++)
-       invalidFIDs.push_back(invalFID);
+    getInvalidFIDs(invalidFIDs);
        
     for (uint16_t i = 0; i < invalidFIDs.size(); i++) {
-        if (invalidFIDs[i] == 0x81)
-            continue;
         LOG_NRM("Issue get feat cmd using invalid FID = 0x%X", invalidFIDs[i]);
         getFeaturesCmd->SetFID(invalidFIDs[i]);
         work = str(boost::format("invalidFIDs.%xh") % invalidFIDs[i]);
@@ -129,5 +114,20 @@ InvalidFieldInCmd_r10b::RunCoreTest()
             getFeaturesCmd, work, true, CESTAT_INVAL_FIELD);
     }
 }
+
+
+void
+InvalidFieldInCmd_r10b::getInvalidFIDs(vector<uint16_t> invalidFIDs) const
+{
+    // Reserved FIDs
+    invalidFIDs.push_back(0x00);
+    for (uint8_t invalFID = 0x0C; invalFID <= 0x7F; invalFID++)
+        invalidFIDs.push_back(invalFID);
+
+    // Command Set Specific reserved FIDs
+   for (uint8_t invalFID = 0x81; invalFID <= 0xBF; invalFID++)
+       invalidFIDs.push_back(invalFID);
+}
+
 
 }   // namespace
