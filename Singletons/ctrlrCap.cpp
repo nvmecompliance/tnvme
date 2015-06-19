@@ -94,10 +94,8 @@ bool CtrlrCap::GetRESVD1(uint8_t &value)
     bool retVal;
     uint16_t tmp;
 
-    // TODO change when multiple spec revs are supported
     if (mSpecRev == SPECREV_10b)
-        /*retVal = GetRegValue(tmp, CAP_RES1, CAP_SH_RES1);*/
-        retVal = GetRegValue(tmp, CAP_RES1_r11, CAP_SH_RES1_r11);
+        retVal = GetRegValue(tmp, CAP_RES1, CAP_SH_RES1);
     else
         retVal = GetRegValue(tmp, CAP_RES1_r11, CAP_SH_RES1_r11);
 
@@ -111,10 +109,8 @@ bool CtrlrCap::GetCSS(uint8_t &value)
     bool retVal;
     uint16_t tmp;
 
-    // TODO change when multiple spec revs are supported
     if (mSpecRev == SPECREV_10b)
-        /*retVal = GetRegValue(tmp, CAP_CSS, CAP_SH_CSS);*/
-        retVal = GetRegValue(tmp, CAP_CSS_r11, CAP_SH_CSS);
+        retVal = GetRegValue(tmp, CAP_CSS, CAP_SH_CSS);
     else
         retVal = GetRegValue(tmp, CAP_CSS_r11, CAP_SH_CSS);
 
@@ -137,12 +133,10 @@ bool CtrlrCap::GetRESVD2(uint8_t &value)
     bool retVal;
     uint16_t tmp;
 
-    // TODO change when multiple spec revs are supported
     if (mSpecRev == SPECREV_10b)
         retVal = GetRegValue(tmp, CAP_RES2, CAP_SH_RES2);
     else
-//        throw FrmwkEx("Field does not exist in current SpecRev");
-        retVal = GetRegValue(tmp, CAP_RES2, CAP_SH_RES2);
+        throw FrmwkEx(HERE, "Field does not exist in current SpecRev");
 
     retVal = GetRegValue(tmp, CAP_RES2, CAP_SH_RES2);
     value = (uint8_t)tmp;
@@ -206,7 +200,7 @@ bool CtrlrCap::GetCQR(bool &value)
     uint16_t tmp;
     retVal = GetRegValue(tmp, CAP_CQR, CAP_SH_CQR);
     value = (tmp != 0);
-    LOG_NRM("Reading CAP.RESVD3 = 0x%X", tmp);
+    LOG_NRM("Reading CAP.CQR = 0x%X", tmp);
     return retVal;
 }
 
