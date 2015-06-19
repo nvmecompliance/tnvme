@@ -464,7 +464,7 @@ Registers::DiscoverPciCapabilities()
 
         default:
             LOG_ERR("Decoded an unknown capability ID: 0x%02X", capId);
-            return;
+            continue;
         }
 
         // For each capability we find update our knowledge of each reg's
