@@ -127,7 +127,7 @@ typedef enum {
     ZZ(IDCTRLRCAP_NVSCC,    530,    1,      true,  SPECREV_11,  "NVM Vendor Spec Cmd Config (NVSCC)")   \
     ZZ(IDCTRLRCAP_RES213,   531,    1,      true,  SPECREV_11,  "Reserved area @ 0x213")                \
     ZZ(IDCTRLRCAP_ACWU,     532,    2,      false, SPECREV_11,  "Atomic Compare & Write Unit (ACWU)")   \
-    ZZ(IDCTRLRCAP_RES216,   531,    1,      true,  SPECREV_11,  "Reserved area @ 0x216")                \
+    ZZ(IDCTRLRCAP_RES216,   534,    2,      true,  SPECREV_11,  "Reserved area @ 0x216")                \
     ZZ(IDCTRLRCAP_SGLS,     536,    4,      false, SPECREV_11,  "SGL Support (SGLS)")                   \
     ZZ(IDCTRLRCAP_RES21C,   540,    164,    true,  SPECREV_11,  "Reserved area @ 0x21C")                \
     ZZ(IDCTRLRCAP_RES2C0,   704,    1344,   true,  SPECREV_10b, "Reserved area @ 2c0")                  \
