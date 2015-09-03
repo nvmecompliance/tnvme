@@ -27,6 +27,7 @@
 #include "fidPwrMgmt_r10b.h"
 #include "fidTempThres_r10b.h"
 #include "fidErrRecovery_r10b.h"
+#include "fidErrRecovery_r12.h"
 #include "fidVolatileCash_r10b.h"
 #include "fidIRQCoalescing_r10b.h"
 #include "fidIRQVec_r10b.h"
@@ -45,7 +46,6 @@ GrpAdminSetGetFeatCombo::GrpAdminSetGetFeatCombo(size_t grpNum) :
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Strategy
     switch (gCmdLine.rev) {
     case SPECREV_11:
-    case SPECREV_12:
     case SPECREV_10b:
         APPEND_TEST_AT_XLEVEL(FIDArbitration_r10b, GrpAdminSetGetFeatCombo)
         APPEND_TEST_AT_XLEVEL(FIDPwrMgmt_r10b, GrpAdminSetGetFeatCombo)
@@ -56,7 +56,18 @@ GrpAdminSetGetFeatCombo::GrpAdminSetGetFeatCombo(size_t grpNum) :
         APPEND_TEST_AT_XLEVEL(FIDIRQVec_r10b, GrpAdminSetGetFeatCombo)
         APPEND_TEST_AT_XLEVEL(FIDWriteAtomicity_r10b, GrpAdminSetGetFeatCombo)
         APPEND_TEST_AT_XLEVEL(FIDAsyncEventCfg_r10b, GrpAdminSetGetFeatCombo)
+        break;
 
+    case SPECREV_12:
+        APPEND_TEST_AT_XLEVEL(FIDArbitration_r10b, GrpAdminSetGetFeatCombo)
+        APPEND_TEST_AT_XLEVEL(FIDPwrMgmt_r10b, GrpAdminSetGetFeatCombo)
+        APPEND_TEST_AT_XLEVEL(FIDTempThres_r10b, GrpAdminSetGetFeatCombo)
+        APPEND_TEST_AT_XLEVEL(FIDErrRecovery_r12, GrpAdminSetGetFeatCombo)
+        APPEND_TEST_AT_XLEVEL(FIDVolatileCash_r10b, GrpAdminSetGetFeatCombo)
+        APPEND_TEST_AT_XLEVEL(FIDIRQCoalescing_r10b, GrpAdminSetGetFeatCombo)
+        APPEND_TEST_AT_XLEVEL(FIDIRQVec_r10b, GrpAdminSetGetFeatCombo)
+        APPEND_TEST_AT_XLEVEL(FIDWriteAtomicity_r10b, GrpAdminSetGetFeatCombo)
+        APPEND_TEST_AT_XLEVEL(FIDAsyncEventCfg_r10b, GrpAdminSetGetFeatCombo)
         break;
 
     default:

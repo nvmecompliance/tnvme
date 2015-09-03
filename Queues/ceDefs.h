@@ -41,14 +41,14 @@ typedef enum SCT {
     ZZ(CESTAT_ABRT_MISS_FUSE,    SCT_GENERIC, 0x0a, "Cmd aborted due to missing fused cmd") \
     ZZ(CESTAT_INVAL_NAMSPC,      SCT_GENERIC, 0x0b, "Invalid namespace or format") \
     ZZ(CESTAT_CMD_SEQ_ERROR,     SCT_GENERIC, 0x0c, "Command Sequence Error") \
-	ZZ(CESTAT_INVAL_SQL_SEG_DESC,  SCT_GENERIC, 0x0d, "Invalid SGL Segment Descriptor") \
-	ZZ(CESTAT_INVAL_SQL_NUM_DESC,  SCT_GENERIC, 0x0e, "Invalid Number of SGL Descriptors") \
-	ZZ(CESTAT_INVAL_SQL_DATA_LEN,  SCT_GENERIC, 0x0f, "Data SGL Length Invalid") \
-	ZZ(CESTAT_INVAL_SQL_META_LEN,  SCT_GENERIC, 0x10, "Metadata SGL Length Invalid") \
-	ZZ(CESTAT_INVAL_SQL_DESC_TYPE, SCT_GENERIC, 0x11, "SGL Descriptor Type Invalid") \
-	ZZ(CESTAT_INVAL_CNTLR_BUF_USE, SCT_GENERIC, 0x12, "Invalid Use Of Controller Memory Buffer") \
-	ZZ(CESTAT_INVAL_PRP_OFFSET,  SCT_GENERIC, 0x13, "PRP Offset Invalid") \
-	ZZ(CESTAT_ATOMIC_WRT_EXCEED, SCT_GENERIC, 0x14, "Atomic Write Unit Exceeded") \
+  	ZZ(CESTAT_INVAL_SGL_SEG_DESC,  SCT_GENERIC, 0x0d, "Invalid SGL Segment Descriptor") \
+  	ZZ(CESTAT_INVAL_SGL_NUM_DESC,  SCT_GENERIC, 0x0e, "Invalid Number of SGL Descriptors") \
+  	ZZ(CESTAT_INVAL_SGL_DATA_LEN,  SCT_GENERIC, 0x0f, "Data SGL Length Invalid") \
+  	ZZ(CESTAT_INVAL_SGL_META_LEN,  SCT_GENERIC, 0x10, "Metadata SGL Length Invalid") \
+  	ZZ(CESTAT_INVAL_SGL_DESC_TYPE, SCT_GENERIC, 0x11, "SGL Descriptor Type Invalid") \
+  	ZZ(CESTAT_INVAL_CNTLR_BUF_USE, SCT_GENERIC, 0x12, "Invalid Use Of Controller Memory Buffer") \
+  	ZZ(CESTAT_INVAL_PRP_OFFSET,  SCT_GENERIC, 0x13, "PRP Offset Invalid") \
+  	ZZ(CESTAT_ATOMIC_WRT_EXCEED, SCT_GENERIC, 0x14, "Atomic Write Unit Exceeded") \
     ZZ(CESTAT_LBA_OUT_RANGE,     SCT_GENERIC, 0x80, "LBA out of range") \
     ZZ(CESTAT_CAP_EXCEEDED,      SCT_GENERIC, 0x81, "Capacity exceeded") \
     ZZ(CESTAT_NAMSPC_NOT_RDY,    SCT_GENERIC, 0x82, "Namespace not ready") \
@@ -72,17 +72,17 @@ typedef enum SCT {
     ZZ(CESTAT_FID_NOT_NS_SPEC,   SCT_CMD,     0x0f, "Feature Not Namespace Specific") \
     ZZ(CESTAT_FW_ACT_REQ_SS_RESET, SCT_CMD,     0x10, "Firmware Activation Requires NVM SubsystemReset") \
     ZZ(CESTAT_FW_ACT_REQ_RESET,    SCT_CMD,     0x11, "Firmware Activation Requires Reset") \
-	ZZ(CESTAT_FW_ACT_REQ_MAX_TIME_VIO, SCT_CMD,     0x12, "Firmware Activation Requires Maximum Time Violation") \
-	ZZ(CESTAT_FW_ACT_PROHIBITED,  SCT_CMD,     0x13, "Firmware Activation Prohibitied") \
-	ZZ(CESTAT_OVERLAP_RANGE,      SCT_CMD,     0x14, "Overlapping Range") \
-	ZZ(CESTAT_NS_INSUFF_CAPACITY, SCT_CMD,     0x15, "Namespace Insufficient Capacity") \
-	ZZ(CESTAT_NS_ID_UNAVAIL,      SCT_CMD,     0x16, "Namespace Identifier Unavailable") \
-	ZZ(CESTAT_RESERVED_x17,       SCT_CMD,     0x17, "RESERVED") \
-	ZZ(CESTAT_NS_ALREADY_ATTACHED,SCT_CMD,     0x18, "Namespace Already Attached") \
-	ZZ(CESTAT_NS_IS_PRIVATE,      SCT_CMD,     0x19, "Namespace Is Private") \
-	ZZ(CESTAT_NS_NOT_ATTACHED,    SCT_CMD,     0x1a, "Namespace Not Attached") \
-	ZZ(CESTAT_THIN_PROV_NOT_SUPP, SCT_CMD,     0x1b, "Thin Provisioning Not Supported") \
-	ZZ(CESTAT_CNTRL_LIST_INVALID, SCT_CMD,     0x1c, "Controller List Invalid") \
+  	ZZ(CESTAT_FW_ACT_REQ_MAX_TIME_VIO, SCT_CMD,     0x12, "Firmware Activation Requires Maximum Time Violation") \
+  	ZZ(CESTAT_FW_ACT_PROHIBITED,  SCT_CMD,     0x13, "Firmware Activation Prohibitied") \
+  	ZZ(CESTAT_OVERLAP_RANGE,      SCT_CMD,     0x14, "Overlapping Range") \
+  	ZZ(CESTAT_NS_INSUFF_CAPACITY, SCT_CMD,     0x15, "Namespace Insufficient Capacity") \
+  	ZZ(CESTAT_NS_ID_UNAVAIL,      SCT_CMD,     0x16, "Namespace Identifier Unavailable") \
+  	ZZ(CESTAT_RESERVED_x17,       SCT_CMD,     0x17, "RESERVED") \
+  	ZZ(CESTAT_NS_ALREADY_ATTACHED,SCT_CMD,     0x18, "Namespace Already Attached") \
+  	ZZ(CESTAT_NS_IS_PRIVATE,      SCT_CMD,     0x19, "Namespace Is Private") \
+  	ZZ(CESTAT_NS_NOT_ATTACHED,    SCT_CMD,     0x1a, "Namespace Not Attached") \
+  	ZZ(CESTAT_THIN_PROV_NOT_SUPP, SCT_CMD,     0x1b, "Thin Provisioning Not Supported") \
+  	ZZ(CESTAT_CNTRL_LIST_INVALID, SCT_CMD,     0x1c, "Controller List Invalid") \
     ZZ(CESTAT_CONFLICT_ATTR,     SCT_CMD,     0x80, "Conflicting attributes") \
     ZZ(CESTAT_INVAL_PROT_INFO,   SCT_CMD,     0x81, "Invalid protection information") \
     ZZ(CESTAT_WRITE_INTO_RO,     SCT_CMD,     0x82, "Attempt to write to read only range") \
@@ -93,6 +93,7 @@ typedef enum SCT {
     ZZ(CESTAT_E2E_REF_TAG_ERR,   SCT_MEDIA,   0x84, "End-to-end reference tag check error") \
     ZZ(CESTAT_COMPARE_FAIL,      SCT_MEDIA,   0x85, "Compare failure") \
     ZZ(CESTAT_ACCESS_DENIED,     SCT_MEDIA,   0x86, "Access denied") \
+    ZZ(CESTAT_DEALLOC_UNWRITTEN_LB, SCT_MEDIA,0x87, "Deallocated or Unwritten Logical Block") \
     ZZ(CESTAT_IGNORE,            SCT_IGNORE,  0xFE, "Placeholder for enum to ignore CE validation")
 
 #define ZZ(a, b, c, d)      a,

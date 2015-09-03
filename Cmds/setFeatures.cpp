@@ -205,8 +205,25 @@ SetFeatures::SetErrRecoveryTLER(uint16_t tler)
 uint16_t
 SetFeatures::GetErrRecoveryTLER() const
 {
-    LOG_NRM("Getting Error recover retry timeout (TLER)");
+    LOG_NRM("Getting error recovery retry timeout (TLER)");
     return GetWord(11, 0);
+}
+
+
+void
+SetFeatures::SetErrRecoveryDULBE(bool dulbe)
+{
+    LOG_NRM("Setting error recovery dealloc or unwritten LBA err EN (DULBE): "
+        "0x%05X", dulbe);
+    SetBit(dulbe, 11, 16);
+}
+
+
+bool
+SetFeatures::GetErrRecoveryDULBE() const
+{
+    LOG_NRM("Getting error recovery dealloc or unwritten LBA err EN (DULBE)");
+    return GetBit(11, 16) != 0;
 }
 
 

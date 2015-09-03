@@ -92,6 +92,14 @@ public:
     uint16_t GetErrRecoveryTLER() const;
 
     /**
+     * Set the error recovery deallocated or unwritten logical block error
+     * enable bit.
+     * @param dulbe The bit value to set; true = 1, false = 0
+     */
+    void SetErrRecoveryDULBE(bool dulbe);
+    bool GetErrRecoveryDULBE() const;
+
+    /**
      * Set the volatile write cache to either enabled or disabled.
      * @param wce Pass write cache enabled(1) or disabled(0).
      */

@@ -35,6 +35,7 @@ typedef enum {
 	NS_E2ES,    // E2E data Separate (E2ES) buffer
 	NS_UNKNOWN, // failure type case
 } NamspcType;
+
 /*     IdCtrlrCap,          offset, length, m/o,   specRev,     desc                                   */
 #define IDCTRLRCAP_PSD_TABLE \
     ZZ(IDCTRLRCAP_PSD0,     2048,   32,     true,  SPECREV_10b, "Power State 0 Desc (PSD0)")            \
@@ -251,11 +252,23 @@ struct IdCtrlrCapStruct {
     ZZ(IDNAMESPC_MC,        27,     1,      true,  SPECREV_10b, "Metadata Capabilities (MC)")           \
     ZZ(IDNAMESPC_DPC,       28,     1,      true,  SPECREV_10b, "End 2 End Data Protection Cap (DPC)")  \
     ZZ(IDNAMESPC_DPS,       29,     1,      true,  SPECREV_10b, "End 2 End Prot Type Settings (DPS)")   \
-    ZZ(IDNAMESPC_NMIC,      30,     1,      false, SPECREV_10b/*SPECREV_11b*/, "Namspc Multi-path I/O and Namspc Sharing Cap (NMIC)")\
-    ZZ(IDNAMESPC_RESCAP,    31,     1,      false, SPECREV_10b/*SPECREV_11b*/, "Reservation Capabilities (RESCAP)")\
+    ZZ(IDNAMESPC_NMIC,      30,     1,      false, SPECREV_11, "Namspc Multi-path I/O and Namspc Sharing Cap (NMIC)")\
+    ZZ(IDNAMESPC_RESCAP,    31,     1,      false, SPECREV_11, "Reservation Capabilities (RESCAP)")    \
     ZZ(IDNAMESPC_RES1E,     30,     98,     true,  SPECREV_10b, "Reserved area @ 0x1e")                 \
-    ZZ(IDNAMESPC_RES20,     32,     88,     true,  SPECREV_10b/*SPECREV_11b*/, "Reserved area @ 0x20")  \
-    ZZ(IDNAMESPC_EUI64,     120,    8,      true,  SPECREV_10b/*SPECREV_11b*/, "IEEE Extended Unique Identifier (EUI64)")  \
+    ZZ(IDNAMESPC_RES20,     32,     88,     true,  SPECREV_11, "Reserved area @ 0x20")                 \
+    ZZ(IDNAMESPC_FPI,       32,     1,      false, SPECREV_12,  "Format Progress Indicator (FPI)")      \
+    ZZ(IDNAMESPC_RES21,     33,     1,      true,  SPECREV_12,  "Reserved area @ 0x21")                 \
+    ZZ(IDNAMESPC_NAWUN,     34,     2,      false, SPECREV_12,  "Namespace Atomic Write Unit Normal (NAWUN)")         \
+    ZZ(IDNAMESPC_NAWUPF,    36,     2,      false, SPECREV_12,  "Namespace Atomic Write Unit Power Fail (NAWUPF)")    \
+    ZZ(IDNAMESPC_NACWU,     38,     2,      false, SPECREV_12,  "Namespace Atomic Compare & Write Unit (NACWU)")      \
+    ZZ(IDNAMESPC_NABSN,     40,     2,      false, SPECREV_12,  "Namespace Atomic Boundary Size Normal (NABSN)")      \
+    ZZ(IDNAMESPC_NABO,      42,     2,      false, SPECREV_12,  "Namespace Atomic Boundary Offset (NABO)")            \
+    ZZ(IDNAMESPC_NABSPF,    44,     2,      false, SPECREV_12,  "Namespace Atomic Boundary Size Power Fail (NABSPF)") \
+    ZZ(IDNAMESPC_RES2E,     46,     2,      true,  SPECREV_12,  "Reserved area @ 0x2e")                 \
+    ZZ(IDNAMESPC_NVMCAP,    48,     16,     false, SPECREV_12,  "NVM Capacity (NVMCAP)")                \
+    ZZ(IDNAMESPC_RES40,     64,     40,     true,  SPECREV_12,  "Reserved area @ 0x40")                 \
+    ZZ(IDNAMESPC_NGUID,     104,    16,     false, SPECREV_12,  "Namespace Globally Unique Identifier (NGUID)")       \
+    ZZ(IDNAMESPC_EUI64,     120,    8,      true,  SPECREV_11, "IEEE Extended Unique Identifier (EUI64)")            \
     ZZ(IDNAMESPC_LBAF0,     128,    4,      true,  SPECREV_10b, "LBA Format 0 Support (LBAF0)")         \
     ZZ(IDNAMESPC_LBAF1,     132,    4,      false, SPECREV_10b, "LBA Format 1 Support (LBAF1)")         \
     ZZ(IDNAMESPC_LBAF2,     136,    4,      false, SPECREV_10b, "LBA Format 2 Support (LBAF2)")         \
@@ -401,7 +414,6 @@ struct NamespaceManagementStruct {
     	snprintf(stringToAppend, 1024, "NMIC  : 0x%02x\n", NMIC);  retStr+=stringToAppend;
     	printf("\n%s\n", retStr.c_str() );
     	return retStr;
-
     }
 } __attribute__((__packed__));
 
@@ -419,14 +431,15 @@ struct NamespaceManagementStruct {
 // CNS_ControllerListAttachedToNSID   0x12    X     A   (Controller List that are attached to NSID X, starting with CNTID greater than A)
 // CNS_ControllerListSubsystem        0x13    -     B   (Controller List present in subsystem starting with CNTID greater than B)
 typedef enum CNSValues {
-	CNS_Namespace  = 0x0,
-	CNS_Controller = 0x1,
-	CNS_NamespaceListAttached = 0x2,
-	CNS_NamespaceListSubsystem = 0x10,
-	CNS_NamespaceStructSubsystem = 0x11,
-	CNS_ControllerListAttachedToNSID = 0x12,
-	CNS_ControllerListSubsystem = 0x13
+  	CNS_Namespace                    = 0x00,
+  	CNS_Controller                   = 0x01,
+  	CNS_NamespaceListAttached        = 0x02,
+  	CNS_NamespaceListSubsystem       = 0x10,
+  	CNS_NamespaceStructSubsystem     = 0x11,
+  	CNS_ControllerListAttachedToNSID = 0x12,
+  	CNS_ControllerListSubsystem      = 0x13
 } CNSValues;
+
 /// Bit definitions for IDCTRLRCAP_ONCS
 typedef enum ONCSBits {
     ONCS_SUP_COMP_CMD           = 0x0001,
@@ -461,5 +474,12 @@ typedef enum RESCAPBits {
     RESCAP_EXCL_ACCESS_ALL  = 0x40,
     RESCAP_RESV             = 0x80
 } RESCAPBits;
+
+typedef enum NSFEATBits {
+    NSFEAT_THIN_PROVISIONING              = 0x01,
+    NSFEAT_NAWUN_NAWUPF_NACWU             = 0x02,
+    NSFEAT_DEALLOCATED_UNWRITTEN_LBA      = 0x04,
+    NSFEAT_RESV                           = 0xF8
+} NSFEATBits;
 
 #endif

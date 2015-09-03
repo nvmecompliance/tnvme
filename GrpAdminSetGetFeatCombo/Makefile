@@ -22,6 +22,7 @@ SRC =					\
 	fidPwrMgmt_r10b.cpp		\
 	fidTempThres_r10b.cpp		\
 	fidErrRecovery_r10b.cpp		\
+	fidErrRecovery_r12.cpp		\
 	fidVolatileCash_r10b.cpp	\
 	fidIRQCoalescing_r10b.cpp	\
 	fidIRQVec_r10b.cpp		\
