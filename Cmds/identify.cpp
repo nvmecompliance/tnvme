@@ -188,53 +188,48 @@ Identify::getPSD(const uint8_t psdNum) const
     IdentifyDataType psd = mIdCtrlrCapMetrics[IDCTRLRCAP_PSD[psdNum]];
     const uint8_t *data = &((GetROPrpBuffer())[psd.offset]);
     uint64_t buf = 0;
-    int numRead = 0;
 
     // PSD is 32 bytes long so need to parse the buffer directly
     desc.MP     = (*((uint16_t *)data) & 0xffff);
-    data += numRead += 2;
+    data += 2;
     desc.RES0   = (*((uint8_t *)data)  & 0xff);
-    data += numRead += 1;
+    data += 1;
     desc.MPS    = (*((uint8_t *)data)  & 0x01);
-    desc.NOPS   = (*((uint8_t *)data)  & 0x02);
+    desc.NOPS   = (*((uint8_t *)data)  & 0x02) >> 1;
     desc.RES1   = (*((uint8_t *)data)  & 0xfc) >> 2;
-    data += numRead += 1;
+    data += 1;
     desc.ENLAT  = (*((uint32_t *)data) & 0xffffffff);
-    data += numRead += 4;
+    data += 4;
     desc.EXLAT  = (*((uint32_t *)data) & 0xffffffff);
-    data += numRead += 4;
+    data += 4;
     desc.RRT    = (*((uint8_t *)data)  & 0x1f);
     desc.RES2   = (*((uint8_t *)data)  & 0xe0) >> 5;
-    data += numRead += 1;
+    data += 1;
     desc.RRL    = (*((uint8_t *)data)  & 0x1f);
     desc.RES3   = (*((uint8_t *)data)  & 0xe0) >> 5;
-    data += numRead += 1;
+    data += 1;
     desc.RWT    = (*((uint8_t *)data)  & 0x1f);
     desc.RES4   = (*((uint8_t *)data)  & 0xe0) >> 5;
-    data += numRead += 1;
+    data += 1;
     desc.RWL    = (*((uint8_t *)data)  & 0x1f);
 
     // Parse RES5 section 1
     buf        |= ((uint64_t)*((uint8_t *)data)  & 0xe0) >> 5;
-    data += numRead += 1;
+    data += 1;
     buf        |= ((uint64_t)*((uint32_t *)data) & 0xffffffff) << 3;
-    data += numRead += 4;
+    data += 4;
     buf        |= ((uint64_t)*((uint32_t *)data) & 0x1fffffff) << 35;
     desc.RES5_1 = buf;
 
     // Parse RES5 section 2; section 3 will be last 5 bits of last chunk
     buf = 0;
     buf        |= ((uint64_t)*((uint32_t *)data) & 0xe0000000) >> 29;
-    data += numRead += 4;
+    data += 4;
     buf        |= ((uint64_t)*((uint32_t *)data) & 0xffffffff) << 3;
-    data += numRead += 4;
+    data += 4;
     buf        |= ((uint64_t)*((uint32_t *)data) & 0x07ffffff) << 35;
     desc.RES5_2 = buf;
     desc.RES5_3 = (*((uint32_t *)data) & 0xf8000000) >> 27;
-
-    // data should be pointing to last 4 bytes of the power state descriptor
-    // at end (i.e. 32 - 4 = 28)
-    assert(numRead == 28);
 
     return desc;
 }
