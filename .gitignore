@@ -8,6 +8,7 @@ tnvme-*/
 tnvme
 .cproject
 .project
+.settings
 *.sublime-project
 *.sublime-workspace
 *.a
