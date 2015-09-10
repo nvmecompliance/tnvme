@@ -23,7 +23,7 @@
 #include "../Utils/kernelAPI.h"
 #include "../Utils/irq.h"
 #include "../Utils/io.h"
-#include "../Cmds/baseFeatures.h"
+#include "../Cmds/featureDefs.h"
 #include "../Cmds/getFeatures.h"
 #include "../Cmds/setFeatures.h"
 
@@ -127,9 +127,9 @@ FIDIRQCoalescing_r10b::RunCoreTest()
         SharedSetFeaturesPtr(new SetFeatures());
 
     LOG_NRM("Set and Get features for IRQ coalescing (FID = 0x%x)",
-        BaseFeatures::FID_IRQ_COALESCING);
-    getFeaturesCmd->SetFID(BaseFeatures::FID_IRQ_COALESCING);
-    setFeaturesCmd->SetFID(BaseFeatures::FID_IRQ_COALESCING);
+        FID_IRQ_COALESCING);
+    getFeaturesCmd->SetFID(FID_IRQ_COALESCING);
+    setFeaturesCmd->SetFID(FID_IRQ_COALESCING);
 
     uint8_t irqclscMismatch = 0;
 

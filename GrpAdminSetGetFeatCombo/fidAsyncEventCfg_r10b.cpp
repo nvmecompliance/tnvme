@@ -23,7 +23,7 @@
 #include "../Utils/kernelAPI.h"
 #include "../Utils/irq.h"
 #include "../Utils/io.h"
-#include "../Cmds/baseFeatures.h"
+#include "../Cmds/featureDefs.h"
 #include "../Cmds/getFeatures.h"
 #include "../Cmds/setFeatures.h"
 
@@ -127,9 +127,9 @@ FIDAsyncEventCfg_r10b::RunCoreTest()
         SharedSetFeaturesPtr(new SetFeatures());
 
     LOG_NRM("Set and Get features for async event config (FID = 0x%x)",
-        BaseFeatures::FID_ASYNC_EVENT_CONFIG);
-    getFeaturesCmd->SetFID(BaseFeatures::FID_ASYNC_EVENT_CONFIG);
-    setFeaturesCmd->SetFID(BaseFeatures::FID_ASYNC_EVENT_CONFIG);
+        FID_ASYNC_EVENT_CONFIG);
+    getFeaturesCmd->SetFID(FID_ASYNC_EVENT_CONFIG);
+    setFeaturesCmd->SetFID(FID_ASYNC_EVENT_CONFIG);
 
     uint8_t asyncEventMismatch = 0;
 

@@ -23,7 +23,7 @@
 #include "../Utils/kernelAPI.h"
 #include "../Utils/irq.h"
 #include "../Utils/io.h"
-#include "../Cmds/baseFeatures.h"
+#include "../Cmds/featureDefs.h"
 #include "../Cmds/getFeatures.h"
 #include "../Cmds/setFeatures.h"
 
@@ -127,9 +127,9 @@ FIDIRQVec_r10b::RunCoreTest()
         SharedSetFeaturesPtr(new SetFeatures());
 
     LOG_NRM("Set and Get features for IRQ vec config (FID = 0x%x)",
-        BaseFeatures::FID_IRQ_VEC_CONFIG);
-    getFeaturesCmd->SetFID(BaseFeatures::FID_IRQ_VEC_CONFIG);
-    setFeaturesCmd->SetFID(BaseFeatures::FID_IRQ_VEC_CONFIG);
+        FID_IRQ_VEC_CONFIG);
+    getFeaturesCmd->SetFID(FID_IRQ_VEC_CONFIG);
+    setFeaturesCmd->SetFID(FID_IRQ_VEC_CONFIG);
 
     uint16_t max_ivec = IRQ::GetMaxIRQsSupportedAnyScheme();
 

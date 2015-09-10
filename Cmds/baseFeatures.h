@@ -40,22 +40,6 @@ public:
      */
     void SetFID(uint8_t fid);
     uint8_t GetFID() const;
-    static const uint8_t FID_ARBITRATION;        // admin cmd
-    static const uint8_t FID_PWR_MGMT;           // admin cmd
-    static const uint8_t FID_LBA_RANGE;          // admin cmd
-    static const uint8_t FID_TEMP_THRESHOLD;     // admin cmd
-    static const uint8_t FID_ERR_RECOVERY;       // admin cmd
-    static const uint8_t FID_VOL_WR_CACHE;       // admin cmd; volatile wr cache
-    static const uint8_t FID_NUM_QUEUES;         // admin cmd
-    static const uint8_t FID_IRQ_COALESCING;     // admin cmd
-    static const uint8_t FID_IRQ_VEC_CONFIG;     // admin cmd
-    static const uint8_t FID_WRITE_ATOMICITY;    // admin cmd
-    static const uint8_t FID_ASYNC_EVENT_CONFIG; // admin cmd
-    static const uint8_t FID_AUTO_PS_TRANS;      // admin cmd
-    static const uint8_t FID_SW_PROGRESS;        // NVM cmd
-    static const uint8_t FID_HOST_ID;            // NVM cmd
-    static const uint8_t FID_RESV_NOTIF_MASK;    // NVM cmd
-    static const uint8_t FID_RESV_PERSIST;       // NVM cmd
 
 
 private:

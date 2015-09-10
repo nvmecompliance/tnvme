@@ -25,6 +25,7 @@
 #include "../Utils/io.h"
 #include "../Cmds/getFeatures.h"
 #include "../Cmds/setFeatures.h"
+#include "../Cmds/featureDefs.h"
 
 #define NO_LIMIT            0x7
 
@@ -128,10 +129,9 @@ FIDArbitration_r10b::RunCoreTest()
     SharedSetFeaturesPtr setFeaturesCmd =
         SharedSetFeaturesPtr(new SetFeatures());
 
-    LOG_NRM("Set and Get features arbitration (FID = 0x%x)",
-        BaseFeatures::FID_ARBITRATION);
-    getFeaturesCmd->SetFID(BaseFeatures::FID_ARBITRATION);
-    setFeaturesCmd->SetFID(BaseFeatures::FID_ARBITRATION);
+    LOG_NRM("Set and Get features arbitration (FID = 0x%x)", FID_ARBITRATION);
+    getFeaturesCmd->SetFID(FID_ARBITRATION);
+    setFeaturesCmd->SetFID(FID_ARBITRATION);
 
     uint8_t arbBurst[] =  {
         0, 1, 2, 3, 4, 5, 6,  NO_LIMIT

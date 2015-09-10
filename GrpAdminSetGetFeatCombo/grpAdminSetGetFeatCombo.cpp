@@ -23,16 +23,17 @@
 #include "../Utils/io.h"
 #include "../Cmds/getFeatures.h"
 #include "../Cmds/setFeatures.h"
+#include "../Cmds/featureDefs.h"
 #include "fidArbitration_r10b.h"
 #include "fidPwrMgmt_r10b.h"
 #include "fidTempThres_r10b.h"
 #include "fidErrRecovery_r10b.h"
-#include "fidErrRecovery_r12.h"
 #include "fidVolatileCash_r10b.h"
 #include "fidIRQCoalescing_r10b.h"
 #include "fidIRQVec_r10b.h"
 #include "fidWriteAtomicity_r10b.h"
 #include "fidAsyncEventCfg_r10b.h"
+#include "fidErrRecovery_r12.h"
 
 namespace GrpAdminSetGetFeatCombo {
 
@@ -45,24 +46,23 @@ GrpAdminSetGetFeatCombo::GrpAdminSetGetFeatCombo(size_t grpNum) :
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Numbering" and
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Strategy
     switch (gCmdLine.rev) {
-    case SPECREV_11:
-    case SPECREV_10b:
+    case SPECREV_12:
         APPEND_TEST_AT_XLEVEL(FIDArbitration_r10b, GrpAdminSetGetFeatCombo)
         APPEND_TEST_AT_XLEVEL(FIDPwrMgmt_r10b, GrpAdminSetGetFeatCombo)
         APPEND_TEST_AT_XLEVEL(FIDTempThres_r10b, GrpAdminSetGetFeatCombo)
-        APPEND_TEST_AT_XLEVEL(FIDErrRecovery_r10b, GrpAdminSetGetFeatCombo)
+        APPEND_TEST_AT_XLEVEL(FIDErrRecovery_r12, GrpAdminSetGetFeatCombo)
         APPEND_TEST_AT_XLEVEL(FIDVolatileCash_r10b, GrpAdminSetGetFeatCombo)
         APPEND_TEST_AT_XLEVEL(FIDIRQCoalescing_r10b, GrpAdminSetGetFeatCombo)
         APPEND_TEST_AT_XLEVEL(FIDIRQVec_r10b, GrpAdminSetGetFeatCombo)
         APPEND_TEST_AT_XLEVEL(FIDWriteAtomicity_r10b, GrpAdminSetGetFeatCombo)
         APPEND_TEST_AT_XLEVEL(FIDAsyncEventCfg_r10b, GrpAdminSetGetFeatCombo)
         break;
-
-    case SPECREV_12:
+    case SPECREV_11:
+    case SPECREV_10b:
         APPEND_TEST_AT_XLEVEL(FIDArbitration_r10b, GrpAdminSetGetFeatCombo)
         APPEND_TEST_AT_XLEVEL(FIDPwrMgmt_r10b, GrpAdminSetGetFeatCombo)
         APPEND_TEST_AT_XLEVEL(FIDTempThres_r10b, GrpAdminSetGetFeatCombo)
-        APPEND_TEST_AT_XLEVEL(FIDErrRecovery_r12, GrpAdminSetGetFeatCombo)
+        APPEND_TEST_AT_XLEVEL(FIDErrRecovery_r10b, GrpAdminSetGetFeatCombo)
         APPEND_TEST_AT_XLEVEL(FIDVolatileCash_r10b, GrpAdminSetGetFeatCombo)
         APPEND_TEST_AT_XLEVEL(FIDIRQCoalescing_r10b, GrpAdminSetGetFeatCombo)
         APPEND_TEST_AT_XLEVEL(FIDIRQVec_r10b, GrpAdminSetGetFeatCombo)
@@ -211,7 +211,7 @@ GrpAdminSetGetFeatCombo::SaveArbitration(SharedASQPtr asq, SharedACQPtr acq)
     LOG_NRM("Create Get features cmd");
     SharedGetFeaturesPtr getFeaturesCmd =
         SharedGetFeaturesPtr(new GetFeatures());
-    getFeaturesCmd->SetFID(BaseFeatures::FID_ARBITRATION);
+    getFeaturesCmd->SetFID(FID_ARBITRATION);
     struct nvme_gen_cq acqMetrics = acq->GetQMetrics();
     IO::SendAndReapCmd(mGrpName, mGrpName, CALC_TIMEOUT_ms(1), asq, acq,
         getFeaturesCmd, "SaveFeatArb", true);
@@ -228,7 +228,7 @@ GrpAdminSetGetFeatCombo::SavePowerState(SharedASQPtr asq, SharedACQPtr acq)
     LOG_NRM("Create Get features cmd");
     SharedGetFeaturesPtr getFeaturesCmd =
         SharedGetFeaturesPtr(new GetFeatures());
-    getFeaturesCmd->SetFID(BaseFeatures::FID_PWR_MGMT);
+    getFeaturesCmd->SetFID(FID_PWR_MGMT);
     struct nvme_gen_cq acqMetrics = acq->GetQMetrics();
     IO::SendAndReapCmd(mGrpName, mGrpName, CALC_TIMEOUT_ms(1), asq, acq,
         getFeaturesCmd, "SaveFeatPwrMgmt", true);
@@ -244,7 +244,7 @@ GrpAdminSetGetFeatCombo::SaveTMPTH(SharedASQPtr asq, SharedACQPtr acq)
     LOG_NRM("Create Get features cmd");
     SharedGetFeaturesPtr getFeaturesCmd =
         SharedGetFeaturesPtr(new GetFeatures());
-    getFeaturesCmd->SetFID(BaseFeatures::FID_TEMP_THRESHOLD);
+    getFeaturesCmd->SetFID(FID_TEMP_THRESHOLD);
     struct nvme_gen_cq acqMetrics = acq->GetQMetrics();
     IO::SendAndReapCmd(mGrpName, mGrpName, CALC_TIMEOUT_ms(1), asq, acq,
         getFeaturesCmd, "SaveFeatTmpThr", true);
@@ -260,7 +260,7 @@ GrpAdminSetGetFeatCombo::SaveTLER(SharedASQPtr asq, SharedACQPtr acq)
     LOG_NRM("Create Get features cmd");
     SharedGetFeaturesPtr getFeaturesCmd =
         SharedGetFeaturesPtr(new GetFeatures());
-    getFeaturesCmd->SetFID(BaseFeatures::FID_ERR_RECOVERY);
+    getFeaturesCmd->SetFID(FID_ERR_RECOVERY);
     struct nvme_gen_cq acqMetrics = acq->GetQMetrics();
     IO::SendAndReapCmd(mGrpName, mGrpName, CALC_TIMEOUT_ms(1), asq, acq,
         getFeaturesCmd, "SaveFeatTler", true);
@@ -278,7 +278,7 @@ GrpAdminSetGetFeatCombo::SaveVolWrCache(SharedASQPtr asq, SharedACQPtr acq)
     SharedGetFeaturesPtr getFeaturesCmd =
         SharedGetFeaturesPtr(new GetFeatures());
 
-    getFeaturesCmd->SetFID(BaseFeatures::FID_VOL_WR_CACHE);
+    getFeaturesCmd->SetFID(FID_VOL_WR_CACHE);
     struct nvme_gen_cq acqMetrics = acq->GetQMetrics();
     IO::SendAndReapCmd(mGrpName, mGrpName, CALC_TIMEOUT_ms(1), asq, acq,
         getFeaturesCmd, "SaveFeatVWC", true);
@@ -296,7 +296,7 @@ GrpAdminSetGetFeatCombo::SaveIRQCoalescing(SharedASQPtr asq, SharedACQPtr acq)
     SharedGetFeaturesPtr getFeaturesCmd =
         SharedGetFeaturesPtr(new GetFeatures());
 
-    getFeaturesCmd->SetFID(BaseFeatures::FID_IRQ_COALESCING);
+    getFeaturesCmd->SetFID(FID_IRQ_COALESCING);
     struct nvme_gen_cq acqMetrics = acq->GetQMetrics();
     IO::SendAndReapCmd(mGrpName, mGrpName, CALC_TIMEOUT_ms(1), asq, acq,
         getFeaturesCmd, "SaveFeatIRQCoalescing", true);
@@ -314,7 +314,7 @@ GrpAdminSetGetFeatCombo::SaveIvecConf(SharedASQPtr asq, SharedACQPtr acq)
     SharedGetFeaturesPtr getFeaturesCmd =
         SharedGetFeaturesPtr(new GetFeatures());
 
-    getFeaturesCmd->SetFID(BaseFeatures::FID_IRQ_VEC_CONFIG);
+    getFeaturesCmd->SetFID(FID_IRQ_VEC_CONFIG);
 
     uint16_t max_ivec = IRQ::GetMaxIRQsSupportedAnyScheme();
 
@@ -338,7 +338,7 @@ GrpAdminSetGetFeatCombo::SaveWrAtomicity(SharedASQPtr asq, SharedACQPtr acq)
     SharedGetFeaturesPtr getFeaturesCmd =
         SharedGetFeaturesPtr(new GetFeatures());
 
-    getFeaturesCmd->SetFID(BaseFeatures::FID_WRITE_ATOMICITY);
+    getFeaturesCmd->SetFID(FID_WRITE_ATOMICITY);
     struct nvme_gen_cq acqMetrics = acq->GetQMetrics();
     IO::SendAndReapCmd(mGrpName, mGrpName, CALC_TIMEOUT_ms(1), asq, acq,
         getFeaturesCmd, "SaveFeatWrAtomicity", true);
@@ -355,7 +355,7 @@ GrpAdminSetGetFeatCombo::SaveAsyncEvent(SharedASQPtr asq, SharedACQPtr acq)
     SharedGetFeaturesPtr getFeaturesCmd =
         SharedGetFeaturesPtr(new GetFeatures());
 
-    getFeaturesCmd->SetFID(BaseFeatures::FID_ASYNC_EVENT_CONFIG);
+    getFeaturesCmd->SetFID(FID_ASYNC_EVENT_CONFIG);
     struct nvme_gen_cq acqMetrics = acq->GetQMetrics();
     IO::SendAndReapCmd(mGrpName, mGrpName, CALC_TIMEOUT_ms(1), asq, acq,
         getFeaturesCmd, "SaveFeatAsyncEvent", true);
@@ -374,8 +374,8 @@ GrpAdminSetGetFeatCombo::RestoreArbitration(SharedASQPtr asq, SharedACQPtr acq)
         SharedSetFeaturesPtr(new SetFeatures());
 
     LOG_NRM("Restoring state with arbitration = 0x%04X", mArbitration);
-    setFeaturesCmd->SetFID(BaseFeatures::FID_ARBITRATION);
-    getFeaturesCmd->SetFID(BaseFeatures::FID_ARBITRATION);
+    setFeaturesCmd->SetFID(FID_ARBITRATION);
+    getFeaturesCmd->SetFID(FID_ARBITRATION);
 
     setFeaturesCmd->SetDword(mArbitration, 11);
     IO::SendAndReapCmd(mGrpName, mGrpName, CALC_TIMEOUT_ms(1), asq, acq,
@@ -404,8 +404,8 @@ GrpAdminSetGetFeatCombo::RestorePowerState(SharedASQPtr asq, SharedACQPtr acq)
         SharedSetFeaturesPtr(new SetFeatures());
 
     LOG_NRM("Restoring state with PSD = 0x%04X", mPowerState);
-    setFeaturesCmd->SetFID(BaseFeatures::FID_PWR_MGMT);
-    getFeaturesCmd->SetFID(BaseFeatures::FID_PWR_MGMT);
+    setFeaturesCmd->SetFID(FID_PWR_MGMT);
+    getFeaturesCmd->SetFID(FID_PWR_MGMT);
 
     setFeaturesCmd->SetDword(mPowerState, 11);
     IO::SendAndReapCmd(mGrpName, mGrpName, CALC_TIMEOUT_ms(1), asq, acq,
@@ -434,8 +434,8 @@ GrpAdminSetGetFeatCombo::RestoreTMPTH(SharedASQPtr asq, SharedACQPtr acq)
         SharedSetFeaturesPtr(new SetFeatures());
 
     LOG_NRM("Restoring state with TMPTH = 0x%04X", mTmpThreshold);
-    setFeaturesCmd->SetFID(BaseFeatures::FID_TEMP_THRESHOLD);
-    getFeaturesCmd->SetFID(BaseFeatures::FID_TEMP_THRESHOLD);
+    setFeaturesCmd->SetFID(FID_TEMP_THRESHOLD);
+    getFeaturesCmd->SetFID(FID_TEMP_THRESHOLD);
 
     setFeaturesCmd->SetDword(mTmpThreshold, 11);
     IO::SendAndReapCmd(mGrpName, mGrpName, CALC_TIMEOUT_ms(1), asq, acq,
@@ -464,8 +464,8 @@ GrpAdminSetGetFeatCombo::RestoreTLER(SharedASQPtr asq, SharedACQPtr acq)
         SharedSetFeaturesPtr(new SetFeatures());
 
     LOG_NRM("Restoring state with TLER = 0x%04X", mTimeLimErrRec);
-    setFeaturesCmd->SetFID(BaseFeatures::FID_ERR_RECOVERY);
-    getFeaturesCmd->SetFID(BaseFeatures::FID_ERR_RECOVERY);
+    setFeaturesCmd->SetFID(FID_ERR_RECOVERY);
+    getFeaturesCmd->SetFID(FID_ERR_RECOVERY);
 
     setFeaturesCmd->SetDword(mTimeLimErrRec, 11);
     IO::SendAndReapCmd(mGrpName, mGrpName, CALC_TIMEOUT_ms(1), asq, acq,
@@ -494,8 +494,8 @@ GrpAdminSetGetFeatCombo::RestoreVolWrCache(SharedASQPtr asq, SharedACQPtr acq)
         SharedSetFeaturesPtr(new SetFeatures());
 
     LOG_NRM("Restoring state with VWC = 0x%04X", mVolWrCache);
-    setFeaturesCmd->SetFID(BaseFeatures::FID_VOL_WR_CACHE);
-    getFeaturesCmd->SetFID(BaseFeatures::FID_VOL_WR_CACHE);
+    setFeaturesCmd->SetFID(FID_VOL_WR_CACHE);
+    getFeaturesCmd->SetFID(FID_VOL_WR_CACHE);
 
     setFeaturesCmd->SetDword(mVolWrCache, 11);
     IO::SendAndReapCmd(mGrpName, mGrpName, CALC_TIMEOUT_ms(1), asq, acq,
@@ -525,8 +525,8 @@ GrpAdminSetGetFeatCombo::RestoreIRQCoalescing(SharedASQPtr asq,
         SharedSetFeaturesPtr(new SetFeatures());
 
     LOG_NRM("Restoring state with IRQCoalescing = 0x%04X", mIrqCoalescing);
-    setFeaturesCmd->SetFID(BaseFeatures::FID_IRQ_COALESCING);
-    getFeaturesCmd->SetFID(BaseFeatures::FID_IRQ_COALESCING);
+    setFeaturesCmd->SetFID(FID_IRQ_COALESCING);
+    getFeaturesCmd->SetFID(FID_IRQ_COALESCING);
 
     setFeaturesCmd->SetDword(mIrqCoalescing, 11);
     IO::SendAndReapCmd(mGrpName, mGrpName, CALC_TIMEOUT_ms(1), asq, acq,
@@ -559,8 +559,8 @@ GrpAdminSetGetFeatCombo::RestoreSaveIvecConf(SharedASQPtr asq, SharedACQPtr acq)
     for (uint16_t ivec = 0; ivec < max_ivec; ivec++) {
         LOG_NRM("Restoring state for ivec = 0x%02X with IvecConf = 0x%04X",
             ivec, mIvecConf[ivec]);
-        setFeaturesCmd->SetFID(BaseFeatures::FID_IRQ_VEC_CONFIG);
-        getFeaturesCmd->SetFID(BaseFeatures::FID_IRQ_VEC_CONFIG);
+        setFeaturesCmd->SetFID(FID_IRQ_VEC_CONFIG);
+        getFeaturesCmd->SetFID(FID_IRQ_VEC_CONFIG);
 
         setFeaturesCmd->SetDword(mIvecConf[ivec], 11);
         IO::SendAndReapCmd(mGrpName, mGrpName, CALC_TIMEOUT_ms(1), asq, acq,
@@ -593,8 +593,8 @@ GrpAdminSetGetFeatCombo::RestoreWrAtomicity(SharedASQPtr asq, SharedACQPtr acq)
         SharedSetFeaturesPtr(new SetFeatures());
 
     LOG_NRM("Restoring state with WrAtomicity = 0x%04X", mWrAtomicity);
-    setFeaturesCmd->SetFID(BaseFeatures::FID_WRITE_ATOMICITY);
-    getFeaturesCmd->SetFID(BaseFeatures::FID_WRITE_ATOMICITY);
+    setFeaturesCmd->SetFID(FID_WRITE_ATOMICITY);
+    getFeaturesCmd->SetFID(FID_WRITE_ATOMICITY);
 
     setFeaturesCmd->SetDword(mWrAtomicity, 11);
     IO::SendAndReapCmd(mGrpName, mGrpName, CALC_TIMEOUT_ms(1), asq, acq,
@@ -623,8 +623,8 @@ GrpAdminSetGetFeatCombo::RestoreAsyncEvent(SharedASQPtr asq, SharedACQPtr acq)
         SharedSetFeaturesPtr(new SetFeatures());
 
     LOG_NRM("Restoring state with mAsyncEvent = 0x%04X", mAsyncEvent);
-    setFeaturesCmd->SetFID(BaseFeatures::FID_ASYNC_EVENT_CONFIG);
-    getFeaturesCmd->SetFID(BaseFeatures::FID_ASYNC_EVENT_CONFIG);
+    setFeaturesCmd->SetFID(FID_ASYNC_EVENT_CONFIG);
+    getFeaturesCmd->SetFID(FID_ASYNC_EVENT_CONFIG);
 
     setFeaturesCmd->SetDword(mAsyncEvent, 11);
     IO::SendAndReapCmd(mGrpName, mGrpName, CALC_TIMEOUT_ms(1), asq, acq,

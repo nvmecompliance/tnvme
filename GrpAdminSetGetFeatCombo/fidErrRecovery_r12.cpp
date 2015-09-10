@@ -128,9 +128,9 @@ FIDErrRecovery_r12::RunCoreTest()
             SharedSetFeaturesPtr(new SetFeatures());
 
     LOG_NRM("Set and Get features for error recovery (FID = 0x%x)",
-            BaseFeatures::FID_ERR_RECOVERY);
-    getFeaturesCmd->SetFID(BaseFeatures::FID_ERR_RECOVERY);
-    setFeaturesCmd->SetFID(BaseFeatures::FID_ERR_RECOVERY);
+            FID_ERR_RECOVERY);
+    getFeaturesCmd->SetFID(FID_ERR_RECOVERY);
+    setFeaturesCmd->SetFID(FID_ERR_RECOVERY);
 
     ConstSharedIdentifyPtr idCtrlr = gInformative->GetIdentifyCmdCtrlr();
     for (uint64_t i = 1; i <= idCtrlr->GetValue(IDCTRLRCAP_NN); i++) {

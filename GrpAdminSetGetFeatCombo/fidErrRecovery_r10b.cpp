@@ -25,6 +25,7 @@
 #include "../Utils/io.h"
 #include "../Cmds/getFeatures.h"
 #include "../Cmds/setFeatures.h"
+#include "../Cmds/featureDefs.h"
 
 namespace GrpAdminSetGetFeatCombo {
 
@@ -125,9 +126,9 @@ FIDErrRecovery_r10b::RunCoreTest()
         SharedSetFeaturesPtr(new SetFeatures());
 
     LOG_NRM("Set and Get features for error recovery (FID = 0x%x)",
-        BaseFeatures::FID_ERR_RECOVERY);
-    getFeaturesCmd->SetFID(BaseFeatures::FID_ERR_RECOVERY);
-    setFeaturesCmd->SetFID(BaseFeatures::FID_ERR_RECOVERY);
+        FID_ERR_RECOVERY);
+    getFeaturesCmd->SetFID(FID_ERR_RECOVERY);
+    setFeaturesCmd->SetFID(FID_ERR_RECOVERY);
 
     uint8_t tlerMismatch = 0;
 

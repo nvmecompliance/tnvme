@@ -23,7 +23,7 @@
 #include "../Utils/kernelAPI.h"
 #include "../Utils/irq.h"
 #include "../Utils/io.h"
-#include "../Cmds/baseFeatures.h"
+#include "../Cmds/featureDefs.h"
 #include "../Cmds/getFeatures.h"
 #include "../Cmds/setFeatures.h"
 
@@ -127,9 +127,9 @@ FIDWriteAtomicity_r10b::RunCoreTest()
         SharedSetFeaturesPtr(new SetFeatures());
 
     LOG_NRM("Set and Get features for Write Atomicity (FID = 0x%x)",
-        BaseFeatures::FID_WRITE_ATOMICITY);
-    getFeaturesCmd->SetFID(BaseFeatures::FID_WRITE_ATOMICITY);
-    setFeaturesCmd->SetFID(BaseFeatures::FID_WRITE_ATOMICITY);
+        FID_WRITE_ATOMICITY);
+    getFeaturesCmd->SetFID(FID_WRITE_ATOMICITY);
+    setFeaturesCmd->SetFID(FID_WRITE_ATOMICITY);
 
     uint8_t wrAtomMismatch = 0;
 

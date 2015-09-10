@@ -20,6 +20,7 @@
 #include "Utils/kernelAPI.h"
 #include "Queues/ce.h"
 #include "Cmds/setFeatures.h"
+#include "Cmds/featureDefs.h"
 #include "Cmds/formatNVM.h"
 #include "Utils/io.h"
 #include "Exception/frmwkEx.h"
@@ -364,7 +365,7 @@ SetFeaturesNumberOfQueues(NumQueues &numQueues)
         LOG_NRM("Create the cmd to carry this data to the DUT");
         SharedSetFeaturesPtr sfNumOfQ =
             SharedSetFeaturesPtr(new SetFeatures());
-        sfNumOfQ->SetFID(BaseFeatures::FID_NUM_QUEUES);
+        sfNumOfQ->SetFID(FID_NUM_QUEUES);
         sfNumOfQ->SetNumberOfQueues(numQueues.ncqr, numQueues.nsqr);
 
         IO::SendAndReapCmd("tnvme", "queues", CALC_TIMEOUT_ms(1),

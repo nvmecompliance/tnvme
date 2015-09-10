@@ -25,6 +25,7 @@
 #include "../Utils/io.h"
 #include "../Cmds/getFeatures.h"
 #include "../Cmds/setFeatures.h"
+#include "../Cmds/featureDefs.h"
 
 namespace GrpAdminSetGetFeatCombo {
 
@@ -126,9 +127,9 @@ FIDTempThres_r10b::RunCoreTest()
         SharedSetFeaturesPtr(new SetFeatures());
 
     LOG_NRM("Set and Get features for temperature thrshold (FID = 0x%x)",
-        BaseFeatures::FID_TEMP_THRESHOLD);
-    getFeaturesCmd->SetFID(BaseFeatures::FID_TEMP_THRESHOLD);
-    setFeaturesCmd->SetFID(BaseFeatures::FID_TEMP_THRESHOLD);
+        FID_TEMP_THRESHOLD);
+    getFeaturesCmd->SetFID(FID_TEMP_THRESHOLD);
+    setFeaturesCmd->SetFID(FID_TEMP_THRESHOLD);
 
     uint8_t tmpthMismatch = 0;
 
