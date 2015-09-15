@@ -450,3 +450,19 @@ SetFeatures::GetSWProgressMarkerPBSLC() const
     LOG_NRM("Getting software progress marker (PBSLC)");
     return GetByte(11, 0);
 }
+
+
+void
+SetFeatures::SetAutoPSTransAPSTE(bool enable)
+{
+    LOG_NRM("Setting autonomous PS transision enable (APSTE): %d", enable);
+    SetBit(enable, 11, 0);
+}
+
+
+bool
+SetFeatures::GetAutoPSTransAPSTE() const
+{
+    LOG_NRM("Getting autonomous PS transision enable (APSTE)");
+    return GetBit(11, 0);
+}

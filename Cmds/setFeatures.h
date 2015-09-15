@@ -166,6 +166,13 @@ public:
      */
     void SetSWProgressMarkerPBSLC(uint8_t pbslc);
     uint8_t GetSWProgressMarkerPBSLC() const;
+
+    /**
+     * Set the autonomous power state transition enable bit.
+     * @param enable auto PS enabled or disabled
+     */
+    void SetAutoPSTransAPSTE(bool enable);
+    bool GetAutoPSTransAPSTE() const;
 };
 
 
