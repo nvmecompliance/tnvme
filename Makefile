@@ -70,6 +70,7 @@ SOURCES:=			\
 	test.cpp		\
 	testRef.cpp		\
 	testDescribe.cpp	\
+	testResults.cpp	\
 	tnvme.cpp		\
 	tnvmeHelpers.cpp	\
 	tnvmeParsers.cpp	\

@@ -26,6 +26,7 @@
 #include "tnvme.h"
 #include "tnvmeHelpers.h"
 #include "tnvmeParsers.h"
+#include "testResults.h"
 #include "version.h"
 #include "globals.h"
 #include "Utils/kernelAPI.h"
@@ -116,8 +117,6 @@ bool ExecuteTests(struct CmdLine &cl, vector<Group *> &groups);
 bool BuildSingletons();
 void DestroyTestFoundation(vector<Group *> &groups);
 bool BuildTestFoundation(vector<Group *> &groups);
-void ReportTestResults(size_t numIters, int numPass, int numFail, int numSkip,
-    int numGrps);
 void ReportExecution(vector<TestRef> failedTests, vector<TestRef> skippedTests);
 
 
@@ -727,12 +726,8 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
     int64_t tstIdx = 0;
     int64_t skipped = 0;
     size_t iLoop;
-    int numPassed = 0;
-    int numFailed = 0;
-    int numSkipped = 0;
     int numGrps = 0;
-    bool allTestsPass = true;    // assuming success until we find otherwise
-    bool allHaveRun = false;
+    TestResults results = TestResults();
     TestRef targetTst;
     TestSetType testsToRun;
     bool tstSetOK;
@@ -766,8 +761,6 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
         LOG_NRM("Start loop execution #%ld", iLoop);
 
         for (size_t iGrp = 0; iGrp < groups.size(); iGrp++) {
-            allHaveRun = false;
-
             LOG_DBG("Processing test(s) for group %ld", iGrp);
             if (cl.test.t.group == UINT_MAX) {
                 targetTst.Init(iGrp, UINT_MAX, UINT_MAX, UINT_MAX);
@@ -791,47 +784,40 @@ ExecuteTests(struct CmdLine &cl, vector<Group *> &groups)
             }
 
             numGrps++;
-            while (allHaveRun == false) {
+            TestResult result = TR_FENCE;
+            while (result != TR_NOTFOUND) {
+                result = groups[iGrp]->RunTest(testsToRun, tstIdx, cl.skiptest,
+                    skipped, cl.preserve, failedTests, skippedTests);
 
-                switch (groups[iGrp]->RunTest(testsToRun, tstIdx,
-                    cl.skiptest, skipped, cl.preserve, failedTests,
-                    skippedTests)) {
-                case Group::TR_SUCCESS:
-                    numPassed++;
-                    break;
-                case Group::TR_FAIL:
-                    allTestsPass = false;
-                    numFailed++;
-                    numSkipped += skipped;
-                    if (cl.ignore) {
-                        LOG_WARN("Detected error, but forced to ignore");
-                    } else {
-                        goto EARLY_OUT;
+                if (result == TR_SKIPPING)
+                    results.addResult(result, skipped);
+                else {
+                    results.addResult(result);
+                    if (result == TR_FAIL) {
+                        results.addResult(TR_SKIPPING, skipped);
+                        if (cl.ignore) {
+                            LOG_WARN("Detected error, but forced to ignore");
+                        } else {
+                            goto EARLY_OUT;
+                        }
                     }
-                    break;
-                case Group::TR_SKIPPING:
-                    numSkipped += skipped;
-                    break;
-                case Group::TR_NOTFOUND:
-                    allHaveRun = true;
-                    break;
                 }
             }
         }
 
         // Report each iteration results
-        ReportTestResults(iLoop, numPassed, numFailed, numSkipped, numGrps);
+        results.report(iLoop, numGrps);
 
         if (failedTests.size() || skippedTests.size())
             ReportExecution(failedTests, skippedTests);
     }
-    return allTestsPass;
+    return results.allTestsPass();
 
 EARLY_OUT:
-    ReportTestResults(iLoop, numPassed, numFailed, numSkipped, numGrps);
+    results.report(iLoop, numGrps);
     if (failedTests.size() || skippedTests.size())
         ReportExecution(failedTests, skippedTests);
-    return allTestsPass;
+    return results.allTestsPass();
 
 ABORT_OUT:
     LOG_NRM("Iteration SUMMARY  : Testing aborted");
@@ -839,22 +825,6 @@ ABORT_OUT:
 }
 
 
-void
-ReportTestResults(size_t numIters, int numPass, int numFail, int numSkip,
-    int numGrps)
-{
-    LOG_NRM("Iteration SUMMARY");
-    LOG_NRM("  passed       : %d", numPass);
-    if (numFail) {
-        LOG_NRM("  failed       : %d  <---", numFail);
-    } else {
-        LOG_NRM("  failed       : %d", numFail);
-    }
-    LOG_NRM("  skipped      : %d", numSkip);
-    LOG_NRM("  total tests  : %d", numPass+numFail+numSkip);
-    LOG_NRM("  total groups : %d", numGrps);
-    LOG_NRM("Stop loop execution #%ld", numIters);
-}
 
 
 void

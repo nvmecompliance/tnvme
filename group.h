@@ -22,6 +22,7 @@
 #include "tnvme.h"
 #include "test.h"
 #include "globals.h"
+#include "testResults.h"
 
 
 /// Use to append a new x.0.0 test number at the XLEVEL
@@ -134,13 +135,6 @@ public:
      */
     bool GetTestSet(TestRef &target, TestSetType &dependencies,
         int64_t &tstIdx);
-
-    typedef enum {
-        TR_SUCCESS,
-        TR_FAIL,
-        TR_SKIPPING,
-        TR_NOTFOUND
-    } TestResult;
 
     /**
      * Run a spec'd test case within the provided dependencies using tstIdx

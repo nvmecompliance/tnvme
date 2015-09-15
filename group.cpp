@@ -207,7 +207,7 @@ Group::GetTestSet(TestRef &target, TestSetType &dependencies, int64_t &tstIdx)
 }
 
 
-Group::TestResult
+TestResult
 Group::RunTest(TestSetType &dependencies, int64_t &tstIdx,
     vector<TestRef> &skipTest, int64_t &numSkipped, bool preserve,
     vector<TestRef> &failedTests, vector<TestRef> &skippedTests)
@@ -261,7 +261,7 @@ Group::RunTest(TestSetType &dependencies, int64_t &tstIdx,
     } else {
         switch ((*myTest)->Runnable(preserve)) {
         case Test::RUN_TRUE:
-            result = (*myTest)->Run() ? TR_SUCCESS: TR_FAIL;
+            result = (*myTest)->Run();
             if (result == TR_FAIL) {
                 failedTests.push_back(tr);
                 numSkipped = AdvanceDependencies(dependencies, tstIdx, true,

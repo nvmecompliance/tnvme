@@ -20,6 +20,7 @@
 #include <string>
 #include <exception>
 #include "testDescribe.h"
+#include "testResults.h"
 #include "Singletons/registers.h"
 #include "tnvme.h"
 
@@ -98,9 +99,9 @@ public:
      * Run the test case. This method will catch all exceptions and convert
      * them into a return value, thus children implementing RunCoreTest() are
      * allowed to throw exceptions and they are treated as errors.
-     * @return true upon success, otherwise false.
+     * @return the result of the run.
      */
-    bool Run();
+    TestResult Run();
 
     typedef enum {
         RUN_TRUE,       // Test is runnable and should be run
@@ -157,6 +158,8 @@ protected:
     string mTestName;
     /// Children must populate this during construction
     TestDescribe mTestDesc;
+    /// The test result type; default is success
+    TestResult mResult = TR_SUCCESS;
 
     /**
      * Forcing children to implement the core logic of each test case.
