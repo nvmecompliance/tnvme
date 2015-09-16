@@ -81,7 +81,7 @@ TestResults::report(const size_t numIters, const int numGrps) const
     LOG_NRM("Iteration SUMMARY");
     for (int i = 0; i < TR_FENCE - 1; i++) {
         if (i == TR_FAIL && results[TR_FAIL])
-            LOG_NRM("  %-*s: %d  <---", fieldLen, resultDesc[i], results[i])
+            LOG_NRM("  %-*s: %d  <---", fieldLen, resultDesc[i], results[i]);
         else
             LOG_NRM("  %-*s: %d", fieldLen, resultDesc[i], results[i]);
         totalTests += results[i];

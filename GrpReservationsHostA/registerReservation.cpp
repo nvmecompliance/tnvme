@@ -106,7 +106,7 @@ RegisterReservation::RunCoreTest()
      * None.
      * \endverbatim
      */
-	LOG_NRM("Start RegisterReservation::RunCoreTest")
+	LOG_NRM("Start RegisterReservation::RunCoreTest");
 
 	SharedIOSQPtr iosq = CAST_TO_IOSQ(gRsrcMngr->GetObj(IOSQ_GROUP_ID));
 	SharedIOCQPtr iocq = CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_GROUP_ID));
@@ -139,13 +139,13 @@ RegisterReservation::RunCoreTest()
     // This should be returning back using APL FW... BUGBUG
     if(retStat != CESTAT_SUCCESS)
     {
-    	LOG_NRM("Was unable to get back HostId after setting...")
+    	LOG_NRM("Was unable to get back HostId after setting...");
     } else
     {
-		LOG_NRM("Compare returned HostID to what was just previously set...")
+		LOG_NRM("Compare returned HostID to what was just previously set...");
 		if (writeHostIDmem->Compare(readHostIDmem) == false)
 		{
-			LOG_NRM("HostID MISMATCH!!!")
+			LOG_NRM("HostID MISMATCH!!!");
 			writeHostIDmem->Dump(
 				FileSystem::PrepDumpFile(mGrpName, mTestName, "WriteHostID"),
 				"setFeatures HostID");
@@ -172,13 +172,13 @@ RegisterReservation::RunCoreTest()
 	retStat = IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq, iocq, reservationRegisterCmd, "Release Any Key HostA", true, possibleReturnStatuses);
 	switch(retStat) {
 		case CESTAT_SUCCESS:
-			LOG_NRM("Success status returned, a key was assumed to have been present and is now cleared.")
+			LOG_NRM("Success status returned, a key was assumed to have been present and is now cleared.");
 			break;
 		case CESTAT_RSRV_CONFLICT:
-			LOG_NRM("Rsrv Conflict status returned, a key was assumed have not been present to be able to be cleared.")
+			LOG_NRM("Rsrv Conflict status returned, a key was assumed have not been present to be able to be cleared.");
 			break;
 		default:
-			LOG_NRM("Unknown stat returned back while attempting to unregister a potential exhisting key... continuing.")
+			LOG_NRM("Unknown stat returned back while attempting to unregister a potential exhisting key... continuing.");
 	}
 
 	LOG_NRM("Register our key (0xAE's), expecting pass");
@@ -203,7 +203,7 @@ RegisterReservation::RunCoreTest()
 	*/
     //retStat = IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq, iocq, reservationRegisterCmd, "Register Key 0xAE HostA", true, CESTAT_RSRV_CONFLICT);
 
-    LOG_NRM("Completed RegisterReservation::RunCoreTest")
+    LOG_NRM("Completed RegisterReservation::RunCoreTest");
 }
 
 }   // namespace

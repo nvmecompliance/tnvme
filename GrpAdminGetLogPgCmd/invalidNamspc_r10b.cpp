@@ -125,12 +125,10 @@ InvalidNamspc_r10b::RunCoreTest()
     // bits 7:1 are reserved, need bit 0
     uint8_t suppSmartPerNamspc = logPageAttr & 0x1;
 
-    if(suppSmartPerNamspc > 0) {
-    	LOG_NRM("IDCTRLRCAP_LPA bit0 is set. Per Namespace Smart Pages supported")
-    }
-    else {
-    	LOG_NRM("IDCTRLRCAP_LPA bit0 is not set. Per Namespace Smart Pages is not supported")
-    }
+    if(suppSmartPerNamspc > 0)
+    	LOG_NRM("IDCTRLRCAP_LPA bit0 is set. Per Namespace Smart Pages supported");
+    else
+    	LOG_NRM("IDCTRLRCAP_LPA bit0 is not set. Per Namespace Smart Pages is not supported");
 
     // for all illegal nsid's verify get log page cmd.
     for (i = (nn + 1), inc = 1; i < 0xffffffff; i += (2 * inc), inc += 1327) {

@@ -110,7 +110,7 @@ CreateAndAttachMaxNamespacesAndVerify::RunCoreTest()
      * None.
      * \endverbatim
      */
-	LOG_NRM("Start CreateAndAttachMaxNamespacesAndVerify::RunCoreTest")
+	LOG_NRM("Start CreateAndAttachMaxNamespacesAndVerify::RunCoreTest");
 
 	SharedIOSQPtr iosq = CAST_TO_IOSQ(gRsrcMngr->GetObj(IOSQ_GROUP_ID));
 	SharedIOCQPtr iocq = CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_GROUP_ID));
@@ -140,7 +140,7 @@ CreateAndAttachMaxNamespacesAndVerify::RunCoreTest()
     uint32_t newlyCreatedNSID = 0;
 
     if( identifyControllerUnallocatedCapacity != identifyControllerTotalCapacity) {
-    	LOG_NRM("TNVMCAP != UNVMCAP, which points to a namespace being allocated but the previous test should have deleted all")
+    	LOG_NRM("TNVMCAP != UNVMCAP, which points to a namespace being allocated but the previous test should have deleted all");
     }
 
 	LOG_NRM("Create Identify Command To Get All Present NSIDs");
@@ -163,7 +163,7 @@ CreateAndAttachMaxNamespacesAndVerify::RunCoreTest()
     // CNS_ControllerListAttachedToNSID   0x12    X     A   (Controller List that are attached to NSID X, starting with CNTID greater than A)
     // CNS_ControllerListSubsystem        0x13    -     B   (Controller List present in subsystem starting with CNTID greater than B)
 
-    LOG_NRM("First ensure there are no namespaces present, as this test depends on deleteAllNamespacesAndVerify to complete successfully")
+    LOG_NRM("First ensure there are no namespaces present, as this test depends on deleteAllNamespacesAndVerify to complete successfully");
 	// See 8.11 in 1.2 spec for describing the process this test is following
 	identifyCmd->SetPrpBuffer(prpBitmask, identifyNamespaceList);
 	identifyCmd->SetNSID( 0 );
@@ -175,7 +175,7 @@ CreateAndAttachMaxNamespacesAndVerify::RunCoreTest()
     	throw FrmwkEx(HERE, "Before creating any namespaces, subsystem was expected to have no NSIDs active and present, but Identify CNS=0x10 returned at least one NSID.");
     }
 
-    LOG_NRM("No namespaces are active, test can continue. Pull back the controller list to be used to attach all NSIDs to all controllers on subsystem")
+    LOG_NRM("No namespaces are active, test can continue. Pull back the controller list to be used to attach all NSIDs to all controllers on subsystem");
 	identifyCmd->SetPrpBuffer(prpBitmask, identifyControllerList);
 	identifyCmd->SetNSID( 0 );
 	identifyCmd->SetCNS(  CNS_ControllerListSubsystem ); // Get all controllers in this subsystem
@@ -231,7 +231,7 @@ CreateAndAttachMaxNamespacesAndVerify::RunCoreTest()
 	    namespaceManagementCmd->SetNSID(0);
 	    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq, namespaceManagementCmd, "Creating namespace that is 1/NNth size of total NVM capacity, 512B bare LBAs.", false, CESTAT_SUCCESS);
 	    newlyCreatedNSID = (acq->PeekCEwithCID( namespaceManagementCmd->GetCID() ) ).t.dw0;
-	    LOG_NRM("Newly created NS has NSID of 0x%llu", (long long unsigned) newlyCreatedNSID)
+	    LOG_NRM("Newly created NS has NSID of 0x%llu", (long long unsigned) newlyCreatedNSID);
 
 		// ID this namespace and see if it is all 0s. Namespace should be created but 'inactive'.
 		identifyCmd->SetCNS(CNS_Namespace ); // Standard Namespace ID, should also be attached to this controller
@@ -269,11 +269,11 @@ CreateAndAttachMaxNamespacesAndVerify::RunCoreTest()
 	    // Now check a couple fields (BUGBUG should check all!)
 	    IdNamespcStruct *currentNamespaceStruct = (IdNamespcStruct*) identifyCmd->GetROPrpBuffer();
 	    if(currentNamespaceStruct->NSZE != individualNamespaceCapacity) {
-	    	LOG_NRM("Namespace NSZE 0x%llx != what was passed to namespaceManagement 0x%08llx", (long long unsigned) currentNamespaceStruct->NSZE, (long long unsigned) individualNamespaceCapacity)
+	    	LOG_NRM("Namespace NSZE 0x%llx != what was passed to namespaceManagement 0x%08llx", (long long unsigned) currentNamespaceStruct->NSZE, (long long unsigned) individualNamespaceCapacity);
 	    	throw FrmwkEx(HERE, "Newly created namespace's NSZE does not match what was sent to namespaceManagement");
 	    }
 	    if(currentNamespaceStruct->NCAP != individualNamespaceCapacity) {
-	    	LOG_NRM("Namespace NCAP 0x%llx != what was passed to namespaceManagement 0x%08llx", (long long unsigned) currentNamespaceStruct->NCAP, (long long unsigned) individualNamespaceCapacity)
+	    	LOG_NRM("Namespace NCAP 0x%llx != what was passed to namespaceManagement 0x%08llx", (long long unsigned) currentNamespaceStruct->NCAP, (long long unsigned) individualNamespaceCapacity);
 	    	throw FrmwkEx(HERE, "Newly created namespace's NCAP does not match what was sent to namespaceManagement");
 	    }
 
@@ -286,7 +286,7 @@ CreateAndAttachMaxNamespacesAndVerify::RunCoreTest()
 	    IdCtrlrCapStruct *currentControllerStruct = (IdCtrlrCapStruct*) identifyCmd->GetROPrpBuffer();
 	    uint64_t expectedNVMCAP = identifyControllerTotalCapacity - (individualNamespaceCapacity * (currentNamespaceIdToCreate+1) * 512);
 	    if(currentControllerStruct->UNVMCAP_LOWER != expectedNVMCAP) {
-	    	LOG_NRM("Expecting UNVMCAP to decrease by last allocated namespace. UNVMCAP = 0x%llx expecting 0x%llx", (long long unsigned) currentControllerStruct->UNVMCAP_LOWER, (long long unsigned) expectedNVMCAP)
+	    	LOG_NRM("Expecting UNVMCAP to decrease by last allocated namespace. UNVMCAP = 0x%llx expecting 0x%llx", (long long unsigned) currentControllerStruct->UNVMCAP_LOWER, (long long unsigned) expectedNVMCAP);
 	    	throw FrmwkEx(HERE, "Identify Controller UNVMCAP is not adjusted after creating a namespace of 1/NNth size");
 	    }
 
@@ -298,7 +298,7 @@ CreateAndAttachMaxNamespacesAndVerify::RunCoreTest()
 	// 1) Controller should state 0 bytes available
 	// 2) Should be Cntrl.NN namespaces active and attached to all controllers on the subsystem
 
-    LOG_NRM("Completed CreateAndAttachMaxNamespacesAndVerify::RunCoreTest")
+    LOG_NRM("Completed CreateAndAttachMaxNamespacesAndVerify::RunCoreTest");
 }
 
 }   // namespace

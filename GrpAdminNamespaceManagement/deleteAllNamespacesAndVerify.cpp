@@ -105,7 +105,7 @@ DeleteAllNamespacesAndVerify::RunCoreTest()
      * None.
      * \endverbatim
      */
-	LOG_NRM("Start DeleteAllNamespacesAndVerify::RunCoreTest")
+	LOG_NRM("Start DeleteAllNamespacesAndVerify::RunCoreTest");
 
 	SharedIOSQPtr iosq = CAST_TO_IOSQ(gRsrcMngr->GetObj(IOSQ_GROUP_ID));
 	SharedIOCQPtr iocq = CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_GROUP_ID));
@@ -164,14 +164,14 @@ DeleteAllNamespacesAndVerify::RunCoreTest()
 	bool namespacesRemaining = true;
     while(namespacesRemaining == true) {
 
-    	LOG_NRM("Setup Identify Command to retrieve a NSID list. Could be larger than 1024, therefore looping. Current potential list starts at NSID > 0x%llx", (long long unsigned) currentNamespaceIdToDelete)
+    	LOG_NRM("Setup Identify Command to retrieve a NSID list. Could be larger than 1024, therefore looping. Current potential list starts at NSID > 0x%llx", (long long unsigned) currentNamespaceIdToDelete);
     	identifyCmd->SetCNS(CNS_NamespaceListSubsystem); // Get all NSIDs attached or not to this controller
     	identifyCmd->SetNSID(currentNamespaceIdToDelete); // This should be 0/1024/2048/etc
     	identifyCmd->SetPrpBuffer(prpBitmask, identifyNamespaceList);
         IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq, identifyCmd, "Read back (up to) 1024 NSIDs attached to this controller (CNS=2)", false, CESTAT_SUCCESS);
         namespaceIdListBuffer32BitPtr = (uint32_t*) identifyCmd->GetROPrpBuffer();
 
-        LOG_NRM("NSID list has been read, loop over the buffer contents, a value of 0 marks the end of the list, NSIDs are required to increment otherwise")
+        LOG_NRM("NSID list has been read, loop over the buffer contents, a value of 0 marks the end of the list, NSIDs are required to increment otherwise");
         for(uint32_t currentNamespaceIndex = 0; currentNamespaceIndex < 1024; currentNamespaceIndex++) {
 
         	if(currentNamespaceIdToDelete > namespaceIdListBuffer32BitPtr[currentNamespaceIndex] && namespaceIdListBuffer32BitPtr[currentNamespaceIndex] != 0) {
@@ -180,23 +180,23 @@ DeleteAllNamespacesAndVerify::RunCoreTest()
 
         	currentNamespaceIdToDelete = namespaceIdListBuffer32BitPtr[currentNamespaceIndex];
         	if (currentNamespaceIdToDelete == 0) {
-        		LOG_NRM("At index %d of NSID List, found a zero entry. Total namespaces dettached is %d and deleted has been %d", currentNamespaceIndex, (uint32_t) numDetachedNamespaces, (uint32_t) numDeletedNamespaces)
+        		LOG_NRM("At index %d of NSID List, found a zero entry. Total namespaces dettached is %d and deleted has been %d", currentNamespaceIndex, (uint32_t) numDetachedNamespaces, (uint32_t) numDeletedNamespaces);
         		namespacesRemaining = false;
 				break;
         	}
 
         	if (currentNamespaceIdToDelete > identifyControllerMaxNSID) {
-    			LOG_NRM("Found NSID value in returned NS list at buffer index 0x%08x  value 0x%x that is greater than IdCtrlr.NN's 0x%x", currentNamespaceIndex, (uint32_t) currentNamespaceIdToDelete, (uint32_t) identifyControllerMaxNSID )
+    			LOG_NRM("Found NSID value in returned NS list at buffer index 0x%08x  value 0x%x that is greater than IdCtrlr.NN's 0x%x", currentNamespaceIndex, (uint32_t) currentNamespaceIdToDelete, (uint32_t) identifyControllerMaxNSID );
     			throw FrmwkEx(HERE, "NSID found in NS List that is greater than CNTLR.NN. Violates 1.6.18 of NVMe 1.2 spec");
         	}
 
         	// For each NSID in the returned list, detach from all controllers stated it is attached to, then delete
         	// Get the controller list that are stated to be attached to this NSID
-        	LOG_NRM("NSID 0x%llx. From namespace list, will be dettached and deleted.", (long long unsigned) currentNamespaceIdToDelete)
+        	LOG_NRM("NSID 0x%llx. From namespace list, will be dettached and deleted.", (long long unsigned) currentNamespaceIdToDelete);
         	bool controllersRemaining = true;
         	currentControllerIdToDelete = 0;
         	while( controllersRemaining == true) {
-            	LOG_NRM("NSID 0x%llx. Check to see if any contollers are attached", (long long unsigned) currentNamespaceIdToDelete)
+            	LOG_NRM("NSID 0x%llx. Check to see if any contollers are attached", (long long unsigned) currentNamespaceIdToDelete);
 
 				identifyCmd->SetCNS( CNS_ControllerListAttachedToNSID ); // Get all CTRLIDs that are attached to this NSID
 				identifyCmd->SetCNTID( currentControllerIdToDelete ); // This number increases per iteration if more than 2047 read the previous time
@@ -204,7 +204,7 @@ DeleteAllNamespacesAndVerify::RunCoreTest()
 				identifyCmd->SetPrpBuffer(prpBitmask, identifyControllerList);
 				IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq, identifyCmd, "Return up to 2047 controllers attached to this NSID", false, CESTAT_SUCCESS);
 				controllerIdListBuffer16BitPtr = (uint16_t*) identifyCmd->GetROPrpBuffer();
-				LOG_NRM("NSID %d was found to be attached to at least %d controllers", currentNamespaceIdToDelete, controllerIdListBuffer16BitPtr[0])
+				LOG_NRM("NSID %d was found to be attached to at least %d controllers", currentNamespaceIdToDelete, controllerIdListBuffer16BitPtr[0]);
 
 				//BUGBUG The APL firmware isn't reporting back the right controller ID list.. make one with IDs 0/1
 				/*
@@ -230,16 +230,16 @@ DeleteAllNamespacesAndVerify::RunCoreTest()
 
 					// BUG... If Namespace Attribute Notices are enabled... check for AER here
 					if( (idCtrlrCap->GetValue(IDCTRLRCAP_OAES) && 0x00000100) > 0 ) {
-						LOG_NRM("Identify Controller's OAES states that NS Attribe Changed events are supported, AER should be submitted to other attached controllers")
+						LOG_NRM("Identify Controller's OAES states that NS Attribe Changed events are supported, AER should be submitted to other attached controllers");
 					}
 
 					// Loop exit case and counter increase qualifications
 					if(controllerIdListBuffer16BitPtr[0] != 2047) {
 						controllersRemaining = false;
-						LOG_NRM("Last controller list pulled for this NSID contained less than 2047 controller IDs, no more to detach.")
+						LOG_NRM("Last controller list pulled for this NSID contained less than 2047 controller IDs, no more to detach.");
 					} else {
 						currentControllerIdToDelete += 2047;
-						LOG_NRM("Last controller list pulled for this NSID contained 2047 controller IDs, try to pull more")
+						LOG_NRM("Last controller list pulled for this NSID contained 2047 controller IDs, try to pull more");
 					}
 
 					// Attempt to detach a namespace that should not have any controllers attached to it.
@@ -247,14 +247,14 @@ DeleteAllNamespacesAndVerify::RunCoreTest()
 					IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq, namespaceAttachCmd, "Detaching a namespace that was already detached", false, CESTAT_NS_NOT_ATTACHED);
 
 		        } else {
-		        	LOG_NRM("Identify Namespace CNS 0x12 returned an emtpy controller list for this NSID. No controller attached, but NSID was not yet deleted. This is odd but ok.")
+		        	LOG_NRM("Identify Namespace CNS 0x12 returned an emtpy controller list for this NSID. No controller attached, but NSID was not yet deleted. This is odd but ok.");
 					controllersRemaining = false;
 		        	break;
 		        } // End If Controllers Attached to current NSID
         	} // End While detaching controllers
 
         	// This NSID is now inactive, as it is detached from all controllers in subsystem... but not invalid. Should return all 0's
-        	LOG_NRM("Issuing Identify Namespace (CNS=0) to this fully detached (inactive) NSID and verifying that the buffer is all 0's.")
+        	LOG_NRM("Issuing Identify Namespace (CNS=0) to this fully detached (inactive) NSID and verifying that the buffer is all 0's.");
         	identifyCmd->SetCNS(  CNS_Namespace );
         	identifyCmd->SetPrpBuffer(prpBitmask, identifyNamespaceStruct);
         	// Potentially read back 1024 namespaces attacjed to this controller ID
@@ -266,7 +266,7 @@ DeleteAllNamespacesAndVerify::RunCoreTest()
         	}
 
         	// BUGBUG This Fails On APL Alpha FW
-        	LOG_NRM("Issuing Identify Namespace (CNS=0x11) to this inactive NSID and expeting STATUS 0:2 (Invalid Field) to be returned.")
+        	LOG_NRM("Issuing Identify Namespace (CNS=0x11) to this inactive NSID and expeting STATUS 0:2 (Invalid Field) to be returned.");
         	identifyCmd->SetCNS(  0x11 );
         	// Potentially read back 1024 namespaces attacjed to this controller ID
             IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq, identifyCmd, "Reading back NSID that was just detached CNS=0x12, should return Invalid Namespace", false, CESTAT_INVAL_FIELD);
@@ -282,12 +282,12 @@ DeleteAllNamespacesAndVerify::RunCoreTest()
 
 
         	// BUGBUG This Fails On APL Alpha FW
-        	LOG_NRM("Issuing Idnetify Namespace (CNS=0x0) to this deleted NSID (now invalid), after it was detached from all controllers, should return Invalid Namespace.")
+        	LOG_NRM("Issuing Idnetify Namespace (CNS=0x0) to this deleted NSID (now invalid), after it was detached from all controllers, should return Invalid Namespace.");
         	identifyCmd->SetCNS( CNS_Namespace );
         	IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq, identifyCmd, "After deleting namespace, should receive invalid NSID status when we identify with CNS=0", false, CESTAT_INVAL_FIELD);
 
         	// BUGBUG This Fails On APL Alpha FW
-        	LOG_NRM("Issuing Identify Namespace (CNS=0x11) to this deleted NSID (now invalid) and expecting Invalid Namespace.")
+        	LOG_NRM("Issuing Identify Namespace (CNS=0x11) to this deleted NSID (now invalid) and expecting Invalid Namespace.");
         	identifyCmd->SetCNS(  0x11 );
         	// Potentially read back 1024 namespaces attacjed to this controller ID
             IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq, identifyCmd, "After deleting namespace, should receive invalid NSID status when we identify with CNS=11", false, CESTAT_INVAL_FIELD);
@@ -304,12 +304,12 @@ DeleteAllNamespacesAndVerify::RunCoreTest()
     pROPrpBuffer = identifyCmd->GetROPrpBuffer();
 	for(uint32_t bufferIndex = 0; bufferIndex < 4096; bufferIndex++) {
 		if (pROPrpBuffer[bufferIndex] != 0) {
-			LOG_NRM("Found non-zero value in returned NS list at buffer index 0x%08x  value  0x%02x", bufferIndex, pROPrpBuffer[bufferIndex] )
+			LOG_NRM("Found non-zero value in returned NS list at buffer index 0x%08x  value  0x%02x", bufferIndex, pROPrpBuffer[bufferIndex]);
 			throw FrmwkEx(HERE, "Expected Identify(CNS=0x10, NSID=0, CNTID=0) to not return any NSIDs after detaching and deleting");
 		}
 	}
 
-    LOG_NRM("Completed DeleteAllNamespacesAndVerify::RunCoreTest")
+    LOG_NRM("Completed DeleteAllNamespacesAndVerify::RunCoreTest");
 }
 
 }   // namespace

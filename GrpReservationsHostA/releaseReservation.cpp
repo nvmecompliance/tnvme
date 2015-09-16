@@ -106,7 +106,7 @@ ReleaseReservation::RunCoreTest()
      * None.
      * \endverbatim
      */
-	LOG_NRM("Start ReleaseReservation::RunCoreTest")
+	LOG_NRM("Start ReleaseReservation::RunCoreTest");
 
 	/*
 	SharedIOSQPtr iosq = CAST_TO_IOSQ(gRsrcMngr->GetObj(IOSQ_GROUP_ID));

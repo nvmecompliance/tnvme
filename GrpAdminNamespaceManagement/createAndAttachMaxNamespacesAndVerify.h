@@ -51,7 +51,7 @@ struct NamespaceManagementCreateStruct {
     */
     void print() {
     	LOG_NRM("NamespaceManagementCreateStruct contains  NSZE = 0x%llx  NCAP = 0x%llx  FLBAS = 0x%x  DPS = 0x%x  NMIC = 0x%x",
-    			(long long unsigned) NSZE, (long long unsigned) NCAP, FLBAS, DPS, NMIC)
+    			(long long unsigned) NSZE, (long long unsigned) NCAP, FLBAS, DPS, NMIC);
     }
 } __attribute__((__packed__));
 

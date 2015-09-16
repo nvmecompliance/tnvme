@@ -108,7 +108,7 @@ AcquireReservation::RunCoreTest()
      * None.
      * \endverbatim
      */
-	LOG_NRM("Start AcquireReservation::RunCoreTest")
+	LOG_NRM("Start AcquireReservation::RunCoreTest");
 
 	SharedIOSQPtr iosq = CAST_TO_IOSQ(gRsrcMngr->GetObj(IOSQ_GROUP_ID));
 	SharedIOCQPtr iocq = CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_GROUP_ID));
@@ -157,9 +157,9 @@ AcquireReservation::RunCoreTest()
 	readCmd->SetNLB(0); // 0's based!
     IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq, iocq, readCmd, "read from LBA5", true, CESTAT_SUCCESS);
 
-    LOG_NRM("Ensure the data read back matches the expected data written (0xCC's)")
+    LOG_NRM("Ensure the data read back matches the expected data written (0xCC's)");
 	if (lbaWriteBuffer->Compare(lbaReadBuffer) == false) {
-		LOG_NRM("Data MISMATCH!!!")
+		LOG_NRM("Data MISMATCH!!!");
 		lbaWriteBuffer->Dump(
 			FileSystem::PrepDumpFile(mGrpName, mTestName, "Write Data"),
 			"write after acquire");
@@ -169,7 +169,7 @@ AcquireReservation::RunCoreTest()
 		throw FrmwkEx(HERE, "Data miscompare");
 	}
 
-    LOG_NRM("Completed AcquireReservation::RunCoreTest")
+    LOG_NRM("Completed AcquireReservation::RunCoreTest");
 }
 
 }   // namespace

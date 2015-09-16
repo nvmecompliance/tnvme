@@ -104,7 +104,7 @@ ReadWriteToUnacquiredReservation::RunCoreTest()
      * None.
      * \endverbatim
      */
-	LOG_NRM("Start ReadWriteToUnacquiredReservation::RunCoreTest")
+	LOG_NRM("Start ReadWriteToUnacquiredReservation::RunCoreTest");
 
 	SharedIOSQPtr iosq = CAST_TO_IOSQ(gRsrcMngr->GetObj(IOSQ_GROUP_ID));
 	SharedIOCQPtr iocq = CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_GROUP_ID));
@@ -133,7 +133,7 @@ ReadWriteToUnacquiredReservation::RunCoreTest()
 	readCmd->SetNLB(0); // 0's based!
     IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq, iocq, readCmd, "read from LBA5 using hostB", true, CESTAT_RSRV_CONFLICT);
 
-    LOG_NRM("Completed ReadWriteToUnacquiredReservation::RunCoreTest")
+    LOG_NRM("Completed ReadWriteToUnacquiredReservation::RunCoreTest");
 }
 
 }   // namespace

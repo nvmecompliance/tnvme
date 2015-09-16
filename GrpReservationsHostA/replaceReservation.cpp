@@ -106,7 +106,7 @@ ReplaceReservation::RunCoreTest()
      * None.
      * \endverbatim
      */
-	LOG_NRM("Start ReplaceReservation::RunCoreTest")
+	LOG_NRM("Start ReplaceReservation::RunCoreTest");
 
 	SharedIOSQPtr iosq = CAST_TO_IOSQ(gRsrcMngr->GetObj(IOSQ_GROUP_ID));
 	SharedIOCQPtr iocq = CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_GROUP_ID));
@@ -159,7 +159,7 @@ ReplaceReservation::RunCoreTest()
 	reservationRegisterCmd->SetPrpBuffer(prpBitmask, writeRegKey);
     IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq, iocq, reservationRegisterCmd, "Invalid replace, wrong CRKEY", true, CESTAT_RSRV_CONFLICT);
 
-    LOG_NRM("Completed ReplaceReservation::RunCoreTest")
+    LOG_NRM("Completed ReplaceReservation::RunCoreTest");
 }
 
 }   // namespace
