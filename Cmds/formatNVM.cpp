@@ -128,7 +128,7 @@ FormatNVM::SetLBAF(uint8_t lbaf)
 
     const uint8_t MAX_VALUE = 0x0F;
     if (lbaf > MAX_VALUE)
-        throw FrmwkEx(HERE, "Illegal lbaf %d > %d(max)", MAX_VALUE);
+        throw FrmwkEx(HERE, "Illegal lbaf %d > %d(max)", lbaf, MAX_VALUE);
 
     LOG_NRM("Setting LBAF = 0x%02X", lbaf);
     work = GetByte(10, 0);
