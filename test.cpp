@@ -25,6 +25,7 @@ Test::Test(string grpName, string testName, SpecRev specRev)
     mSpecRev = specRev;
     mGrpName = grpName;
     mTestName = testName;
+    mResult = TR_SUCCESS;
 }
 
 

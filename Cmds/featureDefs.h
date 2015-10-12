@@ -17,24 +17,31 @@
 #ifndef _FEATUREDEFS_H_
 #define _FEATUREDEFS_H_
 
+/*     FeatureID,                FID              */
+#define FEATURE_TABLE                                                          \
+    ZZ(FID_ARBITRATION,          0x01)                                         \
+    ZZ(FID_PWR_MGMT,             0x02)                                         \
+    ZZ(FID_LBA_RANGE,            0x03)                                         \
+    ZZ(FID_TEMP_THRESHOLD,       0x04)                                         \
+    ZZ(FID_ERR_RECOVERY,         0x05)                                         \
+    ZZ(FID_VOL_WR_CACHE,         0x06)                                         \
+    ZZ(FID_NUM_QUEUES,           0x07)                                         \
+    ZZ(FID_IRQ_COALESCING,       0x08)                                         \
+    ZZ(FID_IRQ_VEC_CONFIG,       0x09)                                         \
+    ZZ(FID_WRITE_ATOMICITY,      0x0a)                                         \
+    ZZ(FID_ASYNC_EVENT_CONFIG,   0x0b)                                         \
+    ZZ(FID_AUTO_PS_TRANS,        0x0c)                                         \
+    ZZ(FID_SW_PROGRESS,          0x80)                                         \
+    ZZ(FID_HOST_ID,              0x81)                                         \
+    ZZ(FID_RESV_NOTIF_MASK,      0x82)                                         \
+    ZZ(FID_RESV_PERSIST,         0x83)
+
+#define ZZ(a, b)        a=b,
 typedef enum FeatureID {
-    FID_ARBITRATION          = 0x01,
-    FID_PWR_MGMT             = 0x02,
-    FID_LBA_RANGE            = 0x03,
-    FID_TEMP_THRESHOLD       = 0x04,
-    FID_ERR_RECOVERY         = 0x05,
-    FID_VOL_WR_CACHE         = 0x06,
-    FID_NUM_QUEUES           = 0x07,
-    FID_IRQ_COALESCING       = 0x08,
-    FID_IRQ_VEC_CONFIG       = 0x09,
-    FID_WRITE_ATOMICITY      = 0x0a,
-    FID_ASYNC_EVENT_CONFIG   = 0x0b,
-    FID_AUTO_PS_TRANS        = 0x0c,
-    FID_SW_PROGRESS          = 0x80,
-    FID_HOST_ID              = 0x81,
-    FID_RESV_NOTIF_MASK      = 0x82,
-    FID_RESV_PERSIST         = 0x83
+    FEATURE_TABLE
+    FID_FENCE    // always must be the last element
 } FeatureID;
+#undef ZZ
 
 struct HostIDStruct {
     uint8_t     HOSTID;

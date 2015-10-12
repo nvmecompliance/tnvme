@@ -159,7 +159,7 @@ protected:
     /// Children must populate this during construction
     TestDescribe mTestDesc;
     /// The test result type; default is success
-    TestResult mResult = TR_SUCCESS;
+    TestResult mResult;
 
     /**
      * Forcing children to implement the core logic of each test case.
