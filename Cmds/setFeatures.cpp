@@ -466,3 +466,16 @@ SetFeatures::GetAutoPSTransAPSTE() const
     LOG_NRM("Getting autonomous PS transision enable (APSTE)");
     return GetBit(11, 0);
 }
+
+
+void
+SetFeatures::SetSave(bool save)
+{
+	if (save)
+		LOG_NRM("Setting SV field to true");
+	else
+		LOG_NRM("Setting SV field to false");
+	SetBit(save, 10, 31);
+}
+
+

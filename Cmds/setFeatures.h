@@ -173,6 +173,13 @@ public:
      */
     void SetAutoPSTransAPSTE(bool enable);
     bool GetAutoPSTransAPSTE() const;
+
+    /**
+     * Sets Save (SV) field that forces the controller to save the
+     * attribute through all power states and resets
+     * @param saveable sets the save (SV) field to either 1 or 0
+     */
+    void SetSave(bool save);
 };
 
 
