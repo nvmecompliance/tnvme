@@ -48,6 +48,11 @@ public:
      * @param iv Specify the interrupt vec for which the config settings needed.
      */
     void SetIntVecConfigIV(uint16_t iv);
+    /**
+     * Sets the Select (SEL) field to what ever the user inputs
+     * @param mask the new value of the SEL field
+     */
+    void SetSelField(uint8_t mask);
 };
 
 

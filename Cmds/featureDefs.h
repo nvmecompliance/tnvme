@@ -183,4 +183,18 @@ typedef enum NumQDW0Bits {
     NQ_DW11_NSQA     = 0x0000ffff
 } NumQDW0Bits;
 
+typedef enum SelDW10Byte {
+	SEL_CURRENT     = 0x0,
+	SEL_DEFAULT     = 0x1,
+	SEL_SAVED       = 0x2,
+	SEL_SUPPORTED   = 0x3,
+	SEL_RES         = 0x4
+} SelDW10Byte;
+
+typedef enum GetDW0 {
+	GET_DW0_SAVEABLE        = 0x1,
+	GET_DW0_IND_NAMSPC      = 0x2,
+	GET_DW0_CHANGEABLE      = 0x4
+} GetDW0;
+
 #endif

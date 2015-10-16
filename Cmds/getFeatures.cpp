@@ -44,3 +44,16 @@ GetFeatures::SetIntVecConfigIV(uint16_t iv)
     LOG_NRM("Setting interrupt vector (IV): 0x%04X", iv);
     SetWord(iv, 11, 0);
 }
+
+
+void
+GetFeatures::SetSelField(uint8_t mask)
+{
+	uint8_t newVal = GetByte(10, 1);
+	LOG_NRM("Origional DW10 byte 1: 0x%d", newVal);
+	newVal |= (mask & 0x7);
+	LOG_NRM("Setting DW10 byte 1: 0x%d", newVal);
+	SetByte(newVal, 10, 1);
+}
+
+
