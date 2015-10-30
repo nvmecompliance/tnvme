@@ -31,6 +31,7 @@
     ZZ(FID_WRITE_ATOMICITY,      0x0a)                                         \
     ZZ(FID_ASYNC_EVENT_CONFIG,   0x0b)                                         \
     ZZ(FID_AUTO_PS_TRANS,        0x0c)                                         \
+    ZZ(FID_HOST_MEM_BUF,         0x0d)                                         \
     ZZ(FID_SW_PROGRESS,          0x80)                                         \
     ZZ(FID_HOST_ID,              0x81)                                         \
     ZZ(FID_RESV_NOTIF_MASK,      0x82)                                         \
