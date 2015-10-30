@@ -15,6 +15,14 @@
  */
 
 #include "baseFeatures.h"
+#include "featureDefs.h"
+
+#define ZZ(a,b)  b,
+const uint8_t FID[] = {
+    FEATURE_TABLE
+    FID_FENCE    // always must be the last element
+};
+#undef ZZ
 
 
 BaseFeatures::BaseFeatures() : Cmd(Trackable::OBJTYPE_FENCE)

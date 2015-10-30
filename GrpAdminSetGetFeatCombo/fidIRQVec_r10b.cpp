@@ -127,9 +127,9 @@ FIDIRQVec_r10b::RunCoreTest()
         SharedSetFeaturesPtr(new SetFeatures());
 
     LOG_NRM("Set and Get features for IRQ vec config (FID = 0x%x)",
-        FID_IRQ_VEC_CONFIG);
-    getFeaturesCmd->SetFID(FID_IRQ_VEC_CONFIG);
-    setFeaturesCmd->SetFID(FID_IRQ_VEC_CONFIG);
+            FID[FID_IRQ_VEC_CONFIG]);
+    getFeaturesCmd->SetFID(FID[FID_IRQ_VEC_CONFIG]);
+    setFeaturesCmd->SetFID(FID[FID_IRQ_VEC_CONFIG]);
 
     uint16_t max_ivec = IRQ::GetMaxIRQsSupportedAnyScheme();
 

@@ -129,9 +129,9 @@ FIDArbitration_r10b::RunCoreTest()
     SharedSetFeaturesPtr setFeaturesCmd =
         SharedSetFeaturesPtr(new SetFeatures());
 
-    LOG_NRM("Set and Get features arbitration (FID = 0x%x)", FID_ARBITRATION);
-    getFeaturesCmd->SetFID(FID_ARBITRATION);
-    setFeaturesCmd->SetFID(FID_ARBITRATION);
+    LOG_NRM("Set and Get features arbitration (FID = 0x%x)", FID[FID_ARBITRATION]);
+    getFeaturesCmd->SetFID(FID[FID_ARBITRATION]);
+    setFeaturesCmd->SetFID(FID[FID_ARBITRATION]);
 
     uint8_t arbBurst[] =  {
         0, 1, 2, 3, 4, 5, 6,  NO_LIMIT

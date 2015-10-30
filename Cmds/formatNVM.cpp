@@ -147,4 +147,3 @@ FormatNVM::GetLBAF() const
     return ((work & BYTE_BITMASK_LBAF) >> 0);
 }
 
-

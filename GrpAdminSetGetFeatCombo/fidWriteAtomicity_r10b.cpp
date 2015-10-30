@@ -127,9 +127,9 @@ FIDWriteAtomicity_r10b::RunCoreTest()
         SharedSetFeaturesPtr(new SetFeatures());
 
     LOG_NRM("Set and Get features for Write Atomicity (FID = 0x%x)",
-        FID_WRITE_ATOMICITY);
-    getFeaturesCmd->SetFID(FID_WRITE_ATOMICITY);
-    setFeaturesCmd->SetFID(FID_WRITE_ATOMICITY);
+        FID[FID_WRITE_ATOMICITY]);
+    getFeaturesCmd->SetFID(FID[FID_WRITE_ATOMICITY]);
+    setFeaturesCmd->SetFID(FID[FID_WRITE_ATOMICITY]);
 
     uint8_t wrAtomMismatch = 0;
 

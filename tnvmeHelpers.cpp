@@ -365,7 +365,7 @@ SetFeaturesNumberOfQueues(NumQueues &numQueues)
         LOG_NRM("Create the cmd to carry this data to the DUT");
         SharedSetFeaturesPtr sfNumOfQ =
             SharedSetFeaturesPtr(new SetFeatures());
-        sfNumOfQ->SetFID(FID_NUM_QUEUES);
+        sfNumOfQ->SetFID(FID[FID_NUM_QUEUES]);
         sfNumOfQ->SetNumberOfQueues(numQueues.ncqr, numQueues.nsqr);
 
         IO::SendAndReapCmd("tnvme", "queues", CALC_TIMEOUT_ms(1),

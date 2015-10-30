@@ -127,9 +127,9 @@ FIDIRQCoalescing_r10b::RunCoreTest()
         SharedSetFeaturesPtr(new SetFeatures());
 
     LOG_NRM("Set and Get features for IRQ coalescing (FID = 0x%x)",
-        FID_IRQ_COALESCING);
-    getFeaturesCmd->SetFID(FID_IRQ_COALESCING);
-    setFeaturesCmd->SetFID(FID_IRQ_COALESCING);
+            FID[FID_IRQ_COALESCING]);
+    getFeaturesCmd->SetFID(FID[FID_IRQ_COALESCING]);
+    setFeaturesCmd->SetFID(FID[FID_IRQ_COALESCING]);
 
     uint8_t irqclscMismatch = 0;
 

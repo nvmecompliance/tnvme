@@ -36,12 +36,14 @@
     ZZ(FID_RESV_NOTIF_MASK,      0x82)                                         \
     ZZ(FID_RESV_PERSIST,         0x83)
 
-#define ZZ(a, b)        a=b,
+#define ZZ(a, b)        a,
 typedef enum FeatureID {
     FEATURE_TABLE
     FID_FENCE    // always must be the last element
 } FeatureID;
 #undef ZZ
+
+extern const uint8_t FID[];
 
 struct HostIDStruct {
     uint8_t     HOSTID;

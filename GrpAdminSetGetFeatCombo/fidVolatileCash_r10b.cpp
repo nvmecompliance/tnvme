@@ -133,9 +133,9 @@ FIDVolatileCash_r10b::RunCoreTest()
         SharedSetFeaturesPtr(new SetFeatures());
 
     LOG_NRM("Set and Get features for volatile write cache (FID = 0x%x)",
-        FID_VOL_WR_CACHE);
-    getFeaturesCmd->SetFID(FID_VOL_WR_CACHE);
-    setFeaturesCmd->SetFID(FID_VOL_WR_CACHE);
+            FID[FID_VOL_WR_CACHE]);
+    getFeaturesCmd->SetFID(FID[FID_VOL_WR_CACHE]);
+    setFeaturesCmd->SetFID(FID[FID_VOL_WR_CACHE]);
 
     uint8_t wce = 0x0; // Disable volatile write cache
     LOG_NRM("Disable volatile wr cache # %d ", wce);

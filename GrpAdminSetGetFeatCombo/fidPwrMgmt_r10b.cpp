@@ -126,9 +126,9 @@ FIDPwrMgmt_r10b::RunCoreTest()
     SharedSetFeaturesPtr setFeaturesCmd =
         SharedSetFeaturesPtr(new SetFeatures());
 
-    LOG_NRM("Set and Get features PSD (FID = 0x%x)", FID_PWR_MGMT);
-    getFeaturesCmd->SetFID(FID_PWR_MGMT);
-    setFeaturesCmd->SetFID(FID_PWR_MGMT);
+    LOG_NRM("Set and Get features PSD (FID = 0x%x)", FID[FID_PWR_MGMT]);
+    getFeaturesCmd->SetFID(FID[FID_PWR_MGMT]);
+    setFeaturesCmd->SetFID(FID[FID_PWR_MGMT]);
 
     uint8_t npss = gInformative->GetIdentifyCmdCtrlr()->
         GetValue(IDCTRLRCAP_NPSS); // 0-based

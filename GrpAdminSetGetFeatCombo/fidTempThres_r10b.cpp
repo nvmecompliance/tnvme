@@ -127,9 +127,9 @@ FIDTempThres_r10b::RunCoreTest()
         SharedSetFeaturesPtr(new SetFeatures());
 
     LOG_NRM("Set and Get features for temperature thrshold (FID = 0x%x)",
-        FID_TEMP_THRESHOLD);
-    getFeaturesCmd->SetFID(FID_TEMP_THRESHOLD);
-    setFeaturesCmd->SetFID(FID_TEMP_THRESHOLD);
+            FID[FID_TEMP_THRESHOLD]);
+    getFeaturesCmd->SetFID(FID[FID_TEMP_THRESHOLD]);
+    setFeaturesCmd->SetFID(FID[FID_TEMP_THRESHOLD]);
 
     uint8_t tmpthMismatch = 0;
 

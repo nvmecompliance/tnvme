@@ -127,9 +127,9 @@ FIDAsyncEventCfg_r10b::RunCoreTest()
         SharedSetFeaturesPtr(new SetFeatures());
 
     LOG_NRM("Set and Get features for async event config (FID = 0x%x)",
-        FID_ASYNC_EVENT_CONFIG);
-    getFeaturesCmd->SetFID(FID_ASYNC_EVENT_CONFIG);
-    setFeaturesCmd->SetFID(FID_ASYNC_EVENT_CONFIG);
+            FID[FID_ASYNC_EVENT_CONFIG]);
+    getFeaturesCmd->SetFID(FID[FID_ASYNC_EVENT_CONFIG]);
+    setFeaturesCmd->SetFID(FID[FID_ASYNC_EVENT_CONFIG]);
 
     uint8_t asyncEventMismatch = 0;
 
