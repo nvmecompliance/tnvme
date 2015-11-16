@@ -21,6 +21,7 @@ SRC =					\
 	createResources_r10b.cpp	\
 	unsupportRsvdFields_r10b.cpp	\
 	unsupportRsvdFields_r11b.cpp	\
+	unsupportRsvdFields_r12.cpp	\
 	invalidQID_r10b.cpp		\
 	maxQSizeExceed_r10b.cpp
 

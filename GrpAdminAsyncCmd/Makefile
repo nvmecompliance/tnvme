@@ -20,6 +20,7 @@ SRC =					\
 	grpAdminAsyncCmd.cpp		\
   unsupportRsvdFields_r10b.cpp	\
   unsupportRsvdFields_r11b.cpp	\
+  unsupportRsvdFields_r12.cpp	\
 	abortByReset_r10b.cpp		\
 	verifyMaxEvents_r10b.cpp	\
 	verifyMasking_r10b.cpp		\

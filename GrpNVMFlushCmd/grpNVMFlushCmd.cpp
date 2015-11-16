@@ -20,6 +20,7 @@
 #include "invalidNamspc_r10b.h"
 #include "unsupportRsvdFields_r10b.h"
 #include "unsupportRsvdFields_r11b.h"
+#include "unsupportRsvdFields_r12.h"
 #include "functionalityBare_r10b.h"
 #include "functionalityMeta_r10b.h"
 
@@ -40,11 +41,17 @@ GrpNVMFlushCmd::GrpNVMFlushCmd(size_t grpNum) :
         APPEND_TEST_AT_YLEVEL(FunctionalityBare_r10b, GrpNVMFlushCmd)
         APPEND_TEST_AT_XLEVEL(FunctionalityMeta_r10b, GrpNVMFlushCmd)
         break;
-    case SPECREV_12:
     case SPECREV_11:
         APPEND_TEST_AT_XLEVEL(CreateResources_r10b, GrpNVMFlushCmd)
         APPEND_TEST_AT_YLEVEL(InvalidNamspc_r10b, GrpNVMFlushCmd)
         APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r11b, GrpNVMFlushCmd)
+        APPEND_TEST_AT_YLEVEL(FunctionalityBare_r10b, GrpNVMFlushCmd)
+        APPEND_TEST_AT_XLEVEL(FunctionalityMeta_r10b, GrpNVMFlushCmd)
+        break;
+    case SPECREV_12:
+        APPEND_TEST_AT_XLEVEL(CreateResources_r10b, GrpNVMFlushCmd)
+        APPEND_TEST_AT_YLEVEL(InvalidNamspc_r10b, GrpNVMFlushCmd)
+        APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r12, GrpNVMFlushCmd)
         APPEND_TEST_AT_YLEVEL(FunctionalityBare_r10b, GrpNVMFlushCmd)
         APPEND_TEST_AT_XLEVEL(FunctionalityMeta_r10b, GrpNVMFlushCmd)
         break;

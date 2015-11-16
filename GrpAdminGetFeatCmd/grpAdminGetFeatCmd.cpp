@@ -21,6 +21,7 @@
 #include "invalidFieldInCmd_r12.h"
 #include "unsupportRsvdFields_r10b.h"
 #include "unsupportRsvdFields_r11b.h"
+#include "unsupportRsvdFields_r12.h"
 
 
 namespace GrpAdminGetFeatCmd {
@@ -47,7 +48,7 @@ GrpAdminGetFeatCmd::GrpAdminGetFeatCmd(size_t grpNum) :
     case SPECREV_12:
         APPEND_TEST_AT_XLEVEL(CreateResources_r10b, GrpAdminGetFeatCmd)
         APPEND_TEST_AT_YLEVEL(InvalidFieldInCmd_r12, GrpAdminGetFeatCmd)
-        APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r11b, GrpAdminGetFeatCmd)
+        APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r12, GrpAdminGetFeatCmd)
         break;
 
     default:

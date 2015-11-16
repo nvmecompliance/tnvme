@@ -19,6 +19,7 @@
 #include "createResources_r10b.h"
 #include "unsupportRsvdFields_r10b.h"
 #include "unsupportRsvdFields_r11b.h"
+#include "unsupportRsvdFields_r12.h"
 #include "invalidQID_r10b.h"
 #include "maxQSizeExceed_r10b.h"
 #include "completionQInvalid_r10b.h"
@@ -43,10 +44,17 @@ GrpAdminCreateIOSQCmd::GrpAdminCreateIOSQCmd(size_t grpNum) :
         APPEND_TEST_AT_XLEVEL(InvalidQID_r10b, GrpAdminCreateIOSQCmd)
         APPEND_TEST_AT_XLEVEL(AcceptQPriority_r10b, GrpAdminCreateIOSQCmd)
         break;
-    case SPECREV_12:
     case SPECREV_11:
         APPEND_TEST_AT_XLEVEL(CreateResources_r10b, GrpAdminCreateIOSQCmd)
         APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r11b, GrpAdminCreateIOSQCmd)
+        APPEND_TEST_AT_YLEVEL(MaxQSizeExceed_r10b, GrpAdminCreateIOSQCmd)
+        APPEND_TEST_AT_YLEVEL(CompletionQInvalid_r10b, GrpAdminCreateIOSQCmd)
+        APPEND_TEST_AT_XLEVEL(InvalidQID_r10b, GrpAdminCreateIOSQCmd)
+        APPEND_TEST_AT_XLEVEL(AcceptQPriority_r10b, GrpAdminCreateIOSQCmd)
+        break;
+    case SPECREV_12:
+        APPEND_TEST_AT_XLEVEL(CreateResources_r10b, GrpAdminCreateIOSQCmd)
+        APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r12, GrpAdminCreateIOSQCmd)
         APPEND_TEST_AT_YLEVEL(MaxQSizeExceed_r10b, GrpAdminCreateIOSQCmd)
         APPEND_TEST_AT_YLEVEL(CompletionQInvalid_r10b, GrpAdminCreateIOSQCmd)
         APPEND_TEST_AT_XLEVEL(InvalidQID_r10b, GrpAdminCreateIOSQCmd)
