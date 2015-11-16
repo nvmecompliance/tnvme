@@ -23,7 +23,8 @@ SRC =					\
 	invalidFieldInCmd_r11.cpp	\
 	invalidFieldInCmd_r12.cpp	\
 	unsupportRsvdFields_r10b.cpp \
-	unsupportRsvdFields_r11b.cpp
+	unsupportRsvdFields_r11b.cpp \
+	unsupportRsvdFields_r12.cpp
 
 .SUFFIXES: .cpp
 

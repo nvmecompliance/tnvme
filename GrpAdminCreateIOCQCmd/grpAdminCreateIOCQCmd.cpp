@@ -19,6 +19,7 @@
 #include "createResources_r10b.h"
 #include "unsupportRsvdFields_r10b.h"
 #include "unsupportRsvdFields_r11b.h"
+#include "unsupportRsvdFields_r12.h"
 #include "invalidQID_r10b.h"
 #include "maxQSizeExceed_r10b.h"
 
@@ -39,10 +40,15 @@ GrpAdminCreateIOCQCmd::GrpAdminCreateIOCQCmd(size_t grpNum) :
         APPEND_TEST_AT_XLEVEL(InvalidQID_r10b, GrpAdminCreateIOCQCmd)
         APPEND_TEST_AT_XLEVEL(MaxQSizeExceed_r10b, GrpAdminCreateIOCQCmd)
         break;
-    case SPECREV_12:
     case SPECREV_11:
         APPEND_TEST_AT_XLEVEL(CreateResources_r10b, GrpAdminCreateIOCQCmd)
         APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r11b, GrpAdminCreateIOCQCmd)
+        APPEND_TEST_AT_XLEVEL(InvalidQID_r10b, GrpAdminCreateIOCQCmd)
+        APPEND_TEST_AT_XLEVEL(MaxQSizeExceed_r10b, GrpAdminCreateIOCQCmd)
+        break;
+    case SPECREV_12:
+        APPEND_TEST_AT_XLEVEL(CreateResources_r10b, GrpAdminCreateIOCQCmd)
+        APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r12, GrpAdminCreateIOCQCmd)
         APPEND_TEST_AT_XLEVEL(InvalidQID_r10b, GrpAdminCreateIOCQCmd)
         APPEND_TEST_AT_XLEVEL(MaxQSizeExceed_r10b, GrpAdminCreateIOCQCmd)
         break;
