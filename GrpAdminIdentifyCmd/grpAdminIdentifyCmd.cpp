@@ -22,7 +22,6 @@
 #include "unsupportRsvdFields_r11b.h"
 #include "unsupportRsvdFields_r12.h"
 #include "invalidNamspc_r10b.h"
-#include "endToEnd_r12.h"
 
 
 namespace GrpAdminIdentifyCmd {
@@ -48,7 +47,6 @@ GrpAdminIdentifyCmd::GrpAdminIdentifyCmd(size_t grpNum) :
         APPEND_TEST_AT_YLEVEL(PRP1PRP2_r10b, GrpAdminIdentifyCmd)
         APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r12, GrpAdminIdentifyCmd)
         APPEND_TEST_AT_YLEVEL(InvalidNamspc_r10b, GrpAdminIdentifyCmd)
-        APPEND_TEST_AT_XLEVEL(EndToEnd_r12, GrpAdminIdentifyCmd)
         break;
     case SPECREV_11:
         APPEND_TEST_AT_XLEVEL(CreateResources_r10b, GrpAdminIdentifyCmd)

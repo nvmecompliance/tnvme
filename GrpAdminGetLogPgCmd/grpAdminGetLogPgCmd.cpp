@@ -20,6 +20,7 @@
 #include "prp1PRP2_r10b.h"
 #include "unsupportRsvdFields_r10b.h"
 #include "unsupportRsvdFields_r11b.h"
+#include "unsupportRsvdFields_r12.h"
 #include "numDIsAdhered_r10b.h"
 #include "invalidLogPageNVMSet_r10b.h"
 #include "invalidLogPageNVMSet_r11b.h"

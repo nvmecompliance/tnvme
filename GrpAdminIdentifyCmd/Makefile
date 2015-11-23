@@ -24,8 +24,7 @@ SRC =					\
 	unsupportRsvdFields_r10b.cpp	\
 	unsupportRsvdFields_r11b.cpp	\
 	unsupportRsvdFields_r12.cpp	\
-	invalidNamspc_r10b.cpp		\
-	endToEnd_r12.cpp
+	invalidNamspc_r10b.cpp
 
 .SUFFIXES: .cpp
 
