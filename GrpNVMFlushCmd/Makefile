@@ -22,6 +22,7 @@ SRC =					\
 	invalidNamspc_r10b.cpp		\
 	unsupportRsvdFields_r10b.cpp	\
 	unsupportRsvdFields_r11b.cpp	\
+	unsupportRsvdFields_r12.cpp		\
 	functionalityBare_r10b.cpp	\
 	functionalityMeta_r10b.cpp
 

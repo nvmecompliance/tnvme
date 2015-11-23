@@ -24,6 +24,7 @@ SRC =						\
 	invalidNamspc_r10b.cpp			\
 	unsupportRsvdFields_r10b.cpp		\
 	unsupportRsvdFields_r11b.cpp		\
+	unsupportRsvdFields_r12.cpp		\
 	ignoreMetaPtrBare_r10b.cpp		\
 	ignoreMetaPtrBare_r12.cpp		\
 	protInfoIgnoreBare_r10b.cpp		\

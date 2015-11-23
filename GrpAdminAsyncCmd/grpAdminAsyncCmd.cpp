@@ -17,6 +17,7 @@
 #include "grpAdminAsyncCmd.h"
 #include "unsupportRsvdFields_r10b.h"
 #include "unsupportRsvdFields_r11b.h"
+#include "unsupportRsvdFields_r12.h"
 #include "abortByReset_r10b.h"
 #include "verifyMaxEvents_r10b.h"
 #include "verifyMasking_r10b.h"
@@ -40,7 +41,6 @@ GrpAdminAsyncCmd::GrpAdminAsyncCmd(size_t grpNum) :
         APPEND_TEST_AT_XLEVEL(VerifyMasking_r10b, GrpAdminAsyncCmd)
         APPEND_TEST_AT_XLEVEL(VerifyEventQueueing_r10b, GrpAdminAsyncCmd)
         break;
-    case SPECREV_12:
     case SPECREV_11:
         APPEND_TEST_AT_XLEVEL(UnsupportRsvdFields_r11b, GrpAdminAsyncCmd)
         APPEND_TEST_AT_XLEVEL(AbortByReset_r10b, GrpAdminAsyncCmd)
@@ -48,7 +48,14 @@ GrpAdminAsyncCmd::GrpAdminAsyncCmd(size_t grpNum) :
         APPEND_TEST_AT_XLEVEL(VerifyMasking_r10b, GrpAdminAsyncCmd)
         APPEND_TEST_AT_XLEVEL(VerifyEventQueueing_r10b, GrpAdminAsyncCmd)
         break;
-        
+    case SPECREV_12:
+        APPEND_TEST_AT_XLEVEL(UnsupportRsvdFields_r12, GrpAdminAsyncCmd)
+        APPEND_TEST_AT_XLEVEL(AbortByReset_r10b, GrpAdminAsyncCmd)
+        APPEND_TEST_AT_XLEVEL(VerifyMaxEvents_r10b, GrpAdminAsyncCmd)
+        APPEND_TEST_AT_XLEVEL(VerifyMasking_r10b, GrpAdminAsyncCmd)
+        APPEND_TEST_AT_XLEVEL(VerifyEventQueueing_r10b, GrpAdminAsyncCmd)
+        break;  
+      
     default:
     case SPECREVTYPE_FENCE:
         throw FrmwkEx(HERE, "Object created with an unknown SpecRev=%d",
