@@ -484,7 +484,7 @@ Informative::SendGetFeaturesNumOfQueues(SharedASQPtr asq, SharedACQPtr acq,
     LOG_NRM("Create get features");
     SharedGetFeaturesPtr gfNumQ = SharedGetFeaturesPtr(new GetFeatures());
     LOG_NRM("Force get features to request number of queues");
-    gfNumQ->SetFID(FID_NUM_QUEUES);
+    gfNumQ->SetFID(FID[FID_NUM_QUEUES]);
     gfNumQ->Dump(
         FileSystem::PrepDumpFile(GRP_NAME, TEST_NAME, "GetFeat", "NumOfQueue"),
         "The get features number of queues cmd");
