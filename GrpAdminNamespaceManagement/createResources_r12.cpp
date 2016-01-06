@@ -88,7 +88,7 @@ CreateResources_r12::RunnableCoreTest(bool preserve)
     ConstSharedIdentifyPtr idCtrlrCap = gInformative->GetIdentifyCmdCtrlr();
     uint64_t oacs = idCtrlrCap->GetValue(IDCTRLRCAP_OACS);
     if ((oacs & OACS_SUP_NSMANAGEMENT_CMD) == 0) {
-        LOG_NRM("Reporting Namespace Management not supported (oncs)%ld", oacs);
+        LOG_NRM("Reporting Namespace Management not supported (oacs)%ld", oacs);
         return RUN_FALSE;
     }
 

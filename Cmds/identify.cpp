@@ -106,7 +106,7 @@ Identify::GetValue(IdCtrlrCap field) const
 {
     if (field >= IDCTRLRCAP_FENCE)
         throw FrmwkEx(HERE, "Unknown ctrlr cap field: %d", field);
-    else if (GetCNS() != 1)
+    else if (GetCNS() != CNS_Controller)
         throw FrmwkEx(HERE, "This cmd does not contain a ctrlr data struct");
 
     return GetValue(field, mIdCtrlrCapMetrics);
@@ -118,10 +118,40 @@ Identify::GetValue(IdNamespc field) const
 {
     if (field >= IDNAMESPC_FENCE)
         throw FrmwkEx(HERE, "Unknown namespace field: %d", field);
-    else if (GetCNS() != 0)
+    else if (GetCNS() != CNS_Namespace)
         throw FrmwkEx(HERE,"This cmd does not contain a namspc data struct");
 
     return GetValue(field, mIdNamespcType);
+}
+
+
+uint32_t
+Identify::GetValue(uint32_t entry) const
+{
+    uint8_t byte;
+    uint8_t value = 0;
+    uint32_t cns = GetCNS();
+    int entrySize;
+
+    if (cns == CNS_NamespaceListActive
+     || cns == CNS_NamespaceListSubsystem) // Namespace List
+    {
+        entrySize = 4;
+    }
+    else if (cns == CNS_ControllerListAttachedToNSID
+          || cns == CNS_ControllerListSubsystem) // Controller List
+    {
+        entrySize = 2;
+    }
+    else
+        throw FrmwkEx(HERE,"This cmd does not contain a list");
+
+    for (int i = 0; i < entrySize; i++) {
+        byte = (GetROPrpBuffer())[entry + i];
+        value |= ((uint32_t)byte << (i*8));
+    }
+    LOG_NRM("List[%d] = 0x%08X", entry, value);
+    return value;
 }
 
 

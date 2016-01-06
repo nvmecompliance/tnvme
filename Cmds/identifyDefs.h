@@ -425,7 +425,7 @@ struct NamespaceManagementStruct {
 // Figure 86 in 1.2 spec               CNS  NSID CNTID Returns
 // CNS_Namespace                      0x00    X     -   (Identify Namespace from NSID X. If attached, receive struct, else all 0's, else invalid namespace ID)
 // CNS_Controller                     0x01    -     -   (Identify Controller struct)
-// CNS_NamespaceListAttached          0x02    Y     -   (Identify Namespace LIST, starting at NSID Y and in an increasing order)
+// CNS_NamespaceListActive            0x02    Y     -   (Identify Namespace LIST, starting at NSID Y and in an increasing order)
 // CNS_NamespaceListSubsystem         0x10    Z     -   (Identify Namespace LIST, starting at NSID Z present in subsystem that may or may not be attached)
 // CNS_NamespaceStructSubsystem       0x11    X     -   (Identify Namespace from NSID A. If attached or not, receive the struct, else invalid namespace ID)
 // CNS_ControllerListAttachedToNSID   0x12    X     A   (Controller List that are attached to NSID X, starting with CNTID greater than A)
@@ -433,7 +433,7 @@ struct NamespaceManagementStruct {
 typedef enum CNSValues {
   	CNS_Namespace                    = 0x00,
   	CNS_Controller                   = 0x01,
-  	CNS_NamespaceListAttached        = 0x02,
+  	CNS_NamespaceListActive          = 0x02,
   	CNS_NamespaceListSubsystem       = 0x10,
   	CNS_NamespaceStructSubsystem     = 0x11,
   	CNS_ControllerListAttachedToNSID = 0x12,

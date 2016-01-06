@@ -69,6 +69,16 @@ public:
     uint64_t GetValue(IdNamespc field) const;
 
     /**
+     * Get specified entry number from list.  The correct data structure
+     * (namespace or controller list) must be backing this cmd or it will
+     * throw.
+     * @param entry Pass which entry in the list to return
+     * @return The value, otherwise will throw if the incorrect data structure
+     *          is backing this cmd.
+     */
+    uint32_t GetValue(uint32_t entry) const;
+
+    /**
      * If this cmd's payload contains a namespace data structure, then this
      * method uses FLBAS field to lookup and return the active LBA format.
      * @return The requested data, otherwise throws
