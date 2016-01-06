@@ -140,7 +140,8 @@ UnsupportRsvdFields_r12::RunCoreTest()
     idCmdNamSpc->SetDword(0xffffffff, 5);
 
     work = idCmdNamSpc->GetDword(10);
-    work |= 0xfffffffc;      // Set DW10_b31:2 bits
+    //work |= 0xfffffffc;      // Set DW10_b31:2 bits
+    work |= 0x0000ff00;        // Set DW10_b31:8 bits
     idCmdNamSpc->SetDword(work, 10);
 
     idCmdNamSpc->SetDword(0xffffffff, 11);
@@ -154,11 +155,30 @@ UnsupportRsvdFields_r12::RunCoreTest()
 
     LOG_NRM("Set CNS field reserved coded value");
     uint32_t cdw10 = idCmdNamSpc->GetDword(10);
-    work = cdw10 | 0x3;
-    idCmdNamSpc->SetDword(work, 10);
+    //work = cdw10 | 0x3;
+    //idCmdNamSpc->SetDword(work, 10);
+    const uint32_t cnsNonRsvdVal[] = {
+        0x00, 0x01, 0x02, 0x10, 0x11, 0x12, 0x13 };
+    const uint32_t cnsNonRevdValCnt = sizeof(cnsNonRsvdVal) / sizeof(uint32_t);
 
-    IO::SendAndReapCmdNot(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
+    /*IO::SendAndReapCmdNot(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
         idCmdNamSpc, "rsvdall.val.set", true, CESTAT_SUCCESS);
+     */
+    for (uint32_t cnsVal = 0; cnsVal <= 0xff; cnsVal++){
+        uint32_t idx = 0;
+
+        while ((idx < cnsNonRevdValCnt) && (cnsVal != cnsNonRsvdVal[idx])){
+            ++idx;
+        }
+
+        if (idx == cnsNonRevdValCnt) {
+            work = cdw10 | cnsVal;
+            idCmdNamSpc->SetDword(work, 10);
+
+            IO::SendAndReapCmdNot(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
+                idCmdNamSpc, "rsvdall.val.set", true, CESTAT_SUCCESS);
+        }
+    }
 }
 
 }   // namespace
