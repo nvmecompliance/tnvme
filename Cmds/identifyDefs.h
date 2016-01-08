@@ -311,7 +311,23 @@ struct LBAFormat {
 } __attribute__((__packed__));
 
 
-struct IdNamespcStruct {
+struct IdNamespcStructNonVS {
+    uint64_t    NSZE;
+    uint64_t    NCAP;
+    uint64_t    NUSE;
+    uint8_t     NSFEAT;
+    uint8_t     NLBAF;
+    uint8_t     FLBAS;
+    uint8_t     MC;
+    uint8_t     DPC;
+    uint8_t     DPS;
+    uint8_t     RES_1E[98];
+    struct LBAFormat LBAF[16];
+    uint8_t     RES_C0[192];
+} __attribute__((__packed__));
+
+
+struct IdNamespcStruct { // TODO use IdNamespcStructNonVS here
     uint64_t    NSZE;
     uint64_t    NCAP;
     uint64_t    NUSE;

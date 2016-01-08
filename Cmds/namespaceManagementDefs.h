@@ -24,10 +24,15 @@ struct NamspcMgmtCreateStruct {
     uint8_t               VS[3072];
 } __attribute__((__packed__));
 
-typedef enum NamspcMgmtSelectBits {
+typedef enum NamspcMgmtSelectVals {
     NAMSPC_MGMT_SEL_CREATE  =   0x0,
     NAMSPC_MGMT_SEL_DELETE  =   0x1,
-} NamspcMgmtSelectBits;
+} NamspcMgmtSelectVals;
+
+typedef enum NamspcAttachSelectVals {
+    NAMSPC_ATTACH_SEL_ATTACH    =   0x0,
+    NAMSPC_ATTACH_SEL_DETACH    =   0x1,
+} NamspcAttachSelectVals;
 
 
 #endif
