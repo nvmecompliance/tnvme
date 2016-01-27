@@ -18,16 +18,17 @@ INCLUDES = -I. -I../ -I../../ -I/usr/local/include
 
 SRC =					\
 	grpAdminSetGetFeatCombo.cpp	\
-	fidArbitration_r10b.cpp		\
-	fidPwrMgmt_r10b.cpp		\
-	fidTempThres_r10b.cpp		\
-	fidErrRecovery_r10b.cpp		\
-	fidErrRecovery_r12.cpp		\
-	fidVolatileCash_r10b.cpp	\
-	fidIRQCoalescing_r10b.cpp	\
-	fidIRQVec_r10b.cpp		\
+	fidArbitration_r10b.cpp			\
+	fidPwrMgmt_r10b.cpp					\
+	fidTempThres_r10b.cpp				\
+	fidErrRecovery_r10b.cpp			\
+	fidVolatileCash_r10b.cpp		\
+	fidIRQCoalescing_r10b.cpp		\
+	fidIRQVec_r10b.cpp					\
+	fidIRQVec_r11.cpp						\
 	fidWriteAtomicity_r10b.cpp	\
-	fidAsyncEventCfg_r10b.cpp
+	fidAsyncEventCfg_r10b.cpp		\
+  fidErrRecovery_r12.cpp
 
 .SUFFIXES: .cpp
 

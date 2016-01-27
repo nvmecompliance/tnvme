@@ -14,14 +14,13 @@
  *  limitations under the License.
  */
 
-#ifndef _FIDIRQVEC_r10b_H_
-#define _FIDIRQVEC_r10b_H_
+#ifndef _FIDIRQVEC_r11_H_
+#define _FIDIRQVEC_r11_H_
 
-#include "test.h"
-#include "../Cmds/getFeatures.h"
-#include "../Cmds/setFeatures.h"
+#include "fidIRQVec_r10b.h"
 #include "../Queues/acq.h"
 #include "../Queues/asq.h"
+#include "../Queues/iocq.h"
 
 namespace GrpAdminSetGetFeatCombo {
 
@@ -33,35 +32,35 @@ namespace GrpAdminSetGetFeatCombo {
  * 1) See notes in the header file of the Test base class
  * \endverbatim
  */
-class FIDIRQVec_r10b : public virtual Test
+class FIDIRQVec_r11 : public FIDIRQVec_r10b
 {
 public:
-    FIDIRQVec_r10b(string grpName, string testName);
-    virtual ~FIDIRQVec_r10b();
+    FIDIRQVec_r11(string grpName, string testName);
+    virtual ~FIDIRQVec_r11();
 
     /**
      * IMPORTANT: Read Test::Clone() header comment.
      */
-    virtual FIDIRQVec_r10b *Clone() const
-        { return new FIDIRQVec_r10b(*this); }
-    FIDIRQVec_r10b &operator=(const FIDIRQVec_r10b &other);
-    FIDIRQVec_r10b(const FIDIRQVec_r10b &other);
+    virtual FIDIRQVec_r11 *Clone() const
+        { return new FIDIRQVec_r11(*this); }
+    FIDIRQVec_r11 &operator=(const FIDIRQVec_r11 &other);
+    FIDIRQVec_r11(const FIDIRQVec_r11 &other);
 
 
 protected:
     virtual void RunCoreTest();
     virtual RunType RunnableCoreTest(bool preserve);
 
-    virtual bool sendFeatures(SharedASQPtr asq, SharedACQPtr acq, uint8_t cd,
-        uint16_t ivec);
-
-    SharedGetFeaturesPtr getFeaturesCmd;
-    SharedSetFeaturesPtr setFeaturesCmd;
-
 private:
     ///////////////////////////////////////////////////////////////////////////
     // Adding a member variable? Then edit the copy constructor and operator=().
     ///////////////////////////////////////////////////////////////////////////
+    void reset(SharedIOCQPtr iocq, SharedASQPtr asq, SharedACQPtr acq);
+    SharedIOCQPtr createQueues(SharedASQPtr asq, SharedACQPtr acq,
+        uint16_t ivec);
+
+    enum nvme_irq_type scheme;
+    uint16_t numIrqSupport;
 };
 
 }   // namespace
