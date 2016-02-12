@@ -22,6 +22,7 @@
 #include "../Queues/acq.h"
 #include "../Cmds/createIOCQ.h"
 #include "../Cmds/createIOSQ.h"
+#include "../Utils/irq.h"
 
 
 /**
@@ -142,6 +143,17 @@ public:
         uint16_t ms, SharedIOSQPtr iosq, SharedASQPtr asq, SharedACQPtr acq,
         string qualify = "", bool verbose = true);
 
+    /**
+     * Disables completely the NVMe device, initializes the admin queues with
+     * length 5, sets the CC.CSS value to the NVM command set, sets the IRQ
+     * scheme to any, then re-enables the controller.
+     * @param acq[out] pointer admin completion queue
+     * @param asq[out] pointer admin submission queue
+     * @param acqGroupId group id for the ACQ
+     * @param asqGroupId group id for the ASQ
+     */
+    static void BasicAdminQueueSetup(SharedACQPtr &acq, SharedASQPtr &asq,
+        string acqGroupId, string asqGroupId);
 
 private:
 };

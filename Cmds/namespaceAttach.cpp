@@ -23,10 +23,12 @@ const uint8_t NamespaceAttach::Opcode = 0x15;
 
 NamespaceAttach::NamespaceAttach() : Cmd(Trackable::OBJ_NAMESPACEATTACH)
 {
-    Init(Opcode, DATADIR_TO_DEVICE, 64); // 64B size of buffer used to hold the admin command 16DW
+    // 64B size of buffer used to hold the admin command 16DW
+    Init(Opcode, DATADIR_TO_DEVICE, 64);
 
     // No cmd should ever be created which violates these masking possibilities
-    send_64b_bitmask allowPrpMask = (send_64b_bitmask) (MASK_PRP1_PAGE | MASK_PRP2_PAGE);
+    send_64b_bitmask allowPrpMask = (send_64b_bitmask)(MASK_PRP1_PAGE
+        | MASK_PRP1_LIST | MASK_PRP2_PAGE);
     SetPrpAllowed(allowPrpMask);
 }
 
@@ -38,8 +40,7 @@ void
 NamespaceAttach::SetSEL(uint8_t sel)
 {
     LOG_NRM("Setting SEL = 0x%01X", sel);
-    uint8_t val = GetByte(10, 0);
-    SetByte(val | (sel & 0xF), 10, 0); // 1st byte in DW10
+    SetNibble(sel, 10, 0);
 }
 
 uint8_t

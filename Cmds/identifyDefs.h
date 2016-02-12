@@ -433,6 +433,12 @@ struct NamespaceManagementStruct {
     }
 } __attribute__((__packed__));
 
+#define NS_LIST_NUM_ENTRIES 1024
+#define NS_LIST_ENTRY_SIZE 4 // bytes
+#define NS_LIST_SIZE NS_LIST_NUM_ENTRIES * NS_LIST_ENTRY_SIZE // bytes
+#define CTLR_LIST_NUM_ENTRIES 2047
+#define CTLR_LIST_ENTRY_SIZE 2 // bytes
+#define CTLR_LIST_SIZE CTLR_LIST_NUM_ENTRIES * CTLR_LIST_ENTRY_SIZE + 2 // bytes
 
 ////////////////////////////////////////////////////////////////////////////////
 //                   REGISTER BIT DEFINITIONS FOLLOW

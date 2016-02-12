@@ -443,5 +443,17 @@ typedef enum CC_CSSValues {
     CC_CSS_ReservedEnd     = 0x7
 } CC_CSSValues;
 
+typedef enum VSBits {
+    VS_RESVD    = 0x000000ff,
+    VS_MNR      = 0x0000ff00,
+    VS_MJR      = 0xffff0000
+} VSBits;
+
+typedef enum VSShift {
+    VS_SH_RESVD = 0,
+    VS_SH_MNR   = 8,
+    VS_SH_MJR   = 16
+} VSShift;
+
 
 #endif

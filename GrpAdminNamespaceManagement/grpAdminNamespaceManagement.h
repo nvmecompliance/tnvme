@@ -18,6 +18,7 @@
 #define _GRPNAMESPACEMANAGEMENT_H_
 
 #include "../group.h"
+#include "../Cmds/identify.h"
 
 namespace GrpAdminNamespaceManagement {
 
@@ -31,6 +32,11 @@ public:
     GrpAdminNamespaceManagement(size_t grpNum);
     virtual ~GrpAdminNamespaceManagement();
 };
+
+SharedIdentifyPtr CreateIdNamspcListActiveCmd(void);
+SharedIdentifyPtr CreateIdNamspcListSubsystemCmd(void);
+SharedIdentifyPtr CreateIdCtlrListAttachedCmd(void);
+SharedIdentifyPtr CreateIdCtlrListSubsystemCmd(void);
 
 }   // namespace
 

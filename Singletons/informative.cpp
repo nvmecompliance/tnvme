@@ -337,7 +337,7 @@ Informative::Get1stBareMetaE2E() const
 {
     vector<uint32_t> namspc;
 
-    namspc= GetBareNamespaces();
+    namspc = GetBareNamespaces();
     if (namspc.size())
         return (Namspc(GetIdentifyCmdNamspc(namspc[0]), namspc[0], NS_BARE));
 

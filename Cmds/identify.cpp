@@ -14,6 +14,7 @@
  *  limitations under the License.
  */
 
+#include <boost/format.hpp>
 #include <assert.h>
 #include <string.h>
 #include "identify.h"
@@ -106,7 +107,7 @@ Identify::GetValue(IdCtrlrCap field) const
 {
     if (field >= IDCTRLRCAP_FENCE)
         throw FrmwkEx(HERE, "Unknown ctrlr cap field: %d", field);
-    else if (GetCNS() != CNS_Controller)
+    else if (!containsCtrlrDataStruct())
         throw FrmwkEx(HERE, "This cmd does not contain a ctrlr data struct");
 
     return GetValue(field, mIdCtrlrCapMetrics);
@@ -118,8 +119,9 @@ Identify::GetValue(IdNamespc field) const
 {
     if (field >= IDNAMESPC_FENCE)
         throw FrmwkEx(HERE, "Unknown namespace field: %d", field);
-    else if (GetCNS() != CNS_Namespace)
+    else if (!containsNamspcDataStruct()) {
         throw FrmwkEx(HERE,"This cmd does not contain a namspc data struct");
+    }
 
     return GetValue(field, mIdNamespcType);
 }
@@ -130,24 +132,20 @@ Identify::GetValue(uint32_t entry) const
 {
     uint8_t byte;
     uint8_t value = 0;
-    uint32_t cns = GetCNS();
-    int entrySize;
+    uint16_t entrySize;
+    uint64_t offset;
 
-    if (cns == CNS_NamespaceListActive
-     || cns == CNS_NamespaceListSubsystem) // Namespace List
-    {
-        entrySize = 4;
-    }
-    else if (cns == CNS_ControllerListAttachedToNSID
-          || cns == CNS_ControllerListSubsystem) // Controller List
-    {
-        entrySize = 2;
-    }
+    if (containsNamspcList())
+        entrySize = NS_LIST_ENTRY_SIZE;
+    else if (containsCtrlrList())
+        entrySize = CTLR_LIST_ENTRY_SIZE;
     else
         throw FrmwkEx(HERE,"This cmd does not contain a list");
 
-    for (int i = 0; i < entrySize; i++) {
-        byte = (GetROPrpBuffer())[entry + i];
+    offset = entry * entrySize;
+
+    for (uint16_t i = 0; i < entrySize; i++) {
+        byte = (GetROPrpBuffer())[offset + i];
         value |= ((uint32_t)byte << (i*8));
     }
     LOG_NRM("List[%d] = 0x%08X", entry, value);
@@ -268,9 +266,16 @@ Identify::getPSD(const uint8_t psdNum) const
 void
 Identify::getStr(const IdentifyDataType idData, string *const output) const
 {
-    unsigned long addr = idData.offset;
-    const uint8_t *data = &((GetROPrpBuffer())[idData.offset]);
-    unsigned long dumpLen = idData.length;
+    getStr(idData.offset, idData.length, output);
+}
+
+void
+Identify::getStr(unsigned long offset, unsigned long length,
+    string * const output) const
+{
+    unsigned long addr = offset;
+    const uint8_t *data = &((GetROPrpBuffer())[offset]);
+    unsigned long dumpLen = length;
     const int BUF_SIZE = 40;
     char work[BUF_SIZE];
 
@@ -345,6 +350,38 @@ Identify::log(IdNamespc field) const
 
 
 void
+Identify::log(uint32_t entry) const
+{
+    string output;
+    string desc;
+    uint16_t entrySize;
+    uint8_t cns = GetCNS();
+
+    if (cns == CNS_NamespaceListActive
+     || cns == CNS_NamespaceListSubsystem) // Namespace List
+    {
+        entrySize = NS_LIST_ENTRY_SIZE;
+        desc = str(boost::format("NSList[%d]") % entry);
+    }
+    else if (cns == CNS_ControllerListAttachedToNSID
+          || cns == CNS_ControllerListSubsystem) // Controller List
+    {
+        entrySize = CTLR_LIST_ENTRY_SIZE;
+        desc = str(boost::format("CtrlList[%d]") % entry);
+    }
+    else
+        throw FrmwkEx(HERE,"This cmd does not contain a list");
+
+    getStr(entry * entrySize, entrySize, &output);
+    if (desc.length() + output.length() + 2 > 55) {
+        LOG_NRM("%s:\n%s", desc.c_str(), output.c_str());
+    } else {
+        LOG_NRM("%s: %s", desc.c_str(), output.c_str());
+    }
+}
+
+
+void
 Identify::Dump(FILE *fp, int field, IdentifyDataType *idData) const
 {
     string output;
@@ -367,7 +404,7 @@ Identify::GetLBAFormat() const
 {
     LBAFormat lbaFormat;
 
-    if (GetCNS())
+    if (!containsNamspcDataStruct())
         throw FrmwkEx(HERE, "This cmd does not contain a namspc data struct");
 
     uint64_t flbas = GetValue(IDNAMESPC_FLBAS);
@@ -420,24 +457,76 @@ bool
 Identify::isZeroFilled(void) const
 {
     const uint8_t *data = GetROPrpBuffer();
+    const uint8_t cns = GetCNS();
 
-    if (GetCNS() == CNS_Controller) {
+    switch (cns) {
+    case CNS_Controller:
         for (int i = 0; i < IDCTRLRCAP_FENCE; i++) {
             for (unsigned long j = 0; j < mIdCtrlrCapMetrics[i].length; j++) {
                 if (*data++ != 0)
                     return false;
             }
         }
-    } else if (GetCNS() == CNS_Namespace) {
+        break;
+    case CNS_Namespace:
+    case CNS_NamespaceStructSubsystem:
         for (int i = 0; i < IDNAMESPC_FENCE; i++) {
             for (unsigned long j = 0; j < mIdNamespcType[i].length; j++) {
                 if (*data++ != 0)
                     return false;
             }
         }
-    } else {
+        break;
+    case CNS_NamespaceListActive:
+    case CNS_NamespaceListSubsystem:
+        for (int i = 0; i < NS_LIST_SIZE; i++) {
+            if (*data++ != 0)
+                return false;
+        }
+        break;
+    case CNS_ControllerListAttachedToNSID:
+    case CNS_ControllerListSubsystem:
+        for (int i = 0; i < CTLR_LIST_SIZE; i++) {
+            if (*data++ != 0)
+                return false;
+        }
+        break;
+    default:
         throw FrmwkEx(HERE, "CNS currently unsupported: 0x%x", GetCNS());
     }
 
     return true;
+}
+
+
+bool
+Identify::containsNamspcDataStruct(void) const
+{
+    uint8_t cns = GetCNS();
+    return cns == CNS_Namespace || cns == CNS_NamespaceStructSubsystem;
+}
+
+
+bool
+Identify::containsCtrlrDataStruct(void) const
+{
+    uint8_t cns = GetCNS();
+    return cns == CNS_Controller;
+}
+
+
+bool
+Identify::containsNamspcList(void) const
+{
+    uint8_t cns = GetCNS();
+    return cns == CNS_NamespaceListActive || cns == CNS_NamespaceListSubsystem;
+}
+
+
+bool
+Identify::containsCtrlrList(void) const
+{
+    uint8_t cns = GetCNS();
+    return cns == CNS_ControllerListAttachedToNSID
+        || cns == CNS_ControllerListSubsystem;
 }

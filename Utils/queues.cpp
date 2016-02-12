@@ -21,6 +21,8 @@
 #include "../Queues/iosq.h"
 #include "../Cmds/deleteIOCQ.h"
 #include "../Cmds/deleteIOSQ.h"
+#include "../Queues/acq.h"
+#include "../Queues/asq.h"
 
 
 Queues::Queues()
@@ -270,3 +272,27 @@ Queues::SupportDiscontigIOQ()
 
     return true;
 }
+
+
+void
+Queues::BasicAdminQueueSetup(SharedACQPtr &acq, SharedASQPtr &asq,
+    string acqGroupId, string asqGroupId)
+{
+    LOG_NRM("Admin queue setup");
+    if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
+        throw FrmwkEx(HERE, "Failed to disable the controller completely");
+
+    acq = CAST_TO_ACQ(gRsrcMngr->AllocObj(Trackable::OBJ_ACQ, acqGroupId))
+    acq->Init(5);
+
+    asq = CAST_TO_ASQ(gRsrcMngr->AllocObj(Trackable::OBJ_ASQ, asqGroupId))
+    asq->Init(5);
+
+    // All queues will use identical IRQ vector
+    IRQ::SetAnySchemeSpecifyNum(1);     // throws upon error
+
+    gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
+    if (gCtrlrConfig->SetState(ST_ENABLE) == false)
+        throw FrmwkEx(HERE, "Failed to enable the controller");
+}
+

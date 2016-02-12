@@ -123,13 +123,32 @@ public:
     virtual void log(IdNamespc field) const;
 
     /**
+     * Log the given field using the LOG_NRM macro from tnvme.h.
+     * @param entry the entry in the list whose value should be printed
+     */
+    virtual void log(uint32_t entry) const;
+
+    /**
      * Get the power state descriptor (PSD) for the given power state number.
      * throws if psdNum is greater than idCtrlrCap.NPSS
      * @param psdNum the number of the PSD to retrieve
      */
     IdPowerStateDescUnpacked getPSD(const uint8_t psdNum) const;
 
+    /**
+     * Get whether the identify command contains a zero filled data buffer.
+     */
     bool isZeroFilled(void) const;
+
+    /**
+     * Get the type of data pointed at by the data buffer based on the CNS
+     * value.  Returns true if the data contains the specified data structured;
+     * false otherwise.
+     */
+    bool containsNamspcDataStruct(void) const;
+    bool containsCtrlrDataStruct(void) const;
+    bool containsNamspcList(void) const;
+    bool containsCtrlrList(void) const;
 
 
 private:
@@ -143,6 +162,8 @@ private:
     uint64_t GetValue(int field, IdentifyDataType *idData) const;
     void Dump(FILE *fp, int field, IdentifyDataType *idData) const;
     void getStr(const IdentifyDataType idData, string *const work) const;
+    void getStr(unsigned long offset, unsigned long length,
+        string * const output) const;
 };
 
 

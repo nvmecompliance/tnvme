@@ -42,8 +42,8 @@ VerifySpecCompatibility(SpecRev specRev)
 
     if (gRegisters->Read(CTLSPC_VS, versionReg) == false)
         return false;
-    hdwMajor = (uint16_t)(versionReg >> 16);
-    hdwMinor = (uint16_t)(versionReg >> 8 & 0xFF); //1.1a errata 8 changed Bits 07:00 to reserved and set Minor Version Number(MVN) to 0x01
+    hdwMajor = (uint16_t)((versionReg & VS_MJR) >> VS_SH_MJR);
+    hdwMinor = (uint16_t)((versionReg & VS_MNR) >> VS_SH_MNR);
 
     switch (specRev) {
     case SPECREV_10b:   tgtMajor = 1;  tgtMinor = 0;  break;

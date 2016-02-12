@@ -38,8 +38,9 @@ void
 NamespaceManagement::SetSEL(uint8_t sel)
 {
     LOG_NRM("Setting SEL = 0x%01X", sel);
-    uint8_t val = GetByte(10, 0);
-    SetByte(val | (sel & 0xF), 10, 0); // 1st byte in DW10
+//    uint8_t val = GetByte(10, 0);
+//    SetByte(val | (sel & 0xF), 10, 0); // 1st byte in DW10
+    SetNibble(sel, 10, 0);
 }
 
 
