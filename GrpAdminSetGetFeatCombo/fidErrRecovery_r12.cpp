@@ -24,6 +24,7 @@
 #include "../Utils/kernelAPI.h"
 #include "../Utils/irq.h"
 #include "../Utils/io.h"
+#include "../Utils/queues.h"
 #include "../Cmds/identifyDefs.h"
 #include "../Cmds/featureDefs.h"
 
@@ -43,7 +44,7 @@ FIDErrRecovery_r12::FIDErrRecovery_r12(
         "FID = 0x05. Programmatically and dynamically force new, legal values "
         "into all fields of CE.DW0 and assoc changes with SetFeatures. Redo "
         "GetFeatures to verify settings were accepted. Version 1.2 now checks "
-        "for memort deallocation support and will set the DULBE bit if "
+        "for memory deallocation support and will set the DULBE bit if "
         "support is found.");
 }
 
@@ -100,26 +101,10 @@ FIDErrRecovery_r12::RunCoreTest()
      * None.
      * \endverbatim
      */
-    string work;
-    union CE ce;
-    struct nvme_gen_cq acqMetrics;
 
-    if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
-       throw FrmwkEx(HERE);
-
-    LOG_NRM("Create admin queues ACQ and ASQ for test lifetime");
-    SharedACQPtr acq = SharedACQPtr(new ACQ(gDutFd));
-    acq->Init(5);
-
-    SharedASQPtr asq = SharedASQPtr(new ASQ(gDutFd));
-    asq->Init(5);
-
-    // All queues will use identical IRQ vector
-    IRQ::SetAnySchemeSpecifyNum(1);
-
-    gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
-    if (gCtrlrConfig->SetState(ST_ENABLE) == false)
-       throw FrmwkEx(HERE);
+    SharedACQPtr acq;
+    SharedASQPtr asq;
+    Queues::BasicAdminQueueSetup(acq, asq, ACQ_GROUP_ID, ASQ_GROUP_ID);
 
     LOG_NRM("Create Get features and set features cmds");
     SharedGetFeaturesPtr getFeaturesCmd =
@@ -135,55 +120,85 @@ FIDErrRecovery_r12::RunCoreTest()
     ConstSharedIdentifyPtr idCtrlr = gInformative->GetIdentifyCmdCtrlr();
     for (uint64_t i = 1; i <= idCtrlr->GetValue(IDCTRLRCAP_NN); i++) {
         LOG_NRM("Processing namspc %ld", i);
-        ConstSharedIdentifyPtr idNamspc = gInformative->GetIdentifyCmdNamspc(i);
+        setFeaturesCmd->SetNSID(i);
+        getFeaturesCmd->SetNSID(i);
+
         // checks NS for deallocation support
-        bool NSFEATsupport = false;
-        if ((idNamspc->GetValue(IDNAMESPC_NSFEAT) &
-                NSFEAT_DEALLOCATED_UNWRITTEN_LBA) != 0) {
-            NSFEATsupport = true;
-        }
-        uint8_t tlerMismatch = 0;
+        ConstSharedIdentifyPtr idNamspc = gInformative->GetIdentifyCmdNamspc(i);
+        bool DULBEsupport = (idNamspc->GetValue(IDNAMESPC_NSFEAT) &
+            NSFEAT_DEALLOCATED_UNWRITTEN_LBA) != 0;
+
+        bool fieldMismatch = false;
         for (uint32_t tlerPow2 = 1; tlerPow2 <= 0xFFFF; tlerPow2 <<= 1) {
             // tler = {(0, 1, 2), (1, 2, 3), ..., (0xFFFF, 0x10000, 0x10001)}
-            for (uint32_t tler = (tlerPow2 - 1); tler <= (tlerPow2 + 1); tler++) {
+            for (uint32_t tler = (tlerPow2 - 1); tler <= (tlerPow2 + 1);
+                tler++) {
                 if (tler > 0xFFFF)
                     break;
-                int counter = 0;
-                while (counter < 2) {
-                    setFeaturesCmd->SetErrRecoveryTLER(tler);
-                    if (NSFEATsupport) {
-                        if (counter != 0)// if set do normally once
-                            setFeaturesCmd->SetErrRecoveryDULBE(true);
-                    } else
-                        setFeaturesCmd->SetErrRecoveryDULBE(false);
-                    counter++;
 
-                    LOG_NRM("Issue set features cmd with TLER = %d", tler);
+                fieldMismatch = SendCommands(acq, asq, setFeaturesCmd,
+                    getFeaturesCmd, tler, false);
+                if (fieldMismatch)
+                    throw FrmwkEx(HERE, "Error recovery fields mismatched.");
 
-                    work = str(boost::format("tler.%d.x100ms") % tler);
-                    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1),
-                            asq, acq, setFeaturesCmd, work, true);
-
-                    acqMetrics = acq->GetQMetrics();
-
-                    LOG_NRM("Issue get features cmd & check tler = %d (x100ms)", tler);
-                    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1),
-                            asq, acq, getFeaturesCmd, work, false);
-
-                    ce = acq->PeekCE(acqMetrics.head_ptr);
-                    LOG_NRM("Get Features Time lim. err reco = %d(x100ms)", ce.t.dw0);
-                    if (tler != ce.t.dw0) {
-                        LOG_ERR("TLER get feat does not match set feat"
-                            "(expected, rcvd) = (%d, %d)", tler, ce.t.dw0);
-                        tlerMismatch = 0xFF;
-                    }
+                // Run again with DUBLE field set if supported
+                if (DULBEsupport) {
+                    fieldMismatch = SendCommands(acq, asq, setFeaturesCmd,
+                        getFeaturesCmd, tler, true);
+                    if (fieldMismatch)
+                        throw FrmwkEx(HERE,
+                            "Error recovery fields mismatched.");
                 }
             }
         }
-        if (tlerMismatch)
-            throw FrmwkEx(HERE, "Time limited error recovery mismatched.");
     }
 
+}
+
+bool
+FIDErrRecovery_r12::SendCommands(SharedACQPtr acq, SharedASQPtr asq,
+    SharedSetFeaturesPtr setFeaturesCmd, SharedGetFeaturesPtr getFeaturesCmd,
+    const uint16_t tler, const bool dulbe) const
+{
+    string work;
+    union CE ce;
+    struct nvme_gen_cq acqMetrics;
+
+    LOG_NRM("Set & Get features for time lim err recovery # %d ", tler);
+    setFeaturesCmd->SetErrRecoveryTLER(tler);
+    LOG_NRM("Set & Get features for dealloc unwritten block # %d ", dulbe);
+    setFeaturesCmd->SetErrRecoveryDULBE(dulbe);
+
+    LOG_WARN("SetFeatNSID: %d", setFeaturesCmd->GetNSID());
+
+    LOG_NRM("Issue set features cmd with TLER = %d, DUBLE = %d", tler, dulbe);
+
+    work = str(boost::format("tler.%d.x100ms,dulbe.%d") % tler % dulbe);
+    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1),
+            asq, acq, setFeaturesCmd, work, true);
+
+    acqMetrics = acq->GetQMetrics();
+
+    LOG_NRM("Issue get features cmd & check tler = %d (x100ms), dulbe = %d",
+        tler, dulbe);
+    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1),
+            asq, acq, getFeaturesCmd, work, false);
+
+    ce = acq->PeekCE(acqMetrics.head_ptr);
+    uint16_t getTLER = ce.t.dw0 & ER_DW11_TLER;
+    uint8_t getDULBE = ce.t.dw0 & ER_DW11_DULBE;
+    LOG_NRM("Get Features tler = %d(x100ms), dulbe = %d", getTLER, getDULBE);
+    if (tler != getTLER) {
+        LOG_ERR("TLER get feat does not match set feat"
+            "(expected, rcvd) = (%d, %d)", tler, getTLER);
+        return true;
+    }
+    if (dulbe != getDULBE) {
+        LOG_ERR("DULBE get feat does not match set feat"
+            "(expected, rcvd) = (%d, %d)", dulbe, getDULBE);
+        return true;
+    }
+    return false;
 }
 
 

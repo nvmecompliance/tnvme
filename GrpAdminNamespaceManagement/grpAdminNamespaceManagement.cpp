@@ -20,7 +20,12 @@
 #include "deleteAllNamespacesAndVerify.h"
 #include "createAndAttachMaxNamespacesAndVerify.h"
 
+#include "../Cmds/identify.h"
+
 namespace GrpAdminNamespaceManagement {
+
+static SharedIdentifyPtr CreateIdNamspcListCmd(CNSValues cns);
+static SharedIdentifyPtr CreateIdCtrlrListCmd(CNSValues cns);
 
 GrpAdminNamespaceManagement::GrpAdminNamespaceManagement(size_t grpNum) :
 		Group(grpNum, "GrpAdminNamespaceManagement", "Namespace Management")
@@ -35,7 +40,7 @@ GrpAdminNamespaceManagement::GrpAdminNamespaceManagement(size_t grpNum) :
     case SPECREV_12:
         APPEND_TEST_AT_XLEVEL(CreateResources_r12, GrpAdminNamespaceManagement)
         APPEND_TEST_AT_YLEVEL(DeleteAllNamespacesAndVerify, GrpAdminNamespaceManagement)
-        APPEND_TEST_AT_YLEVEL(CreateAndAttachMaxNamespacesAndVerify, GrpAdminNamespaceManagement)
+        APPEND_TEST_AT_ZLEVEL(CreateAndAttachMaxNamespacesAndVerify, GrpAdminNamespaceManagement)
         //APPEND_TEST_AT_XLEVEL(NamespaceAttachment,  GrpAdminNamespaceManagement)
         break;
     default:
@@ -45,9 +50,77 @@ GrpAdminNamespaceManagement::GrpAdminNamespaceManagement(size_t grpNum) :
     }
 }
 
+
 GrpAdminNamespaceManagement::~GrpAdminNamespaceManagement()
 {
     // mTests deallocated in parent
 }
+
+
+SharedIdentifyPtr
+CreateIdNamspcListActiveCmd(void)
+{
+    return CreateIdNamspcListCmd(CNS_NamespaceListSubsystem);
+}
+
+
+SharedIdentifyPtr
+CreateIdNamspcListSubsystemCmd(void)
+{
+    return CreateIdNamspcListCmd(CNS_NamespaceListSubsystem);
+}
+
+
+SharedIdentifyPtr
+CreateIdCtlrListAttachedCmd(void)
+{
+    return CreateIdCtrlrListCmd(CNS_ControllerListAttachedToNSID);
+}
+
+
+SharedIdentifyPtr
+CreateIdCtlrListSubsystemCmd(void)
+{
+    return CreateIdCtrlrListCmd(CNS_ControllerListSubsystem);
+}
+
+
+SharedIdentifyPtr
+CreateIdNamspcListCmd(CNSValues cns)
+{
+    LOG_NRM("Form identify cmd for namespace list and associate some buffer");
+    SharedIdentifyPtr idCmdNamSpcList = SharedIdentifyPtr(new Identify());
+    idCmdNamSpcList->SetCNS(cns);
+    idCmdNamSpcList->SetNSID(0);
+
+    SharedMemBufferPtr idMemNamSpcList = SharedMemBufferPtr(new MemBuffer());
+    idMemNamSpcList->InitAlignment(NS_LIST_SIZE);
+
+    send_64b_bitmask idPrpNamSpcList =
+        (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE);
+    idCmdNamSpcList->SetPrpBuffer(idPrpNamSpcList, idMemNamSpcList);
+
+    return idCmdNamSpcList;
+}
+
+
+SharedIdentifyPtr
+CreateIdCtrlrListCmd(CNSValues cns)
+{
+    LOG_NRM("Form identify cmd for controller list and associate some buffer");
+    SharedIdentifyPtr idCmdCtrlrList = SharedIdentifyPtr(new Identify());
+    idCmdCtrlrList->SetCNS(cns);
+    idCmdCtrlrList->SetCNTID(1);
+
+    SharedMemBufferPtr idMemCtrlrList = SharedMemBufferPtr(new MemBuffer());
+    idMemCtrlrList->InitAlignment(CTLR_LIST_SIZE);
+
+    send_64b_bitmask idPrpCtrlrList =
+        (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE);
+    idCmdCtrlrList->SetPrpBuffer(idPrpCtrlrList, idMemCtrlrList);
+
+    return idCmdCtrlrList;
+}
+
 
 }   // namespace

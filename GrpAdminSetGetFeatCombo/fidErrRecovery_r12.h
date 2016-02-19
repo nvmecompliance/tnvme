@@ -55,6 +55,14 @@ private:
     ///////////////////////////////////////////////////////////////////////////
     // Adding a member variable? Then edit the copy constructor and operator=().
     ///////////////////////////////////////////////////////////////////////////
+    /**
+     * @return true if there was a field mismatch detected between the set and
+     * get features command; false otherwise.
+     */
+    bool SendCommands(SharedACQPtr acq, SharedASQPtr asq,
+        SharedSetFeaturesPtr setFeaturesCmd,
+        SharedGetFeaturesPtr getFeaturesCmd, const uint16_t tler,
+        const bool dulbe) const;
 };
 
 }   // namespace
