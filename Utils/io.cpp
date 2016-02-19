@@ -32,7 +32,7 @@ IO::~IO()
 
 
 void
-IO::SendAndReapCmdFail(string grpName, string testName, uint16_t ms,
+IO::SendAndReapCmdFail(string grpName, string testName, uint32_t ms,
     SharedSQPtr sq, SharedCQPtr cq, SharedCmdPtr cmd, string qualify,
     bool verbose)
 {
@@ -82,7 +82,7 @@ IO::SendAndReapCmdFail(string grpName, string testName, uint16_t ms,
 }
 
 CEStat
-IO::SendAndReapCmdIgnore(string grpName, string testName, uint16_t ms,
+IO::SendAndReapCmdIgnore(string grpName, string testName, uint32_t ms,
     SharedSQPtr sq, SharedCQPtr cq, SharedCmdPtr cmd, string qualify,
     bool verbose)
 {
@@ -92,7 +92,7 @@ IO::SendAndReapCmdIgnore(string grpName, string testName, uint16_t ms,
 }
 
 CEStat
-IO::SendAndReapCmdNot(string grpName, string testName, uint16_t ms,
+IO::SendAndReapCmdNot(string grpName, string testName, uint32_t ms,
     SharedSQPtr sq, SharedCQPtr cq, SharedCmdPtr cmd, string qualify,
     bool verbose, CEStat status)
 {
@@ -103,7 +103,7 @@ IO::SendAndReapCmdNot(string grpName, string testName, uint16_t ms,
 }
 
 CEStat
-IO::SendAndReapCmdNot(string grpName, string testName, uint16_t ms,
+IO::SendAndReapCmdNot(string grpName, string testName, uint32_t ms,
     SharedSQPtr sq, SharedCQPtr cq, SharedCmdPtr cmd, string qualify,
     bool verbose, std::vector<CEStat> &status)
 {
@@ -112,7 +112,7 @@ IO::SendAndReapCmdNot(string grpName, string testName, uint16_t ms,
 }
 
 CEStat
-IO::SendAndReapCmd(string grpName, string testName, uint16_t ms,
+IO::SendAndReapCmd(string grpName, string testName, uint32_t ms,
     SharedSQPtr sq, SharedCQPtr cq, SharedCmdPtr cmd, string qualify,
     bool verbose, CEStat status)
 {
@@ -124,7 +124,7 @@ IO::SendAndReapCmd(string grpName, string testName, uint16_t ms,
 
 
 CEStat
-IO::SendAndReapCmd(string grpName, string testName, uint16_t ms,
+IO::SendAndReapCmd(string grpName, string testName, uint32_t ms,
     SharedSQPtr sq, SharedCQPtr cq, SharedCmdPtr cmd, string qualify,
     bool verbose, std::vector<CEStat> &status)
 {
@@ -163,7 +163,7 @@ IO::SendCmd(string grpName, string testName, SharedSQPtr sq,
 
 
 void
-IO::WaitForReap(string grpName, string testName, uint16_t ms,
+IO::WaitForReap(string grpName, string testName, uint32_t ms,
     SharedCQPtr cq, SharedCmdPtr cmd, uint32_t &numCE, uint32_t &isrCount,
     string qualify, bool verbose)
 {
@@ -196,7 +196,7 @@ IO::WaitForReap(string grpName, string testName, uint16_t ms,
 
 
 CEStat
-IO::SendAndReapCmd(string grpName, string testName, uint16_t ms,
+IO::SendAndReapCmd(string grpName, string testName, uint32_t ms,
     SharedSQPtr sq, SharedCQPtr cq, SharedCmdPtr cmd, string qualify,
     bool verbose, std::vector<CEStat> &status,
     CEStat (*Reap)(SharedCQPtr, uint32_t, uint32_t &, string, string,
@@ -218,6 +218,30 @@ IO::SendAndReapCmd(string grpName, string testName, uint16_t ms,
             cmd->GetName(), qualify), "A cmd's contents dumped");
     }
     return retStat;
+}
+
+
+union CE
+IO::SendAndReapCmdWhole(string grpName, string testName, uint32_t ms,
+    SharedSQPtr sq, SharedCQPtr cq, SharedCmdPtr cmd, string qualify,
+    bool verbose)
+{
+    uint32_t numCE;
+    uint32_t isrCount;
+    string work;
+
+    SendCmd(grpName, testName, sq, cq, cmd, numCE, isrCount, qualify, verbose);
+    WaitForReap(grpName, testName, ms, cq, cmd, numCE, isrCount, qualify,
+        verbose);
+
+    // throws if an error occurs
+    union CE retCE = ReapCEWhole(cq, numCE, isrCount, grpName,
+        testName, qualify);
+    if (verbose) {
+        cmd->Dump(FileSystem::PrepDumpFile(grpName, testName,
+            cmd->GetName(), qualify), "A cmd's contents dumped");
+    }
+    return retCE;
 }
 
 
@@ -324,30 +348,6 @@ IO::ReapCE(SharedCQPtr cq, uint32_t numCE, uint32_t &isrCount,
     union CE ce = RetrieveCE(cq, numCE, isrCount, grpName, testName, qualify,
         failOnIoctl);
     return VerifyCE(&ce, status);
-}
-
-
-union CE
-IO::SendAndReapCmdWhole(string grpName, string testName, uint16_t ms,
-    SharedSQPtr sq, SharedCQPtr cq, SharedCmdPtr cmd, string qualify,
-    bool verbose)
-{
-    uint32_t numCE;
-    uint32_t isrCount;
-    string work;
-
-    SendCmd(grpName, testName, sq, cq, cmd, numCE, isrCount, qualify, verbose);
-    WaitForReap(grpName, testName, ms, cq, cmd, numCE, isrCount, qualify,
-        verbose);
-
-    // throws if an error occurs
-    union CE retCE = ReapCEWhole(cq, numCE, isrCount, grpName,
-        testName, qualify);
-    if (verbose) {
-        cmd->Dump(FileSystem::PrepDumpFile(grpName, testName,
-            cmd->GetName(), qualify), "A cmd's contents dumped");
-    }
-    return retCE;
 }
 
 

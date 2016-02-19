@@ -57,10 +57,10 @@ public:
      * @param verbose Pass true to dump resources to dump files, otherwise false
      * @return matching status if successful; throws exception otherwise;
      */
-    static CEStat SendAndReapCmd(string grpName, string testName, uint16_t ms,
+    static CEStat SendAndReapCmd(string grpName, string testName, uint32_t ms,
         SharedSQPtr sq, SharedCQPtr cq, SharedCmdPtr cmd, string qualify,
         bool verbose, CEStat status = CESTAT_SUCCESS);
-    static CEStat SendAndReapCmd(string grpName, string testName, uint16_t ms,
+    static CEStat SendAndReapCmd(string grpName, string testName, uint32_t ms,
         SharedSQPtr sq, SharedCQPtr cq, SharedCmdPtr cmd, string qualify,
         bool verbose, std::vector<CEStat> &status);
 
@@ -84,10 +84,10 @@ public:
      * @return status of cmd if successful; throws exception otherwise;
      */
     static CEStat SendAndReapCmdNot(string grpName, string testName,
-        uint16_t ms,SharedSQPtr sq, SharedCQPtr cq, SharedCmdPtr cmd,
+        uint32_t ms,SharedSQPtr sq, SharedCQPtr cq, SharedCmdPtr cmd,
         string qualify, bool verbose, CEStat status = CESTAT_SUCCESS);
     static CEStat SendAndReapCmdNot(string grpName, string testName,
-        uint16_t ms,SharedSQPtr sq, SharedCQPtr cq, SharedCmdPtr cmd,
+        uint32_t ms,SharedSQPtr sq, SharedCQPtr cq, SharedCmdPtr cmd,
         string qualify, bool verbose, std::vector<CEStat> &status);
 
     /**
@@ -109,7 +109,7 @@ public:
      * @return ce status
      */
     static CEStat SendAndReapCmdIgnore(string grpName, string testName,
-        uint16_t ms, SharedSQPtr sq, SharedCQPtr cq, SharedCmdPtr cmd,
+        uint32_t ms, SharedSQPtr sq, SharedCQPtr cq, SharedCmdPtr cmd,
         string qualify, bool verbose);
 
     /**
@@ -132,7 +132,29 @@ public:
      * @return ce status
      */
     static void SendAndReapCmdFail(string grpName, string testName,
-        uint16_t ms, SharedSQPtr sq, SharedCQPtr cq, SharedCmdPtr cmd,
+        uint32_t ms, SharedSQPtr sq, SharedCQPtr cq, SharedCmdPtr cmd,
+        string qualify, bool verbose);
+
+    /**
+     * Send and Reap an existing, user defined cmd to/from hdw using the spec'd
+     * SQ/CQ pairs. This method requires 0 elements to reside in the CQ and
+     * also assume no other cmd will complete into that CQ while this operation
+     * is occurring. In the end the number of CE's will be verified to
+     * guarantee that only 1 CE arrived as a result of sending this 1 cmd.
+     * @note Throws upon errors
+     * @note Method uses pre-existing values of CC.IOCQES
+     * @param grpName Pass the name of the group to which this test belongs
+     * @param testName Pass the name of the child testclass
+     * @param ms Pass the max number of ms to wait until numTil CE's arrive.
+     * @param sq Pass pre-existing SQ to issue a cmd into
+     * @param cq Pass pre-existing CQ to reap CE to verify successful creation
+     * @param cmd Pass the cmd to issue into the supplied CQ
+     * @param qualify Pass a qualifying string to append to each dump file
+     * @param verbose Pass true to dump resources to dump files, otherwise false
+     * @return matching status if successful; throws exception otherwise;
+     */
+    static union CE SendAndReapCmdWhole(string grpName, string testName,
+        uint32_t ms, SharedSQPtr sq, SharedCQPtr cq, SharedCmdPtr cmd,
         string qualify, bool verbose);
 
     /**
@@ -196,28 +218,6 @@ public:
         const bool failOnIoctl = true);
 
     /**
-     * Send and Reap an existing, user defined cmd to/from hdw using the spec'd
-     * SQ/CQ pairs. This method requires 0 elements to reside in the CQ and
-     * also assume no other cmd will complete into that CQ while this operation
-     * is occurring. In the end the number of CE's will be verified to
-     * guarantee that only 1 CE arrived as a result of sending this 1 cmd.
-     * @note Throws upon errors
-     * @note Method uses pre-existing values of CC.IOCQES
-     * @param grpName Pass the name of the group to which this test belongs
-     * @param testName Pass the name of the child testclass
-     * @param ms Pass the max number of ms to wait until numTil CE's arrive.
-     * @param sq Pass pre-existing SQ to issue a cmd into
-     * @param cq Pass pre-existing CQ to reap CE to verify successful creation
-     * @param cmd Pass the cmd to issue into the supplied CQ
-     * @param qualify Pass a qualifying string to append to each dump file
-     * @param verbose Pass true to dump resources to dump files, otherwise false
-     * @return matching status if successful; throws exception otherwise;
-     */
-    static union CE SendAndReapCmdWhole(string grpName, string testName,
-        uint16_t ms, SharedSQPtr sq, SharedCQPtr cq, SharedCmdPtr cmd,
-        string qualify, bool verbose);
-
-    /**
      * Reap a specified number of CE's from the specified CQ.
      * @note Throws upon errors
      * @param cq Pass the CQ to reap from
@@ -236,7 +236,7 @@ private:
     /**
      * Send and reap using the specified reap function
      */
-    static CEStat SendAndReapCmd(string grpName, string testName, uint16_t ms,
+    static CEStat SendAndReapCmd(string grpName, string testName, uint32_t ms,
         SharedSQPtr sq, SharedCQPtr cq, SharedCmdPtr cmd, string qualify,
         bool verbose, std::vector<CEStat> &status,
         CEStat (*Reap)(SharedCQPtr cq, uint32_t numCE, uint32_t &isrCount,
@@ -257,7 +257,7 @@ private:
      * reaped.
      * @note Throws upon errors
      */
-    static void WaitForReap(string grpName, string testName, uint16_t ms,
+    static void WaitForReap(string grpName, string testName, uint32_t ms,
         SharedCQPtr cq, SharedCmdPtr cmd, uint32_t &numCE, uint32_t &isrCount,
         string qualify, bool verbose);
 
