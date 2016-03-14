@@ -480,12 +480,15 @@ typedef enum OACSBits {
     OACS_SUP_NSMANAGEMENT_CMD = 0x0008
 } OACSBits;
 
+// Bit definitions for IDCTRLRCAP_FRMW
 typedef enum FRMWBits {
-    FRMW_SLOT1_RO   = 0x01,
-    FRMW_NUM_SLOTS  = 0x0e,
-    FRMW_RESV0      = 0xf0
+    FRMW_SLOT1_RO       = 0x01,
+    FRMW_NUM_SLOTS      = 0x0E,
+    FRMW_ACT_NO_RESET   = 0x10,
+    FRMW_RESV0          = 0xE0
 } FRMWBits;
 
+// Bit definitions for IDCTRLRCAP_RESCAP
 typedef enum RESCAPBits {
     RESCAP_PERSIST          = 0x01,
     RESCAP_WRITE_EXCL       = 0x02,
@@ -497,6 +500,14 @@ typedef enum RESCAPBits {
     RESCAP_RESV             = 0x80
 } RESCAPBits;
 
+// Bit definitions for IDCTRLRCAP_LPA
+typedef enum LPABits {
+    LPA_SMART_PER_NAMSPC    = 0x01,
+    LPA_CMD_EFFECTS         = 0x02,
+    LPA_RESV                = 0xFC
+} LPABits;
+
+// Bit definitions for IDNAMESPC_NSFEAT
 typedef enum NSFEATBits {
     NSFEAT_THIN_PROVISIONING              = 0x01,
     NSFEAT_NAWUN_NAWUPF_NACWU             = 0x02,

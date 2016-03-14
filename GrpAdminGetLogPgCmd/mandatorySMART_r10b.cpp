@@ -124,7 +124,7 @@ MandatorySMART_r10b::RunCoreTest()
     IssueGetLogPgCmdLessDwords(asq, acq, getLogPgCmd, getLogPageMem);
 
     LOG_NRM("If SMART supported per namspc, Reissue cmd for valid NSID's");
-    if (logPageAttr) {
+    if (logPageAttr & LPA_SMART_PER_NAMSPC) {
         for (uint32_t i = 1; i <= nn; i++) {
             LOG_NRM("Issue Get log page cmd with NSID = %u", i);
             getLogPgCmd->SetNSID(i);
