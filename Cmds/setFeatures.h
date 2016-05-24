@@ -180,6 +180,12 @@ public:
      * @param saveable sets the save (SV) field to either 1 or 0
      */
     void SetSave(bool save);
+
+    /**
+     * Set Power State to a potentially unsafe power state.
+     * @param ps power state to be set to
+     */
+    void SetUnsafePS(uint8_t ps);
 };
 
 

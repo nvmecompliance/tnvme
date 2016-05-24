@@ -479,3 +479,15 @@ SetFeatures::SetSave(bool save)
 }
 
 
+void
+SetFeatures::SetUnsafePS(uint8_t ps)
+{
+    LOG_NRM("Setting power state (PS): 0x%02X", ps);
+
+    uint8_t work = GetByte(11, 0);
+    work &= ~BYTE_BITMASK_PS;
+    work |= (ps & BYTE_BITMASK_PS);
+    SetByte(work, 11, 0);
+}
+
+
