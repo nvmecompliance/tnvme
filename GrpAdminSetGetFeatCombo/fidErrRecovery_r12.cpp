@@ -186,7 +186,7 @@ FIDErrRecovery_r12::SendCommands(SharedACQPtr acq, SharedASQPtr asq,
 
     ce = acq->PeekCE(acqMetrics.head_ptr);
     uint16_t getTLER = ce.t.dw0 & ER_DW11_TLER;
-    uint8_t getDULBE = ce.t.dw0 & ER_DW11_DULBE;
+    uint32_t getDULBE = ((ce.t.dw0 & ER_DW11_DULBE) >> 16);
     LOG_NRM("Get Features tler = %d(x100ms), dulbe = %d", getTLER, getDULBE);
     if (tler != getTLER) {
         LOG_ERR("TLER get feat does not match set feat"
