@@ -92,6 +92,10 @@ typedef enum {
     ZZ(IDCTRLRCAP_RTD3E,    88,     4,      false, SPECREV_12,  "Entry Latency (RTD3E)")                \
     ZZ(IDCTRLRCAP_OAES,     92,     4,      false, SPECREV_12,  "Opt Async Events Supported)")          \
     ZZ(IDCTRLRCAP_RES60,    96,     160,    false, SPECREV_12,  "Reserved area @ 0x60")                 \
+    ZZ(IDCTRLRCAP_CTRATT,   96,     4,      true,  SPECREV_121, "Controller Attributes (CTRATT)")       \
+    ZZ(IDCTRLRCAP_RES64,    100,    140,    false, SPECREV_121,  "Reserved area @ 0x64")                \
+    ZZ(IDCTRLRCAP_INTRESF0, 250,    15,     false, SPECREV_121, "Reserved area @ 0xF0")                 \
+    ZZ(IDCTRLRCAP_MEC,      255,    1,      true,  SPECREV_121, "Management Endpoint Capabilities (MEC)")\
     ZZ(IDCTRLRCAP_OACS,     256,    2,      true,  SPECREV_10b, "Optional Admin Cmd Support (OACS)")    \
     ZZ(IDCTRLRCAP_ACL,      258,    1,      true,  SPECREV_10b, "Abort Cmd Limit (ACL)")                \
     ZZ(IDCTRLRCAP_AERL,     259,    1,      true,  SPECREV_10b, "Async Event Req Limit (AERL)")         \
@@ -114,9 +118,13 @@ typedef enum {
     ZZ(IDCTRLRCAP_UNVMCAP_UPPER,304,8,      false, SPECREV_12,        "UNVMCAP_UPPER")\
     ZZ(IDCTRLRCAP_RPMBS,    312,    4,      false, SPECREV_12,  "Replay Protected Mem Blk Supp (RPMBS)")\
     ZZ(IDCTRLRCAP_RES13C,   316,    196,    false, SPECREV_12,  "Reserved area @ 0x13c")                \
+    ZZ(IDCTRLRCAP_RES316,   316,    4,      false, SPECREV_121, "Reserved area @ 0x13c")                \
+    ZZ(IDCTRLRCAP_KAS,      320,    2,      false, SPECREV_121, "Keep Alive Support (KAS)")             \
+    ZZ(IDCTRLRCAP_RES141,   322,    190,    false, SPECREV_121, "Reserved area @ 0x141")                \
     ZZ(IDCTRLRCAP_SQES,     512,    1,      true,  SPECREV_10b, "Submission Q Entry Size (SQES)")       \
     ZZ(IDCTRLRCAP_CQES,     513,    1,      true,  SPECREV_10b, "Completion Q Entry Size (CQES)")       \
     ZZ(IDCTRLRCAP_RES202,   514,    2,      true,  SPECREV_10b, "Reserved area @ 0x202")                \
+    ZZ(IDCTRLRCAP_MAXCMD,   514,    2,      true,  SPECREV_121, "Maximum Outstanding Commands (MAXCMD)") \
     ZZ(IDCTRLRCAP_NN,       516,    4,      true,  SPECREV_10b, "Number of Namespaces (NN)")            \
     ZZ(IDCTRLRCAP_ONCS,     520,    2,      true,  SPECREV_10b, "Optional NVM Cmd Support (ONCS)")      \
     ZZ(IDCTRLRCAP_FUSES,    522,    2,      true,  SPECREV_10b, "Fused Operation Suppot (FUSES)")       \
@@ -131,6 +139,15 @@ typedef enum {
     ZZ(IDCTRLRCAP_RES216,   534,    2,      true,  SPECREV_11,  "Reserved area @ 0x216")                \
     ZZ(IDCTRLRCAP_SGLS,     536,    4,      false, SPECREV_11,  "SGL Support (SGLS)")                   \
     ZZ(IDCTRLRCAP_RES21C,   540,    164,    true,  SPECREV_11,  "Reserved area @ 0x21C")                \
+    ZZ(IDCTRLRCAP_RES540,   540,    228,    true,  SPECREV_121, "Reserved area @ 0x21C")                \
+    ZZ(IDCTRLRCAP_SUBNQN,   768,    256,    true,  SPECREV_121, "NVM Subsystem NVMe Qualified Name (SUBNQN)")\
+    ZZ(IDCTRLRCAP_RES400,   1024,   768,    true,  SPECREV_121, "Reserved area @ 0x400")                \
+    ZZ(IDCTRLRCAP_IOCCSZ,   1792,   4,      true,  SPECREV_121,  "I/O Queue Command Capsule Supported Size(IOCCSZ)")\
+    ZZ(IDCTRLRCAP_IORCSZ,   1796,   4,      true,  SPECREV_121,  "I/O Queue Response Capsule Supported Size(IORCSZ)")\
+    ZZ(IDCTRLRCAP_ICDOFF,   1800,   2,      true,  SPECREV_121,  "In Capsule Data  Offset (ICDOFF)")    \
+    ZZ(IDCTRLRCAP_CTRATTR,  1802,   1,      true,  SPECREV_121,  "Controller Attributes (CTRATTR)")     \
+    ZZ(IDCTRLRCAP_MSDBD ,   1803,   1,      true,  SPECREV_121,  "Maximum SGL Data Block Descriptors (MSDBD)")\
+    ZZ(IDCTRLRCAP_RES70C,   1804,   244,    true,  SPECREV_121,  "Reserved area @ 1804")                \
     ZZ(IDCTRLRCAP_RES2C0,   704,    1344,   true,  SPECREV_10b, "Reserved area @ 2c0")                  \
     IDCTRLRCAP_PSD_TABLE    \
     ZZ(IDCTRLRCAP_VS,       3072,   1024,   false, SPECREV_10b, "Vendor Specific (VS)")
@@ -157,6 +174,7 @@ struct IdPowerStateDesc {
     uint64_t    RES_7D[2];
 } __attribute__((__packed__));
 
+// TODO Phase out unpacked for the below struct
 struct IdPowerStateDescUnpacked {
     uint16_t    MP;
     uint8_t     RES0;
@@ -177,67 +195,103 @@ struct IdPowerStateDescUnpacked {
     uint8_t     RES5_3;
 };
 
+// This Struct was updated for 1.2.1
+struct IdPowerStateDescStruct {
+    uint16_t    MP;
+    uint8_t     RES0;
+    unsigned    MXPS:1;
+    unsigned    NOPS:1;
+    unsigned    RES1:6;
+    uint32_t    ENLAT;
+    uint32_t    EXLAT;
+    unsigned    RRT:5;
+    unsigned    RES2:3;
+    unsigned    RRL:5;
+    unsigned    RES3:3;
+    unsigned    RWT:5;
+    unsigned    RES4:3;
+    unsigned    RWL:5;
+    unsigned    RES5:3;
+    uint16_t    IDLP;
+    unsigned    RES6:6;
+    unsigned    IPS:2;
+    uint8_t     RES7;
+    uint16_t    ACTP;
+    unsigned    APW:3;
+    unsigned    RES8:3;
+    unsigned    APS:2;
+    unsigned    RES9:7;
+    uint64_t    RES10;
+
+}__attribute__((__packed__));
+
 struct IdCtrlrCapStruct {
-	// Cntrlr Caps and Features
-    uint16_t    VID;
-    uint16_t    SSVID;
-    uint8_t     SN[20];
-    uint8_t     MN[40];
-    uint8_t     FR[8];
-    uint8_t     RAB;
-    uint8_t     IEEE[3];
-    uint8_t     MIC;
-    uint8_t     MDTS;    // Byte  77
-    uint16_t    CNTLID;  // Bytes 78-79
-    uint32_t    VER;     // Bytes 80-83
-    uint32_t    RTD3R;   // Bytes 84-87
-    uint32_t    RTD3E;   // Bytes 88-91
-    uint32_t    OAES;    // Bytes 92-95
-    uint8_t     RES_60[160]; //   96-255
+    // Cntrlr Caps and Features
+    uint16_t    VID;        // Bytes 0-1
+    uint16_t    SSVID;      // Bytes 2-3
+    uint8_t     SN[20];     // Bytes 4-23
+    uint8_t     MN[40];     // Bytes 24-63
+    uint8_t     FR[8];      // Bytes 64-71
+    uint8_t     RAB;        // Byte  72
+    uint8_t     IEEE[3];    // Bytes 73-75
+    uint8_t     CMIC;       // Byte  76
+    uint8_t     MDTS;       // Byte  77
+    uint16_t    CNTLID;     // Bytes 78-79
+    uint32_t    VER;        // Bytes 80-83
+    uint32_t    RTD3R;      // Bytes 84-87
+    uint32_t    RTD3E;      // Bytes 88-91
+    uint32_t    OAES;       // Bytes 92-95
+    uint32_t	CTRATT;     // Bytes 96-99
+    uint8_t     RES_100[155];//Bytes 100-254
+    uint8_t     MEC;        // Byte  255
     // Admin Cmd Set Attribs
-    uint16_t    OACS;   // Bytes 256-257
-    uint8_t     ACL;    //       258
-    uint8_t     AERL;   //       259
-    uint8_t     FRMW;   //
-    uint8_t     LPA;
-    uint8_t     ELPE;
-    uint8_t     NPSS;
-    uint8_t		AVSCC; // 1.0c addition. Admin Vendor Spec Cmd Config
-    uint8_t     APSTA;   // Byte 265
-    uint16_t    WCTEMP;
-    uint16_t    CCTEMP;
-    uint16_t    MTFA;
-    uint32_t    HMPRE;
-    uint32_t    HMMIN;
+    uint16_t    OACS;       // Bytes 256-257
+    uint8_t     ACL;        // Byte  258
+    uint8_t     AERL;       // Byte  259
+    uint8_t     FRMW;       // Bytes 260
+    uint8_t     LPA;        // Byte  261
+    uint8_t     ELPE;       // Byte  262
+    uint8_t     NPSS;       // Byte  263
+    uint8_t		AVSCC;      // Byte  264
+    uint8_t     APSTA;      // Byte  265
+    uint16_t    WCTEMP;     // Bytes 266-267
+    uint16_t    CCTEMP;     // Bytes 268-269
+    uint16_t    MTFA;       // Bytes 270-271
+    uint32_t    HMPRE;      // Bytes 272-275
+    uint32_t    HMMIN;      // Bytes 276-279
     uint64_t    TNVMCAP_LOWER;
     uint64_t    TNVMCAP_UPPER;
     uint64_t    UNVMCAP_LOWER;
     uint64_t    UNVMCAP_UPPER;
-    uint32_t    RPMBS;
-    uint8_t     RES_13C[196]; // 316-511
+    uint32_t    RPMBS;      // Bytes 312-315
+    uint8_t		RES_316[4]; // Bytes 316-319
+    uint16_t	KAS;        // Bytes 320-321
+    uint8_t     RES_322[190];//Bytes 322-511
     // NVM Command Set Attributes
-    uint8_t     SQES;
-    uint8_t     CQES;
-    uint16_t    RES_202;
-    uint32_t    NN;
-    uint16_t    ONCS;
-    uint16_t    FUSES;
-    uint8_t     FNA;
-    uint8_t     VWC;
-    uint16_t    AWUN;
-    uint16_t    AWUPF; // 1.0c change? Atomic Write Unit Power Fail
-    uint8_t		NVSCC; // 1.0c addition. NVM Vendor Spec Cmd Config
-    uint8_t     RES_213;
-    uint16_t    ACWU;  // 532/533
-    uint8_t     RES_216[2];
-    uint32_t    SGLS;  // 536-539
-    uint8_t     RES_21C[164]; // 540-703
+    uint8_t     SQES;       // Byte  512
+    uint8_t     CQES;       // Byte  513
+    uint16_t    MAXCMD;     // Bytes 514-515
+    uint32_t    NN;         // Bytes 516-519
+    uint16_t    ONCS;       // Bytes 520-521
+    uint16_t    FUSES;      // Bytes 522-523
+    uint8_t     FNA;        // Byte  524
+    uint8_t     VWC;        // Byte  525
+    uint16_t    AWUN;       // Bytes 526-527
+    uint16_t    AWUPF;      // Bytes 528-529
+    uint8_t		NVSCC;      // Byte  530
+    uint8_t     RES_531;    // Byte  531
+    uint16_t    ACWU;       // Bytes 532-533
+    uint8_t     RES_534[2]; // Bytes 534-535
+    uint32_t    SGLS;       // Bytes 536-539
+    uint8_t     RES_540[228];//Bytes 540-767
+    uint8_t		SUBNQN[256];// Bytes 768-1023
     // I/O Command set Attributes (none yet)
-    uint8_t     RES_2C0[1344];
+    uint8_t     RES_1024[768];//Bytes 1024-1791
+    uint8_t		RES_1792[256];// Bytes 1792-2047
     // Power State Descriptors
-    struct IdPowerStateDesc PSD[32];
+    struct IdPowerStateDesc PSD[32];// Bytes 2048-3071
     // Vendor Specific
-    uint8_t     VS[1024];
+    uint8_t     VS[1024];	// Bytes 3072-4095
 } __attribute__((__packed__));
 
 
@@ -311,19 +365,50 @@ struct LBAFormat {
 } __attribute__((__packed__));
 
 
+// This struct was updated to 1.2.1 (06/15/2016)
 struct IdNamespcStructNonVS {
-    uint64_t    NSZE;
-    uint64_t    NCAP;
-    uint64_t    NUSE;
-    uint8_t     NSFEAT;
-    uint8_t     NLBAF;
-    uint8_t     FLBAS;
-    uint8_t     MC;
-    uint8_t     DPC;
-    uint8_t     DPS;
-    uint8_t     RES_1E[98];
-    struct LBAFormat LBAF[16];
-    uint8_t     RES_C0[192];
+    uint64_t    NSZE;       // Bytes 0-7
+    uint64_t    NCAP;       // Bytes 8-15
+    uint64_t    NUSE;       // Bytes 16-23
+    uint8_t     NSFEAT;     // Byte 24
+    uint8_t     NLBAF;      // Byte 25
+    uint8_t     FLBAS;      // Byte 26
+    uint8_t     MC;         // Byte 27
+    uint8_t     DPC;        // Byte 28
+    uint8_t     DPS;        // Byte 29
+    uint8_t     NMIC;       // Byte 30
+    uint8_t     RESCAP;     // Byte 31
+    uint8_t     FPI;        // Byte 32
+    uint8_t     RES_33;     // Byte 33
+    uint16_t    NAWUN;      // Bytes 34-35
+    uint16_t    NAWUPF;     // Bytes 36-37
+    uint16_t    NACWU;      // Bytes 38-39
+    uint16_t    NABSN;      // Bytes 40-41
+    uint16_t    NABO;       // Bytes 42-43
+    uint16_t    NABSPF;     // Bytes 44-45
+    uint16_t    RES_46;     // Bytes 46-47
+    uint8_t     NVMCAP[16]; // Bytes 48-63
+    uint8_t     RES_64[40]; // Bytes 64-103
+    uint8_t     NGUID[16];  // Bytes 104-119
+    uint64_t    EUI64;      // Bytes 120-127
+    uint32_t    LBAF0;      // Bytes 128-131
+    uint32_t    LBAF1;      // Bytes 132-135
+    uint32_t    LBAF2;      // Bytes 136-139
+    uint32_t    LBAF3;      // Bytes 140-143
+    uint32_t    LBAF4;      // Bytes 144-147
+    uint32_t    LBAF5;      // Bytes 148-151
+    uint32_t    LBAF6;      // Bytes 152-155
+    uint32_t    LBAF7;      // Bytes 156-159
+    uint32_t    LBAF8;      // Bytes 160-163
+    uint32_t    LBAF9;      // Bytes 164-167
+    uint32_t    LBAF10;     // Bytes 168-171
+    uint32_t    LBAF11;     // Bytes 172-175
+    uint32_t    LBAF12;     // Bytes 176-179
+    uint32_t    LBAF13;     // Bytes 180-183
+    uint32_t    LBAF14;     // Bytes 184-187
+    uint32_t    LBAF15;     // Bytes 188-191
+    uint8_t     RES_192[192];//Bytes 192-383
+    uint8_t     VS[3712];   // Bytes 384-4095
 } __attribute__((__packed__));
 
 

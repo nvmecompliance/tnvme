@@ -133,6 +133,7 @@ public:
      * throws if psdNum is greater than idCtrlrCap.NPSS
      * @param psdNum the number of the PSD to retrieve
      */
+    IdPowerStateDescStruct getPSDStruct(const uint8_t psdNum) const;
     IdPowerStateDescUnpacked getPSD(const uint8_t psdNum) const;
 
     /**

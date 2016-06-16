@@ -205,6 +205,19 @@ Identify::Dump(DumpFilename filename, string fileHdr) const
 }
 
 
+IdPowerStateDescStruct
+Identify::getPSDStruct(const uint8_t psdNum) const
+{
+    if (psdNum > GetValue(IDCTRLRCAP_NPSS, mIdCtrlrCapMetrics))
+        throw FrmwkEx(HERE, "Power state %d not supported by ctrlr", psdNum);
+
+    IdentifyDataType psd = mIdCtrlrCapMetrics[IDCTRLRCAP_PSD[psdNum]];
+
+    return *(IdPowerStateDescStruct*) &((GetROPrpBuffer())[psd.offset]);;
+}
+
+
+// TODO Remove the getPSD below for the updated function above
 IdPowerStateDescUnpacked
 Identify::getPSD(const uint8_t psdNum) const
 {
