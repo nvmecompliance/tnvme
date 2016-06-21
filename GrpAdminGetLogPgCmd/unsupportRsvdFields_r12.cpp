@@ -88,8 +88,10 @@ UnsupportRsvdFields_r12::RunnableCoreTest(bool preserve)
     // configuration of the DUT. Permanence is defined as state or configuration
     // changes that will not be restored after a cold hard reset.
     ///////////////////////////////////////////////////////////////////////////
-    if (gCmdLine.rsvdfields == false)
-        return RUN_FALSE;   // Optional rsvd fields test skipped.
+
+    // No longer want this to be optional
+    //if (gCmdLine.rsvdfields == false)
+    //    return RUN_FALSE;   // Optional rsvd fields test skipped.
 
     preserve = preserve;    // Suppress compiler error/warning
     return RUN_TRUE;        // This test is never destructive
@@ -141,12 +143,13 @@ UnsupportRsvdFields_r12::RunCoreTest()
     getLogPgCmd->SetDword(0xffffffff, 5);
 
     work = getLogPgCmd->GetDword(10);
-    work |= 0xf0000000;      // Set DW10_b31:28 bits
+    work |= 0x0000ff00;      // Set DW10_b15:08 bits
     getLogPgCmd->SetDword(work, 10);
 
+    work = getLogPgCmd->GetDword(11);
+    work |= 0xffff0000;      // Set DW11_b31:16 bits
+    getLogPgCmd->SetDword(work, 11);
     getLogPgCmd->SetDword(0xffffffff, 11);
-    getLogPgCmd->SetDword(0xffffffff, 12);
-    getLogPgCmd->SetDword(0xffffffff, 13);
     getLogPgCmd->SetDword(0xffffffff, 14);
     getLogPgCmd->SetDword(0xffffffff, 15);
 
@@ -161,7 +164,7 @@ UnsupportRsvdFields_r12::RunCoreTest()
     IO::SendAndReapCmdNot(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
             getLogPgCmd, "rsvd.set", true, CESTAT_SUCCESS);
 
-    for (uint32_t lid = 0x4; lid <= 0x7f; ++lid) {
+    for (uint32_t lid = 0x06; lid <= 0x6f; ++lid) {
         work = cdw10 | lid;
         getLogPgCmd->SetDword(work, 10);
 
@@ -179,10 +182,7 @@ UnsupportRsvdFields_r12::RunCoreTest()
             IO::SendAndReapCmdNot(mGrpName, mTestName, CALC_TIMEOUT_ms(1),
                 asq, acq, getLogPgCmd, "rsvd.val.set", true);
         }
-    }
-
-    else
-    {
+    } else {
         throw new FrmwkEx(HERE, "Unsupported command set selected for test "
                 "revision: %hhX", css);
     }
