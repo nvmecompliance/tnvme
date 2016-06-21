@@ -22,6 +22,11 @@
 #include "../Utils/io.h"
 #include "../Cmds/flush.h"
 
+
+#define NAMSPC_LIST_SIZE          1024 // N
+#define NAMSPC_ENTRY_SIZE         4    // bytes
+
+
 namespace GrpNVMFlushCmd {
 
 
@@ -102,15 +107,52 @@ UnsupportRsvdFields_r12::RunCoreTest()
      * \endverbatim
      */
 
+
+    vector<uint32_t> activeNamespaces;
+    string work;
+    LOG_NRM("Admin queue setup");
+
+    SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID));
+    SharedACQPtr acq = CAST_TO_ACQ(gRsrcMngr->GetObj(ACQ_GROUP_ID));
+    LOG_NRM("Test proper");
+
+
+    LOG_NRM("Form identify cmd for namespace list and associate some buffer");
+    SharedIdentifyPtr idCmdNamSpcList = SharedIdentifyPtr(new Identify());
+    idCmdNamSpcList->SetCNS(CNS_NamespaceListActive);
+    idCmdNamSpcList->SetNSID(0);
+
+    SharedMemBufferPtr idMemNamSpcList = SharedMemBufferPtr(new MemBuffer());
+    idMemNamSpcList->InitAlignment(NAMSPC_LIST_SIZE * NAMSPC_ENTRY_SIZE);
+
+    send_64b_bitmask idPrpNamSpc =
+        (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE);
+    idCmdNamSpcList->SetPrpBuffer(idPrpNamSpc, idMemNamSpcList);
+
+    LOG_NRM("Sending Identify command CNS.%02Xh", CNS_NamespaceListActive);
+    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
+        idCmdNamSpcList, "namspcList", true);
+
+    LOG_NRM("Reading in active Namespaces.");
+    const uint8_t *data = &((idCmdNamSpcList->GetROPrpBuffer())[0]);
+
+    while ((*((uint32_t *)data) & 0xffff) != 0x0000){
+        uint32_t nsid = (*((uint32_t *)data) & 0xffff);
+        LOG_NRM("Found active NSID: %08X", nsid);
+        activeNamespaces.push_back(nsid);
+        data += 4;
+    }
+
     // Lookup objs which were created in a prior test within group
     SharedIOSQPtr iosq = CAST_TO_IOSQ(gRsrcMngr->GetObj(IOSQ_GROUP_ID));
     SharedIOCQPtr iocq = CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_GROUP_ID));
 
     SharedFlushPtr flushCmd = SharedFlushPtr(new Flush());
     ConstSharedIdentifyPtr idCtrlr = gInformative->GetIdentifyCmdCtrlr();
-    for (uint64_t i = 1; i <= idCtrlr->GetValue(IDCTRLRCAP_NN); i++) {
+    //for (uint64_t i = 1; i <= idCtrlr->GetValue(IDCTRLRCAP_NN); i++) {
+    for (size_t i = 0; i < activeNamespaces.size(); i++) {
         LOG_NRM("Processing namspc %ld", i);
-        flushCmd->SetNSID(i);
+        flushCmd->SetNSID(activeNamespaces[i]);
 
         IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq, iocq,
             flushCmd, "none.set", true);
