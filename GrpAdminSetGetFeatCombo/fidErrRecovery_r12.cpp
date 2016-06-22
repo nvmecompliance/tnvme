@@ -28,6 +28,9 @@
 #include "../Cmds/identifyDefs.h"
 #include "../Cmds/featureDefs.h"
 
+#define NAMSPC_LIST_SIZE          1024 // N
+#define NAMSPC_ENTRY_SIZE         4    // bytes
+
 namespace GrpAdminSetGetFeatCombo {
 
 
@@ -37,7 +40,7 @@ FIDErrRecovery_r12::FIDErrRecovery_r12(
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     mTestDesc.SetCompliance("revision 1.2, section 5");
-    mTestDesc.SetShort(     "Verify changes are allowed on FID=Error recovery 1.2");
+    mTestDesc.SetShort(     "Verify changes are allowed on FID = Error recovery 1.2");
     // No string size limit for the long description
     mTestDesc.SetLong(
         "Reset ctrlr to cause a clearing of DUT state. Issue GetFeatures, "
@@ -106,6 +109,36 @@ FIDErrRecovery_r12::RunCoreTest()
     SharedASQPtr asq;
     Queues::BasicAdminQueueSetup(acq, asq, ACQ_GROUP_ID, ASQ_GROUP_ID);
 
+    vector<uint32_t> activeNamespaces;
+    string work;
+
+    LOG_NRM("Form identify cmd for namespace list and associate some buffer");
+    SharedIdentifyPtr idCmdNamSpcList = SharedIdentifyPtr(new Identify());
+    idCmdNamSpcList->SetCNS(CNS_NamespaceListActive);
+    idCmdNamSpcList->SetNSID(0);
+
+    SharedMemBufferPtr idMemNamSpcList = SharedMemBufferPtr(new MemBuffer());
+    idMemNamSpcList->InitAlignment(NAMSPC_LIST_SIZE * NAMSPC_ENTRY_SIZE);
+
+    send_64b_bitmask idPrpNamSpc =
+        (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE);
+    idCmdNamSpcList->SetPrpBuffer(idPrpNamSpc, idMemNamSpcList);
+
+    LOG_NRM("Sending Identify command CNS.%02Xh", CNS_NamespaceListActive);
+    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
+        idCmdNamSpcList, "namspcList", true);
+
+    LOG_NRM("Reading in active Namespaces.");
+    const uint8_t *data = &((idCmdNamSpcList->GetROPrpBuffer())[0]);
+
+    while ((*((uint32_t *)data) & 0xffff) != 0x0000){
+        uint32_t nsid = (*((uint32_t *)data) & 0xffff);
+        LOG_NRM("Found active NSID: %08X", nsid);
+        activeNamespaces.push_back(nsid);
+        data += 4;
+    }
+    LOG_NRM("Finished finding active Namespaces.");
+
     LOG_NRM("Create Get features and set features cmds");
     SharedGetFeaturesPtr getFeaturesCmd =
             SharedGetFeaturesPtr(new GetFeatures());
@@ -118,13 +151,14 @@ FIDErrRecovery_r12::RunCoreTest()
     setFeaturesCmd->SetFID(FID[FID_ERR_RECOVERY]);
 
     ConstSharedIdentifyPtr idCtrlr = gInformative->GetIdentifyCmdCtrlr();
-    for (uint64_t i = 1; i <= idCtrlr->GetValue(IDCTRLRCAP_NN); i++) {
+    //for (uint64_t i = 1; i <= idCtrlr->GetValue(IDCTRLRCAP_NN); i++) {
+    for (size_t i = 0; i < activeNamespaces.size(); i++) {
         LOG_NRM("Processing namspc %ld", i);
-        setFeaturesCmd->SetNSID(i);
-        getFeaturesCmd->SetNSID(i);
+        setFeaturesCmd->SetNSID(activeNamespaces[i]);
+        getFeaturesCmd->SetNSID(activeNamespaces[i]);
 
         // checks NS for deallocation support
-        ConstSharedIdentifyPtr idNamspc = gInformative->GetIdentifyCmdNamspc(i);
+        ConstSharedIdentifyPtr idNamspc = gInformative->GetIdentifyCmdNamspc(activeNamespaces[i]);
         bool DULBEsupport = (idNamspc->GetValue(IDNAMESPC_NSFEAT) &
             NSFEAT_DEALLOCATED_UNWRITTEN_LBA) != 0;
 
