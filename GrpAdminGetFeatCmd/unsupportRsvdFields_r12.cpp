@@ -40,7 +40,7 @@ UnsupportRsvdFields_r12::UnsupportRsvdFields_r12(
         "Unsupported DW's and rsvd fields are treated identical, the recipient "
         "is not required to check their value. Receipt of reserved coded "
         "values shall be reported as an error. Issue a GetFeature cmd with "
-        "DW10.FID = 0x01, and set bits DW0_b14:10, DW2, DW3, DW4, DW5, "
+        "DW10.FID = 0x01, and set bits DW0_b13:10, DW2, DW3, DW4, DW5, "
         "DW10_31:11, DW12, DW13, DW14, DW15, expect success. Issue same cmd "
         "setting all rsvd coded values, expect fail. Set: DW10_b10:8, "
         "DW10_b7:0");
@@ -86,8 +86,8 @@ UnsupportRsvdFields_r12::RunnableCoreTest(bool preserve)
     // configuration of the DUT. Permanence is defined as state or configuration
     // changes that will not be restored after a cold hard reset.
     ///////////////////////////////////////////////////////////////////////////
-    if (gCmdLine.rsvdfields == false)
-        return RUN_FALSE;   // Optional rsvd fields test skipped.
+    //if (gCmdLine.rsvdfields == false)
+    //    return RUN_FALSE;   // Optional rsvd fields test skipped.
 
     preserve = preserve;    // Suppress compiler error/warning
     return RUN_TRUE;        // This test is never destructive
@@ -112,6 +112,9 @@ UnsupportRsvdFields_r12::RunCoreTest()
         SharedGetFeaturesPtr(new GetFeatures());
     getFeaturesCmd->SetFID(FEATURE_ID);
 
+    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
+            getFeaturesCmd, "rsvd.set", true);
+
     LOG_NRM("Set all cmd's rsvd bits");
     uint32_t work = getFeaturesCmd->GetDword(0);
     work |= 0x00003c00;      // Set DW0_b13:10 bits
@@ -128,7 +131,7 @@ UnsupportRsvdFields_r12::RunCoreTest()
 
     // DW10_b31:11
     work = getFeaturesCmd->GetDword(10);
-    work |= 0xffffc000;
+    work |= 0xfffffc00;
     getFeaturesCmd->SetDword(work, 10);
 
     getFeaturesCmd->SetDword(0xffffffff, 12);
@@ -144,6 +147,7 @@ UnsupportRsvdFields_r12::RunCoreTest()
             IDCTRLRCAP_ONCS);
     uint64_t savSelSupp = (oncs & ONCS_SUP_SV_AND_SLCT_FEATS) >> 4;
 
+    LOG_NRM("Checking Select Field reserved values.");
     if (savSelSupp != 0) {
         LOG_NRM("Select field supported, test reserved values");
         for (uint32_t select = BOOST_BINARY(100); select <= BOOST_BINARY(111);
@@ -158,7 +162,42 @@ UnsupportRsvdFields_r12::RunCoreTest()
     }
 
     LOG_NRM("Test reserved FID values");
-    for (uint32_t fid = 0xd; fid <= 0x7f; ++fid) {
+    LOG_NRM("Setting FID = 0x%04X", 0x00);
+    work = cdw10 | 0x00; // FID 0x0e
+    getFeaturesCmd->SetDword(work, 10);
+
+    IO::SendAndReapCmdNot(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
+            getFeaturesCmd, "rsvd.val.set", true, CESTAT_SUCCESS);
+
+    LOG_NRM("Setting FID = 0x%04X", 0x0E);
+    work = cdw10 | 0x0E; // FID 0x0E
+    getFeaturesCmd->SetDword(work, 10);
+
+    IO::SendAndReapCmdNot(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
+            getFeaturesCmd, "rsvd.val.set", true, CESTAT_SUCCESS);
+
+    for (uint32_t fid = 0x10; fid <= 0x77; ++fid) {
+        LOG_NRM("Setting FID = 0x%04X", fid);
+        work = cdw10 | fid;
+        getFeaturesCmd->SetDword(work, 10);
+
+        IO::SendAndReapCmdNot(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
+                getFeaturesCmd, "rsvd.val.set", true, CESTAT_SUCCESS);
+    }
+
+    LOG_NRM("Reserved FIDs from NVMe Management Interface 1.0 Spec.");
+    for (uint32_t fid = 0x78; fid <= 0x7D; ++fid) {
+        LOG_NRM("Setting FID = 0x%04X", fid);
+        work = cdw10 | fid;
+        getFeaturesCmd->SetDword(work, 10);
+
+        IO::SendAndReapCmdNot(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
+                getFeaturesCmd, "rsvd.val.set", true, CESTAT_SUCCESS);
+    }
+
+    LOG_NRM("Command Set Specific Reserved FIDs");
+    for (uint32_t fid = 0x84; fid <= 0xBF; ++fid) {
+        LOG_NRM("Setting FID = 0x%04X", fid);
         work = cdw10 | fid;
         getFeaturesCmd->SetDword(work, 10);
 
