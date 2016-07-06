@@ -89,10 +89,6 @@ UnsupportRsvdFields_r12::RunnableCoreTest(bool preserve)
     // changes that will not be restored after a cold hard reset.
     ///////////////////////////////////////////////////////////////////////////
 
-    // No longer want this to be an optional test
-    //if (gCmdLine.rsvdfields == false)
-    //    return RUN_FALSE;   // Optional rsvd fields test skipped.
-
     preserve = preserve;    // Suppress compiler error/warning
     return RUN_TRUE;        // This test is never destructive
 }
@@ -106,8 +102,7 @@ UnsupportRsvdFields_r12::RunCoreTest()
      * 1) Test CreateResources_r10b has run prior.
      * \endverbatim
      */
-
-
+    CE ce;
     vector<uint32_t> activeNamespaces;
     string work;
     LOG_NRM("Admin queue setup");
@@ -147,15 +142,27 @@ UnsupportRsvdFields_r12::RunCoreTest()
     SharedIOSQPtr iosq = CAST_TO_IOSQ(gRsrcMngr->GetObj(IOSQ_GROUP_ID));
     SharedIOCQPtr iocq = CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_GROUP_ID));
 
-    SharedFlushPtr flushCmd = SharedFlushPtr(new Flush());
     ConstSharedIdentifyPtr idCtrlr = gInformative->GetIdentifyCmdCtrlr();
-    //for (uint64_t i = 1; i <= idCtrlr->GetValue(IDCTRLRCAP_NN); i++) {
+
     for (size_t i = 0; i < activeNamespaces.size(); i++) {
         LOG_NRM("Processing namspc %ld", i);
+        SharedFlushPtr flushCmd = SharedFlushPtr(new Flush());
         flushCmd->SetNSID(activeNamespaces[i]);
 
-        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq, iocq,
+        ce = IO::SendAndReapCmdWhole(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq, iocq,
             flushCmd, "none.set", true);
+        if (ce.n.SF.b.SC != 0x0 || ce.n.SF.b.SCT != 0x0){
+            throw new FrmwkEx(HERE, "Error sending flush command expected (SCT:SC) 0x00:0x00, "
+                    "but detected 0x%02X:0x%02X", ce.n.SF.b.SCT, ce.n.SF.b.SC);
+        }
+
+        if (ce.n.reserved != 0){
+            throw new FrmwkEx(HERE, "Reserved completion entry not cleared found: %08X",
+                    ce.n.reserved);
+        } else if(ce.n.cmdSpec != 0){
+            throw new FrmwkEx(HERE, "Command specific field not cleared found: %08X",
+                    ce.n.cmdSpec);
+        }
 
         LOG_NRM("Set all cmd's rsvd bits");
         uint32_t work = flushCmd->GetDword(0);
@@ -177,8 +184,34 @@ UnsupportRsvdFields_r12::RunCoreTest()
         flushCmd->SetDword(0xffffffff, 14);
         flushCmd->SetDword(0xffffffff, 15);
 
-        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq, iocq,
-            flushCmd, "all.set", true);
+        ce = IO::SendAndReapCmdWhole(mGrpName, mTestName, CALC_TIMEOUT_ms(1),
+                iosq, iocq,flushCmd, "all.set", true);
+        if (ce.n.SF.b.SC != 0x0 || ce.n.SF.b.SCT != 0x0){
+            throw new FrmwkEx(HERE, "Error sending flush command expected (SCT:SC) 0x00:0x00, "
+                    "but detected 0x%02X:0x%02X", ce.n.SF.b.SCT, ce.n.SF.b.SC);
+        }
+
+        if (ce.n.reserved != 0){
+            throw new FrmwkEx(HERE, "Reserved completion entry not cleared found: %08X",
+                    ce.n.reserved);
+        } else if(ce.n.cmdSpec != 0){
+            throw new FrmwkEx(HERE, "Command specific field not cleared found: %08X",
+                    ce.n.cmdSpec);
+        }
+    }
+
+    uint32_t highestNSID = 0;
+    for (uint32_t i = 0; i < activeNamespaces.size(); i++){
+        if (activeNamespaces[i] > highestNSID)
+            highestNSID = activeNamespaces[i];
+    }
+
+    if (highestNSID != 0xffffffff){
+        SharedFlushPtr invalidFlushCmd = SharedFlushPtr(new Flush());
+        invalidFlushCmd->SetNSID(highestNSID + 1);
+        // Could be Invalid Field or Invalid Namespace or Format
+        IO::SendAndReapCmdNot(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq, iocq,
+            invalidFlushCmd, "none.set", true, CESTAT_SUCCESS);
     }
 }
 
