@@ -21,6 +21,7 @@
 #include "../Queues/iosq.h"
 #include "../Utils/io.h"
 #include "../Cmds/flush.h"
+#include <math.h>
 
 
 #define NAMSPC_LIST_SIZE          1024 // N
@@ -200,7 +201,9 @@ UnsupportRsvdFields_r12::RunCoreTest()
         }
     }
 
-    uint32_t highestNSID = 0;
+    // This highestNSID could provide a case where it issues to an inactive NSID
+    // In the case of an inactive NSID the error status would be Invalid Field
+    /*uint32_t highestNSID = 0;
     for (uint32_t i = 0; i < activeNamespaces.size(); i++){
         if (activeNamespaces[i] > highestNSID)
             highestNSID = activeNamespaces[i];
@@ -210,9 +213,25 @@ UnsupportRsvdFields_r12::RunCoreTest()
         SharedFlushPtr invalidFlushCmd = SharedFlushPtr(new Flush());
         invalidFlushCmd->SetNSID(highestNSID + 1);
         // Could be Invalid Field or Invalid Namespace or Format
-        IO::SendAndReapCmdNot(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq, iocq,
-            invalidFlushCmd, "none.set", true, CESTAT_SUCCESS);
+        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq, iocq,
+            invalidFlushCmd, "none.set", true, CESTAT_INVAL_NAMSPC);
+    }*/
+    ConstSharedIdentifyPtr idCtrlrStruct = gInformative->GetIdentifyCmdCtrlr();
+    uint32_t nn = (uint32_t)idCtrlrStruct->GetValue(IDCTRLRCAP_NN);
+    // Issuing flush cmd with a few invalid NSIDs
+    int count = 0;
+    for (uint64_t i = 0; pow(2, i) <= 0xffffffff; i++) {
+        if (pow(2, i) <= nn)
+            continue;
+        LOG_NRM("Issue flush cmd with illegal namspc ID=%llu",
+                (unsigned long long)i);
+        SharedFlushPtr invalidFlushCmd = SharedFlushPtr(new Flush());
+        invalidFlushCmd->SetNSID(pow(2, i));
+        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq,
+                iocq, invalidFlushCmd, "Flush.Invalid", true, CESTAT_INVAL_NAMSPC);
+        count++;
     }
+    LOG_NRM("Ran with: %d invalid NSIDs", count);
 }
 
 
