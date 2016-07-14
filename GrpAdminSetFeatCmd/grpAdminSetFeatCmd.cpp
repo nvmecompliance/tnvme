@@ -16,6 +16,7 @@
 
 #include "grpAdminSetFeatCmd.h"
 #include "invalidFieldInCmd_r10b.h"
+#include "invalidFieldInCmd_r12.h"
 
 namespace GrpAdminSetFeatCmd {
 
@@ -29,9 +30,11 @@ GrpAdminSetFeatCmd::GrpAdminSetFeatCmd(size_t grpNum) :
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Strategy
     switch (gCmdLine.rev) {
     case SPECREV_11:
-    case SPECREV_12:
     case SPECREV_10b:
         APPEND_TEST_AT_XLEVEL(InvalidFieldInCmd_r10b, GrpAdminSetFeatCmd)
+        break;
+    case SPECREV_12:
+        APPEND_TEST_AT_XLEVEL(InvalidFieldInCmd_r12, GrpAdminSetFeatCmd)
         break;
 
     default:

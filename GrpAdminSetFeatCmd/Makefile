@@ -18,7 +18,8 @@ INCLUDES = -I. -I../ -I../../ -I/usr/local/include
 
 SRC =					\
 	grpAdminSetFeatCmd.cpp		\
-	invalidFieldInCmd_r10b.cpp
+	invalidFieldInCmd_r10b.cpp	\
+	invalidFieldInCmd_r12.cpp
 
 .SUFFIXES: .cpp
 
