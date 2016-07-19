@@ -149,7 +149,6 @@ UnsupportRsvdFields_r12::RunCoreTest()
     work = getLogPgCmd->GetDword(11);
     work |= 0xffff0000;      // Set DW11_b31:16 bits
     getLogPgCmd->SetDword(work, 11);
-    getLogPgCmd->SetDword(0xffffffff, 11);
     getLogPgCmd->SetDword(0xffffffff, 14);
     getLogPgCmd->SetDword(0xffffffff, 15);
 

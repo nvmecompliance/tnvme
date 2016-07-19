@@ -155,8 +155,6 @@ UnsupportRsvdFields_r12::RunCoreTest()
         datasetMgmtCmd->SetDword(0xffffffff, 3);
         datasetMgmtCmd->SetDword(0xffffffff, 4);
         datasetMgmtCmd->SetDword(0xffffffff, 5);
-        datasetMgmtCmd->SetDword(0xffffffff, 8);
-        datasetMgmtCmd->SetDword(0xffffffff, 9);
 
         work = datasetMgmtCmd->GetDword(10);
         work |= 0xffffff00;     // Set DW10_b31:8 bits
