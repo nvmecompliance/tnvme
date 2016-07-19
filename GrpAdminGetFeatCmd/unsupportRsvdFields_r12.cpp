@@ -124,16 +124,13 @@ UnsupportRsvdFields_r12::RunCoreTest()
     getFeaturesCmd->SetDword(0xffffffff, 3);
     getFeaturesCmd->SetDword(0xffffffff, 4);
     getFeaturesCmd->SetDword(0xffffffff, 5);
-    getFeaturesCmd->SetDword(0xffffffff, 6);
-    getFeaturesCmd->SetDword(0xffffffff, 7);
-    getFeaturesCmd->SetDword(0xffffffff, 8);
-    getFeaturesCmd->SetDword(0xffffffff, 9);
+    // DWords 6-9 are used for the Data Pointer
 
     // DW10_b31:11
     work = getFeaturesCmd->GetDword(10);
     work |= 0xfffffc00;
     getFeaturesCmd->SetDword(work, 10);
-
+    // DWord 11 used
     getFeaturesCmd->SetDword(0xffffffff, 12);
     getFeaturesCmd->SetDword(0xffffffff, 13);
     getFeaturesCmd->SetDword(0xffffffff, 14);
