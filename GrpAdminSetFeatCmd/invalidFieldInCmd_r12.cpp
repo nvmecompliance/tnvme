@@ -27,15 +27,15 @@ namespace GrpAdminSetFeatCmd {
 
 InvalidFieldInCmd_r12::InvalidFieldInCmd_r12(
     string grpName, string testName) :
-    Test(grpName, testName, SPECREV_10b)
+    Test(grpName, testName, SPECREV_12)
 {
     // 63 chars allowed:     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-    mTestDesc.SetCompliance("revision 1.0b, section 5");
+    mTestDesc.SetCompliance("revision 1.2, section 5");
     mTestDesc.SetShort(     "Issue reserved FID's; SC = Invalid field in cmd");
     // No string size limit for the long description
     mTestDesc.SetLong(
         "Create a baseline SetFeatures cmd, with no PRP payload. Issue cmd "
-        "for all reserved DW10.FID = {0x00, 0x0C to 0x7F, 0x81 to 0xBF}, "
+        "for all reserved DW10.FID = {0x00, 0x10 to 0x77, 0x81 to 0xBF}, "
         "expect failure.");
 }
 
