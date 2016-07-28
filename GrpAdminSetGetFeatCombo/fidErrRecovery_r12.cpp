@@ -104,7 +104,7 @@ FIDErrRecovery_r12::RunCoreTest()
      * None.
      * \endverbatim
      */
-
+    union CE ce;
     SharedACQPtr acq;
     SharedASQPtr asq;
     Queues::BasicAdminQueueSetup(acq, asq, ACQ_GROUP_ID, ASQ_GROUP_ID);
@@ -150,12 +150,28 @@ FIDErrRecovery_r12::RunCoreTest()
     getFeaturesCmd->SetFID(FID[FID_ERR_RECOVERY]);
     setFeaturesCmd->SetFID(FID[FID_ERR_RECOVERY]);
 
-    ConstSharedIdentifyPtr idCtrlr = gInformative->GetIdentifyCmdCtrlr();
-    //for (uint64_t i = 1; i <= idCtrlr->GetValue(IDCTRLRCAP_NN); i++) {
+    getFeaturesCmd->SetNSID(0xffffffff);
+    getFeaturesCmd->SetSelField(SEL_SUPPORTED);
+
+    ce = IO::SendAndReapCmdWhole(mGrpName, mTestName,
+            CALC_TIMEOUT_ms(1), asq, acq, getFeaturesCmd, "getFeatcmd", false);
+
+    bool nsSpec = false;
+    if (!(ce.t.dw0 & GET_DW0_IND_NAMSPC)) {
+        nsSpec = false;
+    } else {
+        nsSpec = true;
+    }
+
     for (size_t i = 0; i < activeNamespaces.size(); i++) {
         LOG_NRM("Processing namspc %ld", i);
-        setFeaturesCmd->SetNSID(activeNamespaces[i]);
-        getFeaturesCmd->SetNSID(activeNamespaces[i]);
+        if (nsSpec) {
+            setFeaturesCmd->SetNSID(activeNamespaces[i]);
+            getFeaturesCmd->SetNSID(activeNamespaces[i]);
+        } else {
+            setFeaturesCmd->SetNSID(0);
+            getFeaturesCmd->SetNSID(0);
+        }
 
         // checks NS for deallocation support
         ConstSharedIdentifyPtr idNamspc = gInformative->GetIdentifyCmdNamspc(activeNamespaces[i]);
@@ -188,6 +204,7 @@ FIDErrRecovery_r12::RunCoreTest()
     }
 
 }
+
 
 bool
 FIDErrRecovery_r12::SendCommands(SharedACQPtr acq, SharedASQPtr asq,
