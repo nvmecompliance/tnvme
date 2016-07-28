@@ -48,7 +48,9 @@ FIDErrRecovery_r12::FIDErrRecovery_r12(
         "into all fields of CE.DW0 and assoc changes with SetFeatures. Redo "
         "GetFeatures to verify settings were accepted. Version 1.2 now checks "
         "for memory deallocation support and will set the DULBE bit if "
-        "support is found.");
+        "support is found. We issue the commands with a NSID based on if "
+        "the controller returned feature namespace specific or not. If "
+        "feature is namespace specific use NSID = 0x1 else NSID = 0xFFFFFFFF.");
 }
 
 
@@ -163,42 +165,39 @@ FIDErrRecovery_r12::RunCoreTest()
         nsSpec = true;
     }
 
-    for (size_t i = 0; i < activeNamespaces.size(); i++) {
-        LOG_NRM("Processing namspc %ld", i);
-        if (nsSpec) {
-            setFeaturesCmd->SetNSID(activeNamespaces[i]);
-            getFeaturesCmd->SetNSID(activeNamespaces[i]);
-        } else {
-            setFeaturesCmd->SetNSID(0);
-            getFeaturesCmd->SetNSID(0);
-        }
+    uint64_t nsid = 0xFFFFFFFF;
+    if (nsSpec) {
+        nsid = 1;
+    }
+    setFeaturesCmd->SetNSID(nsid);
+    getFeaturesCmd->SetNSID(nsid);
 
-        // checks NS for deallocation support
-        ConstSharedIdentifyPtr idNamspc = gInformative->GetIdentifyCmdNamspc(activeNamespaces[i]);
-        bool DULBEsupport = (idNamspc->GetValue(IDNAMESPC_NSFEAT) &
-            NSFEAT_DEALLOCATED_UNWRITTEN_LBA) != 0;
+    LOG_NRM("Processing namspc %ld", nsid);
+    // checks NS for deallocation support
+    ConstSharedIdentifyPtr idNamspc = gInformative->GetIdentifyCmdNamspc(0x01);
+    bool DULBEsupport = (idNamspc->GetValue(IDNAMESPC_NSFEAT) &
+        NSFEAT_DEALLOCATED_UNWRITTEN_LBA) != 0;
 
-        bool fieldMismatch = false;
-        for (uint32_t tlerPow2 = 1; tlerPow2 <= 0xFFFF; tlerPow2 <<= 1) {
-            // tler = {(0, 1, 2), (1, 2, 3), ..., (0xFFFF, 0x10000, 0x10001)}
-            for (uint32_t tler = (tlerPow2 - 1); tler <= (tlerPow2 + 1);
-                tler++) {
-                if (tler > 0xFFFF)
-                    break;
+    bool fieldMismatch = false;
+    for (uint32_t tlerPow2 = 1; tlerPow2 <= 0xFFFF; tlerPow2 <<= 1) {
+        // tler = {(0, 1, 2), (1, 2, 3), ..., (0xFFFF, 0x10000, 0x10001)}
+        for (uint32_t tler = (tlerPow2 - 1); tler <= (tlerPow2 + 1);
+            tler++) {
+            if (tler > 0xFFFF)
+                break;
 
+            fieldMismatch = SendCommands(acq, asq, setFeaturesCmd,
+                getFeaturesCmd, tler, false);
+            if (fieldMismatch)
+                throw FrmwkEx(HERE, "Error recovery fields mismatched.");
+
+            // Run again with DUBLE field set if supported
+            if (DULBEsupport) {
                 fieldMismatch = SendCommands(acq, asq, setFeaturesCmd,
-                    getFeaturesCmd, tler, false);
+                    getFeaturesCmd, tler, true);
                 if (fieldMismatch)
-                    throw FrmwkEx(HERE, "Error recovery fields mismatched.");
-
-                // Run again with DUBLE field set if supported
-                if (DULBEsupport) {
-                    fieldMismatch = SendCommands(acq, asq, setFeaturesCmd,
-                        getFeaturesCmd, tler, true);
-                    if (fieldMismatch)
-                        throw FrmwkEx(HERE,
-                            "Error recovery fields mismatched.");
-                }
+                    throw FrmwkEx(HERE,
+                        "Error recovery fields mismatched.");
             }
         }
     }
