@@ -152,27 +152,29 @@ FIDErrRecovery_r12::RunCoreTest()
     getFeaturesCmd->SetFID(FID[FID_ERR_RECOVERY]);
     setFeaturesCmd->SetFID(FID[FID_ERR_RECOVERY]);
 
-    getFeaturesCmd->SetNSID(0xffffffff);
-    getFeaturesCmd->SetSelField(SEL_SUPPORTED);
+    ConstSharedIdentifyPtr idCtrlrCap = gInformative->GetIdentifyCmdCtrlr();
+    uint64_t oncs = idCtrlrCap->GetValue(IDCTRLRCAP_ONCS);
 
-    ce = IO::SendAndReapCmdWhole(mGrpName, mTestName,
-            CALC_TIMEOUT_ms(1), asq, acq, getFeaturesCmd, "getFeatcmd", false);
+    if (oncs & ONCS_SUP_SV_AND_SLCT_FEATS) {
+        getFeaturesCmd->SetSelField(SEL_SUPPORTED);
+        ce = IO::SendAndReapCmdWhole(mGrpName, mTestName,
+                CALC_TIMEOUT_ms(1), asq, acq, getFeaturesCmd, "getFeatcmd", false);
 
-    bool nsSpec = false;
-    if (!(ce.t.dw0 & GET_DW0_IND_NAMSPC)) {
-        nsSpec = false;
+        if (ce.t.dw0 & GET_DW0_IND_NAMSPC){
+            LOG_NRM("Found feature only applies to a single namespace. Setting NSID to 0x1.");
+            setFeaturesCmd->SetNSID(1);
+            getFeaturesCmd->SetNSID(1);
+        } else {
+            LOG_NRM("Found features not namespace specific. Setting NSID to 0x0.");
+            setFeaturesCmd->SetNSID(0);
+            getFeaturesCmd->SetNSID(0);
+        }
     } else {
-        nsSpec = true;
+        LOG_NRM("Controller does not support Select field on get feature, setting NSID to 0x01.");
+        setFeaturesCmd->SetNSID(1);
+        getFeaturesCmd->SetNSID(1);
     }
 
-    uint64_t nsid = 0xFFFFFFFF;
-    if (nsSpec) {
-        nsid = 1;
-    }
-    setFeaturesCmd->SetNSID(nsid);
-    getFeaturesCmd->SetNSID(nsid);
-
-    LOG_NRM("Processing namspc %ld", nsid);
     // checks NS for deallocation support
     ConstSharedIdentifyPtr idNamspc = gInformative->GetIdentifyCmdNamspc(0x01);
     bool DULBEsupport = (idNamspc->GetValue(IDNAMESPC_NSFEAT) &
