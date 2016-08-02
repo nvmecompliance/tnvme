@@ -110,28 +110,31 @@ FileSystem::RotateDumpDir()
         return true;
 
     // Remove everything in the dir of the form "*.prev"
-    snprintf(work, sizeof(work), "rm %s*.prev", dumpDir.c_str());
+    snprintf(work, sizeof(work), "sudo rm %sprev", dumpDir.c_str());
     system(work);
-
     // Get a vector of filenames of all other files within dir
-    boost::filesystem::path targDir(dumpDir);
-    vector<boost::filesystem::path> allFiles;
-    boost::filesystem::directory_iterator end_iter;
+//    boost::filesystem::path targDir(dumpDir);
+//    vector<boost::filesystem::path> allFiles;
+//    boost::filesystem::directory_iterator end_iter;
+//    boost::filesystem::directory_iterator dir_itrs(targDir);
+
 //    copy(boost::filesystem::directory_iterator(targDir),
 //        boost::filesystem::directory_iterator(), back_inserter(allFiles));
-    for (boost::filesystem::directory_iterator dir_itr(targDir); dir_itr != end_iter;
-            ++dir_itr){
-        allFiles.push_back(dir_itr->path());
-    }
 
     // Rename all files to "*.prev"
-    for (size_t i = 0; i < allFiles.size(); i++) {
-        //string newName = (allFiles[i].filename().native() + ".prev");
-        snprintf(work, sizeof(work), "mv %s%s %s%s.prev",
-            dumpDir.c_str(), allFiles[i].filename().c_str(),
-            dumpDir.c_str(), allFiles[i].filename().c_str());
-        system(work);
-    }
+//    for (size_t i = 0; i < allFiles.size(); i++) {
+//        //string newName = (allFiles[i].filename().native() + ".prev");
+//        snprintf(work, sizeof(work), "mv %s%s %s%s.prev",
+//            dumpDir.c_str(), allFiles[i].filename().c_str(),
+//            dumpDir.c_str(), allFiles[i].filename().c_str());
+//        system(work);
+//    }
+    // Create a new directory to store old dumps
+    snprintf(work, sizeof(work), "mkdir %sprev", dumpDir.c_str());
+    system(work);
+    // Move all current informative results in new folder
+    snprintf(work, sizeof(work), "sudo mv %s* %sprev/", dumpDir.c_str(), dumpDir.c_str());
+    system(work);
     return true;
 }
 
