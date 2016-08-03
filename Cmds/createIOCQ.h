@@ -49,6 +49,7 @@ public:
      * @param iocq Pass the IOCQ object which will initialize this cmd.
      */
     void Init(const SharedIOCQPtr iocq);
+    void InitInvalidPrpOffset(const SharedIOCQPtr iocq);
 };
 
 
