@@ -50,7 +50,7 @@ public:
      * @param memBuffer Hand off this cmds data buffer.
      */
     void SetPrpBuffer(send_64b_bitmask prpFields, SharedMemBufferPtr memBuffer);
-
+    void SetPrpBufferUnsafe(send_64b_bitmask prpFields, SharedMemBufferPtr memBuffer);
     /**
      * This method is only safe to use if and only if the
      * SetPrpBuffer(SharedMemBufferPtr) was used to setup a buffer. This allows

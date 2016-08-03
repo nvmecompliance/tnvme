@@ -63,6 +63,19 @@ PrpData::SetPrpBuffer(send_64b_bitmask prpFields, SharedMemBufferPtr memBuffer)
     mPrpFields = prpFields;
 }
 
+void
+PrpData::SetPrpBufferUnsafe(send_64b_bitmask prpFields, SharedMemBufferPtr memBuffer)
+{
+    // Do allow associating a new buffer with an existing cmd, free the old 1st.
+    // These are just user space buffers and it will allow reusing an existing
+    // cmd over and over by simply changing its associated data buffer.
+    if (mBufRW != MemBuffer::NullMemBufferPtr)
+        mBufRW.reset();
+
+    mBufRW = memBuffer;
+    mBufSize = memBuffer->GetBufSize();
+    mPrpFields = prpFields;
+}
 
 void
 PrpData::SetPrpBuffer(send_64b_bitmask prpFields, uint8_t const *memBuffer,
