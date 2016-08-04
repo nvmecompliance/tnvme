@@ -92,8 +92,6 @@ public:
      */
     void Dump(DumpFilename filename, string fileHdr) const;
 
-
-protected:
     /**
      * Accept a previously created Read Only (RO) IOQ buffer as the user data to
      * be populated in the PRP fields of a cmd. This method is only intended to
@@ -108,6 +106,9 @@ protected:
      */
     void SetPrpBuffer(send_64b_bitmask prpFields, uint8_t const *memBuffer,
         uint64_t bufSize);
+
+
+protected:
 
     /**
      * Each cmd has unique requirements as to how its PRP ptrs can be
