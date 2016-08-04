@@ -264,8 +264,10 @@ struct IdCtrlrCapStruct {
     uint64_t    UNVMCAP_LOWER;
     uint64_t    UNVMCAP_UPPER;
     uint32_t    RPMBS;      // Bytes 312-315
-    uint8_t		RES_316[4]; // Bytes 316-319
-    uint16_t	KAS;        // Bytes 320-321
+    uint16_t    EDSTT;      // Bytes 316-317
+    uint8_t     DSTO;      // Byte  318
+    uint8_t     RES_319;    // Byte  319
+    uint16_t    KAS;        // Bytes 320-321
     uint8_t     RES_322[190];//Bytes 322-511
     // NVM Command Set Attributes
     uint8_t     SQES;       // Byte  512
