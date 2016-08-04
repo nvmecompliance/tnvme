@@ -49,5 +49,17 @@ public:
 
 };
 
+// Reservation Status Data Structure
+struct ReservationStatusDataStruct {
+    uint32_t    GEN;
+    uint8_t     RTYPE;
+    uint16_t    REGCTL;
+    uint16_t    RES_1;
+    uint8_t     PTPLS;
+    uint8_t     RES_2[14];
+    uint8_t     REGCONTDATA[24];
+
+}__attribute__((__packed__));
+
 
 #endif
