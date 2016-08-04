@@ -297,6 +297,17 @@ struct IdCtrlrCapStruct {
 } __attribute__((__packed__));
 
 
+struct RegisteredContDataStruct {
+    // Registered Controller Data Structure
+    uint16_t    CNTLID;     // Bytes 0-1
+    uint8_t     RCSTS;      // Byte 2
+    uint8_t     RES_3[5];   // Bytes 3-7
+    uint64_t    HOSTID;     // Bytes 8-15
+    uint64_t    RKEY;       // Bytes 16-23
+} __attribute__((__packed__));
+
+
+
 /*     IdNamespc,           offset, length, m/o,   specRev,     desc                                   */
 #define IDNAMESPC_TABLE                                                             \
     ZZ(IDNAMESPC_NSZE,      0,      8,      true,  SPECREV_10b, "Namespace Size (NSZE)")                \
