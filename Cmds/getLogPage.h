@@ -61,6 +61,18 @@ public:
     } LogID;
 
     /**
+     * Set the number of DWORDs Lower to be return from the DUT
+     * @param numdl Pass the number of DWORDs
+     */
+    void SetNUMDL(uint16_t numdl);
+
+    /**
+     * Set the number of DWORDs Upper to be return from the DUT
+     * @param numdl Pass the number of DWORDs
+     */
+    void SetNUMDU(uint16_t numdu);
+
+    /**
      * Set the log identifier
      * @param logID Pass the log ID to set
      */
