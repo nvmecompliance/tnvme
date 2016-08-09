@@ -82,10 +82,7 @@ void
 GetLogPage::SetNUMDL(uint16_t numdl)
 {
     LOG_NRM("Setting NUMDL: %04X", numdl);
-    uint16_t curVal = GetWord(10, 0);
-    curVal &= 0x0000FFFF;
-    curVal |= (numdl << 16);
-    SetWord(curVal, 10, 1);
+    SetWord(numdl, 10, 1);
 }
 
 
@@ -93,10 +90,7 @@ void
 GetLogPage::SetNUMDU(uint16_t numdu)
 {
     LOG_NRM("Setting NUMDU: %04X", numdu);
-    uint16_t curVal = GetWord(11, 0);
-    curVal &= 0xFFFF0000;
-    curVal |= numdu;
-    SetWord(curVal, 11, 0);
+    SetWord(numdu, 11, 0);
 }
 
 
@@ -114,6 +108,9 @@ void
 GetLogPage::SetLID(uint16_t logID)
 {
     LOG_NRM("Setting LID 0x%04X", logID);
+    uint16_t curVal = GetWord(10, 0);
+    curVal &= 0xFF00;
+    curVal |= logID;
     SetWord(logID, 10, 0);
 }
 
