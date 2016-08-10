@@ -15,6 +15,7 @@
  */
 
 #include "createAndAttachMaxNamespacesAndVerify.h"
+#include "grpAdminNamespaceManagement.h"
 #include "globals.h"
 #include "grpDefs.h"
 #include "../Queues/acq.h" 

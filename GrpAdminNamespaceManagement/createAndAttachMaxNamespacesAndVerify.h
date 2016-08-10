@@ -21,41 +21,6 @@
 
 namespace GrpAdminNamespaceManagement {
 
-
-struct NamespaceManagementCreateStruct {
-    uint64_t    NSZE;
-    uint64_t    NCAP;
-    uint8_t     Reserved16_25[10];
-    uint8_t     FLBAS;
-    uint8_t     Reserved27_28[2];
-    uint8_t     DPS;
-    uint8_t     NMIC;
-    uint8_t     Reserved31_383[353];
-    /*
-    NamespaceManagementCreateStruct(uint64_t NSZE, uint64_t NCAP, uint8_t FLBAS, uint8_t DPS, uint8_t NMIC) {
-    	this->NSZE  = NSZE;
-    	this->NCAP  = NCAP;
-    	this->FLBAS = FLBAS;
-    	this->DPS   = DPS;
-    	this->NMIC  = NMIC;
-    }
-    */
-    /*
-    NamespaceManagementCreateStruct(uint8_t *buffer) {
-    	this->NSZE  = (NamespaceManagementCreateStruct*) buffer->NSZE;
-    	this->NCAP  = (NamespaceManagementCreateStruct*) buffer->NCAP;
-    	this->FLBAS = (NamespaceManagementCreateStruct*) buffer->FLBAS;
-    	this->DPS   = (NamespaceManagementCreateStruct*) buffer->DPS;
-    	this->NMIC  = (NamespaceManagementCreateStruct*) buffer->NMIC;
-    }
-    */
-    void print() {
-    	LOG_NRM("NamespaceManagementCreateStruct contains  NSZE = 0x%llx  NCAP = 0x%llx  FLBAS = 0x%x  DPS = 0x%x  NMIC = 0x%x",
-    			(long long unsigned) NSZE, (long long unsigned) NCAP, FLBAS, DPS, NMIC);
-    }
-} __attribute__((__packed__));
-
-
 /** \verbatim
  * -----------------------------------------------------------------------------
  * ----------------Mandatory rules for children to follow-----------------------
