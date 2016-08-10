@@ -71,7 +71,6 @@ public:
      */
     void InitOffset1stPage(uint32_t bufSize, uint32_t offset1stPg = 0,
         bool initMem = false, uint8_t initVal = 0);
-
     /**
      * Allocates memory allowing to specify the alignment of that buffer, but
      * not the offset into the 1st page of the allocation. Residual memory
