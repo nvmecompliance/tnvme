@@ -175,6 +175,9 @@ FIDErrRecovery_r12::RunCoreTest()
         getFeaturesCmd->SetNSID(1);
     }
 
+    // Clear the select field
+    getFeaturesCmd->SetSelField(0);
+
     // checks NS for deallocation support
     ConstSharedIdentifyPtr idNamspc = gInformative->GetIdentifyCmdNamspc(0x01);
     bool DULBEsupport = (idNamspc->GetValue(IDNAMESPC_NSFEAT) &
