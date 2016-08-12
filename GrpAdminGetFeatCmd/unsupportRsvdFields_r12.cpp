@@ -128,7 +128,7 @@ UnsupportRsvdFields_r12::RunCoreTest()
 
     // DW10_b31:11
     work = getFeaturesCmd->GetDword(10);
-    work |= 0xfffffc00;
+    work |= 0xfffff800;
     getFeaturesCmd->SetDword(work, 10);
     // DWord 11 used
     getFeaturesCmd->SetDword(0xffffffff, 12);
@@ -139,7 +139,7 @@ UnsupportRsvdFields_r12::RunCoreTest()
     IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
         getFeaturesCmd, "rsvd.set", true);
 
-    uint32_t cdw10 = getFeaturesCmd->GetDword(10) & ~0x3ff;
+    uint32_t cdw10 = getFeaturesCmd->GetDword(10) & ~0x7ff;
     uint64_t oncs = gInformative->GetIdentifyCmdCtrlr()->GetValue(
             IDCTRLRCAP_ONCS);
     uint64_t savSelSupp = (oncs & ONCS_SUP_SV_AND_SLCT_FEATS) >> 4;
