@@ -178,6 +178,26 @@ VerifyMasking_r10b::RunCoreTest()
             }
         }
     }
+
+    LOG_NRM("Waiting 2 second timeout before issuing a controller level reset");
+    sleep(2);
+
+    if (gCtrlrConfig->SetState(ST_DISABLE_COMPLETELY) == false)
+        throw FrmwkEx(HERE);
+
+    LOG_NRM("Create admin queues ACQ and ASQ for test lifetime");
+    acq = SharedACQPtr(new ACQ(gDutFd));
+    acq->Init(nAerlimit + 1); // one extra space than Q full condition
+
+    asq = SharedASQPtr(new ASQ(gDutFd));
+    asq->Init(nAerlimit + 1); // one extra space than Q full condition
+
+    // All queues will use identical IRQ vector
+    IRQ::SetAnySchemeSpecifyNum(1);
+
+    gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
+    if (gCtrlrConfig->SetState(ST_ENABLE) == false)
+        throw FrmwkEx(HERE);
 }
 
 
