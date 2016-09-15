@@ -58,7 +58,7 @@ GetLogPage::GetLogPage() : Cmd(Trackable::OBJ_GETLOGPAGE)
 
     // No cmd should ever be created which violates these masking possibilities
     send_64b_bitmask allowPrpMask = (send_64b_bitmask)
-        (MASK_PRP1_PAGE | MASK_PRP2_PAGE);
+        (MASK_PRP1_PAGE | MASK_PRP2_PAGE | MASK_PRP2_LIST);
     SetPrpAllowed(allowPrpMask);
 }
 
