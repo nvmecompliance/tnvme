@@ -248,7 +248,8 @@ Cmd::GetBits(uint8_t whichDW, uint8_t dwOffset, uint16_t numBits) const
     uint32_t mask = 0;
     for (uint16_t i = 0; i < numBits; i++)
         mask |= (0x1 << i);
-    return (uint8_t)((GetDword(whichDW) & mask) >> (dwOffset * numBits));
+//    return (uint8_t)((GetDword(whichDW) & mask) >> (dwOffset * numBits));
+    return (uint64_t)((GetDword(whichDW) >> (dwOffset * numBits)) & mask);
 }
 
 
