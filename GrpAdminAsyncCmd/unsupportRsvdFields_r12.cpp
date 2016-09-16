@@ -156,12 +156,18 @@ UnsupportRsvdFields_r12::TestAsyncEvents(SharedACQPtr &acq, SharedASQPtr &asq,
     }
 
     InvalidSQWriteDoorbell();
-    sleep(1);
-    if (acq->ReapInquiryWaitSpecify(CALC_TIMEOUT_ms(1), 1, numCE, isrCount)
+//    sleep(1); This is an arbitrary wait
+    int failSafe = 0;
+    while (acq->ReapInquiryWaitSpecify(CALC_TIMEOUT_ms(1), 1, numCE, isrCount)
         == false) {
-        acq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "acq.fail2"),
-            "Dump Entire ACQ");
-        throw FrmwkEx(HERE, "1 CE expected in ACQ but found %d CE's", numCE);
+        if (failSafe >= 10) {// 10 seconds maximum wait should be long enough
+            LOG_NRM("Exceeded test wait time of 10 seconds");
+            acq->Dump(FileSystem::PrepDumpFile(mGrpName, mTestName, "acq.fail2"),
+                "Dump Entire ACQ");
+            throw FrmwkEx(HERE, "1 CE expected in ACQ but found %d CE's", numCE);
+        }
+        sleep(1);
+        failSafe++;
     }
 
     SharedMemBufferPtr ceMem = SharedMemBufferPtr(new MemBuffer());
