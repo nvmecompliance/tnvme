@@ -133,16 +133,16 @@ CreateAndAttachMaxNamespacesAndVerify::RunCoreTest()
     // BUGBUG large assumption that NVMCAP values will not be larger than 64bit num bytes, which is 16384 PETAbytes
     // BUGBUG Also assume we need to create on GB multiples
 
-    uint64_t identifyControllerUnallocatedCapacity = idCtrlrCap->GetValue(IDCTRLRCAP_UNVMCAP_LOWER);
-    uint64_t identifyControllerTotalCapacity       = idCtrlrCap->GetValue(IDCTRLRCAP_TNVMCAP_LOWER);
+    uint64_t identifyControllerUnallocatedCapacity;
+    uint64_t identifyControllerTotalCapacity;
 
-    uint64_t individualNamespaceCapacityInGB       = (uint64_t) floor( identifyControllerUnallocatedCapacity / 1024.0 / 1024.0 / 1024.0 / identifyControllerMaxNSID); // In GB units
-    uint64_t individualNamespaceCapacity = individualNamespaceCapacityInGB * 1024 * 1024 * 1024 / 512; // In 512B LBA units
+    uint64_t individualNamespaceCapacityInGB; // In GB units
+    uint64_t individualNamespaceCapacity; // In 512B LBA units
     uint32_t newlyCreatedNSID = 0;
 
-    if( identifyControllerUnallocatedCapacity != identifyControllerTotalCapacity) {
-    	LOG_NRM("TNVMCAP != UNVMCAP, which points to a namespace being allocated but the previous test should have deleted all");
-    }
+//    if( identifyControllerUnallocatedCapacity != identifyControllerTotalCapacity) {
+//    	LOG_NRM("TNVMCAP != UNVMCAP, which points to a namespace being allocated but the previous test should have deleted all");
+//    }
 
 	LOG_NRM("Create Identify Command To Get All Present NSIDs");
 	SharedIdentifyPtr identifyCmd = SharedIdentifyPtr(new Identify());
@@ -163,6 +163,21 @@ CreateAndAttachMaxNamespacesAndVerify::RunCoreTest()
     // CNS_NamespaceStructSubsystem       0x11    X     -   (Identify Namespace from NSID A. If attached or not, receive the struct, else invalid namespace ID)
     // CNS_ControllerListAttachedToNSID   0x12    X     A   (Controller List that are attached to NSID X, starting with CNTID greater than A)
     // CNS_ControllerListSubsystem        0x13    -     B   (Controller List present in subsystem starting with CNTID greater than B)
+
+    identifyCmd->SetPrpBuffer(prpBitmask, identifyControllerStruct);
+    identifyCmd->SetNSID(0);
+    identifyCmd->SetCNS(CNS_Controller);
+    identifyCmd->SetCNTID(0);
+    IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq, identifyCmd, "Identify Controller to get UNVMCAP", false, CESTAT_SUCCESS);
+    identifyControllerUnallocatedCapacity = identifyCmd->GetValue(IDCTRLRCAP_UNVMCAP_LOWER);
+    identifyControllerTotalCapacity       = identifyCmd->GetValue(IDCTRLRCAP_TNVMCAP_LOWER);
+    individualNamespaceCapacityInGB       = (uint64_t) floor(identifyControllerUnallocatedCapacity / 1024.0 / 1024.0 / 1024.0 / identifyControllerMaxNSID);
+    individualNamespaceCapacity           = individualNamespaceCapacityInGB * 1024 * 1024 * 1024 / 512;
+
+    if (identifyControllerUnallocatedCapacity != identifyControllerTotalCapacity) {
+        LOG_NRM("TNVMCAP != UNVMCAP, which points to a namespace being allocated but the previous test should have deleted all");
+    }
+
 
     LOG_NRM("First ensure there are no namespaces present, as this test depends on deleteAllNamespacesAndVerify to complete successfully");
 	// See 8.11 in 1.2 spec for describing the process this test is following

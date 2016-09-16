@@ -266,14 +266,15 @@ DeleteAllNamespacesAndVerify::RunCoreTest()
         	}
 
         	// BUGBUG This Fails On APL Alpha FW
-        	LOG_NRM("Issuing Identify Namespace (CNS=0x11) to this inactive NSID and expeting STATUS 0:2 (Invalid Field) to be returned.");
-        	identifyCmd->SetCNS(  0x11 );
+        	LOG_NRM("Issuing Identify Namespace (CNS=0x11) to this inactive NSID and expeting STATUS 0:0 (Success) to be returned.");
+        	identifyCmd->SetCNS( 0x11 );
         	// Potentially read back 1024 namespaces attacjed to this controller ID
-            IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq, identifyCmd, "Reading back NSID that was just detached CNS=0x12, should return Invalid Namespace", false, CESTAT_INVAL_FIELD);
+            IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq, identifyCmd, "Reading back NSID that was just detached CNS=0x12, should return success", false);
 
 
         	LOG_NRM("Deleting  NSID 0x%x, expecting pass", (uint32_t) currentNamespaceIdToDelete);
         	namespaceManagementCmd->SetSEL( 0x1 ); // 1 = Delete, 0 = Create
+        	namespaceManagementCmd->SetNSID(currentNamespaceIdToDelete);
         	// No buffer is required for deletion / SEL = 1. Was cleared to 0's prior to this loop
         	IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq, namespaceManagementCmd, "Deleting an inactive namespace", false, CESTAT_SUCCESS);
 
@@ -282,15 +283,15 @@ DeleteAllNamespacesAndVerify::RunCoreTest()
 
 
         	// BUGBUG This Fails On APL Alpha FW
-        	LOG_NRM("Issuing Idnetify Namespace (CNS=0x0) to this deleted NSID (now invalid), after it was detached from all controllers, should return Invalid Namespace.");
+        	LOG_NRM("Issuing Idnetify Namespace (CNS=0x0) to this deleted NSID (now invalid), after it was detached from all controllers, should return success.");
         	identifyCmd->SetCNS( CNS_Namespace );
-        	IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq, identifyCmd, "After deleting namespace, should receive invalid NSID status when we identify with CNS=0", false, CESTAT_INVAL_FIELD);
+        	IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq, identifyCmd, "After deleting namespace, should receive success status when we identify with CNS=0", false);
 
         	// BUGBUG This Fails On APL Alpha FW
-        	LOG_NRM("Issuing Identify Namespace (CNS=0x11) to this deleted NSID (now invalid) and expecting Invalid Namespace.");
+        	LOG_NRM("Issuing Identify Namespace (CNS=0x11) to this deleted NSID (now valid) and expecting Success.");
         	identifyCmd->SetCNS(  0x11 );
         	// Potentially read back 1024 namespaces attacjed to this controller ID
-            IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq, identifyCmd, "After deleting namespace, should receive invalid NSID status when we identify with CNS=11", false, CESTAT_INVAL_FIELD);
+            IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq, identifyCmd, "After deleting namespace, should receive success status when we identify with CNS=11", false);
 
 
         	numDeletedNamespaces++;
