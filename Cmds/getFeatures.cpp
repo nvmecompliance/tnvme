@@ -17,6 +17,8 @@
 #include "getFeatures.h"
 #include "../Utils/buffers.h"
 
+#define BYTE_BITMASK_SEL       0x07
+
 SharedGetFeaturesPtr GetFeatures::NullGetFeaturesPtr;
 const uint8_t GetFeatures::Opcode = 0x0a;
 
@@ -47,12 +49,13 @@ GetFeatures::SetIntVecConfigIV(uint16_t iv)
 
 
 void
-GetFeatures::SetSelField(uint8_t mask)
+GetFeatures::SetSelField(uint8_t selVal)
 {
 	uint8_t newVal = GetByte(10, 1);
-	LOG_NRM("Origional DW10 byte 1: 0x%d", newVal);
-	newVal |= (mask & 0x7);
-	LOG_NRM("Setting DW10 byte 1: 0x%d", newVal);
+	LOG_NRM("Original DW10 byte 1: 0x%d", newVal);
+	newVal &= ~BYTE_BITMASK_SEL;
+	newVal |= (selVal & BYTE_BITMASK_SEL);
+	LOG_NRM("Setting SEL field to: 0x%02X", newVal);
 	SetByte(newVal, 10, 1);
 }
 

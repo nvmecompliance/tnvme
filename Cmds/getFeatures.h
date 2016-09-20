@@ -52,7 +52,7 @@ public:
      * Sets the Select (SEL) field to what ever the user inputs
      * @param mask the new value of the SEL field
      */
-    void SetSelField(uint8_t mask);
+    void SetSelField(uint8_t selVal);
 };
 
 
