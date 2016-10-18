@@ -278,7 +278,7 @@ UnsupportRsvdFields_r12::ReadLogPage(SharedACQPtr &acq, SharedASQPtr &asq,
     LOG_NRM("Create memory buffer for log page to request error information");
     SharedMemBufferPtr getLogPageMem = SharedMemBufferPtr(new MemBuffer());
     send_64b_bitmask prpReq =
-        (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE);
+        (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE | MASK_PRP2_LIST);
 
     LOG_NRM("Get log page to request error information logId = %d", logId);
     getLogPgCmd->SetLID(logId);

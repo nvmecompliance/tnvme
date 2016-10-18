@@ -138,7 +138,7 @@ FrmwkEx::PreliminaryProcessing()
     SharedMemBufferPtr cmdMem = SharedMemBufferPtr(new MemBuffer());
     cmdMem->InitAlignment(bufSize, sysconf(_SC_PAGESIZE), true, 0);
     send_64b_bitmask prpReq =
-        (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE);
+        (send_64b_bitmask)(MASK_PRP1_PAGE | MASK_PRP2_PAGE | MASK_PRP2_LIST);
     getLogPg->SetPrpBuffer(prpReq, cmdMem);
 
     IO::SendAndReapCmd(GRP_NAME, TEST_NAME, CALC_TIMEOUT_ms(1), asq, acq,
