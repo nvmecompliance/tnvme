@@ -156,6 +156,16 @@ AbortByReset_r10b::RunCoreTest()
             "Dump Entire ACQ");
         throw FrmwkEx(HERE, "0 CE expected in ACQ but found %d CE's", numCE);
     }
+
+    LOG_NRM("Reset ctrlr to cause a clearing of CFS bit if set");
+    if (gCtrlrConfig->SetState(ST_DISABLE) == false)
+        throw FrmwkEx(HERE);
+    // All queues will use identical IRQ vector
+    IRQ::SetAnySchemeSpecifyNum(1);
+
+    gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
+    if (gCtrlrConfig->SetState(ST_ENABLE) == false)
+        throw FrmwkEx(HERE);
 }
 
 
