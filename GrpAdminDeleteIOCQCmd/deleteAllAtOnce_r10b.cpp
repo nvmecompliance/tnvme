@@ -36,7 +36,7 @@ DeleteAllAtOnce_r10b::DeleteAllAtOnce_r10b(
         "Calc X, where X = the smaller of 1) max num cmds can fit within ASQ "
         "or 2) max num IOQ's DUT will support. Create X IOCQ/IOSQ pairs; "
         "QID's start with 1 and continue to X, all with num elements = 2. "
-        "Issue X DeleteIOCQ cmds into the ASQ, thus deleting every IOSQ "
+        "Issue X DeleteIOSQ cmds into the ASQ, thus deleting every IOSQ "
         "and reap all CE's, expect success. Then issue X DeleteIOCQ cmds "
         "and make sure the doorbell is rung for all cmds at once. Expect to "
         "reap all X cmds successfully. Verify CE.CID with expected value.");
