@@ -22,7 +22,6 @@
 #include "../Queues/iosq.h"
 #include "../Utils/io.h"
 #include "../Cmds/flush.h"
-#include "../Cmds/getFeatures.h"
 
 namespace GrpNVMFlushCmd {
 
@@ -94,24 +93,9 @@ InvalidNamspc_r10b::RunCoreTest()
      * 1) Test CreateResources_r10b has run prior.
      * \endverbatim
      */
-    uint64_t inc, i;
+    uint64_t i;
     string work;
     ConstSharedIdentifyPtr namSpcPtr;
-    vector<uint16_t> invalidFIDs;
-    uint8_t invalFID;
-    
-    invalidFIDs.push_back(0x00);
-    for (uint8_t invalFID = 0x0D; invalFID <= 0x7F; invalFID++)
-        invalidFIDs.push_back(invalFID);
-
-    if ((gInformative->GetIdentifyCmdCtrlr()->GetValue(IDCTRLRCAP_ONCS))
-            & ONCS_SUP_RSRV)
-        invalFID = 0x84;
-    else
-        invalFID = 0x81;  
- 
-    for (; invalFID <= 0xBF; invalFID++)
-        invalidFIDs.push_back(invalFID);
 
     LOG_NRM("Create Set features cmd");
     // Lookup objs which were created in a prior test within group
@@ -119,34 +103,19 @@ InvalidNamspc_r10b::RunCoreTest()
     SharedIOCQPtr iocq = CAST_TO_IOCQ(gRsrcMngr->GetObj(IOCQ_GROUP_ID));
 
     SharedFlushPtr flushCmd = SharedFlushPtr(new Flush());
-    SharedGetFeaturesPtr getFeaturesCmd = SharedGetFeaturesPtr(
-            new GetFeatures());
     // For all namspc's issue cmd to an illegal namspc
     ConstSharedIdentifyPtr idCtrlrStruct = gInformative->GetIdentifyCmdCtrlr();
     uint32_t nn = (uint32_t)idCtrlrStruct->GetValue(IDCTRLRCAP_NN);
-    uint32_t write_cache_enabled = (uint32_t)idCtrlrStruct->GetValue(
-            IDCTRLRCAP_VWC);
-
-    if (write_cache_enabled == 0){
-         return;
-    }
     
-    if (nn == 0 ) {
+    if (nn == 0) {
         throw FrmwkEx(HERE, "Required to support >= 1 namspc");
     }
 
-    for (i = (nn + 1), inc = 1; i <= 0xffffffff; i += (2 * inc), inc += 1327) {
-
+	uint64_t inc = (0xffffffff - nn) / 100;
+    for (i = (nn + 1); i <= 0xffffffff; i += inc) {
         LOG_NRM("Issue flush cmd with illegal namspc ID=%llu",
             (unsigned long long)i);
         flushCmd->SetNSID(i);
-        for (uint16_t invalidFIDIndex = 0; invalidFIDIndex < invalidFIDs.size(); invalidFIDIndex++) {
-            if (invalidFIDs[invalidFIDIndex] == 0x81)
-               continue;
-             LOG_NRM("Issue get feat cmd using invalid FID = 0x%X", invalidFIDs[invalidFIDIndex]);
-             getFeaturesCmd->SetFID(invalidFIDs[invalidFIDIndex]);
-             work = str(boost::format("invalidFIDs.%xh") % invalidFIDs[invalidFIDIndex]);
-         }
         work = str(boost::format("namspc%d") % i);
         IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), iosq,
             iocq, flushCmd, work, true, CESTAT_INVAL_NAMSPC);
