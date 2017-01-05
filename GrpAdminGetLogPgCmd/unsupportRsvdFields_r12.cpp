@@ -107,7 +107,7 @@ UnsupportRsvdFields_r12::RunCoreTest()
      *  \endverbatim
      */
     // Lookup objs which were created in a prior test within group
-    string globalWork;
+    string workStr;
     //uint64_t i;
     
     SharedASQPtr asq = CAST_TO_ASQ(gRsrcMngr->GetObj(ASQ_GROUP_ID))
@@ -155,31 +155,22 @@ UnsupportRsvdFields_r12::RunCoreTest()
     IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
         getLogPgCmd, "rsvd.set", true);
 
-    LOG_NRM("Set LID field reserved coded values");
-    uint32_t cdw10 = getLogPgCmd->GetDword(10) & ~0xff;
 
-    getLogPgCmd->SetDword(cdw10, 10);
-
-    IO::SendAndReapCmdNot(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
-            getLogPgCmd, "rsvd.set", true, CESTAT_SUCCESS);
-
-    for (uint32_t lid = 0x06; lid <= 0x6f; ++lid) {
-        work = cdw10 | lid;
-        getLogPgCmd->SetDword(work, 10);
-
+    for (uint32_t lid = 0x07; lid <= 0x6f; lid++) {
+        getLogPgCmd->SetDword(lid, 10);
+        workStr = str(boost::format("rsvd.LID.%ld") % lid);
         IO::SendAndReapCmdNot(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq,
-            getLogPgCmd, "rsvd.val.set", true, CESTAT_SUCCESS);
+            getLogPgCmd, workStr, true, CESTAT_SUCCESS);
     }
 
     uint8_t css;
     gCtrlrConfig->GetCSS(css);
     if (css == 0) { /* NVM Command Set selected */
-        for (uint32_t lid = 0x81; lid <= 0xbf; ++lid) {
-            work = cdw10 | lid;
-            getLogPgCmd->SetDword(work, 10);
-
+        for (uint32_t lid = 0x81; lid <= 0xbf; lid++) {
+            getLogPgCmd->SetDword(lid, 10);
+            workStr = str(boost::format("rsvd.LID.%ld") % lid);
             IO::SendAndReapCmdNot(mGrpName, mTestName, CALC_TIMEOUT_ms(1),
-                asq, acq, getLogPgCmd, "rsvd.val.set", true);
+                asq, acq, getLogPgCmd, workStr, true);
         }
     } else {
         throw new FrmwkEx(HERE, "Unsupported command set selected for test "
