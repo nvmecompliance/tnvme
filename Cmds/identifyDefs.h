@@ -421,7 +421,7 @@ struct IdNamespcStructNonVS {
     uint32_t    LBAF14;     // Bytes 184-187
     uint32_t    LBAF15;     // Bytes 188-191
     uint8_t     RES_192[192];//Bytes 192-383
-    uint8_t     VS[3712];   // Bytes 384-4095
+//    uint8_t     VS[3712];   // Bytes 384-4095 non-vs should not def these fields
 } __attribute__((__packed__));
 
 

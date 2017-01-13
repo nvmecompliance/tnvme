@@ -58,6 +58,7 @@ struct ReservationStatusDataStruct {
     uint8_t     PTPLS;
     uint8_t     RES_2[14];
     uint8_t     REGCONTDATA[24];
+    uint8_t     REGCONTDATA2[24];
 
 }__attribute__((__packed__));
 
