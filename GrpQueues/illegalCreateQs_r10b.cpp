@@ -34,7 +34,7 @@ IllegalCreateQs_r10b::IllegalCreateQs_r10b(
         "Issue CreateIOSQ and CreateIOCQ cmds, specify QID = 0 trying to "
         "create all admin Q's, expect status code = \"Invalid Q ID\". Also "
         "issue a legal Create IOSQ but specify CQID = 0 for the illegal "
-        "association, also expect status code = \"Completion Q Invalid\".");
+        "association, also expect status code = \"Invalid Queue Identifier\".");
 }
 
 
@@ -140,7 +140,7 @@ IllegalCreateQs_r10b::RunCoreTest()
         dword = 11;
         mask = 0xFFFF0000;
         value = 0;
-        SendToxicCmd(asq, acq, iosqCmd, dword, mask, value, CESTAT_CQ_INVALID);
+        SendToxicCmd(asq, acq, iosqCmd, dword, mask, value, CESTAT_INVALID_QID);
     }
 }
 
