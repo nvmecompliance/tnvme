@@ -33,6 +33,8 @@ GrpReservationsHostA::GrpReservationsHostA(size_t grpNum) :
     case SPECREV_10b:
         break;
     case SPECREV_12:
+    case SPECREV_121:
+    case SPECREV_13:
     case SPECREV_11:
         APPEND_TEST_AT_XLEVEL(CreateResources_r11, GrpReservationsHostA)
         APPEND_TEST_AT_YLEVEL(RegisterReservation, GrpReservationsHostA)

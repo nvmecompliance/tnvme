@@ -32,6 +32,8 @@ GrpNVMWriteUncorrectCmd::GrpNVMWriteUncorrectCmd(size_t grpNum) :
     case SPECREV_10b:
     case SPECREV_11:
     case SPECREV_12:
+    case SPECREV_121:
+    case SPECREV_13:
         break;
 
     default:

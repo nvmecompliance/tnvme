@@ -49,6 +49,8 @@ GrpAdminAsyncCmd::GrpAdminAsyncCmd(size_t grpNum) :
         APPEND_TEST_AT_XLEVEL(VerifyEventQueueing_r10b, GrpAdminAsyncCmd)
         break;
     case SPECREV_12:
+    case SPECREV_121:
+    case SPECREV_13:
         APPEND_TEST_AT_XLEVEL(UnsupportRsvdFields_r12, GrpAdminAsyncCmd)
         APPEND_TEST_AT_XLEVEL(AbortByReset_r10b, GrpAdminAsyncCmd)
         APPEND_TEST_AT_XLEVEL(VerifyMaxEvents_r10b, GrpAdminAsyncCmd)

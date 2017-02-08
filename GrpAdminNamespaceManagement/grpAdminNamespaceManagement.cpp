@@ -37,6 +37,8 @@ GrpAdminNamespaceManagement::GrpAdminNamespaceManagement(size_t grpNum) :
     case SPECREV_10b:
     case SPECREV_11:
         break;
+    case SPECREV_13:
+    case SPECREV_121:
     case SPECREV_12:
         APPEND_TEST_AT_XLEVEL(CreateResources_r12, GrpAdminNamespaceManagement)
         APPEND_TEST_AT_YLEVEL(DeleteAllNamespacesAndVerify, GrpAdminNamespaceManagement)

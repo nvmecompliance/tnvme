@@ -34,6 +34,8 @@ GrpInterrupts::GrpInterrupts(size_t grpNum) :
     switch (gCmdLine.rev) {
     case SPECREV_11:
     case SPECREV_12:
+    case SPECREV_121:
+    case SPECREV_13:
     case SPECREV_10b:
         APPEND_TEST_AT_XLEVEL(CreateResources_r10b, GrpInterrupts)
         APPEND_TEST_AT_YLEVEL(InvalidMSIXIRQ_r10b, GrpInterrupts)

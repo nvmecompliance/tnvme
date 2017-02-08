@@ -72,6 +72,8 @@ GrpNVMWriteCmd::GrpNVMWriteCmd(size_t grpNum) :
         APPEND_TEST_AT_XLEVEL(ProtInfoIgnoreMeta_r10b, GrpNVMWriteCmd)
         break;
     case SPECREV_12:
+    case SPECREV_121:
+    case SPECREV_13:
         APPEND_TEST_AT_XLEVEL(CreateResources_r10b, GrpNVMWriteCmd)
         APPEND_TEST_AT_YLEVEL(LBAOutOfRangeBare_r12, GrpNVMWriteCmd)
         APPEND_TEST_AT_YLEVEL(InvalidNamspc_r10b, GrpNVMWriteCmd)

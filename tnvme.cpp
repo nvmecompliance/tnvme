@@ -287,8 +287,16 @@ main(int argc, char *argv[])
             } else if (strcmp("1.1", optarg) == 0
                 || strcmp("1.1b", optarg) == 0) {
                 gCmdLine.rev = SPECREV_11;
-            } else if (strcmp("1.2", optarg) == 0)
+            } else if (strcmp("1.2", optarg) == 0){
                 gCmdLine.rev = SPECREV_12;
+            } else if ((strcmp("1.2.1", optarg) == 0) ||
+                    (strcmp("121", optarg) == 0) ||
+					(strcmp("1.21", optarg) == 0)){
+                gCmdLine.rev = SPECREV_121;
+            } else if ((strcmp("1.3", optarg) == 0) ||
+                    (strcmp("13", optarg) == 0)){
+                gCmdLine.rev = SPECREV_13;
+            }
             break;
 
         case 'a':

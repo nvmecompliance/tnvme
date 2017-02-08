@@ -44,6 +44,8 @@ GrpAdminDeleteIOSQCmd::GrpAdminDeleteIOSQCmd(size_t grpNum) :
         APPEND_TEST_AT_XLEVEL(InvalidQID_r10b, GrpAdminDeleteIOSQCmd)
         break;
     case SPECREV_12:
+    case SPECREV_121:
+    case SPECREV_13:
         APPEND_TEST_AT_XLEVEL(CreateResources_r10b, GrpAdminDeleteIOSQCmd)
         APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r12, GrpAdminDeleteIOSQCmd)
         APPEND_TEST_AT_XLEVEL(InvalidQID_r10b, GrpAdminDeleteIOSQCmd)

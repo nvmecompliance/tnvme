@@ -47,6 +47,8 @@ GrpAdminCreateIOCQCmd::GrpAdminCreateIOCQCmd(size_t grpNum) :
         APPEND_TEST_AT_XLEVEL(MaxQSizeExceed_r10b, GrpAdminCreateIOCQCmd)
         break;
     case SPECREV_12:
+    case SPECREV_121:
+    case SPECREV_13:
         APPEND_TEST_AT_XLEVEL(CreateResources_r10b, GrpAdminCreateIOCQCmd)
         APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r12, GrpAdminCreateIOCQCmd)
         APPEND_TEST_AT_XLEVEL(InvalidQID_r10b, GrpAdminCreateIOCQCmd)

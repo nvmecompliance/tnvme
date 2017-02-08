@@ -41,18 +41,20 @@ GrpAdminIdentifyCmd::GrpAdminIdentifyCmd(size_t grpNum) :
         APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r10b, GrpAdminIdentifyCmd)
         APPEND_TEST_AT_YLEVEL(InvalidNamspc_r10b, GrpAdminIdentifyCmd)
         break;
-    case SPECREV_12:
-        APPEND_TEST_AT_XLEVEL(CreateResources_r10b, GrpAdminIdentifyCmd)
-        APPEND_TEST_AT_YLEVEL(PRP1_r10b, GrpAdminIdentifyCmd)
-        APPEND_TEST_AT_YLEVEL(PRP1PRP2_r10b, GrpAdminIdentifyCmd)
-        APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r12, GrpAdminIdentifyCmd)
-        APPEND_TEST_AT_YLEVEL(InvalidNamspc_r10b, GrpAdminIdentifyCmd)
-        break;
     case SPECREV_11:
         APPEND_TEST_AT_XLEVEL(CreateResources_r10b, GrpAdminIdentifyCmd)
         APPEND_TEST_AT_YLEVEL(PRP1_r10b, GrpAdminIdentifyCmd)
         APPEND_TEST_AT_YLEVEL(PRP1PRP2_r10b, GrpAdminIdentifyCmd)
         APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r11b, GrpAdminIdentifyCmd)
+        APPEND_TEST_AT_YLEVEL(InvalidNamspc_r10b, GrpAdminIdentifyCmd)
+        break;
+    case SPECREV_12:
+    case SPECREV_121:
+    case SPECREV_13:
+        APPEND_TEST_AT_XLEVEL(CreateResources_r10b, GrpAdminIdentifyCmd)
+        APPEND_TEST_AT_YLEVEL(PRP1_r10b, GrpAdminIdentifyCmd)
+        APPEND_TEST_AT_YLEVEL(PRP1PRP2_r10b, GrpAdminIdentifyCmd)
+        APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r12, GrpAdminIdentifyCmd)
         APPEND_TEST_AT_YLEVEL(InvalidNamspc_r10b, GrpAdminIdentifyCmd)
         break;
 

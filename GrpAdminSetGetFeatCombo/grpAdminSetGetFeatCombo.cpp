@@ -69,6 +69,8 @@ GrpAdminSetGetFeatCombo::GrpAdminSetGetFeatCombo(size_t grpNum) :
         APPEND_TEST_AT_XLEVEL(FIDWriteAtomicity_r10b, GrpAdminSetGetFeatCombo)
         APPEND_TEST_AT_XLEVEL(FIDAsyncEventCfg_r10b, GrpAdminSetGetFeatCombo)
         break;
+    case SPECREV_13:
+    case SPECREV_121:
     case SPECREV_12:
         APPEND_TEST_AT_XLEVEL(FIDArbitration_r10b, GrpAdminSetGetFeatCombo)
         APPEND_TEST_AT_XLEVEL(FIDPwrMgmt_r10b, GrpAdminSetGetFeatCombo)

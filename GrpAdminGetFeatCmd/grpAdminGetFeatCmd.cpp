@@ -46,6 +46,8 @@ GrpAdminGetFeatCmd::GrpAdminGetFeatCmd(size_t grpNum) :
         APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r11b, GrpAdminGetFeatCmd)
         break;
     case SPECREV_12:
+    case SPECREV_121:
+    case SPECREV_13:
         APPEND_TEST_AT_XLEVEL(CreateResources_r10b, GrpAdminGetFeatCmd)
         APPEND_TEST_AT_YLEVEL(InvalidFieldInCmd_r12, GrpAdminGetFeatCmd)
         APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r12, GrpAdminGetFeatCmd)

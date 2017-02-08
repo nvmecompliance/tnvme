@@ -30,6 +30,8 @@ GrpResets::GrpResets(size_t grpNum) :
     switch (gCmdLine.rev) {
     case SPECREV_11:
     case SPECREV_12:
+    case SPECREV_121:
+    case SPECREV_13:
     case SPECREV_10b:
         APPEND_TEST_AT_XLEVEL(CtrlrResetIOQDeleted_r10b, GrpResets)
         APPEND_TEST_AT_XLEVEL(CtrlrResetNotEffectAdminQ_r10b, GrpResets)

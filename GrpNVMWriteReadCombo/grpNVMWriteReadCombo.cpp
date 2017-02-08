@@ -39,6 +39,8 @@ GrpNVMWriteReadCombo::GrpNVMWriteReadCombo(size_t grpNum) :
     switch (gCmdLine.rev) {
     case SPECREV_11:
     case SPECREV_12:
+    case SPECREV_121:
+    case SPECREV_13:
     case SPECREV_10b:
         APPEND_TEST_AT_XLEVEL(PRPOffsetSinglePgMultiBlk_r10b, GrpNVMWriteReadCombo)
         APPEND_TEST_AT_XLEVEL(PRPOffsetDualPgMultiBlk_r10b, GrpNVMWriteReadCombo)

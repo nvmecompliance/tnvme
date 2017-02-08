@@ -33,6 +33,8 @@ GrpAdminSetFeatCmd::GrpAdminSetFeatCmd(size_t grpNum) :
     case SPECREV_10b:
         APPEND_TEST_AT_XLEVEL(InvalidFieldInCmd_r10b, GrpAdminSetFeatCmd)
         break;
+    case SPECREV_13:
+    case SPECREV_121:
     case SPECREV_12:
         APPEND_TEST_AT_XLEVEL(InvalidFieldInCmd_r12, GrpAdminSetFeatCmd)
         break;

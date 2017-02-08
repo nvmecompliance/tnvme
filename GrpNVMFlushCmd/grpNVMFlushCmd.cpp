@@ -49,6 +49,8 @@ GrpNVMFlushCmd::GrpNVMFlushCmd(size_t grpNum) :
         APPEND_TEST_AT_XLEVEL(FunctionalityMeta_r10b, GrpNVMFlushCmd)
         break;
     case SPECREV_12:
+    case SPECREV_121:
+    case SPECREV_13:
         APPEND_TEST_AT_XLEVEL(CreateResources_r10b, GrpNVMFlushCmd)
         APPEND_TEST_AT_YLEVEL(InvalidNamspc_r10b, GrpNVMFlushCmd)
         APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r12, GrpNVMFlushCmd)

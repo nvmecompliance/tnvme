@@ -40,6 +40,8 @@ GrpCtrlRegisters::GrpCtrlRegisters(size_t grpNum) :
         APPEND_TEST_AT_XLEVEL(CtrlrResetDefaults_r10b, GrpCtrlRegisters)
         break;
     case SPECREV_12:
+    case SPECREV_121:
+    case SPECREV_13:
         APPEND_TEST_AT_XLEVEL(AllCtrlRegs_r12, GrpCtrlRegisters)
         APPEND_TEST_AT_XLEVEL(CtrlrResetDefaults_r10b, GrpCtrlRegisters)
         break;

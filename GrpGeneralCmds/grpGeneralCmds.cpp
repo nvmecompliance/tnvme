@@ -48,6 +48,8 @@ GrpGeneralCmds::GrpGeneralCmds(size_t grpNum) :
         APPEND_TEST_AT_XLEVEL(CIDAcceptedIOSQ_r10b, GrpGeneralCmds)
         break;
     case SPECREV_12:
+    case SPECREV_121:
+    case SPECREV_13:
         APPEND_TEST_AT_XLEVEL(CreateResources_r10b, GrpGeneralCmds)
         APPEND_TEST_AT_YLEVEL(IllegalNVMCmds_r11, GrpGeneralCmds)
         APPEND_TEST_AT_YLEVEL(IllegalAdminCmds_r12, GrpGeneralCmds)

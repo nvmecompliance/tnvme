@@ -53,6 +53,8 @@ GrpAdminCreateIOSQCmd::GrpAdminCreateIOSQCmd(size_t grpNum) :
         APPEND_TEST_AT_XLEVEL(AcceptQPriority_r10b, GrpAdminCreateIOSQCmd)
         break;
     case SPECREV_12:
+    case SPECREV_121:
+    case SPECREV_13:
         APPEND_TEST_AT_XLEVEL(CreateResources_r10b, GrpAdminCreateIOSQCmd)
         APPEND_TEST_AT_YLEVEL(UnsupportRsvdFields_r12, GrpAdminCreateIOSQCmd)
         APPEND_TEST_AT_YLEVEL(MaxQSizeExceed_r10b, GrpAdminCreateIOSQCmd)

@@ -67,6 +67,8 @@ GrpAdminGetLogPgCmd::GrpAdminGetLogPgCmd(size_t grpNum) :
         APPEND_TEST_AT_YLEVEL(MandatoryFW_r10b, GrpAdminGetLogPgCmd)
         break;
     case SPECREV_12:
+    case SPECREV_121:
+    case SPECREV_13:
         APPEND_TEST_AT_XLEVEL(CreateResources_r10b, GrpAdminGetLogPgCmd)
         APPEND_TEST_AT_YLEVEL(PRP1_r10b, GrpAdminGetLogPgCmd)
         APPEND_TEST_AT_YLEVEL(PRP1PRP2_r10b, GrpAdminGetLogPgCmd)

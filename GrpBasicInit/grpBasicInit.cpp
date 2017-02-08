@@ -35,8 +35,10 @@ GrpBasicInit::GrpBasicInit(size_t grpNum) :
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Numbering" and
     // "https://github.com/nvmecompliance/tnvme/wiki/Test-Strategy
     switch (gCmdLine.rev) {
-    case SPECREV_11:
+    case SPECREV_13:
+    case SPECREV_121:
     case SPECREV_12:
+    case SPECREV_11:
     case SPECREV_10b:
         APPEND_TEST_AT_XLEVEL(CreateACQASQ_r10b, GrpBasicInit)
         // Polling 1st
