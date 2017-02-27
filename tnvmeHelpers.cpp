@@ -49,6 +49,8 @@ VerifySpecCompatibility(SpecRev specRev)
     case SPECREV_10b:   tgtMajor = 1;  tgtMinor = 0;  break;
     case SPECREV_11:    tgtMajor = 1;  tgtMinor = 1;  break;
     case SPECREV_12:    tgtMajor = 1;  tgtMinor = 2;  break;
+    case SPECREV_121:   tgtMajor = 1;  tgtMinor = 2;  break;
+    case SPECREV_13:    tgtMajor = 1;  tgtMinor = 3;  break;
 
     default:
         LOG_ERR("Requesting comparison against unknown SpecRev=%d", specRev);
