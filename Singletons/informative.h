@@ -70,6 +70,17 @@ public:
     bool Reinit(SharedASQPtr &asq, SharedACQPtr &acq, uint16_t ms);
 
     /**
+     * Same as above however for devices that support Namespace Management
+     * if some of the namespaces have been removed we cannot issue identify
+     * commands to those NSIDs. Skips issuing Identify commands to each ns.
+     * @param asq Pass pre-existing ASQ in which to issue admin cmds
+     * @param acq Pass pre-existing ACQ to reap any correlating CE's
+     * @param ms Pass the max number of ms to wait until numTil CE's arrive.
+     * @return true upon success, otherwise false.
+     */
+    bool ReinitNSSafe(SharedASQPtr &asq, SharedACQPtr &acq, uint16_t ms);
+
+    /**
      * Get a previously fetched identify command's controller struct.
      * @return The requested data
      */

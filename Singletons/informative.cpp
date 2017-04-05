@@ -470,6 +470,37 @@ Informative::Reinit(SharedASQPtr &asq, SharedACQPtr &acq, uint16_t ms)
     return true;
 }
 
+bool
+Informative::ReinitNSSafe(SharedASQPtr &asq, SharedACQPtr &acq, uint16_t ms)
+{
+    LOG_NRM("------------gInformative(re/init) START------------");
+
+    // Change dump dir to be compatible for info extraction
+    FileSystem::SetBaseDumpDir(true);
+    if (FileSystem::RotateDumpDir() == false) {
+        LOG_ERR("Unable to rotate dump dir\n");
+        throw FrmwkEx(HERE);
+    }
+
+    Clear();    // Clear out the old, in with the new
+
+    LOG_NRM("----------------start(dump regs)-------------------");
+    KernelAPI::DumpPciSpaceRegs(
+        FileSystem::PrepDumpFile(GRP_NAME, TEST_NAME, "pci", "regs"), false);
+    KernelAPI::DumpCtrlrSpaceRegs(
+        FileSystem::PrepDumpFile(GRP_NAME, TEST_NAME, "ctrl", "regs"), false);
+    LOG_NRM("-----------------end(dump regs)--------------------");
+
+    SendGetFeaturesNumOfQueues(asq, acq, ms);
+    SendIdentifyCtrlrStruct(asq, acq, ms);
+    //SendIdentifyNamespaceStruct(asq, acq, ms);
+
+    // Change dump dir to be compatible for test execution
+    FileSystem::SetBaseDumpDir(false);
+    LOG_NRM("------------gInformative(re/init) END------------");
+    return true;
+}
+
 
 void
 Informative::SendGetFeaturesNumOfQueues(SharedASQPtr asq, SharedACQPtr acq,
