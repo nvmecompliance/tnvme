@@ -37,6 +37,26 @@
     ZZ(FID_RESV_NOTIF_MASK,      0x82)                                         \
     ZZ(FID_RESV_PERSIST,         0x83)
 
+/*     FeatureID,                Reserved field mask */
+#define FEATURE_RESERVE_TABLE                                                  \
+    ZZ(FID_ARBITRATION,          0x000000F8)                                   \
+    ZZ(FID_PWR_MGMT,             0xFFFFFF00)                                   \
+    ZZ(FID_LBA_RANGE,            0xFFFFFFC0)                                   \
+    ZZ(FID_TEMP_THRESHOLD,       0xFFC00000)                                   \
+    ZZ(FID_ERR_RECOVERY,         0xFFFE0000)                                   \
+    ZZ(FID_VOL_WR_CACHE,         0xFFFFFFFE)                                   \
+    ZZ(FID_NUM_QUEUES,           0x00000000)                                   \
+    ZZ(FID_IRQ_COALESCING,       0xFFFF0000)                                   \
+    ZZ(FID_IRQ_VEC_CONFIG,       0xFFFE0000)                                   \
+    ZZ(FID_WRITE_ATOMICITY,      0xFFFFFFFE)                                   \
+    ZZ(FID_ASYNC_EVENT_CONFIG,   0xFFFFFC00)                                   \
+    ZZ(FID_AUTO_PS_TRANS,        0xFFFFFFFE)                                   \
+    ZZ(FID_HOST_MEM_BUF,         0xFFFFFFFC)                                   \
+    ZZ(FID_SW_PROGRESS,          0xFFFFFF00)                                   \
+    ZZ(FID_HOST_ID,              0xFFFFFFFE)                                   \
+    ZZ(FID_RESV_NOTIF_MASK,      0xFFFFFFF0)                                   \
+    ZZ(FID_RESV_PERSIST,         0xFFFFFFFE)
+
 #define ZZ(a, b)        a,
 typedef enum FeatureID {
     FEATURE_TABLE
@@ -45,6 +65,7 @@ typedef enum FeatureID {
 #undef ZZ
 
 extern const uint8_t FID[];
+extern const uint32_t FID_RES[];
 
 struct HostIDStruct {
     uint8_t     HOSTID;

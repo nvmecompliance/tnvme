@@ -22,6 +22,10 @@ const uint8_t FID[] = {
     FEATURE_TABLE
     FID_FENCE    // always must be the last element
 };
+const uint32_t FID_RES[] = {
+    FEATURE_RESERVE_TABLE
+    FID_FENCE
+};
 #undef ZZ
 
 
