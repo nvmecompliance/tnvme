@@ -22,6 +22,8 @@
 #include "../Queues/acq.h"
 #include "../Cmds/createIOCQ.h"
 #include "../Cmds/createIOSQ.h"
+#include "../Cmds/deleteIOCQ.h"
+#include "../Cmds/deleteIOSQ.h"
 #include "../Utils/irq.h"
 
 

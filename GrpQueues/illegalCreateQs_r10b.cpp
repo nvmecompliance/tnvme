@@ -116,6 +116,14 @@ IllegalCreateQs_r10b::RunCoreTest()
     }
     {
         LOG_NRM("Create IOSQ ID #%d but toxify its QID to 0", IOQ_ID);
+
+        // Create a valid IOCQ to be associated with the toxic IOSQ
+        SharedIOCQPtr iocq = SharedIOCQPtr(new IOCQ(gDutFd));
+        iocq->Init(IOQ_ID, numEntries, true, 0);
+        SharedCreateIOCQPtr iocqCmd = SharedCreateIOCQPtr(new CreateIOCQ());
+        iocqCmd->Init(iocq);
+        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq, iocqCmd, "", true);
+
         SharedIOSQPtr iosq = SharedIOSQPtr(new IOSQ(gDutFd));
         iosq->Init(IOQ_ID, numEntries, IOQ_ID, 0);
 
@@ -127,6 +135,11 @@ IllegalCreateQs_r10b::RunCoreTest()
         mask = 0xFFFF;
         value = 0;
         SendToxicCmd(asq, acq, iosqCmd, dword, mask, value, CESTAT_INVALID_QID);
+
+        // Destroy the IOCQ
+        SharedDeleteIOCQPtr iocqDeleteCmd = SharedDeleteIOCQPtr(new DeleteIOCQ());
+        iocqDeleteCmd->Init(iocq);
+        IO::SendAndReapCmd(mGrpName, mTestName, CALC_TIMEOUT_ms(1), asq, acq, iocqDeleteCmd, "", true);
     }
     {
         LOG_NRM("Create IOSQ ID #%d but wrongly associate to ACQ", IOQ_ID);
@@ -140,7 +153,7 @@ IllegalCreateQs_r10b::RunCoreTest()
         dword = 11;
         mask = 0xFFFF0000;
         value = 0;
-        SendToxicCmd(asq, acq, iosqCmd, dword, mask, value, CESTAT_INVALID_QID);
+        SendToxicCmd(asq, acq, iosqCmd, dword, mask, value, CESTAT_CQ_INVALID);
     }
 }
 
