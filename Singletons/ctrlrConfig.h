@@ -52,6 +52,9 @@ public:
     static const uint16_t MAX_MSI_MULTI_IRQ_VEC;
     static const uint16_t MAX_MSIX_IRQ_VEC;
 
+    static const uint8_t MIN_IOCQES;
+    static const uint8_t MIN_IOSQES;
+
     /**
      * Gets the active IRQ scheme enabled in the device. It doesn't
      * indicate that IRQ's are being used, to use IRQ's CQ's must be created

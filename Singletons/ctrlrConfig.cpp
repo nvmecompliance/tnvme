@@ -22,6 +22,8 @@ const uint16_t CtrlrConfig::MAX_MSI_SINGLE_IRQ_VEC = 0;
 const uint16_t CtrlrConfig::MAX_MSI_MULTI_IRQ_VEC = 31;
 const uint16_t CtrlrConfig::MAX_MSIX_IRQ_VEC = 2047;
 const uint8_t CtrlrConfig::CSS_NVM_CMDSET   = 0x00;
+const uint8_t CtrlrConfig::MIN_IOCQES = 4;
+const uint8_t CtrlrConfig::MIN_IOSQES = 6;
 
 
 bool CtrlrConfig::mInstanceFlag = false;

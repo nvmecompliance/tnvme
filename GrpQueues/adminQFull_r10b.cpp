@@ -136,6 +136,8 @@ AdminQFull_r10b::AdminQFull(uint16_t numASQEntries, uint16_t numACQEntries,
     asq->Init(numASQEntries);
 
     gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
+    gCtrlrConfig->SetIOCQES(CtrlrConfig::MIN_IOCQES);
+    gCtrlrConfig->SetIOSQES(CtrlrConfig::MIN_IOSQES);
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
         throw FrmwkEx(HERE);
 

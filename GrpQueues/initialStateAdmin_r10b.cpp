@@ -116,6 +116,8 @@ InitialStateAdmin_r10b::ValidateInitialStateAdmin(SharedACQPtr acq,
     for (uint16_t i = 0; i < 2; i++) {
         LOG_NRM("Validating initial state admin for #%d times", i);
         gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
+        gCtrlrConfig->SetIOCQES(CtrlrConfig::MIN_IOCQES);
+        gCtrlrConfig->SetIOSQES(CtrlrConfig::MIN_IOSQES);
         if (gCtrlrConfig->SetState(ST_ENABLE) == false)
             throw FrmwkEx(HERE);
 

@@ -140,6 +140,8 @@ PartialReapMSIX_r10b::RunCoreTest()
             "Unable to use %d IRQ's, but DUT reports it supports", numIrqs);
     }
     gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
+    gCtrlrConfig->SetIOCQES(CtrlrConfig::MIN_IOCQES);
+    gCtrlrConfig->SetIOSQES(CtrlrConfig::MIN_IOSQES);
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
         throw FrmwkEx(HERE);
 
