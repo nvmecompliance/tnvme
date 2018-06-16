@@ -105,6 +105,8 @@ CtrlrResetNotEffectAdminQ_r10b::RunCoreTest()
     asq->Init(15);
 
     gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
+    gCtrlrConfig->SetIOCQES(CtrlrConfig::MIN_IOCQES);
+    gCtrlrConfig->SetIOSQES(CtrlrConfig::MIN_IOSQES);
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
         throw FrmwkEx(HERE);
 
@@ -114,6 +116,8 @@ CtrlrResetNotEffectAdminQ_r10b::RunCoreTest()
     if (gCtrlrConfig->SetState(ST_DISABLE) == false)
         throw FrmwkEx(HERE);
     gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
+    gCtrlrConfig->SetIOCQES(CtrlrConfig::MIN_IOCQES);
+    gCtrlrConfig->SetIOSQES(CtrlrConfig::MIN_IOSQES);
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
         throw FrmwkEx(HERE);
 

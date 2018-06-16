@@ -163,6 +163,8 @@ PRPSinglePageDiscontig_r10b::RunCoreTest()
     IRQ::SetAnySchemeSpecifyNum(1);     // throws upon error
 
     gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
+    gCtrlrConfig->SetIOCQES(CtrlrConfig::MIN_IOCQES);
+    gCtrlrConfig->SetIOSQES(CtrlrConfig::MIN_IOSQES);
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
         throw FrmwkEx(HERE);
 

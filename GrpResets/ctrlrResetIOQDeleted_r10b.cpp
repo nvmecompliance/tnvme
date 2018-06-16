@@ -142,6 +142,8 @@ CtrlrResetIOQDeleted_r10b::VerifyCtrlrResetDeletesIOQs(SharedACQPtr acq,
         snprintf(work, sizeof(work), "iter%d", i);
 
         gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
+        gCtrlrConfig->SetIOCQES(CtrlrConfig::MIN_IOCQES);
+        gCtrlrConfig->SetIOSQES(CtrlrConfig::MIN_IOSQES);
         if (gCtrlrConfig->SetState(ST_ENABLE) == false)
             throw FrmwkEx(HERE);
 

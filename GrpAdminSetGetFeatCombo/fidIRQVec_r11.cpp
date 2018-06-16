@@ -153,6 +153,8 @@ FIDIRQVec_r11::RunCoreTest()
     }
 
     gCtrlrConfig->SetCSS(CtrlrConfig::CSS_NVM_CMDSET);
+    gCtrlrConfig->SetIOCQES(CtrlrConfig::MIN_IOCQES);
+    gCtrlrConfig->SetIOSQES(CtrlrConfig::MIN_IOSQES);
     if (gCtrlrConfig->SetState(ST_ENABLE) == false)
         throw FrmwkEx(HERE, "Failed to enable controller");
 
